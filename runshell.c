@@ -2,14 +2,16 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-typedef void (*sig_t) (int);
+#if MACOS
+typedef void (*sighandler_t) (int);
+#endif
 
 int
 runshell(void)
 {
    int status, ret, pid;
-   sig_t save_quit;
-   sig_t save_int;
+   sighandler_t save_quit;
+   sighandler_t save_int;
 
    save_quit = signal(SIGQUIT, SIG_IGN);
    save_int  = signal(SIGINT,  SIG_IGN);
