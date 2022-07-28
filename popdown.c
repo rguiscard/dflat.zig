@@ -204,10 +204,8 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
             int a;
             struct PopDown *pd = ActivePopDown;
 
-#if MSDOS
-            if ((c & OFFSET) == 0)
+            if ((c & ~0x7F) == 0)       // FIXME unicode
                 c = tolower(c);
-#endif
             a = AltConvert(c);
             while (pd->SelectionTitle != NULL)    {
                 char *cp = strchr(pd->SelectionTitle,

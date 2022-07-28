@@ -707,9 +707,6 @@ anything to execute a command that might interfere with what your
 program is doing.
 
 -------------------------------------------------------------------
-int TestCriticalError(void)
-
--------------------------------------------------------------------
 int DefaultWndProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 
 Call this from a window-processing function to chain to the default

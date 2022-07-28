@@ -4,8 +4,6 @@
 #define KEYS_H
 
 #include "unikey.h"
-#define OFFSET       0  /* FIXME */
-
 #define RUBOUT        8
 #define BELL          7
 #define ESC          27

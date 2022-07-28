@@ -172,9 +172,7 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 			return TRUE;
 		default:
 			if (
-#if MSDOS
-				((c & OFFSET) == 0) &&
-#endif
+				((c & ~0x7F) == 0) &&           // FIXME unicode
 				(isprint(c) || c == '\r'))	{
 			    TurnOffDisplay(wnd);
 				BaseWndProc(EDITOR, wnd, KEYBOARD, p1, p2);

@@ -51,26 +51,20 @@ static char *Menus[9] = {
 };
 #endif
 
-#if MSDOS
-static char Cwd[65];
-#endif
-
 char **Argv;
 
 /* --------------- CREATE_WINDOW Message -------------- */
 static int CreateWindowMsg(WINDOW wnd)
 {
     int rtn;
+
 	ApplicationWindow = wnd;
     ScreenHeight = SCREENHEIGHT;
-#if MSDOS
-	getcwd(Cwd, sizeof(Cwd));
-#endif
     if (!DisplayModified)    {
        	int i;
+#if 0
        	CTLWINDOW *ct, *ct1;
        	ct = FindCommand(&Display, ID_SNOWY, CHECKBOX);
-#if 0
     	if (!isVGA())    {
         	/* ---- modify Display Dialog Box for EGA, CGA ---- */
         	if (isEGA())
@@ -332,10 +326,6 @@ static int CloseWindowMsg(WINDOW wnd)
     UnLoadHelpFile();
 	DisplayModified = FALSE;
 	ApplicationWindow = NULL;
-#if MSDOS
-	setdisk(toupper(*Cwd) - 'A');
-	chdir(Cwd+2);
-#endif
     return rtn;
 }
 

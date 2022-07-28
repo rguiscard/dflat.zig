@@ -292,7 +292,6 @@ void PostEvent(MESSAGE event, int p1, int p2);
 BOOL dispatch_message(void);
 void near collect_events(void);
 void handshake(void);
-int TestCriticalError(void);
 /* ---- standard window message processing prototypes ----- */
 int ApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);
 int NormalProc(WINDOW, MESSAGE, PARAM, PARAM);

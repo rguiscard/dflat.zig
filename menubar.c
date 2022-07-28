@@ -75,10 +75,10 @@ static void PaintMsg(WINDOW wnd)
     wputs(wnd, GetText(wnd), 0, 0);
     if (ActiveMenuBar && ActiveMenuBar->ActiveSelection != -1 &&
             (wnd == inFocus || mwnd != NULL))    {
-        char *sel, *cp;
+        char *cp;
         int offset, offset1;
+        char sel[MAXCOLS];
 
-        sel = DFmalloc(MAXCOLS);    //FIXME alloca?
         offset=menu[ActiveMenuBar->ActiveSelection].x1;
         offset1=menu[ActiveMenuBar->ActiveSelection].x2;
         GetText(wnd)[offset1] = '\0';
@@ -88,8 +88,7 @@ static void PaintMsg(WINDOW wnd)
         cp = strchr(sel, CHANGECOLOR);
         if (cp != NULL)
             *(cp + 2) = background | 0x80;
-        wputs(wnd, sel,
-            offset-ActiveMenuBar->ActiveSelection*4, 0);
+        wputs(wnd, sel, offset-ActiveMenuBar->ActiveSelection*4, 0);
         GetText(wnd)[offset1] = ' ';
         if (mwnd == NULL && wnd == inFocus) {
             char *st = ActiveMenu
@@ -98,7 +97,6 @@ static void PaintMsg(WINDOW wnd)
                 SendMessage(GetParent(wnd), ADDSTATUS,
                     (PARAM)st, 0);
         }
-        free(sel);
     }
 }
 

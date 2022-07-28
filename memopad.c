@@ -12,7 +12,6 @@ static int wndpos;
 static int MemoPadProc(WINDOW, MESSAGE, PARAM, PARAM);
 static void NewFile(WINDOW);
 static void SelectFile(WINDOW);
-static void PadWindow(WINDOW, char *);
 static void OpenPadWindow(WINDOW, char *);
 static void LoadFile(WINDOW);
 static void PrintPad(WINDOW);
@@ -22,9 +21,7 @@ static int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
 static char *NameComponent(char *);
 static int PrintSetupProc(WINDOW, MESSAGE, PARAM, PARAM);
 static void FixTabMenu(void);
-#ifndef TURBOC
 void Calendar(WINDOW);
-#endif
 void BarChart(WINDOW);
 
 #define CHARSLINE 80
@@ -54,7 +51,7 @@ int main(int argc, char *argv[])
     LoadHelpFile(DFlatApplication);
     SendMessage(wnd, SETFOCUS, TRUE, 0);
     while (argc > 1)    {
-        PadWindow(wnd, argv[1]);
+        OpenPadWindow(wnd, argv[1]);
         --argc;
         argv++;
     }
@@ -62,31 +59,7 @@ int main(int argc, char *argv[])
         ;
     return 0;
 }
-/* ------ open text files and put them into editboxes ----- */
-static void PadWindow(WINDOW wnd, char *FileName)
-{
-#if UNIX
-    OpenPadWindow(wnd, FileName);
-#else
-    int ax, criterr = 1;
-    struct ffblk ff;
-    char path[MAXPATH];
-    char *cp;
 
-    CreatePath(path, FileName, FALSE, FALSE);
-    cp = path+strlen(path);
-    CreatePath(path, FileName, TRUE, FALSE);
-    while (criterr == 1)    {
-        ax = findfirst(path, &ff, 0);
-        criterr = TestCriticalError();
-    }
-    while (ax == 0 && !criterr)    {
-        strcpy(cp, ff.ff_name);
-        OpenPadWindow(wnd, path);
-        ax = findnext(&ff);
-    }
-#endif
-}
 /* ------- window processing module for the
                     memopad application window ----- */
 static int MemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
@@ -152,9 +125,7 @@ static int MemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
                     return TRUE;
 #ifdef INCLUDE_PICTUREBOX
 				case ID_CALENDAR:
-#ifndef TURBOC
 					Calendar(wnd);
-#endif
 					return TRUE;
 				case ID_BARCHART:
 					BarChart(wnd);
@@ -217,20 +188,12 @@ static void OpenPadWindow(WINDOW wnd, char *FileName)
     static WINDOW wnd1 = NULL;
 	WINDOW wwnd;
     char *Fname = FileName;
-    char *ermsg;
-    if (strcmp(FileName, Untitled))    {
-#if 0
+    if (strcmp(FileName, Untitled) != 0) {
         struct stat sb;
-        if (stat(FileName, &sb))    {
-#else
-        FILE* fff;
-        if ((fff = fopen(FileName, "rb")) == NULL || (fclose(fff), 0)) {
-#endif
-            ermsg = DFmalloc(strlen(FileName)+20);
-            strcpy(ermsg, "No such file as\n");
-            strcat(ermsg, FileName);
-            ErrorMessage(ermsg);
-            free(ermsg);
+        if (stat(FileName, &sb) < 0) {
+            char errmsg[MAXPATH];
+            sprintf(errmsg, "No such file as\n%s", FileName);
+            ErrorMessage(errmsg);
             return;
         }
         Fname = NameComponent(FileName);
@@ -271,7 +234,7 @@ static void LoadFile(WINDOW wnd)
     if ((fp = fopen(wnd->extension, "rt")) != NULL)    {
 		while (!feof(fp))	{
 			handshake();
-			Buf = DFrealloc(Buf, recptr+150);
+			Buf = DFrealloc(Buf, recptr+150);       //FIXME rewrite for ELKS
 			memset(Buf+recptr, 0, 150);
         	fgets(Buf+recptr, 150, fp);
 			recptr += strlen(Buf+recptr);

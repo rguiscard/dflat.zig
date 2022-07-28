@@ -6,7 +6,6 @@ static int px = -1, py = -1;
 static int pmx = -1, pmy = -1;
 static int mx, my;
 static int handshaking = 0;
-static volatile BOOL CriticalError;
 BOOL AllocTesting = FALSE;
 jmp_buf AllocError;
 BOOL AltDown = FALSE;
@@ -36,11 +35,6 @@ static int MsgQueueCtr;
 
 static int lagdelay = FIRSTDELAY;
 
-#if MSDOS
-static void interrupt (far *oldtimer)(void);
-static void interrupt (far *oldkeyboard)(void);
-#endif
-
 static volatile int keyportvalue;	/* for watching for key release */
 
 WINDOW CaptureMouse;
@@ -48,92 +42,14 @@ WINDOW CaptureKeyboard;
 static BOOL NoChildCaptureMouse;
 static BOOL NoChildCaptureKeyboard;
 
-static volatile int doubletimer = -1;
 static volatile int delaytimer  = -1;
 static volatile int clocktimer  = -1;
 char time_string[] = "         ";
 
 static WINDOW Cwnd;
 
-#if MSDOS
-static void interrupt far newkeyboard(void)
-{
-	keyportvalue = inp(KEYBOARDPORT);
-#ifdef __SMALLER_C__
-	callisr(oldkeyboard);
-#else
-	oldkeyboard();
-#endif
-}
-
-/* ------- timer interrupt service routine ------- */
-static void interrupt far newtimer(void)
-{
-    if (timer_running(doubletimer))
-        countdown(doubletimer);
-    if (timer_running(delaytimer))
-        countdown(delaytimer);
-    if (timer_running(clocktimer))
-        countdown(clocktimer);
-#ifdef __SMALLER_C__
-    callisr(oldtimer);
-#else
-    oldtimer();
-#endif
-}
-#endif
-
-static char ermsg[] = "Error accessing drive x";
-
-/* -------- test for critical errors --------- */
-int TestCriticalError(void)
-{
-    int rtn = 0;
-    if (CriticalError)    {
-        rtn = 1;
-        CriticalError = FALSE;
-        if (TestErrorMessage(ermsg) == FALSE)
-            rtn = 2;
-    }
-    return rtn;
-}
-
-#if MSDOS
-/* ------ critical error interrupt service routine ------ */
-#ifndef __SMALLER_C__
-static void interrupt far newcrit(IREGS ir)
-{
-    if (!(ir.ax & 0x8000))     {
-        ermsg[sizeof(ermsg) - 2] = (ir.ax & 0xff) + 'A';
-        CriticalError = TRUE;
-    }
-    ir.ax = 0;
-}
-#else
-static void interrupt far newcrit(struct INTREGS** ppRegs)
-{
-    struct INTREGS* pRegs = *ppRegs;
-    if (!(pRegs->eax & 0x8000))     {
-        ermsg[sizeof(ermsg) - 2] = (pRegs->eax & 0xff) + 'A';
-        CriticalError = TRUE;
-    }
-    pRegs->eax = 0;
-}
-#endif
-#endif
-
 static void StopMsg(void)
 {
-#if MSDOS
-    if (oldtimer != NULL)    {
-        setvect(TIMER, oldtimer);
-        oldtimer = NULL;
-    }
-    if (oldkeyboard != NULL)    {
-        setvect(KEYBOARDVECT, oldkeyboard);
-        oldkeyboard = NULL;
-    }
-#endif
 	ClearClipboard();
 	ClearDialogBoxes();
 	restorecursor();	
@@ -168,17 +84,6 @@ BOOL init_messages(void)
     NoChildCaptureKeyboard = FALSE;
     MsgQueueOnCtr = MsgQueueOffCtr = MsgQueueCtr = 0;
     EventQueueOnCtr = EventQueueOffCtr = EventQueueCtr = 0;
-#if MSDOS
-    if (oldtimer == NULL)    {
-        oldtimer = getvect(TIMER);
-        setvect(TIMER, newtimer);
-    }
-    if (oldkeyboard == NULL)    {
-        oldkeyboard = getvect(KEYBOARDVECT);
-        setvect(KEYBOARDVECT, newkeyboard);
-    }
-    setvect(CRIT, newcrit);
-#endif
     PostMessage(NULL,START,0,0);
     lagdelay = FIRSTDELAY;
 	return TRUE;
