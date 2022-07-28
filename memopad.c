@@ -200,7 +200,7 @@ static void SelectFile(WINDOW wnd)
         /* --- see if the document is already in a window --- */
         WINDOW wnd1 = FirstWindow(wnd);
         while (wnd1 != NULL)    {
-            if (strcasecmp(FileName, wnd1->extension) == 0)    {
+            if (wnd1->extension && strcasecmp(FileName, wnd1->extension) == 0)    {
                 SendMessage(wnd1, SETFOCUS, TRUE, 0);
                 SendMessage(wnd1, RESTORE, 0, 0);
                 return;

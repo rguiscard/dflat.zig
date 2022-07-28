@@ -145,12 +145,6 @@ int AltConvert(unsigned int c)
     return c;
 }
 
-/* ---- Test for keystroke ---- */
-BOOL keyhit(void)
-{
-    return 0;   // FIXME
-}
-
 /* only called from AllocationError, wait on keyboard read to exit */
 int getkey(void)
 {
@@ -175,7 +169,7 @@ void waitformouse(void)
     char buf[32];
     extern int mouse_button;
 
-    if (mouse_button != kMouseLeftDown)
+    if (mouse_button != kMouseLeftDown && mouse_button != kMouseLeftDoubleClick)
         return;
     for (;;) {
         if ((n = readansi(0, buf, sizeof(buf))) < 0)

@@ -49,11 +49,6 @@ void convert_screen_to_ansi(void);
 #define DIRECTORY 0x08
 #define DRIVE     0x10
 
-#define isEGA()         1
-#define isVGA()         0
-#define Set25()         (void)0
-#define Set43()         (void)0
-#define Set50()         (void)0
 #if ELKS //FIXME
 #define mktime(t)
 #define strftime(f,...)

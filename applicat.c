@@ -70,6 +70,7 @@ static int CreateWindowMsg(WINDOW wnd)
        	int i;
        	CTLWINDOW *ct, *ct1;
        	ct = FindCommand(&Display, ID_SNOWY, CHECKBOX);
+#if 0
     	if (!isVGA())    {
         	/* ---- modify Display Dialog Box for EGA, CGA ---- */
         	if (isEGA())
@@ -95,6 +96,7 @@ static int CreateWindowMsg(WINDOW wnd)
 				for (i = 0; i < 4; i++)
 					*(ct+i) = *(ct+2+i);
 		}
+#endif
         DisplayModified = TRUE;
     }
 #ifdef INCLUDE_WINDOWOPTIONS
@@ -113,6 +115,7 @@ static int CreateWindowMsg(WINDOW wnd)
         PushRadioButton(&Display, ID_REVERSE);
     else
         PushRadioButton(&Display, ID_COLOR);
+#if 0
     if (cfg.ScreenLines == 25)
         PushRadioButton(&Display, ID_25LINES);
     else if (cfg.ScreenLines == 43)
@@ -121,6 +124,7 @@ static int CreateWindowMsg(WINDOW wnd)
         PushRadioButton(&Display, ID_50LINES);
 	if (cfg.snowy)
         SetCheckBox(&Display, ID_SNOWY);
+#endif
     if (SCREENHEIGHT != cfg.ScreenLines)    {
         SetScreenHeight(cfg.ScreenLines);
         if (WindowHeight(wnd) == ScreenHeight ||
@@ -402,7 +406,7 @@ static void ShellDOS(WINDOW wnd)
     SendMessage(NULL, HIDE_MOUSE, 0, 0);
     fflush(stdout);
     tty_restore();
-    system("exec sh");
+    runshell();
     tty_enable_unikey();
 
     if (SCREENHEIGHT != cfg.ScreenLines)
@@ -662,13 +666,15 @@ static void SelectColors(WINDOW wnd)
 /* ---- select screen lines ---- */
 static void SelectLines(WINDOW wnd)
 {
-    cfg.ScreenLines = 25;
+    cfg.ScreenLines = SCREENHEIGHT;
+#if 0
     if (isEGA() || isVGA())    {
         if (RadioButtonSetting(&Display, ID_43LINES))
             cfg.ScreenLines = 43;
         else if (RadioButtonSetting(&Display, ID_50LINES))
             cfg.ScreenLines = 50;
     }
+#endif
     if (SCREENHEIGHT != cfg.ScreenLines)    {
         SetScreenHeight(cfg.ScreenLines);
 		/* ---- re-maximize ---- */
@@ -691,25 +697,16 @@ static void SelectLines(WINDOW wnd)
 /* ---- set the screen height in the video hardware ---- */
 static void SetScreenHeight(int height)
 {
-    if (isEGA() || isVGA())    {
+#if 0	/* display size changes not supported */
         SendMessage(NULL, SAVE_CURSOR, 0, 0);
-        switch (height)    {
-            case 25:
-                Set25();
-                break;
-            case 43:
-                Set43();
-                break;
-            case 50:
-                Set50();
-                break;
-            default:
-                break;
-        }
+
+        /* change display size here */
+
         SendMessage(NULL, RESTORE_CURSOR, 0, 0);
         SendMessage(NULL, RESET_MOUSE, 0, 0);
         SendMessage(NULL, SHOW_MOUSE, 0, 0);
     }
+#endif
 }
 
 #ifdef INCLUDE_WINDOWOPTIONS

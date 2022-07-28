@@ -16,7 +16,6 @@ extern int SCREENHEIGHT;
 int AltConvert(unsigned int);
 int getkey(void);
 int getshift(void);
-BOOL keyhit(void);
 void beep(void);
 /* ---------- cursor prototypes -------- */
 void curr_cursor(int *x, int *y);
@@ -52,13 +51,8 @@ void waitformouse(void);
 #define timer_running(timer)     (timer > 0)
 #define countdown(timer)         --timer
 #define timer_disabled(timer)     (timer == -1)
-/* ----------- video adaptor prototypes ----------- */
-//BOOL isEGA(void);     //FIXME
-//BOOL isVGA(void);
-//void Set25(void);
-//void Set43(void);
-//void Set50(void);
-#define keyhit       kbhit
+
+int runshell(void);
 
 /* ============= Color Macros ============ */
 #define BLACK         0

@@ -58,7 +58,7 @@ DFLATOBJS = \
 
 DFLATOBJS += \
     video.o events-unix.o mouse-ansi.o console-unix.o \
-    kcp437.o runes.o unikey.o tty.o
+    kcp437.o runes.o unikey.o tty.o runshell.o
 
 $(LIBS): $(DFLATOBJS)
 	$(AR) rcs $(LIBS) $(DFLATOBJS)

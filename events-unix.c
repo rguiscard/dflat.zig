@@ -38,6 +38,9 @@ void collect_events(void)
             case kMouseLeftDown:
                 PostEvent(LEFT_BUTTON, mx, my);
                 break;
+            case kMouseLeftDoubleClick:
+                PostEvent(DOUBLE_CLICK, mx, my);
+                break;
             case kMouseRightDown:
                 PostEvent(RIGHT_BUTTON, mx, my);
                 break;
