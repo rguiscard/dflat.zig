@@ -73,17 +73,17 @@ static void PaintMsg(WINDOW wnd)
         SendMessage(GetParent(wnd), ADDSTATUS, 0, 0);
     SetStandardColor(wnd);
     wputs(wnd, GetText(wnd), 0, 0);
-    if (ActiveMenuBar->ActiveSelection != -1 &&
+    if (ActiveMenuBar && ActiveMenuBar->ActiveSelection != -1 &&
             (wnd == inFocus || mwnd != NULL))    {
         char *sel, *cp;
         int offset, offset1;
 
-        sel = DFmalloc(200);
+        sel = DFmalloc(MAXCOLS);    //FIXME alloca?
         offset=menu[ActiveMenuBar->ActiveSelection].x1;
         offset1=menu[ActiveMenuBar->ActiveSelection].x2;
         GetText(wnd)[offset1] = '\0';
         SetReverseColor(wnd);
-        memset(sel, '\0', 200);
+        memset(sel, '\0', MAXCOLS);
         strcpy(sel, GetText(wnd)+offset);
         cp = strchr(sel, CHANGECOLOR);
         if (cp != NULL)

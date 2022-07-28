@@ -2,11 +2,11 @@
 #ifndef DFLAT_H
 #define DFLAT_H
 
-#ifdef BUILD_FULL_DFLAT
 #define INCLUDE_MULTI_WINDOWS
+#define INCLUDE_WINDOWOPTIONS
+#ifdef BUILD_FULL_DFLAT
 #define INCLUDE_LOGGING
 #define INCLUDE_SHELLDOS
-#define INCLUDE_WINDOWOPTIONS
 #define INCLUDE_PICTUREBOX
 #define INCLUDE_MINIMIZE
 #define INCLUDE_MAXIMIZE
@@ -18,15 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#ifndef __SMALLER_C__
-#include <dos.h>
-#include <process.h>
-#include <conio.h>
-#include <bios.h>
-#include <io.h>
-#else
-#include "scdos.h"
-#endif
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -54,6 +46,11 @@ typedef enum {FALSE, TRUE} BOOL;
 #define ENTRYLEN     256  /* starting length for one-liner  */
 #define GROWLENGTH    64  /* buffers grow by this much      */
 
+#define MAXCOLS     300   /* max columns, used in line buffers */
+#define MAXPOPWIDTH 80    /* max popup width */
+#define MAXPATH     80
+
+#include "unix.h"
 #include "system.h"
 #include "config.h"
 #include "rect.h"
@@ -64,7 +61,7 @@ typedef enum {FALSE, TRUE} BOOL;
 #include "helpbox.h"
 
 /* ------ integer type for message parameters ----- */
-typedef long PARAM;
+typedef intptr_t PARAM;
 
 enum Condition     {
     ISRESTORED, ISMINIMIZED, ISMAXIMIZED, ISCLOSING
@@ -291,7 +288,9 @@ extern int CurrentMenuSelection;
 BOOL init_messages(void);
 void PostMessage(WINDOW, MESSAGE, PARAM, PARAM);
 int SendMessage(WINDOW, MESSAGE, PARAM, PARAM);
+void PostEvent(MESSAGE event, int p1, int p2);
 BOOL dispatch_message(void);
+void near collect_events(void);
 void handshake(void);
 int TestCriticalError(void);
 /* ---- standard window message processing prototypes ----- */
@@ -421,7 +420,7 @@ BOOL GenericMessage(WINDOW, char *, char *, int,
 	GenericMessage(NULL, ttl, msg, 1, MessageBoxProc, \
 		Ok, NULL, ID_OK, 0, TRUE)
 #define YesNoBox(msg)	\
-	GenericMessage(NULL, NULL, msg, 2, YesNoBoxProc,   \
+	GenericMessage(NULL, "Confirm", msg, 2, YesNoBoxProc,   \
 		Yes, No, ID_OK, ID_CANCEL, TRUE)
 #define CancelBox(wnd, msg) \
 	GenericMessage(wnd, "Wait...", msg, 1, CancelBoxProc, \

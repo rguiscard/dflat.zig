@@ -36,8 +36,10 @@ static int MsgQueueCtr;
 
 static int lagdelay = FIRSTDELAY;
 
+#if MSDOS
 static void interrupt (far *oldtimer)(void);
 static void interrupt (far *oldkeyboard)(void);
+#endif
 
 static volatile int keyportvalue;	/* for watching for key release */
 
@@ -53,6 +55,7 @@ char time_string[] = "         ";
 
 static WINDOW Cwnd;
 
+#if MSDOS
 static void interrupt far newkeyboard(void)
 {
 	keyportvalue = inp(KEYBOARDPORT);
@@ -78,6 +81,7 @@ static void interrupt far newtimer(void)
     oldtimer();
 #endif
 }
+#endif
 
 static char ermsg[] = "Error accessing drive x";
 
@@ -94,6 +98,7 @@ int TestCriticalError(void)
     return rtn;
 }
 
+#if MSDOS
 /* ------ critical error interrupt service routine ------ */
 #ifndef __SMALLER_C__
 static void interrupt far newcrit(IREGS ir)
@@ -115,9 +120,11 @@ static void interrupt far newcrit(struct INTREGS** ppRegs)
     pRegs->eax = 0;
 }
 #endif
+#endif
 
 static void StopMsg(void)
 {
+#if MSDOS
     if (oldtimer != NULL)    {
         setvect(TIMER, oldtimer);
         oldtimer = NULL;
@@ -126,6 +133,7 @@ static void StopMsg(void)
         setvect(KEYBOARDVECT, oldkeyboard);
         oldkeyboard = NULL;
     }
+#endif
 	ClearClipboard();
 	ClearDialogBoxes();
 	restorecursor();	
@@ -136,11 +144,18 @@ static void StopMsg(void)
 /* ------------ initialize the message system --------- */
 BOOL init_messages(void)
 {
+    int cols, rows;
+
 	AllocTesting = TRUE;
 	if (setjmp(AllocError) != 0)	{
 		StopMsg();
 		return FALSE;
 	}
+    tty_init(MouseTracking|CatchISig|ExitLastLine);
+    if (tty_getsize(&cols, &rows) > 0) {
+        SCREENWIDTH = min(cols, MAXCOLS-1);
+        SCREENHEIGHT = rows - 1;
+    }
     resetmouse();
 	set_mousetravel(0, SCREENWIDTH-1, 0, SCREENHEIGHT-1);
 	savecursor();
@@ -153,6 +168,7 @@ BOOL init_messages(void)
     NoChildCaptureKeyboard = FALSE;
     MsgQueueOnCtr = MsgQueueOffCtr = MsgQueueCtr = 0;
     EventQueueOnCtr = EventQueueOffCtr = EventQueueCtr = 0;
+#if MSDOS
     if (oldtimer == NULL)    {
         oldtimer = getvect(TIMER);
         setvect(TIMER, newtimer);
@@ -162,13 +178,14 @@ BOOL init_messages(void)
         setvect(KEYBOARDVECT, newkeyboard);
     }
     setvect(CRIT, newcrit);
+#endif
     PostMessage(NULL,START,0,0);
     lagdelay = FIRSTDELAY;
 	return TRUE;
 }
 
 /* ----- post an event and parameters to event queue ---- */
-static void PostEvent(MESSAGE event, int p1, int p2)
+void PostEvent(MESSAGE event, int p1, int p2)
 {
     if (EventQueueCtr != MAXMESSAGES)    {
         EventQueue[EventQueueOnCtr].event = event;
@@ -180,8 +197,9 @@ static void PostEvent(MESSAGE event, int p1, int p2)
     }
 }
 
+#if MSDOS
 /* ------ collect mouse, clock, and keyboard events ----- */
-static void near collect_events(void)
+void near collect_events(void)
 {
     static int ShiftKeys = 0;
 	int sk;
@@ -311,6 +329,7 @@ static void near collect_events(void)
     else
         lagdelay = FIRSTDELAY;
 }
+#endif
 
 /* ----- post a message and parameters to msg queue ---- */
 void PostMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
@@ -526,6 +545,8 @@ static RECT VisibleRect(WINDOW wnd)
 	RECT rc = WindowRect(wnd);
 	if (!TestAttribute(wnd, NOCLIP))	{
 		WINDOW pwnd = GetParent(wnd);
+		if (!pwnd)
+			return rc;
 		RECT prc;
 		prc = ClientRect(pwnd);
 		while (pwnd != NULL)	{
@@ -578,9 +599,11 @@ static WINDOW MouseWindow(int x, int y)
 
 void handshake(void)
 {
+#if MSDOS
 	handshaking++;
 	dispatch_message();
 	--handshaking;
+#endif
 }
 
 /* ---- dispatch messages to the message proc function ---- */
@@ -637,10 +660,12 @@ BOOL dispatch_message(void)
 		        Mwnd = MouseWindow(ev.mx, ev.my);
                 SendMessage(Mwnd, ev.event, ev.mx, ev.my);
                 break;
+#if MSDOS	// FIXME add MK_FP
             case CLOCKTICK:
                 SendMessage(Cwnd, ev.event,
                     (PARAM) MK_FP(ev.mx, ev.my), 0);
 				break;
+#endif
             default:
                 break;
         }
@@ -661,5 +686,8 @@ BOOL dispatch_message(void)
 			return FALSE;
 		}
     }
+#if VIDEO_FB
+    convert_screen_to_ansi();
+#endif
     return TRUE;
 }

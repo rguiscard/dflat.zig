@@ -462,7 +462,7 @@ static void DelKey(WINDOW wnd)
     }
     if (isMultiLine(wnd) && *currchar == '\n' && *(currchar+1) == '\0')
         return;
-    strcpy(currchar, currchar+1);
+    memmove(currchar, currchar+1, strlen(currchar+1));
     if (repaint)    {
         BuildTextPointers(wnd);
         SendMessage(wnd, PAINT, 0, 0);
@@ -515,7 +515,7 @@ static void KeyTyped(WINDOW wnd, int c)
         currchar = CurrChar;
     }
     /* ---- test typing at end of text ---- */
-    if (currchar == wnd->text+wnd->MaxTextLength)    {
+    if (currchar == (char *)wnd->text+wnd->MaxTextLength)    {
         /* ---- typing at the end of maximum buffer ---- */
         beep();
         return;
@@ -529,7 +529,7 @@ static void KeyTyped(WINDOW wnd, int c)
     /* --- displayable char or newline --- */
     if (c == '\n' || wnd->InsertMode || *currchar == '\n') {
         /* ------ inserting the keyed character ------ */
-        if (wnd->text[wnd->textlen-1] != '\0')    {
+        if (wnd->textlen == 0 || wnd->text[wnd->textlen-1] != '\0')    {
             /* --- the current text buffer is full --- */
             if (wnd->textlen == wnd->MaxTextLength)    {
                 /* --- text buffer is at maximum size --- */
@@ -571,14 +571,14 @@ static void KeyTyped(WINDOW wnd, int c)
     /* ---------- test end of window --------- */
     if (WndCol == ClientWidth(wnd)-1)    {
         if (!isMultiLine(wnd))	{
-			if (!(currchar == wnd->text+wnd->MaxTextLength-2))
+			if (!(currchar == (char *)wnd->text+wnd->MaxTextLength-2))
             SendMessage(wnd, HORIZSCROLL, TRUE, 0);
 		}
 		else	{
 			char *cp = currchar;
-	        while (*cp != ' ' && cp != TextLine(wnd, wnd->CurrLine))
+	        while (*cp != ' ' && cp != (char *)TextLine(wnd, wnd->CurrLine))
 	            --cp;
-	        if (cp == TextLine(wnd, wnd->CurrLine) ||
+	        if (cp == (char *)TextLine(wnd, wnd->CurrLine) ||
 	                !wnd->WordWrapMode)
 	            SendMessage(wnd, HORIZSCROLL, TRUE, 0);
 	        else    {
@@ -804,7 +804,7 @@ static void ParagraphCmd(WINDOW wnd)
     if (*bel == '\n')
         --bel;
     /* --- change all newlines in block to spaces --- */
-    while (CurrChar < bel)    {
+    while ((char *)CurrChar < bel)    {
         if (*CurrChar == '\n')    {
             *CurrChar = ' ';
             wnd->CurrLine++;

@@ -18,7 +18,7 @@ static void LoadFile(WINDOW);
 static void PrintPad(WINDOW);
 static void SaveFile(WINDOW, int);
 static void DeleteFile(WINDOW);
-static int EditorProc(WINDOW, MESSAGE, PARAM, PARAM);
+static int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
 static char *NameComponent(char *);
 static int PrintSetupProc(WINDOW, MESSAGE, PARAM, PARAM);
 static void FixTabMenu(void);
@@ -30,11 +30,11 @@ void BarChart(WINDOW);
 #define CHARSLINE 80
 #define LINESPAGE 66
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     WINDOW wnd;
     if (!init_messages())
-		return;
+		return 1;
     Argv = argv;
 	if (!LoadConfig())
 		cfg.ScreenLines = SCREENHEIGHT;
@@ -60,13 +60,17 @@ void main(int argc, char *argv[])
     }
     while (dispatch_message())
         ;
+    return 0;
 }
 /* ------ open text files and put them into editboxes ----- */
 static void PadWindow(WINDOW wnd, char *FileName)
 {
+#if UNIX
+    OpenPadWindow(wnd, FileName);
+#else
     int ax, criterr = 1;
     struct ffblk ff;
-    char path[MAXPATH+1];
+    char path[MAXPATH];
     char *cp;
 
     CreatePath(path, FileName, FALSE, FALSE);
@@ -81,6 +85,7 @@ static void PadWindow(WINDOW wnd, char *FileName)
         OpenPadWindow(wnd, path);
         ax = findnext(&ff);
     }
+#endif
 }
 /* ------- window processing module for the
                     memopad application window ----- */
@@ -145,6 +150,7 @@ static int MemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 					cfg.Tabs = 8;
 					FixTabMenu();
                     return TRUE;
+#ifdef INCLUDE_PICTUREBOX
 				case ID_CALENDAR:
 #ifndef TURBOC
 					Calendar(wnd);
@@ -153,6 +159,7 @@ static int MemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 				case ID_BARCHART:
 					BarChart(wnd);
 					return TRUE;
+#endif
                 case ID_ABOUT:
                     MessageBox(
                          "About D-Flat and the MemoPad",
@@ -193,7 +200,7 @@ static void SelectFile(WINDOW wnd)
         /* --- see if the document is already in a window --- */
         WINDOW wnd1 = FirstWindow(wnd);
         while (wnd1 != NULL)    {
-            if (stricmp(FileName, wnd1->extension) == 0)    {
+            if (strcasecmp(FileName, wnd1->extension) == 0)    {
                 SendMessage(wnd1, SETFOCUS, TRUE, 0);
                 SendMessage(wnd1, RESTORE, 0, 0);
                 return;
@@ -235,7 +242,7 @@ static void OpenPadWindow(WINDOW wnd, char *FileName)
     wnd1 = CreateWindow(EDITBOX,
                 Fname,
                 (wndpos-1)*2, wndpos, 10, 40,
-                NULL, wnd, EditorProc,
+                NULL, wnd, OurEditorProc,
                 SHADOW     |
                 MINMAXBOX  |
                 CONTROLBOX |
@@ -381,7 +388,7 @@ static void DeleteFile(WINDOW wnd)
                 char msg[30];
                 sprintf(msg, "Delete %s?", fn);
                 if (YesNoBox(msg))    {
-                    remove(wnd->extension);
+                    unlink(wnd->extension);
                     SendMessage(wnd, CLOSE_WINDOW, 0, 0);
                 }
             }
@@ -397,7 +404,7 @@ static void ShowPosition(WINDOW wnd)
     SendMessage(GetParent(wnd), ADDSTATUS, (PARAM) status, 0);
 }
 /* ----- window processing module for the editboxes ----- */
-static int EditorProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
+static int OurEditorProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 {
     int rtn;
     switch (msg)    {
@@ -535,8 +542,10 @@ static void FixTabMenu(void)
 	if (cp != NULL)	{
 		cp = strchr(cp, '(');
 		if (cp != NULL)	{
+#if MSDOS | ELKS   /* can't overwrite .rodata */
 			*(cp+1) = cfg.Tabs + '0';
-			if (GetClass(inFocus) == POPDOWNMENU)
+#endif
+			if (inFocus && (GetClass(inFocus) == POPDOWNMENU))
 				SendMessage(inFocus, PAINT, 0, 0);
 		}
 	}

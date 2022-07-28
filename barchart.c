@@ -1,6 +1,8 @@
 /* ------------ barchart.c ----------- */
 #include "dflat.h"
 
+#ifdef INCLUDE_PICTUREBOX
+
 #define BCHEIGHT 12
 #define BCWIDTH 44
 #define COLWIDTH 4
@@ -72,3 +74,4 @@ void BarChart(WINDOW pwnd)
     }
     SendMessage(Bwnd, SETFOCUS, TRUE, 0);
 }
+#endif

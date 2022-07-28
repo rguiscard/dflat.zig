@@ -22,7 +22,7 @@ FILE *OpenHelpFile(const char *fn, const char *md)
 {
     char *cp;
     int treect, i;
-    char helpname[65];
+    char helpname[MAXPATH];
 
     /* -------- get the name of the help file ---------- */
     BuildFileName(helpname, fn, ".hlp");

@@ -7,16 +7,21 @@
 #endif
 
 static char path[MAXPATH];
+#if MSDOS
 static char drive[MAXDRIVE] = " :";
 static char dir[MAXDIR];
 static char name[MAXFILE];
 static char ext[MAXEXT];
+#endif
 
 /* ----- Create unambiguous path from file spec, filling in the
      drive and directory if incomplete. Optionally change to
      the new drive and subdirectory ------ */
 void CreatePath(char *spath,char *fspec,int InclName,int Change)
 {
+#if UNIX
+    strcpy(spath, fspec);
+#else
     int cm = 0;
     unsigned currdrive;
     char currdir[MAXPATH+1];
@@ -74,15 +79,19 @@ void CreatePath(char *spath,char *fspec,int InclName,int Change)
         setdisk(currdrive);
         chdir(currdir);
     }
+#endif
 }
 
 static int dircmp(const void *c1, const void *c2)
 {
-    return stricmp(*(char **)c1, *(char **)c2);
+    return strcasecmp(*(char **)c1, *(char **)c2);
 }
 
 static BOOL BuildList(WINDOW wnd, char *fspec, BOOL dirs)
 {
+#if UNIX
+    return FALSE;
+#else
     int ax, i = 0, criterr = 1;
     struct ffblk ff;
     CTLWINDOW *ct = FindCommand(wnd->extension,
@@ -122,6 +131,7 @@ static BOOL BuildList(WINDOW wnd, char *fspec, BOOL dirs)
         SendMessage(lwnd, SHOW_WINDOW, 0, 0);
     }
 	return TRUE;
+#endif
 }
 
 BOOL BuildFileList(WINDOW wnd, char *fspec)
@@ -136,6 +146,7 @@ void BuildDirectoryList(WINDOW wnd)
 
 void BuildDriveList(WINDOW wnd)
 {
+#if MSDOS
     CTLWINDOW *ct = FindCommand(wnd->extension, ID_DRIVE,LISTBOX);
     if (ct != NULL)    {
 	    union REGS regs;
@@ -177,6 +188,7 @@ void BuildDriveList(WINDOW wnd)
         SendMessage(lwnd, SHOW_WINDOW, 0, 0);
     	setdisk(cd);
 	}
+#endif
 }
 
 void BuildPathDisplay(WINDOW wnd)

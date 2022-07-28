@@ -67,6 +67,10 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 				{
                     if ((int)p2 == 0)	{
 						char fn[MAXPATH+1];
+#if UNIX
+						GetItemText(wnd, ID_FILENAME, fn, MAXPATH);
+						strcpy(FileName, fn);
+#else
 						char nm[MAXFILE];
 						char ext[MAXEXT];
                     	GetItemText(wnd, ID_FILENAME, fn, MAXPATH);
@@ -84,6 +88,7 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 							SendMessage(cwnd, SETFOCUS, TRUE, 0);
                         	return TRUE;
 						}
+#endif
                     }
                     break;
 				}
@@ -131,10 +136,12 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 							break;
                     	case LB_CHOOSE:
 						{
+#if MSDOS
                         	/* chose dir */
                         	char dr[15];
                         	GetDlgListText(wnd, dr, ID_DRIVE);
 							setdisk(*dr - 'A');
+#endif
                         	InitDlgBox(wnd);
                             SendMessage(wnd, COMMAND, ID_OK, 0);
 	                    }

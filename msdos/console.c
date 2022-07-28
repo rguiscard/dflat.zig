@@ -11,6 +11,24 @@ static int altconvert[] = {
     ALT_6,ALT_7,ALT_8,ALT_9
 };
 
+/* --------- scroll the window. d: 1 = up, 0 = dn ---------- */
+void scroll_window(WINDOW wnd, RECT rc, int d)
+{
+	if (RectTop(rc) != RectBottom(rc))	{
+		union REGS regs;
+		regs.h.cl = RectLeft(rc);
+		regs.h.ch = RectTop(rc);
+		regs.h.dl = RectRight(rc);
+		regs.h.dh = RectBottom(rc);
+		regs.h.bh = clr(WndForeground(wnd),WndBackground(wnd));
+		regs.h.ah = 7 - d;
+		regs.h.al = 1;
+		hide_mousecursor();
+		int86(VIDEO, &regs, &regs);
+		show_mousecursor();
+	}
+}
+
 unsigned video_mode;
 unsigned video_page;
 

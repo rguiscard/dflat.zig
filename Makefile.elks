@@ -1,0 +1,126 @@
+# External ELKS application Makefile
+TOPDIR = /Users/greg/net/elks-gh
+
+###############################################################################
+include $(TOPDIR)/.config
+INCLUDES    = -I$(TOPDIR)/include -I$(TOPDIR)/libc/include -I$(TOPDIR)/elks/include
+TINYPRINTF  = $(ELKSCMD_DIR)/lib/tiny_vfprintf.o
+
+# Compiler variables for ELKS.
+CC      = ia16-elf-gcc
+HOSTCC  = cc
+CFLBASE = -fno-inline -melks-libc -mtune=i8086 -Wall -Os
+#CFLBASE += -mcmodel=small -mno-segment-relocation-stuff
+CFLBASE += -mcmodel=medium -msegment-relocation-stuff -ffunction-sections
+CFLAGS  = $(CFLBASE) $(WARNINGS) $(LOCALFLAGS) $(INCLUDES)
+LD      = ia16-elf-gcc
+LDFLAGS = $(CFLBASE)
+AS      = ia16-elf-as
+ASFLAGS = -mtune=i8086 --32-segelf
+AR      = ia16-elf-ar
+
+# Standard compilation rules.
+.S.s:
+	$(CC) -E -traditional $(INCLUDES) $(CCDEFS) -o $*.s $<
+
+.S.o:
+	$(CC) -E -traditional $(INCLUDES) $(CCDEFS) -o $*.tmp $<
+	$(AS) $(ASFLAGS) -o $*.o $*.tmp
+	rm -f $*.tmp
+
+.s.o:
+	$(AS) $(ASFLAGS) -o $*.o $<
+
+.c.o:
+	$(CC) $(CFLAGS) -c -o $*.o $<
+
+###############################################################################
+
+#-------------------------------------------------------------------
+#        D - F L A T   M A K E F I L E  -  ELKS
+#-------------------------------------------------------------------
+
+TOPDIR = /Users/greg/net/elks-gh
+
+PRGS = memopad
+#PRGS = memopad huffc fixhelp memopad.hlp
+LIBS = libdflat.a
+
+all: $(LIBS) $(PRGS)
+
+clean:
+	rm -f *.o *.a memopad
+
+#all : memopad.exe memopad.hlp
+
+#  Delete the TESTING macro to eliminate the Reload
+#  Help file selection on the Help menu.
+#TESTING = -DTESTING_DFLAT
+
+#  This macro builds the full D-Flat system with all options enabled.
+#  Comment it out for a minimum system or selectively
+#  comment out the #defines at the top of dflat.h.
+#FULL = -DBUILD_FULL_DFLAT
+
+
+CFLAGS += $(TESTING) $(FULL) -DUNIX=1 -DELKS=1
+CFLAGS += -Wno-pointer-sign
+CFLAGS += -Wno-misleading-indentation -Wno-unused-function -Wno-unused-variable
+#CFLAGS += -Wno-compare-distinct-pointer-types
+#CFLAGS += -Wno-invalid-source-encoding
+LDFLAGS += -maout-heap=0xffff
+
+OBJS = memopad.o dialogs.o menus.o
+
+memopad: $(OBJS) $(LIBS)
+	$(LD) $(LDFLAGS) -o memopad $(OBJS) -L. -ldflat
+	cp memopad $(TOPDIR)/elkscmd/rootfs_template/root
+
+CONSOBJS = cons.o runes.o kcp437.o
+cons: $(CONSOBJS)
+	$(LD) $(LDFLAGS) -o cons $(CONSOBJS)
+	cp cons $(TOPDIR)/elkscmd/rootfs_template/root
+
+TTYOBJS = ttyinfo.o peekpoke.o runes.o unikey.o tty.o
+ttyinfo: $(TTYOBJS)
+	$(LD) $(LDFLAGS) -o ttyinfo $(TTYOBJS)
+	cp ttyinfo $(TOPDIR)/elkscmd/rootfs_template/root
+
+TESTOBJS = test.o peekpoke.o
+test: $(TESTOBJS)
+	$(LD) $(LDFLAGS) -o test $(TESTOBJS)
+	cp test $(TOPDIR)/elkscmd/rootfs_template/root
+
+DFLATOBJS = \
+    window.o textbox.o listbox.o                    \
+    normal.o config.o menu.o menubar.o popdown.o    \
+    rect.o applicat.o keys.o sysmenu.o editbox.o    \
+    dialbox.o button.o fileopen.o msgbox.o          \
+    helpbox.o log.o lists.o statbar.o decomp.o      \
+    combobox.o pictbox.o calendar.o barchart.o      \
+    clipbord.o search.o dfalloc.o checkbox.o        \
+    text.o radio.o box.o spinbutt.o  watch.o        \
+    slidebox.o direct.o editor.o message.o
+
+DFLATOBJS += \
+    video.o events-unix.o mouse-ansi.o console-unix.o \
+    kcp437.o runes.o unikey.o tty.o
+
+$(LIBS): $(DFLATOBJS)
+	$(AR) rcs $(LIBS) $(DFLATOBJS)
+
+huff.o: huff.c
+	$(HOSTCC) -c -o $@ $^
+    
+HUFFOBJS = huffc.o htree.o
+huffc: $(HUFFOBJS)
+	$(HOSTCC) $(LDFLAGS) -o $@ $(HUFFOBJS)
+
+FIXHOBJS = fixhelp.o decomp.o
+fixhelp: $(FIXHOBJS)
+	$(HOSTCC) $(LDFLAGS) -o $@ $(FIXHOBJS)
+
+memopad.hlp: memopad.txt huffc fixhelp
+	./huffc memopad.txt memopad.hlp
+	./fixhelp memopad
+	cp mempad.hlp $(TOPDIR)/elkscmd/rootfs_template/root

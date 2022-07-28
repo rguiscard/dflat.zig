@@ -1,15 +1,21 @@
 /* --------------------- video.c -------------------- */
 
 #include "dflat.h"
+#include <stdint.h>
 
+int SCREENWIDTH = 80;
+int SCREENHEIGHT = 24;
 BOOL ClipString;
-static BOOL snowy;
 
-static unsigned video_address;
-static unsigned short near vpeek(unsigned short far *vp);
-static void near vpoke(unsigned short far *vp, unsigned short c);
-void movefromscreen(void *bf, int offset, int len);
-void movetoscreen(void *bf, int offset, int len);
+#if VIDEO_FB
+char *video_address;
+#endif
+#if VIDEO_EGA
+static unsigned video_address = 0xb800;
+#endif
+
+static void movefromscreen(void far *bf, int offset, int len);
+static void movetoscreen(void far *bf, int offset, int len);
 
 /* -- read a rectangle of video memory into a save buffer -- */
 void getvideo(RECT rc, void far *bf)
@@ -46,10 +52,7 @@ unsigned int GetVideoChar(int x, int y)
 {
     int c;
     hide_mousecursor();
-	if (snowy)
-	    c = vpeek(MK_FP(video_address, vad(x,y)));
-	else
-	    c = peek(video_address, vad(x,y));
+    c = peek(video_address, vad(x,y));
     show_mousecursor();
     return c;
 }
@@ -59,10 +62,7 @@ void PutVideoChar(int x, int y, int c)
 {
     if (x < SCREENWIDTH && y < SCREENHEIGHT)    {
         hide_mousecursor();
-		if (snowy)
-	        vpoke(MK_FP(video_address, vad(x,y)), c);
-		else
-	        poke(video_address, vad(x,y), c);
+        poke(video_address, vad(x,y), c);
         show_mousecursor();
     }
 }
@@ -118,10 +118,7 @@ void wputch(WINDOW wnd, int c, int x, int y)
 		int xc = GetLeft(wnd)+x;
 		int yc = GetTop(wnd)+y;
         hide_mousecursor();
-		if (snowy)
-        	vpoke(MK_FP(video_address, vad(xc, yc)), ch);
-		else
-        	poke(video_address, vad(xc, yc), ch);
+        poke(video_address, vad(xc, yc), ch);
         show_mousecursor();
 	}
 }
@@ -133,7 +130,7 @@ void wputs(WINDOW wnd, void *s, int x, int y)
 	int x2 = x1;
 	int y1 = GetTop(wnd)+y;
     if (x1 < SCREENWIDTH && y1 < SCREENHEIGHT && isVisible(wnd))	{
-		short ln[200];
+		short ln[MAXCOLS];
 		short *cp1 = ln;
 	    unsigned char *str = s;
 	    int fg = foreground;
@@ -206,6 +203,15 @@ void wputs(WINDOW wnd, void *s, int x, int y)
 /* --------- get the current video mode -------- */
 void get_videomode(void)
 {
+#if VIDEO_FB
+    if (!video_address) {
+        video_address = malloc(SCREENHEIGHT * SCREENWIDTH * 2);
+     }
+#else
+#if ELKS
+    video_address = 0xb800;
+#endif
+#if VIDEO_BIOS
     videomode();
     /* ---- Monochrome Display Adaptor or text mode ---- */
 	snowy = FALSE;
@@ -214,81 +220,77 @@ void get_videomode(void)
     else	{
         /* ------ Text mode -------- */
         video_address = 0xb800 + video_page;
-		if (!isEGA() && !isVGA())
-			/* -------- CGA --------- */
-			snowy = cfg.snowy;
 	}
+#endif
+#endif
 }
 
-/* --------- scroll the window. d: 1 = up, 0 = dn ---------- */
-void scroll_window(WINDOW wnd, RECT rc, int d)
+#if VIDEO_FB
+#include "runes.h"
+
+/*                                           blk blu grn cyn red mag yel wht */
+static const unsigned char ansi_colors[8] = {30, 34, 32, 36, 31, 35, 33, 37 };
+
+static char *attr_to_ansi(char *buf, unsigned int attr)
 {
-	if (RectTop(rc) != RectBottom(rc))	{
-		union REGS regs;
-		regs.h.cl = RectLeft(rc);
-		regs.h.ch = RectTop(rc);
-		regs.h.dl = RectRight(rc);
-		regs.h.dh = RectBottom(rc);
-		regs.h.bh = clr(WndForeground(wnd),WndBackground(wnd));
-		regs.h.ah = 7 - d;
-		regs.h.al = 1;
-    	hide_mousecursor();
-    	int86(VIDEO, &regs, &regs);
-    	show_mousecursor();
-	}
+    int fg = attr & 0x07;
+    int bg = (attr & 0x70) >> 4;
+
+    /* convert RED on BLUE to effective yellow on blue for visibility */
+    if (fg == RED && bg == BLUE) fg = BROWN;
+
+    /* convert reverse grey on grey to red on grey for visibility */
+    if (fg == LIGHTGRAY && bg == LIGHTGRAY) fg = RED;
+
+    sprintf(buf, "\e[%d;%dm", ansi_colors[fg], ansi_colors[bg] + 10);
+    return buf;
 }
 
-
-static void near waitforretrace(void)
+void convert_screen_to_ansi()
 {
-#ifdef __SMALLER_C__
+    int r, c, a;
+    int b, ch;
+    unsigned short *chattr = (unsigned short *)video_address;
+    char buf[16];
+    extern int cx, cy;
+
+    printf("\e[?25l\e[H");
+    for (r=0; r<SCREENHEIGHT; r++) {
+        a = -1;
+        for (c=0; c<SCREENWIDTH; c++) {
+            b = chattr[r*SCREENWIDTH + c];
+            ch = kCp437[b & 255];
+            if (a != (b & 0xFF00)) {
+                fputs(attr_to_ansi(buf, b >> 8), stdout);
+                a = b & 0xFF00;
+            }
+            if (runetochar(buf, ch)) {
+                fputs(buf, stdout);
+            }
+        }
+        printf("\n");
+    }
+    printf("\e[1;0;0m");
+    if (cy >= 0)
+        printf("\E[%d;%dH\e[?25h", cy+1, cx+1);
+    fflush(stdout);
+}
+#endif
+
+static void movetoscreen(void far *bf, int offset, int len)
+{
+#if VIDEO_FB
+    memcpy(video_address + offset, bf, len);
 #else
-#ifndef WATCOM
-asm		mov		dx,3dah
-loop1:
-asm		mov		cx,6
-loop2:
-asm		in		al,dx
-asm		test	al,8
-asm		jnz		loop2
-asm		test	al,1
-asm		jz		loop2
-asm		cli
-loop3:
-asm		in		al,dx
-asm		test	al,1
-asm		loopnz	loop3
-asm		sti
-asm		jz		loop1
-#endif
-#endif
-}
-
-void movetoscreen(void *bf, int offset, int len)
-{
-	if (snowy)
-		waitforretrace();
 	movedata(FP_SEG(bf), FP_OFF(bf), video_address, offset, len);
+#endif
 }
 
-void movefromscreen(void *bf, int offset, int len)
+static void movefromscreen(void far *bf, int offset, int len)
 {
-	if (snowy)
-		waitforretrace();
+#if VIDEO_FB
+    memcpy(bf, video_address + offset, len);
+#else
 	movedata(video_address, offset,	FP_SEG(bf), FP_OFF(bf),	len);
-}
-
-
-static unsigned short near vpeek(unsigned short far *vp)
-{
-	unsigned short c;
-	waitforretrace();
-	c = *vp;
-	return c;
-}
-
-static void near vpoke(unsigned short far *vp, unsigned short c)
-{
-	waitforretrace();
-	*vp = c;
+#endif
 }

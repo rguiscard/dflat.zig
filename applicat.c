@@ -51,7 +51,9 @@ static char *Menus[9] = {
 };
 #endif
 
+#if MSDOS
 static char Cwd[65];
+#endif
 
 char **Argv;
 
@@ -61,7 +63,9 @@ static int CreateWindowMsg(WINDOW wnd)
     int rtn;
 	ApplicationWindow = wnd;
     ScreenHeight = SCREENHEIGHT;
-	getcwd(Cwd, 64);
+#if MSDOS
+	getcwd(Cwd, sizeof(Cwd));
+#endif
     if (!DisplayModified)    {
        	int i;
        	CTLWINDOW *ct, *ct1;
@@ -324,8 +328,10 @@ static int CloseWindowMsg(WINDOW wnd)
     UnLoadHelpFile();
 	DisplayModified = FALSE;
 	ApplicationWindow = NULL;
+#if MSDOS
 	setdisk(toupper(*Cwd) - 'A');
 	chdir(Cwd+2);
+#endif
     return rtn;
 }
 
@@ -394,14 +400,11 @@ static void ShellDOS(WINDOW wnd)
     if (ScreenHeight != SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
     SendMessage(NULL, HIDE_MOUSE, 0, 0);
-    printf("To return to %s, execute the DOS exit command.",
-                    DFlatApplication);
     fflush(stdout);
-#ifdef __SMALLER_C__
-    system("");
-#else
-    spawnl(P_WAIT, getenv("COMSPEC"), NULL);
-#endif
+    tty_restore();
+    system("exec sh");
+    tty_enable_unikey();
+
     if (SCREENHEIGHT != cfg.ScreenLines)
         SetScreenHeight(cfg.ScreenLines);
     SwitchCursor();
@@ -490,7 +493,9 @@ void PrepWindowMenu(void *w, struct Menu *mnu)
             if (isVisible(cwnd) && GetClass(cwnd) != MENUBAR &&
                     GetClass(cwnd) != STATUSBAR) {
                 /* --- add the document window to the menu --- */
+#if MSDOS | ELKS
                 strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20);
+#endif
                 pd->SelectionTitle = Menus[MenuNo];
                 if (cwnd == oldFocus)    {
                     /* -- mark the current document -- */
@@ -640,10 +645,11 @@ static void SelectColors(WINDOW wnd)
     else
         cfg.mono = 0;
     cfg.snowy = CheckBoxSetting(&Display, ID_SNOWY);
+#if VIDEO_BIOS
 	get_videomode();
     if ((ismono() || video_mode == 2) && cfg.mono == 0)
         cfg.mono = 1;
-
+#endif
     if (cfg.mono == 1)
         memcpy(cfg.clr, bw, sizeof bw);
     else if (cfg.mono == 2)

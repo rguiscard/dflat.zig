@@ -1,0 +1,6 @@
+*.o
+memopad
+memopad.hlp
+libdflat.a
+fixhelp
+huffc

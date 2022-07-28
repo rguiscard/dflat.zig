@@ -24,15 +24,19 @@ int TextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
                 char *txt = cp;
                 char *cp1 = cp;
                 char *np = strchr(cp, '\n');
+#if MSDOS | ELKS
                 if (np != NULL)
                     *np = '\0';
+#endif
                 mlen = strlen(cp);
                 while ((cp1=strchr(cp1,SHORTCUTCHAR)) != NULL) {
                     mlen += 3;
                     cp1++;
                 }
+#if MSDOS | ELKS
                 if (np != NULL)
                     *np = '\n';
+#endif
                 txt = DFmalloc(mlen+1);
                  CopyCommand(txt, cp, FALSE, WndBackground(wnd));
                 txt[mlen] = '\0';

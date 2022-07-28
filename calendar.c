@@ -1,7 +1,7 @@
 /* ------------- calendar.c ------------- */
 #include "dflat.h"
 
-#ifndef TURBOC
+#ifdef INCLUDE_PICTUREBOX
 
 #define CALHEIGHT 17
 #define CALWIDTH 33

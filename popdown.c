@@ -77,8 +77,8 @@ static BOOL ButtonReleasedMsg(WINDOW wnd, PARAM p1, PARAM p2)
 static void PaintMsg(WINDOW wnd)
 {
     int wd;
-    unsigned char sep[80], *cp = sep;
-    unsigned char sel[80];
+    unsigned char sep[MAXPOPWIDTH], *cp = sep;
+    unsigned char sel[MAXPOPWIDTH];
     struct PopDown *ActivePopDown;
     struct PopDown *pd1;
 
@@ -204,10 +204,11 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
             int a;
             struct PopDown *pd = ActivePopDown;
 
+#if MSDOS
             if ((c & OFFSET) == 0)
                 c = tolower(c);
+#endif
             a = AltConvert(c);
-
             while (pd->SelectionTitle != NULL)    {
                 char *cp = strchr(pd->SelectionTitle,
                                 SHORTCUTCHAR);

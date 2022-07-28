@@ -148,7 +148,7 @@ BOOL GenericMessage(WINDOW wnd,char *ttl,char *msg,int buttonct,
     MsgBox.dwnd.title = ttl;
     MsgBox.ctl[0].dwnd.h = MsgHeight(msg);
     MsgBox.ctl[0].dwnd.w = max(max(MsgWidth(msg),
-            buttonct*8 + buttonct + 2), strlen(ttl)+2);
+            buttonct*8 + buttonct + 2), ttl? strlen(ttl)+2: 0);
     MsgBox.dwnd.h = MsgBox.ctl[0].dwnd.h+6;
     MsgBox.dwnd.w = MsgBox.ctl[0].dwnd.w+4;
     if (buttonct == 1)

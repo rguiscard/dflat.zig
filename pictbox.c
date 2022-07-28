@@ -2,6 +2,7 @@
 
 #include "dflat.h"
 
+#ifdef INCLUDE_PICTUREBOX
 typedef struct    {
     enum VectTypes vt;
     RECT rc;
@@ -280,3 +281,4 @@ void DrawBar(WINDOW wnd,enum VectTypes vt,
     RECT rc = PictureRect(x,y,len,hv);
     SendMessage(wnd, DRAWBAR, (PARAM) &rc, (PARAM) vt);
 }
+#endif

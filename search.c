@@ -31,7 +31,7 @@ static void replacetext(WINDOW wnd, char *cp1, DBOX *db)
         dif = newlen-oldlen;
         if (wnd->textlen < strlen(wnd->text)+dif)    {
             /* ---- need to reallocate the text buffer ---- */
-            int offset = (int)(cp1-wnd->text);
+            int offset = (int)(cp1-(char *)wnd->text);
             wnd->textlen += dif;
             wnd->text = DFrealloc(wnd->text, wnd->textlen+2);
             cp1 = wnd->text + offset;
@@ -89,9 +89,9 @@ static void SearchTextBox(WINDOW wnd, int incr)
             if (wnd->BlkEndLine < wnd->BlkBegLine)
                 wnd->BlkEndLine = wnd->BlkBegLine;
             wnd->BlkEndCol =
-                (int)(s2 - TextLine(wnd, wnd->BlkEndLine));
+                (int)(s2 - (char *)TextLine(wnd, wnd->BlkEndLine));
             wnd->BlkBegCol =
-                (int)(cp1 - TextLine(wnd, wnd->BlkBegLine));
+                (int)(cp1 - (char *)TextLine(wnd, wnd->BlkBegLine));
 
             /* position the cursor at the matching text */
             wnd->CurrCol = wnd->BlkBegCol;

@@ -25,7 +25,7 @@ static int fgetcx(FILE *fi)
     return c;
 }
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     FILE *fi, *fo;
     int c;
@@ -83,7 +83,7 @@ void main(int argc, char *argv[])
     fclose(fi);
     fclose(fo);
     free(ht);
-    exit(0);
+    return 0;
 }
 
 /* ---- compress a character value into a bit stream ---- */

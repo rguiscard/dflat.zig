@@ -364,7 +364,7 @@ static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
     /* ------ paint the client area ----- */
     RECT rc, rcc;
     int y;
-    char blankline[201];
+    char blankline[MAXCOLS];
 
     /* ----- build the rectangle to paint ----- */
     if ((RECT *)p1 == NULL)
@@ -622,12 +622,12 @@ void WriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
 {
     int len = 0;
     int dif = 0;
-    unsigned char line[200];
     RECT rc;
     unsigned char *lp, *svlp;
     int lnlen;
     int i;
     BOOL trunc = FALSE;
+    unsigned char line[MAXCOLS];
 
     /* ------ make sure y is inside the window ----- */
     if (y < wnd->wtop || y >= wnd->wtop+ClientHeight(wnd))
@@ -843,7 +843,7 @@ void BuildTextPointers(WINDOW wnd)
             wnd->TextPointers = DFrealloc(wnd->TextPointers,
                     (wnd->wlines + INITLINES) * sizeof(int));
         }
-        off = (unsigned int) (cp - wnd->text);
+        off = (unsigned int) (cp - (char *)wnd->text);
         *((wnd->TextPointers) + wnd->wlines) = off;
         wnd->wlines++;
         incrs++;

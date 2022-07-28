@@ -38,7 +38,7 @@ unsigned char color[CLASSCOUNT] [4] [2] = {
    {{BLACK, LIGHTGRAY}, /* STD_COLOR    */
     {BLACK, CYAN},      /* SELECT_COLOR */
     {BLACK, LIGHTGRAY}, /* FRAME_COLOR  */
-    {DARKGRAY, RED}},   /* HILITE_COLOR
+    {DARKGRAY, GREEN}},   /* HILITE_COLOR
                           Inactive, Shortcut (both FG) */
 
     /* ---------- POPDOWNMENU --------- */
@@ -476,7 +476,7 @@ void BuildFileName(char *path, const char *fn, const char *ext)
 
 FILE *OpenConfig(char *mode)
 {
-	char path[64];
+	char path[MAXPATH];
 	BuildFileName(path, DFlatApplication, ".cfg");
 	return fopen(path, mode);
 }
@@ -498,7 +498,7 @@ BOOL LoadConfig(void)
 				char path[64];
 				BuildFileName(path, DFlatApplication, ".cfg");
 	        	fclose(fp);
-				remove(path);
+				unlink(path);
             	strcpy(cfg.version, VERSION);
 			}
 			ConfigLoaded = TRUE;
@@ -512,7 +512,7 @@ void SaveConfig(void)
 {
     FILE *fp = OpenConfig("wb");
     if (fp != NULL)    {
-        fwrite(&cfg, sizeof(CONFIG), 1, fp);
+        fwrite((char *)&cfg, sizeof(CONFIG), 1, fp);
         fclose(fp);
     }
 }

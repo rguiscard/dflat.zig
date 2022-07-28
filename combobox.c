@@ -50,10 +50,10 @@ int ListProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
 	WINDOW pwnd = GetParent(GetParent(wnd));
     DBOX *db = pwnd->extension;
-    WINDOW cwnd = ControlWindow(db, wnd->ct->command);
-    char text[130];
+    WINDOW cwnd;
     int rtn;
     WINDOW currFocus;
+    char text[MAXCOLS];		//FIXME overrun possible
     switch (msg)    {
         case CREATE_WINDOW:
             wnd->ct = DFmalloc(sizeof(CTLWINDOW));
@@ -85,6 +85,7 @@ int ListProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             inFocus = currFocus;
             return rtn;
         case LB_SELECTION:
+            cwnd = ControlWindow(db, wnd->ct->command);
             rtn = DefaultWndProc(wnd, msg, p1, p2);
             SendMessage(wnd, LB_GETTEXT,
                             (PARAM) text, wnd->selection);
@@ -93,6 +94,7 @@ int ListProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             cwnd->TextChanged = TRUE;
             return rtn;
         case KEYBOARD:
+            cwnd = ControlWindow(db, wnd->ct->command);
             switch ((int) p1)    {
                 case ESC:
                 case FWD:
@@ -104,6 +106,7 @@ int ListProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             }
             break;
         case LB_CHOOSE:
+            cwnd = ControlWindow(db, wnd->ct->command);
             SendMessage(cwnd, SETFOCUS, TRUE, 0);
             return TRUE;
         case CLOSE_WINDOW:

@@ -171,7 +171,11 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 			RepaintLine(wnd);
 			return TRUE;
 		default:
-			if (((c & OFFSET) == 0) && (isprint(c) || c == '\r'))	{
+			if (
+#if MSDOS
+				((c & OFFSET) == 0) &&
+#endif
+				(isprint(c) || c == '\r'))	{
 			    TurnOffDisplay(wnd);
 				BaseWndProc(EDITOR, wnd, KEYBOARD, p1, p2);
 				AdjustTab(wnd);

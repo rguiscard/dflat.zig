@@ -93,7 +93,7 @@ void InsertTitle(WINDOW wnd, const char *ttl)
     strcpy(wnd->title, ttl);
 }
 
-static unsigned char line[300];
+static unsigned char line[MAXCOLS];
 
 /* ------ write a line to video window client area ------ */
 void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
@@ -101,9 +101,9 @@ void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
     char *cp;
     int len;
     int dif;
-	char wline[200];
+	char wline[MAXCOLS];
 
-	memset(wline, 0, 200);
+    memset(wline, 0, sizeof(wline));
     len = LineLength(str);
     dif = strlen(str) - len;
     strncpy(wline, str, ClientWidth(wnd) + dif);

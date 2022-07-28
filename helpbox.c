@@ -263,7 +263,7 @@ static void ReadHelp(WINDOW wnd)
                     continue;
                 }
                 thisword->lineno = cwnd->wlines;
-                thisword->off1 = (int) (cp - hline);
+                thisword->off1 = (int) ((char *)cp - hline);
                 thisword->off2 = thisword->off1 - colorct * 4;
                 thisword->isDefinition = *(cp+1) == '*';
                 colorct++;
@@ -283,7 +283,7 @@ static void ReadHelp(WINDOW wnd)
                     char *cp1 = strchr(cp, '>');
                     if (cp1 != NULL)    {
 						char hname[80];
-                        int len = (int) (cp1 - cp);
+                        int len = (int) (cp1 - (char *)cp);
 						memset(hname, 0, 80);
                         strncpy(hname, cp+1, len-1);
 						thisword->hkey = FindHelp(hname);
