@@ -764,7 +764,7 @@ from the listbox by using one
 of these methods:
 
 Keyboard:  Move the selection cursor to
-           the subdirectory and 
+           the subdirectory and
            press Enter.
 
 Mouse:     Double-click the subdirectory.
@@ -885,40 +885,12 @@ Select this option for a monochrome display.
 ; -----------------------------------------
 <ID_REVERSE>
 [<<]<ID_MONO>
-[>>]<ID_25LINES>
 The Reverse Option Button
 Select this option for a reverse monochrome
 display. You might find that this option
 works well with the LCD screens of some laptop
 computers, particularly when you turn off the
 [..Texture]<ID_TEXTURE> check box.
-; -----------------------------------------
-<ID_25LINES>
-[<<]<ID_REVERSE>
-[>>]<ID_43LINES>
-The 25 Lines Option Button
-Use this button to select a 25-line display.
-; -----------------------------------------
-<ID_43LINES>
-[<<]<ID_25LINES>
-[>>]<ID_50LINES>
-The 43 Lines Option Button
-Use this button to select a 43-line display.
-(EGA and VGA)
-; -----------------------------------------
-<ID_50LINES>
-[<<]<ID_43LINES>
-[>>]<ID_SNOWY>
-The 50 Lines Option Button
-Use this button to select a 50-line display.
-(VGA only)
-; -----------------------------------------
-<ID_SNOWY>
-[<<]<ID_50LINES>
-Snowy Display
-Select this check box if your display
-(usually a CGA) displays video snow when
-you change the screen.
 ; -----------------------------------------
 <ID_LOGLIST>
 [<<]<Options>

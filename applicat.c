@@ -3,7 +3,6 @@
 #include "dflat.h"
 
 static int ScreenHeight;
-static BOOL DisplayModified = FALSE;
 WINDOW ApplicationWindow;
 
 extern DBOX Display;
@@ -60,39 +59,6 @@ static int CreateWindowMsg(WINDOW wnd)
 
 	ApplicationWindow = wnd;
     ScreenHeight = SCREENHEIGHT;
-    if (!DisplayModified)    {
-       	int i;
-#if 0
-       	CTLWINDOW *ct, *ct1;
-       	ct = FindCommand(&Display, ID_SNOWY, CHECKBOX);
-    	if (!isVGA())    {
-        	/* ---- modify Display Dialog Box for EGA, CGA ---- */
-        	if (isEGA())
-            	ct1 = FindCommand(&Display,ID_50LINES,RADIOBUTTON);
-        	else    {
-            	CTLWINDOW *ct2;
-            	ct2 = FindCommand(&Display,ID_COLOR,RADIOBUTTON)-1;
-				if (ct2)	{
-	            	ct2->dwnd.w++;
-    	        	for (i = 0; i < 7; i++)
-        	        	(ct2+i)->dwnd.x += 8;
-				}
-            	ct1 = FindCommand(&Display,ID_25LINES,RADIOBUTTON)-1;
-        	}
-			if (ct && ct1)
-	        	for (i = 0; i < 6; i++)
-    	        	*ct1++ = *ct++;
-		}
-    	if (isVGA() || isEGA())    {
-			/* ------ eliminate the snowy check box ----- */
-	       	ct = FindCommand(&Display, ID_SNOWY, CHECKBOX);
-			if (ct != NULL)
-				for (i = 0; i < 4; i++)
-					*(ct+i) = *(ct+2+i);
-		}
-#endif
-        DisplayModified = TRUE;
-    }
 #ifdef INCLUDE_WINDOWOPTIONS
     if (cfg.Border)
         SetCheckBox(&Display, ID_BORDER);
@@ -109,16 +75,6 @@ static int CreateWindowMsg(WINDOW wnd)
         PushRadioButton(&Display, ID_REVERSE);
     else
         PushRadioButton(&Display, ID_COLOR);
-#if 0
-    if (cfg.ScreenLines == 25)
-        PushRadioButton(&Display, ID_25LINES);
-    else if (cfg.ScreenLines == 43)
-        PushRadioButton(&Display, ID_43LINES);
-    else if (cfg.ScreenLines == 50)
-        PushRadioButton(&Display, ID_50LINES);
-	if (cfg.snowy)
-        SetCheckBox(&Display, ID_SNOWY);
-#endif
     if (SCREENHEIGHT != cfg.ScreenLines)    {
         SetScreenHeight(cfg.ScreenLines);
         if (WindowHeight(wnd) == ScreenHeight ||
@@ -324,7 +280,6 @@ static int CloseWindowMsg(WINDOW wnd)
     if (ScreenHeight != SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
     UnLoadHelpFile();
-	DisplayModified = FALSE;
 	ApplicationWindow = NULL;
     return rtn;
 }
