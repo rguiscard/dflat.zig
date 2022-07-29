@@ -633,17 +633,12 @@ static void DoWindowColors(WINDOW wnd)
 static void SelectColors(WINDOW wnd)
 {
     if (RadioButtonSetting(&Display, ID_MONO))
-        cfg.mono = 1;
+        cfg.mono = 1;   /* mono */
     else if (RadioButtonSetting(&Display, ID_REVERSE))
-        cfg.mono = 2;
+        cfg.mono = 2;   /* mono reverse */
     else
-        cfg.mono = 0;
-    cfg.snowy = CheckBoxSetting(&Display, ID_SNOWY);
-#if VIDEO_BIOS
-	get_videomode();
-    if ((ismono() || video_mode == 2) && cfg.mono == 0)
-        cfg.mono = 1;
-#endif
+        cfg.mono = 0;   /* color */
+
     if (cfg.mono == 1)
         memcpy(cfg.clr, bw, sizeof bw);
     else if (cfg.mono == 2)
@@ -657,14 +652,6 @@ static void SelectColors(WINDOW wnd)
 static void SelectLines(WINDOW wnd)
 {
     cfg.ScreenLines = SCREENHEIGHT;
-#if 0
-    if (isEGA() || isVGA())    {
-        if (RadioButtonSetting(&Display, ID_43LINES))
-            cfg.ScreenLines = 43;
-        else if (RadioButtonSetting(&Display, ID_50LINES))
-            cfg.ScreenLines = 50;
-    }
-#endif
     if (SCREENHEIGHT != cfg.ScreenLines)    {
         SetScreenHeight(cfg.ScreenLines);
 		/* ---- re-maximize ---- */

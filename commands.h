@@ -70,7 +70,6 @@ enum commands {
     ID_FILENAME,
     ID_FILES,
     ID_DIRECTORY,
-    ID_DRIVE,
     ID_PATH,
     /* ----- Search and Replace dialog boxes ---- */
     ID_SEARCHFOR,

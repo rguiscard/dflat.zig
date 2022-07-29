@@ -15,8 +15,6 @@ void wputs(WINDOW, void *, int, int);
 void scroll_window(WINDOW, RECT, int);
 
 #if VIDEO_BIOS
-extern unsigned video_mode;
-extern unsigned video_page;
 #define ismono() (video_mode == 7)
 #endif
 

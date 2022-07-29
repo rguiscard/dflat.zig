@@ -208,13 +208,9 @@ void get_videomode(void)
         video_address = malloc(SCREENHEIGHT * SCREENWIDTH * 2);
      }
 #else
-#if ELKS
     video_address = 0xb800;
-#endif
 #if VIDEO_BIOS
-    videomode();
     /* ---- Monochrome Display Adaptor or text mode ---- */
-	snowy = FALSE;
     if (ismono())
         video_address = 0xb000;
     else	{

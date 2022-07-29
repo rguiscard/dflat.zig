@@ -745,7 +745,7 @@ On the Save As dialog box:
 ; -----------------------------------------
 <ID_FILES>
 [<<]<ID_FILENAME>
-[>>]<ID_DRIVE>
+[>>]<ID_DIRECTORY>
 The Files Field
 Select a file from the listbox by using one
 of these methods:
@@ -755,20 +755,19 @@ Keyboard:  Move the selection cursor to
 
 Mouse:     Double-click the file name.
 ; -----------------------------------------
-<ID_DRIVE>
+<ID_DIRECTORY>
 [<<]<ID_FILES>
 The Directories Field
 Use this listbox to select a different
-drive or subdirectory. Select a drive or
-subdirectory from the listbox by using one
+subdirectory. Select a subdirectory
+from the listbox by using one
 of these methods:
 
 Keyboard:  Move the selection cursor to
-           the drive or subdirectory and 
+           the subdirectory and 
            press Enter.
 
-Mouse:     Double-click the drive or
-           subdirectory.
+Mouse:     Double-click the subdirectory.
 ; -----------------------------------------
 <ID_PRINTERPORT>
 [<<]<PrintSetup>

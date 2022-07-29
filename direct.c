@@ -1,10 +1,8 @@
 /* ---------- direct.c --------- */
 
 #include "dflat.h"
-
-#ifndef BCPP
-#define FA_DIREC 0x10
-#endif
+#include <dirent.h>
+#include <sys/stat.h>
 
 static char path[MAXPATH];
 #if MSDOS
@@ -89,33 +87,34 @@ static int dircmp(const void *c1, const void *c2)
 
 static BOOL BuildList(WINDOW wnd, char *fspec, BOOL dirs)
 {
-#if UNIX
-    return FALSE;
-#else
-    int ax, i = 0, criterr = 1;
-    struct ffblk ff;
     CTLWINDOW *ct = FindCommand(wnd->extension,
-							dirs ? ID_DIRECTORY : ID_FILES,LISTBOX);
+                            dirs ? ID_DIRECTORY : ID_FILES,LISTBOX);
     WINDOW lwnd;
     char **dirlist = NULL;
 
     if (ct != NULL)    {
+        DIR *dirp;
+        int i = 0, j;
+        struct dirent *dp;
+        struct stat sb;
+
         lwnd = ct->wnd;
         SendMessage(lwnd, CLEARTEXT, 0, 0);
 
-       	while (criterr == 1)    {
-           	ax = findfirst(fspec, &ff, dirs ? FA_DIREC: 0);
-           	criterr = TestCriticalError();
-       	}
-       	if (criterr)
-           	return FALSE;
-        while (ax == 0)    {
-			if (!dirs || (ff.ff_attrib & FA_DIREC) && strcmp(ff.ff_name, "."))	{
-	            dirlist = DFrealloc(dirlist, sizeof(char *)*(i+1));
-    	        dirlist[i] = DFmalloc(strlen(ff.ff_name)+1);
-        	    strcpy(dirlist[i++], ff.ff_name);
-			}
-            ax = findnext(&ff);
+        dirp = opendir(".");
+        if (dirp) {
+            while ((dp = readdir(dirp)) != NULL) {
+                if (dp->d_name[0] == '.' && dp->d_name[1] != '.')
+                    continue;
+                if (stat(dp->d_name, &sb) < 0)
+                    continue;
+                if (S_ISDIR(sb.st_mode) == dirs) {
+                    dirlist = DFrealloc(dirlist, sizeof(char *)*(i+1));
+                    dirlist[i] = DFmalloc(strlen(dp->d_name)+1);
+                    strcpy(dirlist[i++], dp->d_name);
+                }
+            }
+            closedir(dirp);
         }
         if (dirlist != NULL)    {
             int j;
@@ -131,7 +130,6 @@ static BOOL BuildList(WINDOW wnd, char *fspec, BOOL dirs)
         SendMessage(lwnd, SHOW_WINDOW, 0, 0);
     }
 	return TRUE;
-#endif
 }
 
 BOOL BuildFileList(WINDOW wnd, char *fspec)
@@ -142,53 +140,6 @@ BOOL BuildFileList(WINDOW wnd, char *fspec)
 void BuildDirectoryList(WINDOW wnd)
 {
 	BuildList(wnd, "*.*", TRUE);
-}
-
-void BuildDriveList(WINDOW wnd)
-{
-#if MSDOS
-    CTLWINDOW *ct = FindCommand(wnd->extension, ID_DRIVE,LISTBOX);
-    if (ct != NULL)    {
-	    union REGS regs;
-	    char drname[15];
-	    unsigned int cd, dr;
-	    WINDOW lwnd = ct->wnd;
-        SendMessage(lwnd, CLEARTEXT, 0, 0);
-
-    	cd = getdisk();
-    	for (dr = 0; dr < 26; dr++)    {
-        	unsigned ndr;
-        	setdisk(dr);
-        	ndr = getdisk();
-        	if (ndr == dr)    {
-            	/* ----- test for remapped B drive ----- */
-            	if (dr == 1)    {
-                	regs.x.ax = 0x440e; /* IOCTL func 14 */
-                	regs.h.bl = dr+1;
-                	int86(DOS, &regs, &regs);
-                	if (regs.h.al != 0)
-                    	continue;
-            	}
-
-            	sprintf(drname, "%c:", dr+'A');
-
-            	/* ---- test for network or RAM disk ---- */
-            	regs.x.ax = 0x4409;     /* IOCTL func 9 */
-            	regs.h.bl = dr+1;
-            	int86(DOS, &regs, &regs);
-            	if (!regs.x.cflag)    {
-                	if (regs.x.dx & 0x1000)
-                    	strcat(drname, " (Net)");
-                	else if (regs.x.dx == 0x0800)
-                    	strcat(drname, " (RAM)");
-            	}
-            	SendMessage(lwnd,ADDTEXT,(PARAM)drname,0);
-        	}
-    	}
-        SendMessage(lwnd, SHOW_WINDOW, 0, 0);
-    	setdisk(cd);
-	}
-#endif
 }
 
 void BuildPathDisplay(WINDOW wnd)

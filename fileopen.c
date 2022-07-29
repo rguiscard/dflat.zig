@@ -129,27 +129,6 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 					}
                     return TRUE;
 
-                case ID_DRIVE:
-                    switch ((int) p2)    {
-						case ENTERFOCUS:
-                            PutItemText(wnd, ID_FILENAME, FileSpec);
-							break;
-                    	case LB_CHOOSE:
-						{
-#if MSDOS
-                        	/* chose dir */
-                        	char dr[15];
-                        	GetDlgListText(wnd, dr, ID_DRIVE);
-							setdisk(*dr - 'A');
-#endif
-                        	InitDlgBox(wnd);
-                            SendMessage(wnd, COMMAND, ID_OK, 0);
-	                    }
-						default:
-							break;
-					}
-                    return TRUE;
-
                 default:
                     break;
             }
@@ -161,7 +140,6 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 
 BOOL BuildFileList(WINDOW, char *);
 void BuildDirectoryList(WINDOW);
-void BuildDriveList(WINDOW);
 void BuildPathDisplay(WINDOW);
 
 /*
@@ -173,24 +151,19 @@ static void InitDlgBox(WINDOW wnd)
         PutItemText(wnd, ID_FILENAME, FileSpec);
 	if (BuildFileList(wnd, SrchSpec))
 		BuildDirectoryList(wnd);
-	BuildDriveList(wnd);
 	BuildPathDisplay(wnd);
 }
 
 /*
- * Strip the drive and path information from a file spec
+ * Strip the path information from a file spec
  */
 static void StripPath(char *filespec)
 {
     char *cp, *cp1;
 
-    cp = strchr(filespec, ':');
-    if (cp != NULL)
-        cp++;
-    else
-        cp = filespec;
+    cp = filespec;
     while (TRUE)    {
-        cp1 = strchr(cp, '\\');
+        cp1 = strchr(cp, '/');
         if (cp1 == NULL)
             break;
         cp = cp1+1;
@@ -203,8 +176,6 @@ static BOOL IncompleteFilename(char *s)
 {
     int lc = strlen(s)-1;
     if (strchr(s, '?') || strchr(s, '*') || !*s)
-        return TRUE;
-    if (*(s+lc) == ':' || *(s+lc) == '\\')
         return TRUE;
     return FALSE;
 }

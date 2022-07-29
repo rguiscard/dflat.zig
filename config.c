@@ -440,7 +440,6 @@ unsigned char reverse[CLASSCOUNT] [4] [2] = {
 CONFIG cfg = {
     VERSION,
     0,               /* Color                       */
-	FALSE,			 /* Snowy CGA                   */
     TRUE,            /* Editor Insert Mode          */
     4,               /* Editor tab stops            */
     TRUE,            /* Editor word wrap            */
