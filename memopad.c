@@ -123,10 +123,10 @@ static int MemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 					cfg.Tabs = 8;
 					FixTabMenu();
                     return TRUE;
-#ifdef INCLUDE_PICTUREBOX
 				case ID_CALENDAR:
 					Calendar(wnd);
 					return TRUE;
+#ifdef INCLUDE_PICTUREBOX
 				case ID_BARCHART:
 					BarChart(wnd);
 					return TRUE;

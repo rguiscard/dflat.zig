@@ -44,9 +44,4 @@ void convert_screen_to_ansi(void);
 #define DRIVE     0x10
 #endif
 
-#if ELKS //FIXME
-#define mktime(t)
-#define strftime(f,...)
-#endif
-
 #endif

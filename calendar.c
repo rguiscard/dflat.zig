@@ -45,6 +45,12 @@ static void CreateWindowMsg(WINDOW wnd)
         DrawVector(wnd, 1, y, CALWIDTH-4, TRUE);
 }
 
+/* remove requirement for strftime() */
+static char *months[] = {
+	"January", "February", "March", "April", "May", "June", "July",
+	"August", "September", "October", "November", "December"
+};
+
 static void DisplayDates(WINDOW wnd)
 {
     int week, day;
@@ -56,7 +62,7 @@ static void DisplayDates(WINDOW wnd)
     SetStandardColor(wnd);
     PutWindowLine(wnd, "Sun Mon Tue Wed Thu Fri Sat", 2, 1);
     memset(banner, ' ', CALWIDTH-2);
-    strftime(banner1, 16, "%B, %Y", &ttm);
+    sprintf(banner1, "%s %d", months[ttm.tm_mon], ttm.tm_year+1900);
     offset = (CALWIDTH-2 - strlen(banner1)) / 2;
     strcpy(banner+offset, banner1);
     strcat(banner, "    ");
@@ -86,6 +92,8 @@ static void DisplayDates(WINDOW wnd)
 static int KeyboardMsg(WINDOW wnd, PARAM p1)
 {
     switch ((int)p1)    {
+        case BS:
+        case UP:
         case PGUP:
             if (ttm.tm_mon == 0)    {
                 ttm.tm_mon = 12;
@@ -96,6 +104,8 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1)
             mktime(&ttm);
             DisplayDates(wnd);
             return TRUE;
+        case FWD:
+        case DN:
         case PGDN:
             ttm.tm_mon++;
             if (ttm.tm_mon == 12)    {
