@@ -213,7 +213,7 @@ void ReFocus(WINDOW);
 void SkipApplicationControls(void);
 
 BOOL CharInView(WINDOW, int, int);
-void CreatePath(char *, char *, int, int);
+int CheckAndChangeDir(char *);
 #define SwapVideoBuffer(wnd, ish, fh) swapvideo(wnd, wnd->videosave, ish, fh)
 int LineLength(char *);
 RECT AdjustRectangle(WINDOW, RECT);

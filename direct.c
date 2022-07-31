@@ -4,82 +4,107 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-static char path[MAXPATH];
-#if MSDOS
-static char drive[MAXDRIVE] = " :";
-static char dir[MAXDIR];
-static char name[MAXFILE];
-static char ext[MAXEXT];
-#endif
-
-/* ----- Create unambiguous path from file spec, filling in the
-     drive and directory if incomplete. Optionally change to
-     the new drive and subdirectory ------ */
-void CreatePath(char *spath,char *fspec,int InclName,int Change)
+/* Check if fspec is a directory, if so chdir and return TRUE */
+int CheckAndChangeDir(char *fspec)
 {
-#if UNIX
-    strcpy(spath, fspec);
-#else
-    int cm = 0;
-    unsigned currdrive;
-    char currdir[MAXPATH+1];
     char *cp;
+    char path[MAXPATH];
 
-    if (!Change)    {
-        /* ---- save the current drive and subdirectory ---- */
-        currdrive = getdisk();
-        getcwd(currdir, sizeof currdir);
-        memmove(currdir, currdir+2, strlen(currdir+1));
-        cp = currdir+strlen(currdir)-1;
-        if (*cp == '\\')
+    if (chdir(fspec) == 0)
+        return TRUE;
+    strcpy(path, fspec);
+    cp = strrchr(path, '/');
+    if (cp) {
+        if (cp != path)
             *cp = '\0';
+        if (chdir(path) == 0)
+            return TRUE;
     }
-    *drive = *dir = *name = *ext = '\0';
-    fnsplit(fspec, drive, dir, name, ext);
-    if (!InclName)
-        *name = *ext = '\0';
-    *drive = toupper(*drive);
-    if (*ext)
-        cm |= EXTENSION;
-    if (InclName && *name)
-        cm |= FILENAME;
-    if (*dir)
-        cm |= DIRECTORY;
-    if (*drive)
-        cm |= DRIVE;
-    if (cm & DRIVE)
-        setdisk(*drive - 'A');
-    else     {
-        *drive = getdisk();
-        *drive += 'A';
-    }
-    if (cm & DIRECTORY)    {
-        cp = dir+strlen(dir)-1;
-        if (*cp == '\\')
-            *cp = '\0';
-        chdir(dir);
-    }
-    getcwd(dir, sizeof dir);
-    memmove(dir, dir+2, strlen(dir+1));
-    if (InclName)    {
-        if (!(cm & FILENAME))
-            strcpy(name, "*");
-        if (!(cm & EXTENSION) && strchr(fspec, '.') != NULL)
-            strcpy(ext, ".*");
-    }
-    else
-        *name = *ext = '\0';
-    if (dir[strlen(dir)-1] != '\\')
-        strcat(dir, "\\");
-	if (spath != NULL)
-    	fnmerge(spath, drive, dir, name, ext);
-    if (!Change)    {
-        setdisk(currdrive);
-        chdir(currdir);
-    }
-#endif
+    return FALSE;
 }
 
+/*
+ * Routine to see if a text string is matched by a wildcard pattern.
+ * Returns TRUE if the text is matched, or FALSE if it is not matched
+ * or if the pattern is invalid.
+ *  *		matches zero or more characters
+ *  ?		matches a single character
+ *  [abc]	matches 'a', 'b' or 'c'
+ *  \c		quotes character c
+ *
+ * Adapted from code written by Ingo Wilken.
+ * Copyright (c) 1993 by David I. Bell
+ * Permission is granted to use, distribute, or modify this source,
+ * provided that this copyright notice remains intact.
+ */
+static int match(char *text, char *pattern)
+{
+	char	*retrypat;
+	char	*retrytxt;
+	int	ch;
+	int	found;
+
+	if (pattern[0] == '\0')
+		return TRUE;
+
+	retrypat = NULL;
+	retrytxt = NULL;
+
+	while (*text || *pattern) {
+		ch = *pattern++;
+
+		switch (ch) {
+			case '*':
+				retrypat = pattern;
+				retrytxt = text;
+				break;
+
+			case '[':
+				found = FALSE;
+				while ((ch = *pattern++) != ']') {
+					if (ch == '\\')
+						ch = *pattern++;
+					if (ch == '\0')
+						return FALSE;
+					if (*text == ch)
+						found = TRUE;
+				}
+				if (!found) {
+					pattern = retrypat;
+					text = ++retrytxt;
+				}
+				/* fall into next case */
+
+			case '?':
+				if (*text++ == '\0')
+					return FALSE;
+				break;
+
+			case '\\':
+				ch = *pattern++;
+				if (ch == '\0')
+					return FALSE;
+				/* fall into next case */
+
+			default:
+				if (*text == ch) {
+					if (*text)
+						text++;
+					break;
+				}
+				if (*text) {
+					pattern = retrypat;
+					text = ++retrytxt;
+					break;
+				}
+				return FALSE;
+		}
+
+		if (pattern == NULL)
+			return FALSE;
+	}
+	return TRUE;
+}
 static int dircmp(const void *c1, const void *c2)
 {
     return strcasecmp(*(char **)c1, *(char **)c2);
@@ -88,7 +113,7 @@ static int dircmp(const void *c1, const void *c2)
 static BOOL BuildList(WINDOW wnd, char *fspec, BOOL dirs)
 {
     CTLWINDOW *ct = FindCommand(wnd->extension,
-                            dirs ? ID_DIRECTORY : ID_FILES,LISTBOX);
+                        dirs? ID_DIRECTORY : ID_FILES,LISTBOX);
     WINDOW lwnd;
     char **dirlist = NULL;
 
@@ -109,9 +134,11 @@ static BOOL BuildList(WINDOW wnd, char *fspec, BOOL dirs)
                 if (stat(dp->d_name, &sb) < 0)
                     continue;
                 if (S_ISDIR(sb.st_mode) == dirs) {
-                    dirlist = DFrealloc(dirlist, sizeof(char *)*(i+1));
-                    dirlist[i] = DFmalloc(strlen(dp->d_name)+1);
-                    strcpy(dirlist[i++], dp->d_name);
+                    if (match(dp->d_name, fspec)) {
+                        dirlist = DFrealloc(dirlist, sizeof(char *)*(i+1));
+                        dirlist[i] = DFmalloc(strlen(dp->d_name)+1);
+                        strcpy(dirlist[i++], dp->d_name);
+                    }
                 }
             }
             closedir(dirp);
@@ -139,19 +166,18 @@ BOOL BuildFileList(WINDOW wnd, char *fspec)
 
 void BuildDirectoryList(WINDOW wnd)
 {
-	BuildList(wnd, "*.*", TRUE);
+	BuildList(wnd, "*", TRUE);
 }
 
 void BuildPathDisplay(WINDOW wnd)
 {
+    char path[MAXPATH];
+
     CTLWINDOW *ct = FindCommand(wnd->extension, ID_PATH,TEXT);
 	if (ct != NULL)	{
 		int len;
 	    WINDOW lwnd = ct->wnd;
-		CreatePath(path, "*.*", FALSE, FALSE);
-		len = strlen(path);
-		if (len > 3)
-			path[len-1] = '\0';
+		getcwd(path, sizeof(path));
        	SendMessage(lwnd,SETTEXT,(PARAM)path,0);
         SendMessage(lwnd, PAINT, 0, 0);
 	}

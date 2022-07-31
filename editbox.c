@@ -711,7 +711,7 @@ static void DeleteTextCmd(WINDOW wnd)
         int len = (int) (bel - bbl);
         SaveDeletedText(wnd, bbl, len);
         wnd->TextChanged = TRUE;
-        strcpy(bbl, bel);
+        memmove(bbl, bel, strlen(bel));
         wnd->CurrLine = TextLineNumber(wnd, bbl-wnd->BlkBegCol);
         wnd->CurrCol = wnd->BlkBegCol;
         wnd->WndRow = wnd->BlkBegLine - wnd->wtop;

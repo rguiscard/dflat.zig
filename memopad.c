@@ -166,8 +166,8 @@ static void NewFile(WINDOW wnd)
 /* --- The Open... command. Select a file  --- */
 static void SelectFile(WINDOW wnd)
 {
-    char FileName[15];
-    if (OpenFileDialogBox("*.*", FileName))    {
+    char FileName[MAXPATH];
+    if (OpenFileDialogBox("*", FileName))    {
         /* --- see if the document is already in a window --- */
         WINDOW wnd1 = FirstWindow(wnd);
         while (wnd1 != NULL)    {
@@ -190,7 +190,7 @@ static void OpenPadWindow(WINDOW wnd, char *FileName)
     char *Fname = FileName;
     if (strcmp(FileName, Untitled) != 0) {
         struct stat sb;
-        if (stat(FileName, &sb) < 0) {
+        if (stat(FileName, &sb) < 0 || !S_ISREG(sb.st_mode)) {
             char errmsg[MAXPATH];
             sprintf(errmsg, "No such file as\n%s", FileName);
             ErrorMessage(errmsg);
@@ -319,8 +319,8 @@ static void SaveFile(WINDOW wnd, int Saveas)
 {
     FILE *fp;
     if (wnd->extension == NULL || Saveas)    {
-        char FileName[15];
-        if (SaveAsDialogBox("*.*", NULL, FileName))    {
+        char FileName[MAXPATH];
+        if (SaveAsDialogBox("*", NULL, FileName))    {
             if (wnd->extension != NULL)
                 free(wnd->extension);
             wnd->extension = DFmalloc(strlen(FileName)+1);
@@ -430,9 +430,8 @@ static int OurEditorProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 static char *NameComponent(char *FileName)
 {
     char *Fname;
-    if ((Fname = strrchr(FileName, '\\')) == NULL)
-        if ((Fname = strrchr(FileName, ':')) == NULL)
-            Fname = FileName-1;
+    if ((Fname = strrchr(FileName, '/')) == NULL)
+        Fname = FileName-1;
     return Fname + 1;
 }
 

@@ -10,7 +10,7 @@ static BOOL IncompleteFilename(char *);
 
 static char FileSpec[15];
 static char SrchSpec[15];
-static char FileName[15];
+static char FileName[MAXPATH];
 
 extern DBOX FileOpen;
 extern DBOX SaveAs;
@@ -36,8 +36,8 @@ static BOOL DlgFileOpen(char *Fspec, char *Sspec, char *Fname, DBOX *db)
 {
     BOOL rtn;
 
-    strncpy(FileSpec, Fspec, 15);
-    strncpy(SrchSpec, Sspec, 15);
+    strncpy(FileSpec, Fspec, sizeof(FileSpec)-1);
+    strncpy(SrchSpec, Sspec, sizeof(FileSpec)-1);
 
     if ((rtn = DialogBox(NULL, db, TRUE, DlgFnOpen)) != FALSE)
         strcpy(Fname, FileName);
@@ -64,37 +64,27 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
         case COMMAND:
             switch ((int) p1)    {
                 case ID_OK:
-				{
+                {
                     if ((int)p2 == 0)	{
-						char fn[MAXPATH+1];
-#if UNIX
-						GetItemText(wnd, ID_FILENAME, fn, MAXPATH);
-						strcpy(FileName, fn);
-#else
-						char nm[MAXFILE];
-						char ext[MAXEXT];
-                    	GetItemText(wnd, ID_FILENAME, fn, MAXPATH);
-						fnsplit(fn, NULL, NULL, nm, ext);
-						strcpy(FileName, nm);
-						strcat(FileName, ext);
-						CreatePath(NULL, fn, FALSE, TRUE);
-                    	if (IncompleteFilename(FileName))    {
-                        	/* --- no file name yet --- */
-            				DBOX *db = wnd->extension;
-            				WINDOW cwnd = ControlWindow(db, ID_FILENAME);
-	                    	strcpy(FileSpec, FileName);
-	                    	strcpy(SrchSpec, FileName);
-	                       	InitDlgBox(wnd);
-							SendMessage(cwnd, SETFOCUS, TRUE, 0);
-                        	return TRUE;
-						}
-#endif
+                        GetItemText(wnd, ID_FILENAME, FileName, MAXPATH);
+                        if (CheckAndChangeDir(FileName))
+                            strcpy(FileName, "*");
+                        if (IncompleteFilename(FileName)) {
+                            /* --- no file name yet --- */
+                            DBOX *db = wnd->extension;
+                            WINDOW cwnd = ControlWindow(db, ID_FILENAME);
+                            strncpy(FileSpec, FileName, sizeof(FileSpec)-1);
+                            strncpy(SrchSpec, FileName, sizeof(FileSpec)-1);
+                            InitDlgBox(wnd);
+                            SendMessage(cwnd, SETFOCUS, TRUE, 0);
+                            return TRUE;
+                        }
                     }
                     break;
-				}
+                }
                 case ID_FILES:
                     switch ((int) p2)    {
-						case ENTERFOCUS:
+                        case ENTERFOCUS:
                         case LB_SELECTION:
                             /* selected a different filename */
                             GetDlgListText(wnd, FileName, ID_FILES);
@@ -111,22 +101,22 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
                     return TRUE;
                 case ID_DIRECTORY:
                     switch ((int) p2)    {
-						case ENTERFOCUS:
+                        case ENTERFOCUS:
                             PutItemText(wnd, ID_FILENAME, FileSpec);
-							break;
-                    	case LB_CHOOSE:
-						{
-                        	/* chose dir */
-                        	char dd[15];
-                        	GetDlgListText(wnd, dd, ID_DIRECTORY);
-							chdir(dd);
-                        	InitDlgBox(wnd);
+                            break;
+                        case LB_CHOOSE:
+                        {
+                            /* chose dir */
+                            char dd[MAXPATH];
+                            GetDlgListText(wnd, dd, ID_DIRECTORY);
+                            chdir(dd);
+                            InitDlgBox(wnd);
                             SendMessage(wnd, COMMAND, ID_OK, 0);
-							break;
-	                    }
-						default:
-							break;
-					}
+                            break;
+                        }
+                        default:
+                            break;
+                    }
                     return TRUE;
 
                 default:
@@ -149,9 +139,9 @@ static void InitDlgBox(WINDOW wnd)
 {
     if (*FileSpec)
         PutItemText(wnd, ID_FILENAME, FileSpec);
-	if (BuildFileList(wnd, SrchSpec))
-		BuildDirectoryList(wnd);
-	BuildPathDisplay(wnd);
+    if (BuildFileList(wnd, SrchSpec))
+        BuildDirectoryList(wnd);
+    BuildPathDisplay(wnd);
 }
 
 /*
