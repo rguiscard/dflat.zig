@@ -9,12 +9,11 @@ LIBS = libdflat.a
 
 all: $(LIBS) $(PRGS)
 
+elks:
+	make -f Makefile.elks
+
 clean:
 	rm -f *.o *.a memopad huffc fixhelp memopad.hlp
-
-#  Delete the TESTING macro to eliminate the Reload
-#  Help file selection on the Help menu.
-#TESTING = -DTESTING_DFLAT
 
 #  This macro builds the full D-Flat system with all options enabled.
 #  Comment it out for a minimum system or selectively
@@ -22,7 +21,7 @@ clean:
 FULL = -DBUILD_FULL_DFLAT
 
 #------------------------------------------------
-CFLAGS += $(TESTING) $(FULL) -DUNIX=1 -DMACOS=1 -c -g
+CFLAGS += $(FULL) -DMACOS=1 -c -g
 CFLAGS += -Wno-pointer-sign
 CFLAGS += -Wno-compare-distinct-pointer-types
 CFLAGS += -Wno-invalid-source-encoding

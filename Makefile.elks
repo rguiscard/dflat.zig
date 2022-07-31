@@ -53,17 +53,13 @@ clean:
 
 #all : memopad.exe memopad.hlp
 
-#  Delete the TESTING macro to eliminate the Reload
-#  Help file selection on the Help menu.
-#TESTING = -DTESTING_DFLAT
-
 #  This macro builds the full D-Flat system with all options enabled.
 #  Comment it out for a minimum system or selectively
 #  comment out the #defines at the top of dflat.h.
 #FULL = -DBUILD_FULL_DFLAT
 
-
-CFLAGS += $(TESTING) $(FULL) -DUNIX=1 -DELKS=1
+CFLAGS += -fno-short-enums
+CFLAGS += $(FULL) -DELKS=1
 CFLAGS += -Wno-pointer-sign
 CFLAGS += -Wno-misleading-indentation -Wno-unused-function -Wno-unused-variable
 #CFLAGS += -Wno-compare-distinct-pointer-types

@@ -69,15 +69,26 @@ int runshell(void);
 #define WHITE        15
 
 typedef enum messages {
-	FORCEINTSIZE1 = -1,    /* required or enum width is sizeof(char) */
 	#undef DFlatMsg
 	#define DFlatMsg(m) m,
 	#include "dflatmsg.h"
 	MESSAGECOUNT
 } MESSAGE;
 
+/*
+ * Bad behaviour on ELKS compiler and D-Flat for CLASS enum -
+ * it seems that without an enum element of -1, the allocated enum width
+ * may be sizeof(char), and a -1 base class comparison with CLASS is required.
+ * Some code seems to be generated that isn't working. The strange part
+ * is that even with FORCEINTSIZE = -1, the stored size of the CLASS enum
+ * is 1 byte in the CLASSDEFS struct, but things somehow work, when CLASS
+ * is compared to -1.
+ * Because reasons are unknown, FORCEINTSIZE is commented out and the
+ * compiler option -fno-short-enums is used, which forces allocation
+ * of 2 bytes for CLASS in CLASSDEFS struct.
+ */
 typedef enum window_class    {
-	FORCEINTSIZE2 = -1,
+	//FORCEINTSIZE = -1,      /* required or allocated enum width may be sizeof(char) */
 	#define ClassDef(c,b,p,a) c,
 	#include "classes.h"
 	CLASSCOUNT
