@@ -210,6 +210,7 @@ void get_videomode(void)
 #else
     video_address = 0xb800;
 #if VIDEO_BIOS
+#define ismono() (video_mode == 7)
     /* ---- Monochrome Display Adaptor or text mode ---- */
     if (ismono())
         video_address = 0xb000;

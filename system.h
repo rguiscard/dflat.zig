@@ -26,7 +26,6 @@ void savecursor(void);
 void restorecursor(void);
 void normalcursor(void);
 void set_cursor_type(unsigned t);
-//void videomode(void);
 void SwapCursorStack(void);
 /* --------- screen prototpyes -------- */
 void clearscreen(void);
@@ -40,9 +39,6 @@ void hide_mousecursor(void);
 int button_releases(void);
 void resetmouse(void);
 void set_mousetravel(int, int, int, int);
-//#define leftbutton()     (mousebuttons() == kMouseLeftDown)   //FIXME
-//#define rightbutton()    (mousebuttons() == kMouseRightDown)
-//#define waitformouse()    while(mousebuttons() != kMouseLeftUp);
 void waitformouse(void);
 /* ------------ timer macros -------------- */
 #define timed_out(timer)         (timer==0)

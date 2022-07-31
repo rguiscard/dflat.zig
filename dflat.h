@@ -24,6 +24,10 @@
 #include <time.h>
 #include <setjmp.h>
 
+/* max() and min() may come from <stdlib.h> */
+#define max(a,b)        (((a) > (b)) ? (a) : (b))
+#define min(a,b)        (((a) < (b)) ? (a) : (b))
+
 #ifndef VERSION
 #define VERSION "Version 20"
 #endif
@@ -50,7 +54,6 @@ typedef enum {FALSE, TRUE} BOOL;
 #define MAXPOPWIDTH 80    /* max popup width */
 #define MAXPATH     80
 
-#include "unix.h"
 #include "system.h"
 #include "config.h"
 #include "rect.h"
@@ -150,8 +153,8 @@ typedef struct window {
 #endif
 } * WINDOW;
 
-#include "classdef.h"
 #include "video.h"
+#include "classdef.h"
 
 void LogMessages (WINDOW, MESSAGE, PARAM, PARAM);
 void MessageLog(WINDOW);
