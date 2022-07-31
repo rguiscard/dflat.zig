@@ -22,7 +22,7 @@ WINDOW CreateWindow(
     WINDOW wnd = DFcalloc(1, sizeof(struct window));
     get_videomode();
     if (wnd != NULL)    {
-        int base;
+        CLASS base;
         /* ----- height, width = -1: fill the screen ------- */
         if (height == -1)
             height = SCREENHEIGHT;

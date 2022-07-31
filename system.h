@@ -76,19 +76,17 @@ typedef enum messages {
 } MESSAGE;
 
 /*
- * Bad behaviour on ELKS compiler and D-Flat for CLASS enum -
- * it seems that without an enum element of -1, the allocated enum width
- * may be sizeof(char), and a -1 base class comparison with CLASS is required.
- * Some code seems to be generated that isn't working. The strange part
- * is that even with FORCEINTSIZE = -1, the stored size of the CLASS enum
- * is 1 byte in the CLASSDEFS struct, but things somehow work, when CLASS
- * is compared to -1.
- * Because reasons are unknown, FORCEINTSIZE is commented out and the
- * compiler option -fno-short-enums is used, which forces allocation
- * of 2 bytes for CLASS in CLASSDEFS struct.
+ * Incompatibility with ELKS compiler and D-Flat for CLASS enum:
+ * without an enum element of -1, the enum type is optimized to be
+ * unsigned char, with an allocated width of 1 byte. However, a
+ * -1 base class comparison with CLASS is required.
+ * Adding an enum element of -1 still allocates sizeof(char) for enum width,
+ * but type is signed char, which works with -1 class comparison.
+ * Another solution would be using -fno-short-enums, which uses more space,
+ * as 2 bytes (and type int) would always be allocated for a CLASS enum.
  */
 typedef enum window_class    {
-	//FORCEINTSIZE = -1,      /* required or allocated enum width may be sizeof(char) */
+	FORCEINTTYPE = -1,      /* required or enum type is unsigned char */
 	#define ClassDef(c,b,p,a) c,
 	#include "classes.h"
 	CLASSCOUNT

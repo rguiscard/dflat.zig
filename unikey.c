@@ -701,7 +701,7 @@ int ansi_dsr(char *buf, int n, int *cols, int *rows)
     p = buf + 2;
     *rows = getparm(p, 0);
     *cols = getparm(p, 1);
-    printf("DSR terminal size is %dx%d\r\n", *cols, *rows);
+    //printf("DSR terminal size is %dx%d\r\n", *cols, *rows);
     return 1;
 }
 

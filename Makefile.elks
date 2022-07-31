@@ -58,7 +58,6 @@ clean:
 #  comment out the #defines at the top of dflat.h.
 #FULL = -DBUILD_FULL_DFLAT
 
-CFLAGS += -fno-short-enums
 CFLAGS += $(FULL) -DELKS=1
 CFLAGS += -Wno-pointer-sign
 CFLAGS += -Wno-misleading-indentation -Wno-unused-function -Wno-unused-variable
