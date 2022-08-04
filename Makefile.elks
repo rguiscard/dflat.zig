@@ -86,6 +86,11 @@ test: $(TESTOBJS)
 	$(LD) $(LDFLAGS) -o test $(TESTOBJS)
 	cp test $(TOPDIR)/elkscmd/rootfs_template/root
 
+MATRIXOBJS = matrix.o tty.o tty-cp437.o runes.o kcp437.o
+matrix: $(MATRIXOBJS)
+	$(CC) $(LDFLAGS) -o $@ $(MATRIXOBJS)
+	cp $@ $(TOPDIR)/elkscmd/rootfs_template/root
+
 DFLATOBJS = \
     window.o textbox.o listbox.o                    \
     normal.o config.o menu.o menubar.o popdown.o    \
@@ -99,7 +104,7 @@ DFLATOBJS = \
 
 DFLATOBJS += \
     video.o events-unix.o mouse-ansi.o console-unix.o \
-    kcp437.o runes.o unikey.o tty.o runshell.o v7malloc.o
+    kcp437.o runes.o unikey.o tty.o tty-cp437.o runshell.o v7malloc.o
 
 $(LIBS): $(DFLATOBJS)
 	$(AR) rcs $(LIBS) $(DFLATOBJS)

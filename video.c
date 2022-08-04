@@ -204,9 +204,8 @@ void wputs(WINDOW wnd, void *s, int x, int y)
 void get_videomode(void)
 {
 #if VIDEO_FB
-    if (!video_address) {
-        video_address = malloc(SCREENHEIGHT * SCREENWIDTH * 2);
-     }
+    if (!video_address)
+        video_address = tty_allocate_screen(SCREENWIDTH, SCREENHEIGHT);
 #else
     video_address = 0xb800;
 #if VIDEO_BIOS
@@ -223,53 +222,13 @@ void get_videomode(void)
 }
 
 #if VIDEO_FB
-#include "runes.h"
-
-/*                                           blk blu grn cyn red mag yel wht */
-static const unsigned char ansi_colors[8] = {30, 34, 32, 36, 31, 35, 33, 37 };
-
-static char *attr_to_ansi(char *buf, unsigned int attr)
-{
-    int fg = attr & 0x07;
-    int bg = (attr & 0x70) >> 4;
-
-    /* convert RED on BLUE to effective yellow on blue for visibility */
-    if (fg == RED && bg == BLUE) fg = BROWN;
-
-    /* convert reverse grey on grey to red on grey for visibility */
-    if (fg == LIGHTGRAY && bg == LIGHTGRAY) fg = RED;
-
-    sprintf(buf, "\e[%d;%dm", ansi_colors[fg], ansi_colors[bg] + 10);
-    return buf;
-}
-
 void convert_screen_to_ansi()
 {
-    int r, c, a;
-    int b, ch;
-    unsigned short *chattr = (unsigned short *)video_address;
-    char buf[16];
     extern int cx, cy;
 
-    printf("\e[?25l\e[H");
-    for (r=0; r<SCREENHEIGHT; r++) {
-        a = -1;
-        for (c=0; c<SCREENWIDTH; c++) {
-            b = chattr[r*SCREENWIDTH + c];
-            ch = kCp437[b & 255];
-            if (a != (b & 0xFF00)) {
-                fputs(attr_to_ansi(buf, b >> 8), stdout);
-                a = b & 0xFF00;
-            }
-            if (runetochar(buf, ch)) {
-                fputs(buf, stdout);
-            }
-        }
-        printf("\n");
-    }
-    printf("\e[1;0;0m");
+    tty_output_screen(0);
     if (cy >= 0)
-        printf("\E[%d;%dH\e[?25h", cy+1, cx+1);
+        printf("\E[%d;%dH", cy+1, cx+1);
     fflush(stdout);
 }
 #endif

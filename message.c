@@ -67,7 +67,7 @@ BOOL init_messages(void)
 		StopMsg();
 		return FALSE;
 	}
-    tty_init(MouseTracking|CatchISig|ExitLastLine);
+    tty_init(MouseTracking|CatchISig|ExitLastLine|FullBuffer);
     if (tty_getsize(&cols, &rows) > 0) {
         SCREENWIDTH = min(cols, MAXCOLS-1);
         SCREENHEIGHT = rows - 1;

@@ -30,19 +30,24 @@ CFLAGS += -Wno-invalid-source-encoding
 OBJS = memopad.o dialogs.o menus.o
 
 memopad: $(OBJS) $(LIBS)
-	$(CC) $(LDFLAGS) -o memopad $(OBJS) $(LDFLAGS) -L. -ldflat
+	$(CC) $(LDFLAGS) -o memopad $(OBJS) -L. -ldflat
 
 CONSOBJS = cons.o runes.o kcp437.o
 cons: $(CONSOBJS)
-	$(CC) $(LDFLAGS) -o cons $(CONSOBJS) $(LDFLAGS)
+	$(CC) $(LDFLAGS) -o cons $(CONSOBJS)
 
 TTYOBJS = ttyinfo.o runes.o unikey.o tty.o
 ttyinfo: $(TTYOBJS)
-	$(CC) $(LDFLAGS) -o ttyinfo $(TTYOBJS) $(LDFLAGS)
+	$(CC) $(LDFLAGS) -o ttyinfo $(TTYOBJS)
 
+MATRIXOBJS = matrix.o tty.o tty-cp437.o runes.o kcp437.o
+matrix: $(MATRIXOBJS)
+	$(CC) $(LDFLAGS) -o $@ $(MATRIXOBJS)
+
+DFLATOBJS = \
 TESTOBJS = test.o
 test: $(TESTOBJS)
-	$(CC) $(LDFLAGS) -o test $(TESTOBJS) $(LDFLAGS)
+	$(CC) $(LDFLAGS) -o test $(TESTOBJS)
 
 DFLATOBJS = \
     window.o textbox.o listbox.o                    \
@@ -57,7 +62,7 @@ DFLATOBJS = \
 
 DFLATOBJS += \
     video.o events-unix.o mouse-ansi.o console-unix.o \
-    kcp437.o runes.o unikey.o tty.o runshell.o
+    kcp437.o runes.o unikey.o tty.o tty-cp437.o runshell.o
 
 $(LIBS): $(DFLATOBJS)
 	$(AR) rcs $(LIBS) $(DFLATOBJS)
