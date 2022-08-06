@@ -845,6 +845,7 @@ static void ParagraphCmd(WINDOW wnd)
 static int CommandMsg(WINDOW wnd, PARAM p1)
 {
     switch ((int)p1)    {
+#ifdef INCLUDE_EDITMENU
 		case ID_SEARCH:
 			SearchText(wnd);
 			return TRUE;
@@ -884,6 +885,7 @@ static int CommandMsg(WINDOW wnd, PARAM p1)
             ParagraphCmd(wnd);
 			SendMessage(wnd, PAINT, 0, 0);
             return TRUE;
+#endif
         default:
             break;
     }

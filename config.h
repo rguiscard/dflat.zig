@@ -19,11 +19,9 @@ typedef struct config {
     BOOL InsertMode;   /* Editor insert mode                 */
     int Tabs;          /* Editor tab stops                   */
     BOOL WordWrap;     /* True to word wrap editor           */
-#ifdef INCLUDE_WINDOWOPTIONS
     BOOL Border;       /* True for application window border */
     BOOL Title;        /* True for application window title  */
 	BOOL StatusBar;    /* True for appl'n window status bar  */
-#endif
     BOOL Texture;      /* True for textured appl window      */
     int ScreenLines;   /* Number of screen lines (25/43/50)  */
 	char PrinterPort[5];

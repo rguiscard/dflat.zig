@@ -50,8 +50,10 @@ static WINDOW Cwnd;
 
 static void StopMsg(void)
 {
+#ifndef BUILD_SMALL_DFLAT
 	ClearClipboard();
 	ClearDialogBoxes();
+#endif
 	restorecursor();	
 	unhidecursor();
     hide_mousecursor();

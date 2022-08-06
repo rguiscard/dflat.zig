@@ -45,9 +45,10 @@ unsigned char color[CLASSCOUNT] [4] [2] = {
    {{BLACK, CYAN},      /* STD_COLOR    */
     {BLACK, LIGHTGRAY}, /* SELECT_COLOR */
     {BLACK, CYAN},      /* FRAME_COLOR  */
-    {DARKGRAY, RED}},   /* HILITE_COLOR
+    {DARKGRAY, BROWN}}, /* HILITE_COLOR
                            Inactive ,Shortcut (both FG) */
 
+#ifndef BUILD_SMALL_DFLAT
 #ifdef INCLUDE_PICTUREBOX
     /* ------------ PICTUREBOX ----------- */
    {{BLACK, LIGHTGRAY}, /* STD_COLOR    */
@@ -121,6 +122,7 @@ unsigned char color[CLASSCOUNT] [4] [2] = {
     {LIGHTGRAY, BLUE},  /* SELECT_COLOR */
     {BLACK, LIGHTGRAY}, /* FRAME_COLOR  */
     {WHITE, LIGHTGRAY}},/* HILITE_COLOR */
+#endif
 
     /* ---------- STATUSBAR ------------- */
    {{BLACK, CYAN},      /* STD_COLOR    */
@@ -193,6 +195,7 @@ unsigned char bw[CLASSCOUNT] [4] [2] = {
     {DARKGRAY, WHITE}}, /* HILITE_COLOR
                            Inactive ,Shortcut (both FG) */
 
+#ifndef BUILD_SMALL_DFLAT
 #ifdef INCLUDE_PICTUREBOX
     /* ------------ PICTUREBOX ----------- */
    {{BLACK, LIGHTGRAY}, /* STD_COLOR    */
@@ -266,6 +269,7 @@ unsigned char bw[CLASSCOUNT] [4] [2] = {
     {WHITE, BLACK},     /* SELECT_COLOR */
     {LIGHTGRAY, BLACK}, /* FRAME_COLOR  */
     {WHITE, LIGHTGRAY}},/* HILITE_COLOR */
+#endif
 
     /* ---------- STATUSBAR ------------- */
    {{BLACK, LIGHTGRAY}, /* STD_COLOR    */
@@ -337,6 +341,7 @@ unsigned char reverse[CLASSCOUNT] [4] [2] = {
     {DARKGRAY, WHITE}}, /* HILITE_COLOR
                            Inactive ,Shortcut (both FG) */
 
+#ifndef BUILD_SMALL_DFLAT
 #ifdef INCLUDE_PICTUREBOX
     /* ------------ PICTUREBOX ----------- */
    {{BLACK, LIGHTGRAY}, /* STD_COLOR    */
@@ -410,6 +415,7 @@ unsigned char reverse[CLASSCOUNT] [4] [2] = {
     {LIGHTGRAY, BLACK}, /* SELECT_COLOR */
     {BLACK, LIGHTGRAY}, /* FRAME_COLOR  */
     {WHITE, LIGHTGRAY}},/* HILITE_COLOR */
+#endif
 
     /* ---------- STATUSBAR ------------- */
    {{LIGHTGRAY, BLACK},      /* STD_COLOR    */
@@ -443,11 +449,9 @@ CONFIG cfg = {
     TRUE,            /* Editor Insert Mode          */
     4,               /* Editor tab stops            */
     TRUE,            /* Editor word wrap            */
-#ifdef INCLUDE_WINDOWOPTIONS
     TRUE,            /* Application Border          */
     TRUE,            /* Application Title           */
     TRUE,            /* Status Bar                  */
-#endif
     TRUE,            /* Textured application window */
     25,              /* Number of screen lines      */
 	"Lpt1",			 /* Printer Port                */

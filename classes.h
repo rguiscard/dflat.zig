@@ -21,6 +21,7 @@ ClassDef(  MENUBAR,     NORMAL,  MenuBarProc,     NOCLIP     )
 ClassDef(  POPDOWNMENU, LISTBOX, PopDownProc,     SAVESELF  |
                                                   NOCLIP    |
                                                   HASBORDER  )
+#ifndef BUILD_SMALL_DFLAT
 #ifdef INCLUDE_PICTUREBOX
 ClassDef(  PICTUREBOX,  TEXTBOX, PictureProc,     0          )
 #endif
@@ -45,8 +46,9 @@ ClassDef(  HELPBOX,     DIALOG,  HelpBoxProc,     MOVEABLE  |
                                                   HASBORDER |
                                                   NOCLIP    |
                                                   CONTROLBOX )
-ClassDef(  STATUSBAR,   TEXTBOX, StatusBarProc,   NOCLIP     )
+#endif
 
+ClassDef(  STATUSBAR,   TEXTBOX, StatusBarProc,   NOCLIP     )
 ClassDef(  EDITOR,      EDITBOX, EditorProc,	  0			 )
 
 /*

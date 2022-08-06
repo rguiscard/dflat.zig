@@ -68,13 +68,13 @@ static int CreateWindowMsg(WINDOW wnd)
         SetCheckBox(&Display, ID_STATUSBAR);
     if (cfg.Texture)
         SetCheckBox(&Display, ID_TEXTURE);
-#endif
     if (cfg.mono == 1)
         PushRadioButton(&Display, ID_MONO);
     else if (cfg.mono == 2)
         PushRadioButton(&Display, ID_REVERSE);
     else
         PushRadioButton(&Display, ID_COLOR);
+#endif
     if (SCREENHEIGHT != cfg.ScreenLines)    {
         SetScreenHeight(cfg.ScreenLines);
         if (WindowHeight(wnd) == ScreenHeight ||
@@ -183,6 +183,11 @@ static void ShiftChangedMsg(WINDOW wnd, PARAM p1)
 static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     switch ((int)p1)    {
+        case ID_EXIT:
+        case ID_SYSCLOSE:
+            PostMessage(wnd, CLOSE_WINDOW, 0, 0);
+            break;
+#ifdef INCLUDE_HELP
         case ID_HELP:
             DisplayHelp(wnd, DFlatApplication);
             break;
@@ -198,6 +203,7 @@ static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
         case ID_HELPINDEX:
             DisplayHelp(wnd, "HelpIndex");
             break;
+#endif
 #ifdef INCLUDE_LOGGING
         case ID_LOG:
             MessageLog(wnd);
@@ -208,10 +214,7 @@ static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
             ShellDOS(wnd);
             break;
 #endif
-        case ID_EXIT:
-        case ID_SYSCLOSE:
-            PostMessage(wnd, CLOSE_WINDOW, 0, 0);
-            break;
+#ifdef INCLUDE_WINDOWMENU
         case ID_DISPLAY:
             if (DialogBox(wnd, &Display, TRUE, NULL))    {
 				if (inFocus == wnd->MenuBarWnd || inFocus == wnd->StatusBar)
@@ -233,10 +236,6 @@ static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
 			    SendMessage(oldFocus, SETFOCUS, TRUE, 0);
             }
             break;
-        case ID_SAVEOPTIONS:
-            SaveConfig();
-            break;
-#ifdef INCLUDE_MULTI_WINDOWS
         case ID_WINDOW:
             ChooseWindow(wnd, CurrentMenuSelection-2);
             break;
@@ -247,17 +246,22 @@ static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
             MoreWindows(wnd);
             break;
 #endif
+#ifdef INCLUDE_FILE_OPENSAVE
+        case ID_SAVEOPTIONS:
+            SaveConfig();
+            break;
+#endif
 #ifdef INCLUDE_RESTORE
         case ID_SYSRESTORE:
 #endif
-        case ID_SYSMOVE:
-        case ID_SYSSIZE:
 #ifdef INCLUDE_MINIMIZE
         case ID_SYSMINIMIZE:
 #endif
 #ifdef INCLUDE_MAXIMIZE
         case ID_SYSMAXIMIZE:
 #endif
+        case ID_SYSMOVE:
+        case ID_SYSSIZE:
             BaseWndProc(APPLICATION, wnd, COMMAND, p1, p2);
             break;
         default:
@@ -271,7 +275,7 @@ static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
 static int CloseWindowMsg(WINDOW wnd)
 {
     int rtn;
-#ifdef INCLUDE_MULTI_WINDOWS
+#ifdef INCLUDE_WINDOWMENU
     CloseAll(wnd, TRUE);
 	WindowSel = 0;
 #endif
@@ -279,7 +283,9 @@ static int CloseWindowMsg(WINDOW wnd)
     rtn = BaseWndProc(APPLICATION, wnd, CLOSE_WINDOW, 0, 0);
     if (ScreenHeight != SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
+#ifdef INCLUDE_HELP
     UnLoadHelpFile();
+#endif
 	ApplicationWindow = NULL;
     return rtn;
 }
@@ -406,7 +412,7 @@ static void CreateStatusBar(WINDOW wnd)
     }
 }
 
-#ifdef INCLUDE_MULTI_WINDOWS
+#ifdef INCLUDE_WINDOWMENU
 /* -------- return the name of a document window ------- */
 static char *WindowName(WINDOW wnd)
 {
@@ -569,7 +575,7 @@ static void CloseAll(WINDOW wnd, int closing)
         SendMessage(wnd, PAINT, 0, 0);
 }
 
-#endif    /* #ifdef INCLUDE_MULTI_WINDOWS */
+#endif    /* #ifdef INCLUDE_WINDOWMENU */
 
 static void DoWindowColors(WINDOW wnd)
 {
@@ -578,8 +584,10 @@ static void DoWindowColors(WINDOW wnd)
 	cwnd = FirstWindow(wnd);
 	while (cwnd != NULL)	{
         DoWindowColors(cwnd);
+#ifndef BUILD_SMALL_DFLAT
         if (GetClass(cwnd) == TEXT && GetText(cwnd) != NULL)
             SendMessage(cwnd, CLEARTEXT, 0, 0);
+#endif
 		cwnd = NextWindow(cwnd);
     }
 }
@@ -587,6 +595,7 @@ static void DoWindowColors(WINDOW wnd)
 /* ----- set up colors for the application window ------ */
 static void SelectColors(WINDOW wnd)
 {
+#ifdef INCLUDE_WINDOWMENU
     if (RadioButtonSetting(&Display, ID_MONO))
         cfg.mono = 1;   /* mono */
     else if (RadioButtonSetting(&Display, ID_REVERSE))
@@ -599,6 +608,7 @@ static void SelectColors(WINDOW wnd)
     else if (cfg.mono == 2)
         memcpy(cfg.clr, reverse, sizeof reverse);
     else
+#endif
         memcpy(cfg.clr, color, sizeof color);
     DoWindowColors(wnd);
 }
@@ -641,7 +651,7 @@ static void SetScreenHeight(int height)
 #endif
 }
 
-#ifdef INCLUDE_WINDOWOPTIONS
+#ifdef INCLUDE_WINDOWMENU
 
 /* ----- select the screen texture ----- */
 static void SelectTexture(void)

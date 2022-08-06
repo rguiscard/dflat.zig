@@ -146,14 +146,6 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 static void CommandMsg(WINDOW wnd, PARAM p1)
 {
     switch ((int)p1)    {
-        case ID_HELP:
-            DisplayHelp(wnd,ClassNames[GetClass(wnd)]);
-            break;
-#ifdef INCLUDE_RESTORE
-        case ID_SYSRESTORE:
-            SendMessage(wnd, RESTORE, 0, 0);
-            break;
-#endif
         case ID_SYSMOVE:
             SendMessage(wnd, CAPTURE_MOUSE, TRUE,
                 (PARAM) &dwnd);
@@ -174,6 +166,15 @@ static void CommandMsg(WINDOW wnd, PARAM p1)
             WindowSizing = TRUE;
             dragborder(wnd, GetLeft(wnd), GetTop(wnd));
             break;
+        case ID_SYSCLOSE:
+            SendMessage(wnd, CLOSE_WINDOW, 0, 0);
+			SkipApplicationControls();
+            break;
+#ifdef INCLUDE_RESTORE
+        case ID_SYSRESTORE:
+            SendMessage(wnd, RESTORE, 0, 0);
+            break;
+#endif
 #ifdef INCLUDE_MINIMIZE
         case ID_SYSMINIMIZE:
             SendMessage(wnd, MINIMIZE, 0, 0);
@@ -184,10 +185,11 @@ static void CommandMsg(WINDOW wnd, PARAM p1)
             SendMessage(wnd, MAXIMIZE, 0, 0);
             break;
 #endif
-        case ID_SYSCLOSE:
-            SendMessage(wnd, CLOSE_WINDOW, 0, 0);
-			SkipApplicationControls();
+#ifdef INCLUDE_HELP
+        case ID_HELP:
+            DisplayHelp(wnd,ClassNames[GetClass(wnd)]);
             break;
+#endif
         default:
             break;
     }
@@ -611,8 +613,6 @@ int NormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case HIDE_WINDOW:
             HideWindowMsg(wnd);
             break;
-        case DISPLAY_HELP:
-            return DisplayHelp(wnd, (char *)p1);
         case INSIDE_WINDOW:
             return InsideWindow(wnd, (int) p1, (int) p2);
         case KEYBOARD:
@@ -670,6 +670,16 @@ int NormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
                 TerminateMoveSize();
             }
             break;
+        case MOVE:
+            MoveMsg(wnd, p1, p2);
+            break;
+        case SIZE:    {
+            SizeMsg(wnd, p1, p2);
+            break;
+        }
+        case CLOSE_WINDOW:
+            CloseWindowMsg(wnd);
+            break;
 #ifdef INCLUDE_MAXIMIZE
         case MAXIMIZE:
             if (wnd->condition != ISMAXIMIZED)
@@ -694,21 +704,16 @@ int NormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             }
             break;
 #endif
-        case MOVE:
-            MoveMsg(wnd, p1, p2);
-            break;
-        case SIZE:    {
-            SizeMsg(wnd, p1, p2);
-            break;
-        }
-        case CLOSE_WINDOW:
-            CloseWindowMsg(wnd);
-            break;
+#ifdef INCLUDE_HELP
+        case DISPLAY_HELP:
+            return DisplayHelp(wnd, (char *)p1);
+#endif
         default:
             break;
     }
     return TRUE;
 }
+
 #ifdef INCLUDE_MINIMIZE
 /* ---- compute lower right icon space in a rectangle ---- */
 static RECT LowerRight(RECT prc)
@@ -761,6 +766,7 @@ static RECT PositionIcon(WINDOW wnd)
     return rc;
 }
 #endif
+
 /* ----- terminate the move or size operation ----- */
 static void TerminateMoveSize(void)
 {
@@ -822,6 +828,7 @@ static void near sizeborder(WINDOW wnd, int rt, int bt)
         RepaintBorder(&dwnd, NULL);
     }
 }
+
 #ifdef INCLUDE_MULTI_WINDOWS
 /* ----- adjust a rectangle to include the shadow ----- */
 static RECT adjShadow(WINDOW wnd)

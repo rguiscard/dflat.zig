@@ -228,7 +228,7 @@ void convert_screen_to_ansi()
 
     tty_output_screen(0);
     if (cy >= 0)
-        printf("\E[%d;%dH", cy+1, cx+1);
+        printf("\E[%d;%dH\e[?25h", cy+1, cx+1); /* restore cursor pos, cursor on */
     fflush(stdout);
 }
 #endif

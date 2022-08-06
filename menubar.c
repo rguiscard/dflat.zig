@@ -144,6 +144,7 @@ static void KeyboardMsg(WINDOW wnd, PARAM p1)
         mnu++;
     }
     switch ((int)p1)    {
+#ifdef INCLUDE_HELP
         case F1:
             if (ActiveMenu == NULL || ActiveMenuBar == NULL)
 				break;
@@ -159,6 +160,7 @@ static void KeyboardMsg(WINDOW wnd, PARAM p1)
             	return;
 			}
             break;
+#endif
         case '\r':
             if (mwnd == NULL &&
                     ActiveMenuBar->ActiveSelection != -1)

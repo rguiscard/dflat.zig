@@ -33,10 +33,11 @@
 static const int ansi_colors[16] = {30, 34, 32, 36, 31, 35, 33, 37,
                                     90, 94, 92, 96, 91, 95, 93, 97 };
 
+/* two 16-color palettes, fg_pal256 used on 256-color capable terminals */
 static const int *fg_pal16 = ansi_colors;
 static const int *fg_pal256;
 
-/* Set the 16-color fg palette, for use on 16-color or 256-color terminals */
+/* Set non-standard 16-color fg palettes, for use on 16-color or 256-color terminals */
 void tty_setfgpalette(const int *pal16, const int *pal256)
 {
     fg_pal16 = pal16;
@@ -51,12 +52,6 @@ static char *attr_to_ansi(char *buf, unsigned int attr)
     if (fg_pal256 && !iselksconsole) {
         sprintf(buf, "\e[38;5;%dm\e[%dm", fg_pal256[fg], ansi_colors[bg] + 10);
     } else {
-        /* convert RED on BLUE to effective yellow on blue for visibility */
-        if (fg == RED && bg == BLUE) fg = BROWN;
-
-        /* convert reverse grey on grey to red on grey for visibility */
-        if (fg == LIGHTGRAY && bg == LIGHTGRAY) fg = RED;
-
         sprintf(buf, "\e[%d;%dm", fg_pal16[fg], ansi_colors[bg] + 10);
     }
     return buf;
@@ -130,7 +125,7 @@ void tty_output_screen(int flush)
             printf("\r");
         else printf("\n");
     }
-    printf("\e[1;0;0m\e[?25h");  /* reset attrs, cursor on */
+    printf("\e[1;0;0m");           /* reset attrs, cursor left off */
     if (flush)
         fflush(stdout);
 }

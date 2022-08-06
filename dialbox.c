@@ -133,12 +133,6 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
     if (WindowMoving || WindowSizing)
         return FALSE;
     switch ((int)p1)    {
-        case F1:
-            ct = GetControl(inFocus);
-            if (ct != NULL)
-                if (DisplayHelp(wnd, ct->help))
-                    return TRUE;
-            break;
         case SHIFT_HT:
         case BS:
         case UP:
@@ -162,6 +156,14 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
         case ESC:
             SendMessage(wnd, COMMAND, ID_CANCEL, 0);
             break;
+#ifdef INCLUDE_HELP
+        case F1:
+            ct = GetControl(inFocus);
+            if (ct != NULL)
+                if (DisplayHelp(wnd, ct->help))
+                    return TRUE;
+            break;
+#endif
         default:
             /* ------ search all the shortcut keys ----- */
             if (dbShortcutKeys(db, (int) p1))
@@ -186,10 +188,12 @@ static BOOL CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
             else
                 SendMessage(wnd, CLOSE_WINDOW, TRUE, 0);
             return TRUE;
+#ifdef INCLUDE_HELP
         case ID_HELP:
             if ((int)p2 != 0)
                 return TRUE;
             return DisplayHelp(wnd, db->HelpName);
+#endif
         default:
             break;
     }
@@ -571,12 +575,6 @@ static BOOL CtlKeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     CTLWINDOW *ct = GetControl(wnd);
     switch ((int) p1)    {
-        case F1:
-            if (WindowMoving || WindowSizing)
-                break;
-            if (!DisplayHelp(wnd, ct->help))
-                SendMessage(GetParent(wnd),COMMAND,ID_HELP,0);
-            return TRUE;
         case ' ':
             if (!((int)p2 & ALTKEY))
                 break;
@@ -585,6 +583,14 @@ static BOOL CtlKeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
         case ALT_F4:
             PostMessage(GetParent(wnd), KEYBOARD, p1, p2);
             return TRUE;
+#ifdef INCLUDE_HELP
+        case F1:
+            if (WindowMoving || WindowSizing)
+                break;
+            if (!DisplayHelp(wnd, ct->help))
+                SendMessage(GetParent(wnd),COMMAND,ID_HELP,0);
+            return TRUE;
+#endif
         default:
             break;
     }

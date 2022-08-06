@@ -229,9 +229,11 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
             if (ActivePopDown == NULL)
                 SendMessage(GetParent(wnd), KEYBOARD, p1, p2);
             else 
+#ifdef INCLUDE_HELP
                 DisplayHelp(wnd,
                     (ActivePopDown+wnd->selection)->help);
             return TRUE;
+#endif
         case ESC:
             SendMessage(wnd, CLOSE_WINDOW, 0, 0);
             return TRUE;

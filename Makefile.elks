@@ -41,24 +41,32 @@ AR      = ia16-elf-ar
 #-------------------------------------------------------------------
 
 TOPDIR = /Users/greg/net/elks-gh
+SMALL=
+FULL=
 
+ifeq ($(SMALL),y)
+PRGS = smallpad
+else
 PRGS = memopad
 #PRGS = memopad huffc fixhelp memopad.hlp
+endif
+
 LIBS = libdflat.a
 
 all: $(LIBS) $(PRGS)
 
 clean:
-	rm -f *.o *.a memopad
+	rm -f *.o *.a memopad smallpad huffc fixhelp memopad.hlp
 
-#all : memopad.exe memopad.hlp
+ifeq ($(SMALL),y)
+BUILDOPTS = -DBUILD_SMALL_DFLAT
+endif
 
-#  This macro builds the full D-Flat system with all options enabled.
-#  Comment it out for a minimum system or selectively
-#  comment out the #defines at the top of dflat.h.
-#FULL = -DBUILD_FULL_DFLAT
+ifeq ($(FULL),y)
+BUILDOPTS = -DBUILD_FULL_DFLAT
+endif
 
-CFLAGS += $(FULL) -DELKS=1
+CFLAGS += $(BUILDOPTS) -DELKS=1
 CFLAGS += -Wno-pointer-sign
 CFLAGS += -Wno-misleading-indentation -Wno-unused-function -Wno-unused-variable
 #CFLAGS += -Wno-compare-distinct-pointer-types
@@ -66,45 +74,64 @@ CFLAGS += -Wno-misleading-indentation -Wno-unused-function -Wno-unused-variable
 LDFLAGS += -maout-heap=0xffff
 
 OBJS = memopad.o dialogs.o menus.o
-
 memopad: $(OBJS) $(LIBS)
-	$(LD) $(LDFLAGS) -o memopad $(OBJS) -L. -ldflat
-	cp memopad $(TOPDIR)/elkscmd/rootfs_template/root
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) -L. -ldflat
+	cp $@ $(TOPDIR)/elkscmd/rootfs_template/root
+
+SMALLOBJS = smallpad.o
+smallpad: $(SMALLOBJS) $(LIBS)
+	$(CC) $(LDFLAGS) -o $@ $(SMALLOBJS) -L. -ldflat
+	cp $@ $(TOPDIR)/elkscmd/rootfs_template/root
 
 CONSOBJS = cons.o runes.o kcp437.o
 cons: $(CONSOBJS)
-	$(LD) $(LDFLAGS) -o cons $(CONSOBJS)
+	$(LD) $(LDFLAGS) -o $@ $(CONSOBJS)
 	cp cons $(TOPDIR)/elkscmd/rootfs_template/root
 
 TTYOBJS = ttyinfo.o peekpoke.o runes.o unikey.o tty.o
 ttyinfo: $(TTYOBJS)
-	$(LD) $(LDFLAGS) -o ttyinfo $(TTYOBJS)
+	$(LD) $(LDFLAGS) -o $@ $(TTYOBJS)
 	cp ttyinfo $(TOPDIR)/elkscmd/rootfs_template/root
-
-TESTOBJS = test.o peekpoke.o
-test: $(TESTOBJS)
-	$(LD) $(LDFLAGS) -o test $(TESTOBJS)
-	cp test $(TOPDIR)/elkscmd/rootfs_template/root
 
 MATRIXOBJS = matrix.o tty.o tty-cp437.o runes.o kcp437.o
 matrix: $(MATRIXOBJS)
 	$(CC) $(LDFLAGS) -o $@ $(MATRIXOBJS)
 	cp $@ $(TOPDIR)/elkscmd/rootfs_template/root
 
+TESTOBJS = test.o peekpoke.o
+test: $(TESTOBJS)
+	$(LD) $(LDFLAGS) -o $@ $(TESTOBJS)
+	cp test $(TOPDIR)/elkscmd/rootfs_template/root
+
 DFLATOBJS = \
-    window.o textbox.o listbox.o                    \
-    normal.o config.o menu.o menubar.o popdown.o    \
-    rect.o applicat.o keys.o sysmenu.o editbox.o    \
-    dialbox.o button.o fileopen.o msgbox.o          \
-    helpbox.o log.o lists.o statbar.o decomp.o      \
-    combobox.o pictbox.o calendar.o barchart.o      \
-    clipbord.o search.o dfalloc.o checkbox.o        \
-    text.o radio.o box.o spinbutt.o  watch.o        \
-    slidebox.o direct.o editor.o message.o
+    message.o keys.o \
+    config.o dfalloc.o \
+    window.o rect.o lists.o \
+    normal.o applicat.o textbox.o \
+    menubar.o menu.o popdown.o listbox.o \
+    editbox.o editor.o \
+    sysmenu.o \
+    statbar.o
+
+ifneq ($(SMALL),y)
+DFLATOBJS += \
+    dialbox.o msgbox.o \
+    box.o text.o \
+    button.o radio.o checkbox.o spinbutt.o \
+    combobox.o slidebox.o \
+    fileopen.o direct.o \
+    pictbox.o calendar.o barchart.o \
+    search.o clipbord.o \
+    helpbox.o decomp.o \
+    log.o \
+    watch.o
+endif
 
 DFLATOBJS += \
     video.o events-unix.o mouse-ansi.o console-unix.o \
-    kcp437.o runes.o unikey.o tty.o tty-cp437.o runshell.o v7malloc.o
+    kcp437.o runes.o unikey.o tty.o tty-cp437.o runshell.o
+
+DFLATOBJS += v7malloc.o
 
 $(LIBS): $(DFLATOBJS)
 	$(AR) rcs $(LIBS) $(DFLATOBJS)
