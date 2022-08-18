@@ -63,7 +63,7 @@ void tty_fullbuffer(void)
     fflush(stdout);
 #if ELKS
     /* use existing stdout buffer to save heap space */
-    setvbuf(stdout, stdout->bufstart, _IOFBF, stdout->bufend - stdout->bufstart);
+    setvbuf(stdout, (char *)stdout->bufstart, _IOFBF, stdout->bufend - stdout->bufstart);
 #else
     setvbuf(stdout, NULL, _IOFBF, 0);
 #endif
@@ -74,7 +74,7 @@ void tty_linebuffer(void)
     fflush(stdout);
 #if ELKS
     /* use existing stdout buffer to save heap space */
-    setvbuf(stdout, stdout->bufstart, _IOLBF, stdout->bufend - stdout->bufstart);
+    setvbuf(stdout, (char *)stdout->bufstart, _IOLBF, stdout->bufend - stdout->bufstart);
 #else
     setvbuf(stdout, NULL, _IOLBF, 0);
 #endif
