@@ -20,6 +20,7 @@ elks:
 
 clean:
 	rm -f *.o *.a memopad smallpad huffc fixhelp memopad.hlp
+	rm -f memopad.com smallpad.com huffc.com fixhelp.com
 
 ifeq ($(SMALL),y)
 BUILDOPTS = -DBUILD_SMALL_DFLAT
@@ -35,10 +36,16 @@ CFLAGS += -g
 CFLAGS += -Wno-pointer-sign
 CFLAGS += -Wno-compare-distinct-pointer-types
 CFLAGS += -Wno-invalid-source-encoding
+ifneq ($(COSMO),)
+CFLAGS += -DCOSMO=1
+endif
 
 OBJS = memopad.o dialogs.o menus.o
 memopad: $(OBJS) $(LIBS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) -L. -ldflat
+ifneq ($(COSMO),)
+	$(OBJCOPY) -S -O binary $@ $@.com
+endif
 
 SMALLOBJS = smallpad.o
 smallpad: $(SMALLOBJS) $(LIBS)
@@ -91,14 +98,23 @@ DFLATOBJS += \
 $(LIBS): $(DFLATOBJS)
 	$(AR) rcs $(LIBS) $(DFLATOBJS)
 
-HUFFOBJS = huffc.o htree.o
-huffc: $(HUFFOBJS)
-	$(CC) $(LDFLAGS) -o $@ $(HUFFOBJS)
+huffc: huffc.o htree.o
+	$(CC) $(LDFLAGS) -o $@ $^
+ifneq ($(COSMO),)
+	$(OBJCOPY) -S -O binary $@ $@.com
+endif
 
-FIXHOBJS = fixhelp.o decomp.o
-fixhelp: $(FIXHOBJS)
-	$(CC) $(LDFLAGS) -o $@ $(FIXHOBJS)
+fixhelp: fixhelp.o decomp.o
+	$(CC) $(LDFLAGS) -o $@ $^
+ifneq ($(COSMO),)
+	$(OBJCOPY) -S -O binary $@ $@.com
+endif
 
 memopad.hlp: memopad.txt huffc fixhelp
+ifeq ($(COSMO),)
 	./huffc memopad.txt memopad.hlp
 	./fixhelp memopad
+else
+	./huffc.com memopad.txt memopad.hlp
+	./fixhelp.com memopad
+endif

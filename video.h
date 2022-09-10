@@ -13,7 +13,6 @@
 #define far
 #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
 #define peek(a,o)       (*((unsigned short *)((char *)(a)+(o))))
-extern unsigned short kCp437[256];
 void convert_screen_to_ansi(void);
 #endif
 

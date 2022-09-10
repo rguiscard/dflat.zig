@@ -6,6 +6,10 @@
 typedef void (*sighandler_t) (int);
 #endif
 
+#ifdef COSMO
+extern void _exit(int);
+#endif
+
 int
 runshell(void)
 {

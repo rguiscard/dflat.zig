@@ -77,8 +77,6 @@ static int elks_displayable(int c)
 /* convert CP 437 byte to string + NUL, depending on platform */
 int cp437tostr(char *s, int c)
 {
-    extern unsigned short kCp437[256];
-
 #if ELKS
     if (iselksconsole) {
         if (!elks_displayable(c & 255))

@@ -202,7 +202,7 @@ static void OpenPadWindow(WINDOW wnd, char *FileName)
     wndpos += 2;
     if (wndpos == 20)
         wndpos = 2;
-    wnd1 = CreateWindow(EDITOR,
+    wnd1 = CreateWindow(EDITBOX,
                 Fname,
                 (wndpos-1)*2, wndpos, 10, 40,
                 NULL, wnd, OurEditorProc,

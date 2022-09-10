@@ -27,6 +27,9 @@ extern int iselksconsole;
 char *tty_allocate_screen(int cols, int lines);
 void tty_output_screen(int flush);
 void tty_setfgpalette(const int *pal16, const int *pal256);
+#ifndef COSMO
+extern unsigned short kCp437[256];
+#endif
 
 /* unikey.c - recognize ANSI input */
 
@@ -47,8 +50,10 @@ char *unikeyname(int k);
 /* state machine conversion of UTF-8 byte sequence to Rune */
 int stream_to_rune(unsigned int ch);
 
+#ifndef COSMO
 /* Reads single keystroke or control sequence from character device */
 int readansi(int fd, char *p, int n);
+#endif
 
 #define bsr(x)  ((x)? (__builtin_clz(x) ^ ((sizeof(int) * 8) -1)): 0)
 #if 0

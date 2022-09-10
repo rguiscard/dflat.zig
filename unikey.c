@@ -16,7 +16,6 @@
 #define CHECK_MOUSE     1       /* =1 to validate ANSI mouse sequences */
 #define DEBUG           1       /* =1 for keyname() */
 #define ESC             27
-#define unreachable
 
 static char scroll_reverse = 0; /* report reversed scroll wheel direction */
 int kDoubleClickTime = 200;
@@ -277,11 +276,9 @@ int stream_to_rune(unsigned int ch)
 │ TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR             │
 │ PERFORMANCE OF THIS SOFTWARE.                                                │
 ╚─────────────────────────────────────────────────────────────────────────────*/
-//#include "libc/calls/calls.h"
-//#include "libc/calls/internal.h"
-//#include "libc/str/thompike.h"
-//#include "libc/sysv/errfuns.h"
 
+#ifndef COSMO
+#define unreachable
 /**
  * Reads single keystroke or control sequence from character device.
  *
@@ -539,6 +536,7 @@ static int startswith(const char *s, const char *prefix) {
     if (*s++ != *prefix++) return 0;
   }
 }
+#endif
 
 static int getparm(char *buf, int n)
 {
