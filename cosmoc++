@@ -29,8 +29,12 @@ EOF
 exit 0
 fi
 
+# change the following two lines if required
 COSMO="/Users/greg/net/cosmopolitan"
 CXX="x86_64-linux-musl-g++"
+#COSMO="/opt/cosmo"
+#CXX="/opt/cosmo/o/third_party/gcc/bin/x86_64-linux-musl-g++"
+
 CCFLAGS="-O2 -fno-omit-frame-pointer -fdata-sections -ffunction-sections -fno-pie -pg -mnop-mcount -mno-tls-direct-seg-refs"
 CXXFLAGS="-fno-exceptions -fuse-cxa-atexit -fno-threadsafe-statics"
 CPPFLAGS="-DNDEBUG -nostdinc -iquote $COSMO -isystem $COSMO/include -isystem $COSMO/libc/isystem -include libc/integral/normalize.inc"

@@ -29,8 +29,12 @@ EOF
 exit 0
 fi
 
+# change the following two lines if required
 COSMO="/Users/greg/net/cosmopolitan"
 CC="x86_64-linux-musl-gcc"
+#COSMO="/opt/cosmo"
+#CC="/opt/cosmo/o/third_party/gcc/bin/x86_64-linux-musl-gcc"
+
 CFLAGS="-O2 -fno-omit-frame-pointer -fdata-sections -ffunction-sections -fno-pie -pg -mnop-mcount -mno-tls-direct-seg-refs"
 CPPFLAGS="-DNDEBUG -nostdinc -iquote $COSMO -isystem $COSMO/include -isystem $COSMO/libc/isystem -include libc/integral/normalize.inc"
 LDFLAGS="-static -no-pie -nostdlib -fuse-ld=bfd -Wl,--gc-sections -L$COSMO/lib -Wl,-T,$COSMO/o/ape/public/ape.lds $COSMO/o/ape/ape-no-modify-self.o $COSMO/o/libc/crt/crt.o"

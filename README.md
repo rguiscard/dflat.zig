@@ -1,4 +1,4 @@
-# D-Flat: Text User Interface for UNIX and ELKS
+# D-Flat: Text User Interface for UNIX, ELKS and Cosmopolitan
 
 The original D-Flat project was published in the mid-1990's in Dr. Dobbs Journal
 and written by Al Stevens. This is a port of that project to UNIX
@@ -21,9 +21,11 @@ to larger than 8 bits, but that is being worked on.
 
 For UNIX, type `make`.
 
+For Cosmopolitan, edit `make-cosmo` to select the appropriate make command and Cosmopolitan repo path, then edit COSMO= and CC= in `cosmocc`, and type `make-cosmo`.
+
 For ELKS, type `make -f Makefile.elks`.
 
-The resulting output executable is `memopad`.
+The resulting output executable is `memopad` (or `memopad.com` for Cosmopolitan).
 
 ## What keys are used to operate the program?
 
