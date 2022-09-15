@@ -277,6 +277,9 @@ int stream_to_rune(unsigned int ch)
 │ PERFORMANCE OF THIS SOFTWARE.                                                │
 ╚─────────────────────────────────────────────────────────────────────────────*/
 
+#ifdef COSMO
+STATIC_YOINK("vga_console");
+#endif
 #ifndef COSMO
 #define unreachable
 /**
@@ -528,6 +531,7 @@ int readansi(int fd, char *p, int n) {
   errno = e;
   return i;
 }
+#endif
 
 static int startswith(const char *s, const char *prefix) {
   for (;;) {
@@ -536,7 +540,6 @@ static int startswith(const char *s, const char *prefix) {
     if (*s++ != *prefix++) return 0;
   }
 }
-#endif
 
 static int getparm(char *buf, int n)
 {
