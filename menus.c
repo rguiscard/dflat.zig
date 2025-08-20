@@ -99,6 +99,7 @@ DEFMENU(MainMenu)
 ENDMENU
 
 /* ------------- the System Menu --------------------- */
+/*
 DEFMENU(SystemMenu)
     POPDOWN("System Menu", NULL, NULL)
 #ifdef INCLUDE_RESTORE
@@ -116,3 +117,4 @@ DEFMENU(SystemMenu)
         SELECTION("~Close",    ID_SYSCLOSE,    CTRL_F4,   0 )
     ENDPOPDOWN
 ENDMENU
+*/

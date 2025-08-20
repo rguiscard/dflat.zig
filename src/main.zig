@@ -9,8 +9,8 @@ pub fn main() !void {
     const argv = std.os.argv.ptr; // already C-compatible
 
     // Force zig to load, otherwise, it is lazy.
-    const hp = mp.dialogs.HelpBox;
-    _ = hp;
+    _ = mp.dialogs.HelpBox;
+    _ = mp.menus.SystemMenu;
 
     c_main(argc, argv);
 }
