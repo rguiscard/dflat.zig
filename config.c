@@ -454,13 +454,6 @@ CONFIG cfg = {
     TRUE,            /* Status Bar                  */
     TRUE,            /* Textured application window */
     25,              /* Number of screen lines      */
-	"Lpt1",			 /* Printer Port                */
-	66,              /* Lines per printer page      */
-	80,				 /* characters per printer line */
-	6,				 /* Left printer margin			*/
-	70,				 /* Right printer margin		*/
-	3,				 /* Top printer margin			*/
-	55				 /* Bottom printer margin		*/
 };
 
 void BuildFileName(char *path, const char *fn, const char *ext)

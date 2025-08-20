@@ -2,8 +2,6 @@
 
 #include "dflat.h"
 
-extern DBOX PrintSetup;
-
 char DFlatApplication[] = "memopad";
 
 static char Untitled[] = "Untitled";
@@ -14,12 +12,10 @@ static void NewFile(WINDOW);
 static void SelectFile(WINDOW);
 static void OpenPadWindow(WINDOW, char *);
 static void LoadFile(WINDOW);
-static void PrintPad(WINDOW);
 static void SaveFile(WINDOW, int);
 static void DeleteFile(WINDOW);
 static int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
 static char *NameComponent(char *);
-static int PrintSetupProc(WINDOW, MESSAGE, PARAM, PARAM);
 static void FixTabMenu(void);
 void Calendar(WINDOW);
 void BarChart(WINDOW);
@@ -90,12 +86,6 @@ static int MemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
                     return TRUE;
                 case ID_DELETEFILE:
                     DeleteFile(inFocus);
-                    return TRUE;
-				case ID_PRINTSETUP:
-					DialogBox(wnd, &PrintSetup, TRUE, PrintSetupProc);
-					return TRUE;
-                case ID_PRINT:
-                    PrintPad(inFocus);
                     return TRUE;
 				case ID_EXIT:	
 					if (!YesNoBox("Exit Memopad?"))
@@ -247,73 +237,6 @@ static void LoadFile(WINDOW wnd)
     }
 }
 
-static int LineCtr;
-static int CharCtr;
-
-/* ------- print a character -------- */
-static void PrintChar(FILE *prn, int c)
-{
-	int i;
-    if (c == '\n' || CharCtr == cfg.RightMargin)	{
-		fputs("\r\n", prn);
-		LineCtr++;
-		if (LineCtr == cfg.BottomMargin)	{
-    		fputc('\f', prn);
-			for (i = 0; i < cfg.TopMargin; i++)
-	    		fputc('\n', prn);
-			LineCtr = cfg.TopMargin;
-		}
-		CharCtr = 0;
-		if (c == '\n')
-			return;
-	}
-	if (CharCtr == 0)	{
-		for (i = 0; i < cfg.LeftMargin; i++)	{
-			fputc(' ', prn);
-			CharCtr++;
-		}
-	}
-	CharCtr++;
-    fputc(c, prn);
-}
-
-/* --- print the current notepad --- */
-static void PrintPad(WINDOW wnd)
-{
-	if (*cfg.PrinterPort)	{
-		FILE *prn;
-		if ((prn = fopen(cfg.PrinterPort, "wt")) != NULL)	{
-			long percent;
-			BOOL KeepPrinting = TRUE;
-		    unsigned char *text = GetText(wnd);
-			unsigned oldpct = 100, cct = 0, len = strlen(text);
-			WINDOW swnd = SliderBox(20, GetTitle(wnd), "Printing");
-    		/* ------- print the notepad text --------- */
-			LineCtr = CharCtr = 0;
-			while (KeepPrinting && *text)	{
-				PrintChar(prn, *text++);
-				percent = ((long) ++cct * 100) / len;
-				if ((int) percent != oldpct)	{
-					oldpct = (int) percent;
-					KeepPrinting = SendMessage(swnd, PAINT, 0, oldpct);
-				}
-    		}
-			if (KeepPrinting)
-				/* ---- user did not cancel ---- */
-				if (oldpct < 100)
-					SendMessage(swnd, PAINT, 0, 100);
-   			/* ------- follow with a form feed? --------- */
-   			if (YesNoBox("Form Feed?"))
-       			fputc('\f', prn);
-			fclose(prn);
-		}
-		else
-			ErrorMessage("Cannot open printer file");
-	}
-	else
-		ErrorMessage("No printer selected");
-}
-
 /* ---------- save a file to disk ------------ */
 static void SaveFile(WINDOW wnd, int Saveas)
 {
@@ -435,69 +358,6 @@ static char *NameComponent(char *FileName)
     return Fname + 1;
 }
 
-static char *ports[] = {
-	"Lpt1",	"Lpt2",	"Lpt3",
-	"Com1",	"Com2",	"Com3",	"Com4",
- 	 NULL
-};
-
-static int PrintSetupProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
-{
-	int rtn, i = 0, mar;
-	char marg[10];
-	WINDOW cwnd;
-    switch (msg)    {
-		case CREATE_WINDOW:
-		    rtn = DefaultWndProc(wnd, msg, p1, p2);
-			PutItemText(wnd, ID_PRINTERPORT, cfg.PrinterPort);
-			while (ports[i] != NULL)
-				PutComboListText(wnd, ID_PRINTERPORT, ports[i++]);
-			for (mar = CHARSLINE; mar >= 0; --mar)	{
-				sprintf(marg, "%3d", mar);
-				PutItemText(wnd, ID_LEFTMARGIN, marg);
-				PutItemText(wnd, ID_RIGHTMARGIN, marg);
-			}
-			for (mar = LINESPAGE; mar >= 0; --mar)	{
-				sprintf(marg, "%3d", mar);
-				PutItemText(wnd, ID_TOPMARGIN, marg);
-				PutItemText(wnd, ID_BOTTOMMARGIN, marg);
-			}
-			cwnd = ControlWindow(&PrintSetup, ID_LEFTMARGIN);
-			SendMessage(cwnd, LB_SETSELECTION,
-				CHARSLINE-cfg.LeftMargin, 0);
-			cwnd = ControlWindow(&PrintSetup, ID_RIGHTMARGIN);
-			SendMessage(cwnd, LB_SETSELECTION,
-				CHARSLINE-cfg.RightMargin, 0);
-			cwnd = ControlWindow(&PrintSetup, ID_TOPMARGIN);
-			SendMessage(cwnd, LB_SETSELECTION,
-				LINESPAGE-cfg.TopMargin, 0);
-			cwnd = ControlWindow(&PrintSetup, ID_BOTTOMMARGIN);
-			SendMessage(cwnd, LB_SETSELECTION,
-				LINESPAGE-cfg.BottomMargin, 0);
-			return rtn;
-		case COMMAND:
-			if ((int) p1 == ID_OK && (int) p2 == 0)	{
-				GetItemText(wnd, ID_PRINTERPORT, cfg.PrinterPort, 4);
-				cwnd = ControlWindow(&PrintSetup, ID_LEFTMARGIN);
-				cfg.LeftMargin = CHARSLINE -
-					SendMessage(cwnd, LB_CURRENTSELECTION, 0, 0);
-				cwnd = ControlWindow(&PrintSetup, ID_RIGHTMARGIN);
-				cfg.RightMargin = CHARSLINE -
-					SendMessage(cwnd, LB_CURRENTSELECTION, 0, 0);
-				cwnd = ControlWindow(&PrintSetup, ID_TOPMARGIN);
-				cfg.TopMargin = LINESPAGE -
-					SendMessage(cwnd, LB_CURRENTSELECTION, 0, 0);
-				cwnd = ControlWindow(&PrintSetup, ID_BOTTOMMARGIN);
-				cfg.BottomMargin = LINESPAGE -
-					SendMessage(cwnd, LB_CURRENTSELECTION, 0, 0);
-			}
-			break;
-        default:
-            break;
-	}
-    return DefaultWndProc(wnd, msg, p1, p2);
-}
-
 static void FixTabMenu(void)
 {
 	char *cp = GetCommandText(&MainMenu, ID_TABS);
@@ -519,13 +379,11 @@ void PrepFileMenu(void *w, struct Menu *mnu)
 	DeactivateCommand(&MainMenu, ID_SAVE);
 	DeactivateCommand(&MainMenu, ID_SAVEAS);
 	DeactivateCommand(&MainMenu, ID_DELETEFILE);
-	DeactivateCommand(&MainMenu, ID_PRINT);
 	if (wnd != NULL && GetClass(wnd) == EDITBOX) {
 		if (isMultiLine(wnd))	{
 			ActivateCommand(&MainMenu, ID_SAVE);
 			ActivateCommand(&MainMenu, ID_SAVEAS);
 			ActivateCommand(&MainMenu, ID_DELETEFILE);
-			ActivateCommand(&MainMenu, ID_PRINT);
 		}
 	}
 }

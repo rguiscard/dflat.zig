@@ -13,9 +13,6 @@ DEFMENU(MainMenu)
         SELECTION( "Save ~as...", ID_SAVEAS,       0, INACTIVE)
         SELECTION( "D~elete",     ID_DELETEFILE,   0, INACTIVE)
         SEPARATOR
-        SELECTION( "~Print",      ID_PRINT,        0, INACTIVE)
-        SELECTION( "P~rinter setup...", ID_PRINTSETUP, 0, 0   )
-        SEPARATOR
         SELECTION( "~Shell",      ID_DOS,          0, 0 )
         SELECTION( "E~xit",       ID_EXIT,     ALT_X, 0 )
     ENDPOPDOWN

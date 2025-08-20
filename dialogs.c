@@ -36,25 +36,6 @@ DIALOGBOX( SaveAs )
 ENDDB
 */
 
-/* -------------- The Printer Setup dialog box ------------------ */
-DIALOGBOX( PrintSetup )
-	DB_TITLE( "Printer Setup",   -1, -1, 17, 32)
-	CONTROL(BOX,      "Margins",  2,  3,  9, 26, 0 )
-	CONTROL(TEXT,     "~Port:",   4,  1,  1,  5, ID_PRINTERPORT)
-	CONTROL(COMBOBOX, NULL,      12,  1,  8,  9, ID_PRINTERPORT)
-	CONTROL(TEXT,     "~Left:",   6,  4,  1,  5, ID_LEFTMARGIN)
-	CONTROL(SPINBUTTON, NULL,    17,  4,  1,  6, ID_LEFTMARGIN)
-	CONTROL(TEXT,     "~Right:",  6,  6,  1,  6, ID_RIGHTMARGIN)
-	CONTROL(SPINBUTTON, NULL,    17,  6,  1,  6, ID_RIGHTMARGIN)
-	CONTROL(TEXT,     "~Top:",    6,  8,  1,  4, ID_TOPMARGIN)
-	CONTROL(SPINBUTTON, NULL,    17,  8,  1,  6, ID_TOPMARGIN)
-	CONTROL(TEXT,     "~Bottom:", 6, 10,  1,  7, ID_BOTTOMMARGIN)
-	CONTROL(SPINBUTTON, NULL,    17, 10,  1,  6, ID_BOTTOMMARGIN)
-    CONTROL(BUTTON, "   ~OK   ",  1, 13,  1,  8, ID_OK)
-    CONTROL(BUTTON, " ~Cancel ", 11, 13,  1,  8, ID_CANCEL)
-    CONTROL(BUTTON, "  ~Help  ", 21, 13,  1,  8, ID_HELP)
-ENDDB
-
 /* -------------- the Search Text dialog box --------------- */
 /*
 DIALOGBOX( SearchTextDB )

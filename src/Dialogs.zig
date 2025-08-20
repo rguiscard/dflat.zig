@@ -1,6 +1,8 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 
+// This needs to be var because some values will change.
+
 // -------------- the File Open dialog box --------------- 
 pub export var FileOpen:df.DBOX = buildDialog(
     "FileOpen",
@@ -83,8 +85,6 @@ pub export var MsgBox:df.DBOX = buildDialog(
 );
 
 // ------------ Display dialog box --------------
-// This needs to be var instead of const because unlike other dialogs,
-// values of checkbox and radio will change
 pub var Display:df.DBOX = buildDialog(
     "Display",
     .{"Display", -1, -1, 19, 35},

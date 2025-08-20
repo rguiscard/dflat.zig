@@ -24,13 +24,6 @@ typedef struct config {
 	BOOL StatusBar;    /* True for appl'n window status bar  */
     BOOL Texture;      /* True for textured appl window      */
     int ScreenLines;   /* Number of screen lines (25/43/50)  */
-	char PrinterPort[5];
-	int LinesPage;     /* Lines per printer page             */
-	int CharsLine;	   /* Characters per printer line        */
-	int LeftMargin;	   /* Printer margins                    */
-	int RightMargin;
-	int TopMargin;
-	int BottomMargin;
     unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
 } CONFIG;
 

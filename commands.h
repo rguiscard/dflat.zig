@@ -17,8 +17,6 @@ enum commands {
     ID_SAVE,
     ID_SAVEAS,
     ID_DELETEFILE,
-    ID_PRINT,
-    ID_PRINTSETUP,
     ID_DOS,
     ID_EXIT,
     /* --------------- Edit menu ---------------- */
@@ -103,12 +101,6 @@ enum commands {
     ID_BACK,
     ID_PREV,
     ID_NEXT,
-	/* ---------- Print Select dialog box --------- */
-	ID_PRINTERPORT,
-	ID_LEFTMARGIN,
-	ID_RIGHTMARGIN,
-	ID_TOPMARGIN,
-	ID_BOTTOMMARGIN,
 	/* ----------- InputBox dialog box ------------ */
 	ID_INPUTTEXT
 };
