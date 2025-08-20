@@ -1,9 +1,0 @@
-#
-# Script to make D-Flat for Cosmpolitan
-# also requires changing COSMO= and CC= in ./cosmocc to Cosmopolitan installed path
-
-# for Linux
-#make COSMO=1 CC=./cosmocc CXX=./cosmoc++ LD=./cosmoc++ AR=/opt/cosmo/o/third_party/gcc/bin/x86_64-linux-musl-ar OBJCOPY=/opt/cosmo/o/third_party/gcc/bin/x86_64-linux-musl-objcopy
-
-# for macOS or when cross-compiler installed separately:
-make COSMO=1 CC=./cosmocc LD=./cosmoc++ AR=x86_64-linux-musl-ar OBJCOPY=x86_64-linux-musl-objcopy

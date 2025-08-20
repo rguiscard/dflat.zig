@@ -15,6 +15,14 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
+    // Common flags used by dflat
+    const flags = [_][]const u8{"-DMACOS=1",
+                                "-DBUILD_FULL_DFLAT",
+                                "-g",
+                                "-Wno-pointer-sign",
+                                "-Wno-compare-distinct-pointer-types",
+                                "-Wno-invalid-source-encoding"};
+
     // This creates a "module", which represents a collection of source files alongside
     // some compilation options, such as optimization mode and linked system libraries.
     // Every executable or library we compile will be based on one or more modules.
@@ -23,7 +31,7 @@ pub fn build(b: *std.Build) void {
         // only contains e.g. external object files, you can make this `null`.
         // In this case the main source file is merely a path, however, in more
         // complicated build scripts, this could be a generated file.
-        .root_source_file = b.path("src/root.zig"),
+        .root_source_file = null,
         .target = target,
         .optimize = optimize,
         .link_libc = true,
@@ -81,15 +89,26 @@ pub fn build(b: *std.Build) void {
             "tty.c",
             "tty-cp437.c",
             "runshell.c",
+
+            "dialogs.c", // this should belong to library
         },
-        .flags = &[_][]const u8{"-DMACOS=1",
-                                "-DBUILD_FULL_DFLAT",
-                                "-g",
-                                "-Wno-pointer-sign",
-                                "-Wno-compare-distinct-pointer-types",
-                                "-Wno-invalid-source-encoding"},
+        .flags = &flags,
     });
     lib_mod.addIncludePath(b.path("./"));
+
+    const memopad_mod = b.createModule(.{
+        .root_source_file = b.path("src/root.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    memopad_mod.addCSourceFiles(.{ .files = &.{
+            "menus.c",
+            "memopad.c",
+        },
+        .flags = &flags,
+    });
+    memopad_mod.addIncludePath(b.path("."));
 
     // We will also create a module for our other entry point, 'main.zig'.
     const exe_mod = b.createModule(.{
@@ -105,31 +124,17 @@ pub fn build(b: *std.Build) void {
     // Modules can depend on one another using the `std.Build.Module.addImport` function.
     // This is what allows Zig source code to use `@import("foo")` where 'foo' is not a
     // file path. In this case, we set up `exe_mod` to import `lib_mod`.
-    //exe_mod.addImport("dflat_lib", lib_mod);
-
-    // Now, we will create a static library based on the module we created above.
-    // This creates a `std.Build.Step.Compile`, which is the build step responsible
-    // for actually invoking the compiler.
-    const lib = b.addLibrary(.{
-        .linkage = .static,
-        .name = "dflat",
-        .root_module = lib_mod,
-    });
-    lib.linkLibC();
-
-    // This declares intent for the library to be installed into the standard
-    // location when the user invokes the "install" step (the default step when
-    // running `zig build`).
-    b.installArtifact(lib);
+    exe_mod.addImport("dflat", lib_mod); // this import c as module
+    exe_mod.addImport("memopad", memopad_mod);
 
     // This creates another `std.Build.Step.Compile`, but this one builds an executable
     // rather than a static library.
     const exe = b.addExecutable(.{
-        .name = "dflat",
+        .name = "memopad",
         .root_module = exe_mod,
     });
     exe.linkLibC();
-    exe.linkLibrary(lib);
+    exe.addIncludePath(b.path("."));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

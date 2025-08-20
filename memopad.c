@@ -27,7 +27,7 @@ void BarChart(WINDOW);
 #define CHARSLINE 80
 #define LINESPAGE 66
 
-int main(int argc, char *argv[])
+int c_main(int argc, char *argv[])
 {
     WINDOW wnd;
     if (!init_messages())
