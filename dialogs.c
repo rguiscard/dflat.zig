@@ -3,6 +3,7 @@
 #include "dflat.h"
 
 /* -------------- the File Open dialog box --------------- */
+/*
 DIALOGBOX( FileOpen )
     DB_TITLE(        "Open File",    -1,-1,19,57)
     CONTROL(TEXT,    "~Filename:",    3, 1, 1, 9, ID_FILENAME)
@@ -16,8 +17,10 @@ DIALOGBOX( FileOpen )
     CONTROL(BUTTON,  " ~Cancel ",    46,10, 1, 8, ID_CANCEL)
     CONTROL(BUTTON,  "  ~Help  ",    46,13, 1, 8, ID_HELP)
 ENDDB
+*/
 
 /* -------------- the Save As dialog box --------------- */
+/*
 DIALOGBOX( SaveAs )
     DB_TITLE(        "Save As",    -1,-1,19,57)
     CONTROL(TEXT,    "~Filename:",    3, 1, 1, 9, ID_FILENAME)
@@ -31,6 +34,7 @@ DIALOGBOX( SaveAs )
     CONTROL(BUTTON,  " ~Cancel ",    46,10, 1, 8, ID_CANCEL)
     CONTROL(BUTTON,  "  ~Help  ",    46,13, 1, 8, ID_HELP)
 ENDDB
+*/
 
 /* -------------- The Printer Setup dialog box ------------------ */
 DIALOGBOX( PrintSetup )
@@ -52,6 +56,7 @@ DIALOGBOX( PrintSetup )
 ENDDB
 
 /* -------------- the Search Text dialog box --------------- */
+/*
 DIALOGBOX( SearchTextDB )
     DB_TITLE(        "Search Text",    -1,-1,9,48)
     CONTROL(TEXT,    "~Search for:",          2, 1, 1, 11, ID_SEARCHFOR)
@@ -62,8 +67,10 @@ DIALOGBOX( SearchTextDB )
     CONTROL(BUTTON, " ~Cancel ",             19, 5, 1,  8, ID_CANCEL)
     CONTROL(BUTTON, "  ~Help  ",             31, 5, 1,  8, ID_HELP)
 ENDDB
+*/
 
 /* -------------- the Replace Text dialog box --------------- */
+/*
 DIALOGBOX( ReplaceTextDB )
     DB_TITLE(        "Replace Text",    -1,-1,12,50)
     CONTROL(TEXT,    "~Search for:",          2, 1, 1, 11, ID_SEARCHFOR)
@@ -78,14 +85,17 @@ DIALOGBOX( ReplaceTextDB )
     CONTROL(BUTTON, " ~Cancel ",             20, 8, 1,  8, ID_CANCEL)
     CONTROL(BUTTON, "  ~Help  ",             33, 8, 1,  8, ID_HELP)
 ENDDB
+*/
 
 /* -------------- generic message dialog box --------------- */
+/*
 DIALOGBOX( MsgBox )
     DB_TITLE(       NULL,  -1,-1, 0, 0)
     CONTROL(TEXT,   NULL,   1, 1, 0, 0, 0)
     CONTROL(BUTTON, NULL,   0, 0, 1, 8, ID_OK)
     CONTROL(0,      NULL,   0, 0, 1, 8, ID_CANCEL)
 ENDDB
+*/
 
 /* ----------- InputBox Dialog Box ------------ */
 DIALOGBOX( InputBoxDB )
@@ -161,6 +171,7 @@ ENDDB
 #endif
 
 /* ------------ the Help window dialog box -------------- */
+/*
 DIALOGBOX( HelpBox )
     DB_TITLE(         NULL,       -1, -1, 0, 45)
     CONTROL(TEXTBOX, NULL,         1,  1, 0, 40, ID_HELPTEXT)
@@ -169,3 +180,4 @@ DIALOGBOX( HelpBox )
     CONTROL(BUTTON,  "<< ~Prev ", 20,  0, 1,  8, ID_PREV)
     CONTROL(BUTTON,  " ~Next >>", 30,  0, 1,  8, ID_NEXT)
 ENDDB
+*/

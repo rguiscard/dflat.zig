@@ -7,10 +7,15 @@ extern fn c_main(argc: c_int, argv: [*][*:0]u8) void;
 pub fn main() !void {
     const argc: c_int = @intCast(std.os.argv.len);
     const argv = std.os.argv.ptr; // already C-compatible
+
+    // Force zig to load, otherwise, it is lazy.
+    const hp = mp.dialogs.HelpBox;
+    _ = hp;
+
     c_main(argc, argv);
 }
 
 const std = @import("std");
 
 /// This imports the separate module containing `root.zig`. Take a look in `build.zig` for details.
-const lib = @import("dflat_zig_lib");
+const mp = @import("memopad");
