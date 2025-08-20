@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------
 
 SMALL=
-FULL=
+FULL=y
 
 ifeq ($(SMALL),y)
 PRGS = smallpad
@@ -11,9 +11,12 @@ else
 PRGS = memopad huffc fixhelp memopad.hlp
 endif
 
+CC = zig cc
+DFLAT_LIB = ./zig-out/lib/
+
 LIBS = libdflat.a
 
-all: $(LIBS) $(PRGS)
+all: $(PRGS)
 
 elks:
 	make -f Makefile.elks
@@ -41,8 +44,8 @@ CFLAGS += -DCOSMO=1
 endif
 
 OBJS = memopad.o dialogs.o menus.o
-memopad: $(OBJS) $(LIBS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) -L. -ldflat
+memopad: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS) -L${DFLAT_LIB} -ldflat
 ifneq ($(COSMO),)
 	$(OBJCOPY) -S -O binary $@ $@.com
 endif
@@ -66,37 +69,6 @@ matrix: $(MATRIXOBJS)
 TESTOBJS = test.o
 test: $(TESTOBJS)
 	$(CC) $(LDFLAGS) -o $@ $(TESTOBJS)
-
-DFLATOBJS = \
-    message.o keys.o \
-    config.o dfalloc.o \
-    window.o rect.o lists.o \
-    normal.o applicat.o textbox.o \
-    menubar.o menu.o popdown.o listbox.o \
-    editbox.o editor.o \
-    sysmenu.o \
-    statbar.o
-
-ifneq ($(SMALL),y)
-DFLATOBJS += \
-    dialbox.o msgbox.o \
-    box.o text.o \
-    button.o radio.o checkbox.o spinbutt.o \
-    combobox.o slidebox.o \
-    fileopen.o direct.o \
-    pictbox.o calendar.o barchart.o \
-    search.o clipbord.o \
-    helpbox.o decomp.o \
-    log.o \
-    watch.o
-endif
-
-DFLATOBJS += \
-    video.o events-unix.o mouse-ansi.o console-unix.o \
-    kcp437.o runes.o unikey.o tty.o tty-cp437.o runshell.o
-
-$(LIBS): $(DFLATOBJS)
-	$(AR) rcs $(LIBS) $(DFLATOBJS)
 
 huffc: huffc.o htree.o
 	$(CC) $(LDFLAGS) -o $@ $^

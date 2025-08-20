@@ -4,3 +4,6 @@ memopad.hlp
 libdflat.a
 fixhelp
 huffc
+*.swp
+zig-out/
+.zig-cache/

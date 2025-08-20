@@ -105,6 +105,7 @@ static int ct8;
 /* -- collect and write bits to the compressed output file -- */
 static void outbit(FILE *fo, int bit)
 {
+    /*
     if (ct8 == 8 || bit == -1)  {
         while (ct8 < 8)    {
             out8 <<= 1;
@@ -115,4 +116,26 @@ static void outbit(FILE *fo, int bit)
     }
     out8 = (out8 << 1) | bit;
     ct8++;
+    */
+    // Fix crash
+    if (bit == -1) {
+        // Flush any remaining bits by padding with zeros
+        if (ct8 > 0) {
+            out8 <<= (8 - ct8);
+            fputc(out8, fo);
+            ct8 = 0;
+            out8 = 0;
+        }
+        return;
+    }
+
+    // Only allow 0 or 1 bits here
+    out8 = (out8 << 1) | (bit & 1);
+    ct8++;
+
+    if (ct8 == 8) {
+        fputc(out8, fo);
+        ct8 = 0;
+        out8 = 0;
+    }
 }
