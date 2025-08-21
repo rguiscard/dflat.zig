@@ -145,7 +145,7 @@ typedef struct window {
 	unsigned int MaxTextLength; /* maximum text length      */
     /* ---------------- dialog box fields ----------------- */
     int ReturnCode;        /* return code from a dialog box */
-	BOOL Modal;		       /* True if a modeless dialog box */
+//	BOOL Modal;		       /* True if a modeless dialog box */
 	CTLWINDOW *ct;		   /* control structure             */
 	struct window *dfocus; /* control window that has focus */
 	/* -------------- popdownmenu fields ------------------ */
@@ -159,6 +159,8 @@ typedef struct window {
 	int VectorCount;  /* number of vectors in vector list   */
 	void *VectorList; /* list of picture box vectors        */
 #endif
+    /* Zig */
+    void *zin; /* Point to Window in zig */
 } * WINDOW;
 
 #include "video.h"

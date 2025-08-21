@@ -11,6 +11,7 @@ pub fn main() !void {
     // Force zig to load, otherwise, it is lazy.
     _ = mp.dialogs.HelpBox;
     _ = mp.menus.SystemMenu;
+    _ = mp.Window;
 
     c_main(argc, argv);
 }

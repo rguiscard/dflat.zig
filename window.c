@@ -9,7 +9,7 @@ int foreground, background;   /* current video colors */
 static void TopLine(WINDOW, int, RECT);
 
 /* --------- create a window ------------ */
-WINDOW CreateWindow(
+WINDOW cCreateWindow(
     CLASS Class,              /* class of this window       */
     const char *ttl,          /* title or NULL              */
     int left, int top,        /* upper left coordinates     */

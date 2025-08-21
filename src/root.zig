@@ -7,6 +7,9 @@ const testing = std.testing;
 pub const df = @import("ImportC.zig").df;
 pub const dialogs = @import("Dialogs.zig");
 pub const menus = @import("Menus.zig");
+pub const Window = @import("Window.zig");
+
+pub const global_allocator = std.heap.c_allocator;
 
 pub export fn add(a: i32, b: i32) i32 {
     return a + b;
