@@ -66,6 +66,9 @@ pub fn create(
     df.get_videomode();
 
     if (wnd != null) {
+        // This need to go first. Otherwise, SendMessage() will not have this class available
+        wnd.*.zin = @ptrCast(@alignCast(self));
+
         // ----- height, width = -1: fill the screen -------
         var ht = height;
         if (ht == -1)
@@ -137,11 +140,84 @@ pub fn create(
         if (df.isVisible(wnd)>0) {
             _ = df.SendMessage(wnd, df.SHOW_WINDOW, 0, 0);
         }
-
-        wnd.*.zin = @ptrCast(@alignCast(self));
     }
 
     return self;
+}
+
+// --------- send a message to a window -----------
+// This should be in src/Message.zig in case wnd is null.
+// If wnd is not null, call zin.sendMessage() here.
+pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) df.BOOL {
+    const rtn:df.BOOL = df.TRUE;
+
+    if (wnd != null) {
+        if (get_zin(wnd)) |zin| {
+            return zin.sendMessage(msg, p1, p2);
+        } else {
+            // This shouldn't happen, except dummy window at normal.c for now.
+            // Should rtn be TRUE or FALSE if it happens ?
+        }
+    }
+
+    // ----- window processor returned true or the message was sent
+    //  to no window at all (NULL) -----
+    return df.ProcessMessage(wnd, msg, p1, p2, rtn);
+}
+
+// --------- send a message to a window -----------
+pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) df.BOOL {
+    const wnd = self.win;
+    var rtn:c_int = df.TRUE;
+
+    switch (msg) {
+        df.PAINT,
+        df.BORDER => {
+            // ------- don't send these messages unless the
+            //    window is visible --------
+            if (df.isVisible(wnd)>0) {
+//                if (wnd.*.wndproc) |wndproc| {
+//                    rtn = wndproc(wnd, msg, p1, p2);
+//                }
+                if (get_zin(wnd)) |zin| {
+                    if (zin.wndproc) |wndproc| {
+                        rtn = wndproc(wnd, msg, p1, p2);
+                    }
+                }
+            }
+        },
+        df.RIGHT_BUTTON,
+        df.LEFT_BUTTON,
+        df.DOUBLE_CLICK,
+        df.BUTTON_RELEASED => {
+            // --- don't send these messages unless the
+            //  window is visible or has captured the mouse --
+            if ((df.isVisible(wnd)>0) or (wnd == df.CaptureMouse)) {
+                if (wnd.*.wndproc) |wndproc| {
+                        rtn = wndproc(wnd, msg, p1, p2);
+                }
+            }
+        },
+        df.KEYBOARD,
+        df.SHIFT_CHANGED => {
+            // ------- don't send these messages unless the
+            //  window is visible or has captured the keyboard --
+            if ((df.isVisible(wnd)>0) or (wnd == df.CaptureKeyboard)) {
+                if (wnd.*.wndproc) |wndproc| {
+                    rtn = wndproc(wnd, msg, p1, p2);
+                }
+            }
+        },
+        else => {
+            if (wnd.*.wndproc) |wndproc| {
+                rtn = wndproc(wnd, msg, p1, p2);
+            }
+        }
+    }
+
+    // ----- window processor returned true or the message was sent
+    //  to no window at all (NULL) -----
+    return df.ProcessMessage(wnd, msg, p1, p2, rtn);
 }
 
 // ------- window methods -----------

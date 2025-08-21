@@ -25,6 +25,8 @@ char time_string[] = "         ";
 
 static WINDOW Cwnd;
 
+BOOL ProcessMessage(WINDOW, MESSAGE, PARAM, PARAM, int);
+
 static void StopMsg(void)
 {
 #ifndef BUILD_SMALL_DFLAT
@@ -201,6 +203,7 @@ void near collect_events(void)
 #endif
 
 /* --------- send a message to a window ----------- */
+/*
 int SendMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn = TRUE, x, y;
@@ -208,12 +211,12 @@ int SendMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 #ifdef INCLUDE_LOGGING
 	LogMessages(wnd, msg, p1, p2);
 #endif
-    if (wnd != NULL)
+    if (wnd != NULL) {
         switch (msg)    {
             case PAINT:
             case BORDER:
-                /* ------- don't send these messages unless the
-                    window is visible -------- */
+                // ------- don't send these messages unless the
+                //  window is visible --------
                 if (isVisible(wnd))
 	                rtn = (*wnd->wndproc)(wnd, msg, p1, p2);
                 break;
@@ -221,21 +224,36 @@ int SendMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             case LEFT_BUTTON:
             case DOUBLE_CLICK:
             case BUTTON_RELEASED:
-                /* --- don't send these messages unless the
-                    window is visible or has captured the mouse -- */
+                // --- don't send these messages unless the
+                //  window is visible or has captured the mouse --
                 if (isVisible(wnd) || wnd == CaptureMouse)
 	                rtn = (*wnd->wndproc)(wnd, msg, p1, p2);
                 break;
             case KEYBOARD:
             case SHIFT_CHANGED:
-                /* ------- don't send these messages unless the
-                    window is visible or has captured the keyboard -- */
+                // ------- don't send these messages unless the
+                //  window is visible or has captured the keyboard -- 
                 if (!(isVisible(wnd) || wnd == CaptureKeyboard))
 	                break;
             default:
                 rtn = (*wnd->wndproc)(wnd, msg, p1, p2);
                 break;
         }
+    }
+
+    return ProcessMessage(wnd, msg, p1, p2, rtn);
+}
+*/
+
+BOOL ProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2, int val)
+{
+    int rtn = TRUE, x, y;
+    rtn = val;
+
+#ifdef INCLUDE_LOGGING
+	LogMessages(wnd, msg, p1, p2);
+#endif
+
     /* ----- window processor returned true or the message was sent
         to no window at all (NULL) ----- */
     if (rtn != FALSE)    {
