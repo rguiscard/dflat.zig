@@ -20,7 +20,7 @@ static void near dragborder(WINDOW, int, int);
 static void near sizeborder(WINDOW, int, int);
 static int px = -1, py = -1;
 static int diff;
-static struct window dwnd = {DUMMY, NULL, NormalProc,
+struct window dwnd = {DUMMY, NULL, NormalProc,
                                 {-1,-1,-1,-1}};
 static short *Bsave;
 static int Bht, Bwd;

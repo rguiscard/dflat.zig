@@ -159,7 +159,6 @@ typedef struct window {
 	int VectorCount;  /* number of vectors in vector list   */
 	void *VectorList; /* list of picture box vectors        */
 #endif
-    /* Zig */
     void *zin; /* Point to Window in zig */
 } * WINDOW;
 

@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const root = @import("root.zig");
 const Window = @import("Window.zig");
 
 const MAXMESSAGES = 100;
@@ -69,10 +70,20 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             return zin.sendMessage(msg, p1, p2);
         } else {
             // This shouldn't happen, except dummy window at normal.c for now.
-            // Should rtn be TRUE or FALSE if it happens ?
-            // Or we can create a Window instance for it here ?
-            //const dummy = Window.init(&df.dwnd, root.global_allocator);
-            //df.dwnd.*.zin = &dummy;
+            // Or we can create a Window instance for it here.
+            if (root.global_allocator.create(Window)) |win| {
+                win.* = Window.init(wnd, root.global_allocator);
+                wnd.*.zin = @constCast(win);
+            } else |_| {
+                // error
+            }
+
+            // Should rtn be TRUE or FALSE or call sendMessage() ?
+            if (wnd.*.Class != df.DUMMY) {
+                // Try to catch any window which is not dummy nor created by Window.create()
+                _ = df.printf("Not dummy !! \n");
+                while(true) {}
+            }
         }
     }
 
