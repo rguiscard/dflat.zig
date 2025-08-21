@@ -340,6 +340,7 @@ pub fn ClearVisible(self: *TopLevelFields) void {
 
 // Accessories for c
 pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
+    // @fieldParentPtr is not yet reliable at this stage. Therefore, use zin inserted into WINDOW in c.
     if (wnd) |w| {
         if (w.*.zin) |z| {
             const win:*TopLevelFields = @ptrCast(@alignCast(z));
