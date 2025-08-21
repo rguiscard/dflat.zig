@@ -3,8 +3,9 @@
 #include "dflat.h"
 
 /* --------------------- the main menu --------------------- */
+/*
 DEFMENU(MainMenu)
-    /* --------------- the File popdown menu ----------------*/
+    // --------------- the File popdown menu ----------------
     POPDOWN( "~File",  PrepFileMenu, "Read/write/print files. Go to DOS" )
         SELECTION( "~New",        ID_NEW,          0, 0 )
         SELECTION( "~Open...",    ID_OPEN,         0, 0 )
@@ -17,7 +18,7 @@ DEFMENU(MainMenu)
         SELECTION( "E~xit",       ID_EXIT,     ALT_X, 0 )
     ENDPOPDOWN
 
-    /* --------------- the Edit popdown menu ----------------*/
+    // --------------- the Edit popdown menu ----------------
     POPDOWN( "~Edit", PrepEditMenu, "Clipboard, delete text, paragraph" )
         SELECTION( "~Undo",      ID_UNDO,  ALT_BS,    INACTIVE)
         SEPARATOR
@@ -31,20 +32,20 @@ DEFMENU(MainMenu)
         SELECTION( "Pa~ragraph", ID_PARAGRAPH,  ALT_P,INACTIVE)
     ENDPOPDOWN
 
-    /* --------------- the Search popdown menu ----------------*/
+    // --------------- the Search popdown menu ----------------
     POPDOWN( "~Search", PrepSearchMenu, "Search and replace" )
         SELECTION( "~Search...", ID_SEARCH,      0,    INACTIVE)
         SELECTION( "~Replace...",ID_REPLACE,     0,    INACTIVE)
         SELECTION( "~Next",      ID_SEARCHNEXT,  F3,   INACTIVE)
     ENDPOPDOWN
 
-	/* ------------ the Utilities popdown menu --------------- */
+	// ------------ the Utilities popdown menu ---------------
 	POPDOWN( "~Utilities", NULL, "Utility programs" )
 		SELECTION( "~Calendar",   ID_CALENDAR,     0,   0)
 		SELECTION( "~Bar chart",  ID_BARCHART,     0,   0)
 	ENDPOPDOWN
 
-    /* ------------- the Options popdown menu ---------------*/
+    // ------------- the Options popdown menu ---------------
     POPDOWN( "~Options", NULL, "Editor and display options" )
         SELECTION( "~Display...",   ID_DISPLAY,     0,      0 )
         SEPARATOR
@@ -59,7 +60,7 @@ DEFMENU(MainMenu)
         SELECTION( "~Save options", ID_SAVEOPTIONS, 0,      0 )
     ENDPOPDOWN
 
-    /* --------------- the Window popdown menu --------------*/
+    // --------------- the Window popdown menu --------------
     POPDOWN( "~Window", PrepWindowMenu, "Select/close document windows" )
         SELECTION(  NULL,  ID_CLOSEALL, 0, 0)
         SEPARATOR
@@ -78,7 +79,7 @@ DEFMENU(MainMenu)
         SELECTION(  NULL,  ID_WINDOW, 0, 0 )
     ENDPOPDOWN
 
-    /* --------------- the Help popdown menu ----------------*/
+    // --------------- the Help popdown menu ----------------
     POPDOWN( "~Help", NULL, "Get help" )
         SELECTION(  "~Help for help...",  ID_HELPHELP,  0, 0 )
         SELECTION(  "~Extended help...",  ID_EXTHELP,   0, 0 )
@@ -88,7 +89,7 @@ DEFMENU(MainMenu)
         SELECTION(  "~About...",          ID_ABOUT,     0, 0 )
     ENDPOPDOWN
 
-	/* ----- cascaded pulldown from Tabs... above ----- */
+	// ----- cascaded pulldown from Tabs... above ----- 
 	CASCADED_POPDOWN( ID_TABS, NULL )
 		SELECTION( "~2 tab stops", ID_TAB2, 0, 0)
 		SELECTION( "~4 tab stops", ID_TAB4, 0, 0)
@@ -97,6 +98,7 @@ DEFMENU(MainMenu)
     ENDPOPDOWN
 
 ENDMENU
+*/
 
 /* ------------- the System Menu --------------------- */
 /*

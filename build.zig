@@ -118,7 +118,6 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
     memopad_mod.addCSourceFiles(.{ .files = &.{
-            "menus.c",
             "memopad.c",
         },
         .flags = &flags,

@@ -146,26 +146,6 @@ pub fn create(
 }
 
 // --------- send a message to a window -----------
-// This should be in src/Message.zig in case wnd is null.
-// If wnd is not null, call zin.sendMessage() here.
-pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) df.BOOL {
-    const rtn:df.BOOL = df.TRUE;
-
-    if (wnd != null) {
-        if (get_zin(wnd)) |zin| {
-            return zin.sendMessage(msg, p1, p2);
-        } else {
-            // This shouldn't happen, except dummy window at normal.c for now.
-            // Should rtn be TRUE or FALSE if it happens ?
-        }
-    }
-
-    // ----- window processor returned true or the message was sent
-    //  to no window at all (NULL) -----
-    return df.ProcessMessage(wnd, msg, p1, p2, rtn);
-}
-
-// --------- send a message to a window -----------
 pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) df.BOOL {
     const wnd = self.win;
     var rtn:c_int = df.TRUE;

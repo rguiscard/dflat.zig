@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const Window = @import("Window.zig");
 
 const MAXMESSAGES = 100;
 
@@ -57,6 +58,27 @@ pub export fn PostMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARA
         }
         MsgQueueCtr += 1;
     }
+}
+
+// --------- send a message to a window -----------
+pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) df.BOOL {
+    const rtn:df.BOOL = df.TRUE;
+
+    if (wnd != null) {
+        if (Window.get_zin(wnd)) |zin| {
+            return zin.sendMessage(msg, p1, p2);
+        } else {
+            // This shouldn't happen, except dummy window at normal.c for now.
+            // Should rtn be TRUE or FALSE if it happens ?
+            // Or we can create a Window instance for it here ?
+            //const dummy = Window.init(&df.dwnd, root.global_allocator);
+            //df.dwnd.*.zin = &dummy;
+        }
+    }
+
+    // ----- window processor returned true or the message was sent
+    //  to no window at all (NULL) -----
+    return df.ProcessMessage(wnd, msg, p1, p2, rtn);
 }
 
 // ---- dispatch messages to the message proc function ----
