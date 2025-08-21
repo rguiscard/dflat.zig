@@ -12,6 +12,7 @@ pub fn main() !void {
     _ = mp.dialogs.HelpBox;
     _ = mp.menus.SystemMenu;
     _ = mp.Window;
+    _ = mp.Message;
 
     c_main(argc, argv);
 }

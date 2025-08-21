@@ -8,6 +8,7 @@ pub const df = @import("ImportC.zig").df;
 pub const dialogs = @import("Dialogs.zig");
 pub const menus = @import("Menus.zig");
 pub const Window = @import("Window.zig");
+pub const Message = @import("Message.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 
