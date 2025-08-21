@@ -191,7 +191,8 @@ void MessageLog(WINDOW);
 #define GetClientLeft(w)     (GetLeft(w)+BorderAdj(w))
 #define GetClientRight(w)    (GetRight(w)-BorderAdj(w))
 #define GetTitle(w)          ((w)->title)
-#define GetParent(w)         ((w)->parent)
+WINDOW GetParent(WINDOW);
+//#define GetParent(w)         ((w)->parent)
 #define FirstWindow(w)       ((w)->firstchild)
 #define LastWindow(w)        ((w)->lastchild)
 #define NextWindow(w)        ((w)->nextsibling)

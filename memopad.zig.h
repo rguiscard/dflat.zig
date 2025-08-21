@@ -8,3 +8,9 @@ BOOL ProcessMessage(WINDOW, MESSAGE, PARAM, PARAM, int);
 
 // normal.c
 extern struct window dwnd;
+
+// pictbox.c
+typedef struct {
+    enum VectTypes vt;
+    RECT rc;
+} VECT;

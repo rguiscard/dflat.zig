@@ -13,6 +13,7 @@ pub fn main() !void {
     _ = mp.menus.SystemMenu;
     _ = mp.Window;
     _ = mp.Message;
+    _ = mp.BarChart;
 
     c_main(argc, argv);
 }

@@ -4,7 +4,17 @@ const root = @import("root.zig");
 const Klass = @import("Classes.zig");
 
 wndproc: ?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
-modal: bool, // True if a modeless dialog box
+
+// -------------- linked list pointers ----------------
+parent:df.WINDOW = null,       // parent window
+firstchild:df.WINDOW = null,   // first child this parent
+lastchild:df.WINDOW = null,    // last child this parent
+nextsibling:df.WINDOW = null,  // next sibling
+prevsibling:df.WINDOW = null,  // previous sibling
+
+// ---------------- dialog box fields ----------------- 
+modal: bool = false, // True if a modeless dialog box
+
 allocator: std.mem.Allocator,
 win: df.WINDOW,
 
@@ -37,7 +47,6 @@ pub fn init(wnd: df.WINDOW, allocator: std.mem.Allocator) TopLevelFields {
     return .{
         .win = wnd,
         .wndproc = null,
-        .modal = false,
         .allocator = allocator,
     };
 }
@@ -143,6 +152,12 @@ pub fn create(
     }
 
     return self;
+}
+
+// --------- message prototypes -----------
+pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.PARAM) df.BOOL {
+    const buf:[*c]u8 = p1.ptr;
+    return self.sendMessage(msg, @intCast(@intFromPtr(buf)), p2);
 }
 
 // --------- send a message to a window -----------
@@ -348,6 +363,10 @@ pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
         }
     }
     return null;
+}
+
+pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
+    return wnd.*.parent;
 }
 
 pub export fn get_modal(wnd:df.WINDOW) df.BOOL {

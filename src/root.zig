@@ -10,6 +10,7 @@ pub const menus = @import("Menus.zig");
 pub const Window = @import("Window.zig");
 pub const Message = @import("Message.zig");
 pub const Klass = @import("Classes.zig");
+pub const BarChart = @import("BarChart.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 

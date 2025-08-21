@@ -219,7 +219,7 @@ static void DrawBoxMsg(WINDOW wnd, PARAM p1)
     }
 }
 
-int PictureProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cPictureProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case PAINT:

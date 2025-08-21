@@ -44,7 +44,7 @@ static int BarChartProc(WINDOW wnd, MESSAGE msg,
     return DefaultWndProc(wnd, msg, p1, p2);
 }
 
-void BarChart(WINDOW pwnd)
+void cBarChart(WINDOW pwnd)
 {
     int pct = sizeof projs / sizeof(struct ProjChart);
     int i;
