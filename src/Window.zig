@@ -1,7 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
-const Klass = @import("Classes.zig");
 
 wndproc: ?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
 modal: bool, // True if a modeless dialog box

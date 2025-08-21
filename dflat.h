@@ -234,12 +234,10 @@ BOOL isDerivedFrom(WINDOW, CLASS);
 WINDOW GetAncestor(WINDOW);
 void PutWindowChar(WINDOW,int,int,int);
 void PutWindowLine(WINDOW, void *,int,int);
-#define BaseWndProc(Class,wnd,msg,p1,p2)    \
-    (*classdefs[(classdefs[Class].base)].wndproc)(wnd,msg,p1,p2)
-#define DefaultWndProc(wnd,msg,p1,p2)         \
-	(classdefs[wnd->Class].wndproc == NULL) ? \
-	BaseWndProc(wnd->Class,wnd,msg,p1,p2) :	  \
-    (*classdefs[wnd->Class].wndproc)(wnd,msg,p1,p2)
+
+int BaseWndProc(CLASS, WINDOW, MESSAGE, PARAM, PARAM);
+int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM); 
+
 struct LinkedList    {
     WINDOW FirstWindow;
     WINDOW LastWindow;
