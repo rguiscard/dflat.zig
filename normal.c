@@ -22,6 +22,7 @@ static int px = -1, py = -1;
 static int diff;
 struct window dwnd = {DUMMY, NULL, NormalProc,
                                 {-1,-1,-1,-1}};
+void SetParent(WINDOW, WINDOW);
 static short *Bsave;
 static int Bht, Bwd;
 BOOL WindowMoving;
@@ -788,7 +789,8 @@ static void near dragborder(WINDOW wnd, int x, int y)
     dwnd.rc.bt = dwnd.rc.tp+WindowHeight(wnd)-1;
     dwnd.ht = WindowHeight(wnd);
     dwnd.wd = WindowWidth(wnd);
-    dwnd.parent = GetParent(wnd);
+//    dwnd.parent = GetParent(wnd);
+    SetParent(&dwnd, GetParent(wnd));
     dwnd.attrib = VISIBLE | HASBORDER | NOCLIP;
     InitWindowColors(&dwnd);
     SaveBorder(dwnd.rc);

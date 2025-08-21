@@ -12,6 +12,7 @@ pub const Message = @import("Message.zig");
 pub const Klass = @import("Classes.zig");
 pub const BarChart = @import("BarChart.zig");
 pub const Calendar = @import("Calendar.zig");
+pub const list = @import("Lists.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 

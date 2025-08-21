@@ -120,6 +120,8 @@ pub fn create(
             wnd.*.attrib = wnd.*.attrib | attr;
             base = @intFromEnum(cls[1]); // base
         }
+
+        // ---- adjust position with parent ----
         var pt = parent;
         if (parent != null) {
             if (df.TestAttribute(wnd, df.NOCLIP) == 0) {
@@ -131,6 +133,7 @@ pub fn create(
         } else {
             pt = df.ApplicationWindow;
         }
+
         wnd.*.Class = klass;
         wnd.*.extension = extension;
         wnd.*.rc.rt = df.GetLeft(wnd)+wt-1;
@@ -140,7 +143,8 @@ pub fn create(
         if (ttl != null) {
             df.InsertTitle(wnd, title);
         }
-        wnd.*.parent = pt;
+//        wnd.*.parent = pt;
+        self.parent = pt;
         wnd.*.oldcondition = df.ISRESTORED;
         wnd.*.condition = df.ISRESTORED;
         wnd.*.RestoredRC = wnd.*.rc;
@@ -366,7 +370,18 @@ pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
 }
 
 pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
-    return wnd.*.parent;
+//    return wnd.*.parent;
+    if (get_zin(wnd)) |win| {
+        return win.parent;
+    }
+    return null;
+}
+
+pub export fn SetParent(wnd:df.WINDOW, parent:df.WINDOW) void {
+    if (get_zin(wnd)) |win| {
+        win.parent = parent;
+    }
+//    wnd.*.parent = parent;
 }
 
 pub export fn get_modal(wnd:df.WINDOW) df.BOOL {

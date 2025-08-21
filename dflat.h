@@ -91,7 +91,7 @@ typedef struct window {
 	/* ----------------- window colors -------------------- */
 	char WindowColors[4][2];
     /* -------------- linked list pointers ---------------- */
-    struct window *parent; /* parent window                 */
+//    struct window *parent; /* parent window                 */
     struct window *firstchild;  /* first child this parent  */
     struct window *lastchild;   /* last child this parent   */
     struct window *nextsibling; /* next sibling             */
