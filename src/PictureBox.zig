@@ -282,12 +282,12 @@ fn PictureRect(x:c_int, y:c_int, len:c_int, hv:c_int) df.RECT {
     return rc;
 }
 
-pub export fn DrawVector(wnd:df.WINDOW, x:c_int, y:c_int, len:c_int, hv:c_int) void {
+pub fn DrawVector(wnd:df.WINDOW, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
     _ = df.SendMessage(wnd, df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), 0);
 }
 
-pub export fn DrawBox(wnd:df.WINDOW, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
+pub fn DrawBox(wnd:df.WINDOW, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
     const rc:df.RECT = .{
         .lf = x,
         .tp = y,
@@ -297,7 +297,7 @@ pub export fn DrawBox(wnd:df.WINDOW, x:c_int, y:c_int, ht:c_int, wd:c_int) void 
     _ = df.SendMessage(wnd, df.DRAWBOX, @intCast(@intFromPtr(&rc)), 0);
 }
 
-pub export fn DrawBar(wnd:df.WINDOW, vt:df.VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
+pub fn DrawBar(wnd:df.WINDOW, vt:df.VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
     _ = df.SendMessage(wnd, df.DRAWBAR, @intCast(@intFromPtr(&rc)), @intCast(vt));
 }

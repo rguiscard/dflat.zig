@@ -14,6 +14,7 @@ pub fn main() !void {
     _ = mp.Window;
     _ = mp.Message;
     _ = mp.BarChart;
+    _ = mp.Calendar;
 
     c_main(argc, argv);
 }
