@@ -63,7 +63,6 @@ static int CreateWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
         int attrib = 0;
         if (TestAttribute(wnd, NOCLIP))
             attrib |= NOCLIP;
-//        if (wnd->Modal)
         if (get_modal(wnd))
             attrib |= SAVESELF;
         ct->setting = ct->isetting;
@@ -175,7 +174,6 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 				return TRUE;
             break;
     }
-//    return wnd->Modal;
     return get_modal(wnd);
 }
 
@@ -189,7 +187,6 @@ static BOOL CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
             if ((int)p2 != 0)
                 return TRUE;
             wnd->ReturnCode = (int) p1;
-//            if (wnd->Modal)
             if (get_modal(wnd))
                 PostMessage(wnd, ENDDIALOG, 0, 0);
             else
@@ -217,7 +214,6 @@ int DialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case CREATE_WINDOW:
             return CreateWindowMsg(wnd, p1, p2);
         case SHIFT_CHANGED:
-//            if (wnd->Modal)
             if (get_modal(wnd))
                 return TRUE;
             break;
@@ -285,7 +281,6 @@ BOOL DialogBox(WINDOW wnd, DBOX *db, BOOL Modal,
                         wndproc,
                         (Modal ? SAVESELF : 0));
 	SendMessage(DialogWnd, SETFOCUS, TRUE, 0);
-//    DialogWnd->Modal = Modal;
     set_modal(DialogWnd, Modal);
 	FirstFocus(db);
     PostMessage(DialogWnd, INITIATE_DIALOG, 0, 0);

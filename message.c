@@ -10,33 +10,6 @@ BOOL AllocTesting = FALSE;
 jmp_buf AllocError;
 BOOL AltDown = FALSE;
 
-/* ---------- event queue ---------- */
-/*
-static struct events    {
-    MESSAGE event;
-    int mx;
-    int my;
-} EventQueue[MAXMESSAGES];
-*/
-
-/* ---------- message queue --------- */
-/*
-static struct msgs {
-    WINDOW wnd;
-    MESSAGE msg;
-    PARAM p1;
-    PARAM p2;
-} MsgQueue[MAXMESSAGES];
-
-static int EventQueueOnCtr;
-static int EventQueueOffCtr;
-static int EventQueueCtr;
-
-static int MsgQueueOnCtr;
-static int MsgQueueOffCtr;
-static int MsgQueueCtr;
-*/
-
 static int lagdelay = FIRSTDELAY;
 
 static volatile int keyportvalue;	/* for watching for key release */
@@ -88,27 +61,10 @@ BOOL init_messages(void)
     CaptureMouse = CaptureKeyboard = NULL;
     NoChildCaptureMouse = FALSE;
     NoChildCaptureKeyboard = FALSE;
-//    MsgQueueOnCtr = MsgQueueOffCtr = MsgQueueCtr = 0;
-//    EventQueueOnCtr = EventQueueOffCtr = EventQueueCtr = 0;
     PostMessage(NULL,START,0,0);
     lagdelay = FIRSTDELAY;
 	return TRUE;
 }
-
-/* ----- post an event and parameters to event queue ---- */
-/*
-void PostEvent(MESSAGE event, int p1, int p2)
-{
-    if (EventQueueCtr != MAXMESSAGES)    {
-        EventQueue[EventQueueOnCtr].event = event;
-        EventQueue[EventQueueOnCtr].mx = p1;
-        EventQueue[EventQueueOnCtr].my = p2;
-        if (++EventQueueOnCtr == MAXMESSAGES)
-            EventQueueOnCtr = 0;
-        EventQueueCtr++;
-    }
-}
-*/
 
 #if MSDOS
 /* ------ collect mouse, clock, and keyboard events ----- */
@@ -243,22 +199,6 @@ void near collect_events(void)
         lagdelay = FIRSTDELAY;
 }
 #endif
-
-/* ----- post a message and parameters to msg queue ---- */
-/*
-void PostMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
-{
-    if (MsgQueueCtr != MAXMESSAGES)    {
-        MsgQueue[MsgQueueOnCtr].wnd = wnd;
-        MsgQueue[MsgQueueOnCtr].msg = msg;
-        MsgQueue[MsgQueueOnCtr].p1 = p1;
-        MsgQueue[MsgQueueOnCtr].p2 = p2;
-        if (++MsgQueueOnCtr == MAXMESSAGES)
-            MsgQueueOnCtr = 0;
-        MsgQueueCtr++;
-    }
-}
-*/
 
 /* --------- send a message to a window ----------- */
 int SendMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
@@ -574,43 +514,3 @@ void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my)
                 break;
         }
 }
-
-/*
-BOOL dispatch_message(void)
-{
-    // -------- collect mouse and keyboard events -------
-    collect_events();
-    // --------- dequeue and process events --------
-    while (EventQueueCtr > 0)  {
-        struct events ev;
-			
-		ev = EventQueue[EventQueueOffCtr];
-        if (++EventQueueOffCtr == MAXMESSAGES)
-            EventQueueOffCtr = 0;
-        --EventQueueCtr;
-
-	c_dispatch_message(ev);
-
-    }
-    // ------ dequeue and process messages -----
-    while (MsgQueueCtr > 0)  {
-        struct msgs mq;
-
-		mq = MsgQueue[MsgQueueOffCtr];
-        if (++MsgQueueOffCtr == MAXMESSAGES)
-            MsgQueueOffCtr = 0;
-        --MsgQueueCtr;
-        SendMessage(mq.wnd, mq.msg, mq.p1, mq.p2);
-        if (mq.msg == ENDDIALOG)
-			return FALSE;
-        if (mq.msg == STOP)	{
-		    PostMessage(NULL, STOP, 0, 0);
-			return FALSE;
-		}
-    }
-#if VIDEO_FB
-    convert_screen_to_ansi();
-#endif
-    return TRUE;
-}
-*/

@@ -166,12 +166,7 @@ fn buildDialog(comptime help:[]const u8, comptime window:anytype, comptime contr
 }
 
 fn buildControls(comptime controls:anytype) [df.MAXCONTROLS+1]df.CTLWINDOW {
-    var result:[df.MAXCONTROLS+1]df.CTLWINDOW = undefined;
-    inline for(0..(df.MAXCONTROLS+1)) |idx| {
-        result[idx] = .{
-            .Class = 0, // it use Class == 0 to indicate end of available controls
-        };
-    }
+    var result = [_]df.CTLWINDOW{.{.Class = 0}}**(df.MAXCONTROLS+1);
     inline for(controls, 0..) |control, idx| {
         var ty: c_int = undefined ;
         var tx: ?[]const u8 = undefined;
