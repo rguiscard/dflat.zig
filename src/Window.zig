@@ -1,6 +1,7 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
+const Klass = @import("Classes.zig");
 
 wndproc: ?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
 modal: bool, // True if a modeless dialog box
@@ -52,12 +53,7 @@ pub fn create(
     attrib: c_int) *TopLevelFields {
 
     const title = if (ttl) |t| t.ptr else null;
-    const wnd:df.WINDOW = df.cCreateWindow(
-        klass,
-        title,
-        left, top, height, width, 
-        extension, parent, wndproc, attrib
-    );
+    const wnd:df.WINDOW = @ptrCast(@alignCast(df.DFcalloc(1, @sizeOf(df.window))));
 
     var self:*TopLevelFields = undefined;
     if (root.global_allocator.create(TopLevelFields)) |s| {
@@ -66,7 +62,85 @@ pub fn create(
         // error
     }
     self.* = init(wnd, root.global_allocator);
-    wnd.*.zin = @ptrCast(@alignCast(self));
+
+    df.get_videomode();
+
+    if (wnd != null) {
+        // ----- height, width = -1: fill the screen -------
+        var ht = height;
+        if (ht == -1)
+            ht = df.SCREENHEIGHT;
+        var wt = width;
+        if (wt == -1)
+            wt = df.SCREENWIDTH;
+        // ----- coordinates -1, -1 = center the window ----
+        if (left == -1) {
+            wnd.*.rc.lf = @divFloor(df.SCREENWIDTH-wt, 2);
+        } else {
+            wnd.*.rc.lf = left;
+        }
+        if (top == -1) {
+            wnd.*.rc.tp = @divFloor(df.SCREENHEIGHT-ht, 2);
+        } else {
+            wnd.*.rc.tp = top;
+        }
+        wnd.*.attrib = attrib;
+        if (ttl) |tt| {
+            if (tt.len > 0) {
+                // df.AddAttribute(wnd, df.HASTITLEBAR);
+                 wnd.*.attrib = wnd.*.attrib | df.HASTITLEBAR;
+            }
+        }
+        if (wndproc == null) {
+            wnd.*.wndproc = Klass.classdefs[@intCast(klass)][2]; // wndproc
+            self.wndproc = Klass.classdefs[@intCast(klass)][2]; // wndproc
+        } else {
+            wnd.*.wndproc = wndproc;
+            self.wndproc = wndproc;
+        }
+
+        // ---- derive attributes of base classes ----
+        var base = klass;
+        while (base != -1) {
+            const cls = Klass.classdefs[@intCast(base)];
+            const attr:c_int = @intCast(cls[3]); // attributes
+            // df.AddAttribute(wnd, attr);
+            wnd.*.attrib = wnd.*.attrib | attr;
+            base = @intFromEnum(cls[1]); // base
+        }
+        var pt = parent;
+        if (parent != null) {
+            if (df.TestAttribute(wnd, df.NOCLIP) == 0) {
+                const pwin:*TopLevelFields = @constCast(@fieldParentPtr("win", &parent));
+                // -- keep upper left within borders of parent -
+                wnd.*.rc.lf = @intCast(@max(wnd.*.rc.lf, pwin.GetClientLeft()));
+                wnd.*.rc.tp = @intCast(@max(wnd.*.rc.tp, pwin.GetClientTop()));
+            }
+        } else {
+            pt = df.ApplicationWindow;
+        }
+        wnd.*.Class = klass;
+        wnd.*.extension = extension;
+        wnd.*.rc.rt = df.GetLeft(wnd)+wt-1;
+        wnd.*.rc.bt = df.GetTop(wnd)+ht-1;
+        wnd.*.ht = ht;
+        wnd.*.wd = wt;
+        if (ttl != null) {
+            df.InsertTitle(wnd, title);
+        }
+        wnd.*.parent = pt;
+        wnd.*.oldcondition = df.ISRESTORED;
+        wnd.*.condition = df.ISRESTORED;
+        wnd.*.RestoredRC = wnd.*.rc;
+        df.InitWindowColors(wnd);
+        _ = df.SendMessage(wnd, df.CREATE_WINDOW, 0, 0);
+        if (df.isVisible(wnd)>0) {
+            _ = df.SendMessage(wnd, df.SHOW_WINDOW, 0, 0);
+        }
+
+        wnd.*.zin = @ptrCast(@alignCast(self));
+    }
+
     return self;
 }
 
