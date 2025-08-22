@@ -14,6 +14,7 @@ pub const BarChart = @import("BarChart.zig");
 pub const Calendar = @import("Calendar.zig");
 pub const list = @import("Lists.zig");
 pub const Watch = @import("Watch.zig");
+pub const SystemMenu = @import("SystemMenu.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 

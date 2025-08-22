@@ -19,7 +19,7 @@ const picture = @import("PictureBox.zig");
 // Porting priority
 // - dialbox.c: several CreateWindow
 // - memopad.c: several CreateWindow
-// - sysmenu.c: one CreateWindow
+// - sysmenu.c: one CreateWindow (done)
 // - watch.c: one CreateWindow (done)
 
 pub export fn NormalProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
@@ -116,14 +116,6 @@ pub export fn MemoPadProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARA
 pub export fn OurEditorProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     return df.cOurEditorProc(wnd, msg, p1, p2);
 }
-
-pub export fn SystemMenuProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    return df.cSystemMenuProc(wnd, msg, p1, p2);
-}
-
-//pub export fn WatchIconProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-//    return df.cWatchIconProc(wnd, msg, p1, p2);
-//}
 
 // For DialogBox, called in dflat.h
 pub export fn MessageBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {

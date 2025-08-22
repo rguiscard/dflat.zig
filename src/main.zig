@@ -17,6 +17,7 @@ pub fn main() !void {
     _ = mp.Calendar;
     _ = mp.list;
     _ = mp.Watch;
+    _ = mp.SystemMenu;
 
     c_main(argc, argv);
 }
