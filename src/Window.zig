@@ -370,7 +370,6 @@ pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
 }
 
 pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
-//    return wnd.*.parent;
     if (get_zin(wnd)) |win| {
         return win.parent;
     }
@@ -381,7 +380,34 @@ pub export fn SetParent(wnd:df.WINDOW, parent:df.WINDOW) void {
     if (get_zin(wnd)) |win| {
         win.parent = parent;
     }
-//    wnd.*.parent = parent;
+}
+
+pub export fn FirstWindow(wnd:df.WINDOW) df.WINDOW {
+    if (get_zin(wnd)) |win| {
+        return win.firstchild;
+    }
+    return null;
+}
+
+pub export fn LastWindow(wnd:df.WINDOW) df.WINDOW {
+    if (get_zin(wnd)) |win| {
+        return win.lastchild;
+    }
+    return null;
+}
+
+pub export fn NextWindow(wnd:df.WINDOW) df.WINDOW {
+    if (get_zin(wnd)) |win| {
+        return win.nextsibling;
+    }
+    return null;
+}
+
+pub export fn PrevWindow(wnd:df.WINDOW) df.WINDOW {
+    if (get_zin(wnd)) |win| {
+        return win.prevsibling;
+    }
+    return null;
 }
 
 pub export fn get_modal(wnd:df.WINDOW) df.BOOL {

@@ -91,11 +91,11 @@ typedef struct window {
 	/* ----------------- window colors -------------------- */
 	char WindowColors[4][2];
     /* -------------- linked list pointers ---------------- */
-//    struct window *parent; /* parent window                 */
-    struct window *firstchild;  /* first child this parent  */
-    struct window *lastchild;   /* last child this parent   */
-    struct window *nextsibling; /* next sibling             */
-    struct window *prevsibling; /* previous sibling         */
+//    struct window *parent; /* parent window                 //
+//    struct window *firstchild;  /* first child this parent  //
+//    struct window *lastchild;   /* last child this parent   //
+//    struct window *nextsibling; /* next sibling             //
+//    struct window *prevsibling; /* previous sibling         //
 
 	struct window *childfocus;	/* child that ha(s/d) focus */
     int attrib;                 /* Window attributes        */
@@ -192,11 +192,15 @@ void MessageLog(WINDOW);
 #define GetClientRight(w)    (GetRight(w)-BorderAdj(w))
 #define GetTitle(w)          ((w)->title)
 WINDOW GetParent(WINDOW);
+WINDOW FirstWindow(WINDOW);
+WINDOW LastWindow(WINDOW);
+WINDOW NextWindow(WINDOW);
+WINDOW PrevWindow(WINDOW);
 //#define GetParent(w)         ((w)->parent)
-#define FirstWindow(w)       ((w)->firstchild)
-#define LastWindow(w)        ((w)->lastchild)
-#define NextWindow(w)        ((w)->nextsibling)
-#define PrevWindow(w)        ((w)->prevsibling)
+//#define FirstWindow(w)       ((w)->firstchild)
+//#define LastWindow(w)        ((w)->lastchild)
+//#define NextWindow(w)        ((w)->nextsibling)
+//#define PrevWindow(w)        ((w)->prevsibling)
 #define GetClass(w)          ((w)->Class)
 #define GetAttribute(w)      ((w)->attrib)
 #define AddAttribute(w,a)    (GetAttribute(w) |= a)
