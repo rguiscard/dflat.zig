@@ -143,7 +143,6 @@ pub fn create(
         if (ttl != null) {
             df.InsertTitle(wnd, title);
         }
-//        wnd.*.parent = pt;
         self.parent = pt;
         wnd.*.oldcondition = df.ISRESTORED;
         wnd.*.condition = df.ISRESTORED;
@@ -160,8 +159,16 @@ pub fn create(
 
 // --------- message prototypes -----------
 pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.PARAM) df.BOOL {
-    const buf:[*c]u8 = p1.ptr;
-    return self.sendMessage(msg, @intCast(@intFromPtr(buf)), p2);
+    // Be sure to send null-terminated string to c.
+    if (self.allocator.dupeZ(u8, p1)) |txt| {
+        defer self.allocator.free(txt);
+        return self.sendMessage(msg, @intCast(@intFromPtr(txt.ptr)), p2);
+    } else |_| {
+        // error
+    }
+//    const buf:[*c]u8 = p1.ptr;
+//    return self.sendMessage(msg, @intCast(@intFromPtr(buf)), p2);
+    return df.FALSE;
 }
 
 // --------- send a message to a window -----------

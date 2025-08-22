@@ -5,7 +5,7 @@
 static int px = -1, py = -1;
 static int pmx = -1, pmy = -1;
 static int mx, my;
-static int handshaking = 0;
+//static int handshaking = 0;
 BOOL AllocTesting = FALSE;
 jmp_buf AllocError;
 BOOL AltDown = FALSE;
@@ -293,6 +293,7 @@ static WINDOW MouseWindow(int x, int y)
 	return Mwnd;
 }
 
+/*
 void handshake(void)
 {
 #if MSDOS
@@ -301,6 +302,7 @@ void handshake(void)
 	--handshaking;
 #endif
 }
+*/
 
 /* ---- dispatch messages to the message proc function ---- */
 void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my)
@@ -322,25 +324,25 @@ void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my)
         switch (ev_event)    {
             case SHIFT_CHANGED:
             case KEYBOARD:
-				if (!handshaking)
+//              if (!handshaking)
 	                SendMessage(Kwnd, ev_event, ev_mx, ev_my);
                 break;
             case LEFT_BUTTON:
-				if (!handshaking)	{
-		        	Mwnd = MouseWindow(ev_mx, ev_my);
+//              if (!handshaking)	{
+                    Mwnd = MouseWindow(ev_mx, ev_my);
                 	if (!CaptureMouse ||
                         	(!NoChildCaptureMouse &&
 								isAncestor(Mwnd, CaptureMouse)))
                     	if (Mwnd != inFocus)
                         	SendMessage(Mwnd, SETFOCUS, TRUE, 0);
                 	SendMessage(Mwnd, LEFT_BUTTON, ev_mx, ev_my);
-				}
+//				}
                 break;
             case BUTTON_RELEASED:
             case DOUBLE_CLICK:
             case RIGHT_BUTTON:
-				if (handshaking)
-					break;
+//				if (handshaking)
+//					break;
             case MOUSE_MOVED:
 		        Mwnd = MouseWindow(ev_mx, ev_my);
                 SendMessage(Mwnd, ev_event, ev_mx, ev_my);

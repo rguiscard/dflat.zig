@@ -223,7 +223,7 @@ static void LoadFile(WINDOW wnd)
 
     if ((fp = fopen(wnd->extension, "rt")) != NULL)    {
 		while (!feof(fp))	{
-			handshake();
+//			handshake();
 			Buf = DFrealloc(Buf, recptr+150);       //FIXME rewrite for ELKS
 			memset(Buf+recptr, 0, 150);
         	fgets(Buf+recptr, 150, fp);
