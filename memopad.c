@@ -7,7 +7,6 @@ char DFlatApplication[] = "memopad";
 static char Untitled[] = "Untitled";
 static int wndpos;
 
-int MemoPadProc(WINDOW, MESSAGE, PARAM, PARAM);
 static void NewFile(WINDOW);
 static void SelectFile(WINDOW);
 static void OpenPadWindow(WINDOW, char *);
@@ -22,39 +21,6 @@ void BarChart(WINDOW);
 
 #define CHARSLINE 80
 #define LINESPAGE 66
-
-int c_main(int argc, char *argv[])
-{
-    WINDOW wnd;
-    if (!init_messages())
-		return 1;
-    Argv = argv;
-	if (!LoadConfig())
-		cfg.ScreenLines = SCREENHEIGHT;
-    wnd = CreateWindow(APPLICATION,
-                        "D-Flat MemoPad " VERSION,
-                        0, 0, -1, -1,
-                        &MainMenu,
-                        NULL,
-                        MemoPadProc,
-                        MOVEABLE  |
-                        SIZEABLE  |
-                        HASBORDER |
-						MINMAXBOX |
-                        HASSTATUSBAR
-                        );
-
-    LoadHelpFile(DFlatApplication);
-    SendMessage(wnd, SETFOCUS, TRUE, 0);
-    while (argc > 1)    {
-        OpenPadWindow(wnd, argv[1]);
-        --argc;
-        argv++;
-    }
-    while (dispatch_message())
-        ;
-    return 0;
-}
 
 /* ------- window processing module for the
                     memopad application window ----- */
