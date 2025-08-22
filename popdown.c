@@ -284,7 +284,7 @@ static int CloseWindowMsg(WINDOW wnd)
 }
 
 /* - Window processing module for POPDOWNMENU window class - */
-int PopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:

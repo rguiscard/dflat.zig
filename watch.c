@@ -2,7 +2,7 @@
 
 #include "dflat.h"
 
-int WatchIconProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cWatchIconProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn, i;
 	static int tick = 0;

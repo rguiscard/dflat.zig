@@ -4,7 +4,7 @@
 
 static CTLWINDOW *rct[MAXRADIOS];
 
-int RadioButtonProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cRadioButtonProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
     DBOX *db = GetParent(wnd)->extension;

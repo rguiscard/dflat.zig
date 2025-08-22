@@ -205,7 +205,7 @@ static BOOL CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* ----- window-processing module, DIALOG window class ----- */
-int DialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
 	int rtn;
     DBOX *db = wnd->extension;
@@ -684,7 +684,7 @@ static void FixColors(WINDOW wnd)
 }
 
 /* -- generic window processor used by dialog box controls -- */
-static int ControlProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
+int cControlProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 {
     DBOX *db;
 

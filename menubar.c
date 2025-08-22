@@ -336,7 +336,7 @@ static void CloseWindowMsg(WINDOW wnd)
 }
 
 /* --- Window processing module for MENUBAR window class --- */
-int MenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
 

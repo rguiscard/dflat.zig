@@ -8,7 +8,7 @@ WINDOW CancelWnd;
 
 static int ReturnValue;
 
-int MessageBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cMessageBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:
@@ -26,7 +26,7 @@ int MessageBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     return BaseWndProc(MESSAGEBOX, wnd, msg, p1, p2);
 }
 
-int YesNoBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cYesNoBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:
@@ -48,7 +48,7 @@ int YesNoBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     return BaseWndProc(MESSAGEBOX, wnd, msg, p1, p2);
 }
 
-int ErrorBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cErrorBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:
@@ -65,7 +65,7 @@ int ErrorBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     return BaseWndProc(ERRORBOX, wnd, msg, p1, p2);
 }
 
-int CancelBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cCancelBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:
@@ -98,7 +98,7 @@ void CloseCancelBox(void)
 static char *InputText;
 static int TextLength;
 
-int InputBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cInputBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
     switch (msg)    {

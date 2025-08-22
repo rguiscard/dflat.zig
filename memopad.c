@@ -7,14 +7,14 @@ char DFlatApplication[] = "memopad";
 static char Untitled[] = "Untitled";
 static int wndpos;
 
-static int MemoPadProc(WINDOW, MESSAGE, PARAM, PARAM);
+int MemoPadProc(WINDOW, MESSAGE, PARAM, PARAM);
 static void NewFile(WINDOW);
 static void SelectFile(WINDOW);
 static void OpenPadWindow(WINDOW, char *);
 static void LoadFile(WINDOW);
 static void SaveFile(WINDOW, int);
 static void DeleteFile(WINDOW);
-static int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
+int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
 static char *NameComponent(char *);
 static void FixTabMenu(void);
 void Calendar(WINDOW);
@@ -58,7 +58,7 @@ int c_main(int argc, char *argv[])
 
 /* ------- window processing module for the
                     memopad application window ----- */
-static int MemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
+int cMemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 {
 	int rtn;
     switch (msg)    {
@@ -290,7 +290,7 @@ static void ShowPosition(WINDOW wnd)
     SendMessage(GetParent(wnd), ADDSTATUS, (PARAM) status, 0);
 }
 /* ----- window processing module for the editboxes ----- */
-static int OurEditorProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
+int cOurEditorProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 {
     int rtn;
     switch (msg)    {

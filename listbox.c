@@ -266,7 +266,7 @@ static void GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* --------- LISTBOX Window Processing Module ------------ */
-int ListBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cListBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:

@@ -4,7 +4,7 @@
 
 extern char time_string[];
 
-int StatusBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cStatusBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
 	char *statusbar;
 	switch (msg)	{

@@ -435,7 +435,7 @@ static void CloseWindowMsg(WINDOW wnd)
 }
 
 /* ----------- TEXTBOX Message-processing Module ----------- */
-int TextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cTextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:

@@ -2,7 +2,7 @@
 
 #include "dflat.h"
 
-int SystemMenuProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cSystemMenuProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int mx, my;
     WINDOW wnd1;

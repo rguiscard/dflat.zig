@@ -235,7 +235,7 @@ fn DrawBoxMsg(wnd:df.WINDOW, p1:df.PARAM) void {
     }
 }
 
-pub export fn PictureProc(wnd: df.WINDOW, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn PictureProc(wnd: df.WINDOW, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     switch (message) {
         df.PAINT => {
             _ = df.BaseWndProc(df.PICTUREBOX, wnd, message, p1, p2);

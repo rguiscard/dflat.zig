@@ -1,4 +1,5 @@
 const df = @import("ImportC.zig").df;
+const wp = @import("WndProc.zig");
 
 // ----------- classes.h ------------
 //
@@ -49,41 +50,41 @@ pub const classdefs = [_]struct{
     ?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
     isize} {
 
-    .{"NORMAL",      Klass.FORCEINTTYPE, df.NormalProc,        0              },
-    .{"APPLICATION", Klass.NORMAL,       df.ApplicationProc,   df.VISIBLE    |
+    .{"NORMAL",      Klass.FORCEINTTYPE, wp.NormalProc,        0              },
+    .{"APPLICATION", Klass.NORMAL,       wp.ApplicationProc,   df.VISIBLE    |
                                                                df.SAVESELF   |
                                                                df.CONTROLBOX  },
-    .{"TEXTBOX",     Klass.NORMAL,       df.TextBoxProc,       0              },
-    .{"LISTBOX",     Klass.TEXTBOX,      df.ListBoxProc,       0              },
-    .{"EDITBOX",     Klass.TEXTBOX,      df.EditBoxProc,       0              },
-    .{"MENUBAR",     Klass.NORMAL,       df.MenuBarProc,       df.NOCLIP      },
-    .{"POPDOWNMENU", Klass.LISTBOX,      df.PopDownProc,       df.SAVESELF   |
+    .{"TEXTBOX",     Klass.NORMAL,       wp.TextBoxProc,       0              },
+    .{"LISTBOX",     Klass.TEXTBOX,      wp.ListBoxProc,       0              },
+    .{"EDITBOX",     Klass.TEXTBOX,      wp.EditBoxProc,       0              },
+    .{"MENUBAR",     Klass.NORMAL,       wp.MenuBarProc,       df.NOCLIP      },
+    .{"POPDOWNMENU", Klass.LISTBOX,      wp.PopDownProc,       df.SAVESELF   |
                                                                df.NOCLIP     |
                                                                df.HASBORDER   },
-    .{"PICTUREBOX",  Klass.TEXTBOX,      df.PictureProc,       0              },
-    .{"DIALOG",      Klass.NORMAL,       df.DialogProc,        df.SHADOW     |
+    .{"PICTUREBOX",  Klass.TEXTBOX,      wp.PictureProc,       0              },
+    .{"DIALOG",      Klass.NORMAL,       wp.DialogProc,        df.SHADOW     |
                                                                df.MOVEABLE   |
                                                                df.CONTROLBOX |
                                                                df.HASBORDER  |
                                                                df.NOCLIP},
-    .{"BOX",         Klass.NORMAL,       df.BoxProc,           df.HASBORDER   },
-    .{"BUTTON",      Klass.TEXTBOX,      df.ButtonProc,        df.SHADOW      },
-    .{"COMBOBOX",    Klass.EDITBOX,      df.ComboProc,         0              },
-    .{"TEXT",        Klass.TEXTBOX,      df.TextProc,          0              },
-    .{"RADIOBUTTON", Klass.TEXTBOX,      df.RadioButtonProc,   0              },
-    .{"CHECKBOX",    Klass.TEXTBOX,      df.CheckBoxProc,      0              },
-    .{"SPINBUTTON",  Klass.LISTBOX,      df.SpinButtonProc,    0              },
+    .{"BOX",         Klass.NORMAL,       wp.BoxProc,           df.HASBORDER   },
+    .{"BUTTON",      Klass.TEXTBOX,      wp.ButtonProc,        df.SHADOW      },
+    .{"COMBOBOX",    Klass.EDITBOX,      wp.ComboProc,         0              },
+    .{"TEXT",        Klass.TEXTBOX,      wp.TextProc,          0              },
+    .{"RADIOBUTTON", Klass.TEXTBOX,      wp.RadioButtonProc,   0              },
+    .{"CHECKBOX",    Klass.TEXTBOX,      wp.CheckBoxProc,      0              },
+    .{"SPINBUTTON",  Klass.LISTBOX,      wp.SpinButtonProc,    0              },
     .{"ERRORBOX",    Klass.DIALOG,       null,                 df.SHADOW     |
                                                                df.HASBORDER   },
     .{"MESSAGEBOX",  Klass.DIALOG,       null,                 df.SHADOW     |
                                                                df.HASBORDER   },
-    .{"HELPBOX",     Klass.DIALOG,       df.HelpBoxProc,       df.MOVEABLE   |
+    .{"HELPBOX",     Klass.DIALOG,       wp.HelpBoxProc,       df.MOVEABLE   |
                                                                df.SAVESELF   |
                                                                df.HASBORDER  |
                                                                df.NOCLIP     |
                                                                df.CONTROLBOX},
-    .{"STATUSBAR",   Klass.TEXTBOX,      df.StatusBarProc,     df.NOCLIP      },
-    .{"EDITOR",      Klass.EDITBOX,      df.EditorProc,        0              },
+    .{"STATUSBAR",   Klass.TEXTBOX,      wp.StatusBarProc,     df.NOCLIP      },
+    .{"EDITOR",      Klass.EDITBOX,      wp.EditorProc,        0              },
 
     // ========> Add new classes here <========
 

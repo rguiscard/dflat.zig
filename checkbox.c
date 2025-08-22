@@ -2,7 +2,7 @@
 
 #include "dflat.h"
 
-int CheckBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cCheckBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
     CTLWINDOW *ct = GetControl(wnd);

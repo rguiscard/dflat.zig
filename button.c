@@ -59,7 +59,7 @@ void LeftButtonMsg(WINDOW wnd, MESSAGE msg, CTLWINDOW *ct)
         beep();
 }
 
-int ButtonProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cButtonProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     CTLWINDOW *ct = GetControl(wnd);
     if (ct != NULL)    {

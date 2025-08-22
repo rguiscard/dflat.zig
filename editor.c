@@ -189,7 +189,7 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* ------- Window processing module for EDITBOX class ------ */
-int EditorProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cEditorProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
 		case KEYBOARD:

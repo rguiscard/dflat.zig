@@ -602,7 +602,7 @@ static void CloseWindowMsg(WINDOW wnd)
 }
 
 /* ---- Window-processing module for NORMAL window class ---- */
-int NormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:

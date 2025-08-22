@@ -4,7 +4,7 @@
 
 int ListProc(WINDOW, MESSAGE, PARAM, PARAM);
 
-int ComboProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cComboProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:

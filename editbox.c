@@ -906,7 +906,7 @@ static int CloseWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
     return rtn;
 }
 /* ------- Window processing module for EDITBOX class ------ */
-int EditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
     switch (msg)    {

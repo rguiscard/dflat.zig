@@ -46,6 +46,8 @@ static struct helps *FindHelp(char *);
 static void DisplayDefinition(WINDOW, char *);
 static void BestFit(WINDOW, DIALOGWINDOW *);
 
+int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
+
 /* ------------- CREATE_WINDOW message ------------ */
 static void CreateWindowMsg(WINDOW wnd)
 {
@@ -129,7 +131,7 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1)
 }
 
 /* ---- window processing module for the HELPBOX ------- */
-int HelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cHelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:
@@ -216,7 +218,7 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* --- window processing module for HELPBOX's text EDITBOX -- */
-int HelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cHelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
 		case KEYBOARD:

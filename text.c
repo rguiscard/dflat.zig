@@ -2,7 +2,7 @@
 
 #include "dflat.h"
 
-int TextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int i, len;
     CTLWINDOW *ct = GetControl(wnd);

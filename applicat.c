@@ -291,7 +291,7 @@ static int CloseWindowMsg(WINDOW wnd)
 }
 
 /* --- APPLICATION Window Class window processing module --- */
-int ApplicationProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cApplicationProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
         case CREATE_WINDOW:

@@ -2,7 +2,7 @@
 
 #include "dflat.h"
 
-int BoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+int cBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
     CTLWINDOW *ct = GetControl(wnd);
