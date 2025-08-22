@@ -20,13 +20,13 @@ var EventQueueCtr:usize = 0;
 
 // ---------- message queue ---------
 const Msg = struct {
-    wnd:df.WINDOW,
+    win:?*Window,
     msg:df.MESSAGE,
     p1:df.PARAM,
     p2:df.PARAM,
 };
 
-var MsgQueue = [_]Msg{.{.wnd=null, .msg=0, .p1=0, .p2=0}}**MAXMESSAGES;
+var MsgQueue = [_]Msg{.{.win=null, .msg=0, .p1=0, .p2=0}}**MAXMESSAGES;
 
 var MsgQueueOnCtr:usize = 0;
 var MsgQueueOffCtr:usize = 0;
@@ -48,8 +48,12 @@ pub export fn PostEvent(event:df.MESSAGE, p1:c_int, p2:c_int) callconv(.c) void 
 
 // ----- post a message and parameters to msg queue ----
 pub export fn PostMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) void {
+    var win:?*Window = null;
+    if (Window.get_zin(wnd)) |w| {
+        win = w;
+    }
     if (MsgQueueCtr != MAXMESSAGES) {
-        MsgQueue[MsgQueueOnCtr].wnd = wnd;
+        MsgQueue[MsgQueueOnCtr].win = win;
         MsgQueue[MsgQueueOnCtr].msg = msg;
         MsgQueue[MsgQueueOnCtr].p1 = p1;
         MsgQueue[MsgQueueOnCtr].p2 = p2;
@@ -74,6 +78,7 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             if (root.global_allocator.create(Window)) |win| {
                 win.* = Window.init(wnd, root.global_allocator);
                 wnd.*.zin = @constCast(win);
+                // Should call sendMessage() for it ?
             } else |_| {
                 // error
             }
@@ -117,7 +122,11 @@ pub export fn dispatch_message() callconv(.c) df.BOOL {
         }
         MsgQueueCtr -= 1;
 
-        _ = df.SendMessage(mq.wnd, mq.msg, mq.p1, mq.p2);
+        if (mq.win) |w| {
+            _ = w.sendMessage(mq.msg, mq.p1, mq.p2);
+        } else {
+            _ = df.SendMessage(null, mq.msg, mq.p1, mq.p2);
+        }
 
         if (mq.msg == df.ENDDIALOG) {
             return df.FALSE;
