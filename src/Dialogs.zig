@@ -84,8 +84,31 @@ pub export var MsgBox:df.DBOX = buildDialog(
     },
 );
 
+// ----------- InputBox Dialog Box ------------
+pub export var InputBoxDB:df.DBOX = buildDialog(
+    "InputBoxDB",
+    .{null, -1, -1, 9, 0},
+    .{
+        .{df.TEXT,    null,       1, 1, 1, 0, 0,               null           },
+        .{df.EDITBOX, null,       1, 3, 1, 0, df.ID_INPUTTEXT, "ID_INPUTTEXT" },
+        .{df.BUTTON,  "   ~OK   ",0, 5, 1, 8, df.ID_OK,        "ID_OK"        },
+        .{df.BUTTON,  " ~Cancel ",0, 5, 1, 8, df.ID_CANCEL,    "ID_CANCEL"    },
+    },
+);
+
+// ----------- SliderBox Dialog Box -------------
+pub export var SliderBoxDB:df.DBOX = buildDialog(
+    "SliderBoxDB",
+    .{null, -1, -1, 9, 0},
+    .{
+        .{df.TEXT,    null,       0, 1, 1, 0, 0,            null        },
+        .{df.TEXT,    null,       0, 3, 1, 0, 0,            null        },
+        .{df.BUTTON,  " Cancel ", 0, 5, 1, 8, df.ID_CANCEL, "ID_CANCEL" },
+    },
+);
+
 // ------------ Display dialog box --------------
-pub var Display:df.DBOX = buildDialog(
+pub export var Display:df.DBOX = buildDialog(
     "Display",
     .{"Display", -1, -1, 19, 35},
     .{
@@ -111,8 +134,20 @@ pub var Display:df.DBOX = buildDialog(
     },
 );
 
+// ------------ Windows dialog box -------------- 
+pub export var Windows:df.DBOX = buildDialog(
+    "Windows",
+    .{"Windows", -1, -1, 19, 24},
+    .{
+        .{df.LISTBOX, null,        1, 1,11,20, df.ID_WINDOWLIST, "ID_WINDOWLIST" },
+        .{df.BUTTON,  "   ~OK   ", 2,13, 1, 8, df.ID_OK,         "ID_OK"         },
+        .{df.BUTTON,  " ~Cancel ",12,13, 1, 8, df.ID_CANCEL,     "ID_CANCEL"     },
+        .{df.BUTTON,  "  ~Help  ", 7,15, 1, 8, df.ID_HELP,       "ID_HELP"       },
+    },
+);
+
 // ------------ Message Log dialog box --------------
-pub const Log:df.DBOX = buildDialog(
+pub export var Log:df.DBOX = buildDialog(
     "Log",
     .{"D-Flat Message Log", -1, -1,18,41},
     .{

@@ -192,8 +192,13 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             // --- don't send these messages unless the
             //  window is visible or has captured the mouse --
             if ((df.isVisible(wnd)>0) or (wnd == df.CaptureMouse)) {
-                if (wnd.*.wndproc) |wndproc| {
+//                if (wnd.*.wndproc) |wndproc| {
+//                        rtn = wndproc(wnd, msg, p1, p2);
+//                }
+                if (get_zin(wnd)) |zin| {
+                    if (zin.wndproc) |wndproc| {
                         rtn = wndproc(wnd, msg, p1, p2);
+                    }
                 }
             }
         },
@@ -202,14 +207,24 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             // ------- don't send these messages unless the
             //  window is visible or has captured the keyboard --
             if ((df.isVisible(wnd)>0) or (wnd == df.CaptureKeyboard)) {
-                if (wnd.*.wndproc) |wndproc| {
-                    rtn = wndproc(wnd, msg, p1, p2);
+//                if (wnd.*.wndproc) |wndproc| {
+//                    rtn = wndproc(wnd, msg, p1, p2);
+//                }
+                if (get_zin(wnd)) |zin| {
+                    if (zin.wndproc) |wndproc| {
+                        rtn = wndproc(wnd, msg, p1, p2);
+                    }
                 }
             }
         },
         else => {
-            if (wnd.*.wndproc) |wndproc| {
-                rtn = wndproc(wnd, msg, p1, p2);
+//            if (wnd.*.wndproc) |wndproc| {
+//                rtn = wndproc(wnd, msg, p1, p2);
+//            }
+            if (get_zin(wnd)) |zin| {
+                if (zin.wndproc) |wndproc| {
+                    rtn = wndproc(wnd, msg, p1, p2);
+                }
             }
         }
     }
@@ -424,4 +439,12 @@ pub export fn set_modal(wnd:df.WINDOW, val:df.BOOL) void {
     if (get_zin(wnd)) |win| {
         win.modal = if (val == df.TRUE) true else false;
     }
+}
+
+pub export fn set_wndproc(wnd:df.WINDOW,
+           wndproc:*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int) void {
+    if (get_zin(wnd)) |win| {
+        win.wndproc = wndproc;
+    }
+    wnd.*.wndproc = wndproc;
 }

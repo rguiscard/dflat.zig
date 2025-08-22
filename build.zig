@@ -100,8 +100,6 @@ pub fn build(b: *std.Build) void {
             "tty.c",
             "tty-cp437.c",
             "runshell.c",
-
-            "dialogs.c", // this should belong to library
         },
         .flags = &flags,
     });

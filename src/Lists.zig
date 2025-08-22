@@ -34,12 +34,9 @@ pub export fn SetNextFocus() callconv(.c) void {
 	var pwnd:df.WINDOW = null;
         while (true) {
             pwnd = df.GetParent(wnd1);
-//            if (wnd1.*.nextsibling != null) {
-//                wnd1 = wnd1.*.nextsibling;
             if (Window.NextWindow(wnd1) != null) {
                 wnd1 = Window.NextWindow(wnd1);
             } else if (pwnd != null) {
-//                wnd1 = pwnd.*.firstchild;
                 wnd1 = Window.FirstWindow(pwnd);
             }
             if (wnd1 == null or wnd1 == df.inFocus) {
@@ -71,11 +68,6 @@ pub export fn SetPrevFocus() callconv(.c) void {
 	var pwnd:df.WINDOW = null;
         while (true) {
             pwnd = df.GetParent(wnd1);
-//            if (wnd1.*.prevsibling != null) {
-//                wnd1 = wnd1.*.prevsibling;
-//            } else if (pwnd != null) {
-//                wnd1 = pwnd.*.lastchild;
-//            }
             if (Window.PrevWindow(wnd1) != null) {
                 wnd1 = Window.PrevWindow(wnd1);
             } else if (pwnd != null) {
@@ -116,32 +108,18 @@ pub export fn ReFocus(wnd:df.WINDOW) callconv(.c) void {
 pub export fn RemoveWindow(wnd:df.WINDOW) callconv(.c) void {
     if (wnd != null)    {
         const pwnd = df.GetParent(wnd);
-//        if (wnd.*.prevsibling != null) {
-//            const pw = wnd.*.prevsibling;
-//            pw.*.nextsibling = wnd.*.nextsibling;
-//        }
         if (Window.PrevWindow(wnd) != null) {
             const pw = Window.PrevWindow(wnd);
 	    set_next_window(pw, Window.NextWindow(wnd));
         }
-//        if (wnd.*.nextsibling != null) {
-//            const nw = wnd.*.nextsibling;
-//            nw.*.prevsibling = wnd.*.prevsibling;
-//        }
         if (Window.NextWindow(wnd) != null) {
             const nw = Window.NextWindow(wnd);
             set_prev_window(nw, Window.PrevWindow(wnd));
         }
         if (pwnd != null) {
-//            if (wnd == pwnd.*.firstchild) {
-//                pwnd.*.firstchild = wnd.*.nextsibling;
-//            }
             if (wnd == Window.FirstWindow(pwnd)) {
 		set_first_window(pwnd, Window.NextWindow(wnd));
             }
-//            if (wnd == pwnd.*.lastchild) {
-//                pwnd.*.lastchild = wnd.*.prevsibling;
-//            }
             if (wnd == Window.LastWindow(pwnd)) {
                 set_last_window(pwnd, Window.PrevWindow(wnd));
             }
@@ -154,26 +132,16 @@ pub export fn AppendWindow(wnd:df.WINDOW) callconv(.c) void {
     if (wnd != null) {
         const pwnd = df.GetParent(wnd);
         if (pwnd != null) {
-//            if (pwnd.*.firstchild == null) {
-//                pwnd.*.firstchild = wnd;
-//            }
             if (Window.FirstWindow(pwnd) == null) {
                 set_first_window(pwnd, wnd);
             }
-//            if (pwnd.*.lastchild != null) {
-//                const lw = pwnd.*.lastchild;
-//                lw.*.nextsibling = wnd;
-//            }
             if (Window.LastWindow(pwnd) != null) {
                 const lw = Window.LastWindow(pwnd);
 		set_next_window(lw, wnd);
             }
-//            wnd.*.prevsibling = pwnd.*.lastchild;
-//            pwnd.*.lastchild = wnd;
             set_prev_window(wnd, Window.LastWindow(pwnd));
             set_last_window(pwnd, wnd);
         }
-//        wnd.*.nextsibling = null;
         set_next_window(wnd, null);
     }
 }

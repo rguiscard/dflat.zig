@@ -243,7 +243,8 @@ static void ReadHelp(WINDOW wnd)
         return;
     thisword = KeyWords;
 	keywordcount = 0;
-    cwnd->wndproc = HelpTextProc;
+//    cwnd->wndproc = HelpTextProc;
+    set_wndproc(cwnd, HelpTextProc);
 	SendMessage(cwnd, CLEARTEXT, 0, 0);
     /* ----- read the help text ------- */
     while (TRUE)    {

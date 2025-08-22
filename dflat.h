@@ -91,11 +91,6 @@ typedef struct window {
 	/* ----------------- window colors -------------------- */
 	char WindowColors[4][2];
     /* -------------- linked list pointers ---------------- */
-//    struct window *parent; /* parent window                 //
-//    struct window *firstchild;  /* first child this parent  //
-//    struct window *lastchild;   /* last child this parent   //
-//    struct window *nextsibling; /* next sibling             //
-//    struct window *prevsibling; /* previous sibling         //
 
 	struct window *childfocus;	/* child that ha(s/d) focus */
     int attrib;                 /* Window attributes        */
@@ -221,6 +216,9 @@ void PaintShadow(WINDOW);
 void ClearWindow(WINDOW, RECT *, int);
 void writeline(WINDOW, char *, int, int, BOOL);
 void InitWindowColors(WINDOW);
+
+// used in helpbox.c
+void set_wndproc(WINDOW, int (*) (struct window *, enum messages, PARAM, PARAM));
 
 void SetNextFocus(void);
 void SetPrevFocus(void);
