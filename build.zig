@@ -79,7 +79,7 @@ pub fn build(b: *std.Build) void {
             "radio.c",
             "checkbox.c",
             "spinbutt.c",
-            "combobox.c",
+            // "combobox.c", // currently not in use. port later.
             // "slidebox.c", // currently not in use. port later.
             "fileopen.c",
             "direct.c",
@@ -88,7 +88,6 @@ pub fn build(b: *std.Build) void {
             "helpbox.c",
             "decomp.c",
             "log.c",
-            "watch.c",
 
             "video.c",
             "events-unix.c",

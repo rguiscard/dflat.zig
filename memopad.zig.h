@@ -27,7 +27,7 @@ int cPopDownProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cDialogProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cComboProc(WINDOW, MESSAGE, PARAM, PARAM);
+// int cComboProc(WINDOW, MESSAGE, PARAM, PARAM); // not in use. port later.
 int cTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cRadioButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cCheckBoxProc(WINDOW, MESSAGE, PARAM, PARAM);

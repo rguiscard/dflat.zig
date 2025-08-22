@@ -121,7 +121,8 @@ static void KeyboardMsg(WINDOW wnd, PARAM p1)
     }
     /* -------- search for accelerator keys -------- */
     mnu = ActiveMenu;
-    while (mnu->Title != (void *)-1)    {
+//    while (mnu->Title != (void *)-1)    {
+    while (mnu->Title != NULL)    {
         struct PopDown *pd = mnu->Selections;
         if (mnu->PrepMenu)
             (*(mnu->PrepMenu))(GetDocFocus(), mnu);
