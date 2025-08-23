@@ -18,7 +18,7 @@ const picture = @import("PictureBox.zig");
 
 // Porting priority
 // - dialbox.c: several CreateWindow
-// - memopad.c: several CreateWindow
+// - memopad.c: several CreateWindow (done)
 // - sysmenu.c: one CreateWindow (done)
 // - watch.c: one CreateWindow (done)
 

@@ -10,7 +10,7 @@ static int wndpos;
 static void NewFile(WINDOW);
 static void SelectFile(WINDOW);
 static void OpenPadWindow(WINDOW, char *);
-static void LoadFile(WINDOW);
+void LoadFile(WINDOW);
 static void SaveFile(WINDOW, int);
 static void DeleteFile(WINDOW);
 int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
@@ -139,7 +139,8 @@ static void SelectFile(WINDOW wnd)
 }
 
 /* --- open a document window and load a file --- */
-static void OpenPadWindow(WINDOW wnd, char *FileName)
+/*
+void cOpenPadWindow(WINDOW wnd, char *FileName)
 {
     static WINDOW wnd1 = NULL;
 	WINDOW wwnd;
@@ -180,8 +181,10 @@ static void OpenPadWindow(WINDOW wnd, char *FileName)
 	SendMessage(wwnd, CLOSE_WINDOW, 0, 0);
     SendMessage(wnd1, SETFOCUS, TRUE, 0);
 }
+*/
+
 /* --- Load the notepad file into the editor text buffer --- */
-static void LoadFile(WINDOW wnd)
+void LoadFile(WINDOW wnd)
 {
     char *Buf = NULL;
 	int recptr = 0;

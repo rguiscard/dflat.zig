@@ -3,6 +3,8 @@
 //! is to delete this file and start with root.zig instead.
 
 pub const DFlatApplication = "memopad";
+const Untitled:[:0]const u8 = "Untitled";
+var wndpos:c_int = 0;
 
 pub fn main() !void {
 //    const argc: c_int = @intCast(std.os.argv.len);
@@ -15,7 +17,6 @@ pub fn main() !void {
     _ = mp.BarChart;
     _ = mp.Calendar;
     _ = mp.list;
-    _ = mp.Watch;
     _ = mp.SystemMenu;
 
     if (df.init_messages() == df.FALSE) {
@@ -49,6 +50,52 @@ pub fn main() !void {
 //    }
     while (df.dispatch_message()>0) {
     }
+}
+
+// --- open a document window and load a file ---
+pub export fn OpenPadWindow(wnd: df.WINDOW, filename: [*c]u8) callconv(.c) void {
+    const fname = std.mem.span(filename);
+    if (std.mem.eql(u8, Untitled, fname) == false) {
+        // check for existing
+        if (std.fs.cwd().access(fname, .{.mode = .read_only})) {
+            if (std.fs.cwd().statFile(fname)) |stat| {
+                if (stat.kind == std.fs.File.Kind.file) {
+                } else { return; }
+            } else |_| { return; }
+        } else |_| { return; }
+    }
+
+    var wwin = mp.watch.WatchIcon();
+
+    wndpos += 2;
+    if (wndpos == 20)
+        wndpos = 2;
+    var win1 = mp.Window.create(df.EDITBOX, // Win
+                fname,
+                (wndpos-1)*2, wndpos, 10, 40,
+                null, wnd, mp.WndProc.OurEditorProc,
+                df.SHADOW     |
+                df.MINMAXBOX  |
+                df.CONTROLBOX |
+                df.VSCROLLBAR |
+                df.HSCROLLBAR |
+                df.MOVEABLE   |
+                df.HASBORDER  |
+                df.SIZEABLE   |
+                df.MULTILINE);
+
+    if (std.mem.eql(u8, fname, Untitled) == false) {
+        win1.win.*.extension = df.DFmalloc(fname.len+1);
+        const ext:[*c]u8 = @ptrCast(win1.win.*.extension);
+        // wnd.extension is used to store filename.
+        // it is also be used to compared already opened files.
+        _ = df.strcpy(ext, fname.ptr);
+
+        df.LoadFile(win1.win);
+    }
+
+    _ = wwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
+    _ = win1.sendMessage(df.SETFOCUS, df.TRUE, 0);
 }
 
 const std = @import("std");

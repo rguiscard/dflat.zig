@@ -59,7 +59,7 @@ pub fn WatchIconProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
     return root.zDefaultWndProc(wnd, msg, p1, p2);
 }
 
-pub export fn WatchIcon() df.WINDOW {
+pub export fn WatchIcon() *Window {
     var mx:c_int = 10;
     var my:c_int = 10;
     _ = df.SendMessage(null, df.CURRENT_MOUSE_CURSOR, @intCast(@intFromPtr(&mx)), @intCast(@intFromPtr(&my)));
@@ -70,5 +70,5 @@ pub export fn WatchIcon() df.WINDOW {
                     null, null,
                     WatchIconProc,
                     df.VISIBLE | df.HASBORDER | df.SHADOW | df.SAVESELF);
-    return win.win;
+    return win;
 }
