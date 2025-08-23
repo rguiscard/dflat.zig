@@ -5,7 +5,7 @@
 static int inFocusCommand(DBOX *);
 static BOOL dbShortcutKeys(DBOX *, int);
 static int ControlProc(WINDOW, MESSAGE, PARAM, PARAM);
-static void FirstFocus(DBOX *db);
+void FirstFocus(DBOX *db);
 static void NextFocus(DBOX *db);
 static void PrevFocus(DBOX *db);
 static CTLWINDOW *AssociatedControl(DBOX *, enum commands);
@@ -264,7 +264,7 @@ int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 }
 
 /* ------- create and execute a dialog box ---------- */
-BOOL DialogBox(WINDOW wnd, DBOX *db, BOOL Modal,
+BOOL cDialogBox(WINDOW wnd, DBOX *db, BOOL Modal,
   int (*wndproc)(struct window *, enum messages, PARAM, PARAM))
 {
     BOOL rtn = FALSE;
@@ -756,7 +756,7 @@ int cControlProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 }
 
 /* ---- change the focus to the first control --- */
-static void FirstFocus(DBOX *db)
+void FirstFocus(DBOX *db)
 {
     CTLWINDOW *ct = db->ctl;
 	if (ct != NULL)	{

@@ -5,6 +5,9 @@ void LoadFile(WINDOW);
 void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my);
 BOOL ProcessMessage(WINDOW, MESSAGE, PARAM, PARAM, int);
 
+// dialbox.c
+void FirstFocus(DBOX *);
+
 // normal.c
 extern struct window dwnd;
 

@@ -18,6 +18,7 @@ pub fn main() !void {
     _ = mp.Calendar;
     _ = mp.list;
     _ = mp.SystemMenu;
+    _ = mp.MessageBox;
 
     if (df.init_messages() == df.FALSE) {
         return;
