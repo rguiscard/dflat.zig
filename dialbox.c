@@ -211,8 +211,9 @@ int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     DBOX *db = wnd->extension;
 
     switch (msg)    {
-        case CREATE_WINDOW:
-            return CreateWindowMsg(wnd, p1, p2);
+//  Ported to zig side
+//        case CREATE_WINDOW:
+//            return CreateWindowMsg(wnd, p1, p2);
         case SHIFT_CHANGED:
             if (get_modal(wnd))
                 return TRUE;

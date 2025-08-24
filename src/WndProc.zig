@@ -1,5 +1,6 @@
 const df = @import("ImportC.zig").df;
 const picture = @import("PictureBox.zig");
+const dialbox = @import("DialogBox.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -55,7 +56,7 @@ pub export fn PictureProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARA
 }
 
 pub export fn DialogProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    return df.cDialogProc(wnd, msg, p1, p2);
+    return dialbox.DialogProc(wnd, msg, p1, p2);
 }
 
 pub export fn BoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
@@ -138,6 +139,7 @@ pub export fn InputBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
     return df.cInputBoxProc(wnd, msg, p1, p2);
 }
 
+// From dialbox.c
 pub export fn ControlProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     return df.cControlProc(wnd, msg, p1, p2);
 }
