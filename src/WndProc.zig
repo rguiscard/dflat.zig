@@ -17,12 +17,6 @@ const dialbox = @import("DialogBox.zig");
 // - zDefaultWndProc(*Window)
 // - EveneQueue(*Window)
 
-// Porting priority
-// - dialbox.c: several CreateWindow
-// - memopad.c: several CreateWindow (done)
-// - sysmenu.c: one CreateWindow (done)
-// - watch.c: one CreateWindow (done)
-
 pub export fn NormalProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     return df.cNormalProc(wnd, msg, p1, p2);
 }

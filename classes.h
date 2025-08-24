@@ -10,51 +10,51 @@
  *        Class Name  Base Class   Processor       Attribute    
  *       ------------  --------- ---------------  -----------
  */
-ClassDef(  NORMAL,      -1,      NormalProc,      0 )
-ClassDef(  APPLICATION, NORMAL,  ApplicationProc, VISIBLE   |
-                                                  SAVESELF  |
-                                                  CONTROLBOX )
-ClassDef(  TEXTBOX,     NORMAL,  TextBoxProc,     0          )
-ClassDef(  LISTBOX,     TEXTBOX, ListBoxProc,     0          )
-ClassDef(  EDITBOX,     TEXTBOX, EditBoxProc,     0          )
-ClassDef(  MENUBAR,     NORMAL,  MenuBarProc,     NOCLIP     )
-ClassDef(  POPDOWNMENU, LISTBOX, PopDownProc,     SAVESELF  |
-                                                  NOCLIP    |
-                                                  HASBORDER  )
+ClassDef(  NORMAL,      -1,      0 )
+ClassDef(  APPLICATION, NORMAL,  VISIBLE   |
+                                 SAVESELF  |
+                                 CONTROLBOX )
+ClassDef(  TEXTBOX,     NORMAL,  0          )
+ClassDef(  LISTBOX,     TEXTBOX, 0          )
+ClassDef(  EDITBOX,     TEXTBOX, 0          )
+ClassDef(  MENUBAR,     NORMAL,  NOCLIP     )
+ClassDef(  POPDOWNMENU, LISTBOX, SAVESELF  |
+                                 NOCLIP    |
+                                 HASBORDER  )
 #ifndef BUILD_SMALL_DFLAT
 #ifdef INCLUDE_PICTUREBOX
-ClassDef(  PICTUREBOX,  TEXTBOX, PictureProc,     0          )
+ClassDef(  PICTUREBOX,  TEXTBOX, 0          )
 #endif
-ClassDef(  DIALOG,      NORMAL,  DialogProc,      SHADOW    |
-                                                  MOVEABLE  |
-                                                  CONTROLBOX|
-                                                  HASBORDER |
-                                                  NOCLIP     )
-ClassDef(  BOX,         NORMAL,  BoxProc,         HASBORDER  )
-ClassDef(  BUTTON,      TEXTBOX, ButtonProc,      SHADOW     )
-ClassDef(  COMBOBOX,    EDITBOX, ComboProc,       0          )
-ClassDef(  TEXT,        TEXTBOX, TextProc,        0          )
-ClassDef(  RADIOBUTTON, TEXTBOX, RadioButtonProc, 0          )
-ClassDef(  CHECKBOX,    TEXTBOX, CheckBoxProc,    0          )
-ClassDef(  SPINBUTTON,  LISTBOX, SpinButtonProc,  0          )
-ClassDef(  ERRORBOX,    DIALOG,  NULL,            SHADOW    |
-                                                  HASBORDER  )
-ClassDef(  MESSAGEBOX,  DIALOG,  NULL,            SHADOW    |
-                                                  HASBORDER  )
-ClassDef(  HELPBOX,     DIALOG,  HelpBoxProc,     MOVEABLE  |
-                                                  SAVESELF  |
-                                                  HASBORDER |
-                                                  NOCLIP    |
-                                                  CONTROLBOX )
+ClassDef(  DIALOG,      NORMAL,  SHADOW    |
+                                 MOVEABLE  |
+                                 CONTROLBOX|
+                                 HASBORDER |
+                                 NOCLIP     )
+ClassDef(  BOX,         NORMAL,  HASBORDER  )
+ClassDef(  BUTTON,      TEXTBOX, SHADOW     )
+ClassDef(  COMBOBOX,    EDITBOX, 0          )
+ClassDef(  TEXT,        TEXTBOX, 0          )
+ClassDef(  RADIOBUTTON, TEXTBOX, 0          )
+ClassDef(  CHECKBOX,    TEXTBOX, 0          )
+ClassDef(  SPINBUTTON,  LISTBOX, 0          )
+ClassDef(  ERRORBOX,    DIALOG,  SHADOW    |
+                                 HASBORDER  )
+ClassDef(  MESSAGEBOX,  DIALOG,  SHADOW    |
+                                 HASBORDER  )
+ClassDef(  HELPBOX,     DIALOG,  MOVEABLE  |
+                                 SAVESELF  |
+                                 HASBORDER |
+                                 NOCLIP    |
+                                 CONTROLBOX )
 #endif
 
-ClassDef(  STATUSBAR,   TEXTBOX, StatusBarProc,   NOCLIP     )
-ClassDef(  EDITOR,      EDITBOX, EditorProc,	  0			 )
+ClassDef(  STATUSBAR,   TEXTBOX, NOCLIP     )
+ClassDef(  EDITOR,      EDITBOX, 0          )
 
 /*
  *  ========> Add new classes here <========
  */
 
 /* ---------- pseudo classes to create enums, etc. ---------- */
-ClassDef(  TITLEBAR,    -1,      NULL,            0          )
-ClassDef(  DUMMY,       -1,      NULL,            HASBORDER  )
+ClassDef(  TITLEBAR,    -1,      0          )
+ClassDef(  DUMMY,       -1,      HASBORDER  )

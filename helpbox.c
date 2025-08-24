@@ -9,7 +9,7 @@ extern DBOX HelpBox;
       help text collections -------- */
 char *ClassNames[] = {
     #undef ClassDef
-    #define ClassDef(c,b,p,a) #c,
+    #define ClassDef(c,b,a) #c,
     #include "classes.h"
     NULL
 };

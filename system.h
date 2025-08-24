@@ -87,7 +87,7 @@ typedef enum messages {
  */
 typedef enum window_class    {
 	FORCEINTTYPE = -1,      /* required or enum type is unsigned char */
-	#define ClassDef(c,b,p,a) c,
+	#define ClassDef(c,b,a) c,
 	#include "classes.h"
 	CLASSCOUNT
 } CLASS;

@@ -427,6 +427,10 @@ BOOL GenericMessage(WINDOW, char *, char *, int,
 #define TestErrorMessage(msg)	\
 	GenericMessage(NULL, "Error", msg, 2, ErrorBoxProc,	  \
 		Ok, Cancel, ID_OK, ID_CANCEL, TRUE)
+BOOL ErrorMessage(char*);
+BOOL MessageBox(char*, char*);
+BOOL YesNoBox(char*);
+/*
 #define ErrorMessage(msg) \
 	GenericMessage(NULL, "Error", msg, 1, ErrorBoxProc,   \
 		Ok, NULL, ID_OK, 0, TRUE)
@@ -436,6 +440,7 @@ BOOL GenericMessage(WINDOW, char *, char *, int,
 #define YesNoBox(msg)	\
 	GenericMessage(NULL, "Confirm", msg, 2, YesNoBoxProc,   \
 		Yes, No, ID_OK, ID_CANCEL, TRUE)
+*/
 #define CancelBox(wnd, msg) \
 	GenericMessage(wnd, "Wait...", msg, 1, CancelBoxProc, \
 		Cancel, NULL, ID_CANCEL, 0, FALSE)

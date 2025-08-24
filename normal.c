@@ -30,7 +30,7 @@ BOOL WindowSizing;
 /* -------- array of class definitions -------- */
 CLASSDEFS classdefs[] = {
     #undef ClassDef
-    #define ClassDef(c,b,p,a) {b,p,a},
+    #define ClassDef(c,b,a) {b,a},
     #include "classes.h"
 };
 WINDOW HiddenWindow;

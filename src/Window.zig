@@ -104,10 +104,10 @@ pub fn create(
             }
         }
         if (wndproc == null) {
-            wnd.*.wndproc = Klass.classdefs[@intCast(klass)][2]; // wndproc
+//            wnd.*.wndproc = Klass.classdefs[@intCast(klass)][2]; // wndproc
             self.wndproc = Klass.classdefs[@intCast(klass)][2]; // wndproc
         } else {
-            wnd.*.wndproc = wndproc;
+//            wnd.*.wndproc = wndproc;
             self.wndproc = wndproc;
         }
 
@@ -453,5 +453,5 @@ pub export fn set_wndproc(wnd:df.WINDOW,
     if (get_zin(wnd)) |win| {
         win.wndproc = wndproc;
     }
-    wnd.*.wndproc = wndproc;
+//    wnd.*.wndproc = wndproc;
 }
