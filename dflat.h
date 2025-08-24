@@ -206,8 +206,9 @@ WINDOW PrevWindow(WINDOW);
 #define ClearVisible(w)      (GetAttribute(w) &= ~VISIBLE)
 #define gotoxy(w,x,y) cursor(w->rc.lf+(x)+1,w->rc.tp+(y)+1)
 BOOL isVisible(WINDOW);
-WINDOW CreateWindow(CLASS,const char *,int,int,int,int,void*,WINDOW,
-       int (*)(struct window *,enum messages,PARAM,PARAM),int);
+//WINDOW CreateWindow(CLASS,const char *,int,int,int,int,void*,WINDOW,
+//       int (*)(struct window *,enum messages,PARAM,PARAM),int);
+WINDOW CreateWindow(CLASS,const char *,int,int,int,int,void*,WINDOW, int);
 void AddTitle(WINDOW, const char *);
 void InsertTitle(WINDOW, const char *);
 void DisplayTitle(WINDOW, RECT *);

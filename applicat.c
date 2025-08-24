@@ -383,7 +383,6 @@ static void CreateMenu(WINDOW wnd)
                         ClientWidth(wnd),
                         NULL,
                         wnd,
-                        NULL,
                         0);
     SendMessage(wnd->MenuBarWnd,BUILDMENU,
         (PARAM)wnd->extension,0);
@@ -406,7 +405,6 @@ static void CreateStatusBar(WINDOW wnd)
                             ClientWidth(wnd),
                             NULL,
                             wnd,
-                            NULL,
                             0);
         AddAttribute(wnd->StatusBar, VISIBLE);
     }

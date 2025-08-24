@@ -178,7 +178,7 @@ WINDOW MomentaryMessage(char *msg)
                     TEXTBOX,
                     NULL,
                     -1,-1,MsgHeight(msg)+2,MsgWidth(msg)+2,
-                    NULL,NULL,NULL,
+                    NULL,NULL,
                     HASBORDER | SHADOW | SAVESELF);
     SendMessage(wnd, SETTEXT, (PARAM) msg, 0);
     if (cfg.mono == 0)    {

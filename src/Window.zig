@@ -30,7 +30,7 @@ pub export fn CreateWindow(
     height:c_int, width:c_int,   // dimensions
     extension:?*anyopaque,       // pointer to additional data
     parent:df.WINDOW,            // parent of this window
-    wndproc:?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
+//    wndproc:?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
     attrib:c_int)                // window attribute
     callconv(.c) df.WINDOW
 {
@@ -39,7 +39,7 @@ pub export fn CreateWindow(
     if (ttl) |t| {
         title = std.mem.span(t);
     }
-    const win = self.create(klass, title, left, top, height, width, extension, parent, wndproc, attrib);
+    const win = self.create(klass, title, left, top, height, width, extension, parent, null, attrib);
     return win.*.win;
 }
 

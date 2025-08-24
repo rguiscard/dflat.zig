@@ -263,7 +263,6 @@ static void SelectionMsg(WINDOW wnd, PARAM p1, PARAM p2)
                 wd,
                 NULL,
                 wnd,
-                NULL,
                 SHADOW);
 	if (!p2)	{
 	    Selecting = FALSE;

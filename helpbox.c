@@ -530,7 +530,6 @@ static void DisplayDefinition(WINDOW wnd, char *def)
                     ThisHelp->hwidth+2,
                     NULL,
                     wnd,
-                    NULL,
                     HASBORDER | NOCLIP | SAVESELF);
         if (dwnd != NULL)    {
             clearBIOSbuffer();

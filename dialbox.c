@@ -43,13 +43,14 @@ void ClearDialogBoxes(void)
 }
 
 /* -------- CREATE_WINDOW Message --------- */
+/*
 static int CreateWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     DBOX *db = wnd->extension;
     CTLWINDOW *ct = db->ctl;
     WINDOW cwnd;
     int rtn, i;
-    /* ---- build a table of processed dialog boxes ---- */
+    // ---- build a table of processed dialog boxes ----
     for (i = 0; i < dbct; i++)
         if (db == dbs[i])
             break;
@@ -90,6 +91,7 @@ static int CreateWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return rtn;
 }
+*/
 
 /* -------- LEFT_BUTTON Message --------- */
 static BOOL LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -265,6 +267,7 @@ int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 }
 
 /* ------- create and execute a dialog box ---------- */
+/*
 BOOL cDialogBox(WINDOW wnd, DBOX *db, BOOL Modal,
   int (*wndproc)(struct window *, enum messages, PARAM, PARAM))
 {
@@ -297,6 +300,7 @@ BOOL cDialogBox(WINDOW wnd, DBOX *db, BOOL Modal,
     }
     return rtn;
 }
+*/
 
 /* ----- return command code of in-focus control window ---- */
 static int inFocusCommand(DBOX *db)
