@@ -123,10 +123,10 @@ pub export fn HelpTextProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM
     return df.cHelpTextProc(wnd, msg, p1, p2);
 }
 
-pub export fn MemoPadProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cMemoPadProc(wnd, msg, p1, p2);
-}
+//pub export fn MemoPadProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+//    const wnd = win.win;
+//    return df.cMemoPadProc(wnd, msg, p1, p2);
+//}
 
 pub export fn OurEditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;

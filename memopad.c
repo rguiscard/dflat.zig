@@ -7,14 +7,14 @@ char DFlatApplication[] = "memopad";
 static char Untitled[] = "Untitled";
 static int wndpos;
 
-static void NewFile(WINDOW);
-static void SelectFile(WINDOW);
-static void OpenPadWindow(WINDOW, char *);
+//void NewFile(WINDOW);
+//static void SelectFile(WINDOW);
+//static void OpenPadWindow(WINDOW, char *);
 void LoadFile(WINDOW);
-static void SaveFile(WINDOW, int);
+//static void SaveFile(WINDOW, int);
 static void DeleteFile(WINDOW);
 //int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
-static char *NameComponent(char *);
+char *NameComponent(char *);
 static void FixTabMenu(void);
 void Calendar(WINDOW);
 void BarChart(WINDOW);
@@ -38,18 +38,18 @@ int cMemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 			return rtn;
         case COMMAND:
             switch ((int)p1)    {
-                case ID_NEW:
-                    NewFile(wnd);
-                    return TRUE;
-                case ID_OPEN:
-                    SelectFile(wnd);
-                    return TRUE;
-                case ID_SAVE:
-                    SaveFile(inFocus, FALSE);
-                    return TRUE;
-                case ID_SAVEAS:
-                    SaveFile(inFocus, TRUE);
-                    return TRUE;
+//                case ID_NEW:
+//                    NewFile(wnd);
+//                    return TRUE;
+//                case ID_OPEN:
+//                    SelectFile(wnd);
+//                    return TRUE;
+//                case ID_SAVE:
+//                    SaveFile(inFocus, FALSE);
+//                    return TRUE;
+//                case ID_SAVEAS:
+//                    SaveFile(inFocus, TRUE);
+//                    return TRUE;
                 case ID_DELETEFILE:
                     DeleteFile(inFocus);
                     return TRUE;
@@ -115,12 +115,15 @@ int cMemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
     return DefaultWndProc(wnd, msg, p1, p2);
 }
 /* --- The New command. Open an empty editor window --- */
-static void NewFile(WINDOW wnd)
+/*
+void NewFile(WINDOW wnd)
 {
     OpenPadWindow(wnd, Untitled);
 }
+*/
 
 /* --- The Open... command. Select a file  --- */
+/*
 static void SelectFile(WINDOW wnd)
 {
     char FileName[MAXPATH];
@@ -138,6 +141,7 @@ static void SelectFile(WINDOW wnd)
         OpenPadWindow(wnd, FileName);
     }
 }
+*/
 
 
 /* --- open a document window and load a file --- */
@@ -209,6 +213,7 @@ void LoadFile(WINDOW wnd)
 }
 
 /* ---------- save a file to disk ------------ */
+/*
 static void SaveFile(WINDOW wnd, int Saveas)
 {
     FILE *fp;
@@ -235,6 +240,7 @@ static void SaveFile(WINDOW wnd, int Saveas)
         SendMessage(mwnd, CLOSE_WINDOW, 0, 0);
     }
 }
+*/
 
 /* -------- delete a file ------------ */
 static void DeleteFile(WINDOW wnd)

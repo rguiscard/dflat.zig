@@ -2,36 +2,43 @@
 
 #include "dflat.h"
 
-static BOOL DlgFileOpen(char *, char *, char *, DBOX *);
-static int DlgFnOpen(WINDOW, MESSAGE, PARAM, PARAM);
-static void InitDlgBox(WINDOW);
+//static BOOL DlgFileOpen(char *, char *, char *, DBOX *);
+//static int DlgFnOpen(WINDOW, MESSAGE, PARAM, PARAM);
+//static void InitDlgBox(WINDOW);
 static void StripPath(char *);
-static BOOL IncompleteFilename(char *);
+//static BOOL IncompleteFilename(char *);
 
+/*
 static char FileSpec[15];
 static char SrchSpec[15];
 static char FileName[MAXPATH];
 
 extern DBOX FileOpen;
 extern DBOX SaveAs;
+*/
 
 /*
  * Dialog Box to select a file to open
  */
+/*
 BOOL OpenFileDialogBox(char *Fspec, char *Fname)
 {
     return DlgFileOpen(Fspec, Fspec, Fname, &FileOpen);
 }
+*/
 
 /*
  * Dialog Box to select a file to save as
  */
+/*
 BOOL SaveAsDialogBox(char *Fspec, char *Sspec, char *Fname)
 {
     return DlgFileOpen(Fspec, Sspec ? Sspec : Fspec, Fname, &SaveAs);
 }
+*/
 
 /* --------- generic file open ---------- */
+/*
 static BOOL DlgFileOpen(char *Fspec, char *Sspec, char *Fname, DBOX *db)
 {
     BOOL rtn;
@@ -44,10 +51,12 @@ static BOOL DlgFileOpen(char *Fspec, char *Sspec, char *Fname, DBOX *db)
 
     return rtn;
 }
+*/
 
 /*
  *  Process dialog box messages
  */
+/*
 static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 {
     switch (msg)    {
@@ -70,7 +79,7 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
                         if (CheckAndChangeDir(FileName))
                             strcpy(FileName, "*");
                         if (IncompleteFilename(FileName)) {
-                            /* --- no file name yet --- */
+                            // --- no file name yet --- 
                             DBOX *db = wnd->extension;
                             WINDOW cwnd = ControlWindow(db, ID_FILENAME);
                             strncpy(FileSpec, FileName, sizeof(FileSpec)-1);
@@ -86,12 +95,12 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
                     switch ((int) p2)    {
                         case ENTERFOCUS:
                         case LB_SELECTION:
-                            /* selected a different filename */
+                            // selected a different filename 
                             GetDlgListText(wnd, FileName, ID_FILES);
                             PutItemText(wnd, ID_FILENAME, FileName);
                             break;
                         case LB_CHOOSE:
-                            /* chose a file name */
+                            // chose a file name 
                             GetDlgListText(wnd, FileName, ID_FILES);
                             SendMessage(wnd, COMMAND, ID_OK, 0);
                             break;
@@ -106,7 +115,7 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
                             break;
                         case LB_CHOOSE:
                         {
-                            /* chose dir */
+                            // chose dir 
                             char dd[MAXPATH];
                             GetDlgListText(wnd, dd, ID_DIRECTORY);
                             chdir(dd);
@@ -127,6 +136,7 @@ static int DlgFnOpen(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
     }
     return DefaultWndProc(wnd, msg, p1, p2);
 }
+*/
 
 BOOL BuildFileList(WINDOW, char *);
 void BuildDirectoryList(WINDOW);
@@ -135,6 +145,7 @@ void BuildPathDisplay(WINDOW);
 /*
  *  Initialize the dialog box
  */
+/*
 static void InitDlgBox(WINDOW wnd)
 {
     if (*FileSpec)
@@ -143,6 +154,7 @@ static void InitDlgBox(WINDOW wnd)
         BuildDirectoryList(wnd);
     BuildPathDisplay(wnd);
 }
+*/
 
 /*
  * Strip the path information from a file spec
@@ -162,6 +174,7 @@ static void StripPath(char *filespec)
 }
 
 
+/*
 static BOOL IncompleteFilename(char *s)
 {
     int lc = strlen(s)-1;
@@ -169,3 +182,4 @@ static BOOL IncompleteFilename(char *s)
         return TRUE;
     return FALSE;
 }
+*/

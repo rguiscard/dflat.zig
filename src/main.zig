@@ -18,7 +18,6 @@ pub fn main() !void {
     _ = mp.Calendar;
     _ = mp.list;
     _ = mp.SystemMenu;
-    _ = mp.MessageBox;
 
     if (df.init_messages() == df.FALSE) {
         return;
@@ -35,7 +34,7 @@ pub fn main() !void {
                         0, 0, -1, -1,
                         @constCast(@ptrCast(&mp.menus.MainMenu)),
                         null,
-                        mp.WndProc.MemoPadProc,
+                        MemoPadProc,
                         df.MOVEABLE  |
                         df.SIZEABLE  |
                         df.HASBORDER |
@@ -53,9 +52,89 @@ pub fn main() !void {
     }
 }
 
+// ------- window processing module for the
+//                    memopad application window -----
+fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
+
+    switch(msg) {
+        df.COMMAND => {
+            const cmd:c_int = @intCast(p1);
+            switch(cmd) {
+                df.ID_NEW => {
+                    NewFile(win);
+                    return df.TRUE;
+                },
+                df.ID_OPEN => {
+                    if (SelectFile(win)) {
+                        return df.TRUE;
+                    } else |_| {
+                        return df.FALSE;
+                    }
+                },
+                df.ID_SAVE => {
+                    if (mp.Window.get_zin(df.inFocus)) |w| {
+                        SaveFile(w, false);
+                        return df.TRUE;
+                    }
+                    return df.FALSE;
+                },
+                df.ID_SAVEAS => {
+                    if (mp.Window.get_zin(df.inFocus)) |w| {
+                        SaveFile(w, true);
+                        return df.TRUE;
+                    }
+                    return df.FALSE;
+                },
+                else => {
+                    return df.cMemoPadProc(wnd, msg, p1, p2);
+                }
+            }
+        },
+        else => {
+            return df.cMemoPadProc(wnd, msg, p1, p2);
+        }
+    }
+    return mp.zDefaultWndProc(win, msg, p1, p2);
+}
+
+// --- The New command. Open an empty editor window ---
+fn NewFile(win: *mp.Window) void {
+    OpenPadWindow(win, sUntitled);
+}
+
+// --- The Open... command. Select a file  ---
+fn SelectFile(win: *mp.Window) !void {
+    const wnd = win.win;
+    const fspec:[:0]const u8 = "*";
+    var filename = std.mem.zeroes([df.MAXPATH]u8);
+
+    if (mp.fileopen.OpenFileDialogBox(fspec, &filename)) {
+        // --- see if the document is already in a window ---
+        var wnd1:df.WINDOW = mp.Window.FirstWindow(wnd);
+        while (wnd1 != null) {
+            if (wnd1.*.extension) |extension| {
+                const ext:[*c]const u8 = @ptrCast(extension);
+                if (df.strcasecmp(&filename, ext) == 0) {
+                    if (mp.Window.get_zin(wnd1)) |w| {
+                        _ = w.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                        _ = w.sendMessage(df.RESTORE, 0, 0);
+                    }
+                    return;
+                }
+            }
+            wnd1 = mp.Window.NextWindow(wnd1);
+        }
+
+        const fname = @as([*:0]u8, filename[0..filename.len-1:0]);
+        OpenPadWindow(win, std.mem.span(fname));
+    }
+}
+
 // --- open a document window and load a file ---
-pub export fn OpenPadWindow(wnd: df.WINDOW, filename: [*c]const u8) void {
-    const fname = std.mem.span(filename);
+pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
+    const wnd = win.win;
+    const fname = filename;
     if (std.mem.eql(u8, sUntitled, fname) == false) {
         // check for existing
         if (std.fs.cwd().access(fname, .{.mode = .read_only})) {
@@ -90,13 +169,53 @@ pub export fn OpenPadWindow(wnd: df.WINDOW, filename: [*c]const u8) void {
         const ext:[*c]u8 = @ptrCast(win1.win.*.extension);
         // wnd.extension is used to store filename.
         // it is also be used to compared already opened files.
-        _ = df.strcpy(ext, fname.ptr); // This could potentionally be a bug since fname may be long.
+        _ = df.strcpy(ext, fname.ptr); // may use std.mem.copyForwards in the future ?
 
         df.LoadFile(win1.win);
     }
 
     _ = wwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
     _ = win1.sendMessage(df.SETFOCUS, df.TRUE, 0);
+}
+
+// ---------- save a file to disk ------------
+fn SaveFile(win:*mp.Window, Saveas: bool) void {
+    const wnd = win.win;
+    const fspec:[:0]const u8 = "*";
+    var filename = std.mem.zeroes([df.MAXPATH]u8);
+    if ((wnd.*.extension == null) or (Saveas == true)) {
+        if (mp.fileopen.SaveAsDialogBox(fspec, null, &filename)) {
+            if (wnd.*.extension != df.NULL) {
+                df.free(wnd.*.extension);
+            }
+            if (std.fs.cwd().realpathAlloc(mp.global_allocator, ".")) |_| {
+                // should free
+                wnd.*.extension = df.DFmalloc(df.strlen(&filename)+1);
+                const ext:[*c]u8 = @ptrCast(wnd.*.extension);
+                _ = df.strcpy(ext, &filename);
+                df.AddTitle(wnd, df.NameComponent(&filename));
+                _ = df.SendMessage(wnd, df.BORDER, 0, 0);
+            } else |_| {
+            }
+        } else {
+            return;
+        }
+    }
+    if (wnd.*.extension != df.NULL) {
+        const m:[]const u8 = "Saving the file";
+        var mwin = mp.MessageBox.MomentaryMessage(m);
+
+        const extension:[*c]u8 = @ptrCast(wnd.*.extension);
+        const path:[:0]const u8 = std.mem.span(extension);
+        const text:[*c]u8 = @ptrCast(wnd.*.text);
+        const data:[]const u8 = std.mem.span(text);
+        if (std.fs.cwd().writeFile(.{.sub_path = path, .data = data})) {
+            wnd.*.TextChanged = df.FALSE;
+        } else |_| {
+        }
+
+        _ = mwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
+    }
 }
 
 const std = @import("std");

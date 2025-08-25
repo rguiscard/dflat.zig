@@ -72,3 +72,25 @@ fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, message:[*c]u8, buttonct: c_int
     mBox.ctl[2].Class = 0;
     return rtn;
 }
+
+pub fn MomentaryMessage(message: []const u8) *Window {
+    const m:[*c]u8 = @constCast(message.ptr);
+
+    var win = Window.create(
+                    df.TEXTBOX,
+                    null,
+                    -1,-1,df.MsgHeight(m)+2,df.MsgWidth(m)+2,
+                    df.NULL,null,null,
+                    df.HASBORDER | df.SHADOW | df.SAVESELF);
+    const wnd = win.*.win;
+
+    _ = win.sendTextMessage(df.SETTEXT, @constCast(message), 0);
+    if (df.cfg.mono == 0) {
+        wnd.*.WindowColors[df.STD_COLOR][df.FG] = df.WHITE;
+        wnd.*.WindowColors[df.STD_COLOR][df.BG] = df.GREEN;
+        wnd.*.WindowColors[df.FRAME_COLOR][df.FG] = df.WHITE;
+        wnd.*.WindowColors[df.FRAME_COLOR][df.BG] = df.GREEN;
+    }
+    _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    return win;
+}

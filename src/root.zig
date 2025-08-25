@@ -18,6 +18,7 @@ pub const SystemMenu = @import("SystemMenu.zig");
 pub const WndProc = @import("WndProc.zig");
 pub const DialogBox = @import("DialogBox.zig");
 pub const MessageBox = @import("MessageBox.zig");
+pub const fileopen = @import("FileOpen.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 

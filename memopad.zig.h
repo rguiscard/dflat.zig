@@ -1,5 +1,12 @@
 // main.c
 void LoadFile(WINDOW);
+char *NameComponent(char *);
+
+// fileopen.c
+//int DlgFnOpen(WINDOW, MESSAGE, PARAM, PARAM);
+BOOL BuildFileList(WINDOW, char *);
+void BuildDirectoryList(WINDOW);
+void BuildPathDisplay(WINDOW);
 
 // message.c
 void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my);
