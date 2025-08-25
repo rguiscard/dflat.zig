@@ -7,13 +7,8 @@ char DFlatApplication[] = "memopad";
 static char Untitled[] = "Untitled";
 static int wndpos;
 
-//void NewFile(WINDOW);
-//static void SelectFile(WINDOW);
-//static void OpenPadWindow(WINDOW, char *);
 void LoadFile(WINDOW);
-//static void SaveFile(WINDOW, int);
 static void DeleteFile(WINDOW);
-//int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
 char *NameComponent(char *);
 static void FixTabMenu(void);
 void Calendar(WINDOW);
@@ -114,80 +109,6 @@ int cMemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
     }
     return DefaultWndProc(wnd, msg, p1, p2);
 }
-/* --- The New command. Open an empty editor window --- */
-/*
-void NewFile(WINDOW wnd)
-{
-    OpenPadWindow(wnd, Untitled);
-}
-*/
-
-/* --- The Open... command. Select a file  --- */
-/*
-static void SelectFile(WINDOW wnd)
-{
-    char FileName[MAXPATH];
-    if (OpenFileDialogBox("*", FileName))    {
-        // --- see if the document is already in a window ---
-        WINDOW wnd1 = FirstWindow(wnd);
-        while (wnd1 != NULL)    {
-            if (wnd1->extension && strcasecmp(FileName, wnd1->extension) == 0)    {
-                SendMessage(wnd1, SETFOCUS, TRUE, 0);
-                SendMessage(wnd1, RESTORE, 0, 0);
-                return;
-            }
-            wnd1 = NextWindow(wnd1);
-        }
-        OpenPadWindow(wnd, FileName);
-    }
-}
-*/
-
-
-/* --- open a document window and load a file --- */
-/*
-void cOpenPadWindow(WINDOW wnd, char *FileName)
-{
-    static WINDOW wnd1 = NULL;
-	WINDOW wwnd;
-    char *Fname = FileName;
-    if (strcmp(FileName, Untitled) != 0) {
-        struct stat sb;
-        if (stat(FileName, &sb) < 0 || !S_ISREG(sb.st_mode)) {
-            char errmsg[MAXPATH];
-            sprintf(errmsg, "No such file as\n%s", FileName);
-            ErrorMessage(errmsg);
-            return;
-        }
-        Fname = NameComponent(FileName);
-    }
-	wwnd = WatchIcon();
-    wndpos += 2;
-    if (wndpos == 20)
-        wndpos = 2;
-    wnd1 = CreateWindow(EDITBOX,
-                Fname,
-                (wndpos-1)*2, wndpos, 10, 40,
-                NULL, wnd, OurEditorProc,
-                SHADOW     |
-                MINMAXBOX  |
-                CONTROLBOX |
-                VSCROLLBAR |
-                HSCROLLBAR |
-                MOVEABLE   |
-                HASBORDER  |
-                SIZEABLE   |
-                MULTILINE
-    );
-    if (strcmp(FileName, Untitled))    {
-        wnd1->extension = DFmalloc(strlen(FileName)+1);
-        strcpy(wnd1->extension, FileName);
-        LoadFile(wnd1);
-    }
-	SendMessage(wwnd, CLOSE_WINDOW, 0, 0);
-    SendMessage(wnd1, SETFOCUS, TRUE, 0);
-}
-*/
 
 /* --- Load the notepad file into the editor text buffer --- */
 void LoadFile(WINDOW wnd)
@@ -211,36 +132,6 @@ void LoadFile(WINDOW wnd)
 		}
     }
 }
-
-/* ---------- save a file to disk ------------ */
-/*
-static void SaveFile(WINDOW wnd, int Saveas)
-{
-    FILE *fp;
-    if (wnd->extension == NULL || Saveas)    {
-        char FileName[MAXPATH];
-        if (SaveAsDialogBox("*", NULL, FileName))    {
-            if (wnd->extension != NULL)
-                free(wnd->extension);
-            wnd->extension = DFmalloc(strlen(FileName)+1);
-            strcpy(wnd->extension, FileName);
-            AddTitle(wnd, NameComponent(FileName));
-            SendMessage(wnd, BORDER, 0, 0);
-        }
-        else
-            return;
-    }
-    if (wnd->extension != NULL)    {
-        WINDOW mwnd = MomentaryMessage("Saving the file");
-        if ((fp = fopen(wnd->extension, "wt")) != NULL)    {
-            fwrite(GetText(wnd), strlen(GetText(wnd)), 1, fp);
-            fclose(fp);
-            wnd->TextChanged = FALSE;
-        }
-        SendMessage(mwnd, CLOSE_WINDOW, 0, 0);
-    }
-}
-*/
 
 /* -------- delete a file ------------ */
 static void DeleteFile(WINDOW wnd)

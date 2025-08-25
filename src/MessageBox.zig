@@ -14,17 +14,17 @@ const sCONFIRM  = "Confirm";
 
 // InputBox and CancelBox were not used. Port them later.
 pub export fn ErrorMessage(message: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, @constCast(sERROR.ptr), message, 1, WndProc.ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
+    const result = GenericMessage(null, @constCast(sERROR.ptr), message, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
     return result;
 }
 
 pub export fn MessageBox(title: [*c]u8, message: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, title, message, 1, WndProc.MessageBoxProc, sOK, null, df.ID_OK, 0, true);
+    const result = GenericMessage(null, title, message, 1, MessageBoxProc, sOK, null, df.ID_OK, 0, true);
     return result;
 }
 
 pub export fn YesNoBox(message: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, @constCast(sCONFIRM.ptr), message, 2, WndProc.YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
+    const result = GenericMessage(null, @constCast(sCONFIRM.ptr), message, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
     return result;
 }
 
@@ -93,4 +93,19 @@ pub fn MomentaryMessage(message: []const u8) *Window {
     }
     _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
     return win;
+}
+
+fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
+    return df.cMessageBoxProc(wnd, msg, p1, p2);
+}
+
+fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
+    return df.cYesNoBoxProc(wnd, msg, p1, p2);
+}
+
+fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
+    return df.cErrorBoxProc(wnd, msg, p1, p2);
 }
