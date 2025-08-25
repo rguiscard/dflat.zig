@@ -29,7 +29,7 @@ pub export fn YesNoBox(message: [*c]u8) df.BOOL {
 }
 
 fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, message:[*c]u8, buttonct: c_int,
-                  wndproc: *const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
+                  wndproc: *const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
                   button1: ?[]const u8, button2: ?[]const u8, c1: c_int, c2: c_int, isModal: bool) df.BOOL {
     var mBox = Dialogs.MsgBox;
 

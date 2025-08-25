@@ -1,4 +1,5 @@
 const df = @import("ImportC.zig").df;
+const Window = @import("Window.zig");
 const picture = @import("PictureBox.zig");
 const dialbox = @import("DialogBox.zig");
 
@@ -17,51 +18,61 @@ const dialbox = @import("DialogBox.zig");
 // - zDefaultWndProc(*Window)
 // - EveneQueue(*Window)
 
-pub export fn NormalProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn NormalProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cNormalProc(wnd, msg, p1, p2);
 }
 
-pub export fn ApplicationProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn ApplicationProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cApplicationProc(wnd, msg, p1, p2);
 }
 
-pub export fn TextBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn TextBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cTextBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn ListBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cListBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn EditBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cEditBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn MenuBarProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn MenuBarProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cMenuBarProc(wnd, msg, p1, p2);
 }
 
-pub export fn PopDownProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn PopDownProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cPopDownProc(wnd, msg, p1, p2);
 }
 
-pub export fn PictureProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    return picture.PictureProc(wnd, msg, p1, p2);
+pub export fn PictureProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    return picture.PictureProc(win, msg, p1, p2);
 }
 
-pub export fn DialogProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    return dialbox.DialogProc(wnd, msg, p1, p2);
+pub export fn DialogProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    return dialbox.DialogProc(win, msg, p1, p2);
 }
 
-pub export fn BoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn BoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn ButtonProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn ButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cButtonProc(wnd, msg, p1, p2);
 }
 
-pub export fn ComboProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     _ = wnd;
     _ = msg;
     _ = p1;
@@ -71,69 +82,86 @@ pub export fn ComboProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM)
 //    return df.cComboProc(wnd, msg, p1, p2);
 }
 
-pub export fn TextProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn TextProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cTextProc(wnd, msg, p1, p2);
 }
 
-pub export fn RadioButtonProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn RadioButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cRadioButtonProc(wnd, msg, p1, p2);
 }
 
-pub export fn CheckBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn CheckBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cCheckBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn SpinButtonProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cSpinButtonProc(wnd, msg, p1, p2);
 }
 
-pub export fn HelpBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn HelpBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cHelpBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn StatusBarProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn StatusBarProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cStatusBarProc(wnd, msg, p1, p2);
 }
 
-pub export fn EditorProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cEditorProc(wnd, msg, p1, p2);
 }
 
 // Those are called directly by CreateWindow()
-pub export fn HelpTextProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn HelpTextProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cHelpTextProc(wnd, msg, p1, p2);
 }
 
-pub export fn MemoPadProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn MemoPadProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cMemoPadProc(wnd, msg, p1, p2);
 }
 
-pub export fn OurEditorProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn OurEditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cOurEditorProc(wnd, msg, p1, p2);
 }
 
 // For DialogBox, called in dflat.h
-pub export fn MessageBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cMessageBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn YesNoBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cYesNoBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn ErrorBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cErrorBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn CancelBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn CancelBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cCancelBoxProc(wnd, msg, p1, p2);
 }
 
-pub export fn InputBoxProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn InputBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cInputBoxProc(wnd, msg, p1, p2);
 }
 
 // From dialbox.c
-pub export fn ControlProc(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     return df.cControlProc(wnd, msg, p1, p2);
 }
+

@@ -66,7 +66,7 @@ pub export fn PostMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARA
 }
 
 // --------- send a message to a window -----------
-pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) df.BOOL {
+pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) df.BOOL {
     const rtn:df.BOOL = df.TRUE;
 
     if (wnd != null) {

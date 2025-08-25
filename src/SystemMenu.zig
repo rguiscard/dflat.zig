@@ -3,9 +3,8 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 
-pub export fn SystemMenuProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
-    if (Window.get_zin(wnd)) |zin| {
-        const win = zin;
+pub export fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
         switch (msg) {
             df.CREATE_WINDOW => {
                 wnd.*.holdmenu = df.ActiveMenuBar;
@@ -38,8 +37,7 @@ pub export fn SystemMenuProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: 
             else => {
             }
         }
-    }
-    return root.zDefaultWndProc(wnd, msg, p1, p2);
+    return root.zDefaultWndProc(win, msg, p1, p2);
 }
 
 // ------- Build a system menu --------

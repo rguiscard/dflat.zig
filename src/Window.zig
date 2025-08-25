@@ -2,8 +2,13 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Klass = @import("Classes.zig");
+const WndProc = @import("WndProc.zig");
 
-wndproc: ?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
+/// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
+/// name the type here, so it can be easily referenced by other declarations in this file.
+const TopLevelFields = @This();
+
+wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
 
 // -------------- linked list pointers ----------------
 parent:df.WINDOW = null,       // parent window
@@ -17,10 +22,6 @@ modal: bool = false, // True if a modeless dialog box
 
 allocator: std.mem.Allocator,
 win: df.WINDOW,
-
-/// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
-/// name the type here, so it can be easily referenced by other declarations in this file.
-const TopLevelFields = @This();
 
 // --------- create a window ------------
 pub export fn CreateWindow(
@@ -58,7 +59,7 @@ pub fn create(
     height:c_int, width:c_int,  // dimensions
     extension:?*anyopaque,      // pointer to additional data
     parent: df.WINDOW,          // parent of this window
-    wndproc: ?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
+    wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
     attrib: c_int) *TopLevelFields {
 
     const title = if (ttl) |t| t.ptr else null;
@@ -182,13 +183,8 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             // ------- don't send these messages unless the
             //    window is visible --------
             if (df.isVisible(wnd)>0) {
-//                if (wnd.*.wndproc) |wndproc| {
-//                    rtn = wndproc(wnd, msg, p1, p2);
-//                }
-                if (get_zin(wnd)) |zin| {
-                    if (zin.wndproc) |wndproc| {
-                        rtn = wndproc(wnd, msg, p1, p2);
-                    }
+                if (self.wndproc) |wndproc| {
+                    rtn = wndproc(self, msg, p1, p2);
                 }
             }
         },
@@ -199,13 +195,8 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             // --- don't send these messages unless the
             //  window is visible or has captured the mouse --
             if ((df.isVisible(wnd)>0) or (wnd == df.CaptureMouse)) {
-//                if (wnd.*.wndproc) |wndproc| {
-//                        rtn = wndproc(wnd, msg, p1, p2);
-//                }
-                if (get_zin(wnd)) |zin| {
-                    if (zin.wndproc) |wndproc| {
-                        rtn = wndproc(wnd, msg, p1, p2);
-                    }
+                if (self.wndproc) |wndproc| {
+                    rtn = wndproc(self, msg, p1, p2);
                 }
             }
         },
@@ -214,24 +205,14 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             // ------- don't send these messages unless the
             //  window is visible or has captured the keyboard --
             if ((df.isVisible(wnd)>0) or (wnd == df.CaptureKeyboard)) {
-//                if (wnd.*.wndproc) |wndproc| {
-//                    rtn = wndproc(wnd, msg, p1, p2);
-//                }
-                if (get_zin(wnd)) |zin| {
-                    if (zin.wndproc) |wndproc| {
-                        rtn = wndproc(wnd, msg, p1, p2);
-                    }
+                if (self.wndproc) |wndproc| {
+                    rtn = wndproc(self, msg, p1, p2);
                 }
             }
         },
         else => {
-//            if (wnd.*.wndproc) |wndproc| {
-//                rtn = wndproc(wnd, msg, p1, p2);
-//            }
-            if (get_zin(wnd)) |zin| {
-                if (zin.wndproc) |wndproc| {
-                    rtn = wndproc(wnd, msg, p1, p2);
-                }
+            if (self.wndproc) |wndproc| {
+                rtn = wndproc(self, msg, p1, p2);
             }
         }
     }
@@ -448,10 +429,8 @@ pub export fn set_modal(wnd:df.WINDOW, val:df.BOOL) void {
     }
 }
 
-pub export fn set_wndproc(wnd:df.WINDOW,
-           wndproc:*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int) void {
+pub export fn set_HelpTextProc(wnd:df.WINDOW) void {
     if (get_zin(wnd)) |win| {
-        win.wndproc = wndproc;
+        win.wndproc = WndProc.HelpTextProc;
     }
-//    wnd.*.wndproc = wndproc;
 }

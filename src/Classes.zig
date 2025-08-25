@@ -1,5 +1,6 @@
 const df = @import("ImportC.zig").df;
 const wp = @import("WndProc.zig");
+const Window = @import("Window.zig");
 
 // ----------- classes.h ------------
 //
@@ -47,7 +48,7 @@ pub const Klass = enum (c_int) {
 pub const classdefs = [_]struct{
     []const u8,
     Klass,
-    ?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
+    ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
     isize} {
 
     .{"NORMAL",      Klass.FORCEINTTYPE, wp.NormalProc,        0              },

@@ -13,7 +13,7 @@ static void OpenPadWindow(WINDOW, char *);
 void LoadFile(WINDOW);
 static void SaveFile(WINDOW, int);
 static void DeleteFile(WINDOW);
-int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
 static char *NameComponent(char *);
 static void FixTabMenu(void);
 void Calendar(WINDOW);
@@ -119,12 +119,13 @@ static void NewFile(WINDOW wnd)
 {
     OpenPadWindow(wnd, Untitled);
 }
+
 /* --- The Open... command. Select a file  --- */
 static void SelectFile(WINDOW wnd)
 {
     char FileName[MAXPATH];
     if (OpenFileDialogBox("*", FileName))    {
-        /* --- see if the document is already in a window --- */
+        // --- see if the document is already in a window ---
         WINDOW wnd1 = FirstWindow(wnd);
         while (wnd1 != NULL)    {
             if (wnd1->extension && strcasecmp(FileName, wnd1->extension) == 0)    {
@@ -137,6 +138,7 @@ static void SelectFile(WINDOW wnd)
         OpenPadWindow(wnd, FileName);
     }
 }
+
 
 /* --- open a document window and load a file --- */
 /*
@@ -233,6 +235,7 @@ static void SaveFile(WINDOW wnd, int Saveas)
         SendMessage(mwnd, CLOSE_WINDOW, 0, 0);
     }
 }
+
 /* -------- delete a file ------------ */
 static void DeleteFile(WINDOW wnd)
 {
@@ -319,7 +322,7 @@ int cOurEditorProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
     return DefaultWndProc(wnd, msg, p1, p2);
 }
 /* -- point to the name component of a file specification -- */
-static char *NameComponent(char *FileName)
+char *NameComponent(char *FileName)
 {
     char *Fname;
     if ((Fname = strrchr(FileName, '/')) == NULL)

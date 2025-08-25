@@ -25,7 +25,7 @@ const TopLevelFields = @This();
 
 // ------- create and execute a dialog box ----------
 pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
-   wndproc: ?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int) df.BOOL {
+    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int) df.BOOL {
 
     const box = db;
 
@@ -69,7 +69,8 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
 }
 
 // ----- window-processing module, DIALOG window class -----
-pub fn DialogProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     const p2_new = p2;
 
     switch (msg) {
@@ -81,7 +82,7 @@ pub fn DialogProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c
         }
     }
     // Note, p2 will be changed.
-    return root.zBaseWndProc(df.DIALOG, wnd, msg, p1, p2_new);
+    return root.zBaseWndProc(df.DIALOG, win, msg, p1, p2_new);
 }
 
 // -------- CREATE_WINDOW Message ---------
@@ -109,7 +110,7 @@ fn CreateWindowMsg(wnd: df.WINDOW, p1: df.PARAM, p2: df.PARAM) c_int {
         } else |_| { // error
         }
     }
-    rtn = root.zBaseWndProc(df.DIALOG, wnd, df.CREATE_WINDOW, p1, p2);
+    rtn = root.BaseWndProc(df.DIALOG, wnd, df.CREATE_WINDOW, p1, p2);
 
     for(0..MAXCONTROLS) |i| {
         const ctl:*df.CTLWINDOW = @ptrCast(&db.*.ctl[i]);

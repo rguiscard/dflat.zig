@@ -219,7 +219,8 @@ void writeline(WINDOW, char *, int, int, BOOL);
 void InitWindowColors(WINDOW);
 
 // used in helpbox.c
-void set_wndproc(WINDOW, int (*) (struct window *, enum messages, PARAM, PARAM));
+
+void set_HelpTextProc(WINDOW);
 
 void SetNextFocus(void);
 void SetPrevFocus(void);

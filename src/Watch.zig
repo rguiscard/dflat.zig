@@ -7,9 +7,8 @@ var tick:usize = 0;
 const hands = [_][]const u8{" \xC0 ", " \xDA ", " \xBF ", " \xD9 "};
 const bo = "\xCD";
 
-pub fn WatchIconProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
-    if (Window.get_zin(wnd)) |zin| {
-        const win = zin;
+pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
         switch (msg) {
             df.CREATE_WINDOW => {
                 tick = 0;
@@ -54,9 +53,8 @@ pub fn WatchIconProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
             else => {
             }
         }
-    }
 
-    return root.zDefaultWndProc(wnd, msg, p1, p2);
+    return root.zDefaultWndProc(win, msg, p1, p2);
 }
 
 pub export fn WatchIcon() *Window {

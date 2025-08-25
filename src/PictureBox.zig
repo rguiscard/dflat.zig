@@ -235,10 +235,11 @@ fn DrawBoxMsg(wnd:df.WINDOW, p1:df.PARAM) void {
     }
 }
 
-pub fn PictureProc(wnd: df.WINDOW, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
     switch (message) {
         df.PAINT => {
-            _ = df.BaseWndProc(df.PICTUREBOX, wnd, message, p1, p2);
+            _ = root.zBaseWndProc(df.PICTUREBOX, win, message, p1, p2);
             PaintMsg(wnd);
             return df.TRUE;
         },
@@ -262,7 +263,7 @@ pub fn PictureProc(wnd: df.WINDOW, message: df.MESSAGE, p1: df.PARAM, p2: df.PAR
         else => {
         }
     }
-    return df.BaseWndProc(df.PICTUREBOX, wnd, message, p1, p2);
+    return root.zBaseWndProc(df.PICTUREBOX, win, message, p1, p2);
 }
 
 fn PictureRect(x:c_int, y:c_int, len:c_int, hv:c_int) df.RECT {

@@ -3,7 +3,7 @@
 //! is to delete this file and start with root.zig instead.
 
 pub const DFlatApplication = "memopad";
-const Untitled:[:0]const u8 = "Untitled";
+const sUntitled:[:0]const u8 = "Untitled";
 var wndpos:c_int = 0;
 
 pub fn main() !void {
@@ -54,9 +54,9 @@ pub fn main() !void {
 }
 
 // --- open a document window and load a file ---
-pub export fn OpenPadWindow(wnd: df.WINDOW, filename: [*c]u8) callconv(.c) void {
+pub export fn OpenPadWindow(wnd: df.WINDOW, filename: [*c]const u8) void {
     const fname = std.mem.span(filename);
-    if (std.mem.eql(u8, Untitled, fname) == false) {
+    if (std.mem.eql(u8, sUntitled, fname) == false) {
         // check for existing
         if (std.fs.cwd().access(fname, .{.mode = .read_only})) {
             if (std.fs.cwd().statFile(fname)) |stat| {
@@ -85,12 +85,12 @@ pub export fn OpenPadWindow(wnd: df.WINDOW, filename: [*c]u8) callconv(.c) void 
                 df.SIZEABLE   |
                 df.MULTILINE);
 
-    if (std.mem.eql(u8, fname, Untitled) == false) {
+    if (std.mem.eql(u8, fname, sUntitled) == false) {
         win1.win.*.extension = df.DFmalloc(fname.len+1);
         const ext:[*c]u8 = @ptrCast(win1.win.*.extension);
         // wnd.extension is used to store filename.
         // it is also be used to compared already opened files.
-        _ = df.strcpy(ext, fname.ptr);
+        _ = df.strcpy(ext, fname.ptr); // This could potentionally be a bug since fname may be long.
 
         df.LoadFile(win1.win);
     }

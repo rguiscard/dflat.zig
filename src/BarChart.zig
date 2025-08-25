@@ -23,7 +23,7 @@ const ProjChart = [_]struct{[]const u8, isize, isize} {
 const Title =  "              PROJECT SCHEDULE";
 const Months = "           Jan Feb Mar Apr May Jun";
 
-fn BarChartProc(wnd: df.WINDOW, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     switch (message) {
 //        case COMMAND:
 //            if ((int)p1 == ID_HELP)    {
@@ -37,7 +37,7 @@ fn BarChartProc(wnd: df.WINDOW, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         else => {
         }
     }
-    return root.DefaultWndProc(wnd, message, p1, p2);
+    return root.zDefaultWndProc(win, message, p1, p2);
 }
 
 pub export fn BarChart(pwnd: df.WINDOW) void {
