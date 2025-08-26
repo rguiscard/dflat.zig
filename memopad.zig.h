@@ -19,7 +19,8 @@ void FirstFocus(DBOX *);
 extern struct window dwnd;
 void GetVideoBuffer(WINDOW);
 void PutVideoBuffer(WINDOW);
-void PaintOverLappers(WINDOW wnd);
+void PaintOverLappers(WINDOW);
+void PaintUnderLappers(WINDOW);
 void TerminateMoveSize(void);
 
 // pictbox.c

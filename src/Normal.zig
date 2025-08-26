@@ -146,7 +146,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         df.CTRL_F4 => {
             if (win.TestAttribute(df.CONTROLBOX)) {
                 _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
-                df.SkipApplicationControls();
+                lists.SkipApplicationControls();
                 return true;
             }
         },
@@ -182,38 +182,38 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
             if (Window.GetParent(wnd) != null)
                 df.PostMessage(Window.GetParent(wnd), msg, p1, p2);
         },
-//        df.PAINT => {
-//            if (df.isVisible(wnd)>0) {
-//                if (wnd.*.wasCleared > 0) {
-//                    df.PaintUnderLappers(wnd);
-//                } else {
-//                    wnd.*.wasCleared = df.TRUE;
-//
-//                    var pp1:?*df.RECT = null;
-//                    if (p1>0) {
-//                        const p1_addr:usize = @intCast(p1);
-//                        pp1 = @ptrFromInt(p1_addr);
-//                    }
-//
-//                    df.ClearWindow(wnd, pp1, ' ');
-//                }
-//            }
-//        },
-//        df.BORDER => {
-//            if (df.isVisible(wnd)>0) {
-//                var pp1:?*df.RECT = null;
-//                if (p1>0) {
-//                    const p1_addr:usize = @intCast(p1);
-//                    pp1 = @ptrFromInt(p1_addr);
-//                }
-//
-//                if (df.TestAttribute(wnd, df.HASBORDER)>0) {
-//                    df.RepaintBorder(wnd, pp1);
-//                } else if (df.TestAttribute(wnd, df.HASTITLEBAR)>0) {
-//                    df.DisplayTitle(wnd, pp1);
-//                }
-//            }
-//        },
+        df.PAINT => {
+            if (df.isVisible(wnd)>0) {
+                if (wnd.*.wasCleared > 0) {
+                    df.PaintUnderLappers(wnd);
+                } else {
+                    wnd.*.wasCleared = df.TRUE;
+
+                    var pp1:?*df.RECT = null;
+                    if (p1>0) {
+                        const p1_addr:usize = @intCast(p1);
+                        pp1 = @ptrFromInt(p1_addr);
+                    }
+
+                    df.ClearWindow(wnd, pp1, ' '); // pp1 can be null
+                }
+            }
+        },
+        df.BORDER => {
+            if (df.isVisible(wnd)>0) {
+                var pp1:?*df.RECT = null;
+                if (p1>0) {
+                    const p1_addr:usize = @intCast(p1);
+                    pp1 = @ptrFromInt(p1_addr);
+                }
+
+                if (win.TestAttribute(df.HASBORDER)) {
+                    df.RepaintBorder(wnd, pp1);
+                } else if (win.TestAttribute(df.HASTITLEBAR)) {
+                    df.DisplayTitle(wnd, pp1);
+                }
+            }
+        },
 //        df.COMMAND => {
 //            CommandMsg(wnd, p1);
 //        },

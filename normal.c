@@ -4,7 +4,7 @@
 
 #ifdef INCLUDE_MULTI_WINDOWS
 void PaintOverLappers(WINDOW wnd);
-static void near PaintUnderLappers(WINDOW wnd);
+void PaintUnderLappers(WINDOW wnd);
 #endif
 
 //static BOOL InsideWindow(WINDOW, int, int);
@@ -580,27 +580,27 @@ int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            if (GetParent(wnd) != NULL)
 //                PostMessage(GetParent(wnd), msg, p1, p2);
 //            break;
-        case PAINT:
-            if (isVisible(wnd))	{
+//        case PAINT:
+//            if (isVisible(wnd))	{
 #ifdef INCLUDE_MULTI_WINDOWS
-				if (wnd->wasCleared)
-					PaintUnderLappers(wnd);
-				else
+//              if (wnd->wasCleared)
+//                     PaintUnderLappers(wnd);
+//            else
 #endif
-				{
-					wnd->wasCleared = TRUE;
-	                ClearWindow(wnd, (RECT *)p1, ' ');
-				}
-			}
-            break;
-        case BORDER:
-            if (isVisible(wnd))    {
-                if (TestAttribute(wnd, HASBORDER))
-                    RepaintBorder(wnd, (RECT *)p1);
-                else if (TestAttribute(wnd, HASTITLEBAR))
-                    DisplayTitle(wnd, (RECT *)p1);
-            }
-            break;
+// {
+// wnd->wasCleared = TRUE;
+//ClearWindow(wnd, (RECT *)p1, ' ');
+//}
+//}
+//break;
+//        case BORDER:
+//            if (isVisible(wnd))    {
+//                if (TestAttribute(wnd, HASBORDER))
+//                    RepaintBorder(wnd, (RECT *)p1);
+//                else if (TestAttribute(wnd, HASTITLEBAR))
+//                    DisplayTitle(wnd, (RECT *)p1);
+//            }
+//            break;
         case COMMAND:
             CommandMsg(wnd, p1);
             break;
@@ -887,7 +887,7 @@ void PaintOverLappers(WINDOW wnd)
     PaintOverParents(wnd);
 }
 /* --- paint those parts of a window that are overlapped --- */
-static void near PaintUnderLappers(WINDOW wnd)
+void near PaintUnderLappers(WINDOW wnd)
 {
     WINDOW hwnd = NextWindow(wnd);
     while (hwnd != NULL)    {
