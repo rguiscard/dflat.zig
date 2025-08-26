@@ -101,7 +101,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         var y = if (df.WindowMoving>0) df.GetTop(dwnd) else df.GetBottom(dwnd);
         switch (p1)    {
             df.ESC => {
-                df.TerminateMoveSize();
+                TerminateMoveSize();
                 return true;
             },
             df.UP => {
@@ -388,6 +388,49 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
 }
 
+// --------- MOUSE_MOVED Message ----------
+fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    if (df.WindowMoving>0) {
+        var leftmost:c_int = 0;
+        var topmost:c_int = 0;
+        var bottommost:c_int = df.SCREENHEIGHT-2;
+        var rightmost:c_int = df.SCREENWIDTH-2;
+        var x:c_int = @intCast(p1 - df.diff);
+        var y:c_int = @intCast(p2);
+        if ((Window.GetParent(wnd) != null) and
+                (win.TestAttribute(df.NOCLIP) == false)) {
+            const wnd1 = Window.GetParent(wnd);
+            if (Window.get_zin(wnd1)) |win1| {
+                topmost    = @intCast(win1.GetClientTop());
+                leftmost   = @intCast(win1.GetClientLeft());
+                bottommost = @intCast(win1.GetClientBottom());
+                rightmost  = @intCast(win1.GetClientRight());
+            } // else error ?
+        }
+        if ((x < leftmost) or (x > rightmost) or
+                (y < topmost) or (y > bottommost))    {
+            x = @max(x, leftmost);
+            x = @min(x, rightmost);
+            y = @max(y, topmost);
+            y = @min(y, bottommost);
+            _ = df.SendMessage(null,df.MOUSE_CURSOR,x+df.diff,y);
+        }
+        if ((x != df.px) or  (y != df.py))    {
+            df.px = x;
+            df.py = y;
+            df.dragborder(wnd, x, y);
+        }
+        return true;
+    }
+    if (df.WindowSizing>0) {
+        df.sizeborder(wnd, @intCast(p1), @intCast(p2));
+        return true;
+    }
+    return false;
+}
+
+
 pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -458,22 +501,22 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         df.LEFT_BUTTON => {
             LeftButtonMsg(win, p1, p2);
         },
-//        df.MOUSE_MOVED => {
-//            if (MouseMovedMsg(wnd, p1, p2)) {
-//                return df.TRUE;
-//            }
-//        },
-//        df.BUTTON_RELEASED => {
-//            if ((df.WindowMoving>0) or (df.WindowSizing>0)) {
-//                const dwnd = getDummy();
-//                if (df.WindowMoving > 0) {
-//                    df.PostMessage(wnd,df.MOVE,dwnd.*.rc.lf,dwnd.*.rc.tp);
-//                } else {
-//                    df.PostMessage(wnd,df.SIZE,dwnd.*.rc.rt,dwnd.*.rc.bt);
-//                }
-//                TerminateMoveSize(dwnd);
-//            }
-//        },
+        df.MOUSE_MOVED => {
+            if (MouseMovedMsg(win, p1, p2)) {
+                return df.TRUE;
+            }
+        },
+        df.BUTTON_RELEASED => {
+            if ((df.WindowMoving>0) or (df.WindowSizing>0)) {
+                const dwnd = getDummy();
+                if (df.WindowMoving > 0) {
+                    df.PostMessage(wnd,df.MOVE,dwnd.*.rc.lf,dwnd.*.rc.tp);
+                } else {
+                    df.PostMessage(wnd,df.SIZE,dwnd.*.rc.rt,dwnd.*.rc.bt);
+                }
+                TerminateMoveSize();
+            }
+        },
 //        df.MOVE => {
 //            MoveMsg(wnd, p1, p2);
 //        },
@@ -509,4 +552,17 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         }
     }
     return df.TRUE;
+}
+
+// ----- terminate the move or size operation -----
+fn TerminateMoveSize() void {
+    const dwnd = getDummy();
+    df.px = -1;
+    df.py = -1;
+    df.diff = 0;
+    _ = df.SendMessage(dwnd, df.RELEASE_MOUSE, df.TRUE, 0);
+    _ = df.SendMessage(dwnd, df.RELEASE_KEYBOARD, df.TRUE, 0);
+    df.RestoreBorder(dwnd.*.rc);
+    df.WindowMoving = df.FALSE;
+    df.WindowSizing = df.FALSE;
 }

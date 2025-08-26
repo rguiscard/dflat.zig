@@ -9,14 +9,14 @@ void PaintUnderLappers(WINDOW wnd);
 
 void TerminateMoveSize(void);
 static void SaveBorder(RECT);
-static void RestoreBorder(RECT);
+void RestoreBorder(RECT);
 void GetVideoBuffer(WINDOW);
 void PutVideoBuffer(WINDOW);
 #ifdef INCLUDE_MINIMIZE
 static RECT PositionIcon(WINDOW);
 #endif
 void dragborder(WINDOW, int, int);
-static void near sizeborder(WINDOW, int, int);
+void sizeborder(WINDOW, int, int);
 int px = -1, py = -1;
 int diff;
 struct window dwnd = {DUMMY, NULL, NormalProc,
@@ -34,101 +34,8 @@ CLASSDEFS classdefs[] = {
 };
 WINDOW HiddenWindow;
 
-/* --------- DOUBLE_CLICK Message ---------- */
-/*
-static void DoubleClickMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int mx = (int) p1 - GetLeft(wnd);
-    int my = (int) p2 - GetTop(wnd);
-    if (!WindowSizing && !WindowMoving)	{
-        if (HitControlBox(wnd, mx, my))	{
-            PostMessage(wnd, CLOSE_WINDOW, 0, 0);
-			SkipApplicationControls();
-		}
-	}
-}
-*/
-
-/* --------- LEFT_BUTTON Message ---------- */
-static void LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int mx = (int) p1 - GetLeft(wnd);
-    int my = (int) p2 - GetTop(wnd);
-    if (WindowSizing || WindowMoving)
-        return;
-    if (HitControlBox(wnd, mx, my))    {
-        BuildSystemMenu(wnd);
-        return;
-    }
-    if (my == 0 && mx > -1 && mx < WindowWidth(wnd))  {
-        /* ---------- hit the top border -------- */
-        if (TestAttribute(wnd, MINMAXBOX) &&
-                TestAttribute(wnd, HASTITLEBAR))  {
-            if (mx == WindowWidth(wnd)-2)    {
-                if (wnd->condition != ISRESTORED)
-                    /* --- hit the restore box --- */
-                    SendMessage(wnd, RESTORE, 0, 0);
-#ifdef INCLUDE_MAXIMIZE
-                else
-                    /* --- hit the maximize box --- */
-                    SendMessage(wnd, MAXIMIZE, 0, 0);
-#endif
-                return;
-            }
-#ifdef INCLUDE_MINIMIZE
-            if (mx == WindowWidth(wnd)-3)    {
-                /* --- hit the minimize box --- */
-                if (wnd->condition != ISMINIMIZED)
-                    SendMessage(wnd, MINIMIZE, 0, 0);
-                return;
-            }
-#endif
-        }
-#ifdef INCLUDE_MAXIMIZE
-        if (wnd->condition == ISMAXIMIZED)
-            return;
-#endif
-        if (TestAttribute(wnd, MOVEABLE))    {
-            WindowMoving = TRUE;
-            px = mx;
-            py = my;
-            diff = (int) mx;
-            SendMessage(wnd, CAPTURE_MOUSE, TRUE,
-                (PARAM) &dwnd);
-            dragborder(wnd, GetLeft(wnd), GetTop(wnd));
-        }
-        return;
-    }
-    if (mx == WindowWidth(wnd)-1 &&
-            my == WindowHeight(wnd)-1)    {
-        /* ------- hit the resize corner ------- */
-#ifdef INCLUDE_MINIMIZE
-        if (wnd->condition == ISMINIMIZED)
-            return;
-#endif
-        if (!TestAttribute(wnd, SIZEABLE))
-            return;
-#ifdef INCLUDE_MAXIMIZE
-        if (wnd->condition == ISMAXIMIZED)    {
-            if (GetParent(wnd) == NULL)
-                return;
-            if (TestAttribute(GetParent(wnd),HASBORDER))
-                return;
-            /* ----- resizing a maximized window over a
-                    borderless parent ----- */
-            wnd = GetParent(wnd);
-	        if (!TestAttribute(wnd, SIZEABLE))
-    	        return;
-        }
-#endif
-        WindowSizing = TRUE;
-        SendMessage(wnd, CAPTURE_MOUSE,
-            TRUE, (PARAM) &dwnd);
-        dragborder(wnd, GetLeft(wnd), GetTop(wnd));
-    }
-}
-
 /* --------- MOUSE_MOVED Message ---------- */
+/*
 static BOOL MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     if (WindowMoving)    {
@@ -166,6 +73,7 @@ static BOOL MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+*/
 
 #ifdef INCLUDE_MAXIMIZE
 /* --------- MAXIMIZE Message ---------- */
@@ -410,19 +318,19 @@ int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //        case LEFT_BUTTON:
 //            LeftButtonMsg(wnd, p1, p2);
 //            break;
-        case MOUSE_MOVED:
-            if (MouseMovedMsg(wnd, p1, p2))
-                return TRUE;
-            break;
-        case BUTTON_RELEASED:
-            if (WindowMoving || WindowSizing)    {
-                if (WindowMoving)
-                    PostMessage(wnd,MOVE,dwnd.rc.lf,dwnd.rc.tp);
-                else
-                    PostMessage(wnd,SIZE,dwnd.rc.rt,dwnd.rc.bt);
-                TerminateMoveSize();
-            }
-            break;
+//        case MOUSE_MOVED:
+//            if (MouseMovedMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
+//        case BUTTON_RELEASED:
+//            if (WindowMoving || WindowSizing)    {
+//                if (WindowMoving)
+//                    PostMessage(wnd,MOVE,dwnd.rc.lf,dwnd.rc.tp);
+//                else
+//                    PostMessage(wnd,SIZE,dwnd.rc.rt,dwnd.rc.bt);
+//                TerminateMoveSize();
+//            }
+//            break;
         case MOVE:
             MoveMsg(wnd, p1, p2);
             break;
@@ -521,6 +429,7 @@ static RECT PositionIcon(WINDOW wnd)
 #endif
 
 /* ----- terminate the move or size operation ----- */
+/*
 void TerminateMoveSize(void)
 {
     px = py = -1;
@@ -530,6 +439,7 @@ void TerminateMoveSize(void)
     RestoreBorder(dwnd.rc);
     WindowMoving = WindowSizing = FALSE;
 }
+*/
 /* ---- build a dummy window border for moving or sizing --- */
 void dragborder(WINDOW wnd, int x, int y)
 {
@@ -549,7 +459,7 @@ void dragborder(WINDOW wnd, int x, int y)
     RepaintBorder(&dwnd, NULL);
 }
 /* ---- write the dummy window border for sizing ---- */
-static void near sizeborder(WINDOW wnd, int rt, int bt)
+void sizeborder(WINDOW wnd, int rt, int bt)
 {
     int leftmost = GetLeft(wnd)+10;
     int topmost = GetTop(wnd)+3;
@@ -752,7 +662,7 @@ static void SaveBorder(RECT rc)
     }
 }
 /* ---- restore video area used by dummy window border ---- */
-static void RestoreBorder(RECT rc)
+void RestoreBorder(RECT rc)
 {
     if (Bsave != NULL)    {
         RECT lrc;
