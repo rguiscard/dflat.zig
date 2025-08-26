@@ -7,6 +7,9 @@ const rect = @import("Rect.zig");
 const Klass = @import("Classes.zig");
 
 var dummyWnd:?Window = null;
+//var px:c_int = -1;
+//var py:c_int = -1;
+//var diff:c_int = 0;
 
 fn getDummy() df.WINDOW {
     if(dummyWnd == null) {
@@ -300,6 +303,91 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
     }
 }
 
+// --------- DOUBLE_CLICK Message ----------
+fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    const mx = p1 - win.GetLeft();
+    const my = p2 - win.GetTop();
+    if ((df.WindowSizing == 0) and (df.WindowMoving==0)) {
+        if (df.HitControlBox(wnd, mx, my)) {
+            _ = df.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
+            lists.SkipApplicationControls();
+        }
+    }
+}
+
+// --------- LEFT_BUTTON Message ----------
+fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    var wnd = win.win; // this may change
+    const dwnd = getDummy();
+    const mx = p1 - win.GetLeft();
+    const my = p2 - win.GetTop();
+    if ((df.WindowSizing>0) or (df.WindowMoving>0))
+        return;
+    if (df.HitControlBox(wnd, mx, my)) {
+        df.BuildSystemMenu(wnd);
+        return;
+    }
+    if ((my == 0) and (mx > -1) and (mx < win.WindowWidth())) {
+        // ---------- hit the top border --------
+        if (win.TestAttribute(df.MINMAXBOX) and
+                win.TestAttribute(df.HASTITLEBAR)) {
+            if (mx == win.WindowWidth()-2) {
+                if (wnd.*.condition != df.ISRESTORED) {
+                    // --- hit the restore box ---
+                    _ = win.sendMessage(df.RESTORE, 0, 0);
+                } else {
+                    // --- hit the maximize box ---
+                    _ = win.sendMessage(df.MAXIMIZE, 0, 0);
+                }
+                return;
+            }
+            if (mx == win.WindowWidth()-3) {
+                // --- hit the minimize box ---
+                if (wnd.*.condition != df.ISMINIMIZED) {
+                    _ = win.sendMessage(df.MINIMIZE, 0, 0);
+                }
+                return;
+            }
+        }
+        if (wnd.*.condition == df.ISMAXIMIZED) {
+            return;
+        }
+        if (win.TestAttribute(df.MOVEABLE))    {
+            df.WindowMoving = df.TRUE;
+            df.px = @intCast(mx);
+            df.py = @intCast(my);
+            df.diff = @intCast(mx);
+            _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
+            df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+        }
+        return;
+    }
+    if ((mx == win.WindowWidth()-1) and
+            (my == win.WindowHeight()-1)) {
+        // ------- hit the resize corner -------
+        if (wnd.*.condition == df.ISMINIMIZED)
+            return;
+        if (win.TestAttribute(df.SIZEABLE) == false)
+            return;
+        if (wnd.*.condition == df.ISMAXIMIZED) {
+            if (Window.GetParent(wnd) == null) {
+                return;
+            }
+            if (df.TestAttribute(Window.GetParent(wnd), df.HASBORDER)>0) {
+                return;
+            }
+            // ----- resizing a maximized window over a borderless parent -----
+            wnd = Window.GetParent(wnd);
+            if (df.TestAttribute(wnd, df.SIZEABLE) == 0)
+                return;
+        }
+        df.WindowSizing = df.TRUE;
+        _ = df.SendMessage(wnd, df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
+        df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+    }
+}
+
 pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -364,12 +452,12 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         df.SETFOCUS => {
             SetFocusMsg(win, p1);
         },
-//        df.DOUBLE_CLICK => {
-//            DoubleClickMsg(wnd, p1, p2);
-//        },
-//        df.LEFT_BUTTON => {
-//            LeftButtonMsg(wnd, p1, p2);
-//        },
+        df.DOUBLE_CLICK => {
+            DoubleClickMsg(win, p1, p2);
+        },
+        df.LEFT_BUTTON => {
+            LeftButtonMsg(win, p1, p2);
+        },
 //        df.MOUSE_MOVED => {
 //            if (MouseMovedMsg(wnd, p1, p2)) {
 //                return df.TRUE;

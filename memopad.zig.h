@@ -23,6 +23,9 @@ void PaintOverLappers(WINDOW);
 void PaintUnderLappers(WINDOW);
 void TerminateMoveSize(void);
 void dragborder(WINDOW, int, int);
+extern int px;
+extern int py;
+extern int diff;
 
 // pictbox.c
 typedef struct {

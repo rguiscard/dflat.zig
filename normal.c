@@ -17,8 +17,8 @@ static RECT PositionIcon(WINDOW);
 #endif
 void dragborder(WINDOW, int, int);
 static void near sizeborder(WINDOW, int, int);
-static int px = -1, py = -1;
-static int diff;
+int px = -1, py = -1;
+int diff;
 struct window dwnd = {DUMMY, NULL, NormalProc,
                                 {-1,-1,-1,-1}};
 void SetParent(WINDOW, WINDOW);
@@ -34,95 +34,8 @@ CLASSDEFS classdefs[] = {
 };
 WINDOW HiddenWindow;
 
-/* --------- SETFOCUS Message ---------- */
-static void SetFocusMsg(WINDOW wnd, PARAM p1)
-{
-	RECT rc = {0,0,0,0};
-    if (p1 && wnd != NULL && inFocus != wnd)    {
-		WINDOW This, thispar;
-		WINDOW that = NULL, thatpar = NULL;
-
-		WINDOW cwnd = wnd, fwnd = GetParent(wnd);
-		/* ---- post focus in ancestors ---- */
-		while (fwnd != NULL)	{
-			fwnd->childfocus = cwnd;
-			cwnd = fwnd;
-			fwnd = GetParent(fwnd);
-		}
-		/* ---- de-post focus in self and children ---- */
-		fwnd = wnd;
-		while (fwnd != NULL)	{
-			cwnd = fwnd->childfocus;
-			fwnd->childfocus = NULL;
-			fwnd = cwnd;
-		}
-
-		This = wnd;
-		that = thatpar = inFocus;
-
-		/* ---- find common ancestor of prev focus and this window --- */
-		while (thatpar != NULL)	{
-			thispar = wnd;
-			while (thispar != NULL)	{
-				if (This == CaptureMouse || This == CaptureKeyboard)	{
-					/* ---- don't repaint if this window has capture ---- */
-					that = thatpar = NULL;
-					break;
-				}
-				if (thispar == thatpar)	{
-					/* ---- don't repaint if SAVESELF window had focus ---- */
-					if (This != that && TestAttribute(that, SAVESELF))
-						that = thatpar = NULL;
-					break;
-				}
-				This = thispar;
-				thispar = GetParent(thispar);
-			}
-			if (thispar != NULL)
-				break;
-			that = thatpar;
-			thatpar = GetParent(thatpar);
-		}
-		if (inFocus != NULL)
-	        SendMessage(inFocus, SETFOCUS, FALSE, 0);
-        inFocus = wnd;
-		if (that != NULL && isVisible(wnd))	{
-			rc = subRectangle(WindowRect(that), WindowRect(This));
-			if (!ValidRect(rc))	{
-				if (ApplicationWindow != NULL)	{
-					WINDOW fwnd = FirstWindow(ApplicationWindow);
-					while (fwnd != NULL)	{
-						if (!isAncestor(wnd, fwnd))	{
-							rc = subRectangle(WindowRect(wnd),WindowRect(fwnd));
-							if (ValidRect(rc))
-								break;
-						}
-						fwnd = NextWindow(fwnd);
-					}
-				}
-			}
-		}
-		if (that != NULL && !ValidRect(rc) && isVisible(wnd))
-			This = NULL;
-		ReFocus(wnd);
-		if (This != NULL &&
-				(!isVisible(This) || !TestAttribute(This, SAVESELF)))	{
-			wnd->wasCleared = FALSE;
-	        SendMessage(This, SHOW_WINDOW, 0, 0);
-		}
-		else if (!isVisible(wnd))
-	        SendMessage(wnd, SHOW_WINDOW, 0, 0);
-		else 
-		    SendMessage(wnd, BORDER, 0, 0);
-    }
-    else if (!p1 && inFocus == wnd)    {
-        /* -------- clearing focus --------- */
-        inFocus = NULL;
-        SendMessage(wnd, BORDER, 0, 0);
-    }
-}
-
 /* --------- DOUBLE_CLICK Message ---------- */
+/*
 static void DoubleClickMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int mx = (int) p1 - GetLeft(wnd);
@@ -134,6 +47,7 @@ static void DoubleClickMsg(WINDOW wnd, PARAM p1, PARAM p2)
 		}
 	}
 }
+*/
 
 /* --------- LEFT_BUTTON Message ---------- */
 static void LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -490,12 +404,12 @@ int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //        case SETFOCUS:
 //            SetFocusMsg(wnd, p1);
 //            break;
-        case DOUBLE_CLICK:
-            DoubleClickMsg(wnd, p1, p2);
-            break;
-        case LEFT_BUTTON:
-            LeftButtonMsg(wnd, p1, p2);
-            break;
+//        case DOUBLE_CLICK:
+//            DoubleClickMsg(wnd, p1, p2);
+//            break;
+//        case LEFT_BUTTON:
+//            LeftButtonMsg(wnd, p1, p2);
+//            break;
         case MOUSE_MOVED:
             if (MouseMovedMsg(wnd, p1, p2))
                 return TRUE;
