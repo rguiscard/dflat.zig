@@ -45,7 +45,7 @@ pub const Klass = enum (c_int) {
 // The order need to match enum Klass
 // Class Name  Base Class  Processor  Attribute
 // ----------  ----------  ---------  ---------
-pub const classdefs = [_]struct{
+pub const defs = [_]struct{
     []const u8,
     Klass,
     ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,

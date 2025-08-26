@@ -7,7 +7,6 @@ void PaintOverLappers(WINDOW wnd);
 void PaintUnderLappers(WINDOW wnd);
 #endif
 
-//static BOOL InsideWindow(WINDOW, int, int);
 void TerminateMoveSize(void);
 static void SaveBorder(RECT);
 static void RestoreBorder(RECT);
@@ -16,7 +15,7 @@ void PutVideoBuffer(WINDOW);
 #ifdef INCLUDE_MINIMIZE
 static RECT PositionIcon(WINDOW);
 #endif
-static void near dragborder(WINDOW, int, int);
+void dragborder(WINDOW, int, int);
 static void near sizeborder(WINDOW, int, int);
 static int px = -1, py = -1;
 static int diff;
@@ -34,122 +33,6 @@ CLASSDEFS classdefs[] = {
     #include "classes.h"
 };
 WINDOW HiddenWindow;
-
-/* --------- KEYBOARD Message ---------- */
-/*
-static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    if (WindowMoving || WindowSizing)    {
-        // -- move or size a window with keyboard -- 
-        int x, y;
-        x=WindowMoving?GetLeft(&dwnd):GetRight(&dwnd);
-        y=WindowMoving?GetTop(&dwnd):GetBottom(&dwnd);
-        switch ((int)p1)    {
-            case ESC:
-                TerminateMoveSize();
-                return TRUE;
-            case UP:
-                if (y)
-                    --y;
-                break;
-            case DN:
-                if (y < SCREENHEIGHT-1)
-                    y++;
-                break;
-            case FWD:
-                if (x < SCREENWIDTH-1)
-                    x++;
-                break;
-            case BS:
-                if (x)
-                    --x;
-                break;
-            case '\r':
-                SendMessage(wnd,BUTTON_RELEASED,x,y);
-            default:
-                return TRUE;
-        }
-        // -- use the mouse functions to move/size - 
-        SendMessage(wnd, MOUSE_CURSOR, x, y);
-        SendMessage(wnd, MOUSE_MOVED, x, y);
-        return TRUE;
-    }
-    switch ((int)p1)    {
-        case F1:
-            SendMessage(wnd, COMMAND, ID_HELP, 0);
-            return TRUE;
-        case ' ':
-            if ((int)p2 & ALTKEY)
-                if (TestAttribute(wnd, HASTITLEBAR))
-                    if (TestAttribute(wnd, CONTROLBOX))
-                        BuildSystemMenu(wnd);
-            return TRUE;
-        case CTRL_F4:
-            if (TestAttribute(wnd, CONTROLBOX))	{
-            	SendMessage(wnd, CLOSE_WINDOW, 0, 0);
-				SkipApplicationControls();
-	            return TRUE;
-			}
-			break;
-        default:
-            break;
-    }
-    return FALSE;
-}
-*/
-
-/* --------- COMMAND Message ---------- */
-static void CommandMsg(WINDOW wnd, PARAM p1)
-{
-    switch ((int)p1)    {
-        case ID_SYSMOVE:
-            SendMessage(wnd, CAPTURE_MOUSE, TRUE,
-                (PARAM) &dwnd);
-            SendMessage(wnd, CAPTURE_KEYBOARD, TRUE,
-                (PARAM) &dwnd);
-            SendMessage(wnd, MOUSE_CURSOR,
-                GetLeft(wnd), GetTop(wnd));
-            WindowMoving = TRUE;
-            dragborder(wnd, GetLeft(wnd), GetTop(wnd));
-            break;
-        case ID_SYSSIZE:
-            SendMessage(wnd, CAPTURE_MOUSE, TRUE,
-                (PARAM) &dwnd);
-            SendMessage(wnd, CAPTURE_KEYBOARD, TRUE,
-                (PARAM) &dwnd);
-            SendMessage(wnd, MOUSE_CURSOR,
-                GetRight(wnd), GetBottom(wnd));
-            WindowSizing = TRUE;
-            dragborder(wnd, GetLeft(wnd), GetTop(wnd));
-            break;
-        case ID_SYSCLOSE:
-            SendMessage(wnd, CLOSE_WINDOW, 0, 0);
-			SkipApplicationControls();
-            break;
-#ifdef INCLUDE_RESTORE
-        case ID_SYSRESTORE:
-            SendMessage(wnd, RESTORE, 0, 0);
-            break;
-#endif
-#ifdef INCLUDE_MINIMIZE
-        case ID_SYSMINIMIZE:
-            SendMessage(wnd, MINIMIZE, 0, 0);
-            break;
-#endif
-#ifdef INCLUDE_MAXIMIZE
-        case ID_SYSMAXIMIZE:
-            SendMessage(wnd, MAXIMIZE, 0, 0);
-            break;
-#endif
-#ifdef INCLUDE_HELP
-        case ID_HELP:
-            DisplayHelp(wnd,ClassNames[GetClass(wnd)]);
-            break;
-#endif
-        default:
-            break;
-    }
-}
 
 /* --------- SETFOCUS Message ---------- */
 static void SetFocusMsg(WINDOW wnd, PARAM p1)
@@ -601,12 +484,12 @@ int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //                    DisplayTitle(wnd, (RECT *)p1);
 //            }
 //            break;
-        case COMMAND:
-            CommandMsg(wnd, p1);
-            break;
-        case SETFOCUS:
-            SetFocusMsg(wnd, p1);
-            break;
+//        case COMMAND:
+//            CommandMsg(wnd, p1);
+//            break;
+//        case SETFOCUS:
+//            SetFocusMsg(wnd, p1);
+//            break;
         case DOUBLE_CLICK:
             DoubleClickMsg(wnd, p1, p2);
             break;
@@ -734,7 +617,7 @@ void TerminateMoveSize(void)
     WindowMoving = WindowSizing = FALSE;
 }
 /* ---- build a dummy window border for moving or sizing --- */
-static void near dragborder(WINDOW wnd, int x, int y)
+void dragborder(WINDOW wnd, int x, int y)
 {
     RestoreBorder(dwnd.rc);
     /* ------- build the dummy window -------- */
@@ -975,22 +858,6 @@ static void RestoreBorder(RECT rc)
         Bsave = NULL;
     }
 }
-/* ----- test if screen coordinates are in a window ---- */
-/*
-static BOOL InsideWindow(WINDOW wnd, int x, int y)
-{
-    RECT rc;
-    rc = WindowRect(wnd);
-    if (!TestAttribute(wnd, NOCLIP))    {
-        WINDOW pwnd = GetParent(wnd);
-        while (pwnd != NULL)    {
-            rc = subRectangle(rc, ClientRect(pwnd));
-            pwnd = GetParent(pwnd);
-        }
-    }
-    return InsideRect(x, y, rc);
-}
-*/
 
 BOOL isDerivedFrom(WINDOW wnd, CLASS Class)
 {

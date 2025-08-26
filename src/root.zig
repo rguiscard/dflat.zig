@@ -39,9 +39,9 @@ pub export fn DefaultWndProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: 
 }
 
 pub fn zBaseWndProc(klass: df.CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
-    const base_class = Klass.classdefs[@intCast(klass)][1]; // base
+    const base_class = Klass.defs[@intCast(klass)][1]; // base
     const index:c_int = @intFromEnum(base_class);
-    if (Klass.classdefs[@intCast(index)][2]) |proc| { // wndproc
+    if (Klass.defs[@intCast(index)][2]) |proc| { // wndproc
         return proc(win, msg, p1, p2);
     }
     return df.FALSE;
@@ -49,7 +49,7 @@ pub fn zBaseWndProc(klass: df.CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM,
 
 pub fn zDefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const klass = win.win.*.Class;
-    if (Klass.classdefs[@intCast(klass)][2]) |proc| { // wndproc
+    if (Klass.defs[@intCast(klass)][2]) |proc| { // wndproc
         return proc(win, msg, p1, p2);
     }
     return zBaseWndProc(klass, win, msg, p1, p2);

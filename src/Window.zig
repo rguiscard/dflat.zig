@@ -108,8 +108,8 @@ pub fn create(
             }
         }
         if (wndproc == null) {
-//            wnd.*.wndproc = Klass.classdefs[@intCast(klass)][2]; // wndproc
-            self.wndproc = Klass.classdefs[@intCast(klass)][2]; // wndproc
+//            wnd.*.wndproc = Klass.defs[@intCast(klass)][2]; // wndproc
+            self.wndproc = Klass.defs[@intCast(klass)][2]; // wndproc
         } else {
 //            wnd.*.wndproc = wndproc;
             self.wndproc = wndproc;
@@ -118,7 +118,7 @@ pub fn create(
         // ---- derive attributes of base classes ----
         var base = klass;
         while (base != -1) {
-            const cls = Klass.classdefs[@intCast(base)];
+            const cls = Klass.defs[@intCast(base)];
             const attr:c_int = @intCast(cls[3]); // attributes
             // df.AddAttribute(wnd, attr);
             wnd.*.attrib = wnd.*.attrib | attr;

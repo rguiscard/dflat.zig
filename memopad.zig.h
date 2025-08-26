@@ -22,6 +22,7 @@ void PutVideoBuffer(WINDOW);
 void PaintOverLappers(WINDOW);
 void PaintUnderLappers(WINDOW);
 void TerminateMoveSize(void);
+void dragborder(WINDOW, int, int);
 
 // pictbox.c
 typedef struct {

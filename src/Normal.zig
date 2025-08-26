@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const lists = @import("Lists.zig");
 const rect = @import("Rect.zig");
+const Klass = @import("Classes.zig");
 
 var dummyWnd:?Window = null;
 
@@ -156,6 +157,149 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
+// --------- COMMAND Message ----------
+fn CommandMsg(win:*Window, p1:df.PARAM) void {
+    const wnd = win.win;
+    const dwnd = getDummy();
+    const dwnd_p2:df.PARAM = @intCast(@intFromPtr(dwnd));
+    switch (p1) {
+        df.ID_SYSMOVE => {
+            _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
+            _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
+            _ = win.sendMessage(df.MOUSE_CURSOR, df.GetLeft(wnd), df.GetTop(wnd));
+            df.WindowMoving = df.TRUE;
+            df.dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
+//            dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
+        },
+        df.ID_SYSSIZE => {
+            _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
+            _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
+            _ = win.sendMessage(df.MOUSE_CURSOR, df.GetRight(wnd), df.GetBottom(wnd));
+            df.WindowSizing = df.TRUE;
+            df.dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
+//            dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
+        },
+        df.ID_SYSCLOSE => {
+            _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
+            lists.SkipApplicationControls();
+        },
+        df.ID_SYSRESTORE => {
+            _ = win.sendMessage(df.RESTORE, 0, 0);
+        },
+        df.ID_SYSMINIMIZE => {
+            _ = win.sendMessage(df.MINIMIZE, 0, 0);
+        },
+        df.ID_SYSMAXIMIZE => {
+            _ = win.sendMessage(df.MAXIMIZE, 0, 0);
+        },
+        df.ID_HELP => {
+            const name = Klass.defs[@intCast(df.GetClass(wnd))][0];
+            _ = df.DisplayHelp(wnd, @constCast(name.ptr));
+        },
+        else => {
+        }
+    }
+}
+
+// --------- SETFOCUS Message ----------
+fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
+    const wnd = win.win;
+    var rc:df.RECT = .{.lf=0, .tp=0, .rt=0, .bt=0};
+    if ((p1>0) and (df.inFocus != wnd)) {
+        // set focus
+        var this:df.WINDOW = null;
+        var thispar:df.WINDOW = null;
+        var that:df.WINDOW = null;
+        var thatpar:df.WINDOW = null;
+
+        var cwnd = wnd;
+        var fwnd = Window.GetParent(wnd);
+
+        // ---- post focus in ancestors ----
+        while (fwnd != null) {
+            fwnd.*.childfocus = cwnd;
+            cwnd = fwnd;
+            fwnd = Window.GetParent(fwnd);
+        }
+        // ---- de-post focus in self and children ----
+        fwnd = wnd;
+        while (fwnd != null) {
+            cwnd = fwnd.*.childfocus;
+            fwnd.*.childfocus = null;
+            fwnd = cwnd;
+        }
+
+        this = wnd;
+        that = df.inFocus;
+        thatpar = df.inFocus;
+        // ---- find common ancestor of prev focus and this window ---
+        while (thatpar != null) {
+            thispar = wnd;
+            while (thispar != null) {
+                if ((this == df.CaptureMouse) or (this == df.CaptureKeyboard)) {
+                    // ---- don't repaint if this window has capture ----
+                    that = null;
+                    thatpar = null;
+                    break;
+                }
+                if (thispar == thatpar) {
+                    // ---- don't repaint if SAVESELF window had focus ----
+                    if ((this != that) and (df.TestAttribute(that, df.SAVESELF)>0)) {
+                        that = null;
+                        thatpar = null;
+                    }
+                    break;
+                }
+                this = thispar;
+                thispar = Window.GetParent(thispar);
+            }
+            if (thispar != null) {
+                break;
+            }
+            that = thatpar;
+            thatpar = Window.GetParent(thatpar);
+        }
+        if (df.inFocus != null) {
+            _ = df.SendMessage(df.inFocus, df.SETFOCUS, df.FALSE, 0);
+        }
+        df.inFocus = wnd;
+        if ((that != null) and (df.isVisible(wnd)>0)) {
+            rc = df.subRectangle(df.WindowRect(that), df.WindowRect(this));
+            if (df.ValidRect(rc) == false) {
+                if (df.ApplicationWindow != null) {
+                    var ffwnd = Window.FirstWindow(df.ApplicationWindow);
+                    while (ffwnd != null) {
+                        if (df.isAncestor(wnd, ffwnd) == 0) {
+                            rc = df.subRectangle(df.WindowRect(wnd),df.WindowRect(ffwnd));
+                            if (df.ValidRect(rc)) {
+                                break;
+                            }
+                        }
+                        ffwnd = Window.NextWindow(ffwnd);
+                    }
+                }
+            }
+        }
+        if ((that != null) and (df.ValidRect(rc)==false) and (df.isVisible(wnd)>0)) {
+            this = null;
+        }
+        df.ReFocus(wnd);
+        if ((this != null) and ((df.isVisible(this) == 0) or (df.TestAttribute(this, df.SAVESELF) == 0))) {
+            wnd.*.wasCleared = df.FALSE;
+            _ = df.SendMessage(this, df.SHOW_WINDOW, 0, 0);
+        } else if (df.isVisible(wnd) == 0) {
+            _ = df.SendMessage(wnd, df.SHOW_WINDOW, 0, 0);
+        } else {
+            _ = df.SendMessage(wnd, df.BORDER, 0, 0);
+        }
+    }
+    else if ((p1 == 0) and (df.inFocus == wnd)) {
+        // -------- clearing focus ---------
+        df.inFocus = null;
+        _ = win.sendMessage(df.BORDER, 0, 0);
+    }
+}
+
 pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -214,12 +358,12 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
                 }
             }
         },
-//        df.COMMAND => {
-//            CommandMsg(wnd, p1);
-//        },
-//        df.SETFOCUS => {
-//            df.SetFocusMsg(wnd, p1);
-//        },
+        df.COMMAND => {
+            CommandMsg(win, p1);
+        },
+        df.SETFOCUS => {
+            SetFocusMsg(win, p1);
+        },
 //        df.DOUBLE_CLICK => {
 //            DoubleClickMsg(wnd, p1, p2);
 //        },
