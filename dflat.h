@@ -151,8 +151,8 @@ typedef struct window {
 	BOOL TimePosted; /* True if time has been posted        */
 #ifdef INCLUDE_PICTUREBOX
 	/* ------------- picture box fields ------------------- */
-	int VectorCount;  /* number of vectors in vector list   */
-	void *VectorList; /* list of picture box vectors        */
+//	int VectorCount;  /* number of vectors in vector list   */
+//	void *VectorList; /* list of picture box vectors        */
 #endif
     void *zin; /* Point to Window in zig */
 } * WINDOW;

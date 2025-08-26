@@ -20,6 +20,9 @@ prevsibling:df.WINDOW = null,  // previous sibling
 // ---------------- dialog box fields ----------------- 
 modal: bool = false, // True if a modeless dialog box
 
+// ------------- picture box fields -------------------
+VectorList:?[]df.VECT = null, // list of picture box vectors
+
 allocator: std.mem.Allocator,
 win: df.WINDOW,
 

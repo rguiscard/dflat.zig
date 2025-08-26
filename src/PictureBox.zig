@@ -48,13 +48,11 @@ pub const VectCvt:[3][11][2][3]u8 = .{
 };
 
 // -- compute whether character is first, middle, or last --
-fn FindVector(wnd:df.WINDOW, rc:df.RECT, x:c_int, y:c_int) c_int {
+fn FindVector(win:*Window, rc:df.RECT, x:c_int, y:c_int) c_int {
     var coll:c_int = -1;
 
-    const vc:[*c]df.VECT = @alignCast(@ptrCast(wnd.*.VectorList));
-    if (vc) |vectors| {
-        const vcs:[]df.VECT = vectors[0..@intCast(wnd.*.VectorCount)];
-        for(vcs) |v| {
+    if (win.VectorList) |vectors| {
+        for(vectors) |v| {
             const rcc:df.RECT = v.rc;
             // --- skip the colliding vector ---
             if ((rcc.lf == rc.lf) and (rcc.rt == rc.rt) and
@@ -95,9 +93,8 @@ fn FindVector(wnd:df.WINDOW, rc:df.RECT, x:c_int, y:c_int) c_int {
     return coll;
 }
 
-fn PaintVector(wnd:df.WINDOW, rc:df.RECT) void {
-    const win:*Window = @constCast(@fieldParentPtr("win", &wnd));
-
+fn PaintVector(win:*Window, rc:df.RECT) void {
+    const wnd = win.win;
     var len: c_int = 0;
     var nc: c_uint = 0;
     var vertvect: c_int = 0;
@@ -134,7 +131,7 @@ fn PaintVector(wnd:df.WINDOW, rc:df.RECT) void {
         for (0..CharInWnd.len) |cw| {
             if (ch == CharInWnd[cw]) {
                 // ---- hit another vector character ----
-                coll = FindVector(wnd, rc, xi, yi);
+                coll = FindVector(win, rc, xi, yi);
                 if (coll != -1) {
                     // compute first/middle/last subscript
                     if (i == len-1) {
@@ -152,7 +149,8 @@ fn PaintVector(wnd:df.WINDOW, rc:df.RECT) void {
     }
 }
 
-fn PaintBar(wnd:df.WINDOW, rc:df.RECT, vt:df.VectTypes) void {
+fn PaintBar(win:*Window, rc:df.RECT, vt:df.VectTypes) void {
+    const wnd = win.win;
     var len:c_int = 0;
     var vertbar:c_int = 0;
     const tys = [_]c_int{219, 178, 177, 176};
@@ -180,84 +178,90 @@ fn PaintBar(wnd:df.WINDOW, rc:df.RECT, vt:df.VectTypes) void {
     }
 }
 
-fn PaintMsg(wnd:df.WINDOW) void {
-    const vc:[*c]df.VECT = @alignCast(@ptrCast(wnd.*.VectorList));
-    if (vc) |vectors| {
-        const vcs:[]df.VECT = vectors[0..@intCast(wnd.*.VectorCount)];
-        for(vcs) |v| {
+fn PaintMsg(win:*Window) void {
+    if (win.VectorList) |vectors| {
+        for(vectors) |v| {
             if (v.vt == df.VECTOR) {
-                PaintVector(wnd, v.rc);
+                PaintVector(win, v.rc);
             } else {
-                PaintBar(wnd, v.rc, v.vt);
+                PaintBar(win, v.rc, v.vt);
             }
         }
     }
 }
 
-fn DrawVectorMsg(wnd:df.WINDOW, p1:df.PARAM, vt:df.VectTypes) void {
-    // This is essentially append the vt into wnd.*.VectorList
-    // Probably can be rewritten better
+fn DrawVectorMsg(win:*Window, p1:df.PARAM, vt:df.VectTypes) void {
     if (p1 != 0) {
-        var vc:df.VECT = undefined;
-        const size:usize = @intCast(@sizeOf(df.VECT) * (wnd.*.VectorCount + 1));
-        wnd.*.VectorList = df.DFrealloc(wnd.*.VectorList, size);
-        vc.vt = vt;
-        const p1_addr:usize = @intCast(p1);
-        const p1_ptr:*df.RECT = @ptrFromInt(p1_addr);
-        vc.rc = p1_ptr.*;
-        
-        const vlist:[*c]df.VECT = @alignCast(@ptrCast(wnd.*.VectorList));
-        if (vlist) |vectors| {
-            const addr:usize = @intCast(wnd.*.VectorCount);
-            const v = vectors+addr;
-            v.* = vc;
+        var vectors:std.ArrayList(df.VECT) = undefined;
+        if (win.VectorList) |list| {
+            vectors = std.ArrayList(df.VECT).fromOwnedSlice(list);
+        } else {
+            if (std.ArrayList(df.VECT).initCapacity(win.allocator, 0)) |list| {
+                vectors = list;
+            } else |_| {
+                // error
+            }
+       
         }
-        wnd.*.VectorCount += 1;
+        if (vectors.addOne(win.allocator)) |vc| {
+            vc.*.vt = vt;
+            const p1_addr:usize = @intCast(p1);
+            const p1_ptr:*df.RECT = @ptrFromInt(p1_addr);
+            vc.*.rc = p1_ptr.*;
+        } else |_| {
+            // error
+        }
+
+        if (vectors.toOwnedSlice(win.allocator)) |list| {
+            win.VectorList = list;
+            vectors.deinit(win.allocator);
+        } else |_| {
+            // error
+        }
     }
 }
 
-fn DrawBoxMsg(wnd:df.WINDOW, p1:df.PARAM) void {
+fn DrawBoxMsg(win:*Window, p1:df.PARAM) void {
     if (p1 != 0)    {
         const p1_addr:usize = @intCast(p1);
         const p1_ptr:*df.RECT = @ptrFromInt(p1_addr); 
         var rc:df.RECT = p1_ptr.*;
         rc.bt = rc.tp;
-        _ = df.SendMessage(wnd, df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.TRUE);
+        _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.TRUE);
         rc = p1_ptr.*;
         rc.lf = rc.rt;
-        _ = df.SendMessage(wnd, df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.FALSE);
+        _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.FALSE);
         rc = p1_ptr.*;
         rc.tp = rc.bt;
-        _ = df.SendMessage(wnd, df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.TRUE);
+        _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.TRUE);
         rc = p1_ptr.*;
         rc.rt = rc.lf;
-        _ = df.SendMessage(wnd, df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.FALSE);
+        _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.FALSE);
     }
 }
 
 pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
     switch (message) {
         df.PAINT => {
             _ = root.zBaseWndProc(df.PICTUREBOX, win, message, p1, p2);
-            PaintMsg(wnd);
+            PaintMsg(win);
             return df.TRUE;
         },
         df.DRAWVECTOR => {
-            DrawVectorMsg(wnd, p1, df.VECTOR);
+            DrawVectorMsg(win, p1, df.VECTOR);
             return df.TRUE;
         },
         df.DRAWBOX => {
-            DrawBoxMsg(wnd, p1);
+            DrawBoxMsg(win, p1);
             return df.TRUE;
         },
         df.DRAWBAR => {
-            DrawVectorMsg(wnd, p1, @intCast(p2));
+            DrawVectorMsg(win, p1, @intCast(p2));
             return df.TRUE;
         },
         df.CLOSE_WINDOW => {
-            if (wnd.*.VectorList) |list| {
-                df.free(list);
+            if (win.VectorList) |list| {
+                win.allocator.free(list);
             }
         },
         else => {
