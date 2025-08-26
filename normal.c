@@ -36,6 +36,7 @@ CLASSDEFS classdefs[] = {
 WINDOW HiddenWindow;
 
 /* --------- CREATE_WINDOW Message ---------- */
+/*
 static void CreateWindowMsg(WINDOW wnd)
 {
     AppendWindow(wnd);
@@ -44,8 +45,10 @@ static void CreateWindowMsg(WINDOW wnd)
     if (TestAttribute(wnd, SAVESELF) && isVisible(wnd))
         GetVideoBuffer(wnd);
 }
+*/
 
 /* --------- SHOW_WINDOW Message ---------- */
+/*
 static void ShowWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     if (GetParent(wnd) == NULL || isVisible(GetParent(wnd)))    {
@@ -56,7 +59,7 @@ static void ShowWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
         SetVisible(wnd);
         SendMessage(wnd, PAINT, 0, TRUE);
         SendMessage(wnd, BORDER, 0, 0);
-        /* --- show the children of this window --- */
+        // --- show the children of this window --- 
 		cwnd = FirstWindow(wnd);
 		while (cwnd != NULL)	{
             if (cwnd->condition != ISCLOSING)
@@ -65,13 +68,15 @@ static void ShowWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
         }
     }
 }
+*/
 
 /* --------- HIDE_WINDOW Message ---------- */
+/*
 static void HideWindowMsg(WINDOW wnd)
 {
     if (isVisible(wnd))    {
         ClearVisible(wnd);
-        /* --- paint what this window covered --- */
+        // --- paint what this window covered --- 
 	    if (TestAttribute(wnd, SAVESELF))
             PutVideoBuffer(wnd);
 #ifdef INCLUDE_MULTI_WINDOWS
@@ -81,6 +86,7 @@ static void HideWindowMsg(WINDOW wnd)
 		wnd->wasCleared = FALSE;
     }
 }
+*/
 
 /* --------- KEYBOARD Message ---------- */
 static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -614,8 +620,8 @@ int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //        case HIDE_WINDOW:
 //            HideWindowMsg(wnd);
 //            break;
-        case INSIDE_WINDOW:
-            return InsideWindow(wnd, (int) p1, (int) p2);
+//        case INSIDE_WINDOW:
+//            return InsideWindow(wnd, (int) p1, (int) p2);
         case KEYBOARD:
             if (KeyboardMsg(wnd, p1, p2))
                 return TRUE;
@@ -1021,6 +1027,7 @@ static void RestoreBorder(RECT rc)
     }
 }
 /* ----- test if screen coordinates are in a window ---- */
+/*
 static BOOL InsideWindow(WINDOW wnd, int x, int y)
 {
     RECT rc;
@@ -1034,6 +1041,7 @@ static BOOL InsideWindow(WINDOW wnd, int x, int y)
     }
     return InsideRect(x, y, rc);
 }
+*/
 
 BOOL isDerivedFrom(WINDOW wnd, CLASS Class)
 {

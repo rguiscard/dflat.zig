@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const lists = @import("Lists.zig");
+const rect = @import("Rect.zig");
 
 // --------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) void {
@@ -55,6 +56,23 @@ fn HideWindowMsg(win:*Window) void {
     }
 }
 
+// ----- test if screen coordinates are in a window ----
+fn InsideWindow(win:*Window, x:c_int, y:c_int) c_int {
+    const wnd = win.win;
+    var rc = df.WindowRect(wnd);
+    if (win.TestAttribute(df.NOCLIP))    {
+        var pwnd = Window.GetParent(wnd);
+        while (pwnd != null) {
+            rc = df.subRectangle(rc, df.ClientRect(pwnd));
+            pwnd = Window.GetParent(pwnd);
+        }
+    }
+    if (rect.InsideRect(x, y, rc)) {
+        return df.TRUE;
+    }
+    return df.FALSE;
+}
+
 pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -67,9 +85,9 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         df.HIDE_WINDOW => {
             HideWindowMsg(win);
         },
-//        df.INSIDE_WINDOW => {
-//            return InsideWindow(wnd, @intCast(p1), @intCast(p2));
-//        },
+        df.INSIDE_WINDOW => {
+            return InsideWindow(win, @intCast(p1), @intCast(p2));
+        },
 //        df.KEYBOARD => {
 //            if (KeyboardMsg(wnd, p1, p2))
 //                return df.TRUE;

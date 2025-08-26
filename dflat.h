@@ -186,11 +186,6 @@ WINDOW FirstWindow(WINDOW);
 WINDOW LastWindow(WINDOW);
 WINDOW NextWindow(WINDOW);
 WINDOW PrevWindow(WINDOW);
-//#define GetParent(w)         ((w)->parent)
-//#define FirstWindow(w)       ((w)->firstchild)
-//#define LastWindow(w)        ((w)->lastchild)
-//#define NextWindow(w)        ((w)->nextsibling)
-//#define PrevWindow(w)        ((w)->prevsibling)
 #define GetClass(w)          ((w)->Class)
 #define GetAttribute(w)      ((w)->attrib)
 #define AddAttribute(w,a)    (GetAttribute(w) |= a)
@@ -237,12 +232,6 @@ void PutWindowLine(WINDOW, void *,int,int);
 int BaseWndProc(CLASS, WINDOW, MESSAGE, PARAM, PARAM);
 int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM); 
 
-/*
-struct LinkedList    {
-    WINDOW FirstWindow;
-    WINDOW LastWindow;
-};
-*/
 extern WINDOW ApplicationWindow;
 extern WINDOW inFocus;
 extern WINDOW CaptureMouse;
