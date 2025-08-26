@@ -149,11 +149,6 @@ typedef struct window {
 	struct window *oldFocus;
 	/* -------------- status bar fields ------------------- */
 	BOOL TimePosted; /* True if time has been posted        */
-#ifdef INCLUDE_PICTUREBOX
-	/* ------------- picture box fields ------------------- */
-//	int VectorCount;  /* number of vectors in vector list   */
-//	void *VectorList; /* list of picture box vectors        */
-#endif
     void *zin; /* Point to Window in zig */
 } * WINDOW;
 
@@ -242,10 +237,12 @@ void PutWindowLine(WINDOW, void *,int,int);
 int BaseWndProc(CLASS, WINDOW, MESSAGE, PARAM, PARAM);
 int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM); 
 
+/*
 struct LinkedList    {
     WINDOW FirstWindow;
     WINDOW LastWindow;
 };
+*/
 extern WINDOW ApplicationWindow;
 extern WINDOW inFocus;
 extern WINDOW CaptureMouse;

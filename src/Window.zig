@@ -243,7 +243,7 @@ pub fn WindowWidth(self: *TopLevelFields) isize {
 
 pub fn BorderAdj(self: *TopLevelFields) isize {
     var border:isize = 0;
-    if (df.TestAttribute(self.win, df.HASBORDER) > 0) {
+    if (self.TestAttribute(df.HASBORDER)) {
         border = 1;
     }
     return border;
@@ -251,7 +251,7 @@ pub fn BorderAdj(self: *TopLevelFields) isize {
 
 pub fn BottomBorderAdj(self: *TopLevelFields) isize {
     var border = BorderAdj(self);
-    if (df.TestAttribute(self.win, df.HASSTATUSBAR) > 0) {
+    if (self.TestAttribute(df.HASSTATUSBAR)) {
         border = 1;
     }
     return border;
@@ -259,10 +259,10 @@ pub fn BottomBorderAdj(self: *TopLevelFields) isize {
 
 pub fn TopBorderAdj(self: *TopLevelFields) isize {
     var border:isize = 0;
-    if ((df.TestAttribute(self.win, df.HASTITLEBAR) > 0) and (df.TestAttribute(self.win, df.HASMENUBAR) > 0)) {
+    if ((self.TestAttribute(df.HASTITLEBAR)) and (self.TestAttribute(df.HASMENUBAR))) {
         border = 2;
     } else {
-        if (df.TestAttribute(self.win, df.HASTITLEBAR | df.HASMENUBAR | df.HASBORDER) > 0) {
+        if (self.TestAttribute(df.HASTITLEBAR | df.HASMENUBAR | df.HASBORDER)) {
             border = 1;
         }
     }

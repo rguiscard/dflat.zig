@@ -17,6 +17,9 @@ void FirstFocus(DBOX *);
 
 // normal.c
 extern struct window dwnd;
+void GetVideoBuffer(WINDOW);
+void PutVideoBuffer(WINDOW);
+void PaintOverLappers(WINDOW wnd);
 
 // pictbox.c
 typedef struct {

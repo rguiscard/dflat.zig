@@ -3,7 +3,7 @@
 #include "dflat.h"
 
 #ifdef INCLUDE_MULTI_WINDOWS
-static void near PaintOverLappers(WINDOW wnd);
+void PaintOverLappers(WINDOW wnd);
 static void near PaintUnderLappers(WINDOW wnd);
 #endif
 
@@ -11,8 +11,8 @@ static BOOL InsideWindow(WINDOW, int, int);
 static void TerminateMoveSize(void);
 static void SaveBorder(RECT);
 static void RestoreBorder(RECT);
-static void GetVideoBuffer(WINDOW);
-static void PutVideoBuffer(WINDOW);
+void GetVideoBuffer(WINDOW);
+void PutVideoBuffer(WINDOW);
 #ifdef INCLUDE_MINIMIZE
 static RECT PositionIcon(WINDOW);
 #endif
@@ -605,15 +605,15 @@ static void CloseWindowMsg(WINDOW wnd)
 int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
-        case CREATE_WINDOW:
-            CreateWindowMsg(wnd);
-            break;
-        case SHOW_WINDOW:
-            ShowWindowMsg(wnd, p1, p2);
-            break;
-        case HIDE_WINDOW:
-            HideWindowMsg(wnd);
-            break;
+//        case CREATE_WINDOW:
+//            CreateWindowMsg(wnd);
+//            break;
+//        case SHOW_WINDOW:
+//            ShowWindowMsg(wnd, p1, p2);
+//            break;
+//        case HIDE_WINDOW:
+//            HideWindowMsg(wnd);
+//            break;
         case INSIDE_WINDOW:
             return InsideWindow(wnd, (int) p1, (int) p2);
         case KEYBOARD:
@@ -926,7 +926,7 @@ static void PaintOverParents(WINDOW wnd)
     }
 }
 /* - paint the parts of all windows that a window is over - */
-static void near PaintOverLappers(WINDOW wnd)
+void PaintOverLappers(WINDOW wnd)
 {
     HiddenWindow = wnd;
     PaintOverParents(wnd);
@@ -1082,7 +1082,7 @@ static RECT near ClipRect(WINDOW wnd)
 }
 
 /* -- get the video memory that is to be used by a window -- */
-static void GetVideoBuffer(WINDOW wnd)
+void GetVideoBuffer(WINDOW wnd)
 {
     RECT rc;
     int ht;
@@ -1097,7 +1097,7 @@ static void GetVideoBuffer(WINDOW wnd)
 }
 
 /* -- put the video memory that is used by a window -- */
-static void PutVideoBuffer(WINDOW wnd)
+void PutVideoBuffer(WINDOW wnd)
 {
     if (wnd->videosave != NULL)    {
     	RECT rc;
