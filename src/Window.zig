@@ -437,3 +437,9 @@ pub export fn set_HelpTextProc(wnd:df.WINDOW) void {
         win.wndproc = WndProc.HelpTextProc;
     }
 }
+
+pub export fn set_NormalProc(wnd:df.WINDOW) void {
+    if (get_zin(wnd)) |win| {
+        win.wndproc = WndProc.NormalProc;
+    }
+}

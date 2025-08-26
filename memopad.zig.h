@@ -20,6 +20,7 @@ extern struct window dwnd;
 void GetVideoBuffer(WINDOW);
 void PutVideoBuffer(WINDOW);
 void PaintOverLappers(WINDOW wnd);
+void TerminateMoveSize(void);
 
 // pictbox.c
 typedef struct {

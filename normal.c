@@ -7,8 +7,8 @@ void PaintOverLappers(WINDOW wnd);
 static void near PaintUnderLappers(WINDOW wnd);
 #endif
 
-static BOOL InsideWindow(WINDOW, int, int);
-static void TerminateMoveSize(void);
+//static BOOL InsideWindow(WINDOW, int, int);
+void TerminateMoveSize(void);
 static void SaveBorder(RECT);
 static void RestoreBorder(RECT);
 void GetVideoBuffer(WINDOW);
@@ -35,64 +35,12 @@ CLASSDEFS classdefs[] = {
 };
 WINDOW HiddenWindow;
 
-/* --------- CREATE_WINDOW Message ---------- */
-/*
-static void CreateWindowMsg(WINDOW wnd)
-{
-    AppendWindow(wnd);
-    if (!SendMessage(NULL, MOUSE_INSTALLED, 0, 0))
-        ClearAttribute(wnd, VSCROLLBAR | HSCROLLBAR);
-    if (TestAttribute(wnd, SAVESELF) && isVisible(wnd))
-        GetVideoBuffer(wnd);
-}
-*/
-
-/* --------- SHOW_WINDOW Message ---------- */
-/*
-static void ShowWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    if (GetParent(wnd) == NULL || isVisible(GetParent(wnd)))    {
-		WINDOW cwnd;
-        if (TestAttribute(wnd, SAVESELF) &&
-                        wnd->videosave == NULL)
-            GetVideoBuffer(wnd);
-        SetVisible(wnd);
-        SendMessage(wnd, PAINT, 0, TRUE);
-        SendMessage(wnd, BORDER, 0, 0);
-        // --- show the children of this window --- 
-		cwnd = FirstWindow(wnd);
-		while (cwnd != NULL)	{
-            if (cwnd->condition != ISCLOSING)
-                SendMessage(cwnd, SHOW_WINDOW, p1, p2);
-			cwnd = NextWindow(cwnd);
-        }
-    }
-}
-*/
-
-/* --------- HIDE_WINDOW Message ---------- */
-/*
-static void HideWindowMsg(WINDOW wnd)
-{
-    if (isVisible(wnd))    {
-        ClearVisible(wnd);
-        // --- paint what this window covered --- 
-	    if (TestAttribute(wnd, SAVESELF))
-            PutVideoBuffer(wnd);
-#ifdef INCLUDE_MULTI_WINDOWS
-        else
-            PaintOverLappers(wnd);
-#endif
-		wnd->wasCleared = FALSE;
-    }
-}
-*/
-
 /* --------- KEYBOARD Message ---------- */
+/*
 static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     if (WindowMoving || WindowSizing)    {
-        /* -- move or size a window with keyboard -- */
+        // -- move or size a window with keyboard -- 
         int x, y;
         x=WindowMoving?GetLeft(&dwnd):GetRight(&dwnd);
         y=WindowMoving?GetTop(&dwnd):GetBottom(&dwnd);
@@ -121,7 +69,7 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
             default:
                 return TRUE;
         }
-        /* -- use the mouse functions to move/size - */
+        // -- use the mouse functions to move/size - 
         SendMessage(wnd, MOUSE_CURSOR, x, y);
         SendMessage(wnd, MOUSE_MOVED, x, y);
         return TRUE;
@@ -148,6 +96,7 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+*/
 
 /* --------- COMMAND Message ---------- */
 static void CommandMsg(WINDOW wnd, PARAM p1)
@@ -622,15 +571,15 @@ int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            break;
 //        case INSIDE_WINDOW:
 //            return InsideWindow(wnd, (int) p1, (int) p2);
-        case KEYBOARD:
-            if (KeyboardMsg(wnd, p1, p2))
-                return TRUE;
-            /* ------- fall through ------- */
-        case ADDSTATUS:
-        case SHIFT_CHANGED:
-            if (GetParent(wnd) != NULL)
-                PostMessage(GetParent(wnd), msg, p1, p2);
-            break;
+//        case KEYBOARD:
+//            if (KeyboardMsg(wnd, p1, p2))
+//                return TRUE;
+//            /* ------- fall through ------- */
+//        case ADDSTATUS:
+//        case SHIFT_CHANGED:
+//            if (GetParent(wnd) != NULL)
+//                PostMessage(GetParent(wnd), msg, p1, p2);
+//            break;
         case PAINT:
             if (isVisible(wnd))	{
 #ifdef INCLUDE_MULTI_WINDOWS
@@ -775,7 +724,7 @@ static RECT PositionIcon(WINDOW wnd)
 #endif
 
 /* ----- terminate the move or size operation ----- */
-static void TerminateMoveSize(void)
+void TerminateMoveSize(void)
 {
     px = py = -1;
     diff = 0;

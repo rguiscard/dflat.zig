@@ -5,6 +5,20 @@ const Window = @import("Window.zig");
 const lists = @import("Lists.zig");
 const rect = @import("Rect.zig");
 
+var dummyWnd:?Window = null;
+
+fn getDummy() df.WINDOW {
+    if(dummyWnd == null) {
+        dummyWnd = Window.init(&df.dwnd, root.global_allocator);
+        df.dwnd.zin = @ptrCast(@alignCast(&dummyWnd.?));
+        Window.set_NormalProc(&df.dwnd); // doesn't seem necessary
+
+//        dummyWnd = Window.create(df.DUMMY, null, -1, -1, -1, -1, null, null, NormalProc, 0);
+    }
+    const wnd = dummyWnd.?.win;
+    return wnd;
+}
+
 // --------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) void {
     const wnd = win.win;
@@ -73,6 +87,75 @@ fn InsideWindow(win:*Window, x:c_int, y:c_int) c_int {
     return df.FALSE;
 }
 
+// --------- KEYBOARD Message ----------
+fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    const dwnd = getDummy();
+    if ((df.WindowMoving>0) or (df.WindowSizing>0)) {
+        // -- move or size a window with keyboard --
+        var x = if (df.WindowMoving>0) df.GetLeft(dwnd) else df.GetRight(dwnd);
+        var y = if (df.WindowMoving>0) df.GetTop(dwnd) else df.GetBottom(dwnd);
+        switch (p1)    {
+            df.ESC => {
+                df.TerminateMoveSize();
+                return true;
+            },
+            df.UP => {
+                if (y>0)
+                    y -= 1;
+            },
+            df.DN => {
+                if (y < df.SCREENHEIGHT-1)
+                    y += 1;
+            },
+            df.FWD => {
+                if (x < df.SCREENWIDTH-1)
+                    x += 1;
+            },
+            df.BS => {
+                if (x>0)
+                    x -= 1;
+            },
+            '\r' => {
+                _ = win.sendMessage(df.BUTTON_RELEASED,x,y);
+            },
+            else => {
+                return true;
+            }
+        }
+        _ = df.SendMessage(wnd, df.MOUSE_CURSOR, x, y);
+        _ = df.SendMessage(wnd, df.MOUSE_MOVED, x, y);
+        return true;
+    }
+    switch (p1) {
+        df.F1 => {
+            _ = win.sendMessage(df.COMMAND, df.ID_HELP, 0);
+            return true;
+        },
+        ' ' => {
+            const p2_i:isize = p2;
+            if ((p2_i & df.ALTKEY) > 0) {
+                if (win.TestAttribute(df.HASTITLEBAR)) {
+                    if (win.TestAttribute(df.CONTROLBOX)) {
+                        df.BuildSystemMenu(wnd);
+                    }
+                }
+            }
+            return true;
+        },
+        df.CTRL_F4 => {
+            if (win.TestAttribute(df.CONTROLBOX)) {
+                _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
+                df.SkipApplicationControls();
+                return true;
+            }
+        },
+        else => {
+        }
+    }
+    return false;
+}
+
 pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -88,17 +171,17 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         df.INSIDE_WINDOW => {
             return InsideWindow(win, @intCast(p1), @intCast(p2));
         },
-//        df.KEYBOARD => {
-//            if (KeyboardMsg(wnd, p1, p2))
-//                return df.TRUE;
-//            // ------- fall through -------
-//            if (df.GetParent(wnd) != null)
-//                df.PostMessage(df.GetParent(wnd), message, p1, p2);
-//        },
-//        df.ADDSTATUS, df.SHIFT_CHANGED => {
-//            if (df.GetParent(wnd) != null)
-//                df.PostMessage(df.GetParent(wnd), message, p1, p2);
-//        },
+        df.KEYBOARD => {
+            if (KeyboardMsg(win, p1, p2))
+                return df.TRUE;
+            // ------- fall through -------
+            if (Window.GetParent(wnd) != null)
+                df.PostMessage(Window.GetParent(wnd), msg, p1, p2);
+        },
+        df.ADDSTATUS, df.SHIFT_CHANGED => {
+            if (Window.GetParent(wnd) != null)
+                df.PostMessage(Window.GetParent(wnd), msg, p1, p2);
+        },
 //        df.PAINT => {
 //            if (df.isVisible(wnd)>0) {
 //                if (wnd.*.wasCleared > 0) {
