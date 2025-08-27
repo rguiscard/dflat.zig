@@ -17,7 +17,7 @@ void FirstFocus(DBOX *);
 void NextFocus(DBOX *db);
 void PrevFocus(DBOX *db);
 BOOL dbShortcutKeys(DBOX *, int);
-extern BOOL SysMenuOpen;
+int inFocusCommand(DBOX *);
 
 // normal.c
 extern struct window dwnd;

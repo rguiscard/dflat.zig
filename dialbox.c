@@ -2,7 +2,7 @@
 
 #include "dflat.h"
 
-static int inFocusCommand(DBOX *);
+int inFocusCommand(DBOX *);
 BOOL dbShortcutKeys(DBOX *, int);
 static int ControlProc(WINDOW, MESSAGE, PARAM, PARAM);
 void FirstFocus(DBOX *db);
@@ -41,147 +41,6 @@ void ClearDialogBoxes(void)
     }
     dbct = 0;
 }
-
-/* -------- CREATE_WINDOW Message --------- */
-/*
-static int CreateWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    DBOX *db = wnd->extension;
-    CTLWINDOW *ct = db->ctl;
-    WINDOW cwnd;
-    int rtn, i;
-    // ---- build a table of processed dialog boxes ----
-    for (i = 0; i < dbct; i++)
-        if (db == dbs[i])
-            break;
-    if (i == dbct)    {
-        dbs = DFrealloc(dbs, sizeof(DBOX *) * (dbct+1));
-        *(dbs + dbct++) = db;
-    }
-    rtn = BaseWndProc(DIALOG, wnd, CREATE_WINDOW, p1, p2);
-    ct = db->ctl;
-    while (ct->Class)    {
-        int attrib = 0;
-        if (TestAttribute(wnd, NOCLIP))
-            attrib |= NOCLIP;
-        if (get_modal(wnd))
-            attrib |= SAVESELF;
-        ct->setting = ct->isetting;
-        if (ct->Class == EDITBOX && ct->dwnd.h > 1)
-            attrib |= (MULTILINE | HASBORDER);
-        else if ((ct->Class == LISTBOX || ct->Class == TEXTBOX) &&
-				ct->dwnd.h > 2)
-            attrib |= HASBORDER;
-        cwnd = CreateWindow(ct->Class,
-                        ct->dwnd.title,
-                        ct->dwnd.x+GetClientLeft(wnd),
-                        ct->dwnd.y+GetClientTop(wnd),
-                        ct->dwnd.h,
-                        ct->dwnd.w,
-                        ct,
-                        wnd,
-                        ControlProc,
-                        attrib);
-        if ((ct->Class == EDITBOX || ct->Class == TEXTBOX ||
-                ct->Class == COMBOBOX) &&
-                    ct->itext != NULL) {
-            SendMessage(cwnd, SETTEXT, (PARAM) ct->itext, 0);
-        }
-        ct++;
-    }
-    return rtn;
-}
-*/
-
-/* -------- LEFT_BUTTON Message --------- */
-/*
-static BOOL LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    DBOX *db = wnd->extension;
-    CTLWINDOW *ct = db->ctl;
-    if (WindowSizing || WindowMoving)
-        return TRUE;
-    if (HitControlBox(wnd, p1-GetLeft(wnd), p2-GetTop(wnd))) {
-        PostMessage(wnd, KEYBOARD, ' ', ALTKEY);
-        return TRUE;
-    }
-    while (ct->Class)    {
-        WINDOW cwnd = ct->wnd;
-        if (ct->Class == COMBOBOX)    {
-            if (p2 == GetTop(cwnd))    {
-                if (p1 == GetRight(cwnd)+1)    {
-                    SendMessage(cwnd, LEFT_BUTTON, p1, p2);
-                    return TRUE;
-                }
-            }
-            if (GetClass(inFocus) == LISTBOX)
-                SendMessage(wnd, SETFOCUS, TRUE, 0);
-        }
-        else if (ct->Class == SPINBUTTON)    {
-            if (p2 == GetTop(cwnd))    {
-                if (p1 == GetRight(cwnd)+1 ||
-                        p1 == GetRight(cwnd)+2)    {
-                    SendMessage(cwnd, LEFT_BUTTON, p1, p2);
-                    return TRUE;
-                }
-            }
-        }
-        ct++;
-    }
-    return FALSE;
-}
-*/
-
-/* -------- KEYBOARD Message --------- */
-/*
-static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    DBOX *db = wnd->extension;
-    CTLWINDOW *ct;
-
-    if (WindowMoving || WindowSizing)
-        return FALSE;
-    switch ((int)p1)    {
-        case SHIFT_HT:
-        case BS:
-        case UP:
-            PrevFocus(db);
-            break;
-        case ALT_F6:
-        case '\t':
-        case FWD:
-        case DN:
-            NextFocus(db);
-            break;
-        case ' ':
-            if (((int)p2 & ALTKEY) &&
-                    TestAttribute(wnd, CONTROLBOX))    {
-                SysMenuOpen = TRUE;
-                BuildSystemMenu(wnd);
-				return TRUE;
-            }
-            break;
-        case CTRL_F4:
-        case ESC:
-            SendMessage(wnd, COMMAND, ID_CANCEL, 0);
-            break;
-#ifdef INCLUDE_HELP
-        case F1:
-            ct = GetControl(inFocus);
-            if (ct != NULL)
-                if (DisplayHelp(wnd, ct->help))
-                    return TRUE;
-            break;
-#endif
-        default:
-            // ------ search all the shortcut keys -----
-            if (dbShortcutKeys(db, (int) p1))
-				return TRUE;
-            break;
-    }
-    return get_modal(wnd);
-}
-*/
 
 /* -------- COMMAND Message --------- */
 static BOOL CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -232,19 +91,19 @@ int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            if (KeyboardMsg(wnd, p1, p2))
 //                return TRUE;
 //            break;
-        case CLOSE_POPDOWN:
-            SysMenuOpen = FALSE;
-            break;
-        case LB_SELECTION:
-        case LB_CHOOSE:
-            if (SysMenuOpen)
-                return TRUE;
-            SendMessage(wnd, COMMAND, inFocusCommand(db), msg);
-            break;
-		case SETFOCUS:
-			if ((int)p1 && wnd->dfocus != NULL && isVisible(wnd))
-				return SendMessage(wnd->dfocus, SETFOCUS, TRUE, 0);
-			break;
+//        case CLOSE_POPDOWN:
+//            SysMenuOpen = FALSE;
+//            break;
+//        case LB_SELECTION:
+//        case LB_CHOOSE:
+//            if (SysMenuOpen)
+//                return TRUE;
+//            SendMessage(wnd, COMMAND, inFocusCommand(db), msg);
+//            break;
+//		case SETFOCUS:
+//		if ((int)p1 && wnd->dfocus != NULL && isVisible(wnd))
+//			return SendMessage(wnd->dfocus, SETFOCUS, TRUE, 0);
+//			break;
         case COMMAND:
             if (CommandMsg(wnd, p1, p2))
                 return TRUE;
@@ -307,7 +166,7 @@ BOOL cDialogBox(WINDOW wnd, DBOX *db, BOOL Modal,
 */
 
 /* ----- return command code of in-focus control window ---- */
-static int inFocusCommand(DBOX *db)
+int inFocusCommand(DBOX *db)
 {
     CTLWINDOW *ct = db->ctl;
     while (ct->Class)    {

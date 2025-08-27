@@ -6,6 +6,7 @@ const Dialogs = @import("Dialogs.zig");
 const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
 
+var SysMenuOpen = false;
 const MAXCONTROLS = 30;
 var dialogboxes:?std.ArrayList(*df.DBOX) = null;
 
@@ -189,7 +190,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         },
         ' ' => {
             if (((p2 & df.ALTKEY)>0) and win.TestAttribute(df.CONTROLBOX)) {
-                df.SysMenuOpen = df.TRUE;
+                SysMenuOpen = true;
                 df.BuildSystemMenu(wnd);
                 return true;
             }
@@ -236,22 +237,22 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) call
             if (KeyboardMsg(win, p1, p2))
                 return df.TRUE;
         },
-//        df.CLOSE_POPDOWN => {
-//            SysMenuOpen = false;
-//        },
-//        df.LB_SELECTION, df.LB_CHOOSE => {
-//            if (SysMenuOpen)
-//                return df.TRUE;
-//            if (wnd.*.extension) |extension| {
-//                const db:*df.DBOX = @alignCast(@ptrCast(extension));
-//                _ = df.SendMessage(wnd, df.COMMAND, inFocusCommand(db), message);
-//            }
-//        },
-//        df.SETFOCUS => {
-//            if ((p1 != 0) and (wnd.*.dfocus != null) and (df.isVisible(wnd) > 0)) {
-//                return df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
-//            }
-//        },
+        df.CLOSE_POPDOWN => {
+            SysMenuOpen = false;
+        },
+        df.LB_SELECTION, df.LB_CHOOSE => {
+            if (SysMenuOpen)
+                return df.TRUE;
+            if (wnd.*.extension) |extension| {
+                const db:*df.DBOX = @alignCast(@ptrCast(extension));
+                _ = win.sendMessage(df.COMMAND, df.inFocusCommand(db), msg);
+            }
+        },
+        df.SETFOCUS => {
+            if ((p1 != 0) and (wnd.*.dfocus != null) and (df.isVisible(wnd) > 0)) {
+                return df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
+            }
+        },
 //        df.COMMAND => {
 //            if (CommandMsg(win, p1, p2) > 0)
 //                return df.TRUE;
