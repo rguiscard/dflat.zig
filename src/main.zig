@@ -153,7 +153,7 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
     var win1 = mp.Window.create(df.EDITBOX, // Win
                 fname,
                 (wndpos-1)*2, wndpos, 10, 40,
-                null, wnd, mp.WndProc.OurEditorProc,
+                null, wnd, OurEditorProc,
                 df.SHADOW     |
                 df.MINMAXBOX  |
                 df.CONTROLBOX |
@@ -216,6 +216,75 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
 
         _ = mwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
     }
+}
+
+// ----- window processing module for the editboxes -----
+fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
+    var rtn:c_int = 0;
+    switch (msg) {
+        df.SETFOCUS => {
+            if (p1 > 0) {
+                wnd.*.InsertMode = df.GetCommandToggle(@constCast(@ptrCast(&mp.menus.MainMenu)), df.ID_INSERT);
+                wnd.*.WordWrapMode = df.GetCommandToggle(@constCast(@ptrCast(&mp.menus.MainMenu)), df.ID_WRAP);
+            }
+            rtn = mp.zDefaultWndProc(win, msg, p1, p2);
+            if (p1 == 0) {
+                _ = df.SendMessage(mp.Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
+            } else {
+                df.ShowPosition(wnd);
+            }
+            return rtn;
+        },
+        df.KEYBOARD_CURSOR => {
+            rtn = mp.zDefaultWndProc(win, msg, p1, p2);
+            df.ShowPosition(wnd);
+            return rtn;
+        },
+        df.COMMAND => {
+            switch(p1) {
+                df.ID_HELP => {
+                    const helpfile:[:0]const u8 = "MEMOPADDOC";
+                    _ = df.DisplayHelp(wnd, @constCast(helpfile.ptr));
+                    return df.TRUE;
+                },
+                df.ID_WRAP => {
+                    _ = df.SendMessage(mp.Window.GetParent(wnd), df.COMMAND, df.ID_WRAP, 0);
+                    wnd.*.WordWrapMode = df.cfg.WordWrap;
+                },
+                df.ID_INSERT => {
+                    _ = df.SendMessage(mp.Window.GetParent(wnd), df.COMMAND, df.ID_INSERT, 0);
+                    wnd.*.InsertMode = df.cfg.InsertMode;
+                    _ = df.SendMessage(null, df.SHOW_CURSOR, wnd.*.InsertMode, 0);
+                },
+                else => {
+                }
+            }
+        },
+        df.CLOSE_WINDOW => {
+            if (wnd.*.TextChanged > 0)    {
+                _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                const tl:[*c]u8 = @ptrCast(wnd.*.title);
+                const title = std.mem.span(tl);
+                if (std.fmt.allocPrintSentinel(mp.global_allocator, "{s}\nText changed. Save it ?", .{title}, 0)) |m| {
+                    defer mp.global_allocator.free(m);
+                    if (mp.MessageBox.YesNoBox(m) > 0) {
+                        _ = df.SendMessage(mp.Window.GetParent(wnd), df.COMMAND, df.ID_SAVE, 0);
+                    }
+                } else |_| {
+                    // error
+                }
+            }
+            wndpos = 0;
+            if (wnd.*.extension != null)    {
+                df.free(wnd.*.extension);
+                wnd.*.extension = null;
+            }
+        },
+        else => {
+        }
+    }
+    return mp.zDefaultWndProc(win, msg, p1, p2);
 }
 
 const std = @import("std");

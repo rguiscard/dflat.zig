@@ -16,7 +16,6 @@ pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
             },
             df.BORDER => {
                 const rtn = root.zBaseWndProc(df.BOX, win, msg, p1, p2);
-//-                if (ct != NULL && ct->itext != NULL)
                 if (ctl.*.itext) |txt| {
                     df.writeline(wnd, txt, 1, 0, df.FALSE);
                 }

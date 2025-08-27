@@ -1,6 +1,7 @@
 // main.c
 void LoadFile(WINDOW);
 char *NameComponent(char *);
+void ShowPosition(WINDOW);
 
 // fileopen.c
 //int DlgFnOpen(WINDOW, MESSAGE, PARAM, PARAM);

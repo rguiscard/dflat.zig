@@ -13,6 +13,7 @@ char *NameComponent(char *);
 static void FixTabMenu(void);
 void Calendar(WINDOW);
 void BarChart(WINDOW);
+void ShowPosition(WINDOW wnd);
 
 #define CHARSLINE 80
 #define LINESPAGE 66
@@ -151,7 +152,7 @@ static void DeleteFile(WINDOW wnd)
     }
 }
 /* ------ display the row and column in the statusbar ------ */
-static void ShowPosition(WINDOW wnd)
+void ShowPosition(WINDOW wnd)
 {
     char status[30];
     sprintf(status, "Line:%4d  Column: %2d",
