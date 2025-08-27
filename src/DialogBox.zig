@@ -69,6 +69,173 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
     return rtn;
 }
 
+// ------- CREATE_WINDOW Message (Control) -----
+fn CtlCreateWindowMsg(win:*Window) void {
+    const wnd = win.win;
+    if (wnd.*.extension) |extension| {
+        wnd.*.ct = @alignCast(@ptrCast(extension));
+
+        const ct = wnd.*.ct;
+        ct.*.wnd = wnd;
+    } else {
+        wnd.*.ct = null;
+    }
+    wnd.*.extension = null;
+}
+
+// ------- KEYBOARD Message (Control) -----
+fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    switch (p1) {
+        ' ' => {
+            if ((p2 & df.ALTKEY) > 0) {
+                // it didn't break. Fall through
+                q.PostMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
+                return true;
+            }
+        },
+        df.ALT_F6,
+        df.CTRL_F4,
+        df.ALT_F4 => {
+            q.PostMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
+            return true;
+        },
+        df.F1 => {
+            if ((df.WindowMoving==0) and (df.WindowSizing==0)) {
+                const ct = df.GetControl(wnd);
+                if (df.DisplayHelp(wnd, ct.*.help) == 0) {
+                    _ = df.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
+                }
+                return true;
+            }
+        },
+        else => {
+        }
+    }
+    if (df.GetClass(wnd) == df.EDITBOX) {
+        if (df.isMultiLine(wnd)>0) {
+            return false;
+        }
+    }
+    if (df.GetClass(wnd) == df.TEXTBOX) {
+        if (win.WindowHeight() > 1) {
+            return false;
+        }
+    }
+    switch (p1) {
+// does not seem to do anything ?
+//        df.UP => {
+//            if (df.isDerivedFrom(wnd, df.LISTBOX) == 0) {
+//                p1 = CTRL_FIVE;
+//                p2 = LEFTSHIFT;
+//            }
+//        },
+//        case BS:
+//            if (!isDerivedFrom(wnd, EDITBOX))    {
+//                p1 = CTRL_FIVE;
+//                p2 = LEFTSHIFT;
+//            }
+//            break;
+//        case DN:
+//            if (!isDerivedFrom(wnd, LISTBOX) &&
+//                    !isDerivedFrom(wnd, COMBOBOX))
+//                p1 = '\t';
+//            break;
+//        case FWD:
+//            if (!isDerivedFrom(wnd, EDITBOX))
+//                p1 = '\t';
+//            break;
+//        case '\r':
+//            if (isDerivedFrom(wnd, EDITBOX))
+//                if (isMultiLine(wnd))
+//                    break;
+//            if (isDerivedFrom(wnd, BUTTON))
+//                break;
+//            if (isDerivedFrom(wnd, LISTBOX))
+//                break;
+//            SendMessage(GetParent(wnd), COMMAND, ID_OK, 0);
+//            return TRUE;
+        else => {
+        }
+    }
+    return false;
+}
+
+pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    // win can be null ?
+    const wnd = win.win;
+    switch(msg) {
+        df.CREATE_WINDOW => {
+            CtlCreateWindowMsg(win);
+        },
+        df.KEYBOARD => {
+            if (CtlKeyboardMsg(win, p1, p2))
+                return df.TRUE;
+        },
+        df.PAINT => {
+            df.FixColors(wnd);
+            if ((df.GetClass(wnd) == df.EDITBOX) or
+                (df.GetClass(wnd) == df.LISTBOX) or
+                (df.GetClass(wnd) == df.TEXTBOX)) {
+                df.SetScrollBars(wnd);
+            }
+        },
+        df.BORDER => {
+            df.FixColors(wnd);
+            if (df.GetClass(wnd) == df.EDITBOX) {
+                const oldFocus = df.inFocus;
+                df.inFocus = null;
+                _ = root.DefaultWndProc(wnd, msg, p1, p2);
+                df.inFocus = oldFocus;
+                return df.TRUE;
+            }
+        },
+        df.SETFOCUS => {
+            const pwnd = Window.GetParent(wnd);
+            var db:?*df.DBOX = null;
+            if (pwnd != null) {
+                db = @alignCast(@ptrCast(pwnd.*.extension));
+            }
+            if (p1 > 0) {
+                const oldFocus = df.inFocus;
+                // we assume df.inFocus is not null
+                if (Window.get_zin(oldFocus)) |oldWin| {
+                    if ((pwnd != null) and (df.GetClass(oldFocus) != df.APPLICATION) and
+                                       (df.isAncestor(df.inFocus, pwnd) == 0)) {
+                        df.inFocus = null;
+                        _ = df.SendMessage(oldFocus, df.BORDER, 0, 0);
+                        _ = df.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);
+                        df.inFocus = oldFocus;
+                        oldWin.ClearVisible();
+                    }
+                    if ((df.GetClass(oldFocus) == df.APPLICATION) and
+                            df.NextWindow(pwnd) != null) {
+                        pwnd.*.wasCleared = df.FALSE;
+                    }
+                    _ = root.DefaultWndProc(wnd, msg, p1, p2);
+                    oldWin.SetVisible();
+                    if (pwnd != null) {
+                        pwnd.*.dfocus = wnd;
+                        _ = df.SendMessage(pwnd, df.COMMAND,
+                                 df.inFocusCommand(db), df.ENTERFOCUS);
+                    }
+                    return df.TRUE;
+                }
+            } else {
+                _ = df.SendMessage(pwnd, df.COMMAND,
+                            df.inFocusCommand(db), df.LEAVEFOCUS);
+            }
+        },
+        df.CLOSE_WINDOW => {
+            df.CtlCloseWindowMsg(wnd);
+        },
+        else => {
+            return df.cControlProc(wnd, msg, p1, p2);
+        }
+    }
+    return root.zDefaultWndProc(win, msg, p1, p2);
+}
+
 // -------- CREATE_WINDOW Message ---------
 fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
@@ -116,7 +283,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) c_int {
                         ctl.*.dwnd.w,
                         ctl,
                         wnd,
-                        WndProc.ControlProc,
+                        ControlProc,
                         attrib);
         if ((ctl.*.Class == df.EDITBOX or ctl.*.Class == df.TEXTBOX or
                 ctl.*.Class == df.COMBOBOX) and

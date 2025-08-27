@@ -138,10 +138,3 @@ pub export fn InputBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM
     const wnd = win.win;
     return df.cInputBoxProc(wnd, msg, p1, p2);
 }
-
-// From dialbox.c
-pub export fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cControlProc(wnd, msg, p1, p2);
-}
-

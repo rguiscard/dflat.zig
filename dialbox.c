@@ -8,6 +8,9 @@ static int ControlProc(WINDOW, MESSAGE, PARAM, PARAM);
 void FirstFocus(DBOX *db);
 void NextFocus(DBOX *db);
 void PrevFocus(DBOX *db);
+void FixColors(WINDOW wnd);
+void SetScrollBars(WINDOW wnd);
+void CtlCloseWindowMsg(WINDOW wnd);
 static CTLWINDOW *AssociatedControl(DBOX *, enum commands);
 
 BOOL SysMenuOpen;
@@ -41,131 +44,6 @@ void ClearDialogBoxes(void)
     }
     dbct = 0;
 }
-
-/* -------- COMMAND Message --------- */
-/*
-static BOOL CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    DBOX *db = wnd->extension;
-    switch ((int) p1)    {
-        case ID_OK:
-        case ID_CANCEL:
-            if ((int)p2 != 0)
-                return TRUE;
-            wnd->ReturnCode = (int) p1;
-            if (get_modal(wnd))
-                PostMessage(wnd, ENDDIALOG, 0, 0);
-            else
-                SendMessage(wnd, CLOSE_WINDOW, TRUE, 0);
-            return TRUE;
-#ifdef INCLUDE_HELP
-        case ID_HELP:
-            if ((int)p2 != 0)
-                return TRUE;
-            return DisplayHelp(wnd, db->HelpName);
-#endif
-        default:
-            break;
-    }
-    return FALSE;
-}
-*/
-
-/* ----- window-processing module, DIALOG window class ----- */
-//int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
-//{
-//	int rtn;
-//    DBOX *db = wnd->extension;
-//
-//    switch (msg)    {
-//  Ported to zig side
-//        case CREATE_WINDOW:
-//            return CreateWindowMsg(wnd, p1, p2);
-//        case SHIFT_CHANGED:
-//            if (get_modal(wnd))
-//                return TRUE;
-//            break;
-//        case LEFT_BUTTON:
-//            if (LeftButtonMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
-//        case KEYBOARD:
-//            if (KeyboardMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
-//        case CLOSE_POPDOWN:
-//            SysMenuOpen = FALSE;
-//            break;
-//        case LB_SELECTION:
-//        case LB_CHOOSE:
-//            if (SysMenuOpen)
-//                return TRUE;
-//            SendMessage(wnd, COMMAND, inFocusCommand(db), msg);
-//            break;
-//		case SETFOCUS:
-//		if ((int)p1 && wnd->dfocus != NULL && isVisible(wnd))
-//			return SendMessage(wnd->dfocus, SETFOCUS, TRUE, 0);
-//			break;
-//        case COMMAND:
-//            if (CommandMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
-//        case PAINT:
-//            p2 = TRUE;
-//            break;
-//  case MOVE:
-//case SIZE:
-//rtn = BaseWndProc(DIALOG, wnd, msg, p1, p2);
-//if (wnd->dfocus != NULL && isVisible(wnd))
-//SendMessage(wnd->dfocus, SETFOCUS, TRUE, 0);
-//return rtn;
-//        case CLOSE_WINDOW:
-//            if (!p1)    {
-//                SendMessage(wnd, COMMAND, ID_CANCEL, 0);
-//                return TRUE;
-//            }
-//            break;
-//        default:
-//            break;
-//    }
-//    return BaseWndProc(DIALOG, wnd, msg, p1, p2);
-//}
-
-/* ------- create and execute a dialog box ---------- */
-/*
-BOOL cDialogBox(WINDOW wnd, DBOX *db, BOOL Modal,
-  int (*wndproc)(struct window *, enum messages, PARAM, PARAM))
-{
-    BOOL rtn = FALSE;
-    int x = db->dwnd.x, y = db->dwnd.y;
-    WINDOW DialogWnd;
-
-    DialogWnd = CreateWindow(DIALOG,
-                        db->dwnd.title,
-                        x, y,
-                        db->dwnd.h,
-                        db->dwnd.w,
-                        db,
-                        wnd,
-                        wndproc,
-                        (Modal ? SAVESELF : 0));
-	SendMessage(DialogWnd, SETFOCUS, TRUE, 0);
-    set_modal(DialogWnd, Modal);
-	FirstFocus(db);
-    PostMessage(DialogWnd, INITIATE_DIALOG, 0, 0);
-    if (Modal)    {
-        SendMessage(DialogWnd, CAPTURE_MOUSE, 0, 0);
-        SendMessage(DialogWnd, CAPTURE_KEYBOARD, 0, 0);
-	    while (dispatch_message())
-    	    ;
-        rtn = DialogWnd->ReturnCode == ID_OK;
-        SendMessage(DialogWnd, RELEASE_MOUSE, 0, 0);
-        SendMessage(DialogWnd, RELEASE_KEYBOARD, 0, 0);
-	    SendMessage(DialogWnd, CLOSE_WINDOW, TRUE, 0);
-    }
-    return rtn;
-}
-*/
 
 /* ----- return command code of in-focus control window ---- */
 int inFocusCommand(DBOX *db)
@@ -435,6 +313,7 @@ void SetScrollBars(WINDOW wnd)
 }
 
 /* ------- CREATE_WINDOW Message (Control) ----- */
+/*
 static void CtlCreateWindowMsg(WINDOW wnd)
 {
     CTLWINDOW *ct;
@@ -443,8 +322,10 @@ static void CtlCreateWindowMsg(WINDOW wnd)
     if (ct != NULL)
         ct->wnd = wnd;
 }
+*/
 
 /* ------- KEYBOARD Message (Control) ----- */
+/*
 static BOOL CtlKeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     CTLWINDOW *ct = GetControl(wnd);
@@ -511,9 +392,10 @@ static BOOL CtlKeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+*/
 
 /* ------- CLOSE_WINDOW Message (Control) ----- */
-static void CtlCloseWindowMsg(WINDOW wnd)
+void CtlCloseWindowMsg(WINDOW wnd)
 {
     CTLWINDOW *ct = GetControl(wnd);
     if (ct != NULL)    {
@@ -534,7 +416,7 @@ static void CtlCloseWindowMsg(WINDOW wnd)
     }
 }
 
-static void FixColors(WINDOW wnd)
+void FixColors(WINDOW wnd)
 {
     CTLWINDOW *ct = wnd->ct;
 	if (ct->Class != BUTTON)	{
@@ -563,30 +445,30 @@ int cControlProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
     db = GetParent(wnd) ? GetParent(wnd)->extension : NULL;
 
     switch (msg)    {
-        case CREATE_WINDOW:
-            CtlCreateWindowMsg(wnd);
-            break;
-        case KEYBOARD:
-            if (CtlKeyboardMsg(wnd, p1, p2))
-                return TRUE;
-            break;
-        case PAINT:
-			FixColors(wnd);
-            if (GetClass(wnd) == EDITBOX ||
-                    GetClass(wnd) == LISTBOX ||
-                        GetClass(wnd) == TEXTBOX)
-                SetScrollBars(wnd);
-            break;
-        case BORDER:
-			FixColors(wnd);
-            if (GetClass(wnd) == EDITBOX)    {
-                WINDOW oldFocus = inFocus;
-                inFocus = NULL;
-                DefaultWndProc(wnd, msg, p1, p2);
-                inFocus = oldFocus;
-                return TRUE;
-            }
-            break;
+//        case CREATE_WINDOW:
+//            CtlCreateWindowMsg(wnd);
+//            break;
+//        case KEYBOARD:
+//            if (CtlKeyboardMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
+//        case PAINT:
+//			FixColors(wnd);
+//            if (GetClass(wnd) == EDITBOX ||
+//                    GetClass(wnd) == LISTBOX ||
+//                        GetClass(wnd) == TEXTBOX)
+//                SetScrollBars(wnd);
+//            break;
+//        case BORDER:
+//FixColors(wnd);
+//            if (GetClass(wnd) == EDITBOX)    {
+//                WINDOW oldFocus = inFocus;
+//                inFocus = NULL;
+//                DefaultWndProc(wnd, msg, p1, p2);
+//                inFocus = oldFocus;
+//                return TRUE;
+//            }
+//            break;
         case SETFOCUS:	{
 			WINDOW pwnd = GetParent(wnd);
             if (p1)    {

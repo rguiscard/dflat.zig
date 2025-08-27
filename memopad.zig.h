@@ -18,6 +18,9 @@ void NextFocus(DBOX *db);
 void PrevFocus(DBOX *db);
 BOOL dbShortcutKeys(DBOX *, int);
 int inFocusCommand(DBOX *);
+void FixColors(WINDOW);
+void SetScrollBars(WINDOW);
+void CtlCloseWindowMsg(WINDOW);
 
 // normal.c
 extern struct window dwnd;
