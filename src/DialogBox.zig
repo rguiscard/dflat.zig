@@ -161,8 +161,9 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
+// -- generic window processor used by dialog box controls --
 pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    // win can be null ?
+    // win can be null ? probably not.
     const wnd = win.win;
     switch(msg) {
         df.CREATE_WINDOW => {
@@ -230,7 +231,6 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
             df.CtlCloseWindowMsg(wnd);
         },
         else => {
-            return df.cControlProc(wnd, msg, p1, p2);
         }
     }
     return root.zDefaultWndProc(win, msg, p1, p2);
@@ -413,7 +413,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ----- window-processing module, DIALOG window class -----
-pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     var p2_new = p2;
 

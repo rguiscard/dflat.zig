@@ -326,7 +326,7 @@ static void CtlCreateWindowMsg(WINDOW wnd)
 
 /* ------- KEYBOARD Message (Control) ----- */
 /*
-static BOOL CtlKeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
+BOOL cCtlKeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     CTLWINDOW *ct = GetControl(wnd);
     switch ((int) p1)    {
@@ -436,6 +436,7 @@ void FixColors(WINDOW wnd)
 }
 
 /* -- generic window processor used by dialog box controls -- */
+/*
 int cControlProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 {
     DBOX *db;
@@ -506,6 +507,7 @@ int cControlProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
     }
     return DefaultWndProc(wnd, msg, p1, p2);
 }
+*/
 
 /* ---- change the focus to the first control --- */
 void FirstFocus(DBOX *db)
