@@ -216,10 +216,39 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return win.modal;
 }
 
+// -------- COMMAND Message ---------
+fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.*.win;
+    switch (p1) {
+        df.ID_OK, df.ID_CANCEL => {
+            if (p2 != 0)
+                return true;
+            wnd.*.ReturnCode = @intCast(p1);
+            if (win.modal) {
+                _ = q.PostMessage(wnd, df.ENDDIALOG, 0, 0);
+            } else {
+                _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
+            }
+            return true;
+        },
+        df.ID_HELP => {
+            if (p2 != 0)
+                return true;
+
+            const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
+            const rtn = df.DisplayHelp(wnd, db.*.HelpName);
+            return (rtn == df.TRUE);
+        },
+        else => {
+        }
+    }
+    return false;
+}
+
 // ----- window-processing module, DIALOG window class -----
 pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
-    const p2_new = p2;
+    var p2_new = p2;
 
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -253,27 +282,26 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) call
                 return df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
             }
         },
-//        df.COMMAND => {
-//            if (CommandMsg(win, p1, p2) > 0)
-//                return df.TRUE;
-//        },
-//        df.PAINT => {
-//            p2_new = df.TRUE;
-//        },
-//        df.MOVE, df.SIZE => {
-//            rtn = root.BaseWndProc(df.DIALOG, wnd, message, p1, p2);
-//            if ((wnd.*.dfocus != null) and (df.isVisible(wnd) > 0))
-//                _ = df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
-//            return rtn;
-//        },
-//        df.CLOSE_WINDOW => {
-//            if (p1 == 0) {
-//                _ = df.SendMessage(wnd, df.COMMAND, df.ID_CANCEL, 0);
-//                return df.TRUE;
-//            }
-//        },
+        df.COMMAND => {
+            if (CommandMsg(win, p1, p2))
+                return df.TRUE;
+        },
+        df.PAINT => {
+            p2_new = df.TRUE;
+        },
+        df.MOVE, df.SIZE => {
+            const rtn = root.zBaseWndProc(df.DIALOG, win, msg, p1, p2);
+            if ((wnd.*.dfocus != null) and (df.isVisible(wnd) > 0))
+                _ = df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
+            return rtn;
+        },
+        df.CLOSE_WINDOW => {
+            if (p1 == 0) {
+                _ = win.sendMessage(df.COMMAND, df.ID_CANCEL, 0);
+                return df.TRUE;
+            }
+        },
         else => {
-            return df.cDialogProc(wnd, msg, p1, p2);
         }
     }
     // Note, p2 will be changed.

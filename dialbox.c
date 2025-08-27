@@ -43,6 +43,7 @@ void ClearDialogBoxes(void)
 }
 
 /* -------- COMMAND Message --------- */
+/*
 static BOOL CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     DBOX *db = wnd->extension;
@@ -68,14 +69,15 @@ static BOOL CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+*/
 
 /* ----- window-processing module, DIALOG window class ----- */
-int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
-{
-	int rtn;
-    DBOX *db = wnd->extension;
-
-    switch (msg)    {
+//int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+//{
+//	int rtn;
+//    DBOX *db = wnd->extension;
+//
+//    switch (msg)    {
 //  Ported to zig side
 //        case CREATE_WINDOW:
 //            return CreateWindowMsg(wnd, p1, p2);
@@ -104,30 +106,30 @@ int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //		if ((int)p1 && wnd->dfocus != NULL && isVisible(wnd))
 //			return SendMessage(wnd->dfocus, SETFOCUS, TRUE, 0);
 //			break;
-        case COMMAND:
-            if (CommandMsg(wnd, p1, p2))
-                return TRUE;
-            break;
-        case PAINT:
-            p2 = TRUE;
-            break;
-		case MOVE:
-		case SIZE:
-		    rtn = BaseWndProc(DIALOG, wnd, msg, p1, p2);
-			if (wnd->dfocus != NULL && isVisible(wnd))
-				SendMessage(wnd->dfocus, SETFOCUS, TRUE, 0);
-			return rtn;
-        case CLOSE_WINDOW:
-            if (!p1)    {
-                SendMessage(wnd, COMMAND, ID_CANCEL, 0);
-                return TRUE;
-            }
-            break;
-        default:
-            break;
-    }
-    return BaseWndProc(DIALOG, wnd, msg, p1, p2);
-}
+//        case COMMAND:
+//            if (CommandMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
+//        case PAINT:
+//            p2 = TRUE;
+//            break;
+//  case MOVE:
+//case SIZE:
+//rtn = BaseWndProc(DIALOG, wnd, msg, p1, p2);
+//if (wnd->dfocus != NULL && isVisible(wnd))
+//SendMessage(wnd->dfocus, SETFOCUS, TRUE, 0);
+//return rtn;
+//        case CLOSE_WINDOW:
+//            if (!p1)    {
+//                SendMessage(wnd, COMMAND, ID_CANCEL, 0);
+//                return TRUE;
+//            }
+//            break;
+//        default:
+//            break;
+//    }
+//    return BaseWndProc(DIALOG, wnd, msg, p1, p2);
+//}
 
 /* ------- create and execute a dialog box ---------- */
 /*
