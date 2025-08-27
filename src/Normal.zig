@@ -20,8 +20,7 @@ fn getDummy() df.WINDOW {
 
 //        dummyWnd = Window.create(df.DUMMY, null, -1, -1, -1, -1, null, null, NormalProc, 0);
     }
-    const wnd = dummyWnd.?.win;
-    return wnd;
+    return &df.dwnd;
 }
 
 // --------- CREATE_WINDOW Message ----------
@@ -359,7 +358,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             df.px = @intCast(mx);
             df.py = @intCast(my);
             df.diff = @intCast(mx);
-            _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
+            _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(dwnd)));
             df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         }
         return;
