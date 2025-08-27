@@ -24,6 +24,7 @@ void PaintUnderLappers(WINDOW);
 void dragborder(WINDOW, int, int);
 void sizeborder(WINDOW, int, int);
 void RestoreBorder(RECT);
+RECT PositionIcon(WINDOW);
 extern int px;
 extern int py;
 extern int diff;

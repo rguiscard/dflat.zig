@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const lists = @import("Lists.zig");
 const rect = @import("Rect.zig");
 const Klass = @import("Classes.zig");
+const q = @import("Message.zig");
 
 var dummyWnd:?Window = null;
 //var px:c_int = -1;
@@ -27,7 +28,7 @@ fn getDummy() df.WINDOW {
 fn CreateWindowMsg(win:*Window) void {
     const wnd = win.win;
     lists.AppendWindow(wnd);
-    const rtn = df.SendMessage(null, df.MOUSE_INSTALLED, 0, 0);
+    const rtn = q.SendMessage(null, df.MOUSE_INSTALLED, 0, 0);
     if (rtn == 0) {
         win.ClearAttribute(df.VSCROLLBAR | df.HSCROLLBAR);
     }
@@ -52,7 +53,7 @@ fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         var cwnd = Window.FirstWindow(wnd);
         while (cwnd) |cw| {
             if (cw.*.condition != df.ISCLOSING) {
-                _ = df.SendMessage(cw, df.SHOW_WINDOW, p1, p2);
+                _ = q.SendMessage(cw, df.SHOW_WINDOW, p1, p2);
             }
             cwnd = Window.NextWindow(cw);
         }
@@ -127,8 +128,8 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
             }
         }
-        _ = df.SendMessage(wnd, df.MOUSE_CURSOR, x, y);
-        _ = df.SendMessage(wnd, df.MOUSE_MOVED, x, y);
+        _ = q.SendMessage(wnd, df.MOUSE_CURSOR, x, y);
+        _ = q.SendMessage(wnd, df.MOUSE_MOVED, x, y);
         return true;
     }
     switch (p1) {
@@ -263,7 +264,7 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
             thatpar = Window.GetParent(thatpar);
         }
         if (df.inFocus != null) {
-            _ = df.SendMessage(df.inFocus, df.SETFOCUS, df.FALSE, 0);
+            _ = q.SendMessage(df.inFocus, df.SETFOCUS, df.FALSE, 0);
         }
         df.inFocus = wnd;
         if ((that != null) and (df.isVisible(wnd)>0)) {
@@ -289,11 +290,11 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         df.ReFocus(wnd);
         if ((this != null) and ((df.isVisible(this) == 0) or (df.TestAttribute(this, df.SAVESELF) == 0))) {
             wnd.*.wasCleared = df.FALSE;
-            _ = df.SendMessage(this, df.SHOW_WINDOW, 0, 0);
+            _ = q.SendMessage(this, df.SHOW_WINDOW, 0, 0);
         } else if (df.isVisible(wnd) == 0) {
-            _ = df.SendMessage(wnd, df.SHOW_WINDOW, 0, 0);
+            _ = q.SendMessage(wnd, df.SHOW_WINDOW, 0, 0);
         } else {
-            _ = df.SendMessage(wnd, df.BORDER, 0, 0);
+            _ = q.SendMessage(wnd, df.BORDER, 0, 0);
         }
     }
     else if ((p1 == 0) and (df.inFocus == wnd)) {
@@ -310,7 +311,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const my = p2 - win.GetTop();
     if ((df.WindowSizing == 0) and (df.WindowMoving==0)) {
         if (df.HitControlBox(wnd, mx, my)) {
-            _ = df.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
+            q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
             lists.SkipApplicationControls();
         }
     }
@@ -383,7 +384,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 return;
         }
         df.WindowSizing = df.TRUE;
-        _ = df.SendMessage(wnd, df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
+        _ = q.SendMessage(wnd, df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
         df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
     }
 }
@@ -414,7 +415,7 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             x = @min(x, rightmost);
             y = @max(y, topmost);
             y = @min(y, bottommost);
-            _ = df.SendMessage(null,df.MOUSE_CURSOR,x+df.diff,y);
+            _ = q.SendMessage(null,df.MOUSE_CURSOR,x+df.diff,y);
         }
         if ((x != df.px) or  (y != df.py))    {
             df.px = x;
@@ -430,6 +431,183 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
+// --------- MOVE Message ----------
+fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    const wasVisible = (df.isVisible(wnd) > 0);
+    const xdif = p1 - win.GetLeft();
+    const ydif = p2 - win.GetTop();
+
+    if ((xdif == 0) and (ydif == 0)) {
+        return;
+    }
+    wnd.*.wasCleared = df.FALSE;
+    if (wasVisible) {
+        _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+    }
+    wnd.*.rc.lf = @intCast(p1);
+    wnd.*.rc.tp = @intCast(p2);
+    // be careful, changing the same struct.
+    wnd.*.rc.rt = @intCast(win.GetLeft()+win.WindowWidth()-1);
+    wnd.*.rc.bt = @intCast(win.GetTop()+win.WindowHeight()-1);
+    if (wnd.*.condition == df.ISRESTORED) {
+        wnd.*.RestoredRC = wnd.*.rc;
+    }
+
+    var cwnd = Window.FirstWindow(wnd);
+    while (cwnd) |cw| {
+        _ = q.SendMessage(cw, df.MOVE, cwnd.*.rc.lf+xdif, cwnd.*.rc.tp+ydif);
+        cwnd = Window.NextWindow(cw);
+    }
+    if (wasVisible)
+        _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+}
+
+
+// --------- SIZE Message ----------
+fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    const wasVisible = (df.isVisible(wnd) > 0);
+    const xdif = p1 - win.GetRight();
+    const ydif = p2 - win.GetBottom();
+
+    if ((xdif == 0) and (ydif == 0)) {
+        return;
+    }
+    wnd.*.wasCleared = df.FALSE;
+    if (wasVisible) {
+        _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+    }
+    wnd.*.rc.rt = @intCast(p1);
+    wnd.*.rc.bt = @intCast(p2);
+    wnd.*.ht = @intCast(win.GetBottom()-win.GetTop()+1);
+    wnd.*.wd = @intCast(win.GetRight()-win.GetLeft()+1);
+
+    if (wnd.*.condition == df.ISRESTORED)
+        wnd.*.RestoredRC = df.WindowRect(wnd);
+
+    const rc = rect.ClientRect(win);
+
+    var cwnd = Window.FirstWindow(wnd);
+    while (cwnd != null) {
+        if (cwnd.*.condition == df.ISMAXIMIZED) {
+            _ = q.SendMessage(cwnd, df.SIZE, df.RectRight(rc), df.RectBottom(rc));
+        }
+        cwnd = Window.NextWindow(cwnd);
+    }
+
+    if (wasVisible)
+        _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+}
+
+// --------- CLOSE_WINDOW Message ----------
+fn CloseWindowMsg(win:*Window) void {
+    const wnd = win.win;
+    wnd.*.condition = df.ISCLOSING;
+    // ----------- hide this window ------------
+    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+
+    // --- close the children of this window ---
+    var cwnd = Window.LastWindow(wnd);
+    while (cwnd != null) {
+        if (df.inFocus == cwnd) {
+            df.inFocus = wnd;
+        }
+        _ = q.SendMessage(cwnd,df.CLOSE_WINDOW,0,0);
+        cwnd = Window.LastWindow(wnd);
+    }
+
+    // ----- release captured resources ------
+    if (wnd.*.PrevClock != null)
+        _ = win.sendMessage(df.RELEASE_CLOCK, 0, 0);
+    if (wnd.*.PrevMouse != null)
+        _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
+    if (wnd.*.PrevKeyboard != null)
+        _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
+    // --- change focus if this window had it --
+    if (wnd == df.inFocus)
+        lists.SetPrevFocus();
+    // -- free memory allocated to this window --
+    if (wnd.*.title != null)
+        df.free(wnd.*.title);
+    if (wnd.*.videosave != null)
+        df.free(wnd.*.videosave);
+    // -- remove window from parent's list of children --
+        lists.RemoveWindow(wnd);
+    if (wnd == df.inFocus)
+        df.inFocus = null;
+    df.free(wnd);
+    // FIXME: should also free parent win
+}
+
+// --------- MAXIMIZE Message ----------
+fn MaximizeMsg(win:*Window) void {
+    const wnd = win.win;
+    var rc:df.RECT = .{.lf=0, .tp=0, .rt=0, .bt=0};
+    const holdrc = wnd.*.RestoredRC;
+    rc.rt = df.SCREENWIDTH-1;
+    rc.bt = df.SCREENHEIGHT-1;
+    if (Window.GetParent(wnd)) |parent| {
+        if (Window.get_zin(parent)) |zin| {
+            rc = rect.ClientRect(zin);
+        }
+    }
+    wnd.*.oldcondition = wnd.*.condition;
+    wnd.*.condition = df.ISMAXIMIZED;
+    wnd.*.wasCleared = df.FALSE;
+    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+    _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
+    _ = win.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
+    if (wnd.*.restored_attrib == 0) {
+        wnd.*.restored_attrib = wnd.*.attrib;
+    }
+    win.ClearAttribute(df.SHADOW);
+    _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    wnd.*.RestoredRC = holdrc;
+}
+
+// --------- MINIMIZE Message ----------
+fn MinimizeMsg(win:*Window) void {
+    const wnd = win.win;
+    const holdrc = wnd.*.RestoredRC;
+    const rc = df.PositionIcon(wnd);
+    wnd.*.oldcondition = wnd.*.condition;
+    wnd.*.condition = df.ISMINIMIZED;
+    wnd.*.wasCleared = df.FALSE;
+    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+    _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
+    _ = win.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
+    if (wnd == df.inFocus) {
+        lists.SetNextFocus();
+    }
+    if (wnd.*.restored_attrib == 0) {
+        wnd.*.restored_attrib = wnd.*.attrib;
+    }
+    win.ClearAttribute( df.SHADOW | df.SIZEABLE | df.HASMENUBAR |
+                        df.VSCROLLBAR | df.HSCROLLBAR);
+    _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    wnd.*.RestoredRC = holdrc;
+}
+
+// --------- RESTORE Message ----------
+fn RestoreMsg(win:*Window) void {
+    const wnd = win.win;
+    const holdrc = wnd.*.RestoredRC;
+    wnd.*.oldcondition = wnd.*.condition;
+    wnd.*.condition = df.ISRESTORED;
+    wnd.*.wasCleared = df.FALSE;
+    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+    wnd.*.attrib = wnd.*.restored_attrib;
+    wnd.*.restored_attrib = 0;
+    _ = win.sendMessage(df.MOVE, wnd.*.RestoredRC.lf, wnd.*.RestoredRC.tp);
+    wnd.*.RestoredRC = holdrc;
+    _ = win.sendMessage(df.SIZE, wnd.*.RestoredRC.rt, wnd.*.RestoredRC.bt);
+    if (wnd != df.inFocus) {
+        _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
+    } else {
+        _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    }
+}
 
 pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
@@ -451,11 +629,11 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
                 return df.TRUE;
             // ------- fall through -------
             if (Window.GetParent(wnd) != null)
-                df.PostMessage(Window.GetParent(wnd), msg, p1, p2);
+                q.PostMessage(Window.GetParent(wnd), msg, p1, p2);
         },
         df.ADDSTATUS, df.SHIFT_CHANGED => {
             if (Window.GetParent(wnd) != null)
-                df.PostMessage(Window.GetParent(wnd), msg, p1, p2);
+                q.PostMessage(Window.GetParent(wnd), msg, p1, p2);
         },
         df.PAINT => {
             if (df.isVisible(wnd)>0) {
@@ -510,45 +688,46 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
             if ((df.WindowMoving>0) or (df.WindowSizing>0)) {
                 const dwnd = getDummy();
                 if (df.WindowMoving > 0) {
-                    df.PostMessage(wnd,df.MOVE,dwnd.*.rc.lf,dwnd.*.rc.tp);
+                    q.PostMessage(wnd,df.MOVE,dwnd.*.rc.lf,dwnd.*.rc.tp);
                 } else {
-                    df.PostMessage(wnd,df.SIZE,dwnd.*.rc.rt,dwnd.*.rc.bt);
+                    q.PostMessage(wnd,df.SIZE,dwnd.*.rc.rt,dwnd.*.rc.bt);
                 }
                 TerminateMoveSize();
             }
         },
-//        df.MOVE => {
-//            MoveMsg(wnd, p1, p2);
-//        },
-//        df.SIZE => {
-//            SizeMsg(wnd, p1, p2);
-//        },
-//        df.CLOSE_WINDOW => {
-//            CloseWindowMsg(wnd);
-//        },
-//        case MAXIMIZE:
-//            if (wnd->condition != ISMAXIMIZED)
-//                MaximizeMsg(wnd);
-//            break;
-//        case MINIMIZE:
-//            if (wnd->condition != ISMINIMIZED)
-//                MinimizeMsg(wnd);
-//            break;
-//        case RESTORE:
-//            if (wnd->condition != ISRESTORED)    {
-//                if (wnd->oldcondition == ISMAXIMIZED)
-//                    SendMessage(wnd, MAXIMIZE, 0, 0);
-//                else
-//                    RestoreMsg(wnd);
-//            }
-//            break;
-//        df.DISPLAY_HELP => {
-//            const p1_addr:usize = @intCast(p1);
-//            const pp1:[*c]u8 = @ptrFromInt(p1_addr);
-//            return helpbox.DisplayHelp(wnd, std.mem.span(pp1));
-//        },
+        df.MOVE => {
+            MoveMsg(win, p1, p2);
+        },
+        df.SIZE => {
+            SizeMsg(win, p1, p2);
+        },
+        df.CLOSE_WINDOW => {
+            CloseWindowMsg(win);
+        },
+        df.MAXIMIZE => {
+            if (wnd.*.condition != df.ISMAXIMIZED)
+                MaximizeMsg(win);
+        },
+        df.MINIMIZE => {
+            if (wnd.*.condition != df.ISMINIMIZED)
+                MinimizeMsg(win);
+        },
+        df.RESTORE => {
+            if (wnd.*.condition != df.ISRESTORED) {
+                if (wnd.*.oldcondition == df.ISMAXIMIZED) {
+                    _ = win.sendMessage(df.MAXIMIZE, 0, 0);
+                } else {
+                    RestoreMsg(win);
+                }
+            }
+        },
+        df.DISPLAY_HELP => {
+            const p1_addr:usize = @intCast(p1);
+            const pp1:[*c]u8 = @ptrFromInt(p1_addr);
+            const rtn = df.DisplayHelp(wnd, pp1);
+            return @intCast(rtn);
+        },
         else => {
-            return df.cNormalProc(wnd, msg, p1, p2);
         }
     }
     return df.TRUE;
@@ -560,8 +739,8 @@ fn TerminateMoveSize() void {
     df.px = -1;
     df.py = -1;
     df.diff = 0;
-    _ = df.SendMessage(dwnd, df.RELEASE_MOUSE, df.TRUE, 0);
-    _ = df.SendMessage(dwnd, df.RELEASE_KEYBOARD, df.TRUE, 0);
+    _ = q.SendMessage(dwnd, df.RELEASE_MOUSE, df.TRUE, 0);
+    _ = q.SendMessage(dwnd, df.RELEASE_KEYBOARD, df.TRUE, 0);
     df.RestoreBorder(dwnd.*.rc);
     df.WindowMoving = df.FALSE;
     df.WindowSizing = df.FALSE;

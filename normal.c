@@ -13,7 +13,7 @@ void RestoreBorder(RECT);
 void GetVideoBuffer(WINDOW);
 void PutVideoBuffer(WINDOW);
 #ifdef INCLUDE_MINIMIZE
-static RECT PositionIcon(WINDOW);
+RECT PositionIcon(WINDOW);
 #endif
 void dragborder(WINDOW, int, int);
 void sizeborder(WINDOW, int, int);
@@ -34,49 +34,9 @@ CLASSDEFS classdefs[] = {
 };
 WINDOW HiddenWindow;
 
-/* --------- MOUSE_MOVED Message ---------- */
-/*
-static BOOL MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    if (WindowMoving)    {
-        int leftmost = 0, topmost = 0,
-            bottommost = SCREENHEIGHT-2,
-            rightmost = SCREENWIDTH-2;
-        int x = (int) p1 - diff;
-        int y = (int) p2;
-        if (GetParent(wnd) != NULL &&
-                !TestAttribute(wnd, NOCLIP))    {
-            WINDOW wnd1 = GetParent(wnd);
-            topmost    = GetClientTop(wnd1);
-            leftmost   = GetClientLeft(wnd1);
-            bottommost = GetClientBottom(wnd1);
-            rightmost  = GetClientRight(wnd1);
-        }
-        if (x < leftmost || x > rightmost ||
-                y < topmost || y > bottommost)    {
-            x = max(x, leftmost);
-            x = min(x, rightmost);
-            y = max(y, topmost);
-            y = min(y, bottommost);
-            SendMessage(NULL,MOUSE_CURSOR,x+diff,y);
-        }
-        if (x != px || y != py)    {
-            px = x;
-            py = y;
-            dragborder(wnd, x, y);
-        }
-        return TRUE;
-    }
-    if (WindowSizing)    {
-        sizeborder(wnd, (int) p1, (int) p2);
-        return TRUE;
-    }
-    return FALSE;
-}
-*/
-
 #ifdef INCLUDE_MAXIMIZE
 /* --------- MAXIMIZE Message ---------- */
+/*
 static void MaximizeMsg(WINDOW wnd)
 {
     RECT rc = {0, 0, 0, 0};
@@ -100,10 +60,12 @@ static void MaximizeMsg(WINDOW wnd)
     SendMessage(wnd, SHOW_WINDOW, 0, 0);
     wnd->RestoredRC = holdrc;
 }
+*/
 #endif
 
 #ifdef INCLUDE_MINIMIZE
 /* --------- MINIMIZE Message ---------- */
+/*
 static void MinimizeMsg(WINDOW wnd)
 {
     RECT rc;
@@ -129,10 +91,12 @@ static void MinimizeMsg(WINDOW wnd)
     SendMessage(wnd, SHOW_WINDOW, 0, 0);
     wnd->RestoredRC = holdrc;
 }
+*/
 #endif
 
 #ifdef INCLUDE_RESTORE
 /* --------- RESTORE Message ---------- */
+/*
 static void RestoreMsg(WINDOW wnd)
 {
     RECT holdrc;
@@ -153,9 +117,11 @@ static void RestoreMsg(WINDOW wnd)
 	else
 	    SendMessage(wnd, SHOW_WINDOW, 0, 0);
 }
+*/
 #endif
 
 /* --------- MOVE Message ---------- */
+/*
 static void MoveMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     WINDOW cwnd;
@@ -183,8 +149,10 @@ static void MoveMsg(WINDOW wnd, PARAM p1, PARAM p2)
     if (wasVisible)
         SendMessage(wnd, SHOW_WINDOW, 0, 0);
 }
+*/
 
 /* --------- SIZE Message ---------- */
+/*
 static void SizeMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     BOOL wasVisible = isVisible(wnd);
@@ -220,16 +188,18 @@ static void SizeMsg(WINDOW wnd, PARAM p1, PARAM p2)
     if (wasVisible)
         SendMessage(wnd, SHOW_WINDOW, 0, 0);
 }
+*/
 
 /* --------- CLOSE_WINDOW Message ---------- */
+/*
 static void CloseWindowMsg(WINDOW wnd)
 {
     WINDOW cwnd;
     wnd->condition = ISCLOSING;
-    /* ----------- hide this window ------------ */
+    // ----------- hide this window ------------
     SendMessage(wnd, HIDE_WINDOW, 0, 0);
 
-    /* --- close the children of this window --- */
+    // --- close the children of this window ---
 	cwnd = LastWindow(wnd);
 	while (cwnd != NULL)	{
         if (inFocus == cwnd)
@@ -238,7 +208,7 @@ static void CloseWindowMsg(WINDOW wnd)
 		cwnd = LastWindow(wnd);
     }
 
-	/* ----- release captured resources ------ */
+	// ----- release captured resources ------
     if (wnd->PrevClock != NULL)
         SendMessage(wnd, RELEASE_CLOCK, 0, 0);
     if (wnd->PrevMouse != NULL)
@@ -246,22 +216,24 @@ static void CloseWindowMsg(WINDOW wnd)
     if (wnd->PrevKeyboard != NULL)
         SendMessage(wnd, RELEASE_KEYBOARD, 0, 0);
 
-    /* --- change focus if this window had it -- */
+    // --- change focus if this window had it --
 	if (wnd == inFocus)
 	    SetPrevFocus();
-    /* -- free memory allocated to this window - */
+    // -- free memory allocated to this window -
     if (wnd->title != NULL)
         free(wnd->title);
     if (wnd->videosave != NULL)
         free(wnd->videosave);
-    /* -- remove window from parent's list of children -- */
+    // -- remove window from parent's list of children --
 	RemoveWindow(wnd);
     if (wnd == inFocus)
         inFocus = NULL;
     free(wnd);
 }
+*/
 
 /* ---- Window-processing module for NORMAL window class ---- */
+/*
 int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
@@ -279,7 +251,7 @@ int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //        case KEYBOARD:
 //            if (KeyboardMsg(wnd, p1, p2))
 //                return TRUE;
-//            /* ------- fall through ------- */
+//            // ------- fall through ------- 
 //        case ADDSTATUS:
 //        case SHIFT_CHANGED:
 //            if (GetParent(wnd) != NULL)
@@ -331,49 +303,50 @@ int cNormalProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //                TerminateMoveSize();
 //            }
 //            break;
-        case MOVE:
-            MoveMsg(wnd, p1, p2);
-            break;
-        case SIZE:    {
-            SizeMsg(wnd, p1, p2);
-            break;
-        }
-        case CLOSE_WINDOW:
-            CloseWindowMsg(wnd);
-            break;
+//        case MOVE:
+//            MoveMsg(wnd, p1, p2);
+//            break;
+//        case SIZE:    {
+//            SizeMsg(wnd, p1, p2);
+//            break;
+//        }
+//        case CLOSE_WINDOW:
+//            CloseWindowMsg(wnd);
+//            break;
 #ifdef INCLUDE_MAXIMIZE
-        case MAXIMIZE:
-            if (wnd->condition != ISMAXIMIZED)
-                MaximizeMsg(wnd);
-            break;
+//        case MAXIMIZE:
+//            if (wnd->condition != ISMAXIMIZED)
+//                MaximizeMsg(wnd);
+//            break;
 #endif
 #ifdef INCLUDE_MINIMIZE
-        case MINIMIZE:
-            if (wnd->condition != ISMINIMIZED)
-                MinimizeMsg(wnd);
-            break;
+//        case MINIMIZE:
+//            if (wnd->condition != ISMINIMIZED)
+//                MinimizeMsg(wnd);
+//            break;
 #endif
 #ifdef INCLUDE_RESTORE
-        case RESTORE:
-            if (wnd->condition != ISRESTORED)    {
+//        case RESTORE:
+//            if (wnd->condition != ISRESTORED)    {
 #ifdef INCLUDE_MAXIMIZE
-                if (wnd->oldcondition == ISMAXIMIZED)
-                    SendMessage(wnd, MAXIMIZE, 0, 0);
-                else
+//                if (wnd->oldcondition == ISMAXIMIZED)
+//                    SendMessage(wnd, MAXIMIZE, 0, 0);
+//                else
 #endif
-                    RestoreMsg(wnd);
-            }
-            break;
+//                    RestoreMsg(wnd);
+//            }
+//            break;
 #endif
 #ifdef INCLUDE_HELP
-        case DISPLAY_HELP:
-            return DisplayHelp(wnd, (char *)p1);
+//        case DISPLAY_HELP:
+//            return DisplayHelp(wnd, (char *)p1);
 #endif
-        default:
-            break;
-    }
-    return TRUE;
-}
+//        default:
+//            break;
+//    }
+//    return TRUE;
+//}
+*/
 
 #ifdef INCLUDE_MINIMIZE
 /* ---- compute lower right icon space in a rectangle ---- */
@@ -387,7 +360,7 @@ static RECT LowerRight(RECT prc)
     return rc;
 }
 /* ----- compute a position for a minimized window icon ---- */
-static RECT PositionIcon(WINDOW wnd)
+RECT PositionIcon(WINDOW wnd)
 {
 	WINDOW pwnd = GetParent(wnd);
     RECT rc;
@@ -428,18 +401,6 @@ static RECT PositionIcon(WINDOW wnd)
 }
 #endif
 
-/* ----- terminate the move or size operation ----- */
-/*
-void TerminateMoveSize(void)
-{
-    px = py = -1;
-    diff = 0;
-    SendMessage(&dwnd, RELEASE_MOUSE, TRUE, 0);
-    SendMessage(&dwnd, RELEASE_KEYBOARD, TRUE, 0);
-    RestoreBorder(dwnd.rc);
-    WindowMoving = WindowSizing = FALSE;
-}
-*/
 /* ---- build a dummy window border for moving or sizing --- */
 void dragborder(WINDOW wnd, int x, int y)
 {

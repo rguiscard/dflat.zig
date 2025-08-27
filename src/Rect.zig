@@ -36,3 +36,14 @@ pub export fn InsideRect(x:c_int, y:c_int, r:df.RECT) callconv(.c) bool {
     return within((x), RectLeft(r), RectRight(r)) and
            within((y), RectTop(r), RectBottom(r));
 }
+
+// ------- return the client rectangle of a window ------
+pub fn ClientRect(win:*Window) df.RECT {
+    const rc:df.RECT = .{
+        .lf = @intCast(win.GetClientLeft()),
+        .tp = @intCast(win.GetClientTop()),
+        .rt = @intCast(win.GetClientRight()),
+        .bt = @intCast(win.GetClientBottom()),
+    };
+    return rc;
+}
