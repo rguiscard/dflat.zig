@@ -728,6 +728,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
             return @intCast(rtn);
         },
         else => {
+            return df.cNormalProc(wnd, msg, p1, p2);
         }
     }
     return df.TRUE;
