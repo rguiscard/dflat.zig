@@ -3,14 +3,14 @@
 #include "dflat.h"
 
 static int inFocusCommand(DBOX *);
-static BOOL dbShortcutKeys(DBOX *, int);
+BOOL dbShortcutKeys(DBOX *, int);
 static int ControlProc(WINDOW, MESSAGE, PARAM, PARAM);
 void FirstFocus(DBOX *db);
-static void NextFocus(DBOX *db);
-static void PrevFocus(DBOX *db);
+void NextFocus(DBOX *db);
+void PrevFocus(DBOX *db);
 static CTLWINDOW *AssociatedControl(DBOX *, enum commands);
 
-static BOOL SysMenuOpen;
+BOOL SysMenuOpen;
 
 static DBOX **dbs = NULL;
 static int dbct = 0;
@@ -94,6 +94,7 @@ static int CreateWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
 */
 
 /* -------- LEFT_BUTTON Message --------- */
+/*
 static BOOL LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     DBOX *db = wnd->extension;
@@ -129,8 +130,10 @@ static BOOL LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+*/
 
 /* -------- KEYBOARD Message --------- */
+/*
 static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     DBOX *db = wnd->extension;
@@ -171,13 +174,14 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
             break;
 #endif
         default:
-            /* ------ search all the shortcut keys ----- */
+            // ------ search all the shortcut keys -----
             if (dbShortcutKeys(db, (int) p1))
 				return TRUE;
             break;
     }
     return get_modal(wnd);
 }
+*/
 
 /* -------- COMMAND Message --------- */
 static BOOL CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -216,18 +220,18 @@ int cDialogProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //  Ported to zig side
 //        case CREATE_WINDOW:
 //            return CreateWindowMsg(wnd, p1, p2);
-        case SHIFT_CHANGED:
-            if (get_modal(wnd))
-                return TRUE;
-            break;
-        case LEFT_BUTTON:
-            if (LeftButtonMsg(wnd, p1, p2))
-                return TRUE;
-            break;
-        case KEYBOARD:
-            if (KeyboardMsg(wnd, p1, p2))
-                return TRUE;
-            break;
+//        case SHIFT_CHANGED:
+//            if (get_modal(wnd))
+//                return TRUE;
+//            break;
+//        case LEFT_BUTTON:
+//            if (LeftButtonMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
+//        case KEYBOARD:
+//            if (KeyboardMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
         case CLOSE_POPDOWN:
             SysMenuOpen = FALSE;
             break;
@@ -517,7 +521,7 @@ static CTLWINDOW *AssociatedControl(DBOX *db,enum commands Tcmd)
 }
 
 /* --- process dialog box shortcut keys --- */
-static BOOL dbShortcutKeys(DBOX *db, int ky)
+BOOL dbShortcutKeys(DBOX *db, int ky)
 {
     CTLWINDOW *ct;
     int ch = AltConvert(ky);
@@ -775,7 +779,7 @@ void FirstFocus(DBOX *db)
 }
 
 /* ---- change the focus to the next control --- */
-static void NextFocus(DBOX *db)
+void NextFocus(DBOX *db)
 {
     CTLWINDOW *ct = WindowControl(db, inFocus);
 	int looped = 0;
@@ -794,7 +798,7 @@ static void NextFocus(DBOX *db)
 }
 
 /* ---- change the focus to the previous control --- */
-static void PrevFocus(DBOX *db)
+void PrevFocus(DBOX *db)
 {
     CTLWINDOW *ct = WindowControl(db, inFocus);
 	int looped = 0;

@@ -14,6 +14,10 @@ BOOL ProcessMessage(WINDOW, MESSAGE, PARAM, PARAM, int);
 
 // dialbox.c
 void FirstFocus(DBOX *);
+void NextFocus(DBOX *db);
+void PrevFocus(DBOX *db);
+BOOL dbShortcutKeys(DBOX *, int);
+extern BOOL SysMenuOpen;
 
 // normal.c
 extern struct window dwnd;
