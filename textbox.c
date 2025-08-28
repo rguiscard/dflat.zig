@@ -90,9 +90,10 @@ void SetTextMsg(WINDOW wnd, char *txt)
 */
 
 /* ------------ CLEARTEXT Message -------------- */
+/*
 static void ClearTextMsg(WINDOW wnd)
 {
-    /* ----- clear text from textbox ----- */
+    // ----- clear text from textbox -----
     if (wnd->text != NULL)
         free(wnd->text);
     wnd->text = NULL;
@@ -103,8 +104,10 @@ static void ClearTextMsg(WINDOW wnd)
     ClearTextBlock(wnd);
     ClearTextPointers(wnd);
 }
+*/
 
 /* ------------ KEYBOARD Message -------------- */
+/*
 static int KeyboardMsg(WINDOW wnd, PARAM p1)
 {
     switch ((int) p1)    {
@@ -133,25 +136,27 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1)
     }
     return FALSE;
 }
+*/
 
 /* ------------ LEFT_BUTTON Message -------------- */
+/*
 static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int mx = (int) p1 - GetLeft(wnd);
     int my = (int) p2 - GetTop(wnd);
     if (TestAttribute(wnd, VSCROLLBAR) &&
                         mx == WindowWidth(wnd)-1)    {
-        /* -------- in the right border ------- */
+        // -------- in the right border -------
         if (my == 0 || my == ClientHeight(wnd)+1)
-            /* --- above or below the scroll bar --- */
+            // --- above or below the scroll bar ---
             return FALSE;
         if (my == 1)
-            /* -------- top scroll button --------- */
+            // -------- top scroll button ---------
             return SendMessage(wnd, SCROLL, FALSE, 0);
         if (my == ClientHeight(wnd))
-            /* -------- bottom scroll button --------- */
+            // -------- bottom scroll button ---------
             return SendMessage(wnd, SCROLL, TRUE, 0);
-        /* ---------- in the scroll bar ----------- */
+        // ---------- in the scroll bar -----------
         if (!VSliding && my-1 == wnd->VScrollBox)    {
             RECT rc;
             VSliding = TRUE;
@@ -168,21 +173,21 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     if (TestAttribute(wnd, HSCROLLBAR) &&
                         my == WindowHeight(wnd)-1) {
-        /* -------- in the bottom border ------- */
+        // -------- in the bottom border -------
         if (mx == 0 || my == ClientWidth(wnd)+1)
-            /* ------  outside the scroll bar ---- */
+            // ------  outside the scroll bar ----
             return FALSE;
         if (mx == 1)
             return SendMessage(wnd, HORIZSCROLL,FALSE,0);
         if (mx == WindowWidth(wnd)-2)
             return SendMessage(wnd, HORIZSCROLL,TRUE,0);
         if (!HSliding && mx-1 == wnd->HScrollBox)    {
-            /* --- hit the scroll box --- */
+            // --- hit the scroll box ---
             RECT rc;
             rc.lf = GetLeft(wnd)+2;
             rc.rt = GetRight(wnd)-2;
             rc.tp = rc.bt = GetBottom(wnd);
-            /* - keep the mouse in the scroll bar - */
+            // - keep the mouse in the scroll bar -
             SendMessage(NULL,MOUSE_TRAVEL,(PARAM)&rc,0);
             HSliding = TRUE;
             return TRUE;
@@ -194,6 +199,7 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+*/
 
 /* ------------ MOUSE_MOVED Message -------------- */
 static BOOL MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -464,12 +470,12 @@ int cTextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            if (KeyboardMsg(wnd, p1))
 //                return TRUE;
 //            break;
-        case LEFT_BUTTON:
-            if (WindowSizing || WindowMoving)
-                return FALSE;
-            if (LeftButtonMsg(wnd, p1, p2))
-                return TRUE;
-            break;
+//        case LEFT_BUTTON:
+//            if (WindowSizing || WindowMoving)
+//                return FALSE;
+//            if (LeftButtonMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
         case MOUSE_MOVED:
             if (MouseMovedMsg(wnd, p1, p2))
                 return TRUE;

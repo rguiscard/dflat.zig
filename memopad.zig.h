@@ -56,6 +56,8 @@ void cDisplay(WINDOW, PARAM, PARAM);
 BOOL AddTextMsg(WINDOW, char *);
 void DeleteTextMsg(WINDOW, int);
 void InsertTextMsg(WINDOW, char *, int);
+extern BOOL VSliding;
+extern BOOL HSliding;
 
 // pictbox.c
 typedef struct {
