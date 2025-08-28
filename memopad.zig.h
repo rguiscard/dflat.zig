@@ -37,6 +37,19 @@ extern int px;
 extern int py;
 extern int diff;
 
+// applicat.c
+void CreateStatusBar(WINDOW);
+void SelectColors(WINDOW);
+void SetScreenHeight(int);
+void SelectLines(WINDOW);
+void SelectTexture(void);
+void SelectBorder(WINDOW);
+void SelectTitle(WINDOW);
+void SelectStatusBar(WINDOW);
+void CreateMenu(WINDOW);
+extern DBOX Display;
+extern BOOL AltDown;
+
 // pictbox.c
 typedef struct {
     enum VectTypes vt;

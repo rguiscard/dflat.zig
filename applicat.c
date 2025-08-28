@@ -18,17 +18,17 @@ extern DBOX Log;
 #ifdef INCLUDE_SHELLDOS
 static void ShellDOS(WINDOW);
 #endif
-static void CreateMenu(WINDOW);
-static void CreateStatusBar(WINDOW);
-static void SelectColors(WINDOW);
-static void SetScreenHeight(int);
-static void SelectLines(WINDOW);
+void CreateMenu(WINDOW);
+void CreateStatusBar(WINDOW);
+void SelectColors(WINDOW);
+void SetScreenHeight(int);
+void SelectLines(WINDOW);
 
 #ifdef INCLUDE_WINDOWOPTIONS
-static void SelectTexture(void);
-static void SelectBorder(WINDOW);
-static void SelectTitle(WINDOW);
-static void SelectStatusBar(WINDOW);
+void SelectTexture(void);
+void SelectBorder(WINDOW);
+void SelectTitle(WINDOW);
+void SelectStatusBar(WINDOW);
 #endif
 
 static WINDOW oldFocus;
@@ -370,7 +370,7 @@ static void ShellDOS(WINDOW wnd)
 #endif
 
 /* -------- Create the menu bar -------- */
-static void CreateMenu(WINDOW wnd)
+void CreateMenu(WINDOW wnd)
 {
     AddAttribute(wnd, HASMENUBAR);
     if (wnd->MenuBarWnd != NULL)
@@ -390,7 +390,7 @@ static void CreateMenu(WINDOW wnd)
 }
 
 /* ----------- Create the status bar ------------- */
-static void CreateStatusBar(WINDOW wnd)
+void CreateStatusBar(WINDOW wnd)
 {
     if (wnd->StatusBar != NULL)    {
         SendMessage(wnd->StatusBar, CLOSE_WINDOW, 0, 0);
@@ -591,7 +591,7 @@ static void DoWindowColors(WINDOW wnd)
 }
 
 /* ----- set up colors for the application window ------ */
-static void SelectColors(WINDOW wnd)
+void SelectColors(WINDOW wnd)
 {
 #ifdef INCLUDE_WINDOWMENU
     if (RadioButtonSetting(&Display, ID_MONO))
@@ -612,7 +612,7 @@ static void SelectColors(WINDOW wnd)
 }
 
 /* ---- select screen lines ---- */
-static void SelectLines(WINDOW wnd)
+void SelectLines(WINDOW wnd)
 {
     cfg.ScreenLines = SCREENHEIGHT;
     if (SCREENHEIGHT != cfg.ScreenLines)    {
@@ -635,7 +635,7 @@ static void SelectLines(WINDOW wnd)
 }
 
 /* ---- set the screen height in the video hardware ---- */
-static void SetScreenHeight(int height)
+void SetScreenHeight(int height)
 {
 #if 0	/* display size changes not supported */
         SendMessage(NULL, SAVE_CURSOR, 0, 0);
@@ -652,13 +652,13 @@ static void SetScreenHeight(int height)
 #ifdef INCLUDE_WINDOWMENU
 
 /* ----- select the screen texture ----- */
-static void SelectTexture(void)
+void SelectTexture(void)
 {
     cfg.Texture = CheckBoxSetting(&Display, ID_TEXTURE);
 }
 
 /* -- select whether the application screen has a border -- */
-static void SelectBorder(WINDOW wnd)
+void SelectBorder(WINDOW wnd)
 {
     cfg.Border = CheckBoxSetting(&Display, ID_BORDER);
     if (cfg.Border)
@@ -668,7 +668,7 @@ static void SelectBorder(WINDOW wnd)
 }
 
 /* select whether the application screen has a status bar */
-static void SelectStatusBar(WINDOW wnd)
+void SelectStatusBar(WINDOW wnd)
 {
     cfg.StatusBar = CheckBoxSetting(&Display, ID_STATUSBAR);
     if (cfg.StatusBar)
@@ -678,7 +678,7 @@ static void SelectStatusBar(WINDOW wnd)
 }
 
 /* select whether the application screen has a title bar */
-static void SelectTitle(WINDOW wnd)
+void SelectTitle(WINDOW wnd)
 {
     cfg.Title = CheckBoxSetting(&Display, ID_TITLE);
     if (cfg.Title)

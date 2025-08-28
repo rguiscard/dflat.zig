@@ -2,6 +2,7 @@ const df = @import("ImportC.zig").df;
 const Window = @import("Window.zig");
 const picture = @import("PictureBox.zig");
 const normal = @import("Normal.zig");
+const app = @import("Application.zig");
 const dialbox = @import("DialogBox.zig");
 const box = @import("Box.zig");
 
@@ -25,8 +26,7 @@ pub export fn NormalProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) 
 }
 
 pub export fn ApplicationProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cApplicationProc(wnd, msg, p1, p2);
+    return app.ApplicationProc(win, msg, p1, p2);
 }
 
 pub export fn TextBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {

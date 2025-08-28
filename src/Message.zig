@@ -132,7 +132,7 @@ pub export fn dispatch_message() callconv(.c) df.BOOL {
             return df.FALSE;
         }
         if (mq.msg == df.STOP) {
-            _ = df.PostMessage(null, df.STOP, 0, 0);
+            PostMessage(null, df.STOP, 0, 0);
             return df.FALSE;
         }
     }

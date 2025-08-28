@@ -159,66 +159,7 @@ void ShowPosition(WINDOW wnd)
         wnd->CurrLine, wnd->CurrCol);
     SendMessage(GetParent(wnd), ADDSTATUS, (PARAM) status, 0);
 }
-/* ----- window processing module for the editboxes ----- */
-int cOurEditorProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
-{
-    int rtn;
-    switch (msg)    {
-        case SETFOCUS:
-			if ((int)p1)	{
-				wnd->InsertMode = GetCommandToggle(&MainMenu, ID_INSERT);
-				wnd->WordWrapMode = GetCommandToggle(&MainMenu, ID_WRAP);
-			}
-            rtn = DefaultWndProc(wnd, msg, p1, p2);
-            if ((int)p1 == FALSE)
-                SendMessage(GetParent(wnd), ADDSTATUS, 0, 0);
-            else 
-                ShowPosition(wnd);
-            return rtn;
-        case KEYBOARD_CURSOR:
-            rtn = DefaultWndProc(wnd, msg, p1, p2);
-            ShowPosition(wnd);
-            return rtn;
-        case COMMAND:
-			switch ((int) p1)	{
-				case ID_HELP:
-	                DisplayHelp(wnd, "MEMOPADDOC");
-    	            return TRUE;
-				case ID_WRAP:
-					SendMessage(GetParent(wnd), COMMAND, ID_WRAP, 0);
-					wnd->WordWrapMode = cfg.WordWrap;
-    	            return TRUE;
-				case ID_INSERT:
-					SendMessage(GetParent(wnd), COMMAND, ID_INSERT, 0);
-					wnd->InsertMode = cfg.InsertMode;
-					SendMessage(NULL, SHOW_CURSOR, wnd->InsertMode, 0);
-    	            return TRUE;
-				default:
-					break;
-            }
-            break;
-        case CLOSE_WINDOW:
-            if (wnd->TextChanged)    {
-                char *cp = DFmalloc(25+strlen(GetTitle(wnd)));
-                SendMessage(wnd, SETFOCUS, TRUE, 0);
-                strcpy(cp, GetTitle(wnd));
-                strcat(cp, "\nText changed. Save it?");
-                if (YesNoBox(cp))
-                    SendMessage(GetParent(wnd),
-                        COMMAND, ID_SAVE, 0);
-                free(cp);
-            }
-            wndpos = 0;
-            if (wnd->extension != NULL)    {
-                free(wnd->extension);
-                wnd->extension = NULL;
-            }
-            break;
-        default:
-            break;
-    }
-    return DefaultWndProc(wnd, msg, p1, p2);
-}
+
 /* -- point to the name component of a file specification -- */
 char *NameComponent(char *FileName)
 {
