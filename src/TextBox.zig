@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const rect = @import("Rect.zig");
 
 pub var VSliding = false; // also used in ListBox
 var HSliding = false;
@@ -203,6 +204,72 @@ fn ButtonReleasedMsg(win:*Window) void {
     }
 }
 
+// ------------ SCROLL Message --------------
+fn ScrollMsg(win:*Window,p1:df.PARAM) c_int {
+    const wnd = win.win;
+    // ---- vertical scroll one line ----
+    if (p1>0) {
+        // ----- scroll one line up -----
+        if (wnd.*.wtop+win.ClientHeight() >= wnd.*.wlines) {
+            return df.FALSE;
+        }
+        wnd.*.wtop += 1;
+    } else {
+        // ----- scroll one line down -----
+        if (wnd.*.wtop == 0) {
+            return df.FALSE;
+        }
+        wnd.*.wtop -= 1;
+    }
+    if (df.isVisible(wnd)>0) {
+        const rc = df.ClipRectangle(wnd, rect.ClientRect(win));
+        if (df.ValidRect(rc))    {
+            // ---- scroll the window ----- 
+            if (wnd != df.inFocus) {
+                _ = win.sendMessage(df.PAINT, 0, 0);
+            } else {
+                df.scroll_window(wnd, rc, @intCast(p1));
+                if (p1 == 0) {
+                    // -- write top line (down) --
+                    df.WriteTextLine(wnd,null,wnd.*.wtop,df.FALSE);
+                } else {
+                    // -- write bottom line (up) --
+                    const y=df.RectBottom(rc)-win.GetClientTop();
+                    df.WriteTextLine(wnd,null,@intCast(wnd.*.wtop+y), df.FALSE);
+                }
+            }
+        }
+        // ---- reset the scroll box ----
+        if (win.TestAttribute(df.VSCROLLBAR)) {
+            const vscrollbox = df.ComputeVScrollBox(wnd);
+            if (vscrollbox != wnd.*.VScrollBox) {
+                df.MoveScrollBox(wnd, vscrollbox);
+            }
+        }
+    }
+    return df.TRUE;
+}
+
+fn HorizScrollMsg(win:*Window,p1:df.PARAM) c_int {
+    const wnd = win.win;
+    // --- horizontal scroll one column ---
+    if (p1>0) {
+        // --- scroll left ---
+        if (wnd.*.wleft + win.ClientWidth()-1 >= wnd.*.textwidth) {
+            return df.FALSE;
+        }
+        wnd.*.wleft += 1;
+    } else {
+        // --- scroll right ---
+        if (wnd.*.wleft == 0) {
+            return df.FALSE;
+        }
+        wnd.*.wleft -= 1;
+    }
+    _ = win.sendMessage(df.PAINT, 0, 0);
+    return df.TRUE;
+}
+
 // ----------- TEXTBOX Message-processing Module -----------
 pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
@@ -259,10 +326,12 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) cal
         df.BUTTON_RELEASED => {
             ButtonReleasedMsg(win);
         },
-//        case SCROLL:
-//            return ScrollMsg(wnd, p1);
-//        case HORIZSCROLL:
-//            return HorizScrollMsg(wnd, p1);
+        df.SCROLL => {
+            return ScrollMsg(win, p1);
+        },
+        df.HORIZSCROLL => {
+            return HorizScrollMsg(win, p1);
+        },
 //        case SCROLLPAGE:
 //            ScrollPageMsg(wnd, p1);
 //            return TRUE;

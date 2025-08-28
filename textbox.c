@@ -4,9 +4,9 @@
 
 void ComputeWindowTop(WINDOW);
 void ComputeWindowLeft(WINDOW);
-static int ComputeVScrollBox(WINDOW);
-static int ComputeHScrollBox(WINDOW);
-static void MoveScrollBox(WINDOW, int);
+int ComputeVScrollBox(WINDOW);
+int ComputeHScrollBox(WINDOW);
+void MoveScrollBox(WINDOW, int);
 static char *GetTextLine(WINDOW, int);
 
 BOOL VSliding;
@@ -74,68 +74,19 @@ void InsertTextMsg(WINDOW wnd, char *txt, int lno)
 	}
 }
 
-/* ------------ MOUSE_MOVED Message -------------- */
-/*
-static BOOL MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int mx = (int) p1 - GetLeft(wnd);
-    int my = (int) p2 - GetTop(wnd);
-    if (VSliding)    {
-        // ---- dragging the vertical scroll box ---
-        if (my-1 != wnd->VScrollBox)    {
-            foreground = FrameForeground(wnd);
-            background = FrameBackground(wnd);
-            wputch(wnd, SCROLLBARCHAR, WindowWidth(wnd)-1,
-                    wnd->VScrollBox+1);
-            wnd->VScrollBox = my-1;
-            wputch(wnd, SCROLLBOXCHAR, WindowWidth(wnd)-1,
-                    my);
-        }
-        return TRUE;
-    }
-    if (HSliding)    {
-        // --- dragging the horizontal scroll box --- 
-        if (mx-1 != wnd->HScrollBox)    {
-            foreground = FrameForeground(wnd);
-            background = FrameBackground(wnd);
-            wputch(wnd, SCROLLBARCHAR, wnd->HScrollBox+1,
-                    WindowHeight(wnd)-1);
-            wnd->HScrollBox = mx-1;
-            wputch(wnd, SCROLLBOXCHAR, mx, WindowHeight(wnd)-1);
-        }
-        return TRUE;
-    }
-    return FALSE;
-}
-*/
-
-/* ------------ BUTTON_RELEASED Message -------------- */
-/*
-static void ButtonReleasedMsg(WINDOW wnd)
-{
-    if (HSliding || VSliding)    {
-        // release the mouse ouside the scroll bar 
-        SendMessage(NULL, MOUSE_TRAVEL, 0, 0);
-        VSliding ? ComputeWindowTop(wnd):ComputeWindowLeft(wnd);
-        SendMessage(wnd, PAINT, 0, 0);
-        SendMessage(wnd, KEYBOARD_CURSOR, 0, 0);
-        VSliding = HSliding = FALSE;
-    }
-}
-*/
-
 /* ------------ SCROLL Message -------------- */
+/*
 static BOOL ScrollMsg(WINDOW wnd, PARAM p1)
 {
-    /* ---- vertical scroll one line ---- */
+    // ---- vertical scroll one line ---- 
     if (p1)    {
-        /* ----- scroll one line up ----- */
+        // ----- scroll one line up ----- 
         if (wnd->wtop+ClientHeight(wnd) >= wnd->wlines)
             return FALSE;
         wnd->wtop++;
     }
     else    {
-        /* ----- scroll one line down ----- */
+        // ----- scroll one line down ----- 
         if (wnd->wtop == 0)
             return FALSE;
         --wnd->wtop;
@@ -144,23 +95,23 @@ static BOOL ScrollMsg(WINDOW wnd, PARAM p1)
         RECT rc;
         rc = ClipRectangle(wnd, ClientRect(wnd));
         if (ValidRect(rc))    {
-            /* ---- scroll the window ----- */
+            // ---- scroll the window ----- 
             if (wnd != inFocus)
                 SendMessage(wnd, PAINT, 0, 0);
             else    {
                 scroll_window(wnd, rc, (int)p1);
                 if (!(int)p1)
-                    /* -- write top line (down) -- */
+                    // -- write top line (down) -- 
                     WriteTextLine(wnd,NULL,wnd->wtop,FALSE);
                 else    {
-                    /* -- write bottom line (up) -- */
+                    // -- write bottom line (up) -- 
                     int y=RectBottom(rc)-GetClientTop(wnd);
                     WriteTextLine(wnd, NULL,
                         wnd->wtop+y, FALSE);
                 }
             }
         }
-        /* ---- reset the scroll box ---- */
+        // ---- reset the scroll box ---- 
         if (TestAttribute(wnd, VSCROLLBAR))    {
             int vscrollbox = ComputeVScrollBox(wnd);
             if (vscrollbox != wnd->VScrollBox)
@@ -169,19 +120,21 @@ static BOOL ScrollMsg(WINDOW wnd, PARAM p1)
     }
     return TRUE;
 }
+*/
 
 /* ------------ HORIZSCROLL Message -------------- */
+/*
 static BOOL HorizScrollMsg(WINDOW wnd, PARAM p1)
 {
-    /* --- horizontal scroll one column --- */
+    // --- horizontal scroll one column ---
     if (p1)    {
-        /* --- scroll left --- */
+        // --- scroll left --- 
         if (wnd->wleft + ClientWidth(wnd)-1 >= wnd->textwidth)
 			return FALSE;
         wnd->wleft++;
     }
     else	{
-        /* --- scroll right --- */
+        // --- scroll right --- 
         if (wnd->wleft == 0)
 			return FALSE;
         --wnd->wleft;
@@ -189,6 +142,7 @@ static BOOL HorizScrollMsg(WINDOW wnd, PARAM p1)
     SendMessage(wnd, PAINT, 0, 0);
 	return TRUE;
 }
+*/
 
 /* ------------  SCROLLPAGE Message -------------- */
 static void ScrollPageMsg(WINDOW wnd, PARAM p1)
@@ -360,10 +314,10 @@ int cTextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //        case BUTTON_RELEASED:
 //            ButtonReleasedMsg(wnd);
 //            break;
-        case SCROLL:
-            return ScrollMsg(wnd, p1);
-        case HORIZSCROLL:
-            return HorizScrollMsg(wnd, p1);
+//        case SCROLL:
+//            return ScrollMsg(wnd, p1);
+//        case HORIZSCROLL:
+//            return HorizScrollMsg(wnd, p1);
         case SCROLLPAGE:
             ScrollPageMsg(wnd, p1);
             return TRUE;
@@ -390,7 +344,7 @@ int cTextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 
 /* ------ compute the vertical scroll box position from
                    the text pointers --------- */
-static int ComputeVScrollBox(WINDOW wnd)
+int ComputeVScrollBox(WINDOW wnd)
 {
     int pagelen = wnd->wlines - ClientHeight(wnd);
     int barlen = ClientHeight(wnd)-2;
@@ -438,7 +392,7 @@ void ComputeWindowTop(WINDOW wnd)
 
 /* ------ compute the horizontal scroll box position from
                    the text pointers --------- */
-static int ComputeHScrollBox(WINDOW wnd)
+int ComputeHScrollBox(WINDOW wnd)
 {
     int pagewidth = wnd->textwidth - ClientWidth(wnd);
     int barlen = ClientWidth(wnd)-2;
@@ -742,7 +696,7 @@ void BuildTextPointers(WINDOW wnd)
     }
 }
 
-static void MoveScrollBox(WINDOW wnd, int vscrollbox)
+void MoveScrollBox(WINDOW wnd, int vscrollbox)
 {
     foreground = FrameForeground(wnd);
     background = FrameBackground(wnd);

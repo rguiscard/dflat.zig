@@ -58,6 +58,9 @@ void DeleteTextMsg(WINDOW, int);
 void InsertTextMsg(WINDOW, char *, int);
 void ComputeWindowTop(WINDOW);
 void ComputeWindowLeft(WINDOW);
+int ComputeVScrollBox(WINDOW);
+int ComputeHScrollBox(WINDOW);
+void MoveScrollBox(WINDOW, int);
 
 // pictbox.c
 typedef struct {
