@@ -175,30 +175,28 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             df.ShellDOS(wnd);
         },
         df.ID_DISPLAY => {
-            df.cDisplay(wnd, p1, p2);
-//            const box = Dialogs.Display;
-//            if (DialogBox.DialogBox(wnd, @constCast(&box), df.TRUE, null)>0) {
-//                if ((df.inFocus == wnd.*.MenuBarWnd) or (df.inFocus == wnd.*.StatusBar)) {
-//                    oldFocus = df.ApplicationWindow;
-//                } else {
-//                    oldFocus = df.inFocus;
-//                }
-//                _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
-//                df.SelectColors(wnd);
-//                df.SelectLines(wnd);
-//                df.SelectBorder(wnd);
-//                df.SelectTitle(wnd);
-//                df.SelectStatusBar(wnd);
-//                df.SelectTexture();
-//                df.CreateMenu(wnd);
-//                df.CreateStatusBar(wnd);
-//                _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
-//                if (oldFocus) |focus| { // cannot sure old focus can be null
-//                    _ = q.SendMessage(focus, df.SETFOCUS, df.TRUE, 0);
-//                } else {
-//                    _ = q.SendMessage(null, df.SETFOCUS, df.TRUE, 0);
-//                }
-//            }
+            if (DialogBox.DialogBox(wnd, &df.Display, df.TRUE, null)>0) {
+                if ((df.inFocus == wnd.*.MenuBarWnd) or (df.inFocus == wnd.*.StatusBar)) {
+                    oldFocus = df.ApplicationWindow;
+                } else {
+                    oldFocus = df.inFocus;
+                }
+                _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+                df.SelectColors(wnd);
+                df.SelectLines(wnd);
+                df.SelectBorder(wnd);
+                df.SelectTitle(wnd);
+                df.SelectStatusBar(wnd);
+                df.SelectTexture();
+                df.CreateMenu(wnd);
+                df.CreateStatusBar(wnd);
+                _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+                if (oldFocus) |focus| { // cannot sure old focus can be null
+                    _ = q.SendMessage(focus, df.SETFOCUS, df.TRUE, 0);
+                } else {
+                    _ = q.SendMessage(null, df.SETFOCUS, df.TRUE, 0);
+                }
+            }
         },
         df.ID_WINDOW => {
 //-            df.ChooseWindow(wnd, df.CurrentMenuSelection-2);
