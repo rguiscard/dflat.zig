@@ -2,6 +2,10 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
+const q = @import("Message.zig");
+
+pub var VSliding = false; // also used in ListBox
+var HSliding = false;
 
 // ------------ SETTEXT Message --------------
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
@@ -99,15 +103,15 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return (df.TRUE == win.sendMessage(df.SCROLL, df.TRUE, 0));
         }
         // ---------- in the scroll bar -----------
-        if ((df.VSliding == 0) and (my-1 == wnd.*.VScrollBox)) {
-            df.VSliding = df.TRUE;
+        if ((VSliding == false) and (my-1 == wnd.*.VScrollBox)) {
+            VSliding = true;
             const rc:df.RECT = .{
                 .lf = @intCast(win.GetRight()),
                 .rt = @intCast(win.GetRight()),
                 .tp = @intCast(win.GetTop()+2),
                 .bt = @intCast(win.GetBottom()-2),
             };
-            return (df.TRUE == df.SendMessage(null, df.MOUSE_TRAVEL, @intCast(@intFromPtr(&rc)), 0));
+            return (df.TRUE == q.SendMessage(null, df.MOUSE_TRAVEL, @intCast(@intFromPtr(&rc)), 0));
         }
         if (my-1 < wnd.*.VScrollBox) {
             return (df.TRUE == win.sendMessage(df.SCROLLPAGE,df.FALSE,0));
@@ -129,9 +133,9 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         if (mx == win.WindowWidth()-2) {
             return (df.TRUE == win.sendMessage(df.HORIZSCROLL,df.TRUE,0));
         }
-        if ((df.HSliding == 0) and (mx-1 == wnd.*.HScrollBox)) {
+        if ((HSliding == false) and (mx-1 == wnd.*.HScrollBox)) {
             // --- hit the scroll box ---
-            df.HSliding = df.TRUE;
+            HSliding = true;
             const rc:df.RECT = .{
                 .lf = @intCast(win.GetLeft()+2),
                 .rt = @intCast(win.GetRight()-2),
@@ -139,7 +143,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 .bt = @intCast(win.GetBottom()),
             };
             // - keep the mouse in the scroll bar -
-            _ = df.SendMessage(null, df.MOUSE_TRAVEL, @intCast(@intFromPtr(&rc)), 0);
+            _ = q.SendMessage(null, df.MOUSE_TRAVEL, @intCast(@intFromPtr(&rc)), 0);
             return true;
         }
         if (mx-1 < wnd.*.HScrollBox) {
@@ -150,6 +154,53 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         }
     }
     return false;
+}
+
+fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
+    const wnd = win.win;
+    const mx = p1 - win.GetLeft();
+    const my = p2 - win.GetTop();
+    if (VSliding) {
+        // ---- dragging the vertical scroll box ---
+        if (my-1 != wnd.*.VScrollBox) {
+            df.foreground = df.FrameForeground(wnd);
+            df.background = df.FrameBackground(wnd);
+            df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1), wnd.*.VScrollBox+1);
+            wnd.*.VScrollBox = @intCast(my-1);
+            df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(win.WindowWidth()-1), @intCast(my));
+        }
+        return true;
+    }
+    if (HSliding) {
+        // --- dragging the horizontal scroll box ---
+        if (mx-1 != wnd.*.HScrollBox) {
+            df.foreground = df.FrameForeground(wnd);
+            df.background = df.FrameBackground(wnd);
+            df.wputch(wnd, df.SCROLLBARCHAR, wnd.*.HScrollBox+1, @intCast(win.WindowHeight()-1));
+            wnd.*.HScrollBox = @intCast(mx-1);
+            df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(mx), @intCast(win.WindowHeight()-1));
+        }
+        return true;
+    }
+    return false;
+}
+
+// ------------ BUTTON_RELEASED Message --------------
+fn ButtonReleasedMsg(win:*Window) void {
+    const wnd = win.win;
+    if (HSliding or VSliding) {
+        // release the mouse ouside the scroll bar
+        _ = q.SendMessage(null, df.MOUSE_TRAVEL, 0, 0);
+        if (VSliding) {
+            df.ComputeWindowTop(wnd);
+        } else {
+            df.ComputeWindowLeft(wnd);
+        }
+        _ = win.sendMessage(df.PAINT, 0, 0);
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, 0, 0);
+        VSliding = false;
+        HSliding = false;
+    }
 }
 
 // ----------- TEXTBOX Message-processing Module -----------
@@ -200,13 +251,14 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) cal
                 return df.TRUE;
             }
         },
-//        case MOUSE_MOVED:
-//            if (MouseMovedMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
-//        case BUTTON_RELEASED:
-//            ButtonReleasedMsg(wnd);
-//            break;
+        df.MOUSE_MOVED => {
+            if (MouseMovedMsg(win, p1, p2)) {
+                return df.TRUE;
+            }
+        },
+        df.BUTTON_RELEASED => {
+            ButtonReleasedMsg(win);
+        },
 //        case SCROLL:
 //            return ScrollMsg(wnd, p1);
 //        case HORIZSCROLL:

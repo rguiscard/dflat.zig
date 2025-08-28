@@ -2,15 +2,15 @@
 
 #include "dflat.h"
 
-static void ComputeWindowTop(WINDOW);
-static void ComputeWindowLeft(WINDOW);
+void ComputeWindowTop(WINDOW);
+void ComputeWindowLeft(WINDOW);
 static int ComputeVScrollBox(WINDOW);
 static int ComputeHScrollBox(WINDOW);
 static void MoveScrollBox(WINDOW, int);
 static char *GetTextLine(WINDOW, int);
 
 BOOL VSliding;
-BOOL HSliding;
+//BOOL HSliding;
 
 /* ------------ ADDTEXT Message -------------- */
 BOOL AddTextMsg(WINDOW wnd, char *txt)
@@ -74,140 +74,14 @@ void InsertTextMsg(WINDOW wnd, char *txt, int lno)
 	}
 }
 
-/* ------------ SETTEXT Message -------------- */
-/*
-void SetTextMsg(WINDOW wnd, char *txt)
-{
-    // -- assign new text value to textbox buffer -- 
-    unsigned int len = strlen(txt)+1;
-	SendMessage(wnd, CLEARTEXT, 0, 0);
-    wnd->textlen = len;
-    wnd->text=DFrealloc(wnd->text, len+1);
-    wnd->text[len] = '\0';
-    strcpy(wnd->text, txt);
-    BuildTextPointers(wnd);
-}
-*/
-
-/* ------------ CLEARTEXT Message -------------- */
-/*
-static void ClearTextMsg(WINDOW wnd)
-{
-    // ----- clear text from textbox -----
-    if (wnd->text != NULL)
-        free(wnd->text);
-    wnd->text = NULL;
-    wnd->textlen = 0;
-    wnd->wlines = 0;
-    wnd->textwidth = 0;
-    wnd->wtop = wnd->wleft = 0;
-    ClearTextBlock(wnd);
-    ClearTextPointers(wnd);
-}
-*/
-
-/* ------------ KEYBOARD Message -------------- */
-/*
-static int KeyboardMsg(WINDOW wnd, PARAM p1)
-{
-    switch ((int) p1)    {
-        case UP:
-            return SendMessage(wnd,SCROLL,FALSE,0);
-        case DN:
-            return SendMessage(wnd,SCROLL,TRUE,0);
-        case FWD:
-            return SendMessage(wnd,HORIZSCROLL,TRUE,0);
-        case BS:
-            return SendMessage(wnd,HORIZSCROLL,FALSE,0);
-        case PGUP:
-            return SendMessage(wnd,SCROLLPAGE,FALSE,0);
-        case PGDN:
-            return SendMessage(wnd,SCROLLPAGE,TRUE,0);
-        case CTRL_PGUP:
-            return SendMessage(wnd,HORIZPAGE,FALSE,0);
-        case CTRL_PGDN:
-            return SendMessage(wnd,HORIZPAGE,TRUE,0);
-        case HOME:
-            return SendMessage(wnd,SCROLLDOC,TRUE,0);
-        case END:
-            return SendMessage(wnd,SCROLLDOC,FALSE,0);
-        default:
-            break;
-    }
-    return FALSE;
-}
-*/
-
-/* ------------ LEFT_BUTTON Message -------------- */
-/*
-static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int mx = (int) p1 - GetLeft(wnd);
-    int my = (int) p2 - GetTop(wnd);
-    if (TestAttribute(wnd, VSCROLLBAR) &&
-                        mx == WindowWidth(wnd)-1)    {
-        // -------- in the right border -------
-        if (my == 0 || my == ClientHeight(wnd)+1)
-            // --- above or below the scroll bar ---
-            return FALSE;
-        if (my == 1)
-            // -------- top scroll button ---------
-            return SendMessage(wnd, SCROLL, FALSE, 0);
-        if (my == ClientHeight(wnd))
-            // -------- bottom scroll button ---------
-            return SendMessage(wnd, SCROLL, TRUE, 0);
-        // ---------- in the scroll bar -----------
-        if (!VSliding && my-1 == wnd->VScrollBox)    {
-            RECT rc;
-            VSliding = TRUE;
-            rc.lf = rc.rt = GetRight(wnd);
-            rc.tp = GetTop(wnd)+2;
-            rc.bt = GetBottom(wnd)-2;
-            return SendMessage(NULL, MOUSE_TRAVEL,
-                (PARAM) &rc, 0);
-        }
-        if (my-1 < wnd->VScrollBox)
-            return SendMessage(wnd,SCROLLPAGE,FALSE,0);
-        if (my-1 > wnd->VScrollBox)
-            return SendMessage(wnd,SCROLLPAGE,TRUE,0);
-    }
-    if (TestAttribute(wnd, HSCROLLBAR) &&
-                        my == WindowHeight(wnd)-1) {
-        // -------- in the bottom border -------
-        if (mx == 0 || my == ClientWidth(wnd)+1)
-            // ------  outside the scroll bar ----
-            return FALSE;
-        if (mx == 1)
-            return SendMessage(wnd, HORIZSCROLL,FALSE,0);
-        if (mx == WindowWidth(wnd)-2)
-            return SendMessage(wnd, HORIZSCROLL,TRUE,0);
-        if (!HSliding && mx-1 == wnd->HScrollBox)    {
-            // --- hit the scroll box ---
-            RECT rc;
-            rc.lf = GetLeft(wnd)+2;
-            rc.rt = GetRight(wnd)-2;
-            rc.tp = rc.bt = GetBottom(wnd);
-            // - keep the mouse in the scroll bar -
-            SendMessage(NULL,MOUSE_TRAVEL,(PARAM)&rc,0);
-            HSliding = TRUE;
-            return TRUE;
-        }
-        if (mx-1 < wnd->HScrollBox)
-            return SendMessage(wnd,HORIZPAGE,FALSE,0);
-        if (mx-1 > wnd->HScrollBox)
-            return SendMessage(wnd,HORIZPAGE,TRUE,0);
-    }
-    return FALSE;
-}
-*/
-
 /* ------------ MOUSE_MOVED Message -------------- */
+/*
 static BOOL MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int mx = (int) p1 - GetLeft(wnd);
     int my = (int) p2 - GetTop(wnd);
     if (VSliding)    {
-        /* ---- dragging the vertical scroll box --- */
+        // ---- dragging the vertical scroll box ---
         if (my-1 != wnd->VScrollBox)    {
             foreground = FrameForeground(wnd);
             background = FrameBackground(wnd);
@@ -220,7 +94,7 @@ static BOOL MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
         return TRUE;
     }
     if (HSliding)    {
-        /* --- dragging the horizontal scroll box --- */
+        // --- dragging the horizontal scroll box --- 
         if (mx-1 != wnd->HScrollBox)    {
             foreground = FrameForeground(wnd);
             background = FrameBackground(wnd);
@@ -233,12 +107,14 @@ static BOOL MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+*/
 
 /* ------------ BUTTON_RELEASED Message -------------- */
+/*
 static void ButtonReleasedMsg(WINDOW wnd)
 {
     if (HSliding || VSliding)    {
-        /* release the mouse ouside the scroll bar */
+        // release the mouse ouside the scroll bar 
         SendMessage(NULL, MOUSE_TRAVEL, 0, 0);
         VSliding ? ComputeWindowTop(wnd):ComputeWindowLeft(wnd);
         SendMessage(wnd, PAINT, 0, 0);
@@ -246,6 +122,7 @@ static void ButtonReleasedMsg(WINDOW wnd)
         VSliding = HSliding = FALSE;
     }
 }
+*/
 
 /* ------------ SCROLL Message -------------- */
 static BOOL ScrollMsg(WINDOW wnd, PARAM p1)
@@ -476,13 +353,13 @@ int cTextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            if (LeftButtonMsg(wnd, p1, p2))
 //                return TRUE;
 //            break;
-        case MOUSE_MOVED:
-            if (MouseMovedMsg(wnd, p1, p2))
-                return TRUE;
-            break;
-        case BUTTON_RELEASED:
-            ButtonReleasedMsg(wnd);
-            break;
+//        case MOUSE_MOVED:
+//            if (MouseMovedMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
+//        case BUTTON_RELEASED:
+//            ButtonReleasedMsg(wnd);
+//            break;
         case SCROLL:
             return ScrollMsg(wnd, p1);
         case HORIZSCROLL:
@@ -536,7 +413,7 @@ static int ComputeVScrollBox(WINDOW wnd)
 }
 
 /* ---- compute top text line from scroll box position ---- */
-static void ComputeWindowTop(WINDOW wnd)
+void ComputeWindowTop(WINDOW wnd)
 {
     int pagelen = wnd->wlines - ClientHeight(wnd);
     if (wnd->VScrollBox == 0)
@@ -584,7 +461,7 @@ static int ComputeHScrollBox(WINDOW wnd)
 }
 
 /* ---- compute left column from scroll box position ---- */
-static void ComputeWindowLeft(WINDOW wnd)
+void ComputeWindowLeft(WINDOW wnd)
 {
     int pagewidth = wnd->textwidth - ClientWidth(wnd);
 
