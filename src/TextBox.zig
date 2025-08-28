@@ -270,6 +270,64 @@ fn HorizScrollMsg(win:*Window,p1:df.PARAM) c_int {
     return df.TRUE;
 }
 
+// ------------  SCROLLPAGE Message --------------
+fn ScrollPageMsg(win:*Window,p1:df.PARAM) void {
+    const wnd = win.win;
+    // --- vertical scroll one page ---
+    if (p1 == df.FALSE)    {
+        // ---- page up ----
+        if (wnd.*.wtop>0) {
+            wnd.*.wtop -= @intCast(win.ClientHeight());
+        }
+    } else {
+        // ---- page down ----
+        if (wnd.*.wtop+win.ClientHeight() < wnd.*.wlines) {
+            wnd.*.wtop += @intCast(win.ClientHeight());
+            if (wnd.*.wtop>wnd.*.wlines-win.ClientHeight()) {
+                wnd.*.wtop=@intCast(wnd.*.wlines-win.ClientHeight());
+            }
+        }
+    }
+    if (wnd.*.wtop < 0) {
+        wnd.*.wtop = 0;
+    }
+    _ = win.sendMessage(df.PAINT, 0, 0);
+}
+
+// ------------ HORIZSCROLLPAGE Message --------------
+fn HorizScrollPageMsg(win:*Window,p1:df.PARAM) void {
+    const wnd = win.win;
+    // --- horizontal scroll one page ---
+    if (p1 == df.FALSE) {
+        // ---- page left -----
+        wnd.*.wleft -= @intCast(win.ClientWidth());
+    } else {
+        // ---- page right -----
+        wnd.*.wleft += @intCast(win.ClientWidth());
+        if (wnd.*.wleft > wnd.*.textwidth-win.ClientWidth()) {
+            wnd.*.wleft = @intCast(wnd.*.textwidth-win.ClientWidth());
+        }
+    }
+    if (wnd.*.wleft < 0) {
+        wnd.*.wleft = 0;
+    }
+    _ = win.sendMessage(df.PAINT, 0, 0);
+}
+
+// ------------ SCROLLDOC Message --------------
+fn ScrollDocMsg(win:*Window,p1:df.PARAM) void {
+    const wnd = win.win;
+    // --- scroll to beginning or end of document ---
+    if (p1>0) {
+        wnd.*.wtop = 0;
+        wnd.*.wleft = 0;
+    } else if (wnd.*.wtop+win.ClientHeight() < wnd.*.wlines) {
+        wnd.*.wtop = @intCast(wnd.*.wlines-win.ClientHeight());
+        wnd.*.wleft = 0;
+    }
+    _ = win.sendMessage(df.PAINT, 0, 0);
+}
+
 // ----------- TEXTBOX Message-processing Module -----------
 pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
@@ -332,15 +390,18 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) cal
         df.HORIZSCROLL => {
             return HorizScrollMsg(win, p1);
         },
-//        case SCROLLPAGE:
-//            ScrollPageMsg(wnd, p1);
-//            return TRUE;
-//        case HORIZPAGE:
-//            HorizScrollPageMsg(wnd, p1);
-//            return TRUE;
-//        case SCROLLDOC:
-//            ScrollDocMsg(wnd, p1);
-//            return TRUE;
+        df.SCROLLPAGE => {
+            ScrollPageMsg(win, p1);
+            return df.TRUE;
+        },
+        df.HORIZPAGE => {
+            HorizScrollPageMsg(win, p1);
+            return df.TRUE;
+        },
+        df.SCROLLDOC => {
+            ScrollDocMsg(win, p1);
+            return df.TRUE;
+        },
 //        case PAINT:
 //            if (isVisible(wnd))    {
 //                PaintMsg(wnd, p1, p2);

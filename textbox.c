@@ -145,16 +145,17 @@ static BOOL HorizScrollMsg(WINDOW wnd, PARAM p1)
 */
 
 /* ------------  SCROLLPAGE Message -------------- */
+/*
 static void ScrollPageMsg(WINDOW wnd, PARAM p1)
 {
-    /* --- vertical scroll one page --- */
+    // --- vertical scroll one page --- 
     if ((int) p1 == FALSE)    {
-        /* ---- page up ---- */
+        // ---- page up ---- 
         if (wnd->wtop)
             wnd->wtop -= ClientHeight(wnd);
     }
     else     {
-        /* ---- page down ---- */
+        // ---- page down ---- 
         if (wnd->wtop+ClientHeight(wnd) < wnd->wlines) {
             wnd->wtop += ClientHeight(wnd);
             if (wnd->wtop>wnd->wlines-ClientHeight(wnd))
@@ -165,16 +166,18 @@ static void ScrollPageMsg(WINDOW wnd, PARAM p1)
         wnd->wtop = 0;
     SendMessage(wnd, PAINT, 0, 0);
 }
+*/
 
 /* ------------ HORIZSCROLLPAGE Message -------------- */
+/*
 static void HorizScrollPageMsg(WINDOW wnd, PARAM p1)
 {
-    /* --- horizontal scroll one page --- */
+    // --- horizontal scroll one page --- 
     if ((int) p1 == FALSE)
-        /* ---- page left ----- */
+        // ---- page left ----- 
         wnd->wleft -= ClientWidth(wnd);
     else    {
-        /* ---- page right ----- */
+        // ---- page right ----- 
         wnd->wleft += ClientWidth(wnd);
         if (wnd->wleft > wnd->textwidth-ClientWidth(wnd))
             wnd->wleft = wnd->textwidth-ClientWidth(wnd);
@@ -183,11 +186,13 @@ static void HorizScrollPageMsg(WINDOW wnd, PARAM p1)
         wnd->wleft = 0;
     SendMessage(wnd, PAINT, 0, 0);
 }
+*/
 
 /* ------------ SCROLLDOC Message -------------- */
+/*
 static void ScrollDocMsg(WINDOW wnd, PARAM p1)
 {
-    /* --- scroll to beginning or end of document --- */
+    // --- scroll to beginning or end of document ---
     if ((int) p1)
         wnd->wtop = wnd->wleft = 0;
     else if (wnd->wtop+ClientHeight(wnd) < wnd->wlines){
@@ -196,6 +201,7 @@ static void ScrollDocMsg(WINDOW wnd, PARAM p1)
     }
     SendMessage(wnd, PAINT, 0, 0);
 }
+*/
 
 /* ------------ PAINT Message -------------- */
 static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -318,15 +324,15 @@ int cTextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            return ScrollMsg(wnd, p1);
 //        case HORIZSCROLL:
 //            return HorizScrollMsg(wnd, p1);
-        case SCROLLPAGE:
-            ScrollPageMsg(wnd, p1);
-            return TRUE;
-        case HORIZPAGE:
-            HorizScrollPageMsg(wnd, p1);
-            return TRUE;
-        case SCROLLDOC:
-            ScrollDocMsg(wnd, p1);
-            return TRUE;
+//        case SCROLLPAGE:
+//            ScrollPageMsg(wnd, p1);
+//            return TRUE;
+//        case HORIZPAGE:
+//            HorizScrollPageMsg(wnd, p1);
+//            return TRUE;
+//        case SCROLLDOC:
+//            ScrollDocMsg(wnd, p1);
+//            return TRUE;
         case PAINT:
             if (isVisible(wnd))    {
                 PaintMsg(wnd, p1, p2);
