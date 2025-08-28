@@ -13,7 +13,7 @@ BOOL VSliding;
 BOOL HSliding;
 
 /* ------------ ADDTEXT Message -------------- */
-static BOOL AddTextMsg(WINDOW wnd, char *txt)
+BOOL AddTextMsg(WINDOW wnd, char *txt)
 {
     /* --- append text to the textbox's buffer --- */
     unsigned adln = strlen(txt);
@@ -46,7 +46,7 @@ static BOOL AddTextMsg(WINDOW wnd, char *txt)
 }
 
 /* ------------ DELETETEXT Message -------------- */
-static void DeleteTextMsg(WINDOW wnd, int lno)
+void DeleteTextMsg(WINDOW wnd, int lno)
 {
 	char *cp1 = TextLine(wnd, lno);
 	--wnd->wlines;
@@ -60,7 +60,7 @@ static void DeleteTextMsg(WINDOW wnd, int lno)
 }
 
 /* ------------ INSERTTEXT Message -------------- */
-static void InsertTextMsg(WINDOW wnd, char *txt, int lno)
+void InsertTextMsg(WINDOW wnd, char *txt, int lno)
 {
 	if (AddTextMsg(wnd, txt))	{
 		int len = strlen(txt)+1;
@@ -75,9 +75,10 @@ static void InsertTextMsg(WINDOW wnd, char *txt, int lno)
 }
 
 /* ------------ SETTEXT Message -------------- */
-static void SetTextMsg(WINDOW wnd, char *txt)
+/*
+void SetTextMsg(WINDOW wnd, char *txt)
 {
-    /* -- assign new text value to textbox buffer -- */
+    // -- assign new text value to textbox buffer -- 
     unsigned int len = strlen(txt)+1;
 	SendMessage(wnd, CLEARTEXT, 0, 0);
     wnd->textlen = len;
@@ -86,6 +87,7 @@ static void SetTextMsg(WINDOW wnd, char *txt)
     strcpy(wnd->text, txt);
     BuildTextPointers(wnd);
 }
+*/
 
 /* ------------ CLEARTEXT Message -------------- */
 static void ClearTextMsg(WINDOW wnd)
@@ -438,30 +440,30 @@ static void CloseWindowMsg(WINDOW wnd)
 int cTextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
-        case CREATE_WINDOW:
-            wnd->HScrollBox = wnd->VScrollBox = 1;
-            ClearTextPointers(wnd);
-            break;
-        case ADDTEXT:
-            return AddTextMsg(wnd, (char *) p1);
-		case DELETETEXT:
-            DeleteTextMsg(wnd, (int) p1);
-            return TRUE;
-		case INSERTTEXT:
-            InsertTextMsg(wnd, (char *) p1, (int) p2);
-            return TRUE;
-        case SETTEXT:
-            SetTextMsg(wnd, (char *) p1);
-			return TRUE;
-        case CLEARTEXT:
-            ClearTextMsg(wnd);
-            break;
-        case KEYBOARD:
-            if (WindowMoving || WindowSizing)
-                break;
-            if (KeyboardMsg(wnd, p1))
-                return TRUE;
-            break;
+//        case CREATE_WINDOW:
+//            wnd->HScrollBox = wnd->VScrollBox = 1;
+//            ClearTextPointers(wnd);
+//            break;
+//        case ADDTEXT:
+//            return AddTextMsg(wnd, (char *) p1);
+//		case DELETETEXT:
+//            DeleteTextMsg(wnd, (int) p1);
+//            return TRUE;
+//		case INSERTTEXT:
+//            InsertTextMsg(wnd, (char *) p1, (int) p2);
+//            return TRUE;
+//        case SETTEXT:
+//            SetTextMsg(wnd, (char *) p1);
+//			return TRUE;
+//        case CLEARTEXT:
+//            ClearTextMsg(wnd);
+//            break;
+//        case KEYBOARD:
+//            if (WindowMoving || WindowSizing)
+//                break;
+//            if (KeyboardMsg(wnd, p1))
+//                return TRUE;
+//            break;
         case LEFT_BUTTON:
             if (WindowSizing || WindowMoving)
                 return FALSE;

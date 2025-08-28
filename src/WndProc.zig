@@ -5,6 +5,7 @@ const normal = @import("Normal.zig");
 const app = @import("Application.zig");
 const dialbox = @import("DialogBox.zig");
 const box = @import("Box.zig");
+const textbox = @import("TextBox.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -30,8 +31,7 @@ pub export fn ApplicationProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PA
 }
 
 pub export fn TextBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cTextBoxProc(wnd, msg, p1, p2);
+    return textbox.TextBoxProc(win, msg, p1, p2);
 }
 
 pub export fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {

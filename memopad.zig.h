@@ -52,6 +52,11 @@ extern DBOX Display;
 extern BOOL AltDown;
 void cDisplay(WINDOW, PARAM, PARAM);
 
+// textbox.c
+BOOL AddTextMsg(WINDOW, char *);
+void DeleteTextMsg(WINDOW, int);
+void InsertTextMsg(WINDOW, char *, int);
+
 // pictbox.c
 typedef struct {
     enum VectTypes vt;
