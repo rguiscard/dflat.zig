@@ -4,9 +4,12 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const lists = @import("Lists.zig");
+const Dialogs = @import("Dialogs.zig");
+const DialogBox = @import("DialogBox.zig");
 
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
+var oldFocus:?df.WINDOW = null;
 
 // --------------- CREATE_WINDOW Message --------------
 fn CreateWindowMsg(win: *Window) c_int {
@@ -165,47 +168,50 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             const help = "HelpIndex";
             _ = df.DisplayHelp(wnd, @constCast(help.ptr));
         },
-//        df.ID_LOG => {
-//            log.MessageLog(wnd);
-//        },
-//        df.ID_DOS => {
-//            df.ShellDOS(wnd);
-//        },
-//        df.ID_DISPLAY => {
+        df.ID_LOG => {
+            df.MessageLog(wnd);
+        },
+        df.ID_DOS => {
+            df.ShellDOS(wnd);
+        },
+        df.ID_DISPLAY => {
+            df.cDisplay(wnd, p1, p2);
 //            const box = Dialogs.Display;
-//            var dialog = DialogBox.init(@constCast(&box));
-//            if (dialog.create(wnd, true, null)) {
-//                                if (inFocus == wnd->MenuBarWnd || inFocus == wnd->StatusBar)
-//                                        oldFocus = ApplicationWindow;
-//                                else
-//                                        oldFocus = inFocus;
-//                SendMessage(wnd, HIDE_WINDOW, 0, 0);
-//                SelectColors(wnd);
-//                SelectLines(wnd);
-
-// INCLUDE_WINDOWOPTIONS
-//                SelectBorder(wnd);
-//                SelectTitle(wnd);
-//                SelectStatusBar(wnd);
-//                SelectTexture();
-//                CreateMenu(wnd);
-//                CreateStatusBar(wnd);
-//                SendMessage(wnd, SHOW_WINDOW, 0, 0);
-//                            SendMessage(oldFocus, SETFOCUS, TRUE, 0);
+//            if (DialogBox.DialogBox(wnd, @constCast(&box), df.TRUE, null)>0) {
+//                if ((df.inFocus == wnd.*.MenuBarWnd) or (df.inFocus == wnd.*.StatusBar)) {
+//                    oldFocus = df.ApplicationWindow;
+//                } else {
+//                    oldFocus = df.inFocus;
+//                }
+//                _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+//                df.SelectColors(wnd);
+//                df.SelectLines(wnd);
+//                df.SelectBorder(wnd);
+//                df.SelectTitle(wnd);
+//                df.SelectStatusBar(wnd);
+//                df.SelectTexture();
+//                df.CreateMenu(wnd);
+//                df.CreateStatusBar(wnd);
+//                _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+//                if (oldFocus) |focus| { // cannot sure old focus can be null
+//                    _ = q.SendMessage(focus, df.SETFOCUS, df.TRUE, 0);
+//                } else {
+//                    _ = q.SendMessage(null, df.SETFOCUS, df.TRUE, 0);
+//                }
 //            }
-//        },
-//        df.ID_WINDOW => {
+        },
+        df.ID_WINDOW => {
 //-            df.ChooseWindow(wnd, df.CurrentMenuSelection-2);
-//        },
+        },
         df.ID_CLOSEALL => {
             CloseAll(win, false);
         },
-//        df.ID_MOREWINDOWS => {
+        df.ID_MOREWINDOWS => {
 //-            df.MoreWindows(wnd);
-//        },
-//        df.ID_SAVEOPTIONS => {
-//-            df.SaveConfig();
-//        },
+        },
+        df.ID_SAVEOPTIONS => {
+            df.SaveConfig();
+        },
         df.ID_SYSRESTORE,
         df.ID_SYSMINIMIZE,
         df.ID_SYSMAXIMIZE,
@@ -288,7 +294,6 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
             return CloseWindowMsg(win);
         },
         else => {
-            return df.cApplicationProc(wnd, msg, p1, p2);
         }
     }
     return root.zBaseWndProc(df.APPLICATION, win, msg, p1, p2);

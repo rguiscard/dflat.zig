@@ -16,7 +16,7 @@ extern DBOX Log;
 #endif
 
 #ifdef INCLUDE_SHELLDOS
-static void ShellDOS(WINDOW);
+void ShellDOS(WINDOW);
 #endif
 void CreateMenu(WINDOW);
 void CreateStatusBar(WINDOW);
@@ -99,6 +99,7 @@ static int CreateWindowMsg(WINDOW wnd)
 }
 
 /* --------- ADDSTATUS Message ---------- */
+/*
 static void AddStatusMsg(WINDOW wnd, PARAM p1)
 {
     if (wnd->StatusBar != NULL)    {
@@ -109,8 +110,10 @@ static void AddStatusMsg(WINDOW wnd, PARAM p1)
         SendMessage(wnd->StatusBar, PAINT, 0, 0);
     }
 }
+*/
 
 /* -------- SETFOCUS Message -------- */
+/*
 static void SetFocusMsg(WINDOW wnd, BOOL p1)
 {
     if (p1)
@@ -122,8 +125,10 @@ static void SetFocusMsg(WINDOW wnd, BOOL p1)
 	else 
 	    SendMessage(wnd, SHOW_WINDOW, 0, 0);
 }
+*/
 
 /* ------- SIZE Message -------- */
+/*
 static void SizeMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     BOOL WasVisible;
@@ -138,8 +143,10 @@ static void SizeMsg(WINDOW wnd, PARAM p1, PARAM p2)
     if (WasVisible)
         SendMessage(wnd, SHOW_WINDOW, 0, 0);
 }
+*/
 
 /* ----------- KEYBOARD Message ------------ */
+/*
 static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     if (WindowMoving || WindowSizing || (int) p1 == F1)
@@ -164,8 +171,10 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
     PostMessage(wnd->MenuBarWnd, KEYBOARD, p1, p2);
     return TRUE;
 }
+*/
 
 /* --------- SHIFT_CHANGED Message -------- */
+/*
 static void ShiftChangedMsg(WINDOW wnd, PARAM p1)
 {
 	extern BOOL AltDown;
@@ -178,43 +187,67 @@ static void ShiftChangedMsg(WINDOW wnd, PARAM p1)
         SendMessage(wnd->MenuBarWnd, KEYBOARD, F10, 0);
     }
 }
+*/
+
+void cDisplay(WINDOW wnd, PARAM p1, PARAM p2) {
+            if (DialogBox(wnd, &Display, TRUE, NULL))    {
+				if (inFocus == wnd->MenuBarWnd || inFocus == wnd->StatusBar)
+					oldFocus = ApplicationWindow;
+				else 
+					oldFocus = inFocus;
+                SendMessage(wnd, HIDE_WINDOW, 0, 0);
+                SelectColors(wnd);
+                SelectLines(wnd);
+//#ifdef INCLUDE_WINDOWOPTIONS
+                SelectBorder(wnd);
+                SelectTitle(wnd);
+                SelectStatusBar(wnd);
+                SelectTexture();
+//#endif
+                CreateMenu(wnd);
+                CreateStatusBar(wnd);
+                SendMessage(wnd, SHOW_WINDOW, 0, 0);
+			    SendMessage(oldFocus, SETFOCUS, TRUE, 0);
+            }
+}
 
 /* -------- COMMAND Message ------- */
-static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
+/*
+void cCommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     switch ((int)p1)    {
-        case ID_EXIT:
-        case ID_SYSCLOSE:
-            PostMessage(wnd, CLOSE_WINDOW, 0, 0);
-            break;
-#ifdef INCLUDE_HELP
-        case ID_HELP:
-            DisplayHelp(wnd, DFlatApplication);
-            break;
-        case ID_HELPHELP:
-            DisplayHelp(wnd, "HelpHelp");
-            break;
-        case ID_EXTHELP:
-            DisplayHelp(wnd, "ExtHelp");
-            break;
-        case ID_KEYSHELP:
-            DisplayHelp(wnd, "KeysHelp");
-            break;
-        case ID_HELPINDEX:
-            DisplayHelp(wnd, "HelpIndex");
-            break;
-#endif
-#ifdef INCLUDE_LOGGING
-        case ID_LOG:
-            MessageLog(wnd);
-            break;
-#endif
-#ifdef INCLUDE_SHELLDOS
-        case ID_DOS:
-            ShellDOS(wnd);
-            break;
-#endif
-#ifdef INCLUDE_WINDOWMENU
+//        case ID_EXIT:
+//        case ID_SYSCLOSE:
+//            PostMessage(wnd, CLOSE_WINDOW, 0, 0);
+//            break;
+//#ifdef INCLUDE_HELP
+//        case ID_HELP:
+//            DisplayHelp(wnd, DFlatApplication);
+//            break;
+//        case ID_HELPHELP:
+//            DisplayHelp(wnd, "HelpHelp");
+//            break;
+//        case ID_EXTHELP:
+//            DisplayHelp(wnd, "ExtHelp");
+//            break;
+//        case ID_KEYSHELP:
+//            DisplayHelp(wnd, "KeysHelp");
+//            break;
+//        case ID_HELPINDEX:
+//            DisplayHelp(wnd, "HelpIndex");
+//            break;
+//#endif
+//#ifdef INCLUDE_LOGGING
+//        case ID_LOG:
+//            MessageLog(wnd);
+//            break;
+//#endif
+//#ifdef INCLUDE_SHELLDOS
+//        case ID_DOS:
+//            ShellDOS(wnd);
+//            break;
+//#endif
+//#ifdef INCLUDE_WINDOWMENU
         case ID_DISPLAY:
             if (DialogBox(wnd, &Display, TRUE, NULL))    {
 				if (inFocus == wnd->MenuBarWnd || inFocus == wnd->StatusBar)
@@ -224,12 +257,12 @@ static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
                 SendMessage(wnd, HIDE_WINDOW, 0, 0);
                 SelectColors(wnd);
                 SelectLines(wnd);
-#ifdef INCLUDE_WINDOWOPTIONS
+//#ifdef INCLUDE_WINDOWOPTIONS
                 SelectBorder(wnd);
                 SelectTitle(wnd);
                 SelectStatusBar(wnd);
                 SelectTexture();
-#endif
+//#endif
                 CreateMenu(wnd);
                 CreateStatusBar(wnd);
                 SendMessage(wnd, SHOW_WINDOW, 0, 0);
@@ -239,39 +272,41 @@ static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
         case ID_WINDOW:
             ChooseWindow(wnd, CurrentMenuSelection-2);
             break;
-        case ID_CLOSEALL:
-            CloseAll(wnd, FALSE);
-            break;
+//        case ID_CLOSEALL:
+//            CloseAll(wnd, FALSE);
+//            break;
         case ID_MOREWINDOWS:
             MoreWindows(wnd);
             break;
-#endif
-#ifdef INCLUDE_FILE_OPENSAVE
+//#endif
+//#ifdef INCLUDE_FILE_OPENSAVE
         case ID_SAVEOPTIONS:
             SaveConfig();
             break;
-#endif
-#ifdef INCLUDE_RESTORE
-        case ID_SYSRESTORE:
-#endif
-#ifdef INCLUDE_MINIMIZE
-        case ID_SYSMINIMIZE:
-#endif
-#ifdef INCLUDE_MAXIMIZE
-        case ID_SYSMAXIMIZE:
-#endif
-        case ID_SYSMOVE:
-        case ID_SYSSIZE:
-            BaseWndProc(APPLICATION, wnd, COMMAND, p1, p2);
-            break;
+//#endif
+//#ifdef INCLUDE_RESTORE
+//        case ID_SYSRESTORE:
+//#endif
+//#ifdef INCLUDE_MINIMIZE
+//        case ID_SYSMINIMIZE:
+//#endif
+//#ifdef INCLUDE_MAXIMIZE
+//        case ID_SYSMAXIMIZE:
+//#endif
+//        case ID_SYSMOVE:
+//        case ID_SYSSIZE:
+//            BaseWndProc(APPLICATION, wnd, COMMAND, p1, p2);
+//            break;
         default:
             if (inFocus != wnd->MenuBarWnd && inFocus != wnd)
                 PostMessage(inFocus, COMMAND, p1, p2);
             break;
     }
 }
+*/
 
 /* --------- CLOSE_WINDOW Message -------- */
+/*
 static int CloseWindowMsg(WINDOW wnd)
 {
     int rtn;
@@ -289,8 +324,10 @@ static int CloseWindowMsg(WINDOW wnd)
 	ApplicationWindow = NULL;
     return rtn;
 }
+*/
 
 /* --- APPLICATION Window Class window processing module --- */
+/*
 int cApplicationProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
@@ -337,6 +374,7 @@ int cApplicationProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     }
     return BaseWndProc(APPLICATION, wnd, msg, p1, p2);
 }
+*/
 
 #ifdef INCLUDE_SHELLDOS
 static void SwitchCursor(void)
@@ -347,7 +385,7 @@ static void SwitchCursor(void)
 }
 
 /* ------- Shell out to DOS ---------- */
-static void ShellDOS(WINDOW wnd)
+void ShellDOS(WINDOW wnd)
 {
 	oldFocus = inFocus;
     SendMessage(wnd, HIDE_WINDOW, 0, 0);
@@ -554,6 +592,7 @@ static void ChooseWindow(WINDOW wnd, int WindowNo)
 }
 
 /* ----- Close all document windows ----- */
+/*
 static void CloseAll(WINDOW wnd, int closing)
 {
     WINDOW wnd1, wnd2;
@@ -572,6 +611,7 @@ static void CloseAll(WINDOW wnd, int closing)
     if (!closing)
         SendMessage(wnd, PAINT, 0, 0);
 }
+*/
 
 #endif    /* #ifdef INCLUDE_WINDOWMENU */
 
@@ -600,6 +640,7 @@ void SelectColors(WINDOW wnd)
         cfg.mono = 2;   /* mono reverse */
     else
         cfg.mono = 0;   /* color */
+    printf("color %d\n", cfg.mono);
 
     if (cfg.mono == 1)
         memcpy(cfg.clr, bw, sizeof bw);

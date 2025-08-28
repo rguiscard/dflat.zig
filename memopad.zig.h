@@ -47,8 +47,10 @@ void SelectBorder(WINDOW);
 void SelectTitle(WINDOW);
 void SelectStatusBar(WINDOW);
 void CreateMenu(WINDOW);
+void ShellDOS(WINDOW);
 extern DBOX Display;
 extern BOOL AltDown;
+void cDisplay(WINDOW, PARAM, PARAM);
 
 // pictbox.c
 typedef struct {
