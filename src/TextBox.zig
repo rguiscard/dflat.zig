@@ -328,6 +328,84 @@ fn ScrollDocMsg(win:*Window,p1:df.PARAM) void {
     _ = win.sendMessage(df.PAINT, 0, 0);
 }
 
+// ------------ PAINT Message --------------
+fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
+    const wnd = win.win;
+    // ------ paint the client area -----
+    var rc:df.RECT = undefined;
+
+    // ----- build the rectangle to paint -----
+    if (p1 == 0) { // does it equal to (RECT *)p1 == NULL ?
+        rc = df.RelativeWindowRect(wnd, win.WindowRect());
+    } else {
+        const pp1:usize = @intCast(p1);
+        const rect1:*df.RECT = @ptrFromInt(pp1);
+        rc = rect1.*;
+    }
+   
+    if (win.TestAttribute(df.HASBORDER) and
+            (rect.RectRight(rc) >= win.WindowWidth()-1)) {
+        if (rect.RectLeft(rc) >= win.WindowWidth()-1) {
+            return;
+        }
+        rc.rt = @intCast(win.WindowWidth()-2);
+    }
+    const rcc = df.AdjustRectangle(wnd, rc);
+
+    if ((p2 == 0) and (wnd != df.inFocus)) {
+        df.ClipString += 1;
+    }
+
+    // ----- blank line for padding -----
+    var blankline = [_]u8{' '}**df.MAXCOLS;
+    blankline[@intCast(rect.RectRight(rcc)+1)] = 0;
+
+//    char blankline[df.MAXCOLS];
+//    memset(blankline, ' ', SCREENWIDTH);
+//    blankline[RectRight(rcc)+1] = '\0';
+
+    // ------- each line within rectangle ------
+//    for (y = RectTop(rc); y <= RectBottom(rc); y++){
+    for (@intCast(rect.RectTop(rc))..@intCast(rect.RectBottom(rc)+1)) |y| {
+        // ---- test outside of Client area ----
+        if (win.TestAttribute(df.HASBORDER | df.HASTITLEBAR)) {
+            if (y < win.TopBorderAdj()) {
+                continue;
+            }
+            if (y > win.WindowHeight()-2) {
+                continue;
+            }
+        }
+        const yi:isize = @intCast(y);
+        const yy = yi-win.TopBorderAdj(); // not sure this number will be negative
+        if (yy < wnd.*.wlines-wnd.*.wtop) {
+            // ---- paint a text line ----
+            df.WriteTextLine(wnd, &rc,
+                        @intCast(yy+wnd.*.wtop), df.FALSE);
+        } else {
+            // ---- paint a blank line ----
+            df.SetStandardColor(wnd);
+            df.writeline(wnd, &blankline[@intCast(rect.RectLeft(rcc))],
+                    @intCast(rect.RectLeft(rcc)+win.BorderAdj()), @intCast(yi), df.FALSE);
+        }
+    }
+
+    // ------- position the scroll box -------
+    if (win.TestAttribute(df.VSCROLLBAR|df.HSCROLLBAR)) {
+        const hscrollbox = df.ComputeHScrollBox(wnd);
+        const vscrollbox = df.ComputeVScrollBox(wnd);
+        if ((hscrollbox != wnd.*.HScrollBox) or
+                (vscrollbox != wnd.*.VScrollBox)) {
+            wnd.*.HScrollBox = hscrollbox;
+            wnd.*.VScrollBox = vscrollbox;
+            _ = win.sendMessage(df.BORDER, p1, 0);
+        }
+    }
+    if ((p2 == 0) and (wnd != df.inFocus)) {
+        df.ClipString -= 1;
+    }
+}
+
 // ----------- TEXTBOX Message-processing Module -----------
 pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
@@ -402,12 +480,12 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) cal
             ScrollDocMsg(win, p1);
             return df.TRUE;
         },
-//        case PAINT:
-//            if (isVisible(wnd))    {
-//                PaintMsg(wnd, p1, p2);
-//                return FALSE;
-//            }
-//            break;
+        df.PAINT => {
+            if (df.isVisible(wnd)>0) {
+                PaintMsg(win, p1, p2);
+                return df.FALSE;
+            }
+        },
 //        case CLOSE_WINDOW:
 //            CloseWindowMsg(wnd);
 //            break;

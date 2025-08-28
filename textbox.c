@@ -74,144 +74,16 @@ void InsertTextMsg(WINDOW wnd, char *txt, int lno)
 	}
 }
 
-/* ------------ SCROLL Message -------------- */
-/*
-static BOOL ScrollMsg(WINDOW wnd, PARAM p1)
-{
-    // ---- vertical scroll one line ---- 
-    if (p1)    {
-        // ----- scroll one line up ----- 
-        if (wnd->wtop+ClientHeight(wnd) >= wnd->wlines)
-            return FALSE;
-        wnd->wtop++;
-    }
-    else    {
-        // ----- scroll one line down ----- 
-        if (wnd->wtop == 0)
-            return FALSE;
-        --wnd->wtop;
-    }
-    if (isVisible(wnd))    {
-        RECT rc;
-        rc = ClipRectangle(wnd, ClientRect(wnd));
-        if (ValidRect(rc))    {
-            // ---- scroll the window ----- 
-            if (wnd != inFocus)
-                SendMessage(wnd, PAINT, 0, 0);
-            else    {
-                scroll_window(wnd, rc, (int)p1);
-                if (!(int)p1)
-                    // -- write top line (down) -- 
-                    WriteTextLine(wnd,NULL,wnd->wtop,FALSE);
-                else    {
-                    // -- write bottom line (up) -- 
-                    int y=RectBottom(rc)-GetClientTop(wnd);
-                    WriteTextLine(wnd, NULL,
-                        wnd->wtop+y, FALSE);
-                }
-            }
-        }
-        // ---- reset the scroll box ---- 
-        if (TestAttribute(wnd, VSCROLLBAR))    {
-            int vscrollbox = ComputeVScrollBox(wnd);
-            if (vscrollbox != wnd->VScrollBox)
-                MoveScrollBox(wnd, vscrollbox);
-        }
-    }
-    return TRUE;
-}
-*/
-
-/* ------------ HORIZSCROLL Message -------------- */
-/*
-static BOOL HorizScrollMsg(WINDOW wnd, PARAM p1)
-{
-    // --- horizontal scroll one column ---
-    if (p1)    {
-        // --- scroll left --- 
-        if (wnd->wleft + ClientWidth(wnd)-1 >= wnd->textwidth)
-			return FALSE;
-        wnd->wleft++;
-    }
-    else	{
-        // --- scroll right --- 
-        if (wnd->wleft == 0)
-			return FALSE;
-        --wnd->wleft;
-	}
-    SendMessage(wnd, PAINT, 0, 0);
-	return TRUE;
-}
-*/
-
-/* ------------  SCROLLPAGE Message -------------- */
-/*
-static void ScrollPageMsg(WINDOW wnd, PARAM p1)
-{
-    // --- vertical scroll one page --- 
-    if ((int) p1 == FALSE)    {
-        // ---- page up ---- 
-        if (wnd->wtop)
-            wnd->wtop -= ClientHeight(wnd);
-    }
-    else     {
-        // ---- page down ---- 
-        if (wnd->wtop+ClientHeight(wnd) < wnd->wlines) {
-            wnd->wtop += ClientHeight(wnd);
-            if (wnd->wtop>wnd->wlines-ClientHeight(wnd))
-                wnd->wtop=wnd->wlines-ClientHeight(wnd);
-        }
-    }
-    if (wnd->wtop < 0)
-        wnd->wtop = 0;
-    SendMessage(wnd, PAINT, 0, 0);
-}
-*/
-
-/* ------------ HORIZSCROLLPAGE Message -------------- */
-/*
-static void HorizScrollPageMsg(WINDOW wnd, PARAM p1)
-{
-    // --- horizontal scroll one page --- 
-    if ((int) p1 == FALSE)
-        // ---- page left ----- 
-        wnd->wleft -= ClientWidth(wnd);
-    else    {
-        // ---- page right ----- 
-        wnd->wleft += ClientWidth(wnd);
-        if (wnd->wleft > wnd->textwidth-ClientWidth(wnd))
-            wnd->wleft = wnd->textwidth-ClientWidth(wnd);
-    }
-    if (wnd->wleft < 0)
-        wnd->wleft = 0;
-    SendMessage(wnd, PAINT, 0, 0);
-}
-*/
-
-/* ------------ SCROLLDOC Message -------------- */
-/*
-static void ScrollDocMsg(WINDOW wnd, PARAM p1)
-{
-    // --- scroll to beginning or end of document ---
-    if ((int) p1)
-        wnd->wtop = wnd->wleft = 0;
-    else if (wnd->wtop+ClientHeight(wnd) < wnd->wlines){
-        wnd->wtop = wnd->wlines-ClientHeight(wnd);
-        wnd->wleft = 0;
-    }
-    SendMessage(wnd, PAINT, 0, 0);
-}
-*/
-
 /* ------------ PAINT Message -------------- */
+/*
 static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
-    /* ------ paint the client area ----- */
+    // ------ paint the client area -----
     RECT rc, rcc;
     int y;
     char blankline[MAXCOLS];
 
-    /* ----- build the rectangle to paint ----- */
+    // ----- build the rectangle to paint -----
     if ((RECT *)p1 == NULL)
         rc=RelativeWindowRect(wnd, WindowRect(wnd));
     else
@@ -227,14 +99,14 @@ static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
 	if (!p2 && wnd != inFocus)
 		ClipString++;
 
-    /* ----- blank line for padding ----- */
+    // ----- blank line for padding -----
     memset(blankline, ' ', SCREENWIDTH);
     blankline[RectRight(rcc)+1] = '\0';
 
-    /* ------- each line within rectangle ------ */
+    // ------- each line within rectangle ------
     for (y = RectTop(rc); y <= RectBottom(rc); y++){
         int yy;
-        /* ---- test outside of Client area ---- */
+        // ---- test outside of Client area ---- 
         if (TestAttribute(wnd,
                     HASBORDER | HASTITLEBAR))    {
             if (y < TopBorderAdj(wnd))
@@ -244,17 +116,17 @@ static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
         }
         yy = y-TopBorderAdj(wnd);
         if (yy < wnd->wlines-wnd->wtop)
-            /* ---- paint a text line ---- */
+            // ---- paint a text line ---- 
             WriteTextLine(wnd, &rc,
                         yy+wnd->wtop, FALSE);
         else    {
-            /* ---- paint a blank line ---- */
+            // ---- paint a blank line ---- 
             SetStandardColor(wnd);
             writeline(wnd, blankline+RectLeft(rcc),
                     RectLeft(rcc)+BorderAdj(wnd), y, FALSE);
         }
     }
-    /* ------- position the scroll box ------- */
+    // ------- position the scroll box ------- 
     if (TestAttribute(wnd, VSCROLLBAR|HSCROLLBAR)) {
         int hscrollbox = ComputeHScrollBox(wnd);
         int vscrollbox = ComputeVScrollBox(wnd);
@@ -268,6 +140,7 @@ static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
 	if (!p2 && wnd != inFocus)
 		--ClipString;
 }
+*/
 
 /* ------------ CLOSE_WINDOW Message -------------- */
 static void CloseWindowMsg(WINDOW wnd)
@@ -333,12 +206,12 @@ int cTextBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //        case SCROLLDOC:
 //            ScrollDocMsg(wnd, p1);
 //            return TRUE;
-        case PAINT:
-            if (isVisible(wnd))    {
-                PaintMsg(wnd, p1, p2);
-                return FALSE;
-            }
-            break;
+//        case PAINT:
+//            if (isVisible(wnd))    {
+//                PaintMsg(wnd, p1, p2);
+//                return FALSE;
+//            }
+//            break;
         case CLOSE_WINDOW:
             CloseWindowMsg(wnd);
             break;
