@@ -35,7 +35,7 @@ fn CreateWindowMsg(win: *Window) c_int {
         df.PushRadioButton(&df.Display, df.ID_COLOR);
     }
     if (df.SCREENHEIGHT != df.cfg.ScreenLines) {
-        df.SetScreenHeight(df.cfg.ScreenLines); // This method currently does nothing.
+        df.SetScreenHeight(df.cfg.ScreenLines);
         if ((win.WindowHeight() == ScreenHeight) or
                 (df.SCREENHEIGHT-1 < win.GetBottom()))    {
             win.SetWindowHeight(df.SCREENHEIGHT);
@@ -44,7 +44,6 @@ fn CreateWindowMsg(win: *Window) c_int {
         }
     }
     df.SelectColors(wnd);
-    // INCLUDE_WINDOWOPTIONS
     df.SelectBorder(wnd);
     df.SelectTitle(wnd);
     df.SelectStatusBar(wnd);
@@ -144,29 +143,33 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
 fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
     switch (p1) {
-//        df.ID_EXIT, df.ID_SYSCLOSE => {
-//            df.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
-//        },
+        df.ID_EXIT, df.ID_SYSCLOSE => {
+            q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
+        },
         df.ID_HELP => {
             _ = df.DisplayHelp(wnd, df.DFlatApplication);
         },
-//        df.ID_HELPHELP => {
-//            _ = helpbox.DisplayHelp(wnd, "HelpHelp");
-//        },
-//        df.ID_EXTHELP => {
-//            _ = helpbox.DisplayHelp(wnd, "ExtHelp");
-//        },
-//        df.ID_KEYSHELP => {
-//            _ = helpbox.DisplayHelp(wnd, "KeysHelp");
-//        },
-//        df.ID_HELPINDEX => {
-//            _ = helpbox.DisplayHelp(wnd, "HelpIndex");
-//        },
+        df.ID_HELPHELP => {
+            const help = "HelpHelp";
+            _ = df.DisplayHelp(wnd, @constCast(help.ptr));
+        },
+        df.ID_EXTHELP => {
+            const help = "ExtHelp";
+            _ = df.DisplayHelp(wnd, @constCast(help.ptr));
+        },
+        df.ID_KEYSHELP => {
+            const help = "KeysHelp";
+            _ = df.DisplayHelp(wnd, @constCast(help.ptr));
+        },
+        df.ID_HELPINDEX => {
+            const help = "HelpIndex";
+            _ = df.DisplayHelp(wnd, @constCast(help.ptr));
+        },
 //        df.ID_LOG => {
 //            log.MessageLog(wnd);
 //        },
 //        df.ID_DOS => {
-//-            df.ShellDOS(wnd);
+//            df.ShellDOS(wnd);
 //        },
 //        df.ID_DISPLAY => {
 //            const box = Dialogs.Display;
@@ -194,9 +197,9 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 //        df.ID_WINDOW => {
 //-            df.ChooseWindow(wnd, df.CurrentMenuSelection-2);
 //        },
-//        df.ID_CLOSEALL => {
-//            CloseAll(win, false);
-//        },
+        df.ID_CLOSEALL => {
+            CloseAll(win, false);
+        },
 //        df.ID_MOREWINDOWS => {
 //-            df.MoreWindows(wnd);
 //        },
@@ -211,26 +214,24 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             _ = root.zBaseWndProc(df.APPLICATION, win, df.COMMAND, p1, p2);
         },
         else => {
-//            if ((df.inFocus != wnd.*.MenuBarWnd) and (df.inFocus != wnd)) {
-//                df.PostMessage(df.inFocus, df.COMMAND, p1, p2);
-//            }
+            if ((df.inFocus != wnd.*.MenuBarWnd) and (df.inFocus != wnd)) {
+                q.PostMessage(df.inFocus, df.COMMAND, p1, p2);
+            }
         }
     }
 }
 
 // --------- CLOSE_WINDOW Message --------
 fn CloseWindowMsg(win:*Window) c_int {
-    const wnd = win.win;
-    _ = wnd;
-//    CloseAll(win, true);
+    CloseAll(win, true);
     WindowSel = 0;
     q.PostMessage(null, df.STOP, 0, 0);
 
     const rtn = root.zBaseWndProc(df.APPLICATION, win, df.CLOSE_WINDOW, 0, 0);
-//    if (ScreenHeight != df.SCREENHEIGHT)
-//        SetScreenHeight(ScreenHeight);
+    if (ScreenHeight != df.SCREENHEIGHT)
+        SetScreenHeight(ScreenHeight);
 
-    // UnLoadHelpFile();
+    df.UnLoadHelpFile();
     df.ApplicationWindow = null;
     return rtn;
 }
@@ -293,6 +294,29 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
     return root.zBaseWndProc(df.APPLICATION, win, msg, p1, p2);
 }
 
+// ----- Close all document windows -----
+fn CloseAll(win:*Window, closing:bool) void {
+    const wnd = win.win;
+    _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
+
+    var wnd1 = Window.LastWindow(wnd);
+    while (wnd1) |w1| {
+        const wnd2 = Window.PrevWindow(w1);
+        if ((df.isVisible(w1)>0) and
+                                (df.GetClass(w1) != df.MENUBAR) and 
+                                        (df.GetClass(w1) != df.STATUSBAR)) {
+            if (Window.get_zin(w1)) |zin| {
+                zin.ClearVisible();
+                _ = zin.sendMessage(df.CLOSE_WINDOW, 0, 0);
+            }
+        }
+        wnd1 = wnd2;
+    }
+
+    if (closing == false)
+        _ = win.sendMessage(df.PAINT, 0, 0);
+}
+
 // -------- SETFOCUS Message --------
 fn SetFocusMsg(win:*Window, p1:bool) void {
     const wnd = win.win;
@@ -307,4 +331,20 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
     } else {
         _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
     }
+}
+
+// ---- set the screen height in the video hardware ----
+fn SetScreenHeight(height: c_int) void {
+    _ = height;
+    // not implemented originally
+//#if 0   /* display size changes not supported */
+//        SendMessage(NULL, SAVE_CURSOR, 0, 0);
+//
+//        /* change display size here */
+//
+//        SendMessage(NULL, RESTORE_CURSOR, 0, 0);
+//        SendMessage(NULL, RESET_MOUSE, 0, 0);
+//        SendMessage(NULL, SHOW_MOUSE, 0, 0);
+//    }
+//#endif
 }
