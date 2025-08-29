@@ -23,11 +23,11 @@ static int casc;
 static WINDOW GetDocFocus(void);
 
 int menu_get_x1(int);
-void menu_set_x1(int, int);
+//void menu_set_x1(int, int);
 int menu_get_x2(int);
-void menu_set_x2(int, int);
+//void menu_set_x2(int, int);
 char menu_get_sc(int);
-void menu_set_sc(int, char);
+//void menu_set_sc(int, char);
 int get_mctr();
 
 /* ----------- SETFOCUS Message ----------- */
@@ -44,7 +44,7 @@ static int SetFocusMsg(WINDOW wnd, PARAM p1)
 }
 */
 
-// return -1 to break;
+// return FALSE to break;
 BOOL cBuildMenu(WINDOW wnd, char *title, int offset, char **buf) {
     if (strlen(*buf+offset) < strlen(title)+3)
         return FALSE;
@@ -56,6 +56,7 @@ BOOL cBuildMenu(WINDOW wnd, char *title, int offset, char **buf) {
 }
 
 /* --------- BUILDMENU Message --------- */
+/*
 void cBuildMenuMsg(WINDOW wnd, PARAM p1, char** buf)
 {
     int offset = 3;
@@ -72,14 +73,12 @@ void cBuildMenuMsg(WINDOW wnd, PARAM p1, char** buf)
 	if (rtn == FALSE)
             break;
 
-	/*
-        if (strlen(*buf+offset) <
-                strlen(title)+3)
-            break;
-        *buf = DFrealloc(*buf, strlen(*buf)+5);
-        memmove(*buf+offset+4, *buf+offset, strlen(*buf)-offset+1);
-        CopyCommand(*buf+offset,title,FALSE,wnd->WindowColors [STD_COLOR] [BG]);
-	*/
+//        if (strlen(*buf+offset) <
+//                strlen(title)+3)
+//            break;
+//        *buf = DFrealloc(*buf, strlen(*buf)+5);
+//        memmove(*buf+offset+4, *buf+offset, strlen(*buf)-offset+1);
+//        CopyCommand(*buf+offset,title,FALSE,wnd->WindowColors [STD_COLOR] [BG]);
 
 //        menu[mctr].x1 = offset;
         menu_set_x1(idx, offset);
@@ -101,6 +100,7 @@ void cBuildMenuMsg(WINDOW wnd, PARAM p1, char** buf)
     }
     ActiveMenu = ActiveMenuBar->PullDown;
 }
+*/
 
 /* ---------- PAINT Message ---------- */
 void cPaintMsg(WINDOW wnd)

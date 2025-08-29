@@ -1,3 +1,4 @@
+const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
@@ -10,27 +11,27 @@ var mctr:usize = 0;
 var mwnd:?df.WINDOW = null;
 
 // Temporary
-pub export fn menu_set_x1(idx:usize, val:isize) callconv(.c) void {
-    menu[idx].x1 = val;
-    if (mctr < (idx+1))
-        mctr = idx+1;
-}
+//pub export fn menu_set_x1(idx:usize, val:isize) callconv(.c) void {
+//    menu[idx].x1 = val;
+//    if (mctr < (idx+1))
+//        mctr = idx+1;
+//}
 
 pub export fn menu_get_x1(idx:usize) callconv(.c) isize {
     return menu[idx].x1;
 }
 
-pub export fn menu_set_x2(idx:usize, val:isize) callconv(.c) void {
-    menu[idx].x2 = val;
-}
+//pub export fn menu_set_x2(idx:usize, val:isize) callconv(.c) void {
+//    menu[idx].x2 = val;
+//}
 
 pub export fn menu_get_x2(idx:usize) callconv(.c) isize {
     return menu[idx].x2;
 }
 
-pub export fn menu_set_sc(idx:usize, val:u8) callconv(.c) void {
-    menu[idx].sc = val;
-}
+//pub export fn menu_set_sc(idx:usize, val:u8) callconv(.c) void {
+//    menu[idx].sc = val;
+//}
 
 pub export fn menu_get_sc(idx:usize) callconv(.c) u8 {
     return menu[idx].sc;
@@ -59,9 +60,35 @@ fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
     const len = df.strlen(wnd.*.text);
     if (root.global_allocator.dupe(u8, wnd.*.text[0..len])) |buf| {
         const b:[*c]u8 = buf.ptr;
+        var offset:isize = 3;
+        var idx:usize = 0;
+        const pp1:usize = @intCast(p1);
+        df.ActiveMenuBar = @ptrFromInt(pp1);
+//        df.ActiveMenu = &df.ActiveMenuBar.*.PullDown;
+        for(df.ActiveMenuBar.*.PullDown) |m| {
+            if (m.Title) |title| {
+                const rtn = df.cBuildMenu(wnd, title, @intCast(offset), @constCast(&b));
+                if (rtn == df.FALSE) {
+                    break;
+                }
+                menu[idx].x1 = offset;
+                offset += @intCast(df.strlen(title) + (3+df.MSPACE));
+                menu[idx].x2 = offset-df.MSPACE;
 
-        df.cBuildMenuMsg(wnd, p1, @constCast(&b));
+                const l = df.strlen(title);
+                if (std.mem.indexOfScalar(u8, title[0..l], df.SHORTCUTCHAR)) |pos| {
+                    menu[idx].sc = std.ascii.toLower(title[pos+1]);
+                }
+//                cp = strchr(title, SHORTCUTCHAR);
+//                if (cp) {
+//            menu[mctr].sc = tolower(*(cp+1));
+//                menu_set_sc(idx, tolower(*(cp+1)));
+                idx += 1;
+                mctr += 1;
+            }
+        }
 
+        df.ActiveMenu = &df.ActiveMenuBar.*.PullDown;
         wnd.*.text = b;
     } else |_| {
         // error 
