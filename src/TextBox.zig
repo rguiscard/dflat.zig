@@ -486,11 +486,10 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) cal
                 return df.FALSE;
             }
         },
-//        case CLOSE_WINDOW:
-//            CloseWindowMsg(wnd);
-//            break;
+        df.CLOSE_WINDOW => {
+            df.CloseWindowMsg(wnd);
+        },
         else => {
-            return df.cTextBoxProc(wnd, msg, p1, p2);
         }
     }
     return root.zBaseWndProc(df.TEXTBOX, win, msg, p1, p2);

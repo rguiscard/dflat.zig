@@ -2,7 +2,7 @@
 
 #include "dflat.h"
 
-static void reset_menubar(WINDOW);
+void reset_menubar(WINDOW);
 
 static struct {
     int x1, x2;     /* position in menu bar */
@@ -21,6 +21,7 @@ static int casc;
 static WINDOW GetDocFocus(void);
 
 /* ----------- SETFOCUS Message ----------- */
+/*
 static int SetFocusMsg(WINDOW wnd, PARAM p1)
 {
 	int rtn;
@@ -31,6 +32,7 @@ static int SetFocusMsg(WINDOW wnd, PARAM p1)
 		SendMessage(NULL, HIDE_CURSOR, 0, 0);
 	return rtn;
 }
+*/
 
 /* --------- BUILDMENU Message --------- */
 static void BuildMenuMsg(WINDOW wnd, PARAM p1)
@@ -341,11 +343,11 @@ int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     int rtn;
 
     switch (msg)    {
-        case CREATE_WINDOW:
-            reset_menubar(wnd);
-            break;
-        case SETFOCUS:
-			return SetFocusMsg(wnd, p1);
+//        case CREATE_WINDOW:
+//            reset_menubar(wnd);
+//            break;
+//        case SETFOCUS:
+//			return SetFocusMsg(wnd, p1);
         case BUILDMENU:
             BuildMenuMsg(wnd, p1);
             break;
@@ -386,7 +388,7 @@ int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 }
 
 /* ------------- reset the MENUBAR -------------- */
-static void reset_menubar(WINDOW wnd)
+void reset_menubar(WINDOW wnd)
 {
     GetText(wnd) = DFrealloc(GetText(wnd), SCREENWIDTH+5);
     memset(GetText(wnd), ' ', SCREENWIDTH);

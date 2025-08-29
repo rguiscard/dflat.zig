@@ -56,6 +56,7 @@ void cDisplay(WINDOW, PARAM, PARAM);
 BOOL AddTextMsg(WINDOW, char *);
 void DeleteTextMsg(WINDOW, int);
 void InsertTextMsg(WINDOW, char *, int);
+void CloseWindowMsg(WINDOW);
 void ComputeWindowTop(WINDOW);
 void ComputeWindowLeft(WINDOW);
 int ComputeVScrollBox(WINDOW);
@@ -67,6 +68,9 @@ typedef struct {
     enum VectTypes vt;
     RECT rc;
 } VECT;
+
+// menubar.c
+void reset_menubar(WINDOW);
 
 
 // all wndproc
