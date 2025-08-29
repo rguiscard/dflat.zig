@@ -2,6 +2,43 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const rect = @import("Rect.zig");
+
+// positions in menu bar & shortcut key value
+var menu = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
+var mctr:usize = 0;
+var mwnd:?df.WINDOW = null;
+
+// Temporary
+pub export fn menu_set_x1(idx:usize, val:isize) callconv(.c) void {
+    menu[idx].x1 = val;
+    if (mctr < (idx+1))
+        mctr = idx+1;
+}
+
+pub export fn menu_get_x1(idx:usize) callconv(.c) isize {
+    return menu[idx].x1;
+}
+
+pub export fn menu_set_x2(idx:usize, val:isize) callconv(.c) void {
+    menu[idx].x2 = val;
+}
+
+pub export fn menu_get_x2(idx:usize) callconv(.c) isize {
+    return menu[idx].x2;
+}
+
+pub export fn menu_set_sc(idx:usize, val:u8) callconv(.c) void {
+    menu[idx].sc = val;
+}
+
+pub export fn menu_get_sc(idx:usize) callconv(.c) u8 {
+    return menu[idx].sc;
+}
+
+pub export fn get_mctr() callconv(.c) usize {
+    return mctr;
+}
 
 // ----------- SETFOCUS Message -----------
 fn SetFocusMsg(win:*Window,p1:df.PARAM) c_int {
@@ -15,23 +52,79 @@ fn SetFocusMsg(win:*Window,p1:df.PARAM) c_int {
     return rtn;
 }
 
+// --------- BUILDMENU Message ---------
+fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
+    const wnd = win.win;
+    reset_menubar(win);
+    const len = df.strlen(wnd.*.text);
+    if (root.global_allocator.dupe(u8, wnd.*.text[0..len])) |buf| {
+        const b:[*c]u8 = buf.ptr;
+
+        df.cBuildMenuMsg(wnd, p1, @constCast(&b));
+
+        wnd.*.text = b;
+    } else |_| {
+        // error 
+    }
+}
+
+// ---------- PAINT Message ----------
+fn PaintMsg(win:*Window) void {
+    const wnd = win.win;
+    df.cPaintMsg(wnd);
+}
+
+// --------------- LEFT_BUTTON Message ----------
+fn LeftButtonMsg(win:*Window,p1:df.PARAM) void {
+    const mx = p1-win.GetLeft();
+    // --- compute the selection that the left button hit ---
+    for (menu, 0..) |m, idx| {
+        if (m.x1 == -1) {
+            break; // out of range
+        }
+        const i:isize = @intCast(idx);
+        if ((mx >= menu[idx].x1-4*i) and
+               (mx <= menu[idx].x2-4*i-5)) {
+            if ((idx != df.ActiveMenuBar.*.ActiveSelection) or (mwnd == null)) {
+                _ = win.sendMessage(df.MB_SELECTION, i, 0);
+            }
+            break;
+        }
+    }
+}
+
+// ---------------- CLOSE_WINDOW Message ---------------
+fn CloseWindowMsg(win:*Window) void {
+    const wnd = win.win;
+    if (wnd.*.text) |text| {
+        const len = df.strlen(wnd.*.text);
+        root.global_allocator.free(text[0..len]); // off by 1 ?
+        wnd.*.text = null;
+    }
+    mctr = 0;
+    df.ActiveMenuBar.*.ActiveSelection = -1;
+    df.ActiveMenu = null;
+    df.ActiveMenuBar = null;
+}
+
 pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
-            df.reset_menubar(wnd);
+            reset_menubar(win);
         },
         df.SETFOCUS => {
             return SetFocusMsg(win, p1);
         },
-//        case BUILDMENU:
-//            BuildMenuMsg(wnd, p1);
-//            break;
-//        case PAINT:
-//            if (!isVisible(wnd) || GetText(wnd) == NULL)
-//                break;
-//            PaintMsg(wnd);
-//            return FALSE;
+        df.BUILDMENU => {
+            BuildMenuMsg(win, p1);
+        },
+        df.PAINT => {
+            if ((df.isVisible(wnd)>0) and (wnd.*.text != null)) {
+                PaintMsg(win);
+                return df.FALSE;
+            }
+        },
 //        case BORDER:
 //                    if (mwnd == NULL)
 //                                SendMessage(wnd, PAINT, 0, 0);
@@ -39,27 +132,52 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
 //        case KEYBOARD:
 //            KeyboardMsg(wnd, p1);
 //            return TRUE;
-//        case LEFT_BUTTON:
-//            LeftButtonMsg(wnd, p1);
-//            return TRUE;
+        df.LEFT_BUTTON => {
+            LeftButtonMsg(win, p1);
+            return df.TRUE;
+        },
 //        case MB_SELECTION:
 //            SelectionMsg(wnd, p1, p2);
 //            break;
 //        case COMMAND:
 //            CommandMsg(wnd, p1, p2);
 //            return TRUE;
-//        case INSIDE_WINDOW:
-//            return InsideRect(p1, p2, WindowRect(wnd));
+        df.INSIDE_WINDOW => {
+            return if (rect.InsideRect(@intCast(p1), @intCast(p2), win.WindowRect())) df.TRUE else df.FALSE;
+        },
 //        case CLOSE_POPDOWN:
 //            ClosePopdownMsg(wnd);
 //            return TRUE;
-//        case CLOSE_WINDOW:
-//            rtn = BaseWndProc(MENUBAR, wnd, msg, p1, p2);
-//            CloseWindowMsg(wnd);
-//            return rtn;
+        df.CLOSE_WINDOW => {
+            const rtn = root.zBaseWndProc(df.MENUBAR, win, msg, p1, p2);
+            CloseWindowMsg(win);
+            return rtn;
+        },
         else => {
             return df.cMenuBarProc(wnd, msg, p1, p2);
         }
     }
     return root.zBaseWndProc(df.MENUBAR, win, msg, p1, p2);
+}
+
+// ------------- reset the MENUBAR --------------
+fn reset_menubar(win:*Window) void {
+    const wnd = win.win;
+    if (wnd.*.text == null) {
+        if (root.global_allocator.alloc(u8, @intCast(df.SCREENWIDTH+5))) |b| {
+            @memset(b, ' ');
+            wnd.*.text = b.ptr;
+        } else |_| {
+            // error
+        }
+    } else {
+        const len = df.strlen(wnd.*.text); // off by 1?
+        if (root.global_allocator.realloc(wnd.*.text[0..len], @intCast(df.SCREENWIDTH+5))) |b| {
+            @memset(b, ' ');
+            wnd.*.text = b.ptr;
+        } else |_| {
+            // error
+        }
+    }
+    wnd.*.text[@intCast(win.WindowWidth())] = 0;
 }

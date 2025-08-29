@@ -71,7 +71,10 @@ typedef struct {
 
 // menubar.c
 void reset_menubar(WINDOW);
-
+void cBuildMenuMsg(WINDOW, PARAM, char**);
+void cCloseWindowMsg(WINDOW);
+void cPaintMsg(WINDOW);
+extern MENU *ActiveMenu;
 
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);

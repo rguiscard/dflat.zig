@@ -2,16 +2,18 @@
 
 #include "dflat.h"
 
-void reset_menubar(WINDOW);
+//void reset_menubar(WINDOW);
 
+/*
 static struct {
-    int x1, x2;     /* position in menu bar */
-    char sc;        /* shortcut key value   */
+    int x1, x2;     // position in menu bar 
+    char sc;        // shortcut key value   
 } menu[10];
 static int mctr;
+*/
 
 MBAR *ActiveMenuBar;
-static MENU *ActiveMenu;
+MENU *ActiveMenu;
 
 static WINDOW mwnd;
 static BOOL Selecting;
@@ -19,6 +21,14 @@ static BOOL Selecting;
 static WINDOW Cascaders[MAXCASCADES];
 static int casc;
 static WINDOW GetDocFocus(void);
+
+int menu_get_x1(int);
+void menu_set_x1(int, int);
+int menu_get_x2(int);
+void menu_set_x2(int, int);
+char menu_get_sc(int);
+void menu_set_sc(int, char);
+int get_mctr();
 
 /* ----------- SETFOCUS Message ----------- */
 /*
@@ -34,40 +44,66 @@ static int SetFocusMsg(WINDOW wnd, PARAM p1)
 }
 */
 
+// return -1 to break;
+BOOL cBuildMenu(WINDOW wnd, char *title, int offset, char **buf) {
+    if (strlen(*buf+offset) < strlen(title)+3)
+        return FALSE;
+    *buf = DFrealloc(*buf, strlen(*buf)+5);
+    memmove(*buf+offset+4, *buf+offset, strlen(*buf)-offset+1);
+    CopyCommand(*buf+offset,title,FALSE,wnd->WindowColors [STD_COLOR] [BG]);
+
+    return TRUE;
+}
+
 /* --------- BUILDMENU Message --------- */
-static void BuildMenuMsg(WINDOW wnd, PARAM p1)
+void cBuildMenuMsg(WINDOW wnd, PARAM p1, char** buf)
 {
     int offset = 3;
-    reset_menubar(wnd);
-    mctr = 0;
+    int idx = 0;
+//    mctr = 0;
     ActiveMenuBar = (MBAR *) p1;
     ActiveMenu = ActiveMenuBar->PullDown;
     while (ActiveMenu->Title != NULL &&
             ActiveMenu->Title != (void*)-1)    {
         char *cp;
-        if (strlen(GetText(wnd)+offset) <
-                strlen(ActiveMenu->Title)+3)
+	char *title = ActiveMenu->Title;
+
+	BOOL rtn = cBuildMenu(wnd, title, offset, buf);
+	if (rtn == FALSE)
             break;
-        GetText(wnd) = DFrealloc(GetText(wnd),
-            strlen(GetText(wnd))+5);
-        memmove(GetText(wnd) + offset+4, GetText(wnd) + offset,
-                strlen(GetText(wnd))-offset+1);
-        CopyCommand(GetText(wnd)+offset,ActiveMenu->Title,FALSE,
-                wnd->WindowColors [STD_COLOR] [BG]);
-        menu[mctr].x1 = offset;
-        offset += strlen(ActiveMenu->Title) + (3+MSPACE);
-        menu[mctr].x2 = offset-MSPACE;
-        cp = strchr(ActiveMenu->Title, SHORTCUTCHAR);
-        if (cp)
-            menu[mctr].sc = tolower(*(cp+1));
-        mctr++;
+
+	/*
+        if (strlen(*buf+offset) <
+                strlen(title)+3)
+            break;
+        *buf = DFrealloc(*buf, strlen(*buf)+5);
+        memmove(*buf+offset+4, *buf+offset, strlen(*buf)-offset+1);
+        CopyCommand(*buf+offset,title,FALSE,wnd->WindowColors [STD_COLOR] [BG]);
+	*/
+
+//        menu[mctr].x1 = offset;
+        menu_set_x1(idx, offset);
+
+        offset += strlen(title) + (3+MSPACE);
+
+//        menu[mctr].x2 = offset-MSPACE;
+        menu_set_x2(idx, offset-MSPACE);
+
+        cp = strchr(title, SHORTCUTCHAR);
+        if (cp) {
+//            menu[mctr].sc = tolower(*(cp+1));
+            menu_set_sc(idx, tolower(*(cp+1)));
+	}
+
+//        mctr++;
+        idx++;
         ActiveMenu++;
     }
     ActiveMenu = ActiveMenuBar->PullDown;
 }
 
 /* ---------- PAINT Message ---------- */
-static void PaintMsg(WINDOW wnd)
+void cPaintMsg(WINDOW wnd)
 {
 	if (Selecting)
 		return;
@@ -81,8 +117,11 @@ static void PaintMsg(WINDOW wnd)
         int offset, offset1;
         char sel[MAXCOLS];
 
-        offset=menu[ActiveMenuBar->ActiveSelection].x1;
-        offset1=menu[ActiveMenuBar->ActiveSelection].x2;
+//        offset=menu[ActiveMenuBar->ActiveSelection].x1;
+//        offset1=menu[ActiveMenuBar->ActiveSelection].x2;
+        offset=menu_get_x1(ActiveMenuBar->ActiveSelection);
+        offset1=menu_get_x2(ActiveMenuBar->ActiveSelection);
+
         GetText(wnd)[offset1] = '\0';
         SetReverseColor(wnd);
         memset(sel, '\0', MAXCOLS);
@@ -112,9 +151,9 @@ static void KeyboardMsg(WINDOW wnd, PARAM p1)
         int c = tolower((int)p1);
         int a = AltConvert((int)p1);
         int j;
-        for (j = 0; j < mctr; j++)    {
-            if ((inFocus == wnd && menu[j].sc == c) ||
-                    (a && menu[j].sc == a))    {
+        for (j = 0; j < get_mctr(); j++)    {
+            if ((inFocus == wnd && menu_get_sc(j) == c) ||
+                    (a && menu_get_sc(j) == a))    {
 				SendMessage(wnd, SETFOCUS, TRUE, 0);
                 SendMessage(wnd, MB_SELECTION, j, 0);
                 return;
@@ -188,7 +227,7 @@ static void KeyboardMsg(WINDOW wnd, PARAM p1)
             break;
         case FWD:
             ActiveMenuBar->ActiveSelection++;
-            if (ActiveMenuBar->ActiveSelection == mctr)
+            if (ActiveMenuBar->ActiveSelection == get_mctr())
                 ActiveMenuBar->ActiveSelection = 0;
             if (mwnd != NULL)
                 SendMessage(wnd, MB_SELECTION,
@@ -199,7 +238,7 @@ static void KeyboardMsg(WINDOW wnd, PARAM p1)
         case BS:
             if (ActiveMenuBar->ActiveSelection == 0 ||
 					ActiveMenuBar->ActiveSelection == -1)
-                ActiveMenuBar->ActiveSelection = mctr;
+                ActiveMenuBar->ActiveSelection = get_mctr();
             --ActiveMenuBar->ActiveSelection;
             if (mwnd != NULL)
                 SendMessage(wnd, MB_SELECTION,
@@ -213,19 +252,21 @@ static void KeyboardMsg(WINDOW wnd, PARAM p1)
 }
 
 /* --------------- LEFT_BUTTON Message ---------- */
+/*
 static void LeftButtonMsg(WINDOW wnd, PARAM p1)
 {
     int i;
     int mx = (int) p1 - GetLeft(wnd);
-    /* --- compute the selection that the left button hit --- */
-    for (i = 0; i < mctr; i++)
-        if (mx >= menu[i].x1-4*i &&
-                mx <= menu[i].x2-4*i-5)
+    // --- compute the selection that the left button hit ---
+    for (i = 0; i < get_mctr(); i++)
+        if (mx >= menu_get_x1(i)-4*i &&
+                mx <= menu_get_x2(i)-4*i-5)
             break;
-    if (i < mctr)
+    if (i < get_mctr())
         if (i != ActiveMenuBar->ActiveSelection || mwnd == NULL)
             SendMessage(wnd, MB_SELECTION, i, 0);
 }
+*/
 
 /* -------------- MB_SELECTION Message -------------- */
 static void SelectionMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -250,7 +291,7 @@ static void SelectionMsg(WINDOW wnd, PARAM p1, PARAM p2)
         my = GetTop(mwnd) + mwnd->selection;
     }
     else    {
-        int offset = menu[(int)p1].x1 - 4 * (int)p1;
+        int offset = menu_get_x1(p1) - 4 * (int)p1;
         if (mwnd != NULL)
             SendMessage(mwnd, CLOSE_WINDOW, 0, 0);
         ActiveMenuBar->ActiveSelection = (int) p1;
@@ -288,7 +329,7 @@ static void CommandMsg(WINDOW wnd, PARAM p1, PARAM p2)
 	}
     if (isCascadedCommand(ActiveMenuBar, (int)p1))    {
         /* find the cascaded menu based on command id in p1 */
-        MENU *mnu = ActiveMenu+mctr;
+        MENU *mnu = ActiveMenu+get_mctr();
         while (mnu->Title != (void *)-1)    {
             if (mnu->CascadeId == (int) p1)    {
                 if (casc < MAXCASCADES)    {
@@ -325,17 +366,20 @@ static void ClosePopdownMsg(WINDOW wnd)
 }
 
 /* ---------------- CLOSE_WINDOW Message --------------- */
-static void CloseWindowMsg(WINDOW wnd)
+/*
+void cCloseWindowMsg(WINDOW wnd)
 {
-    if (GetText(wnd) != NULL)    {
-        free(GetText(wnd));
-        GetText(wnd) = NULL;
-    }
-    mctr = 0;
+//    if (GetText(wnd) != NULL)    {
+//        free(GetText(wnd));
+//        GetText(wnd) = NULL;
+//    }
+
+//    mctr = 0;
     ActiveMenuBar->ActiveSelection = -1;
     ActiveMenu = NULL;
     ActiveMenuBar = NULL;
 }
+*/
 
 /* --- Window processing module for MENUBAR window class --- */
 int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
@@ -348,14 +392,14 @@ int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            break;
 //        case SETFOCUS:
 //			return SetFocusMsg(wnd, p1);
-        case BUILDMENU:
-            BuildMenuMsg(wnd, p1);
-            break;
-        case PAINT:    
-            if (!isVisible(wnd) || GetText(wnd) == NULL)
-                break;
-            PaintMsg(wnd);
-            return FALSE;
+//        case BUILDMENU:
+//            BuildMenuMsg(wnd, p1);
+//            break;
+//        case PAINT:    
+//            if (!isVisible(wnd) || GetText(wnd) == NULL)
+//                break;
+//            PaintMsg(wnd);
+//            return FALSE;
         case BORDER:
 		    if (mwnd == NULL)
 				SendMessage(wnd, PAINT, 0, 0);
@@ -363,9 +407,9 @@ int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case KEYBOARD:
             KeyboardMsg(wnd, p1);
             return TRUE;
-        case LEFT_BUTTON:
-            LeftButtonMsg(wnd, p1);
-            return TRUE;
+//        case LEFT_BUTTON:
+//            LeftButtonMsg(wnd, p1);
+//            return TRUE;
         case MB_SELECTION:
             SelectionMsg(wnd, p1, p2);
             break;
@@ -377,10 +421,10 @@ int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case CLOSE_POPDOWN:
             ClosePopdownMsg(wnd);
             return TRUE;
-        case CLOSE_WINDOW:
-            rtn = BaseWndProc(MENUBAR, wnd, msg, p1, p2);
-            CloseWindowMsg(wnd);
-            return rtn;
+//        case CLOSE_WINDOW:
+//            rtn = BaseWndProc(MENUBAR, wnd, msg, p1, p2);
+//            CloseWindowMsg(wnd);
+//            return rtn;
         default:
             break;
     }
@@ -388,12 +432,14 @@ int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 }
 
 /* ------------- reset the MENUBAR -------------- */
+/*
 void reset_menubar(WINDOW wnd)
 {
     GetText(wnd) = DFrealloc(GetText(wnd), SCREENWIDTH+5);
     memset(GetText(wnd), ' ', SCREENWIDTH);
     *(GetText(wnd)+WindowWidth(wnd)) = '\0';
 }
+*/
 
 static WINDOW GetDocFocus(void)
 {
