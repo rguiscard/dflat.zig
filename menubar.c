@@ -22,6 +22,8 @@ static WINDOW Cascaders[MAXCASCADES];
 static int casc;
 static WINDOW GetDocFocus(void);
 
+BOOL get_selecting();
+void set_selecting(BOOL val);
 int menu_get_x1(int);
 //void menu_set_x1(int, int);
 int menu_get_x2(int);
@@ -102,15 +104,28 @@ void cBuildMenuMsg(WINDOW wnd, PARAM p1, char** buf)
 }
 */
 
+void cPaintMenu(WINDOW wnd, int offset, int offset1, int selection) {
+    char *cp;
+    char sel[MAXCOLS];
+    memset(sel, '\0', MAXCOLS);
+    strcpy(sel, GetText(wnd)+offset);
+    cp = strchr(sel, CHANGECOLOR);
+    if (cp != NULL)
+        *(cp + 2) = background | 0x80;
+//    wputs(wnd, sel, offset-ActiveMenuBar->ActiveSelection*4, 0);
+    wputs(wnd, sel, offset-selection*4, 0);
+    GetText(wnd)[offset1] = ' ';
+}
+
 /* ---------- PAINT Message ---------- */
 void cPaintMsg(WINDOW wnd)
 {
-	if (Selecting)
-		return;
-    if (wnd == inFocus)
-        SendMessage(GetParent(wnd), ADDSTATUS, 0, 0);
-    SetStandardColor(wnd);
-    wputs(wnd, GetText(wnd), 0, 0);
+//	if (Selecting)
+//		return;
+//    if (wnd == inFocus)
+//        SendMessage(GetParent(wnd), ADDSTATUS, 0, 0);
+//    SetStandardColor(wnd);
+//    wputs(wnd, GetText(wnd), 0, 0);
     if (ActiveMenuBar && ActiveMenuBar->ActiveSelection != -1 &&
             (wnd == inFocus || mwnd != NULL))    {
         char *cp;

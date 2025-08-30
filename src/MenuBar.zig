@@ -9,6 +9,15 @@ const rect = @import("Rect.zig");
 var menu = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
 var mctr:usize = 0;
 var mwnd:?df.WINDOW = null;
+var Selecting:bool = false;
+
+pub export fn get_selecting() c_int {
+    return if(Selecting) df.TRUE else df.FALSE;
+} 
+
+pub export fn set_selecting(val:c_int) void {
+    Selecting = if (val > 0) true else false;
+}
 
 pub export fn menu_get_x1(idx:usize) callconv(.c) isize {
     return menu[idx].x1;
@@ -78,7 +87,32 @@ fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
 // ---------- PAINT Message ----------
 fn PaintMsg(win:*Window) void {
     const wnd = win.win;
-    df.cPaintMsg(wnd);
+    if (Selecting)
+        return;
+    if (wnd == df.inFocus) {
+        _ = df.SendMessage(Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
+    }
+    df.SetStandardColor(wnd);
+    df.wputs(wnd, wnd.*.text, 0, 0);
+
+    if ((df.ActiveMenuBar != null) and (df.ActiveMenuBar.*.ActiveSelection != -1) and
+            ((wnd == df.inFocus) or (mwnd != null))) {
+
+        const offset=menu[@intCast(df.ActiveMenuBar.*.ActiveSelection)].x1;
+        const offset1=menu[@intCast(df.ActiveMenuBar.*.ActiveSelection)].x2;
+
+        wnd.*.text[@intCast(offset1)] = 0;
+        df.SetReverseColor(wnd);
+        df.cPaintMenu(wnd, @intCast(offset), @intCast(offset1), df.ActiveMenuBar.*.ActiveSelection);
+
+        if ((mwnd == null) and (wnd == df.inFocus)) {
+            const st = df.ActiveMenu[@intCast(df.ActiveMenuBar.*.ActiveSelection)].StatusText;
+            if (st) |txt| {
+                _ = df.SendMessage(Window.GetParent(wnd), df.ADDSTATUS,
+                    @intCast(@intFromPtr(txt)), 0);
+            }
+        }
+    }
 }
 
 // --------------- LEFT_BUTTON Message ----------

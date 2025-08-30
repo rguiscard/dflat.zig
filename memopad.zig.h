@@ -75,6 +75,7 @@ void cBuildMenuMsg(WINDOW, PARAM, char**);
 void cCloseWindowMsg(WINDOW);
 void cPaintMsg(WINDOW);
 BOOL cBuildMenu(WINDOW, char *, int, char **);
+void cPaintMenu(WINDOW, int, int, int);
 extern MENU *ActiveMenu;
 
 // all wndproc
