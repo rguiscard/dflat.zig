@@ -412,7 +412,6 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
             return rtn;
         },
         else => {
-            return df.cMenuBarProc(wnd, msg, p1, p2);
         }
     }
     return root.zBaseWndProc(df.MENUBAR, win, msg, p1, p2);

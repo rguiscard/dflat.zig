@@ -70,10 +70,6 @@ typedef struct {
 } VECT;
 
 // menubar.c
-void reset_menubar(WINDOW);
-void cBuildMenuMsg(WINDOW, PARAM, char**);
-void cCloseWindowMsg(WINDOW);
-void cPaintMsg(WINDOW);
 BOOL cBuildMenu(WINDOW, char *, int, char **);
 void cPaintMenu(WINDOW, int, int, int);
 WINDOW GetDocFocus(void);
