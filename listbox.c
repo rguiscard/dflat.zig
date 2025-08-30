@@ -30,57 +30,8 @@ static void AddModeKey(WINDOW wnd)
 }
 #endif
 
-/* --------- UP (Up Arrow) Key ------------ */
-/*
-static void UpKey(WINDOW wnd, PARAM p2)
-{
-    if (wnd->selection > 0)    {
-        if (wnd->selection == wnd->wtop)    {
-            BaseWndProc(LISTBOX, wnd, KEYBOARD, UP, p2);
-            PostMessage(wnd, LB_SELECTION, wnd->selection-1,
-                isMultiLine(wnd) ? p2 : FALSE);
-        }
-        else    {
-            int newsel = wnd->selection-1;
-            if (wnd->wlines == ClientHeight(wnd))
-                while (*TextLine(wnd, newsel) == LINE)
-                    --newsel;
-            PostMessage(wnd, LB_SELECTION, newsel,
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-                isMultiLine(wnd) ? p2 :
-#endif
-                FALSE);
-        }
-    }
-}
-*/
-
-/* --------- DN (Down Arrow) Key ------------ */
-/*
-static void DnKey(WINDOW wnd, PARAM p2)
-{
-    if (wnd->selection < wnd->wlines-1)    {
-        if (wnd->selection == wnd->wtop+ClientHeight(wnd)-1)  {
-            BaseWndProc(LISTBOX, wnd, KEYBOARD, DN, p2);
-            PostMessage(wnd, LB_SELECTION, wnd->selection+1,
-                isMultiLine(wnd) ? p2 : FALSE);
-        }
-        else    {
-            int newsel = wnd->selection+1;
-            if (wnd->wlines == ClientHeight(wnd))
-                while (*TextLine(wnd, newsel) == LINE)
-                    newsel++;
-            PostMessage(wnd, LB_SELECTION, newsel,
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-                isMultiLine(wnd) ? p2 :
-#endif
-                FALSE);
-        }
-    }
-}
-*/
-
 /* --------- HOME and PGUP Keys ------------ */
+/*
 static void HomePgUpKey(WINDOW wnd, PARAM p1, PARAM p2)
 {
     BaseWndProc(LISTBOX, wnd, KEYBOARD, p1, p2);
@@ -90,8 +41,10 @@ static void HomePgUpKey(WINDOW wnd, PARAM p1, PARAM p2)
 #endif
         FALSE);
 }
+*/
 
 /* --------- END and PGDN Keys ------------ */
+/*
 static void EndPgDnKey(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int bot;
@@ -105,6 +58,7 @@ static void EndPgDnKey(WINDOW wnd, PARAM p1, PARAM p2)
 #endif
         FALSE);
 }
+*/
 
 #ifdef INCLUDE_EXTENDEDSELECTIONS
 /* --------- Space Bar Key ------------ */
@@ -163,6 +117,7 @@ static void KeyPress(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* --------- KEYBOARD Message ------------ */
+/*
 int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     switch ((int) p1)    {
@@ -179,30 +134,31 @@ int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 //            TestExtended(wnd, p2);
 //            DnKey(wnd, p2);
 //            return TRUE;
-        case PGUP:
-        case HOME:
-            TestExtended(wnd, p2);
-            HomePgUpKey(wnd, p1, p2);
-            return TRUE;
-        case PGDN:
-        case END:
-            TestExtended(wnd, p2);
-            EndPgDnKey(wnd, p1, p2);
-            return TRUE;
+//        case PGUP:
+//        case HOME:
+//            TestExtended(wnd, p2);
+//            HomePgUpKey(wnd, p1, p2);
+//            return TRUE;
+//        case PGDN:
+//        case END:
+//            TestExtended(wnd, p2);
+//            EndPgDnKey(wnd, p1, p2);
+//            return TRUE;
 #ifdef INCLUDE_EXTENDEDSELECTIONS
-        case ' ':
-            SpacebarKey(wnd, p2);
-            break;
+//        case ' ':
+//            SpacebarKey(wnd, p2);
+//            break;
 #endif
-        case '\r':
-            EnterKey(wnd);
-            return TRUE;
+//        case '\r':
+//            EnterKey(wnd);
+//            return TRUE;
         default:
             KeyPress(wnd, p1, p2);
             break;
     }
     return FALSE;
 }
+*/
 
 /* --------- GETTEXT Message ------------ */
 static void GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)

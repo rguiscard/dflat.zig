@@ -73,9 +73,74 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
     }
 }
 
+// --------- HOME and PGUP Keys ------------
+fn HomePgUpKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    _ = root.zBaseWndProc(df.LISTBOX, win, df.KEYBOARD, p1, p2);
+    q.PostMessage(wnd, df.LB_SELECTION, wnd.*.wtop,
+        if (df.isMultiLine(wnd)>0) p2 else df.FALSE);  // EXTENDEDSELECTIONS
+}
+
+// --------- END and PGDN Keys ------------
+fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    _ = root.zBaseWndProc(df.LISTBOX, win, df.KEYBOARD, p1, p2);
+    var bot:c_int = @intCast(wnd.*.wtop+win.ClientHeight()-1);
+    if (bot > wnd.*.wlines-1)
+        bot = @intCast(wnd.*.wlines-1);
+    q.PostMessage(wnd, df.LB_SELECTION, bot,
+        if (df.isMultiLine(wnd)>0) p2 else df.FALSE);  // EXTENDEDSELECTIONS
+}
+
+// --------- Enter ('\r') Key ------------
+fn EnterKey(win:*Window) void {
+    const wnd = win.win;
+    if (wnd.*.selection != -1) {
+        _ = win.sendMessage(df.LB_SELECTION, wnd.*.selection, df.TRUE);
+        _ = win.sendMessage(df.LB_CHOOSE, wnd.*.selection, 0);
+    }
+}
+
+// --------- All Other Key Presses ------------
+fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    var sel:usize = @intCast(wnd.*.selection+1);
+    while (sel < wnd.*.wlines) {
+        const cp = df.TextLine(wnd, sel);
+        if (cp == null)
+            break;
+//#ifdef INCLUDE_EXTENDEDSELECTIONS
+//        if (isMultiLine(wnd))
+//            cp++;
+//#endif
+
+        const first = cp[0];
+        if ((first < 256) and (std.ascii.toLower(first) == p1)) {
+            _ = win.sendMessage(df.LB_SELECTION, @intCast(sel),
+                if (df.isMultiLine(wnd)>0) p2 else df.FALSE);
+            if (SelectionInWindow(win, sel) == false) {
+                const x:usize = @intCast(win.ClientHeight());
+                wnd.*.wtop = @intCast(sel-x+1);
+                _ = win.sendMessage(df.PAINT, 0, 0);
+            }
+            break;
+        }
+//        if (tolower(*cp) == (int)p1)    {
+//            SendMessage(wnd, LB_SELECTION, sel,
+//                isMultiLine(wnd) ? p2 : FALSE);
+//            if (!SelectionInWindow(wnd, sel))    {
+//                wnd->wtop = sel-ClientHeight(wnd)+1;
+//                SendMessage(wnd, PAINT, 0, 0);
+//            }
+//            break;
+//        }
+        sel += 1;
+    }
+}
+
 // --------- KEYBOARD Message ------------
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
+//    const wnd = win.win;
     switch (p1) {
 //#ifdef INCLUDE_EXTENDEDSELECTIONS
 //        case SHIFT_F8:
@@ -92,27 +157,29 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             DnKey(win, p2);
             return true;
         },
-//        case PGUP:
-//        case HOME:
-//            TestExtended(wnd, p2);
-//            HomePgUpKey(wnd, p1, p2);
-//            return TRUE;
-//        case PGDN:
-//        case END:
-//            TestExtended(wnd, p2);
-//            EndPgDnKey(wnd, p1, p2);
-//            return TRUE;
+        df.PGUP,
+        df.HOME => {
+            TestExtended(win, p2);
+            HomePgUpKey(win, p1, p2);
+            return true;
+        },
+        df.PGDN,
+        df.END => {
+            TestExtended(win, p2);
+            EndPgDnKey(win, p1, p2);
+            return true;
+        },
 //#ifdef INCLUDE_EXTENDEDSELECTIONS
 //        case ' ':
 //            SpacebarKey(wnd, p2);
 //            break;
 //#endif
-//        case '\r':
-//            EnterKey(wnd);
-//            return TRUE;
+        '\r' => {
+            EnterKey(win);
+            return true;
+        },
         else => {
-//            KeyPress(wnd, p1, p2);
-            return if (df.KeyboardMsg(wnd, p1, p2) == df.TRUE) true else false;
+            KeyPress(win, p1, p2);
         }
     }
     return false;
@@ -268,4 +335,10 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
         }
     }
     return root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
+}
+
+fn SelectionInWindow(win:*Window, sel:usize) bool {
+    const wnd = win.win;
+    return ((wnd.*.wlines>0) and (sel >= wnd.*.wtop) and
+            (sel < wnd.*.wtop+win.ClientHeight()));
 }
