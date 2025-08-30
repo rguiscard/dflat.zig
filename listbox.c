@@ -201,6 +201,7 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* ------- LEFT_BUTTON Message -------- */
+/*
 static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int my = (int) p2 - GetTop(wnd);
@@ -225,8 +226,10 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return TRUE;
 }
+*/
 
 /* ------------- DOUBLE_CLICK Message ------------ */
+/*
 static int DoubleClickMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     if (WindowMoving || WindowSizing)
@@ -239,8 +242,10 @@ static int DoubleClickMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return TRUE;
 }
+*/
 
 /* ------------ ADDTEXT Message -------------- */
+/*
 static int AddTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int rtn = BaseWndProc(LISTBOX, wnd, ADDTEXT, p1, p2);
@@ -252,6 +257,7 @@ static int AddTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 #endif
     return rtn;
 }
+*/
 
 /* --------- GETTEXT Message ------------ */
 static void GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -269,32 +275,32 @@ static void GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 int cListBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
-        case CREATE_WINDOW:
-            BaseWndProc(LISTBOX, wnd, msg, p1, p2);
-            wnd->selection = -1;
+//        case CREATE_WINDOW:
+//            BaseWndProc(LISTBOX, wnd, msg, p1, p2);
+//            wnd->selection = -1;
 #ifdef INCLUDE_EXTENDEDSELECTIONS
-            wnd->AnchorPoint = -1;
+//            wnd->AnchorPoint = -1;
 #endif
-            return TRUE;
+//            return TRUE;
         case KEYBOARD:
             if (WindowMoving || WindowSizing)
                 break;
             if (KeyboardMsg(wnd, p1, p2))
                 return TRUE;
             break;
-        case LEFT_BUTTON:
-            if (LeftButtonMsg(wnd, p1, p2) == TRUE)
-                return TRUE;
-            break;
-        case DOUBLE_CLICK:
-            if (DoubleClickMsg(wnd, p1, p2))
-                return TRUE;
-            break;
-        case BUTTON_RELEASED:
-            if (WindowMoving || WindowSizing || VSliding)
-                break;
-            py = -1;
-            return TRUE;
+//        case LEFT_BUTTON:
+//            if (LeftButtonMsg(wnd, p1, p2) == TRUE)
+//                return TRUE;
+//            break;
+//        case DOUBLE_CLICK:
+//            if (DoubleClickMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
+//        case BUTTON_RELEASED:
+//            if (WindowMoving || WindowSizing || VSliding)
+//                break;
+//            py = -1;
+//            return TRUE;
         case ADDTEXT:
             return AddTextMsg(wnd, p1, p2);
         case LB_GETTEXT:
