@@ -7,15 +7,126 @@ const rect = @import("Rect.zig");
 
 var py:c_int = -1;    // the previous y mouse coordinate
 
+// ----- Test for extended selections in the listbox -----
+fn TestExtended(win:*Window, p2:df.PARAM) void {
+    // EXTENDEDSELECTIONS
+    _ = win;
+    _ = p2;
+//    if (isMultiLine(wnd) && !wnd->AddMode &&
+//            !((int) p2 & (LEFTSHIFT | RIGHTSHIFT)))    {
+//        if (wnd->SelectCount > 1)    {
+//            ClearAllSelections(wnd);
+//            SendMessage(wnd, PAINT, 0, 0);
+//        }
+//    }
+}
+
+// --------- UP (Up Arrow) Key ------------
+fn UpKey(win:*Window,p2:df.PARAM) void {
+    const wnd = win.win;
+    if (wnd.*.selection > 0)    {
+        if (wnd.*.selection == wnd.*.wtop) {
+            _ = root.zBaseWndProc(df.LISTBOX, win, df.KEYBOARD, df.UP, p2);
+            q.PostMessage(wnd, df.LB_SELECTION, wnd.*.selection-1,
+                if (df.isMultiLine(wnd)>0) p2 else df.FALSE);
+        } else {
+            var newsel:usize = @intCast(wnd.*.selection-1);
+            if (wnd.*.wlines == win.ClientHeight()) {
+                  var last = df.TextLine(wnd, newsel);
+                  while(last[0] == df.LINE) {
+                      // Not sure this is really work.
+                      newsel -= 1;
+                      last = df.TextLine(wnd, newsel);
+                  }
+//                while (*TextLine(wnd, newsel) == LINE)
+//                    --newsel;
+            }
+            q.PostMessage(wnd, df.LB_SELECTION, @intCast(newsel),
+                if (df.isMultiLine(wnd)>0) p2 else df.FALSE); // EXTENDEDSELECTIONS
+        }
+    }
+}
+
+// --------- DN (Down Arrow) Key ------------
+fn DnKey(win:*Window, p2:df.PARAM) void {
+    const wnd = win.win;
+    if (wnd.*.selection < wnd.*.wlines-1) {
+        if (wnd.*.selection == wnd.*.wtop+win.ClientHeight()-1) {
+            _ = root.zBaseWndProc(df.LISTBOX, win, df.KEYBOARD, df.DN, p2);
+            q.PostMessage(wnd, df.LB_SELECTION, wnd.*.selection+1,
+                if (df.isMultiLine(wnd)>0) p2 else df.FALSE);
+        } else {
+            var newsel:usize = @intCast(wnd.*.selection+1);
+            if (wnd.*.wlines == win.ClientHeight()) {
+                  var last = df.TextLine(wnd, newsel);
+                  while(last[0] == df.LINE) {
+                      // Not sure this is really work.
+                      newsel += 1;
+                      last = df.TextLine(wnd, newsel);
+                  }
+//                while (*TextLine(wnd, newsel) == LINE)
+//                    newsel++;
+            }
+            q.PostMessage(wnd, df.LB_SELECTION, @intCast(newsel),
+                if (df.isMultiLine(wnd)>0) p2 else df.FALSE);  // EXTENDEDSELECTIONS
+        }
+    }
+}
+
+// --------- KEYBOARD Message ------------
+fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    switch (p1) {
+//#ifdef INCLUDE_EXTENDEDSELECTIONS
+//        case SHIFT_F8:
+//            AddModeKey(wnd);
+//            return TRUE;
+//#endif
+        df.UP => {
+            TestExtended(win, p2);
+            UpKey(win, p2);
+            return true;
+        },
+        df.DN => {
+            TestExtended(win, p2);
+            DnKey(win, p2);
+            return true;
+        },
+//        case PGUP:
+//        case HOME:
+//            TestExtended(wnd, p2);
+//            HomePgUpKey(wnd, p1, p2);
+//            return TRUE;
+//        case PGDN:
+//        case END:
+//            TestExtended(wnd, p2);
+//            EndPgDnKey(wnd, p1, p2);
+//            return TRUE;
+//#ifdef INCLUDE_EXTENDEDSELECTIONS
+//        case ' ':
+//            SpacebarKey(wnd, p2);
+//            break;
+//#endif
+//        case '\r':
+//            EnterKey(wnd);
+//            return TRUE;
+        else => {
+//            KeyPress(wnd, p1, p2);
+            return if (df.KeyboardMsg(wnd, p1, p2) == df.TRUE) true else false;
+        }
+    }
+    return false;
+}
+
 // ------- LEFT_BUTTON Message --------
-fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) c_int {
+fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     var my:c_int = @intCast(p2 - win.GetTop());
     if (my >= wnd.*.wlines-wnd.*.wtop)
         my = wnd.*.wlines - wnd.*.wtop;
 
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win)) == false) {
-        return df.FALSE;
+        return false;
     }
     if ((wnd.*.wlines > 0) and  (my != py)) {
         const sel:c_int = wnd.*.wtop+my-1;
@@ -33,20 +144,20 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) c_int {
         _ = win.sendMessage(df.LB_SELECTION, sel, df.TRUE);
         py = my;
     }
-    return df.TRUE;
+    return true;
 }
 
 // ------------- DOUBLE_CLICK Message ------------
-fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) c_int {
+fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     if (df.WindowMoving>0 or df.WindowSizing>0)
-        return df.FALSE;
+        return false;
     if (wnd.*.wlines>0) {
         _ = root.zBaseWndProc(df.LISTBOX, win, df.DOUBLE_CLICK, p1, p2);
         if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win)))
             _ = win.sendMessage(df.LB_CHOOSE, wnd.*.selection, 0);
     }
-    return df.TRUE;
+    return true;
 }
 
 // ------------ ADDTEXT Message --------------
@@ -71,18 +182,18 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
             wnd.*.AnchorPoint = -1; // EXTENDEDSELECTIONS
             return df.TRUE;
         },
-//        case KEYBOARD:
-//            if (WindowMoving || WindowSizing)
-//                break;
-//            if (KeyboardMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
+        df.KEYBOARD => {
+            if ((df.WindowMoving == 0) and (df.WindowSizing == 0)) {
+                if (KeyboardMsg(win, p1, p2))
+                    return df.TRUE;
+            }
+        },
         df.LEFT_BUTTON => {
-            if (LeftButtonMsg(win, p1, p2) == df.TRUE)
+            if (LeftButtonMsg(win, p1, p2))
                 return df.TRUE;
         },
         df.DOUBLE_CLICK => {
-            if (DoubleClickMsg(win, p1, p2) > 0)
+            if (DoubleClickMsg(win, p1, p2))
                 return df.TRUE;
         },
         df.BUTTON_RELEASED => {

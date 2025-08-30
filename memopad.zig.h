@@ -78,6 +78,7 @@ extern MENU *ActiveMenu;
 //listbox.c
 void WriteSelection(WINDOW, int, int, RECT *);
 void ChangeSelection(WINDOW, int, int);
+int KeyboardMsg(WINDOW, PARAM, PARAM);
 
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);

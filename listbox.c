@@ -31,6 +31,7 @@ static void AddModeKey(WINDOW wnd)
 #endif
 
 /* --------- UP (Up Arrow) Key ------------ */
+/*
 static void UpKey(WINDOW wnd, PARAM p2)
 {
     if (wnd->selection > 0)    {
@@ -52,8 +53,10 @@ static void UpKey(WINDOW wnd, PARAM p2)
         }
     }
 }
+*/
 
 /* --------- DN (Down Arrow) Key ------------ */
+/*
 static void DnKey(WINDOW wnd, PARAM p2)
 {
     if (wnd->selection < wnd->wlines-1)    {
@@ -75,6 +78,7 @@ static void DnKey(WINDOW wnd, PARAM p2)
         }
     }
 }
+*/
 
 /* --------- HOME and PGUP Keys ------------ */
 static void HomePgUpKey(WINDOW wnd, PARAM p1, PARAM p2)
@@ -159,7 +163,7 @@ static void KeyPress(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* --------- KEYBOARD Message ------------ */
-static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
+int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     switch ((int) p1)    {
 #ifdef INCLUDE_EXTENDEDSELECTIONS
@@ -167,14 +171,14 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
             AddModeKey(wnd);
             return TRUE;
 #endif
-        case UP:
-            TestExtended(wnd, p2);
-            UpKey(wnd, p2);
-            return TRUE;
-        case DN:
-            TestExtended(wnd, p2);
-            DnKey(wnd, p2);
-            return TRUE;
+//        case UP:
+//            TestExtended(wnd, p2);
+//            UpKey(wnd, p2);
+//            return TRUE;
+//        case DN:
+//            TestExtended(wnd, p2);
+//            DnKey(wnd, p2);
+//            return TRUE;
         case PGUP:
         case HOME:
             TestExtended(wnd, p2);
@@ -223,12 +227,12 @@ int cListBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            wnd->AnchorPoint = -1;
 #endif
 //            return TRUE;
-        case KEYBOARD:
-            if (WindowMoving || WindowSizing)
-                break;
-            if (KeyboardMsg(wnd, p1, p2))
-                return TRUE;
-            break;
+//        case KEYBOARD:
+//            if (WindowMoving || WindowSizing)
+//                break;
+//            if (KeyboardMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
 //        case LEFT_BUTTON:
 //            if (LeftButtonMsg(wnd, p1, p2) == TRUE)
 //                return TRUE;
