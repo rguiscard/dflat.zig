@@ -25,6 +25,7 @@ static int ButtonX, ButtonY;
 static int PrevY = -1;
 
 /* ----------- CREATE_WINDOW Message ---------- */
+/*
 static int CreateWindowMsg(WINDOW wnd)
 {
     int rtn = BaseWndProc(EDITBOX, wnd, CREATE_WINDOW, 0, 0);
@@ -36,6 +37,8 @@ static int CreateWindowMsg(WINDOW wnd)
 	SendMessage(wnd, CLEARTEXT, 0, 0);
     return rtn;
 }
+*/
+
 /* ----------- SETTEXT Message ---------- */
 static int SetTextMsg(WINDOW wnd, PARAM p1)
 {
@@ -910,8 +913,10 @@ int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
     switch (msg)    {
+/*
         case CREATE_WINDOW:
             return CreateWindowMsg(wnd);
+*/
         case ADDTEXT:
             return AddTextMsg(wnd, p1, p2);
         case SETTEXT:

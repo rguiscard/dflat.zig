@@ -8,6 +8,7 @@ const box = @import("Box.zig");
 const textbox = @import("TextBox.zig");
 const menubar = @import("MenuBar.zig");
 const listbox = @import("ListBox.zig");
+const editbox = @import("EditBox.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -41,8 +42,7 @@ pub export fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM)
 }
 
 pub export fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cEditBoxProc(wnd, msg, p1, p2);
+    return editbox.EditBoxProc(win, msg, p1, p2);
 }
 
 pub export fn MenuBarProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
