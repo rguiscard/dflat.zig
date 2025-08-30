@@ -13,30 +13,6 @@ var Selecting:bool = false;
 var Cascaders = [_]df.WINDOW{0}**df.MAXCASCADES;
 var casc:usize = 0;
 
-pub export fn get_selecting() c_int {
-    return if(Selecting) df.TRUE else df.FALSE;
-} 
-
-pub export fn set_selecting(val:c_int) void {
-    Selecting = if (val > 0) true else false;
-}
-
-pub export fn menu_get_x1(idx:usize) callconv(.c) isize {
-    return menu[idx].x1;
-}
-
-pub export fn menu_get_x2(idx:usize) callconv(.c) isize {
-    return menu[idx].x2;
-}
-
-pub export fn menu_get_sc(idx:usize) callconv(.c) u8 {
-    return menu[idx].sc;
-}
-
-pub export fn get_mctr() callconv(.c) usize {
-    return mctr;
-}
-
 // ----------- SETFOCUS Message -----------
 fn SetFocusMsg(win:*Window,p1:df.PARAM) c_int {
     const wnd = win.win;
@@ -100,21 +76,150 @@ fn PaintMsg(win:*Window) void {
     if ((df.ActiveMenuBar != null) and (df.ActiveMenuBar.*.ActiveSelection != -1) and
             ((wnd == df.inFocus) or (mwnd != null))) {
 
-        const offset=menu[@intCast(df.ActiveMenuBar.*.ActiveSelection)].x1;
-        const offset1=menu[@intCast(df.ActiveMenuBar.*.ActiveSelection)].x2;
+        const idx:usize = @intCast(df.ActiveMenuBar.*.ActiveSelection);
+        const offset=menu[idx].x1;
+        const offset1=menu[idx].x2;
 
         wnd.*.text[@intCast(offset1)] = 0;
         df.SetReverseColor(wnd);
         df.cPaintMenu(wnd, @intCast(offset), @intCast(offset1), df.ActiveMenuBar.*.ActiveSelection);
 
         if ((mwnd == null) and (wnd == df.inFocus)) {
-            const st = df.ActiveMenu[@intCast(df.ActiveMenuBar.*.ActiveSelection)].StatusText;
+            const st = df.ActiveMenu[idx].StatusText;
             if (st) |txt| {
                 _ = q.SendMessage(Window.GetParent(wnd), df.ADDSTATUS,
                     @intCast(@intFromPtr(txt)), 0);
             }
         }
     }
+}
+
+// ------------ KEYBOARD Message -------------
+fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
+    const wnd = win.win;
+    if ((mwnd == null) and (p1 < 256)) {
+        // ----- search for menu bar shortcut keys ----
+        const c = std.ascii.toLower(@intCast(p1));
+        const a = df.AltConvert(@intCast(p1));
+        for (menu, 0..) |m, idx| {
+            if (((df.inFocus == wnd) and (m.sc == c)) or
+                ((a > 0) and (m.sc == a))) {
+                _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                _ = win.sendMessage(df.MB_SELECTION, @intCast(idx), 0);
+                return;
+            }
+        }
+    }
+    // -------- search for accelerator keys --------
+    for (df.ActiveMenuBar.*.PullDown) |mnu| {
+        if (mnu.Title != null) {
+            if (mnu.PrepMenu) |proc| {
+                proc(df.GetDocFocus(), @constCast(&mnu));
+            }
+            for (mnu.Selections) |pd| {
+                if (pd.SelectionTitle) |_| {
+                    if (pd.Accelerator == p1) {
+                        if (pd.Attrib & df.INACTIVE > 0) {
+                            df.beep();
+                        } else {
+//                            if (pd.Attrib & df.TOGGLE > 0)
+//                                pd.Attrib ^= df.CHECKED;
+                            _ = q.SendMessage(df.GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+                            q.PostMessage(df.GetParent(wnd), df.COMMAND, pd.ActionId, 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+//    MENU *mnu;
+//        int sel;
+//    const mnu = ActiveMenu;
+//-   while (mnu->Title != (void *)-1)    {
+//    while (mnu->Title != NULL)    {
+//        struct PopDown *pd = mnu->Selections;
+//        if (mnu->PrepMenu)
+//            (*(mnu->PrepMenu))(GetDocFocus(), mnu);
+//        while (pd->SelectionTitle != NULL)    {
+//            if (pd->Accelerator == (int) p1)    {
+//                if (pd->Attrib & INACTIVE)
+//                    beep();
+//                else    {
+//                    if (pd->Attrib & TOGGLE)
+//                        pd->Attrib ^= CHECKED;
+//                    SendMessage(GetDocFocus(),
+//                        SETFOCUS, TRUE, 0);
+//                    PostMessage(GetParent(wnd),
+//                        COMMAND, pd->ActionId, 0);
+//                }
+//                return;
+//            }
+//            pd++;
+//        }
+//        mnu++;
+//    }
+//    switch ((int)p1)    {
+//        case F1:
+//            if (ActiveMenu == NULL || ActiveMenuBar == NULL)
+//                                break;
+//                        sel = ActiveMenuBar->ActiveSelection;
+//                        if (sel == -1)  {
+//                        BaseWndProc(MENUBAR, wnd, KEYBOARD, F1, 0);
+//                                return;
+//                        }
+//                        mnu = ActiveMenu+sel;
+//                        if (mwnd == NULL ||
+//                                        mnu->Selections[0].SelectionTitle == NULL) {
+//                DisplayHelp(wnd,mnu->Title);
+//                return;
+//                        }
+//            break;
+//        case '\r':
+//            if (mwnd == NULL &&
+//                    ActiveMenuBar->ActiveSelection != -1)
+//                SendMessage(wnd, MB_SELECTION,
+//                    ActiveMenuBar->ActiveSelection, 0);
+//            break;
+//        case F10:
+//            if (wnd != inFocus && mwnd == NULL)    {
+//                SendMessage(wnd, SETFOCUS, TRUE, 0);
+//                            if ( ActiveMenuBar->ActiveSelection == -1)
+//                                ActiveMenuBar->ActiveSelection = 0;
+//                            SendMessage(wnd, PAINT, 0, 0);
+//                break;
+//            }
+//            /* ------- fall through ------- */
+//        case ESC:
+//            if (inFocus == wnd && mwnd == NULL)    {
+//                ActiveMenuBar->ActiveSelection = -1;
+//                SendMessage(GetDocFocus(),SETFOCUS,TRUE,0);
+//                SendMessage(wnd, PAINT, 0, 0);
+//            }
+//            break;
+//        case FWD:
+//            ActiveMenuBar->ActiveSelection++;
+//            if (ActiveMenuBar->ActiveSelection == get_mctr())
+//                ActiveMenuBar->ActiveSelection = 0;
+//            if (mwnd != NULL)
+//                SendMessage(wnd, MB_SELECTION,
+//                    ActiveMenuBar->ActiveSelection, 0);
+//            else
+//                SendMessage(wnd, PAINT, 0, 0);
+//            break;
+//        case BS:
+//            if (ActiveMenuBar->ActiveSelection == 0 ||
+//                                        ActiveMenuBar->ActiveSelection == -1)
+//                ActiveMenuBar->ActiveSelection = get_mctr();
+//            --ActiveMenuBar->ActiveSelection;
+//            if (mwnd != NULL)
+//                SendMessage(wnd, MB_SELECTION,
+//                    ActiveMenuBar->ActiveSelection, 0);
+//            else
+//                SendMessage(wnd, PAINT, 0, 0);
+//            break;
+//        default:
+//            break;
+//    }
 }
 
 // --------------- LEFT_BUTTON Message ----------
@@ -147,11 +252,11 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
     Selecting = true;
     // should use Menu or Menu* ?
-    const mnu = df.ActiveMenu[@intCast(p1)];
-    if (mnu.PrepMenu) |proc| {
-        proc(df.GetDocFocus(), @constCast(&mnu));
+    const mnu = &df.ActiveMenu[@intCast(p1)];
+    if (mnu.*.PrepMenu) |proc| {
+        proc(df.GetDocFocus(), @constCast(mnu));
     }
-    const wd = df.MenuWidth(@constCast(&mnu.Selections));
+    const wd = df.MenuWidth(@constCast(&mnu.*.Selections));
     if (p2>0) {
         const brd = win.GetRight();
         if (Window.get_zin(mwnd)) |zin| { // assume mwnd exist ?
@@ -174,7 +279,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
     const mwin = Window.create(df.POPDOWNMENU, null,
                 mx, my,
-                df.MenuHeight(@constCast(&mnu.Selections)),
+                df.MenuHeight(@constCast(&mnu.*.Selections)),
                 wd,
                 null,
                 win.win,
@@ -186,8 +291,8 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         _ = win.sendMessage(df.PAINT, 0, 0);
         Selecting = true;
     }
-    if (mnu.Selections[0].SelectionTitle != null)    {
-        _ = mwin.sendMessage(df.BUILD_SELECTIONS, @intCast(@intFromPtr(&mnu)), 0);
+    if (mnu.*.Selections[0].SelectionTitle != null)    {
+        _ = mwin.sendMessage(df.BUILD_SELECTIONS, @intCast(@intFromPtr(mnu)), 0);
         _ = mwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
         _ = mwin.sendMessage(df.SHOW_WINDOW, 0, 0);
     }
@@ -279,9 +384,10 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
             }
             return df.TRUE;
         },
-//        case KEYBOARD:
-//            KeyboardMsg(wnd, p1);
-//            return TRUE;
+        df.KEYBOARD => {
+            KeyboardMsg(win, p1);
+            return df.TRUE;
+        },
         df.LEFT_BUTTON => {
             LeftButtonMsg(win, p1);
             return df.TRUE;

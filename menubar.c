@@ -421,9 +421,9 @@ int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //		    if (mwnd == NULL)
 //				SendMessage(wnd, PAINT, 0, 0);
 //            return TRUE;
-        case KEYBOARD:
-            KeyboardMsg(wnd, p1);
-            return TRUE;
+//        case KEYBOARD:
+//            KeyboardMsg(wnd, p1);
+//            return TRUE;
 //        case LEFT_BUTTON:
 //            LeftButtonMsg(wnd, p1);
 //            return TRUE;
