@@ -8,8 +8,10 @@ const rect = @import("Rect.zig");
 // positions in menu bar & shortcut key value
 var menu = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
 var mctr:usize = 0;
-var mwnd:?df.WINDOW = null;
+var mwnd:df.WINDOW = null;
 var Selecting:bool = false;
+var Cascaders = [_]df.WINDOW{0}**df.MAXCASCADES;
+var casc:usize = 0;
 
 pub export fn get_selecting() c_int {
     return if(Selecting) df.TRUE else df.FALSE;
@@ -90,7 +92,7 @@ fn PaintMsg(win:*Window) void {
     if (Selecting)
         return;
     if (wnd == df.inFocus) {
-        _ = df.SendMessage(Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
+        _ = q.SendMessage(Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
     }
     df.SetStandardColor(wnd);
     df.wputs(wnd, wnd.*.text, 0, 0);
@@ -108,7 +110,7 @@ fn PaintMsg(win:*Window) void {
         if ((mwnd == null) and (wnd == df.inFocus)) {
             const st = df.ActiveMenu[@intCast(df.ActiveMenuBar.*.ActiveSelection)].StatusText;
             if (st) |txt| {
-                _ = df.SendMessage(Window.GetParent(wnd), df.ADDSTATUS,
+                _ = q.SendMessage(Window.GetParent(wnd), df.ADDSTATUS,
                     @intCast(@intFromPtr(txt)), 0);
             }
         }
@@ -130,6 +132,111 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM) void {
                 _ = win.sendMessage(df.MB_SELECTION, i, 0);
             }
             break;
+        }
+    }
+}
+
+// -------------- MB_SELECTION Message --------------
+fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    var mx:c_int = 0;
+    var my:c_int = 0;
+
+    if (p2 == 0) {
+        df.ActiveMenuBar.*.ActiveSelection = -1;
+        _ = win.sendMessage(df.PAINT, 0, 0);
+    }
+    Selecting = true;
+    // should use Menu or Menu* ?
+    const mnu = df.ActiveMenu[@intCast(p1)];
+    if (mnu.PrepMenu) |proc| {
+        proc(df.GetDocFocus(), @constCast(&mnu));
+    }
+    const wd = df.MenuWidth(@constCast(&mnu.Selections));
+    if (p2>0) {
+        const brd = win.GetRight();
+        if (Window.get_zin(mwnd)) |zin| { // assume mwnd exist ?
+            mx = @intCast(zin.GetLeft() + zin.WindowWidth() - 1);
+            if (mx + wd > brd) {
+                mx = @intCast(brd - wd);
+            }
+            my = @intCast(zin.GetTop() + mwnd.*.selection);
+        }
+    } else {
+        var offset = menu[@intCast(p1)].x1 - 4 * p1;
+        if (mwnd != null)
+            _ = q.SendMessage(mwnd, df.CLOSE_WINDOW, 0, 0);
+            df.ActiveMenuBar.*.ActiveSelection = @intCast(p1);
+        if (offset > win.WindowWidth()-wd) {
+            offset = win.WindowWidth()-wd;
+        }
+        mx = @intCast(win.GetLeft()+offset);
+        my = @intCast(win.GetTop()+1);
+    }
+    const mwin = Window.create(df.POPDOWNMENU, null,
+                mx, my,
+                df.MenuHeight(@constCast(&mnu.Selections)),
+                wd,
+                null,
+                win.win,
+                null,
+                df.SHADOW);
+    mwnd = mwin.win;
+    if (p2 == 0) {
+        Selecting = false;
+        _ = win.sendMessage(df.PAINT, 0, 0);
+        Selecting = true;
+    }
+    if (mnu.Selections[0].SelectionTitle != null)    {
+        _ = mwin.sendMessage(df.BUILD_SELECTIONS, @intCast(@intFromPtr(&mnu)), 0);
+        _ = mwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+        _ = mwin.sendMessage(df.SHOW_WINDOW, 0, 0);
+    }
+    Selecting = false;
+}
+
+// --------- COMMAND Message ----------
+fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    if (p1 == df.ID_HELP) {
+        _ = root.zBaseWndProc(df.MENUBAR, win, df.COMMAND, p1, p2);
+        return;
+    }
+    if (df.isCascadedCommand(df.ActiveMenuBar, @intCast(p1))>0) {
+        // FIXME: Cascade menu will show, but command will not be sent.
+        // Could possibly to title is not (void*)-1, but null.
+        //
+        // find the cascaded menu based on command id in p1
+        for(df.ActiveMenuBar.*.PullDown[mctr..], mctr..) |mnu, del| {
+            if ((mnu.CascadeId != -1) and // instead of using -1 for title, check CascadeId.
+                (mnu.CascadeId == p1)) {
+                    if (casc < df.MAXCASCADES) {
+                        Cascaders[casc] = mwnd;
+                        casc += 1;
+                        _ = win.sendMessage(df.MB_SELECTION, @intCast(del), df.TRUE);
+                    }
+                    break;
+            }
+        }
+    } else {
+        if (mwnd) |mm| {
+            _ = q.SendMessage(mm, df.CLOSE_WINDOW, 0, 0);
+        }
+        _ = q.SendMessage(df.GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+        q.PostMessage(Window.GetParent(wnd), df.COMMAND, p1, p2);
+    }
+}
+
+// --------------- CLOSE_POPDOWN Message ---------------
+fn ClosePopdownMsg(win:*Window) void {
+    if (casc > 0) {
+        casc -= 1;
+        _ = q.SendMessage(Cascaders[casc], df.CLOSE_WINDOW, 0, 0);
+    } else {
+        mwnd = null;
+        df.ActiveMenuBar.*.ActiveSelection = -1;
+        if (Selecting == false) {
+            _ = q.SendMessage(df.GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+            _ = win.sendMessage(df.PAINT, 0, 0);
         }
     }
 }
@@ -166,10 +273,12 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
                 return df.FALSE;
             }
         },
-//        case BORDER:
-//                    if (mwnd == NULL)
-//                                SendMessage(wnd, PAINT, 0, 0);
-//            return TRUE;
+        df.BORDER => {
+            if (mwnd == null) {
+                _ = win.sendMessage(df.PAINT, 0, 0);
+            }
+            return df.TRUE;
+        },
 //        case KEYBOARD:
 //            KeyboardMsg(wnd, p1);
 //            return TRUE;
@@ -177,18 +286,20 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
             LeftButtonMsg(win, p1);
             return df.TRUE;
         },
-//        case MB_SELECTION:
-//            SelectionMsg(wnd, p1, p2);
-//            break;
-//        case COMMAND:
-//            CommandMsg(wnd, p1, p2);
-//            return TRUE;
+        df.MB_SELECTION => {
+           SelectionMsg(win, p1, p2);
+        },
+        df.COMMAND => {
+            CommandMsg(win, p1, p2);
+            return df.TRUE;
+        },
         df.INSIDE_WINDOW => {
             return if (rect.InsideRect(@intCast(p1), @intCast(p2), win.WindowRect())) df.TRUE else df.FALSE;
         },
-//        case CLOSE_POPDOWN:
-//            ClosePopdownMsg(wnd);
-//            return TRUE;
+        df.CLOSE_POPDOWN => {
+            ClosePopdownMsg(win);
+            return df.TRUE;
+        },
         df.CLOSE_WINDOW => {
             const rtn = root.zBaseWndProc(df.MENUBAR, win, msg, p1, p2);
             CloseWindowMsg(win);

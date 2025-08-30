@@ -20,7 +20,7 @@ static BOOL Selecting;
 
 static WINDOW Cascaders[MAXCASCADES];
 static int casc;
-static WINDOW GetDocFocus(void);
+WINDOW GetDocFocus(void);
 
 BOOL get_selecting();
 void set_selecting(BOOL val);
@@ -118,6 +118,7 @@ void cPaintMenu(WINDOW wnd, int offset, int offset1, int selection) {
 }
 
 /* ---------- PAINT Message ---------- */
+/*
 void cPaintMsg(WINDOW wnd)
 {
 //	if (Selecting)
@@ -155,6 +156,7 @@ void cPaintMsg(WINDOW wnd)
         }
     }
 }
+*/
 
 /* ------------ KEYBOARD Message ------------- */
 static void KeyboardMsg(WINDOW wnd, PARAM p1)
@@ -415,27 +417,27 @@ int cMenuBarProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //                break;
 //            PaintMsg(wnd);
 //            return FALSE;
-        case BORDER:
-		    if (mwnd == NULL)
-				SendMessage(wnd, PAINT, 0, 0);
-            return TRUE;
+//        case BORDER:
+//		    if (mwnd == NULL)
+//				SendMessage(wnd, PAINT, 0, 0);
+//            return TRUE;
         case KEYBOARD:
             KeyboardMsg(wnd, p1);
             return TRUE;
 //        case LEFT_BUTTON:
 //            LeftButtonMsg(wnd, p1);
 //            return TRUE;
-        case MB_SELECTION:
-            SelectionMsg(wnd, p1, p2);
-            break;
-        case COMMAND:
-            CommandMsg(wnd, p1, p2);
-            return TRUE;
-        case INSIDE_WINDOW:
-            return InsideRect(p1, p2, WindowRect(wnd));
-        case CLOSE_POPDOWN:
-            ClosePopdownMsg(wnd);
-            return TRUE;
+//        case MB_SELECTION:
+//            SelectionMsg(wnd, p1, p2);
+//            break;
+//        case COMMAND:
+//            CommandMsg(wnd, p1, p2);
+//            return TRUE;
+//        case INSIDE_WINDOW:
+//            return InsideRect(p1, p2, WindowRect(wnd));
+//        case CLOSE_POPDOWN:
+//            ClosePopdownMsg(wnd);
+//            return TRUE;
 //        case CLOSE_WINDOW:
 //            rtn = BaseWndProc(MENUBAR, wnd, msg, p1, p2);
 //            CloseWindowMsg(wnd);
@@ -456,7 +458,7 @@ void reset_menubar(WINDOW wnd)
 }
 */
 
-static WINDOW GetDocFocus(void)
+WINDOW GetDocFocus(void)
 {
 	WINDOW wnd = ApplicationWindow;
 	if (wnd != NULL)	{

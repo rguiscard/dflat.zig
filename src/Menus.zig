@@ -128,7 +128,7 @@ fn buildMenu(comptime pulldowns:anytype) [df.MAXPULLDOWNS+1]df.MENU {
         var title:?[]const u8 = undefined;
         var PrepMenu:?*const fn (w: ?*anyopaque, mnu: ?*df.MENU) callconv(.c) void = undefined;
         var StatusText:?[]const u8 = undefined;
-        var CascadeId:c_int = undefined;
+        var CascadeId:c_int = -1;
         title, PrepMenu, StatusText, CascadeId, _ = pulldown;
 
         result[idx] = .{

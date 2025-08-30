@@ -5,7 +5,7 @@
 static struct PopDown *FindCmd(MBAR *mn, int cmd)
 {
     MENU *mnu = mn->PullDown;
-    while (mnu->Title != (void *)-1)    {
+    while (mnu->Title != NULL)    {
         struct PopDown *pd = mnu->Selections;
         while (pd->SelectionTitle != NULL)    {
             if (pd->ActionId == cmd)
