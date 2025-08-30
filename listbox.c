@@ -12,8 +12,8 @@ static void ClearSelection(WINDOW, int);
 #else
 #define TestExtended(w,p) /**/
 #endif
-static void near ChangeSelection(WINDOW, int, int);
-static void near WriteSelection(WINDOW, int, int, RECT *);
+void ChangeSelection(WINDOW, int, int);
+void WriteSelection(WINDOW, int, int, RECT *);
 static BOOL SelectionInWindow(WINDOW, int);
 
 static int py = -1;    /* the previous y mouse coordinate */
@@ -200,65 +200,6 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
     return FALSE;
 }
 
-/* ------- LEFT_BUTTON Message -------- */
-/*
-static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int my = (int) p2 - GetTop(wnd);
-    if (my >= wnd->wlines-wnd->wtop)
-        my = wnd->wlines - wnd->wtop;
-
-    if (!InsideRect(p1, p2, ClientRect(wnd)))
-        return FALSE;
-    if (wnd->wlines && my != py)    {
-        int sel = wnd->wtop+my-1;
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-        int sh = getshift();
-        if (!(sh & (LEFTSHIFT | RIGHTSHIFT)))    {
-            if (!(sh & CTRLKEY))
-                ClearAllSelections(wnd);
-            wnd->AnchorPoint = sel;
-            SendMessage(wnd, PAINT, 0, 0);
-        }
-#endif
-        SendMessage(wnd, LB_SELECTION, sel, TRUE);
-        py = my;
-    }
-    return TRUE;
-}
-*/
-
-/* ------------- DOUBLE_CLICK Message ------------ */
-/*
-static int DoubleClickMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    if (WindowMoving || WindowSizing)
-        return FALSE;
-    if (wnd->wlines)    {
-        RECT rc = ClientRect(wnd);
-        BaseWndProc(LISTBOX, wnd, DOUBLE_CLICK, p1, p2);
-        if (InsideRect(p1, p2, rc))
-            SendMessage(wnd, LB_CHOOSE, wnd->selection, 0);
-    }
-    return TRUE;
-}
-*/
-
-/* ------------ ADDTEXT Message -------------- */
-/*
-static int AddTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int rtn = BaseWndProc(LISTBOX, wnd, ADDTEXT, p1, p2);
-    if (wnd->selection == -1)
-        SendMessage(wnd, LB_SETSELECTION, 0, 0);
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-    if (*(char *)p1 == LISTSELECTOR)
-        wnd->SelectCount++;
-#endif
-    return rtn;
-}
-*/
-
 /* --------- GETTEXT Message ------------ */
 static void GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
@@ -301,56 +242,56 @@ int cListBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //                break;
 //            py = -1;
 //            return TRUE;
-        case ADDTEXT:
-            return AddTextMsg(wnd, p1, p2);
+//        case ADDTEXT:
+//            return AddTextMsg(wnd, p1, p2);
         case LB_GETTEXT:
             GetTextMsg(wnd, p1, p2);
             return TRUE;
-        case CLEARTEXT:
-            wnd->selection = -1;
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-            wnd->AnchorPoint = -1;
-#endif
-            wnd->SelectCount = 0;
-            break;
-        case PAINT:
-            BaseWndProc(LISTBOX, wnd, msg, p1, p2);
-            WriteSelection(wnd, wnd->selection, TRUE, (RECT *)p1);
-            return TRUE;
-		case SETFOCUS:
-            BaseWndProc(LISTBOX, wnd, msg, p1, p2);
-			if ((int)p1)
-            	WriteSelection(wnd, wnd->selection, TRUE, NULL);
-            return TRUE;
-        case SCROLL:
-        case HORIZSCROLL:
-        case SCROLLPAGE:
-        case HORIZPAGE:
-        case SCROLLDOC:
-            BaseWndProc(LISTBOX, wnd, msg, p1, p2);
-            WriteSelection(wnd,wnd->selection,TRUE,NULL);
-            return TRUE;
-        case LB_CHOOSE:
-            SendMessage(GetParent(wnd), LB_CHOOSE, p1, p2);
-            return TRUE;
-        case LB_SELECTION:
-            ChangeSelection(wnd, (int) p1, (int) p2);
-            SendMessage(GetParent(wnd), LB_SELECTION,
-                wnd->selection, 0);
-            return TRUE;
-        case LB_CURRENTSELECTION:
-            return wnd->selection;
-        case LB_SETSELECTION:
-            ChangeSelection(wnd, (int) p1, 0);
-            return TRUE;
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-        case CLOSE_WINDOW:
-            if (isMultiLine(wnd) && wnd->AddMode)    {
-                wnd->AddMode = FALSE;
-                SendMessage(GetParent(wnd), ADDSTATUS, 0, 0);
-            }
-            break;
-#endif
+//        case CLEARTEXT:
+//            wnd->selection = -1;
+//#ifdef INCLUDE_EXTENDEDSELECTIONS
+//            wnd->AnchorPoint = -1;
+//#endif
+//            wnd->SelectCount = 0;
+//            break;
+//        case PAINT:
+//            BaseWndProc(LISTBOX, wnd, msg, p1, p2);
+//            WriteSelection(wnd, wnd->selection, TRUE, (RECT *)p1);
+//            return TRUE;
+//		case SETFOCUS:
+//            BaseWndProc(LISTBOX, wnd, msg, p1, p2);
+//			if ((int)p1)
+//            	WriteSelection(wnd, wnd->selection, TRUE, NULL);
+//            return TRUE;
+//        case SCROLL:
+//        case HORIZSCROLL:
+//        case SCROLLPAGE:
+//        case HORIZPAGE:
+//        case SCROLLDOC:
+//            BaseWndProc(LISTBOX, wnd, msg, p1, p2);
+//            WriteSelection(wnd,wnd->selection,TRUE,NULL);
+//            return TRUE;
+//        case LB_CHOOSE:
+//            SendMessage(GetParent(wnd), LB_CHOOSE, p1, p2);
+//            return TRUE;
+//        case LB_SELECTION:
+//            ChangeSelection(wnd, (int) p1, (int) p2);
+//            SendMessage(GetParent(wnd), LB_SELECTION,
+//                wnd->selection, 0);
+//            return TRUE;
+//        case LB_CURRENTSELECTION:
+//            return wnd->selection;
+//        case LB_SETSELECTION:
+//            ChangeSelection(wnd, (int) p1, 0);
+//            return TRUE;
+//#ifdef INCLUDE_EXTENDEDSELECTIONS
+//        case CLOSE_WINDOW:
+//            if (isMultiLine(wnd) && wnd->AddMode)    {
+//                wnd->AddMode = FALSE;
+//                SendMessage(GetParent(wnd), ADDSTATUS, 0, 0);
+//            }
+//            break;
+//#endif
         default:
             break;
     }
@@ -363,7 +304,7 @@ static BOOL SelectionInWindow(WINDOW wnd, int sel)
             sel < wnd->wtop+ClientHeight(wnd));
 }
 
-static void near WriteSelection(WINDOW wnd, int sel,
+void WriteSelection(WINDOW wnd, int sel,
                                     int reverse, RECT *rc)
 {
     if (isVisible(wnd))
@@ -450,7 +391,7 @@ BOOL ItemSelected(WINDOW wnd, int sel)
 }
 #endif
 
-static void near ChangeSelection(WINDOW wnd,int sel,int shift)
+void ChangeSelection(WINDOW wnd,int sel,int shift)
 {
     if (sel != wnd->selection)    {
 #ifdef INCLUDE_EXTENDEDSELECTIONS

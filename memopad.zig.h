@@ -75,6 +75,10 @@ void cPaintMenu(WINDOW, int, int, int);
 WINDOW GetDocFocus(void);
 extern MENU *ActiveMenu;
 
+//listbox.c
+void WriteSelection(WINDOW, int, int, RECT *);
+void ChangeSelection(WINDOW, int, int);
+
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);
