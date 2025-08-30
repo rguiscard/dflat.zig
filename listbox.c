@@ -30,36 +30,6 @@ static void AddModeKey(WINDOW wnd)
 }
 #endif
 
-/* --------- HOME and PGUP Keys ------------ */
-/*
-static void HomePgUpKey(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    BaseWndProc(LISTBOX, wnd, KEYBOARD, p1, p2);
-    PostMessage(wnd, LB_SELECTION, wnd->wtop,
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-        isMultiLine(wnd) ? p2 :
-#endif
-        FALSE);
-}
-*/
-
-/* --------- END and PGDN Keys ------------ */
-/*
-static void EndPgDnKey(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int bot;
-    BaseWndProc(LISTBOX, wnd, KEYBOARD, p1, p2);
-    bot = wnd->wtop+ClientHeight(wnd)-1;
-    if (bot > wnd->wlines-1)
-        bot = wnd->wlines-1;
-    PostMessage(wnd, LB_SELECTION, bot,
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-        isMultiLine(wnd) ? p2 :
-#endif
-        FALSE);
-}
-*/
-
 #ifdef INCLUDE_EXTENDEDSELECTIONS
 /* --------- Space Bar Key ------------ */
 static void SpacebarKey(WINDOW wnd, PARAM p2)
@@ -82,95 +52,23 @@ static void SpacebarKey(WINDOW wnd, PARAM p2)
 }
 #endif
 
-/* --------- Enter ('\r') Key ------------ */
-static void EnterKey(WINDOW wnd)
-{
-    if (wnd->selection != -1)    {
-        SendMessage(wnd, LB_SELECTION, wnd->selection, TRUE);
-        SendMessage(wnd, LB_CHOOSE, wnd->selection, 0);
-    }
+void ListCopyText(char *dst, char *src) {
+    while (src && *src && *src != '\n')
+        *dst++ = *src++;
+    *dst = '\0';
 }
-
-/* --------- All Other Key Presses ------------ */
-static void KeyPress(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int sel = wnd->selection+1;
-    while (sel < wnd->wlines)    {
-        char *cp = TextLine(wnd, sel);
-        if (cp == NULL)
-            break;
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-        if (isMultiLine(wnd))
-            cp++;
-#endif
-        if (tolower(*cp) == (int)p1)    {
-            SendMessage(wnd, LB_SELECTION, sel,
-                isMultiLine(wnd) ? p2 : FALSE);
-            if (!SelectionInWindow(wnd, sel))    {
-                wnd->wtop = sel-ClientHeight(wnd)+1;
-                SendMessage(wnd, PAINT, 0, 0);
-            }
-            break;
-        }
-        sel++;
-    }
-}
-
-/* --------- KEYBOARD Message ------------ */
-/*
-int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    switch ((int) p1)    {
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-        case SHIFT_F8:
-            AddModeKey(wnd);
-            return TRUE;
-#endif
-//        case UP:
-//            TestExtended(wnd, p2);
-//            UpKey(wnd, p2);
-//            return TRUE;
-//        case DN:
-//            TestExtended(wnd, p2);
-//            DnKey(wnd, p2);
-//            return TRUE;
-//        case PGUP:
-//        case HOME:
-//            TestExtended(wnd, p2);
-//            HomePgUpKey(wnd, p1, p2);
-//            return TRUE;
-//        case PGDN:
-//        case END:
-//            TestExtended(wnd, p2);
-//            EndPgDnKey(wnd, p1, p2);
-//            return TRUE;
-#ifdef INCLUDE_EXTENDEDSELECTIONS
-//        case ' ':
-//            SpacebarKey(wnd, p2);
-//            break;
-#endif
-//        case '\r':
-//            EnterKey(wnd);
-//            return TRUE;
-        default:
-            KeyPress(wnd, p1, p2);
-            break;
-    }
-    return FALSE;
-}
-*/
 
 /* --------- GETTEXT Message ------------ */
+/*
 static void GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     if ((int)p2 != -1)    {
         char *cp1 = (char *)p1;
         char *cp2 = TextLine(wnd, (int)p2);
-        while (cp2 && *cp2 && *cp2 != '\n')
-            *cp1++ = *cp2++;
-        *cp1 = '\0';
+	ListCopyText(cp1, cp2);
     }
 }
+*/
 
 /* --------- LISTBOX Window Processing Module ------------ */
 int cListBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
@@ -204,9 +102,9 @@ int cListBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 //            return TRUE;
 //        case ADDTEXT:
 //            return AddTextMsg(wnd, p1, p2);
-        case LB_GETTEXT:
-            GetTextMsg(wnd, p1, p2);
-            return TRUE;
+//        case LB_GETTEXT:
+//            GetTextMsg(wnd, p1, p2);
+//            return TRUE;
 //        case CLEARTEXT:
 //            wnd->selection = -1;
 //#ifdef INCLUDE_EXTENDEDSELECTIONS

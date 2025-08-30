@@ -240,6 +240,20 @@ fn AddTextMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) c_int {
     return rtn;
 }
 
+// --------- GETTEXT Message ------------
+fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    if (p2 != -1) {
+        const pp1:usize = @intCast(p1);
+        const cp1:[*c]u8 = @ptrFromInt(pp1);
+        const pp2:usize = @intCast(p2);
+        const cp2:[*c]u8 = df.TextLine(wnd, pp2);
+//        char *cp1 = (char *)p1;
+//        char *cp2 = TextLine(wnd, (int)p2);
+        df.ListCopyText(cp1, cp2);
+    }
+}
+
 pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -273,9 +287,10 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
         df.ADDTEXT => {
             return AddTextMsg(win, p1, p2);
         },
-//        case LB_GETTEXT:
-//            GetTextMsg(wnd, p1, p2);
-//            return TRUE;
+        df.LB_GETTEXT => {
+            GetTextMsg(win, p1, p2);
+            return df.TRUE;
+        },
         df.CLEARTEXT => {
             wnd.*.selection = -1;
             wnd.*.AnchorPoint = -1; // EXTENDEDSELECTIONS
@@ -331,7 +346,6 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
             }
         },
         else => {
-            return df.cListBoxProc(wnd, msg, p1, p2);
         }
     }
     return root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
