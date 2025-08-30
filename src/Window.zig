@@ -18,7 +18,8 @@ nextsibling:df.WINDOW = null,  // next sibling
 prevsibling:df.WINDOW = null,  // previous sibling
 
 // ----------------- text box fields ------------------
-//TextPointers:[]c_uint = @constCast(&[_]c_uint{0}),  // -> list of line offsets
+text:?[]u8 = null,   // window text
+textlen:usize = 0,   // text length
 
 // ---------------- dialog box fields ----------------- 
 modal: bool = false, // True if a modeless dialog box

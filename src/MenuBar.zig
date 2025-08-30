@@ -10,28 +10,13 @@ var menu = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
 var mctr:usize = 0;
 var mwnd:?df.WINDOW = null;
 
-// Temporary
-//pub export fn menu_set_x1(idx:usize, val:isize) callconv(.c) void {
-//    menu[idx].x1 = val;
-//    if (mctr < (idx+1))
-//        mctr = idx+1;
-//}
-
 pub export fn menu_get_x1(idx:usize) callconv(.c) isize {
     return menu[idx].x1;
 }
 
-//pub export fn menu_set_x2(idx:usize, val:isize) callconv(.c) void {
-//    menu[idx].x2 = val;
-//}
-
 pub export fn menu_get_x2(idx:usize) callconv(.c) isize {
     return menu[idx].x2;
 }
-
-//pub export fn menu_set_sc(idx:usize, val:u8) callconv(.c) void {
-//    menu[idx].sc = val;
-//}
 
 pub export fn menu_get_sc(idx:usize) callconv(.c) u8 {
     return menu[idx].sc;
@@ -57,16 +42,15 @@ fn SetFocusMsg(win:*Window,p1:df.PARAM) c_int {
 fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
     const wnd = win.win;
     reset_menubar(win);
-    const len = df.strlen(wnd.*.text);
-    if (root.global_allocator.dupe(u8, wnd.*.text[0..len])) |buf| {
+    if (win.text) |buf| {
         const b:[*c]u8 = buf.ptr;
         var offset:isize = 3;
         var idx:usize = 0;
         const pp1:usize = @intCast(p1);
         df.ActiveMenuBar = @ptrFromInt(pp1);
-//        df.ActiveMenu = &df.ActiveMenuBar.*.PullDown;
         for(df.ActiveMenuBar.*.PullDown) |m| {
             if (m.Title) |title| {
+                // FIX: this method realloc buf, may cause memory leak.
                 const rtn = df.cBuildMenu(wnd, title, @intCast(offset), @constCast(&b));
                 if (rtn == df.FALSE) {
                     break;
@@ -79,10 +63,6 @@ fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
                 if (std.mem.indexOfScalar(u8, title[0..l], df.SHORTCUTCHAR)) |pos| {
                     menu[idx].sc = std.ascii.toLower(title[pos+1]);
                 }
-//                cp = strchr(title, SHORTCUTCHAR);
-//                if (cp) {
-//            menu[mctr].sc = tolower(*(cp+1));
-//                menu_set_sc(idx, tolower(*(cp+1)));
                 idx += 1;
                 mctr += 1;
             }
@@ -90,7 +70,7 @@ fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
 
         df.ActiveMenu = &df.ActiveMenuBar.*.PullDown;
         wnd.*.text = b;
-    } else |_| {
+    } else {
         // error 
     }
 }
@@ -123,9 +103,9 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM) void {
 // ---------------- CLOSE_WINDOW Message ---------------
 fn CloseWindowMsg(win:*Window) void {
     const wnd = win.win;
-    if (wnd.*.text) |text| {
-        const len = df.strlen(wnd.*.text);
-        root.global_allocator.free(text[0..len]); // off by 1 ?
+    if (win.text) |text| {
+        root.global_allocator.free(text);
+        win.text = null;
         wnd.*.text = null;
     }
     mctr = 0;
@@ -190,21 +170,23 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
 // ------------- reset the MENUBAR --------------
 fn reset_menubar(win:*Window) void {
     const wnd = win.win;
-    if (wnd.*.text == null) {
-        if (root.global_allocator.alloc(u8, @intCast(df.SCREENWIDTH+5))) |b| {
-            @memset(b, ' ');
-            wnd.*.text = b.ptr;
+    if (win.text) |text|{
+        if (root.global_allocator.realloc(text, @intCast(df.SCREENWIDTH+5))) |b| {
+            win.text= b;
         } else |_| {
             // error
         }
     } else {
-        const len = df.strlen(wnd.*.text); // off by 1?
-        if (root.global_allocator.realloc(wnd.*.text[0..len], @intCast(df.SCREENWIDTH+5))) |b| {
-            @memset(b, ' ');
-            wnd.*.text = b.ptr;
+        if (root.global_allocator.alloc(u8, @intCast(df.SCREENWIDTH+5))) |b| {
+            win.text= b;
         } else |_| {
             // error
         }
+    }
+    if (win.text) |text| {
+        @memset(text, ' ');
+        wnd.*.text = text.ptr;
+        wnd.*.text[text.len-1] = 0;
     }
     wnd.*.text[@intCast(win.WindowWidth())] = 0;
 }
