@@ -330,6 +330,205 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
     }
 }
 
+// ----------- ID_DELETETEXT Command ----------
+fn DeleteTextCmd(win:*Window) void {
+    const wnd = win.win;
+    if (df.TextBlockMarked(wnd)) {
+        const beg_sel:c_uint = @intCast(wnd.*.BlkBegLine);
+        const end_sel:c_uint = @intCast(wnd.*.BlkEndLine);
+        const beg_col:c_uint = @intCast(wnd.*.BlkBegCol);
+        const end_col:c_uint = @intCast(wnd.*.BlkEndCol);
+
+        const bbl=df.TextLine(wnd,beg_sel)+beg_col;
+        const bel=df.TextLine(wnd,end_sel)+end_col;
+        const len:c_int = @intCast(bel - bbl);
+        SaveDeletedText(win, bbl, @intCast(len));
+        wnd.*.TextChanged = df.TRUE;
+        _ = df.memmove(bbl, bel, df.strlen(bel));
+        const bcol:usize = @intCast(wnd.*.BlkBegCol); // could we reuse beg_col?
+        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl-bcol);
+        wnd.*.CurrCol = wnd.*.BlkBegCol;
+        wnd.*.WndRow = wnd.*.BlkBegLine - wnd.*.wtop;
+        if (wnd.*.WndRow < 0) {
+            wnd.*.wtop = wnd.*.BlkBegLine;
+            wnd.*.WndRow = 0;
+        }
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
+        textbox.ClearTextBlock(win);
+        df.BuildTextPointers(wnd);
+    }
+}
+
+// ----------- ID_CLEAR Command ----------
+fn ClearCmd(win:*Window) void {
+    const wnd = win.win;
+    if (df.TextBlockMarked(wnd))    {
+        const beg_sel:c_uint = @intCast(wnd.*.BlkBegLine);
+        const end_sel:c_uint = @intCast(wnd.*.BlkEndLine);
+        const beg_col:c_uint = @intCast(wnd.*.BlkBegCol);
+        const end_col:c_uint = @intCast(wnd.*.BlkEndCol);
+
+        const bbl=df.TextLine(wnd,beg_sel)+beg_col;
+        const bel=df.TextLine(wnd,end_sel)+end_col;
+        const len:c_int = @intCast(bel - bbl);
+        SaveDeletedText(win, bbl, @intCast(len));
+        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl);
+        wnd.*.CurrCol = wnd.*.BlkBegCol;
+        wnd.*.WndRow = wnd.*.BlkBegLine - wnd.*.wtop;
+        if (wnd.*.WndRow < 0) {
+            wnd.*.WndRow = 0;
+            wnd.*.wtop = wnd.*.BlkBegLine;
+        }
+
+//        char *bbl=TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol;
+//        char *bel=TextLine(wnd,wnd->BlkEndLine)+wnd->BlkEndCol;
+//        int len = (int) (bel - bbl);
+//        SaveDeletedText(wnd, bbl, len);
+//        wnd->CurrLine = TextLineNumber(wnd, bbl);
+//        wnd->CurrCol = wnd->BlkBegCol;
+//        wnd->WndRow = wnd->BlkBegLine - wnd->wtop;
+//        if (wnd->WndRow < 0)    {
+//            wnd->WndRow = 0;
+//            wnd->wtop = wnd->BlkBegLine;
+//        }
+
+        // ------ change all text lines in block to \n -----
+        df.TextBlockToN(bbl, bel);
+//        while (bbl < bel)    {
+//            char *cp = strchr(bbl, '\n');
+//            if (cp > bel)
+//                cp = bel;
+//            strcpy(bbl, cp);
+//            bel -= (int) (cp - bbl);
+//            bbl++;
+//        }
+
+        textbox.ClearTextBlock(win);
+        df.BuildTextPointers(wnd);
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
+        wnd.*.TextChanged = df.TRUE;
+
+//        ClearTextBlock(wnd);
+//        BuildTextPointers(wnd);
+//        SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
+//        wnd->TextChanged = TRUE;
+    }
+}
+
+// ----------- ID_UNDO Command ----------
+fn UndoCmd(win:*Window) void {
+    const wnd = win.win;
+    if (win.DeletedText) |text| {
+        _ = df.PasteText(wnd, wnd.*.DeletedText, wnd.*.DeletedLength);
+        root.global_allocator.free(text);
+        win.DeletedText = null;
+        win.*.DeletedText = null;
+        win.DeletedLength = 0;
+        wnd.*.DeletedLength = 0;
+        _ = win.sendMessage(df.PAINT, 0, 0);
+    }
+//    if (wnd->DeletedText != NULL)    {
+//        PasteText(wnd, wnd->DeletedText, wnd->DeletedLength);
+//        free(wnd->DeletedText);
+//        wnd->DeletedText = NULL;
+//        wnd->DeletedLength = 0;
+//        SendMessage(wnd, PAINT, 0, 0);
+//    }
+}
+
+// ----------- ID_PARAGRAPH Command ----------
+fn ParagraphCmd(win:*Window) void {
+    const wnd = win.win;
+    textbox.ClearTextBlock(win);
+
+    df.ParagraphCmd(wnd);
+
+    _ = win.sendMessage(df.PAINT, 0, 0);
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
+    wnd.*.TextChanged = df.TRUE;
+    df.BuildTextPointers(wnd);
+}
+
+// ----------- COMMAND Message ----------
+fn CommandMsg(win:*Window,p1:df.PARAM) bool {
+    const wnd = win.win;
+    switch (p1) {
+        df.ID_SEARCH => {
+            df.SearchText(wnd);
+            return true;
+        },
+        df.ID_REPLACE => {
+            df.ReplaceText(wnd);
+            return true;
+        },
+        df.ID_SEARCHNEXT => {
+            df.SearchNext(wnd);
+            return true;
+        },
+        df.ID_CUT => {
+            df.CopyToClipboard(wnd);
+            _ = win.sendMessage(df.COMMAND, df.ID_DELETETEXT, 0);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            return true;
+        },
+        df.ID_COPY => {
+            df.CopyToClipboard(wnd);
+            textbox.ClearTextBlock(win);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            return true;
+        },
+        df.ID_PASTE => {
+            _ = df.PasteFromClipboard(wnd);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            return true;
+        },
+        df.ID_DELETETEXT => {
+            DeleteTextCmd(win);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            return true;
+        },
+        df.ID_CLEAR => {
+            ClearCmd(win);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            return true;
+        },
+        df.ID_UNDO => {
+            UndoCmd(win);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            return true;
+        },
+        df.ID_PARAGRAPH => {
+            ParagraphCmd(win);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            return true;
+        },
+        else => {
+        }
+    }
+    return false;
+}
+
+// ---------- CLOSE_WINDOW Message -----------
+fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) c_int {
+    const wnd = win.win;
+    _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
+    if (win.DeletedText) |text| {
+        root.global_allocator.free(text);
+
+        // May not necessary. Not in original code
+        wnd.*.DeletedText = null;
+        win.DeletedText = null;
+    }
+
+    const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CLOSE_WINDOW, p1, p2);
+    if (win.text) |text| {
+        root.global_allocator.free(text);
+        win.text = null;
+        win.*.text = null;
+    }
+    return rtn;
+}
+
 pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -402,12 +601,13 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
         df.SHIFT_CHANGED => {
             ShiftChangedMsg(win, p1);
         },
-//        case COMMAND:
-//            if (CommandMsg(wnd, p1))
-//                return TRUE;
-//            break;
-//        case CLOSE_WINDOW:
-//            return CloseWindowMsg(wnd, p1, p2);
+        df.COMMAND => {
+            if (CommandMsg(win, p1))
+                return df.TRUE;
+        },
+        df.CLOSE_WINDOW => {
+            return CloseWindowMsg(win, p1, p2);
+        },
         else => {
             return df.cEditBoxProc(wnd, msg, p1, p2);
         }
@@ -432,4 +632,30 @@ fn StopMarking(win:*Window) void {
             (wnd.*.BlkBegCol > wnd.*.BlkEndCol)) {
         swap(&wnd.*.BlkBegCol, &wnd.*.BlkEndCol);
     }
+}
+
+// ------ save deleted text for the Undo command ------
+fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
+    const wnd = win.win;
+    wnd.*.DeletedLength = @intCast(len);
+    win.DeletedLength = len;
+
+    if (win.DeletedText) |txt| {
+        if (root.global_allocator.realloc(txt, len)) |buf| {
+            win.DeletedText = buf;
+        } else |_| {
+        }
+    } else {
+        if (root.global_allocator.alloc(u8, len)) |buf| {
+            win.DeletedText = buf;
+        } else |_| {
+        }
+    }
+    if (win.DeletedText) |buf| {
+        wnd.*.DeletedText = buf.ptr;
+        @memmove(buf, bbl[0..len]);
+    }
+
+//    wnd->DeletedText=DFrealloc(wnd->DeletedText,len);
+//    memmove(wnd->DeletedText, bbl, len);
 }

@@ -84,7 +84,9 @@ void ListCopyText(char *, char *);
 void StickEnd(WINDOW);
 void ExtendBlock(WINDOW, int, int);
 void SetAnchor(WINDOW, int, int);
-void StopMarking(WINDOW);
+int CommandMsg(WINDOW, PARAM);
+void TextBlockToN(char *, char *);
+void ParagraphCmd(WINDOW);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
 // all wndproc

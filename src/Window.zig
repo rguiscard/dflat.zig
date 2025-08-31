@@ -21,6 +21,10 @@ prevsibling:df.WINDOW = null,  // previous sibling
 text:?[]u8 = null,   // window text
 textlen:usize = 0,   // text length
 
+// ----------------- edit box fields ------------------
+DeletedText:?[]u8 = null,    // for undo
+DeletedLength:usize = 0,     // Length of deleted field
+
 // ---------------- dialog box fields ----------------- 
 modal: bool = false, // True if a modeless dialog box
 
