@@ -4,8 +4,15 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
+const textbox = @import("TextBox.zig");
 
+// -------- local variables --------
+var KeyBoardMarking = false;
+var ButtonDown = false;
 var TextMarking = false;
+var ButtonX:c_int = 0;
+var ButtonY:c_int = 0;
+var PrevY:c_int = -1;
 
 fn EditBufLen(win:*Window) c_uint {
     const wnd = win.win;
@@ -197,6 +204,132 @@ fn HorizPageMsg(win:*Window, p1:df.PARAM) c_int {
     return rtn;
 }
 
+// ----------- LEFT_BUTTON Message ---------- 
+fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    var MouseX:c_int = @intCast(p1 - win.GetClientLeft());
+    var MouseY:c_int = @intCast(p2 - win.GetClientTop());
+    const rc = rect.ClientRect(win);
+    if (KeyBoardMarking)
+        return true;
+    if (df.WindowMoving>0 or df.WindowSizing>0)
+        return false;
+
+    if (TextMarking) {
+        if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false) {
+            var x = MouseX;
+            var y = MouseY;
+            var dir = df.FALSE;
+            var msg:df.MESSAGE = 0;
+            if (p2 == win.GetTop()) {
+                y += 1;
+                dir = df.FALSE;
+                msg = df.SCROLL;
+            } else if (p2 == win.GetBottom()) {
+                y -= 1;
+                dir = df.TRUE;
+                msg = df.SCROLL;
+            } else if (p1 == win.GetLeft()) {
+                x -= 1;
+                dir = df.FALSE;
+                msg = df.HORIZSCROLL;
+            } else if (p1 == win.GetRight()) {
+                x += 1;
+                dir = df.TRUE;
+                msg = df.HORIZSCROLL;
+            }
+            if (msg != 0)   {
+                if (win.sendMessage(msg, dir, 0)>0) {
+                    df.ExtendBlock(wnd, x, y);
+                }
+                _ = win.sendMessage(df.PAINT, 0, 0);
+            }
+        }
+        return true;
+    }
+    if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false)
+        return false;
+    if (df.TextBlockMarked(wnd)) {
+        textbox.ClearTextBlock(win);
+        _ = win.sendMessage(df.PAINT, 0, 0);
+    }
+    if (wnd.*.wlines>0) {
+        if (MouseY > wnd.*.wlines-1)
+            return true;
+        const sel:c_uint = @intCast(MouseY+wnd.*.wtop);
+        const lp = df.TextLine(wnd, sel);
+        const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
+
+        MouseX = @min(MouseX, len);
+        if (MouseX < wnd.*.wleft) {
+            MouseX = 0;
+            _ = win.sendMessage(df.KEYBOARD, df.HOME, 0);
+        }
+        ButtonDown = true;
+        ButtonX = MouseX;
+        ButtonY = MouseY;
+    } else {
+        MouseX = 0;
+        MouseY = 0;
+    }
+    wnd.*.WndRow = MouseY;
+    wnd.*.CurrLine = MouseY+wnd.*.wtop;
+
+    if (df.isMultiLine(wnd)>0 or
+        ((df.TextBlockMarked(wnd) == false) and
+            (MouseX+wnd.*.wleft < df.strlen(wnd.*.text)))) {
+        wnd.*.CurrCol = @intCast(MouseX+wnd.*.wleft);
+    }
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
+    return true;
+}
+
+// ----------- MOUSE_MOVED Message ----------
+fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    const MouseX:c_int = @intCast(p1 - win.GetClientLeft());
+    const MouseY:c_int = @intCast(p2 - win.GetClientTop());
+    var rc = rect.ClientRect(win);
+    if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false)
+        return false;
+    if (MouseY > wnd.*.wlines-1)
+        return false;
+    if (ButtonDown) {
+        df.SetAnchor(wnd, @intCast(ButtonX+wnd.*.wleft), @intCast(ButtonY+wnd.*.wtop));
+        TextMarking = true;
+        rc = win.WindowRect();
+        _ = q.SendMessage(null,df.MOUSE_TRAVEL,@intCast(@intFromPtr(&rc)), 0);
+        ButtonDown = false;
+    }
+    if (TextMarking and !(df.WindowMoving>0 or df.WindowSizing>0)) {
+        df.ExtendBlock(wnd, MouseX, MouseY);
+        return true;
+    }
+    return false;
+}
+
+// ----------- BUTTON_RELEASED Message ----------
+fn ButtonReleasedMsg(win:*Window) bool {
+    ButtonDown = false;
+    if (TextMarking and !(df.WindowMoving>0 or df.WindowSizing>0)) {
+        // release the mouse ouside the edit box
+        _ = q.SendMessage(null, df.MOUSE_TRAVEL, 0, 0);
+        StopMarking(win);
+        return true;
+    }
+    PrevY = -1;
+    return false;
+}
+
+// ----------- SHIFT_CHANGED Message ----------
+fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
+    const v = p1 & (df.LEFTSHIFT | df.RIGHTSHIFT);
+    if ((v == 0) and KeyBoardMarking) {
+        StopMarking(win);
+        KeyBoardMarking = false;
+    }
+}
+
 pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -250,25 +383,25 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
         df.HORIZPAGE => {
             return HorizPageMsg(win, p1);
         },
-//        case LEFT_BUTTON:
-//            if (LeftButtonMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
-//        case MOUSE_MOVED:
-//            if (MouseMovedMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
-//        case BUTTON_RELEASED:
-//            if (ButtonReleasedMsg(wnd))
-//                return TRUE;
-//            break;
+        df.LEFT_BUTTON => {
+            if (LeftButtonMsg(win, p1, p2))
+                return df.TRUE;
+        },
+        df.MOUSE_MOVED => {
+            if (MouseMovedMsg(win, p1, p2))
+                return df.TRUE;
+        },
+        df.BUTTON_RELEASED => {
+            if (ButtonReleasedMsg(win))
+                return df.TRUE;
+        },
 //        case KEYBOARD:
 //            if (KeyboardMsg(wnd, p1, p2))
 //                return TRUE;
 //            break;
-//        case SHIFT_CHANGED:
-//            ShiftChangedMsg(wnd, p1);
-//            break;
+        df.SHIFT_CHANGED => {
+            ShiftChangedMsg(win, p1);
+        },
 //        case COMMAND:
 //            if (CommandMsg(wnd, p1))
 //                return TRUE;
@@ -280,4 +413,23 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
         }
     }
     return root.zBaseWndProc(df.EDITBOX, win, msg, p1, p2);
+}
+
+fn swap(a:*c_int, b:*c_int) void {
+    const x = a.*;
+    a.* = b.*;
+    b.* = x;
+}
+
+fn StopMarking(win:*Window) void {
+    const wnd = win.win;
+    TextMarking = false;
+    if (wnd.*.BlkBegLine > wnd.*.BlkEndLine) {
+        swap(&wnd.*.BlkBegLine, &wnd.*.BlkEndLine);
+        swap(&wnd.*.BlkBegCol, &wnd.*.BlkEndCol);
+    }
+    if ((wnd.*.BlkBegLine == wnd.*.BlkEndLine) and
+            (wnd.*.BlkBegCol > wnd.*.BlkEndCol)) {
+        swap(&wnd.*.BlkBegCol, &wnd.*.BlkEndCol);
+    }
 }

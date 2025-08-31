@@ -82,6 +82,9 @@ void ListCopyText(char *, char *);
 
 // editbox.c
 void StickEnd(WINDOW);
+void ExtendBlock(WINDOW, int, int);
+void SetAnchor(WINDOW, int, int);
+void StopMarking(WINDOW);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
 // all wndproc

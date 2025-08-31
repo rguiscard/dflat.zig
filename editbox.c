@@ -17,81 +17,15 @@ void StickEnd(WINDOW);
 static void NextWord(WINDOW);
 static void PrevWord(WINDOW);
 static void ModTextPointers(WINDOW, int, int);
-static void SetAnchor(WINDOW, int, int);
+void SetAnchor(WINDOW, int, int);
+void ExtendBlock(WINDOW, int, int);
+void StopMarking(WINDOW);
 /* -------- local variables -------- */
 static BOOL KeyBoardMarking, ButtonDown;
 static BOOL TextMarking;
 static int ButtonX, ButtonY;
 static int PrevY = -1;
 
-/* ----------- CREATE_WINDOW Message ---------- */
-/*
-static int CreateWindowMsg(WINDOW wnd)
-{
-    int rtn = BaseWndProc(EDITBOX, wnd, CREATE_WINDOW, 0, 0);
-    wnd->MaxTextLength = MAXTEXTLEN+1;
-    wnd->textlen = EditBufLen(wnd);
-    wnd->InsertMode = TRUE;
-	if (isMultiLine(wnd))
-	    wnd->WordWrapMode = TRUE;
-	SendMessage(wnd, CLEARTEXT, 0, 0);
-    return rtn;
-}
-*/
-
-/* ----------- SETTEXT Message ---------- */
-/*
-static int SetTextMsg(WINDOW wnd, PARAM p1)
-{
-    int rtn = FALSE;
-    if (strlen((char *)p1) <= wnd->MaxTextLength)	{
-        rtn = BaseWndProc(EDITBOX, wnd, SETTEXT, p1, 0);
-	    wnd->TextChanged = FALSE;
-	}
-    return rtn;
-}
-*/
-/* ----------- CLEARTEXT Message ------------ */
-static int ClearTextMsg(WINDOW wnd)
-{
-    int rtn = BaseWndProc(EDITBOX, wnd, CLEARTEXT, 0, 0);
-    unsigned blen = EditBufLen(wnd)+2;
-    wnd->text = DFrealloc(wnd->text, blen);
-    memset(wnd->text, 0, blen);
-    wnd->wlines = 0;
-    wnd->CurrLine = 0;
-    wnd->CurrCol = 0;
-    wnd->WndRow = 0;
-    wnd->wleft = 0;
-    wnd->wtop = 0;
-    wnd->textwidth = 0;
-    wnd->TextChanged = FALSE;
-    return rtn;
-}
-/* ----------- ADDTEXT Message ---------- */
-/*
-static int AddTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int rtn = FALSE;
-    if (strlen((char *)p1)+wnd->textlen <= wnd->MaxTextLength) {
-        rtn = BaseWndProc(EDITBOX, wnd, ADDTEXT, p1, p2);
-        if (rtn != FALSE)    {
-            if (!isMultiLine(wnd))    {
-                wnd->CurrLine = 0;
-                wnd->CurrCol = strlen((char *)p1);
-                if (wnd->CurrCol >= ClientWidth(wnd))    {
-                    wnd->wleft = wnd->CurrCol-ClientWidth(wnd);
-                    wnd->CurrCol -= wnd->wleft;
-                }
-                wnd->BlkEndCol = wnd->CurrCol;
-                SendMessage(wnd, KEYBOARD_CURSOR,
-                                     WndCol, wnd->WndRow);
-            }
-        }
-    }
-    return rtn;
-}
-*/
 /* ----------- GETTEXT Message ---------- */
 static int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
@@ -121,109 +55,9 @@ static int SetTextLengthMsg(WINDOW wnd, unsigned int len)
     }
     return FALSE;
 }
-/* ----------- KEYBOARD_CURSOR Message ---------- */
-static void KeyboardCursorMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    wnd->CurrCol = (int)p1 + wnd->wleft;
-    wnd->WndRow = (int)p2;
-    wnd->CurrLine = (int)p2 + wnd->wtop;
-    if (wnd == inFocus)	{
-		if (CharInView(wnd, (int)p1, (int)p2))
-	        SendMessage(NULL, SHOW_CURSOR,
-				(wnd->InsertMode && !TextMarking), 0);
-    	else
-			SendMessage(NULL, HIDE_CURSOR, 0, 0);
-	}
-}
-/* ----------- SIZE Message ---------- */
-int SizeMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int rtn = BaseWndProc(EDITBOX, wnd, SIZE, p1, p2);
-    if (WndCol > ClientWidth(wnd)-1)
-        wnd->CurrCol = ClientWidth(wnd)-1 + wnd->wleft;
-    if (wnd->WndRow > ClientHeight(wnd)-1)    {
-        wnd->WndRow = ClientHeight(wnd)-1;
-        SetLinePointer(wnd, wnd->WndRow+wnd->wtop);
-    }
-    SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-    return rtn;
-}
-/* ----------- SCROLL Message ---------- */
-static int ScrollMsg(WINDOW wnd, PARAM p1)
-{
-    int rtn = FALSE;
-    if (isMultiLine(wnd))    {
-        rtn = BaseWndProc(EDITBOX,wnd,SCROLL,p1,0);
-        if (rtn != FALSE)    {
-            if (p1)    {
-                /* -------- scrolling up --------- */
-                if (wnd->WndRow == 0)    {
-                    wnd->CurrLine++;
-                    StickEnd(wnd);
-                }
-                else
-                    --wnd->WndRow;
-            }
-            else    {
-                /* -------- scrolling down --------- */
-                if (wnd->WndRow == ClientHeight(wnd)-1)    {
-                    if (wnd->CurrLine > 0)
-                        --wnd->CurrLine;
-                    StickEnd(wnd);
-                }
-                else
-                    wnd->WndRow++;
-            }
-            SendMessage(wnd,KEYBOARD_CURSOR,WndCol,wnd->WndRow);
-        }
-    }
-    return rtn;
-}
-/* ----------- HORIZSCROLL Message ---------- */
-static int HorizScrollMsg(WINDOW wnd, PARAM p1)
-{
-    int rtn = FALSE;
-    char *currchar = CurrChar;
-    if (!(p1 &&
-            wnd->CurrCol == wnd->wleft && *currchar == '\n'))  {
-        rtn = BaseWndProc(EDITBOX, wnd, HORIZSCROLL, p1, 0);
-        if (rtn != FALSE)    {
-            if (wnd->CurrCol < wnd->wleft)
-                wnd->CurrCol++;
-            else if (WndCol == ClientWidth(wnd))
-                --wnd->CurrCol;
-            SendMessage(wnd,KEYBOARD_CURSOR,WndCol,wnd->WndRow);
-        }
-    }
-    return rtn;
-}
-/* ----------- SCROLLPAGE Message ---------- */
-static int ScrollPageMsg(WINDOW wnd, PARAM p1)
-{
-    int rtn = FALSE;
-    if (isMultiLine(wnd))    {
-        rtn = BaseWndProc(EDITBOX, wnd, SCROLLPAGE, p1, 0);
-        SetLinePointer(wnd, wnd->wtop+wnd->WndRow);
-        StickEnd(wnd);
-        SendMessage(wnd, KEYBOARD_CURSOR,WndCol, wnd->WndRow);
-    }
-    return rtn;
-}
-/* ----------- HORIZSCROLLPAGE Message ---------- */
-static int HorizPageMsg(WINDOW wnd, PARAM p1)
-{
-    int rtn = BaseWndProc(EDITBOX, wnd, HORIZPAGE, p1, 0);
-    if ((int) p1 == FALSE)    {
-        if (wnd->CurrCol > wnd->wleft+ClientWidth(wnd)-1)
-            wnd->CurrCol = wnd->wleft+ClientWidth(wnd)-1;
-    }
-    else if (wnd->CurrCol < wnd->wleft)
-        wnd->CurrCol = wnd->wleft;
-    SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-    return rtn;
-}
+
 /* ----- Extend the marked block to the new x,y position ---- */
-static void ExtendBlock(WINDOW wnd, int x, int y)
+void ExtendBlock(WINDOW wnd, int x, int y)
 {
     int bbl, bel;
     int ptop = min(wnd->BlkBegLine, wnd->BlkEndLine);
@@ -248,6 +82,7 @@ static void ExtendBlock(WINDOW wnd, int x, int y)
     }
 }
 /* ----------- LEFT_BUTTON Message ---------- */
+/*
 static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int MouseX = (int) p1 - GetClientLeft(wnd);
@@ -312,7 +147,9 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
     SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
     return TRUE;
 }
+*/
 /* ----------- MOUSE_MOVED Message ---------- */
+/*
 static int MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int MouseX = (int) p1 - GetClientLeft(wnd);
@@ -335,7 +172,9 @@ static int MouseMovedMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
-static void StopMarking(WINDOW wnd)
+*/
+
+void StopMarking(WINDOW wnd)
 {
     TextMarking = FALSE;
     if (wnd->BlkBegLine > wnd->BlkEndLine)    {
@@ -347,11 +186,12 @@ static void StopMarking(WINDOW wnd)
         swap(wnd->BlkBegCol, wnd->BlkEndCol);
 }
 /* ----------- BUTTON_RELEASED Message ---------- */
+/*
 static int ButtonReleasedMsg(WINDOW wnd)
 {
     ButtonDown = FALSE;
     if (TextMarking && !(WindowMoving || WindowSizing))  {
-        /* release the mouse ouside the edit box */
+        // release the mouse ouside the edit box 
         SendMessage(NULL, MOUSE_TRAVEL, 0, 0);
         StopMarking(wnd);
         return TRUE;
@@ -359,6 +199,7 @@ static int ButtonReleasedMsg(WINDOW wnd)
     PrevY = -1;
     return FALSE;
 }
+*/
 /* ---- Process text block keys for multiline text box ---- */
 static void DoMultiLines(WINDOW wnd, int c, PARAM p2)
 {
@@ -953,7 +794,6 @@ int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             return ScrollPageMsg(wnd, p1);
         case HORIZPAGE:
             return HorizPageMsg(wnd, p1);
-*/
         case LEFT_BUTTON:
             if (LeftButtonMsg(wnd, p1, p2))
                 return TRUE;
@@ -966,13 +806,16 @@ int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             if (ButtonReleasedMsg(wnd))
                 return TRUE;
             break;
+*/
         case KEYBOARD:
             if (KeyboardMsg(wnd, p1, p2))
                 return TRUE;
             break;
+/*
         case SHIFT_CHANGED:
             ShiftChangedMsg(wnd, p1);
             break;
+*/
         case COMMAND:
             if (CommandMsg(wnd, p1))
                 return TRUE;
@@ -1134,7 +977,7 @@ static void ModTextPointers(WINDOW wnd, int lineno, int var)
         *((wnd->TextPointers) + lineno++) += var;
 }
 /* ----- set anchor point for marking text block ----- */
-static void SetAnchor(WINDOW wnd, int mx, int my)
+void SetAnchor(WINDOW wnd, int mx, int my)
 {
     ClearTextBlock(wnd);
     /* ------ set the anchor ------ */
