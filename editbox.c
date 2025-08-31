@@ -6,7 +6,6 @@
 #define Ch(c) ((c)&0x7f)
 #define isWhite(c) (Ch(c)==' '||Ch(c)=='\n'||Ch(c)=='\f'||Ch(c)=='\t')
 /* ---------- local prototypes ----------- */
-static void SaveDeletedText(WINDOW, char *, int);
 static void Forward(WINDOW);
 static void Backward(WINDOW);
 static void End(WINDOW);
@@ -20,10 +19,8 @@ static void ModTextPointers(WINDOW, int, int);
 void SetAnchor(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
 /* -------- local variables -------- */
-static BOOL KeyBoardMarking, ButtonDown;
+static BOOL KeyBoardMarking;
 static BOOL TextMarking;
-static int ButtonX, ButtonY;
-static int PrevY = -1;
 
 /* ----------- GETTEXT Message ---------- */
 static int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -39,6 +36,7 @@ static int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
     return FALSE;
 }
 /* ----------- SETTEXTLENGTH Message ---------- */
+/*
 static int SetTextLengthMsg(WINDOW wnd, unsigned int len)
 {
     if (++len < MAXTEXTLEN)    {
@@ -54,6 +52,7 @@ static int SetTextLengthMsg(WINDOW wnd, unsigned int len)
     }
     return FALSE;
 }
+*/
 
 /* ----- Extend the marked block to the new x,y position ---- */
 void ExtendBlock(WINDOW wnd, int x, int y)
@@ -422,58 +421,6 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 		beep();
     return TRUE;
 }
-/* ----------- ID_DELETETEXT Command ---------- */
-static void DeleteTextCmd(WINDOW wnd)
-{
-    if (TextBlockMarked(wnd))    {
-        char *bbl=TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol;
-        char *bel=TextLine(wnd,wnd->BlkEndLine)+wnd->BlkEndCol;
-        int len = (int) (bel - bbl);
-        SaveDeletedText(wnd, bbl, len);
-        wnd->TextChanged = TRUE;
-        memmove(bbl, bel, strlen(bel));
-        wnd->CurrLine = TextLineNumber(wnd, bbl-wnd->BlkBegCol);
-        wnd->CurrCol = wnd->BlkBegCol;
-        wnd->WndRow = wnd->BlkBegLine - wnd->wtop;
-        if (wnd->WndRow < 0)    {
-            wnd->wtop = wnd->BlkBegLine;
-            wnd->WndRow = 0;
-        }
-        SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-        ClearTextBlock(wnd);
-        BuildTextPointers(wnd);
-    }
-}
-/* ----------- ID_CLEAR Command ---------- */
-static void ClearCmd(WINDOW wnd)
-{
-    if (TextBlockMarked(wnd))    {
-        char *bbl=TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol;
-        char *bel=TextLine(wnd,wnd->BlkEndLine)+wnd->BlkEndCol;
-        int len = (int) (bel - bbl);
-        SaveDeletedText(wnd, bbl, len);
-        wnd->CurrLine = TextLineNumber(wnd, bbl);
-        wnd->CurrCol = wnd->BlkBegCol;
-        wnd->WndRow = wnd->BlkBegLine - wnd->wtop;
-        if (wnd->WndRow < 0)    {
-            wnd->WndRow = 0;
-            wnd->wtop = wnd->BlkBegLine;
-        }
-        /* ------ change all text lines in block to \n ----- */
-        while (bbl < bel)    {
-            char *cp = strchr(bbl, '\n');
-            if (cp > bel)
-                cp = bel;
-            strcpy(bbl, cp);
-            bel -= (int) (cp - bbl);
-            bbl++;
-        }
-        ClearTextBlock(wnd);
-        BuildTextPointers(wnd);
-        SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-        wnd->TextChanged = TRUE;
-    }
-}
 
 // ------ change all text lines in block to \n -----
 void TextBlockToN(char *bbl, char *bel) {
@@ -487,17 +434,6 @@ void TextBlockToN(char *bbl, char *bel) {
         }
 }
 
-/* ----------- ID_UNDO Command ---------- */
-static void UndoCmd(WINDOW wnd)
-{
-    if (wnd->DeletedText != NULL)    {
-        PasteText(wnd, wnd->DeletedText, wnd->DeletedLength);
-        free(wnd->DeletedText);
-        wnd->DeletedText = NULL;
-        wnd->DeletedLength = 0;
-        SendMessage(wnd, PAINT, 0, 0);
-    }
-}
 /* ----------- ID_PARAGRAPH Command ---------- */
 void ParagraphCmd(WINDOW wnd)
 {
@@ -577,152 +513,24 @@ void ParagraphCmd(WINDOW wnd)
     BuildTextPointers(wnd);
     */
 }
-/* ----------- COMMAND Message ---------- */
-int CommandMsg(WINDOW wnd, PARAM p1)
-{
-    switch ((int)p1)    {
-#ifdef INCLUDE_EDITMENU
-/*
-		case ID_SEARCH:
-			SearchText(wnd);
-			return TRUE;
-		case ID_REPLACE:
-			ReplaceText(wnd);
-			return TRUE;
-		case ID_SEARCHNEXT:
-			SearchNext(wnd);
-			return TRUE;
-		case ID_CUT:
-			CopyToClipboard(wnd);
-			SendMessage(wnd, COMMAND, ID_DELETETEXT, 0);
-			SendMessage(wnd, PAINT, 0, 0);
-			return TRUE;
-		case ID_COPY:
-			CopyToClipboard(wnd);
-			ClearTextBlock(wnd);
-			SendMessage(wnd, PAINT, 0, 0);
-			return TRUE;
-		case ID_PASTE:
-			PasteFromClipboard(wnd);
-			SendMessage(wnd, PAINT, 0, 0);
-			return TRUE;
-        case ID_DELETETEXT:
-            DeleteTextCmd(wnd);
-			SendMessage(wnd, PAINT, 0, 0);
-            return TRUE;
-        case ID_CLEAR:
-            ClearCmd(wnd);
-			SendMessage(wnd, PAINT, 0, 0);
-            return TRUE;
-        case ID_UNDO:
-            UndoCmd(wnd);
-			SendMessage(wnd, PAINT, 0, 0);
-            return TRUE;
-*/
-        case ID_PARAGRAPH:
-            ParagraphCmd(wnd);
-			SendMessage(wnd, PAINT, 0, 0);
-            return TRUE;
-#endif
-        default:
-            break;
-    }
-    return FALSE;
-}
-/* ---------- CLOSE_WINDOW Message ----------- */
-static int CloseWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-	int rtn;
-    SendMessage(NULL, HIDE_CURSOR, 0, 0);
-    if (wnd->DeletedText != NULL)
-        free(wnd->DeletedText);
-    rtn = BaseWndProc(EDITBOX, wnd, CLOSE_WINDOW, p1, p2);
-	if (wnd->text != NULL)	{
-		free(wnd->text);
-		wnd->text = NULL;
-	}
-    return rtn;
-}
+
 /* ------- Window processing module for EDITBOX class ------ */
 int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
     switch (msg)    {
-/*
-        case CREATE_WINDOW:
-            return CreateWindowMsg(wnd);
-        case ADDTEXT:
-            return AddTextMsg(wnd, p1, p2);
-        case SETTEXT:
-            return SetTextMsg(wnd, p1);
-        case CLEARTEXT:
-			return ClearTextMsg(wnd);
-*/
         case GETTEXT:
             return GetTextMsg(wnd, p1, p2);
-        case SETTEXTLENGTH:
-            return SetTextLengthMsg(wnd, (unsigned) p1);
-/*
-        case KEYBOARD_CURSOR:
-            KeyboardCursorMsg(wnd, p1, p2);
-			return TRUE;
-        case SETFOCUS:
-			if (!(int)p1)
-				SendMessage(NULL, HIDE_CURSOR, 0, 0);
-        case PAINT:
-        case MOVE:
-            rtn = BaseWndProc(EDITBOX, wnd, msg, p1, p2);
-            SendMessage(wnd,KEYBOARD_CURSOR,WndCol,wnd->WndRow);
-            return rtn;
-        case SIZE:
-            return SizeMsg(wnd, p1, p2);
-        case SCROLL:
-            return ScrollMsg(wnd, p1);
-        case HORIZSCROLL:
-            return HorizScrollMsg(wnd, p1);
-        case SCROLLPAGE:
-            return ScrollPageMsg(wnd, p1);
-        case HORIZPAGE:
-            return HorizPageMsg(wnd, p1);
-        case LEFT_BUTTON:
-            if (LeftButtonMsg(wnd, p1, p2))
-                return TRUE;
-            break;
-        case MOUSE_MOVED:
-            if (MouseMovedMsg(wnd, p1, p2))
-                return TRUE;
-            break;
-        case BUTTON_RELEASED:
-            if (ButtonReleasedMsg(wnd))
-                return TRUE;
-            break;
-*/
+//        case SETTEXTLENGTH:
+//            return SetTextLengthMsg(wnd, (unsigned) p1);
         case KEYBOARD:
             if (KeyboardMsg(wnd, p1, p2))
                 return TRUE;
             break;
-/*
-        case SHIFT_CHANGED:
-            ShiftChangedMsg(wnd, p1);
-            break;
-*/
-        case COMMAND:
-            if (CommandMsg(wnd, p1))
-                return TRUE;
-            break;
-        case CLOSE_WINDOW:
-            return CloseWindowMsg(wnd, p1, p2);
         default:
             break;
     }
     return BaseWndProc(EDITBOX, wnd, msg, p1, p2);
-}
-/* ------ save deleted text for the Undo command ------ */
-static void SaveDeletedText(WINDOW wnd, char *bbl, int len)
-{
-    wnd->DeletedLength = len;
-    wnd->DeletedText=DFrealloc(wnd->DeletedText,len);
-    memmove(wnd->DeletedText, bbl, len);
 }
 /* ---- cursor right key: right one character position ---- */
 static void Forward(WINDOW wnd)

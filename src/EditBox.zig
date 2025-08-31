@@ -93,6 +93,44 @@ fn ClearTextMsg(win:*Window) c_int {
     return rtn;
 }
 
+// ----------- SETTEXTLENGTH Message ----------
+fn SetTextLengthMsg(win:*Window, p1:df.PARAM) c_int {
+    const wnd = win.win;
+    var len:c_int = @intCast(p1);
+    len += 1;
+    if (len < df.MAXTEXTLEN) {
+        wnd.*.MaxTextLength = @intCast(len);
+        if (len < win.textlen) {
+            if (win.text) |txt| {
+                if (root.global_allocator.realloc(txt, @intCast(len+2))) |buf| {
+                    win.text = buf;
+                } else |_| {
+                }
+            } else {
+                if (root.global_allocator.alloc(u8, @intCast(len+2))) |buf| {
+                    win.text = buf;
+                } else |_| {
+                }
+            }
+            if (win.text) |txt| {
+                wnd.*.text = txt.ptr;
+                wnd.*.textlen = @intCast(len); // len is less than actually allocated memory
+                win.textlen = @intCast(len);
+                wnd.*.text[@intCast(len)] = 0;
+                wnd.*.text[@intCast(len+1)] = 0;
+                df.BuildTextPointers(wnd);
+            }
+//            wnd->text=DFrealloc(wnd->text, len+2);
+//            wnd->textlen = len;
+//            *((wnd->text)+len) = '\0';
+//            *((wnd->text)+len+1) = '\0';
+//            BuildTextPointers(wnd);
+        }
+        return df.TRUE;
+    }
+    return df.FALSE;
+}
+
 // ----------- KEYBOARD_CURSOR Message ----------
 fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
@@ -546,8 +584,9 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
         },
 //        case GETTEXT:
 //            return GetTextMsg(wnd, p1, p2);
-//        case SETTEXTLENGTH:
-//            return SetTextLengthMsg(wnd, (unsigned) p1);
+        df.SETTEXTLENGTH => {
+            return SetTextLengthMsg(win, p1);
+        },
         df.KEYBOARD_CURSOR => {
             KeyboardCursorMsg(win, p1, p2);
             return df.TRUE;
