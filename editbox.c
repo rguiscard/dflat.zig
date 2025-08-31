@@ -13,7 +13,7 @@ static void End(WINDOW);
 static void Home(WINDOW);
 static void Downward(WINDOW);
 static void Upward(WINDOW);
-static void StickEnd(WINDOW);
+void StickEnd(WINDOW);
 static void NextWord(WINDOW);
 static void PrevWord(WINDOW);
 static void ModTextPointers(WINDOW, int, int);
@@ -943,7 +943,6 @@ int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             rtn = BaseWndProc(EDITBOX, wnd, msg, p1, p2);
             SendMessage(wnd,KEYBOARD_CURSOR,WndCol,wnd->WndRow);
             return rtn;
-*/
         case SIZE:
             return SizeMsg(wnd, p1, p2);
         case SCROLL:
@@ -954,6 +953,7 @@ int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             return ScrollPageMsg(wnd, p1);
         case HORIZPAGE:
             return HorizPageMsg(wnd, p1);
+*/
         case LEFT_BUTTON:
             if (LeftButtonMsg(wnd, p1, p2))
                 return TRUE;
@@ -1008,7 +1008,7 @@ static void Forward(WINDOW wnd)
     }
 }
 /* ----- stick the moving cursor to the end of the line ---- */
-static void StickEnd(WINDOW wnd)
+void StickEnd(WINDOW wnd)
 {
     char *cp = TextLine(wnd, wnd->CurrLine);
     char *cp1 = strchr(cp, '\n');

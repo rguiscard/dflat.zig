@@ -12,6 +12,11 @@ fn EditBufLen(win:*Window) c_uint {
     return if (df.isMultiLine(wnd)>0) df.EDITLEN else df.ENTRYLEN;
 }
 
+fn WndCol(win:*Window) c_int {
+    const wnd = win.win;
+    return wnd.*.CurrCol-wnd.*.wleft;
+}
+
 // ----------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) c_int {
     const wnd = win.win;
@@ -43,7 +48,7 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) c_int {
                 }
                 wnd.*.BlkEndCol = wnd.*.CurrCol;
                 _ = win.sendMessage(df.KEYBOARD_CURSOR,
-                                     @intCast(wnd.*.CurrCol-wnd.*.wleft), wnd.*.WndRow); // WndCol
+                                     @intCast(WndCol(win)), wnd.*.WndRow); // WndCol
             }
         }
     }
@@ -97,6 +102,101 @@ fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
 }
 
+// ----------- SIZE Message ----------
+fn SizeMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) c_int {
+    const wnd = win.win;
+    const rtn = root.zBaseWndProc(df.EDITBOX, win, df.SIZE, p1, p2);
+    if (WndCol(win) > win.ClientWidth()-1) {
+        wnd.*.CurrCol = @intCast(win.ClientWidth()-1 + wnd.*.wleft);
+    }
+    if (wnd.*.WndRow > win.ClientHeight()-1) {
+        wnd.*.WndRow = @intCast(win.ClientHeight()-1);
+        wnd.*.CurrLine = wnd.*.WndRow+wnd.*.wtop;
+    }
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
+    return rtn;
+}
+
+// ----------- SCROLL Message ----------
+fn ScrollMsg(win:*Window, p1:df.PARAM) c_int {
+    const wnd = win.win;
+    var rtn = df.FALSE;
+    if (df.isMultiLine(wnd)>0) {
+        rtn = root.zBaseWndProc(df.EDITBOX,win,df.SCROLL,p1,0);
+        if (rtn != df.FALSE) {
+            if (p1>0) {
+                // -------- scrolling up ---------
+                if (wnd.*.WndRow == 0)    {
+                    wnd.*.CurrLine += 1;
+                    df.StickEnd(wnd);
+                } else {
+                    wnd.*.WndRow -= 1;
+                }
+            } else {
+                // -------- scrolling down ---------
+                if (wnd.*.WndRow == win.ClientHeight()-1)    {
+                    if (wnd.*.CurrLine > 0) {
+                        wnd.*.CurrLine -= 1;
+                    }
+                    df.StickEnd(wnd);
+                } else {
+                    wnd.*.WndRow += 1;
+                }
+            }
+            _ = win.sendMessage(df.KEYBOARD_CURSOR,@intCast(WndCol(win)),@intCast(wnd.*.WndRow));
+        }
+    }
+    return rtn;
+}
+
+// ----------- HORIZSCROLL Message ----------
+fn HorizScrollMsg(win:*Window, p1:df.PARAM) c_int {
+    const wnd = win.win;
+    var rtn = df.FALSE;
+//    char *currchar = CurrChar;
+    const curr_char = df.zCurrChar(wnd);
+    if (((p1>0) and (wnd.*.CurrCol == wnd.*.wleft) and
+               (curr_char[0] == '\n')) == false)  {
+        rtn = root.zBaseWndProc(df.EDITBOX, win, df.HORIZSCROLL, p1, 0);
+        if (rtn == df.TRUE) {
+            if (wnd.*.CurrCol < wnd.*.wleft) {
+                wnd.*.CurrCol += 1;
+            } else if (WndCol(win) == win.ClientWidth()) {
+                wnd.*.CurrCol -= 1;
+            }
+            _ = win.sendMessage(df.KEYBOARD_CURSOR,@intCast(WndCol(win)),@intCast(wnd.*.WndRow));
+        }
+    }
+    return rtn;
+}
+
+// ----------- SCROLLPAGE Message ----------
+fn ScrollPageMsg(win:*Window,p1:df.PARAM) c_int {
+    const wnd = win.win;
+    var rtn = df.FALSE;
+    if (df.isMultiLine(wnd)>0)    {
+        rtn = root.zBaseWndProc(df.EDITBOX, win, df.SCROLLPAGE, p1, 0);
+//        SetLinePointer(wnd, wnd->wtop+wnd->WndRow);
+        wnd.*.CurrLine = wnd.*.wtop+wnd.*.WndRow;
+        df.StickEnd(wnd);
+        _ = win.sendMessage(df.KEYBOARD_CURSOR,@intCast(WndCol(win)), @intCast(wnd.*.WndRow));
+    }
+    return rtn;
+}
+// ----------- HORIZSCROLLPAGE Message ----------
+fn HorizPageMsg(win:*Window, p1:df.PARAM) c_int {
+    const wnd = win.win;
+    const rtn = root.zBaseWndProc(df.EDITBOX, win, df.HORIZPAGE, p1, 0);
+    if (p1 == df.FALSE) {
+        if (wnd.*.CurrCol > wnd.*.wleft+win.ClientWidth()-1)
+            wnd.*.CurrCol = @intCast(wnd.*.wleft+win.ClientWidth()-1);
+    } else if (wnd.*.CurrCol < wnd.*.wleft) {
+        wnd.*.CurrCol = wnd.*.wleft;
+    }
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
+    return rtn;
+}
+
 pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
     switch (msg) {
@@ -135,16 +235,21 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
             _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(wnd.*.CurrCol-wnd.*.wleft), wnd.*.WndRow);
             return rtn;
         },
-//        case SIZE:
-//            return SizeMsg(wnd, p1, p2);
-//        case SCROLL:
-//            return ScrollMsg(wnd, p1);
-//        case HORIZSCROLL:
-//            return HorizScrollMsg(wnd, p1);
-//        case SCROLLPAGE:
-//            return ScrollPageMsg(wnd, p1);
-//        case HORIZPAGE:
-//            return HorizPageMsg(wnd, p1);
+        df.SIZE => {
+            return SizeMsg(win, p1, p2);
+        },
+        df.SCROLL => {
+            return ScrollMsg(win, p1);
+        },
+        df.HORIZSCROLL => {
+            return HorizScrollMsg(win, p1);
+        },
+        df.SCROLLPAGE => {
+            return ScrollPageMsg(win, p1);
+        },
+        df.HORIZPAGE => {
+            return HorizPageMsg(win, p1);
+        },
 //        case LEFT_BUTTON:
 //            if (LeftButtonMsg(wnd, p1, p2))
 //                return TRUE;

@@ -80,6 +80,10 @@ void WriteSelection(WINDOW, int, int, RECT *);
 void ChangeSelection(WINDOW, int, int);
 void ListCopyText(char *, char *);
 
+// editbox.c
+void StickEnd(WINDOW);
+#define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
+
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);
