@@ -40,6 +40,7 @@ static int CreateWindowMsg(WINDOW wnd)
 */
 
 /* ----------- SETTEXT Message ---------- */
+/*
 static int SetTextMsg(WINDOW wnd, PARAM p1)
 {
     int rtn = FALSE;
@@ -49,6 +50,7 @@ static int SetTextMsg(WINDOW wnd, PARAM p1)
 	}
     return rtn;
 }
+*/
 /* ----------- CLEARTEXT Message ------------ */
 static int ClearTextMsg(WINDOW wnd)
 {
@@ -67,6 +69,7 @@ static int ClearTextMsg(WINDOW wnd)
     return rtn;
 }
 /* ----------- ADDTEXT Message ---------- */
+/*
 static int AddTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int rtn = FALSE;
@@ -88,6 +91,7 @@ static int AddTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return rtn;
 }
+*/
 /* ----------- GETTEXT Message ---------- */
 static int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
@@ -916,17 +920,18 @@ int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 /*
         case CREATE_WINDOW:
             return CreateWindowMsg(wnd);
-*/
         case ADDTEXT:
             return AddTextMsg(wnd, p1, p2);
         case SETTEXT:
             return SetTextMsg(wnd, p1);
         case CLEARTEXT:
 			return ClearTextMsg(wnd);
+*/
         case GETTEXT:
             return GetTextMsg(wnd, p1, p2);
         case SETTEXTLENGTH:
             return SetTextLengthMsg(wnd, (unsigned) p1);
+/*
         case KEYBOARD_CURSOR:
             KeyboardCursorMsg(wnd, p1, p2);
 			return TRUE;
@@ -938,6 +943,7 @@ int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             rtn = BaseWndProc(EDITBOX, wnd, msg, p1, p2);
             SendMessage(wnd,KEYBOARD_CURSOR,WndCol,wnd->WndRow);
             return rtn;
+*/
         case SIZE:
             return SizeMsg(wnd, p1, p2);
         case SCROLL:
