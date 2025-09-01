@@ -119,6 +119,106 @@ fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
     }
 }
 
+// ---------- KEYBOARD Message ---------
+fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    if (wnd.*.mnu) |_| {
+        var c:c_uint = @intCast(p1);
+        if (c < 128) { // FIXME unicode
+            c = std.ascii.toLower(@intCast(c));
+        }
+        const a = df.AltConvert(c);
+        for(wnd.*.mnu.*.Selections, 0..) |popdown, sel| {
+            if (popdown.SelectionTitle) |title| {
+                if (std.mem.indexOfScalar(u8, std.mem.span(title), df.SHORTCUTCHAR)) |idx| {
+                    var sc:u8 = title[idx+1];
+                    if (sc < 256) {
+                        sc = std.ascii.toLower(sc);
+                    }
+                    if ((sc == c) or ((a > 0) and (sc == a)) or
+                           (popdown.Accelerator == c)) {
+                        q.PostMessage(wnd, df.LB_SELECTION, @intCast(sel), 0);
+                        q.PostMessage(wnd, df.LB_CHOOSE, @intCast(sel), df.TRUE);
+                        return true;
+                    }
+                }
+            }
+        }
+
+//        struct PopDown *ActivePopDown = wnd->mnu->Selections;
+//        if (ActivePopDown != NULL)    {
+//            int c = (int)p1;
+//            int sel = 0;
+//            int a;
+//            struct PopDown *pd = ActivePopDown;
+//
+//            while (pd->SelectionTitle != NULL)    {
+//                char *cp = strchr(pd->SelectionTitle,
+//                                SHORTCUTCHAR);
+//                if (cp) {
+//                    int sc = tolower(*(cp+1));
+//                    if ((cp && sc == c) ||
+//                            (a && sc == a) ||
+//                                pd->Accelerator == c)    {
+//                        PostMessage(wnd, LB_SELECTION, sel, 0);
+//                        PostMessage(wnd, LB_CHOOSE, sel, TRUE);
+//                        return TRUE;
+//                    }
+//                }
+//                pd++, sel++;
+//            }
+//        }
+    }
+    switch (p1) {
+        df.F1 => {
+            // if (ActivePopDown == NULL)
+            if (wnd.*.mnu.*.Selections[0].SelectionTitle == null) {
+                _ = q.SendMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
+            } else {
+                _ = df.DisplayHelp(wnd, wnd.*.mnu.*.Selections[@intCast(wnd.*.selection)].help);
+//                    (ActivePopDown+wnd->selection)->help);
+            }
+            return true;
+        },
+        df.ESC => {
+            _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
+            return true;
+        },
+        df.FWD,
+        df.BS => {
+            if (df.GetClass(Window.GetParent(wnd)) == df.MENUBAR) {
+                q.PostMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
+            }
+            return true;
+        },
+        df.UP => {
+            if (wnd.*.selection == 0) {
+                if (wnd.*.wlines == win.ClientHeight()) {
+                    q.PostMessage(wnd, df.LB_SELECTION,
+                                    @intCast(wnd.*.wlines-1), df.FALSE);
+                    return true;
+                }
+            }
+        },
+        df.DN => {
+            if (wnd.*.selection == wnd.*.wlines-1) {
+                if (wnd.*.wlines == win.ClientHeight()) {
+                    q.PostMessage(wnd, df.LB_SELECTION, 0, df.FALSE);
+                    return true;
+                }
+            }
+        },
+        df.HOME,
+        df.END,
+        '\r' => {
+        },
+        else => {
+            return true;
+        }
+    }
+    return false;
+}
+
 // ----------- CLOSE_WINDOW Message ----------
 fn CloseWindowMsg(win:*Window) c_int {
     const wnd = win.win;
@@ -175,10 +275,10 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
             LBChooseMsg(win, p1);
             return df.TRUE;
         },
-//        case KEYBOARD:
-//            if (KeyboardMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
+        df.KEYBOARD => {
+            if (KeyboardMsg(win, p1, p2))
+                return df.TRUE;
+        },
         df.CLOSE_WINDOW => {
             return CloseWindowMsg(win);
         },

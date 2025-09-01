@@ -160,22 +160,6 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
     return FALSE;
 }
 
-/* ----------- CLOSE_WINDOW Message ---------- */
-/*
-static int CloseWindowMsg(WINDOW wnd)
-{
-    int rtn;
-	WINDOW pwnd = GetParent(wnd);
-    SendMessage(wnd, RELEASE_MOUSE, 0, 0);
-    SendMessage(wnd, RELEASE_KEYBOARD, 0, 0);
-    SendMessage(NULL, RESTORE_CURSOR, 0, 0);
-	inFocus = wnd->oldFocus;
-    rtn = BaseWndProc(POPDOWNMENU, wnd, CLOSE_WINDOW, 0, 0);
-    SendMessage(pwnd, CLOSE_POPDOWN, 0, 0);
-    return rtn;
-}
-*/
-
 /* - Window processing module for POPDOWNMENU window class - */
 int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
@@ -213,12 +197,10 @@ int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case LB_CHOOSE:
             LBChooseMsg(wnd, p1);
             return TRUE;
-*/
         case KEYBOARD:
             if (KeyboardMsg(wnd, p1, p2))
                 return TRUE;
             break;
-/*
         case CLOSE_WINDOW:
             return CloseWindowMsg(wnd);
 */
