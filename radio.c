@@ -3,43 +3,6 @@
 #include "dflat.h"
 
 static CTLWINDOW *rct[MAXRADIOS];
-
-int cRadioButtonProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
-{
-    int rtn;
-    DBOX *db = GetParent(wnd)->extension;
-    CTLWINDOW *ct = GetControl(wnd);
-    if (ct != NULL)    {
-        switch (msg)    {
-            case SETFOCUS:
-                if (!(int)p1)
-                    SendMessage(NULL, HIDE_CURSOR, 0, 0);
-            case MOVE:
-                rtn = BaseWndProc(RADIOBUTTON,wnd,msg,p1,p2);
-                SetFocusCursor(wnd);
-                return rtn;
-            case PAINT:    {
-                char rb[] = "( )";
-                if (ct->setting)
-                    rb[1] = 7;
-                SendMessage(wnd, CLEARTEXT, 0, 0);
-                SendMessage(wnd, ADDTEXT, (PARAM) rb, 0);
-                SetFocusCursor(wnd);
-                break;
-            }
-            case KEYBOARD:
-                if ((int)p1 != ' ')
-                    break;
-            case LEFT_BUTTON:
-                SetRadioButton(db, ct);
-                break;
-            default:
-                break;
-        }
-    }
-    return BaseWndProc(RADIOBUTTON, wnd, msg, p1, p2);
-}
-
 static BOOL Setting = TRUE;
 
 void SetRadioButton(DBOX *db, CTLWINDOW *ct)
