@@ -74,7 +74,7 @@ pub fn build(b: *std.Build) void {
             "text.c",
             "radio.c",
             "checkbox.c",
-            "spinbutt.c",
+            // "spinbutt.c", // currently not in use. port later.
             // "combobox.c", // currently not in use. port later.
             // "slidebox.c", // currently not in use. port later.
             "fileopen.c",

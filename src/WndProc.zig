@@ -14,6 +14,7 @@ const text = @import("Text.zig");
 const radio = @import("RadioButton.zig");
 const checkbox = @import("CheckBox.zig");
 const statusbar = @import("StatusBar.zig");
+const popdown = @import("PopDown.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -55,8 +56,7 @@ pub export fn MenuBarProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM)
 }
 
 pub export fn PopDownProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cPopDownProc(wnd, msg, p1, p2);
+    return popdown.PopDownProc(win, msg, p1, p2);
 }
 
 pub export fn PictureProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
@@ -100,7 +100,13 @@ pub export fn CheckBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM
 
 pub export fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
-    return df.cSpinButtonProc(wnd, msg, p1, p2);
+    _ = wnd;
+    _ = msg;
+    _ = p1;
+    _ = p2;
+    return df.FALSE;
+// not currently in use. port later.
+//    return df.cSpinButtonProc(wnd, msg, p1, p2);
 }
 
 pub export fn HelpBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
