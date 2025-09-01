@@ -68,7 +68,6 @@ pub fn build(b: *std.Build) void {
             "listbox.c",
             "editbox.c",
             "editor.c",
-            "statbar.c",
 
             "dialbox.c",
             "msgbox.c",

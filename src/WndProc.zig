@@ -13,6 +13,7 @@ const button = @import("Button.zig");
 const text = @import("Text.zig");
 const radio = @import("RadioButton.zig");
 const checkbox = @import("CheckBox.zig");
+const statusbar = @import("StatusBar.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -108,8 +109,7 @@ pub export fn HelpBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM)
 }
 
 pub export fn StatusBarProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cStatusBarProc(wnd, msg, p1, p2);
+    return statusbar.StatusBarProc(win, msg, p1, p2);
 }
 
 pub export fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
