@@ -95,6 +95,9 @@ int ScrollingKey(WINDOW, int, PARAM);
 int GetTextMsg(WINDOW, PARAM, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
+// text.c
+void drawText(WINDOW);
+
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);

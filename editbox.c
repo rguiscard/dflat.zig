@@ -121,13 +121,7 @@ int ScrollingKey(WINDOW wnd, int c, PARAM p2)
         default:
             return FALSE;
     }
-    /*
-    if (!KeyBoardMarking && TextBlockMarked(wnd))    {
-        ClearTextBlock(wnd);
-        SendMessage(wnd, PAINT, 0, 0);
-    }
-    SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-    */
+
     return TRUE;
 }
 /* -------------- Del key ---------------- */
@@ -405,21 +399,6 @@ void ParagraphCmd(WINDOW wnd)
         wnd->wtop = fl;
     wnd->WndRow = fl - wnd->wtop;
 }
-
-/* ------- Window processing module for EDITBOX class ------ */
-/*
-int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
-{
-    int rtn;
-    switch (msg)    {
-        case GETTEXT:
-            return GetTextMsg(wnd, p1, p2);
-        default:
-            break;
-    }
-    return BaseWndProc(EDITBOX, wnd, msg, p1, p2);
-}
-*/
 
 /* ---- cursor right key: right one character position ---- */
 static void Forward(WINDOW wnd)

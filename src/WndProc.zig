@@ -9,6 +9,8 @@ const textbox = @import("TextBox.zig");
 const menubar = @import("MenuBar.zig");
 const listbox = @import("ListBox.zig");
 const editbox = @import("EditBox.zig");
+const button = @import("Button.zig");
+const text = @import("Text.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -67,8 +69,7 @@ pub export fn BoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) cal
 }
 
 pub export fn ButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cButtonProc(wnd, msg, p1, p2);
+    return button.ButtonProc(win, msg, p1, p2);
 }
 
 pub export fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
@@ -83,8 +84,7 @@ pub export fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c
 }
 
 pub export fn TextProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cTextProc(wnd, msg, p1, p2);
+    return text.TextProc(win, msg, p1, p2);
 }
 
 pub export fn RadioButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
