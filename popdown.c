@@ -287,6 +287,7 @@ static int CloseWindowMsg(WINDOW wnd)
 int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
+/*
         case CREATE_WINDOW:
             return CreateWindowMsg(wnd);
         case LEFT_BUTTON:
@@ -303,6 +304,7 @@ int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             if (ButtonReleasedMsg(wnd, p1, p2))
                 return TRUE;
             break;
+*/
         case BUILD_SELECTIONS:
             wnd->mnu = (void *) p1;
             wnd->selection = wnd->mnu->Selection;
