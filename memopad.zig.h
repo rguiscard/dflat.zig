@@ -53,9 +53,10 @@ extern BOOL AltDown;
 void cDisplay(WINDOW, PARAM, PARAM);
 
 // textbox.c
-BOOL AddTextMsg(WINDOW, char *);
+//BOOL AddTextMsg(WINDOW, char *);
 void DeleteTextMsg(WINDOW, int);
-void InsertTextMsg(WINDOW, char *, int);
+//void InsertTextMsg(WINDOW, char *, int);
+void InsertTextAt(WINDOW, char *, int);
 void CloseWindowMsg(WINDOW);
 void ComputeWindowTop(WINDOW);
 void ComputeWindowLeft(WINDOW);

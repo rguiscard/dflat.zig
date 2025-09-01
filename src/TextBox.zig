@@ -75,6 +75,17 @@ fn AddTextMsg(win:*Window, txt:[]const u8) c_int {
     return df.FALSE;
 }
 
+// ------------ INSERTTEXT Message --------------
+fn InsertTextMsg(win:*Window, txt:[]const u8, lno:c_int) void {
+    const wnd = win.win;
+    if (AddTextMsg(win, txt)>0) {
+        df.InsertTextAt(wnd, @constCast(txt.ptr), lno);
+        df.BuildTextPointers(wnd);
+        wnd.*.TextChanged = df.TRUE;
+    }
+}
+
+
 // ------------ SETTEXT Message --------------
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
     const wnd = win.win;
@@ -501,7 +512,6 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) cal
             const txt:[*c]u8 = @ptrFromInt(pp1);
             const len = df.strlen(txt);
             const rtn = AddTextMsg(win, txt[0..len]);
-//            const rtn = df.AddTextMsg(wnd, txt);
             return @intCast(rtn);
         },
         df.DELETETEXT => {
@@ -510,7 +520,9 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) cal
         },
         df.INSERTTEXT => {
             const pp1:usize = @intCast(p1);
-            df.InsertTextMsg(wnd, @ptrFromInt(pp1), @intCast(p2));
+            const txt:[*c]u8 = @ptrFromInt(pp1);
+            const len = df.strlen(txt);
+            InsertTextMsg(win, txt[0..len], @intCast(p2));
             return df.TRUE;
         },
         df.SETTEXT => {

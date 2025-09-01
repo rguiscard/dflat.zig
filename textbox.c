@@ -13,14 +13,15 @@ BOOL VSliding;
 //BOOL HSliding;
 
 /* ------------ ADDTEXT Message -------------- */
+/*
 BOOL AddTextMsg(WINDOW wnd, char *txt)
 {
-    /* --- append text to the textbox's buffer --- */
+    // --- append text to the textbox's buffer --- 
     unsigned adln = strlen(txt);
     if (adln > (unsigned)0xfff0)
         return FALSE;
     if (wnd->text != NULL)    {
-        /* ---- appending to existing text ---- */
+        // ---- appending to existing text ---- 
         unsigned txln = strlen(wnd->text);
         if ((long)txln+adln > (unsigned) 0xfff0)
             return FALSE;
@@ -30,13 +31,13 @@ BOOL AddTextMsg(WINDOW wnd, char *txt)
         }
     }
     else    {
-        /* ------ 1st text appended ------ */
+        // ------ 1st text appended ------ 
         wnd->text = DFcalloc(1, adln+3);
         wnd->textlen = adln+1;
     }
 	wnd->TextChanged = TRUE;
     if (wnd->text != NULL)    {
-        /* ---- append the text ---- */
+        // ---- append the text ---- 
         strcat(wnd->text, txt);
         strcat(wnd->text, "\n");
         BuildTextPointers(wnd);
@@ -44,6 +45,7 @@ BOOL AddTextMsg(WINDOW wnd, char *txt)
     }
 	return FALSE;
 }
+*/
 
 /* ------------ DELETETEXT Message -------------- */
 void DeleteTextMsg(WINDOW wnd, int lno)
@@ -59,20 +61,26 @@ void DeleteTextMsg(WINDOW wnd, int lno)
     BuildTextPointers(wnd);
 }
 
+void InsertTextAt(WINDOW wnd, char *txt, int lno) {
+    int len = strlen(txt)+1;
+    char *cp2 = TextLine(wnd, lno);
+    char *cp1 = cp2+len;
+    memmove(cp1, cp2, strlen(cp2)-len);
+    strcpy(cp2, txt);
+    *(cp2+len-1) = '\n';
+}
+
 /* ------------ INSERTTEXT Message -------------- */
+/*
 void InsertTextMsg(WINDOW wnd, char *txt, int lno)
 {
-	if (AddTextMsg(wnd, txt))	{
-		int len = strlen(txt)+1;
-		char *cp2 = TextLine(wnd, lno);
-		char *cp1 = cp2+len;
-		memmove(cp1, cp2, strlen(cp2)-len);
-		strcpy(cp2, txt);
-		*(cp2+len-1) = '\n';
-	    BuildTextPointers(wnd);
-		wnd->TextChanged = TRUE;
-	}
+    if (AddTextMsg(wnd, txt)) {
+        InsertTextAt(wnd, txt, lno);
+        BuildTextPointers(wnd);
+        wnd->TextChanged = TRUE;
+    }
 }
+*/
 
 /* ------------ CLOSE_WINDOW Message -------------- */
 void CloseWindowMsg(WINDOW wnd)
