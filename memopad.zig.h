@@ -98,6 +98,10 @@ int GetTextMsg(WINDOW, PARAM, PARAM);
 // text.c
 void drawText(WINDOW);
 
+// popdown.c
+void PaintMsg(WINDOW);
+void PaintPopDownSelection(WINDOW, struct PopDown *, char*);
+
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);

@@ -6,28 +6,12 @@ static int SelectionWidth(struct PopDown *);
 static int py = -1;
 int CurrentMenuSelection;
 
-/* --------- PAINT Message -------- */
-static void PaintMsg(WINDOW wnd)
-{
-    int wd;
-    unsigned char sep[MAXPOPWIDTH], *cp = sep;
-    unsigned char sel[MAXPOPWIDTH];
+void PaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel) {
     struct PopDown *ActivePopDown;
-    struct PopDown *pd1;
-
-    ActivePopDown = pd1 = wnd->mnu->Selections;
-    wd = MenuWidth(ActivePopDown)-2;
-    while (wd--)
-        *cp++ = LINE;
-    *cp = '\0';
-    SendMessage(wnd, CLEARTEXT, 0, 0);
-    wnd->selection = wnd->mnu->Selection;
-    while (pd1->SelectionTitle != NULL)    {
-        if (*pd1->SelectionTitle == LINE)
-            SendMessage(wnd, ADDTEXT, (PARAM) sep, 0);
-        else    {
+    ActivePopDown = wnd->mnu->Selections;
             int len;
-            memset(sel, '\0', sizeof sel);
+//            memset(sel, '\0', sizeof sel);
+            memset(sel, '\0', MAXPOPWIDTH);
             if (pd1->Attrib & INACTIVE)
                 /* ------ inactive menu selection ----- */
                 sprintf(sel, "%c%c%c",
@@ -68,6 +52,83 @@ static void PaintMsg(WINDOW wnd)
             if (pd1->Attrib & CASCADED)    {
                 /* ---- paint cascaded menu token ---- */
                 if (!pd1->Accelerator)    {
+                    int wd = MenuWidth(ActivePopDown)-len+1;
+                    while (wd--)
+                        strcat(sel, " ");
+                }
+                sel[strlen(sel)-1] = CASCADEPOINTER;
+            }
+            else
+                strcat(sel, " ");
+            strcat(sel, " ");
+            sel[strlen(sel)-1] = RESETCOLOR;
+}
+
+/* --------- PAINT Message -------- */
+void PaintMsg(WINDOW wnd)
+{
+    int wd;
+    unsigned char sep[MAXPOPWIDTH], *cp = sep;
+    unsigned char sel[MAXPOPWIDTH];
+    struct PopDown *ActivePopDown;
+    struct PopDown *pd1;
+
+    ActivePopDown = pd1 = wnd->mnu->Selections;
+    wd = MenuWidth(ActivePopDown)-2;
+    while (wd--)
+        *cp++ = LINE;
+    *cp = '\0';
+    SendMessage(wnd, CLEARTEXT, 0, 0);
+    wnd->selection = wnd->mnu->Selection;
+    while (pd1->SelectionTitle != NULL)    {
+        if (*pd1->SelectionTitle == LINE)
+            SendMessage(wnd, ADDTEXT, (PARAM) sep, 0);
+        else    {
+		PaintPopDownSelection(wnd, pd1, sel);
+                SendMessage(wnd, ADDTEXT, (PARAM) sel, 0);
+		/*
+            int len;
+            memset(sel, '\0', sizeof sel);
+            if (pd1->Attrib & INACTIVE)
+                // ------ inactive menu selection ----- 
+                sprintf(sel, "%c%c%c",
+                    CHANGECOLOR,
+                    wnd->WindowColors [HILITE_COLOR] [FG]|0x80,
+                    wnd->WindowColors [STD_COLOR] [BG]|0x80);
+            strcat(sel, " ");
+            if (pd1->Attrib & CHECKED)
+                // ---- paint the toggle checkmark ---- 
+                sel[strlen(sel)-1] = CHECKMARK;
+            len=CopyCommand(sel+strlen(sel),pd1->SelectionTitle,
+                    pd1->Attrib & INACTIVE,
+                    wnd->WindowColors [STD_COLOR] [BG]);
+            if (pd1->Accelerator)    {
+                // ---- paint accelerator key ---- 
+                int i;
+                int wd1 = 2+SelectionWidth(ActivePopDown) -
+                                    strlen(pd1->SelectionTitle);
+				int key = pd1->Accelerator;
+				if (key > 0 && key < 27)	{
+					// --- CTRL+ key --- 
+                    while (wd1--)
+                        strcat(sel, " ");
+                   	sprintf(sel+strlen(sel), "[Ctrl+%c]", key-1+'A');
+				}
+				else	{
+                	for (i = 0; keys[i].keylabel; i++)    {
+                    	if (keys[i].keycode == key)   {
+                        	while (wd1--)
+                            	strcat(sel, " ");
+                        	sprintf(sel+strlen(sel), "[%s]",
+                            	keys[i].keylabel);
+                        	break;
+                    	}
+					}
+                }
+            }
+            if (pd1->Attrib & CASCADED)    {
+                // ---- paint cascaded menu token ---- 
+                if (!pd1->Accelerator)    {
                     wd = MenuWidth(ActivePopDown)-len+1;
                     while (wd--)
                         strcat(sel, " ");
@@ -79,12 +140,14 @@ static void PaintMsg(WINDOW wnd)
             strcat(sel, " ");
             sel[strlen(sel)-1] = RESETCOLOR;
             SendMessage(wnd, ADDTEXT, (PARAM) sel, 0);
+	    */
         }
         pd1++;
     }
 }
 
 /* ---------- KEYBOARD Message --------- */
+/*
 static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     struct PopDown *ActivePopDown = wnd->mnu->Selections;
@@ -159,6 +222,7 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+*/
 
 /* - Window processing module for POPDOWNMENU window class - */
 int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
@@ -185,13 +249,11 @@ int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             wnd->mnu = (void *) p1;
             wnd->selection = wnd->mnu->Selection;
             break;
-*/
         case PAINT:
             if (wnd->mnu == NULL)
                 return TRUE;
             PaintMsg(wnd);
             break;
-/*
         case BORDER:
             return BorderMsg(wnd);
         case LB_CHOOSE:

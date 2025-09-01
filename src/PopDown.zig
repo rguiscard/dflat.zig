@@ -82,6 +82,30 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
+// --------- PAINT Message --------
+fn PaintMsg(win:*Window) void {
+    const wnd = win.win;
+    var sep = [_]u8{0}**df.MAXPOPWIDTH;
+    var sel = [_]u8{0}**df.MAXPOPWIDTH;
+    const wd:usize = @intCast(df.MenuWidth(&wnd.*.mnu.*.Selections[0])-2);
+    for (0..wd) |idx| {
+        sep[idx] = df.LINE;
+    }
+
+    _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+    wnd.*.selection = wnd.*.mnu.*.Selection;
+    for (wnd.*.mnu.*.Selections) |mnu| {
+        if (mnu.SelectionTitle) |title| {
+            if (title[0] == df.LINE) {
+                _ = win.sendTextMessage(df.ADDTEXT, sep[0..wd], 0);
+            } else {
+                df.PaintPopDownSelection(wnd, @constCast(&mnu), &sel);
+                _ = win.sendTextMessage(df.ADDTEXT, &sel, 0);
+            }
+        }
+    }
+}
+
 fn BorderMsg(win:*Window) c_int {
     const wnd = win.win;
     var rtn = df.TRUE;
@@ -144,30 +168,6 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                 }
             }
         }
-
-//        struct PopDown *ActivePopDown = wnd->mnu->Selections;
-//        if (ActivePopDown != NULL)    {
-//            int c = (int)p1;
-//            int sel = 0;
-//            int a;
-//            struct PopDown *pd = ActivePopDown;
-//
-//            while (pd->SelectionTitle != NULL)    {
-//                char *cp = strchr(pd->SelectionTitle,
-//                                SHORTCUTCHAR);
-//                if (cp) {
-//                    int sc = tolower(*(cp+1));
-//                    if ((cp && sc == c) ||
-//                            (a && sc == a) ||
-//                                pd->Accelerator == c)    {
-//                        PostMessage(wnd, LB_SELECTION, sel, 0);
-//                        PostMessage(wnd, LB_CHOOSE, sel, TRUE);
-//                        return TRUE;
-//                    }
-//                }
-//                pd++, sel++;
-//            }
-//        }
     }
     switch (p1) {
         df.F1 => {
@@ -176,7 +176,6 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                 _ = q.SendMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
             } else {
                 _ = df.DisplayHelp(wnd, wnd.*.mnu.*.Selections[@intCast(wnd.*.selection)].help);
-//                    (ActivePopDown+wnd->selection)->help);
             }
             return true;
         },
@@ -263,11 +262,12 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
             wnd.*.mnu = @ptrFromInt(pp);
             wnd.*.selection = wnd.*.mnu.*.Selection;
         },
-//        case PAINT:
-//            if (wnd->mnu == NULL)
-//                return TRUE;
-//            PaintMsg(wnd);
-//            break;
+        df.PAINT => {
+            if (wnd.*.mnu == null)
+                return df.TRUE;
+//            df.PaintMsg(wnd);
+            PaintMsg(win);
+        },
         df.BORDER => {
             return BorderMsg(win);
         },
