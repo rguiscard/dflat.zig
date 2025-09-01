@@ -27,8 +27,13 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
                 _ = df.SetFocusCursor(wnd);
             },
             df.KEYBOARD => {
-//                if ((int)p1 != ' ')
-//                    break;
+                if (p1 == ' ') {
+                    // fall through
+                    if (Window.GetParent(wnd).*.extension) |extension| {
+                        const db:*df.DBOX = @alignCast(@ptrCast(extension));
+                        df.SetRadioButton(db, ct);
+                    }
+                }
             },
             df.LEFT_BUTTON => {
                 if (Window.GetParent(wnd).*.extension) |extension| {

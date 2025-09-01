@@ -12,6 +12,7 @@ const editbox = @import("EditBox.zig");
 const button = @import("Button.zig");
 const text = @import("Text.zig");
 const radio = @import("RadioButton.zig");
+const checkbox = @import("CheckBox.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -93,8 +94,7 @@ pub export fn RadioButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PA
 }
 
 pub export fn CheckBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cCheckBoxProc(wnd, msg, p1, p2);
+    return checkbox.CheckBoxProc(win, msg, p1, p2);
 }
 
 pub export fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
