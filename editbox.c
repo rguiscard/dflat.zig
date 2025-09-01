@@ -18,12 +18,9 @@ static void PrevWord(WINDOW);
 static void ModTextPointers(WINDOW, int, int);
 void SetAnchor(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
-/* -------- local variables -------- */
-//static BOOL KeyBoardMarking;
-//static BOOL TextMarking;
 
 /* ----------- GETTEXT Message ---------- */
-static int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
+int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     char *cp1 = (char *)p1;
     char *cp2 = wnd->text;
@@ -35,24 +32,6 @@ static int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
-/* ----------- SETTEXTLENGTH Message ---------- */
-/*
-static int SetTextLengthMsg(WINDOW wnd, unsigned int len)
-{
-    if (++len < MAXTEXTLEN)    {
-        wnd->MaxTextLength = len;
-        if (len < wnd->textlen)    {
-            wnd->text=DFrealloc(wnd->text, len+2);
-            wnd->textlen = len;
-            *((wnd->text)+len) = '\0';
-            *((wnd->text)+len+1) = '\0';
-            BuildTextPointers(wnd);
-        }
-        return TRUE;
-    }
-    return FALSE;
-}
-*/
 
 /* ----- Extend the marked block to the new x,y position ---- */
 void ExtendBlock(WINDOW wnd, int x, int y)
@@ -79,38 +58,6 @@ void ExtendBlock(WINDOW wnd, int x, int y)
         --pbot;
     }
 }
-
-/* ---- Process text block keys for multiline text box ---- */
-/*
-void DoMultiLines(WINDOW wnd, int c, PARAM p2)
-{
-    if (!KeyBoardMarking)    {
-        if ((int)p2 & (LEFTSHIFT | RIGHTSHIFT))    {
-            switch (c)    {
-                case HOME:
-                case CTRL_HOME:
-                case CTRL_BS:
-                case PGUP:
-                case CTRL_PGUP:
-                case UP:
-                case BS:
-                case END:
-                case CTRL_END:
-                case PGDN:
-                case CTRL_PGDN:
-                case DN:
-                case FWD:
-                case CTRL_FWD:
-                    KeyBoardMarking = TextMarking = TRUE;
-                    SetAnchor(wnd, wnd->CurrCol, wnd->CurrLine);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-}
-*/
 
 /* ---------- page/scroll keys ----------- */
 int ScrollingKey(WINDOW wnd, int c, PARAM p2)
@@ -374,62 +321,6 @@ void DoKeyStroke(WINDOW wnd, int c, PARAM p2)
     }
 }
 
-/* ----------- KEYBOARD Message ---------- */
-/*
-static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int c = (int) p1;
-    if (WindowMoving || WindowSizing || ((int)p2 & ALTKEY))
-        return FALSE;
-    switch (c)    {
-        // --- these keys get processed by lower classes --- 
-        case ESC:
-        case F1:
-        case F2:
-        case F3:
-        case F4:
-        case F5:
-        case F6:
-        case F7:
-        case F8:
-        case F9:
-        case F10:
-        case INS:
-        case SHIFT_INS:
-        case SHIFT_DEL:
-            return FALSE;
-        // --- these keys get processed here --- 
-        case CTRL_FWD:
-        case CTRL_BS:
-        case CTRL_HOME:
-        case CTRL_END:
-        case CTRL_PGUP:
-        case CTRL_PGDN:
-            break;
-        default:
-            // other ctrl keys get processed by lower classes 
-            if ((int)p2 & CTRLKEY)
-                return FALSE;
-            // --- all other keys get processed here --- 
-            break;
-    }
-    DoMultiLines(wnd, c, p2);
-    if (DoScrolling(wnd, c, p2))    {
-        if (KeyBoardMarking)
-            ExtendBlock(wnd, WndCol, wnd->WndRow);
-    }
-    else if (!TestAttribute(wnd, READONLY))    {
-        DoKeyStroke(wnd, c, p2);
-        SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-    }
-	else if (c == '\t')
-	    PostMessage(GetParent(wnd), KEYBOARD, '\t', p2);
-	else
-		beep();
-    return TRUE;
-}
-*/
-
 // ------ change all text lines in block to \n -----
 void TextBlockToN(char *bbl, char *bel) {
         while (bbl < bel)    {
@@ -443,12 +334,12 @@ void TextBlockToN(char *bbl, char *bel) {
 }
 
 /* ----------- ID_PARAGRAPH Command ---------- */
+// Rewrite to be called from  zig size
 void ParagraphCmd(WINDOW wnd)
 {
     int bc, fl;
     char *bl, *bbl, *bel, *bb;
 
-//    ClearTextBlock(wnd);
     /* ---- forming paragraph from cursor position --- */
     fl = wnd->wtop + wnd->WndRow;
     bbl = bel = bl = TextLine(wnd, wnd->CurrLine);
@@ -513,33 +404,23 @@ void ParagraphCmd(WINDOW wnd)
     if (fl < wnd->wtop)
         wnd->wtop = fl;
     wnd->WndRow = fl - wnd->wtop;
-
-    /*
-    SendMessage(wnd, PAINT, 0, 0);
-    SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-    wnd->TextChanged = TRUE;
-    BuildTextPointers(wnd);
-    */
 }
 
 /* ------- Window processing module for EDITBOX class ------ */
+/*
 int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn;
     switch (msg)    {
         case GETTEXT:
             return GetTextMsg(wnd, p1, p2);
-//        case SETTEXTLENGTH:
-//            return SetTextLengthMsg(wnd, (unsigned) p1);
-//        case KEYBOARD:
-//            if (KeyboardMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
         default:
             break;
     }
     return BaseWndProc(EDITBOX, wnd, msg, p1, p2);
 }
+*/
+
 /* ---- cursor right key: right one character position ---- */
 static void Forward(WINDOW wnd)
 {

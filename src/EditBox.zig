@@ -654,8 +654,9 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
         df.CLEARTEXT => {
             return ClearTextMsg(win);
         },
-//        case GETTEXT:
-//            return GetTextMsg(wnd, p1, p2);
+        df.GETTEXT => {
+            return df.GetTextMsg(wnd, p1, p2);
+        },
         df.SETTEXTLENGTH => {
             return SetTextLengthMsg(win, p1);
         },
@@ -720,7 +721,6 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
             return CloseWindowMsg(win, p1, p2);
         },
         else => {
-            return df.cEditBoxProc(wnd, msg, p1, p2);
         }
     }
     return root.zBaseWndProc(df.EDITBOX, win, msg, p1, p2);

@@ -92,6 +92,7 @@ void ParagraphCmd(WINDOW);
 //int DoScrolling(WINDOW, int, PARAM);
 void DoKeyStroke(WINDOW, int, PARAM);
 int ScrollingKey(WINDOW, int, PARAM);
+int GetTextMsg(WINDOW, PARAM, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
 // all wndproc
