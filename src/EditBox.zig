@@ -81,8 +81,25 @@ fn ClearTextMsg(win:*Window) c_int {
     const wnd = win.win;
     const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CLEARTEXT, 0, 0);
     const blen = EditBufLen(win)+2;
-    wnd.*.text = @ptrCast(df.DFrealloc(wnd.*.text, blen));
-    _ = df.memset(wnd.*.text, 0, blen);
+
+    if (win.text) |txt| {
+        if (root.global_allocator.realloc(txt, blen)) |buf| {
+            win.text = buf;
+        } else |_| {
+        }
+    } else {
+        if (root.global_allocator.alloc(u8, blen)) |buf| {
+            win.text = buf;
+        } else |_| {
+        }
+    }
+
+    if (win.text) |buf| {
+        @memset(buf, 0);
+        wnd.*.text = buf.ptr;
+    }
+//    wnd.*.text = @ptrCast(df.DFrealloc(wnd.*.text, blen));
+//    _ = df.memset(wnd.*.text, 0, blen);
     wnd.*.wlines = 0;
     wnd.*.CurrLine = 0;
     wnd.*.CurrCol = 0;
