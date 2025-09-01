@@ -378,6 +378,59 @@ fn ButtonReleasedMsg(win:*Window) bool {
     return false;
 }
 
+// ----------- KEYBOARD Message ----------
+fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    if (df.WindowMoving>0 or df.WindowSizing>0 or ((p2 & df.ALTKEY)>0))
+        return false;
+    switch (p1) {
+        // --- these keys get processed by lower classes ---
+        df.ESC,
+        df.F1,
+        df.F2,
+        df.F3,
+        df.F4,
+        df.F5,
+        df.F6,
+        df.F7,
+        df.F8,
+        df.F9,
+        df.F10,
+        df.INS,
+        df.SHIFT_INS,
+        df.SHIFT_DEL => {
+            return false;
+        },
+        // --- these keys get processed here ---
+        df.CTRL_FWD,
+        df.CTRL_BS,
+        df.CTRL_HOME,
+        df.CTRL_END,
+        df.CTRL_PGUP,
+        df.CTRL_PGDN => {
+        },
+        else => {
+            // other ctrl keys get processed by lower classes
+            if ((p2 & df.CTRLKEY) > 0)
+                return false;
+            // --- all other keys get processed here ---
+        }
+    }
+    DoMultiLines(win, p1, p2);
+    if (DoScrolling(win, @intCast(p1), p2)) {
+        if (KeyBoardMarking)
+            df.ExtendBlock(wnd, WndCol(win), wnd.*.WndRow);
+    } else if (win.TestAttribute(df.READONLY) == false) {
+        df.DoKeyStroke(wnd, @intCast(p1), p2);
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
+    } else if (p1 == '\t') {
+        q.PostMessage(Window.GetParent(wnd), df.KEYBOARD, @intCast('\t'), p2);
+    } else {
+        df.beep();
+    }
+    return true;
+}
+
 // ----------- SHIFT_CHANGED Message ----------
 fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
     const v = p1 & (df.LEFTSHIFT | df.RIGHTSHIFT);
@@ -652,10 +705,10 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
             if (ButtonReleasedMsg(win))
                 return df.TRUE;
         },
-//        case KEYBOARD:
-//            if (KeyboardMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
+        df.KEYBOARD => {
+            if (KeyboardMsg(win, p1, p2))
+                return df.TRUE;
+        },
         df.SHIFT_CHANGED => {
             ShiftChangedMsg(win, p1);
         },
@@ -671,6 +724,53 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callco
         }
     }
     return root.zBaseWndProc(df.EDITBOX, win, msg, p1, p2);
+}
+
+// ---- Process text block keys for multiline text box ----
+fn DoMultiLines(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+    const wnd = win.win;
+    if (!KeyBoardMarking)    {
+        if ((p2 & (df.LEFTSHIFT | df.RIGHTSHIFT))>0) {
+            switch (p1) {
+                df.HOME,
+                df.CTRL_HOME,
+                df.CTRL_BS,
+                df.PGUP,
+                df.CTRL_PGUP,
+                df.UP,
+                df.BS,
+                df.END,
+                df.CTRL_END,
+                df.PGDN,
+                df.CTRL_PGDN,
+                df.DN,
+                df.FWD,
+                df.CTRL_FWD => {
+                    KeyBoardMarking = true;
+                    TextMarking = true;
+                    df.SetAnchor(wnd, wnd.*.CurrCol, wnd.*.CurrLine);
+                },
+                else => {
+                }
+            }
+        }
+    }
+}
+
+// ---------- page/scroll keys -----------
+fn DoScrolling(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    const rtn = df.ScrollingKey(wnd, @intCast(p1), p2);
+    if (rtn == df.FALSE) {
+        return false;
+    }
+
+    if (!KeyBoardMarking and df.TextBlockMarked(wnd)) {
+        textbox.ClearTextBlock(win);
+        _ = win.sendMessage(df.PAINT, 0, 0);
+    }
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
+    return true;
 }
 
 fn swap(a:*c_int, b:*c_int) void {

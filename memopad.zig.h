@@ -88,6 +88,10 @@ void SetAnchor(WINDOW, int, int);
 int CommandMsg(WINDOW, PARAM);
 void TextBlockToN(char *, char *);
 void ParagraphCmd(WINDOW);
+//void DoMultiLines(WINDOW, int, PARAM);
+//int DoScrolling(WINDOW, int, PARAM);
+void DoKeyStroke(WINDOW, int, PARAM);
+int ScrollingKey(WINDOW, int, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
 // all wndproc

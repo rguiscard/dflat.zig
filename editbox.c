@@ -19,8 +19,8 @@ static void ModTextPointers(WINDOW, int, int);
 void SetAnchor(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
 /* -------- local variables -------- */
-static BOOL KeyBoardMarking;
-static BOOL TextMarking;
+//static BOOL KeyBoardMarking;
+//static BOOL TextMarking;
 
 /* ----------- GETTEXT Message ---------- */
 static int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -81,7 +81,8 @@ void ExtendBlock(WINDOW wnd, int x, int y)
 }
 
 /* ---- Process text block keys for multiline text box ---- */
-static void DoMultiLines(WINDOW wnd, int c, PARAM p2)
+/*
+void DoMultiLines(WINDOW wnd, int c, PARAM p2)
 {
     if (!KeyBoardMarking)    {
         if ((int)p2 & (LEFTSHIFT | RIGHTSHIFT))    {
@@ -109,8 +110,10 @@ static void DoMultiLines(WINDOW wnd, int c, PARAM p2)
         }
     }
 }
+*/
+
 /* ---------- page/scroll keys ----------- */
-static int DoScrolling(WINDOW wnd, int c, PARAM p2)
+int ScrollingKey(WINDOW wnd, int c, PARAM p2)
 {
     switch (c)    {
         case PGUP:
@@ -171,11 +174,13 @@ static int DoScrolling(WINDOW wnd, int c, PARAM p2)
         default:
             return FALSE;
     }
+    /*
     if (!KeyBoardMarking && TextBlockMarked(wnd))    {
         ClearTextBlock(wnd);
         SendMessage(wnd, PAINT, 0, 0);
     }
     SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
+    */
     return TRUE;
 }
 /* -------------- Del key ---------------- */
@@ -335,7 +340,7 @@ static void KeyTyped(WINDOW wnd, int c)
 }
 
 /* ------------ screen changing key strokes ------------- */
-static void DoKeyStroke(WINDOW wnd, int c, PARAM p2)
+void DoKeyStroke(WINDOW wnd, int c, PARAM p2)
 {
     switch (c)    {
         case RUBOUT:
@@ -368,14 +373,16 @@ static void DoKeyStroke(WINDOW wnd, int c, PARAM p2)
             break;
     }
 }
+
 /* ----------- KEYBOARD Message ---------- */
+/*
 static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int c = (int) p1;
     if (WindowMoving || WindowSizing || ((int)p2 & ALTKEY))
         return FALSE;
     switch (c)    {
-        /* --- these keys get processed by lower classes --- */
+        // --- these keys get processed by lower classes --- 
         case ESC:
         case F1:
         case F2:
@@ -391,7 +398,7 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
         case SHIFT_INS:
         case SHIFT_DEL:
             return FALSE;
-        /* --- these keys get processed here --- */
+        // --- these keys get processed here --- 
         case CTRL_FWD:
         case CTRL_BS:
         case CTRL_HOME:
@@ -400,10 +407,10 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
         case CTRL_PGDN:
             break;
         default:
-            /* other ctrl keys get processed by lower classes */
+            // other ctrl keys get processed by lower classes 
             if ((int)p2 & CTRLKEY)
                 return FALSE;
-            /* --- all other keys get processed here --- */
+            // --- all other keys get processed here --- 
             break;
     }
     DoMultiLines(wnd, c, p2);
@@ -421,6 +428,7 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 		beep();
     return TRUE;
 }
+*/
 
 // ------ change all text lines in block to \n -----
 void TextBlockToN(char *bbl, char *bel) {
@@ -523,10 +531,10 @@ int cEditBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             return GetTextMsg(wnd, p1, p2);
 //        case SETTEXTLENGTH:
 //            return SetTextLengthMsg(wnd, (unsigned) p1);
-        case KEYBOARD:
-            if (KeyboardMsg(wnd, p1, p2))
-                return TRUE;
-            break;
+//        case KEYBOARD:
+//            if (KeyboardMsg(wnd, p1, p2))
+//                return TRUE;
+//            break;
         default:
             break;
     }
