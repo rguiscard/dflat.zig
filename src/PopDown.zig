@@ -82,6 +82,62 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
+fn BorderMsg(win:*Window) c_int {
+    const wnd = win.win;
+    var rtn = df.TRUE;
+    if (wnd.*.mnu) |_| {
+        const currFocus = df.inFocus;
+        df.inFocus = null;
+        rtn = root.zBaseWndProc(df.POPDOWNMENU, win, df.BORDER, 0, 0);
+        df.inFocus = currFocus;
+        for (0..@intCast(win.ClientHeight())) |i| {
+            if (df.TextLine(wnd, i)[0] == df.LINE) {
+                df.wputch(wnd, df.LEDGE, 0, @intCast(i+1));
+                df.wputch(wnd, df.REDGE, @intCast(win.WindowWidth()-1), @intCast(i+1));
+            }
+        }
+    }
+    return rtn;
+}
+
+// -------------- LB_CHOOSE Message --------------
+fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
+    const wnd = win.win;
+//    if (wnd.*.mnu.*.Selections) |ActivePopDown| {
+//        const popdown = &ActivePopDown[@intCast(p1)];
+        const popdown = &wnd.*.mnu.*.Selections[@intCast(p1)];
+        wnd.*.mnu.*.Selection = @intCast(p1);
+        if ((popdown.*.Attrib & df.INACTIVE) == 0) {
+            const pwnd = Window.GetParent(wnd);
+            if ((popdown.*.Attrib & df.TOGGLE) > 0) {
+                popdown.*.Attrib ^= df.CHECKED;
+            }
+            if (pwnd != null) {
+                CurrentMenuSelection = @intCast(p1);
+                q.PostMessage(pwnd, df.COMMAND, popdown.*.ActionId, 0); // p2 was p1
+            }
+        } else {
+            df.beep();
+        }
+//    }
+//    if (ActivePopDown != NULL)    {
+//        int *attr = &(ActivePopDown+(int)p1)->Attrib;
+//        wnd->mnu->Selection = (int)p1;
+//        if (!(*attr & INACTIVE))    {
+//                        WINDOW pwnd = GetParent(wnd);
+//            if (*attr & TOGGLE)
+//                *attr ^= CHECKED;
+//                        if (pwnd != NULL)       {
+//                                CurrentMenuSelection = p1;
+//                PostMessage(pwnd, COMMAND,
+//                        (ActivePopDown+(int)p1)->ActionId, 0); /* p2 was p1 */
+//                        }
+//        }
+//        else
+//            beep();
+//    }
+}
+
 // - Window processing module for POPDOWNMENU window class -
 pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
@@ -108,20 +164,23 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
             if (ButtonReleasedMsg(win, p1, p2))
                 return df.TRUE;
         },
-//        case BUILD_SELECTIONS:
-//            wnd->mnu = (void *) p1;
-//            wnd->selection = wnd->mnu->Selection;
-//            break;
+        df.BUILD_SELECTIONS => {
+            const pp:usize = @intCast(p1);
+            wnd.*.mnu = @ptrFromInt(pp);
+            wnd.*.selection = wnd.*.mnu.*.Selection;
+        },
 //        case PAINT:
 //            if (wnd->mnu == NULL)
 //                return TRUE;
 //            PaintMsg(wnd);
 //            break;
-//        case BORDER:
-//            return BorderMsg(wnd);
-//        case LB_CHOOSE:
-//            LBChooseMsg(wnd, p1);
-//            return TRUE;
+        df.BORDER => {
+            return BorderMsg(win);
+        },
+        df.LB_CHOOSE => {
+            LBChooseMsg(win, p1);
+            return df.TRUE;
+        },
 //        case KEYBOARD:
 //            if (KeyboardMsg(wnd, p1, p2))
 //                return TRUE;

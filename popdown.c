@@ -6,73 +6,6 @@ static int SelectionWidth(struct PopDown *);
 static int py = -1;
 int CurrentMenuSelection;
 
-/* ------------ CREATE_WINDOW Message ------------- */
-static int CreateWindowMsg(WINDOW wnd)
-{
-    int rtn, adj;
-    ClearAttribute(wnd, HASTITLEBAR     |
-                        VSCROLLBAR     |
-                        MOVEABLE     |
-                        SIZEABLE     |
-                        HSCROLLBAR);
-	/* ------ adjust to keep popdown on screen ----- */
-	adj = SCREENHEIGHT-1-wnd->rc.bt;
-	if (adj < 0)	{
-		wnd->rc.tp += adj;
-		wnd->rc.bt += adj;
-	}
-	adj = SCREENWIDTH-1-wnd->rc.rt;
-	if (adj < 0)	{
-		wnd->rc.lf += adj;
-		wnd->rc.rt += adj;
-	}
-    rtn = BaseWndProc(POPDOWNMENU, wnd, CREATE_WINDOW, 0, 0);
-    SendMessage(wnd, CAPTURE_MOUSE, 0, 0);
-    SendMessage(wnd, CAPTURE_KEYBOARD, 0, 0);
-    SendMessage(NULL, SAVE_CURSOR, 0, 0);
-    SendMessage(NULL, HIDE_CURSOR, 0, 0);
-	wnd->oldFocus = inFocus;
-	inFocus = wnd;
-    return rtn;
-}
-
-/* --------- LEFT_BUTTON Message --------- */
-static void LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int my = (int) p2 - GetTop(wnd);
-    if (InsideRect(p1, p2, ClientRect(wnd)))    {
-        if (my != py)    {
-            SendMessage(wnd, LB_SELECTION,
-                    (PARAM) wnd->wtop+my-1, TRUE);
-            py = my;
-        }
-    }
-    else if ((int)p2 == GetTop(GetParent(wnd)))
-        if (GetClass(GetParent(wnd)) == MENUBAR)
-            PostMessage(GetParent(wnd), LEFT_BUTTON, p1, p2);
-}
-
-/* -------- BUTTON_RELEASED Message -------- */
-static BOOL ButtonReleasedMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    py = -1;
-    if (InsideRect((int)p1, (int)p2, ClientRect(wnd)))    {
-        int sel = (int)p2 - GetClientTop(wnd);
-        if (*TextLine(wnd, sel) != LINE)
-            SendMessage(wnd, LB_CHOOSE, wnd->selection, 0);
-    }
-    else    {
-        WINDOW pwnd = GetParent(wnd);
-        if (GetClass(pwnd) == MENUBAR && (int)p2==GetTop(pwnd))
-            return FALSE;
-        if ((int)p1 == GetLeft(pwnd)+2)
-            return FALSE;
-        SendMessage(wnd, CLOSE_WINDOW, 0, 0);
-        return TRUE;
-    }
-    return FALSE;
-}
-
 /* --------- PAINT Message -------- */
 static void PaintMsg(WINDOW wnd)
 {
@@ -304,21 +237,23 @@ int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             if (ButtonReleasedMsg(wnd, p1, p2))
                 return TRUE;
             break;
-*/
         case BUILD_SELECTIONS:
             wnd->mnu = (void *) p1;
             wnd->selection = wnd->mnu->Selection;
             break;
+*/
         case PAINT:
             if (wnd->mnu == NULL)
                 return TRUE;
             PaintMsg(wnd);
             break;
+/*
         case BORDER:
             return BorderMsg(wnd);
         case LB_CHOOSE:
             LBChooseMsg(wnd, p1);
             return TRUE;
+*/
         case KEYBOARD:
             if (KeyboardMsg(wnd, p1, p2))
                 return TRUE;
