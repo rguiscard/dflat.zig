@@ -84,48 +84,6 @@ static void PaintMsg(WINDOW wnd)
     }
 }
 
-/* ---------- BORDER Message ----------- */
-static int BorderMsg(WINDOW wnd)
-{
-    int i, rtn = TRUE;
-    WINDOW currFocus;
-    if (wnd->mnu != NULL)    {
-        currFocus = inFocus;
-        inFocus = NULL;
-        rtn = BaseWndProc(POPDOWNMENU, wnd, BORDER, 0, 0);
-        inFocus = currFocus;
-        for (i = 0; i < ClientHeight(wnd); i++)    {
-            if (*TextLine(wnd, i) == LINE)    {
-                wputch(wnd, LEDGE, 0, i+1);
-                wputch(wnd, REDGE, WindowWidth(wnd)-1, i+1);
-            }
-        }
-    }
-    return rtn;
-}
-
-/* -------------- LB_CHOOSE Message -------------- */
-static void LBChooseMsg(WINDOW wnd, PARAM p1)
-{
-    struct PopDown *ActivePopDown = wnd->mnu->Selections;
-    if (ActivePopDown != NULL)    {
-        int *attr = &(ActivePopDown+(int)p1)->Attrib;
-        wnd->mnu->Selection = (int)p1;
-        if (!(*attr & INACTIVE))    {
-			WINDOW pwnd = GetParent(wnd);
-            if (*attr & TOGGLE)
-                *attr ^= CHECKED;
-			if (pwnd != NULL)	{
-				CurrentMenuSelection = p1;
-    	        PostMessage(pwnd, COMMAND,
-        	        (ActivePopDown+(int)p1)->ActionId, 0); /* p2 was p1 */
-			}
-        }
-        else
-            beep();
-    }
-}
-
 /* ---------- KEYBOARD Message --------- */
 static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
@@ -203,6 +161,7 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* ----------- CLOSE_WINDOW Message ---------- */
+/*
 static int CloseWindowMsg(WINDOW wnd)
 {
     int rtn;
@@ -215,6 +174,7 @@ static int CloseWindowMsg(WINDOW wnd)
     SendMessage(pwnd, CLOSE_POPDOWN, 0, 0);
     return rtn;
 }
+*/
 
 /* - Window processing module for POPDOWNMENU window class - */
 int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
@@ -258,8 +218,10 @@ int cPopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             if (KeyboardMsg(wnd, p1, p2))
                 return TRUE;
             break;
+/*
         case CLOSE_WINDOW:
             return CloseWindowMsg(wnd);
+*/
         default:
             break;
     }

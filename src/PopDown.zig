@@ -103,39 +103,33 @@ fn BorderMsg(win:*Window) c_int {
 // -------------- LB_CHOOSE Message --------------
 fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
     const wnd = win.win;
-//    if (wnd.*.mnu.*.Selections) |ActivePopDown| {
-//        const popdown = &ActivePopDown[@intCast(p1)];
-        const popdown = &wnd.*.mnu.*.Selections[@intCast(p1)];
-        wnd.*.mnu.*.Selection = @intCast(p1);
-        if ((popdown.*.Attrib & df.INACTIVE) == 0) {
-            const pwnd = Window.GetParent(wnd);
-            if ((popdown.*.Attrib & df.TOGGLE) > 0) {
-                popdown.*.Attrib ^= df.CHECKED;
-            }
-            if (pwnd != null) {
-                CurrentMenuSelection = @intCast(p1);
-                q.PostMessage(pwnd, df.COMMAND, popdown.*.ActionId, 0); // p2 was p1
-            }
-        } else {
-            df.beep();
+    const popdown = &wnd.*.mnu.*.Selections[@intCast(p1)];
+    wnd.*.mnu.*.Selection = @intCast(p1);
+    if ((popdown.*.Attrib & df.INACTIVE) == 0) {
+        const pwnd = Window.GetParent(wnd);
+        if ((popdown.*.Attrib & df.TOGGLE) > 0) {
+            popdown.*.Attrib ^= df.CHECKED;
         }
-//    }
-//    if (ActivePopDown != NULL)    {
-//        int *attr = &(ActivePopDown+(int)p1)->Attrib;
-//        wnd->mnu->Selection = (int)p1;
-//        if (!(*attr & INACTIVE))    {
-//                        WINDOW pwnd = GetParent(wnd);
-//            if (*attr & TOGGLE)
-//                *attr ^= CHECKED;
-//                        if (pwnd != NULL)       {
-//                                CurrentMenuSelection = p1;
-//                PostMessage(pwnd, COMMAND,
-//                        (ActivePopDown+(int)p1)->ActionId, 0); /* p2 was p1 */
-//                        }
-//        }
-//        else
-//            beep();
-//    }
+        if (pwnd != null) {
+            CurrentMenuSelection = @intCast(p1);
+            q.PostMessage(pwnd, df.COMMAND, popdown.*.ActionId, 0); // p2 was p1
+        }
+    } else {
+        df.beep();
+    }
+}
+
+// ----------- CLOSE_WINDOW Message ----------
+fn CloseWindowMsg(win:*Window) c_int {
+    const wnd = win.win;
+    const pwnd = Window.GetParent(wnd);
+    _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
+    _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
+    _ = q.SendMessage(null, df.RESTORE_CURSOR, 0, 0);
+    df.inFocus = wnd.*.oldFocus;
+    const rtn = root.zBaseWndProc(df.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
+    _ = q.SendMessage(pwnd, df.CLOSE_POPDOWN, 0, 0);
+    return rtn;
 }
 
 // - Window processing module for POPDOWNMENU window class -
@@ -185,8 +179,9 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
 //            if (KeyboardMsg(wnd, p1, p2))
 //                return TRUE;
 //            break;
-//case CLOSE_WINDOW:
-//        return CloseWindowMsg(wnd);
+        df.CLOSE_WINDOW => {
+            return CloseWindowMsg(win);
+        },
         else => {
             return df.cPopDownProc(wnd, msg, p1, p2);
         }
