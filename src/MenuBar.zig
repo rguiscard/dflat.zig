@@ -428,6 +428,7 @@ fn reset_menubar(win:*Window) void {
         }
     } else {
         if (root.global_allocator.alloc(u8, @intCast(df.SCREENWIDTH+5))) |b| {
+            @memset(b, 0);
             win.text= b;
         } else |_| {
             // error

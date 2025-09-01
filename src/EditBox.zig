@@ -30,6 +30,7 @@ fn CreateWindowMsg(win:*Window) c_int {
     const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CREATE_WINDOW, 0, 0);
     wnd.*.MaxTextLength = df.MAXTEXTLEN+1;
     wnd.*.textlen = EditBufLen(win);
+    win.textlen = EditBufLen(win);
     wnd.*.InsertMode = df.TRUE;
     if (df.isMultiLine(wnd)>0)
         wnd.*.WordWrapMode = df.TRUE;
@@ -108,6 +109,7 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) c_int {
                 }
             } else {
                 if (root.global_allocator.alloc(u8, @intCast(len+2))) |buf| {
+                    @memset(buf, 0);
                     win.text = buf;
                 } else |_| {
                 }
@@ -562,7 +564,7 @@ fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) c_int {
     if (win.text) |text| {
         root.global_allocator.free(text);
         win.text = null;
-        win.*.text = null;
+        wnd.*.text = null;
     }
     return rtn;
 }
@@ -686,6 +688,7 @@ fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
         }
     } else {
         if (root.global_allocator.alloc(u8, len)) |buf| {
+            @memset(buf, 0);
             win.DeletedText = buf;
         } else |_| {
         }

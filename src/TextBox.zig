@@ -8,6 +8,73 @@ const rect = @import("Rect.zig");
 pub var VSliding = false; // also used in ListBox
 var HSliding = false;
 
+// ------------ ADDTEXT Message --------------
+fn AddTextMsg(win:*Window, txt:[]const u8) c_int {
+    const wnd = win.win;
+    // --- append text to the textbox's buffer ---
+    const adln:usize = txt.len;
+    if (adln > 0xfff0)
+        return df.FALSE;
+    if (win.text) |t| {
+        // ---- appending to existing text ----
+        const txln:usize = @intCast(df.strlen(wnd.*.text)); // more accurate than win.text because \0 ?
+        if (txln+adln > 0xfff0) { // consider overflow ?
+            return df.FALSE;
+        }
+        if (txln+adln > wnd.*.textlen) {
+            if (root.global_allocator.realloc(t, txln+adln+3)) |buf| {
+                win.text = buf;
+                wnd.*.text = buf.ptr;
+                win.textlen = txln+adln+1;
+                wnd.*.textlen = @intCast(txln+adln+1);
+            } else |_| {
+            }
+        }
+    } else {
+        // ------ 1st text appended ------
+        if (root.global_allocator.alloc(u8, adln+3)) |buf| {
+            @memset(buf, 0);
+            win.text = buf;
+            wnd.*.text = buf.ptr;
+            win.textlen = adln+1;
+            wnd.*.textlen = @intCast(adln+1);
+        } else |_| {
+        }
+    }
+
+//    if (wnd->text != NULL)    {
+//        /* ---- appending to existing text ---- */
+//        unsigned txln = strlen(wnd->text);
+//        if ((long)txln+adln > (unsigned) 0xfff0)
+//            return FALSE;
+//        if (txln+adln > wnd->textlen)    {
+//            wnd->text = DFrealloc(wnd->text, txln+adln+3);
+//            wnd->textlen = txln+adln+1;
+//        }
+//    }
+//    else    {
+//        /* ------ 1st text appended ------ */
+//        wnd->text = DFcalloc(1, adln+3);
+//        wnd->textlen = adln+1;
+//    }
+
+    wnd.*.TextChanged = df.TRUE;
+    if (win.text) |buf| {
+        // ---- append the text ----
+        if (std.mem.indexOfScalar(u8, buf, 0)) |idx| {
+            @memcpy(buf.ptr[idx..idx+txt.len], txt);
+            @memcpy(buf.ptr[idx+txt.len..idx+txt.len+1], "\n");
+            @memcpy(buf.ptr[idx+txt.len+1..idx+txt.len+2], "\x00");
+        }
+//        strcat(wnd->text, txt);
+//        strcat(wnd->text, "\n");
+
+        df.BuildTextPointers(wnd);
+        return df.TRUE;
+    }
+    return df.FALSE;
+}
+
 // ------------ SETTEXT Message --------------
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
     const wnd = win.win;
@@ -15,13 +82,25 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
     const len = txt.len;
     _ = win.sendMessage(df.CLEARTEXT, 0, 0);
     
-    if (root.global_allocator.alloc(u8, len+1)) |buf| {
+    if (win.text) |t| {
+        if (root.global_allocator.realloc(t, @intCast(len+1))) |buf| {
+            win.text = buf;
+        } else |_| {
+        }
+    } else {
+        if (root.global_allocator.alloc(u8, @intCast(len+1))) |buf| {
+            @memset(buf, 0);
+            win.text = buf;
+        } else |_| {
+        }
+    }
+
+    if (win.text) |buf| {
         @memcpy(buf[0..len], txt);
         wnd.*.textlen = @intCast(len);
+        win.textlen = @intCast(len);
         wnd.*.text = buf.ptr;
         wnd.*.text[len] = 0;
-    } else |_| {
-        // error 
     }
     df.BuildTextPointers(wnd);
 }
@@ -29,11 +108,13 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
 fn ClearTextMsg(win:*Window) void {
     const wnd = win.win;
     // ----- clear text from textbox -----
-    if (wnd.*.text) |text| {
-        df.free(text);
+    if (win.text) |text| {
+        root.global_allocator.free(text);
+        win.text = null;
     }
     wnd.*.text = null;
     wnd.*.textlen = 0;
+    win.textlen = 0;
     wnd.*.wlines = 0;
     wnd.*.textwidth = 0;
     wnd.*.wtop = 0;
@@ -416,8 +497,11 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) cal
             df.ClearTextPointers(wnd);
         },
         df.ADDTEXT => {
-            const pp:usize = @intCast(p1);
-            const rtn = df.AddTextMsg(wnd, @ptrFromInt(pp));
+            const pp1:usize = @intCast(p1);
+            const txt:[*c]u8 = @ptrFromInt(pp1);
+            const len = df.strlen(txt);
+            const rtn = AddTextMsg(win, txt[0..len]);
+//            const rtn = df.AddTextMsg(wnd, txt);
             return @intCast(rtn);
         },
         df.DELETETEXT => {
