@@ -15,6 +15,7 @@ const radio = @import("RadioButton.zig");
 const checkbox = @import("CheckBox.zig");
 const statusbar = @import("StatusBar.zig");
 const popdown = @import("PopDown.zig");
+const editor = @import("Editor.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -119,8 +120,7 @@ pub export fn StatusBarProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARA
 }
 
 pub export fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cEditorProc(wnd, msg, p1, p2);
+    return editor.EditorProc(win, msg, p1, p2);
 }
 
 // Those are called directly by CreateWindow()

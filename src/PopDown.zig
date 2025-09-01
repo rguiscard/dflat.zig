@@ -283,7 +283,6 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
             return CloseWindowMsg(win);
         },
         else => {
-            return df.cPopDownProc(wnd, msg, p1, p2);
         }
     }
     return root.zBaseWndProc(df.POPDOWNMENU, win, msg, p1, p2);
