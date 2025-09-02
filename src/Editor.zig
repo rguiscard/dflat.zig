@@ -9,10 +9,10 @@ const pTab = '\t' + 0x80;
 const sTab = 0x0C + 0x80; // '\f'
 
 // ---------- SETTEXT Message ------------
-fn SetTextMsg(win:*Window,p1:df.PARAM) c_int {
+fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
     const wnd = win.win;
     const pp:usize = @intCast(p1);
-    return df.cSetTextMsg(wnd, @ptrFromInt(pp));
+    return if (df.cSetTextMsg(wnd, @ptrFromInt(pp)) == df.TRUE) true else false;
 }
 
 // --------- KEYBOARD Message ----------
@@ -98,11 +98,11 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ------- Window processing module for EDITBOX class ------ 
-pub fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
+pub fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     switch (msg) {
         df.KEYBOARD => {
             if (KeyboardMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.SETTEXT => {
             return SetTextMsg(win, p1);

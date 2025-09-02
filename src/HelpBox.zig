@@ -67,7 +67,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
     return false;
 }
 
-pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -79,13 +79,13 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_
         df.COMMAND => {
             if (p2 == 0) {
                 if (CommandMsg(win, p1))
-                    return df.TRUE;
+                    return true;
             }
         },
         df.KEYBOARD => {
             if (df.WindowMoving == 0) {
                 if (df.HelpBoxKeyboardMsg(wnd, p1) > 0)
-                    return df.TRUE;
+                    return true;
             }
         },
         df.CLOSE_WINDOW => {
@@ -100,16 +100,16 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_
 }
 
 // --- window processing module for HELPBOX's text EDITBOX --
-pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.KEYBOARD => {
         },
         df.PAINT => {
-            return df.HelpTextPaintMsg(wnd, p1, p2);
+            return if (df.HelpTextPaintMsg(wnd, p1, p2) == df.TRUE) true else false;
         },
         df.LEFT_BUTTON => {
-            return df.HelpTextLeftButtonMsg(wnd, p1, p2);
+            return if (df.HelpTextLeftButtonMsg(wnd, p1, p2) == df.TRUE) true else false;
         },
         df.DOUBLE_CLICK => {
             q.PostMessage(wnd, df.KEYBOARD, '\r', 0);

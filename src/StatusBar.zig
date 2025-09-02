@@ -4,7 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 
-pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -12,7 +12,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
         },
         df.KEYBOARD => {
             if (p1 == df.CTRL_F4)
-                return df.TRUE;
+                return true;
         },
         df.PAINT => {
             if (df.isVisible(wnd) > 0) {
@@ -43,7 +43,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                     df.SetStandardColor(wnd);
                     df.PutWindowLine(wnd, @constCast(@ptrCast(sb.ptr)), 0, 0);
                     defer root.global_allocator.free(sb);
-                    return df.TRUE;
+                    return true;
                 } else |_| {
                     // error
                 }
@@ -69,7 +69,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
             }
         },
         df.BORDER => {
-            return df.TRUE;
+            return true;
         },
         df.CLOCKTICK => {
             df.SetStandardColor(wnd);
@@ -77,7 +77,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
             df.PutWindowLine(wnd, @ptrFromInt(pp), @intCast(win.WindowWidth()-8), 0);
             wnd.*.TimePosted = df.TRUE;
             _ = q.SendMessage(wnd.*.PrevClock, msg, p1, p2);
-            return df.TRUE;
+            return true;
         },
         df.CLOSE_WINDOW => {
             _ = win.sendMessage(df.RELEASE_CLOCK, 0, 0);

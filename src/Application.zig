@@ -14,7 +14,7 @@ var WindowSel:c_int = 0;
 var oldFocus:df.WINDOW = null;
 
 // --------------- CREATE_WINDOW Message --------------
-fn CreateWindowMsg(win: *Window) c_int {
+fn CreateWindowMsg(win: *Window) bool {
     const wnd = win.win;
     df.ApplicationWindow = wnd;
     ScreenHeight = df.SCREENHEIGHT;
@@ -102,7 +102,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
 }
 
-fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) c_int {
+fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     if ((df.WindowMoving > 0) or (df.WindowSizing>0) or (p1 == df.F1))
         return root.zBaseWndProc(df.APPLICATION, win, df.KEYBOARD, p1, p2);
@@ -111,23 +111,23 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) c_int {
             if (win.TestAttribute(df.CONTROLBOX)) {
                 q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
             }
-            return df.TRUE;
+            return true;
         },
         df.ALT_F6 => {
             lists.SetNextFocus();
-            return df.TRUE;
+            return true;
         },
         df.ALT_HYPHEN => {
             if (win.TestAttribute(df.CONTROLBOX)) {
                 sysmenu.BuildSystemMenu(win);
             }
-            return df.TRUE;
+            return true;
         },
         else => {
         }
     }
     q.PostMessage(wnd.*.MenuBarWnd, df.KEYBOARD, p1, p2);
-    return df.TRUE;
+    return true;
 }
 
 // --------- SHIFT_CHANGED Message --------
@@ -228,7 +228,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 }
 
 // --------- CLOSE_WINDOW Message --------
-fn CloseWindowMsg(win:*Window) c_int {
+fn CloseWindowMsg(win:*Window) bool {
     CloseAll(win, true);
     WindowSel = 0;
     q.PostMessage(null, df.STOP, 0, 0);
@@ -242,7 +242,7 @@ fn CloseWindowMsg(win:*Window) c_int {
     return rtn;
 }
 
-pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
 
     switch (msg) {
@@ -255,28 +255,28 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         },
         df.ADDSTATUS => {
             AddStatusMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.SETFOCUS => {
             const p1b = (p1 > 0);
             if (p1b == (df.inFocus != wnd)) {
                 SetFocusMsg(win, p1b);
-                return df.TRUE;
+                return true;
             }
         },
         df.SIZE => {
             SizeMsg(win, p1, p2);
-            return df.TRUE;
+            return true;
         },
         df.MINIMIZE => {
-            return df.TRUE;
+            return true;
         },
         df.KEYBOARD => {
             return KeyboardMsg(win, p1, p2);
         },
         df.SHIFT_CHANGED => {
             ShiftChangedMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.PAINT => {
             if (df.isVisible(wnd) > 0)    {
@@ -284,11 +284,11 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
                 const pptr:usize = @intCast(p1);
                 df.ClearWindow(wnd, @ptrFromInt(pptr), cl);
             }
-            return df.TRUE;
+            return true;
         },
         df.COMMAND => {
             CommandMsg(win, p1, p2);
-            return df.TRUE;
+            return true;
         },
         df.CLOSE_WINDOW => {
             return CloseWindowMsg(win);

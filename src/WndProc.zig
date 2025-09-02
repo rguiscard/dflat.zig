@@ -19,27 +19,27 @@ const helpbox = @import("HelpBox.zig");
 // - EveneQueue(*Window)
 
 pub export fn NormalProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
-    return normal.NormalProc(win, msg, p1, p2);
+    return if (normal.NormalProc(win, msg, p1, p2)) df.TRUE else df.FALSE;
 }
 
-pub fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
+pub fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     _ = wnd;
     _ = msg;
     _ = p1;
     _ = p2;
-    return df.FALSE;
+    return false;
 // not currently in use. port later.
 //    return df.cComboProc(wnd, msg, p1, p2);
 }
 
-pub fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
+pub fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     _ = wnd;
     _ = msg;
     _ = p1;
     _ = p2;
-    return df.FALSE;
+    return false;
 // not currently in use. port later.
 //    return df.cSpinButtonProc(wnd, msg, p1, p2);
 }

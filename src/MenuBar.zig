@@ -14,7 +14,7 @@ var Cascaders = [_]df.WINDOW{0}**df.MAXCASCADES;
 var casc:usize = 0;
 
 // ----------- SETFOCUS Message -----------
-fn SetFocusMsg(win:*Window,p1:df.PARAM) c_int {
+fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
     const wnd = win.win;
     const rtn = root.zBaseWndProc(df.MENUBAR, win, df.SETFOCUS, p1, 0);
     if (p1>0) {
@@ -360,7 +360,7 @@ fn CloseWindowMsg(win:*Window) void {
     df.ActiveMenuBar = null;
 }
 
-pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -375,36 +375,36 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_
         df.PAINT => {
             if ((df.isVisible(wnd)>0) and (wnd.*.text != null)) {
                 PaintMsg(win);
-                return df.FALSE;
+                return false;
             }
         },
         df.BORDER => {
             if (mwnd == null) {
                 _ = win.sendMessage(df.PAINT, 0, 0);
             }
-            return df.TRUE;
+            return true;
         },
         df.KEYBOARD => {
             KeyboardMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.LEFT_BUTTON => {
             LeftButtonMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.MB_SELECTION => {
            SelectionMsg(win, p1, p2);
         },
         df.COMMAND => {
             CommandMsg(win, p1, p2);
-            return df.TRUE;
+            return true;
         },
         df.INSIDE_WINDOW => {
-            return if (rect.InsideRect(@intCast(p1), @intCast(p2), win.WindowRect())) df.TRUE else df.FALSE;
+            return rect.InsideRect(@intCast(p1), @intCast(p2), win.WindowRect());
         },
         df.CLOSE_POPDOWN => {
             ClosePopdownMsg(win);
-            return df.TRUE;
+            return true;
         },
         df.CLOSE_WINDOW => {
             const rtn = root.zBaseWndProc(df.MENUBAR, win, msg, p1, p2);

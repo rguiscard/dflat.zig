@@ -143,27 +143,27 @@ fn DisplayDates(wnd:df.WINDOW) void {
 //}
 
 
-pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             _ = root.zDefaultWndProc(win, msg, p1, p2);
             CreateWindowMsg(wnd);
-            return df.TRUE;
+            return true;
         },
         df.KEYBOARD => {
 //            if (KeyboardMsg(wnd, p1))
-//                return TRUE;
+//                return true;
         },
         df.PAINT => {
             _ = root.zDefaultWndProc(win, msg, p1, p2);
             DisplayDates(wnd);
-            return df.TRUE;
+            return true;
         },
         df.COMMAND => {
             if (p1 == df.ID_HELP) {
                 _ = helpbox.DisplayHelp(win, "Calendar");
-                return df.TRUE;
+                return true;
             }
         },
         df.CLOSE_WINDOW => {

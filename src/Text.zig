@@ -4,14 +4,14 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 
-pub fn TextProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn TextProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg)    {
         df.SETFOCUS => {
-            return df.TRUE;
+            return true;
         },
         df.LEFT_BUTTON => {
-            return df.TRUE;
+            return true;
         },
         df.PAINT => {
             df.drawText(wnd);

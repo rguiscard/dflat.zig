@@ -68,7 +68,7 @@ pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *df.D
     return if (rtn>0) true else false;
 }
 
-fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -108,7 +108,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
                             set_srchSpec(&fName);
                             InitDlgBox(win);
                             _ = df.SendMessage(cwnd, df.SETFOCUS, df.TRUE, 0);
-                            return df.TRUE;
+                            return true;
                         }
                     }
                 },
@@ -131,7 +131,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
                         else => {
                         }
                     }
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_DIRECTORY => {
                     switch (subcmd) {
@@ -150,7 +150,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
                         else => {
                         }
                     }
-                    return df.TRUE;
+                    return true;
                 },
                 else => {
                 }

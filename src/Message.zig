@@ -71,7 +71,7 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 
     if (wnd != null) {
         if (Window.get_zin(wnd)) |zin| {
-            return zin.sendMessage(msg, p1, p2);
+            return if (zin.sendMessage(msg, p1, p2)) df.TRUE else df.FALSE;
         } else {
             // This shouldn't happen, except dummy window at normal.c for now.
             // Or we can create a Window instance for it here.
@@ -125,7 +125,7 @@ pub export fn dispatch_message() callconv(.c) df.BOOL {
         if (mq.win) |w| {
             _ = w.sendMessage(mq.msg, mq.p1, mq.p2);
         } else {
-            _ = df.SendMessage(null, mq.msg, mq.p1, mq.p2);
+            _ = SendMessage(null, mq.msg, mq.p1, mq.p2);
         }
 
         if (mq.msg == df.ENDDIALOG) {

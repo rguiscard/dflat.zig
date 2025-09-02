@@ -228,7 +228,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ------------ ADDTEXT Message --------------
-fn AddTextMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) c_int {
+fn AddTextMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
     const wnd = win.win;
     const rtn = root.zBaseWndProc(df.LISTBOX, win, df.ADDTEXT, p1, p2);
     if (wnd.*.selection == -1)
@@ -254,34 +254,34 @@ fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
 }
 
-pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
+pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             _ = root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
             wnd.*.selection = -1;
             wnd.*.AnchorPoint = -1; // EXTENDEDSELECTIONS
-            return df.TRUE;
+            return true;
         },
         df.KEYBOARD => {
             if ((df.WindowMoving == 0) and (df.WindowSizing == 0)) {
                 if (KeyboardMsg(win, p1, p2))
-                    return df.TRUE;
+                    return true;
             }
         },
         df.LEFT_BUTTON => {
             if (LeftButtonMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.DOUBLE_CLICK => {
             if (DoubleClickMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.BUTTON_RELEASED => {
             if (df.WindowMoving>0 or df.WindowSizing>0 or df.VSliding>0) {
             } else {
                 py = -1;
-                return df.TRUE;
+                return true;
             }
         },
         df.ADDTEXT => {
@@ -289,7 +289,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int 
         },
         df.LB_GETTEXT => {
             GetTextMsg(win, p1, p2);
-            return df.TRUE;
+            return true;
         },
         df.CLEARTEXT => {
             wnd.*.selection = -1;
@@ -305,13 +305,13 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int 
             } else {
                 df.WriteSelection(wnd, wnd.*.selection, df.TRUE, null);
             }
-            return df.TRUE;
+            return true;
         },
         df.SETFOCUS => {
             _ = root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
             if (p1>0)
                 df.WriteSelection(wnd, wnd.*.selection, df.TRUE, null);
-            return df.TRUE;
+            return true;
         },
         df.SCROLL,
         df.HORIZSCROLL,
@@ -320,24 +320,24 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int 
         df.SCROLLDOC => {
             _ = root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
             df. WriteSelection(wnd,wnd.*.selection,df.TRUE,null);
-            return df.TRUE;
+            return true;
         },
         df.LB_CHOOSE => {
             _ = q.SendMessage(Window.GetParent(wnd), df.LB_CHOOSE, p1, p2);
-            return df.TRUE;
+            return true;
         },
         df.LB_SELECTION => {
             df.ChangeSelection(wnd, @intCast(p1), @intCast(p2));
             _ = q.SendMessage(Window.GetParent(wnd), df.LB_SELECTION,
                 wnd.*.selection, 0);
-            return df.TRUE;
+            return true;
         },
         df.LB_CURRENTSELECTION => {
-            return wnd.*.selection;
+            return (wnd.*.selection>0);
         },
         df.LB_SETSELECTION => {
             df.ChangeSelection(wnd, @intCast(p1), 0);
-            return df.TRUE;
+            return true;
         },
         df.CLOSE_WINDOW => {
             if ((df.isMultiLine(wnd) > 0) and (wnd.*.AddMode == df.TRUE)) {

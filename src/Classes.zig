@@ -65,7 +65,7 @@ pub const Klass = enum (c_int) {
 pub const defs = [_]struct{
     []const u8,
     Klass,
-    ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int,
+    ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
     isize} {
 
     .{"NORMAL",      Klass.FORCEINTTYPE, normal.NormalProc,        0              },

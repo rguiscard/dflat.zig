@@ -3,16 +3,16 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 
-pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     const ct:?*df.CTLWINDOW = df.GetControl(wnd);
     if (ct) |ctl| {
         switch (msg) {
             df.SETFOCUS, df.PAINT => {
-                return df.FALSE;
+                return false;
             },
             df.LEFT_BUTTON, df.BUTTON_RELEASED => {
-                return df.SendMessage(Window.GetParent(wnd), msg, p1, p2);
+                return if (df.SendMessage(Window.GetParent(wnd), msg, p1, p2) == df.TRUE) true else false;
             },
             df.BORDER => {
                 const rtn = root.zBaseWndProc(df.BOX, win, msg, p1, p2);

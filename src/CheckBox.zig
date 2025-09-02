@@ -4,7 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 
-pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     const ct:?*df.CTLWINDOW = df.GetControl(wnd);
     if (ct) |ctl| {
@@ -35,13 +35,13 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c
                     // fall through
                     ctl.*.setting ^= df.ON;
                     _ = win.sendMessage(df.PAINT, 0, 0);
-                    return df.TRUE;
+                    return true;
                 }
             },
             df.LEFT_BUTTON => {
                 ctl.*.setting ^= df.ON;
                 _ = win.sendMessage(df.PAINT, 0, 0);
-                return df.TRUE;
+                return true;
             },
             else => {
             }

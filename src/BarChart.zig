@@ -24,12 +24,12 @@ const ProjChart = [_]struct{[]const u8, isize, isize} {
 const Title =  "              PROJECT SCHEDULE";
 const Months = "           Jan Feb Mar Apr May Jun";
 
-fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch (message) {
         df.COMMAND => {
             if (p1 == df.ID_HELP) {
                 _ = helpbox.DisplayHelp(win, "BarChart");
-                return df.TRUE;
+                return true;
             }
         },
         df.CLOSE_WINDOW => {

@@ -9,17 +9,17 @@ pub var VSliding = false; // also used in ListBox
 var HSliding = false;
 
 // ------------ ADDTEXT Message --------------
-fn AddTextMsg(win:*Window, txt:[]const u8) c_int {
+fn AddTextMsg(win:*Window, txt:[]const u8) bool {
     const wnd = win.win;
     // --- append text to the textbox's buffer ---
     const adln:usize = txt.len;
     if (adln > 0xfff0)
-        return df.FALSE;
+        return false;
     if (win.text) |t| {
         // ---- appending to existing text ----
         const txln:usize = @intCast(df.strlen(wnd.*.text)); // more accurate than win.text because \0 ?
         if (txln+adln > 0xfff0) { // consider overflow ?
-            return df.FALSE;
+            return false;
         }
         if (txln+adln > wnd.*.textlen) {
             if (root.global_allocator.realloc(t, txln+adln+3)) |buf| {
@@ -70,15 +70,15 @@ fn AddTextMsg(win:*Window, txt:[]const u8) c_int {
 //        strcat(wnd->text, "\n");
 
         df.BuildTextPointers(wnd);
-        return df.TRUE;
+        return true;
     }
-    return df.FALSE;
+    return false;
 }
 
 // ------------ INSERTTEXT Message --------------
 fn InsertTextMsg(win:*Window, txt:[]const u8, lno:c_int) void {
     const wnd = win.win;
-    if (AddTextMsg(win, txt)>0) {
+    if (AddTextMsg(win, txt)) {
         df.InsertTextAt(wnd, @constCast(txt.ptr), lno);
         df.BuildTextPointers(wnd);
         wnd.*.TextChanged = df.TRUE;
@@ -136,7 +136,7 @@ fn ClearTextMsg(win:*Window) void {
 
 // ------------ KEYBOARD Message --------------
 fn KeyboardMsg(win:*Window, p1:df.PARAM) bool {
-    var rtn:c_uint = df.FALSE;
+    var rtn = false;
 
     switch (p1) {
         df.UP => {
@@ -172,7 +172,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM) bool {
         else => {
         }
     }
-    return (rtn == df.TRUE);
+    return rtn;
 }
 
 // ------------ LEFT_BUTTON Message --------------
@@ -189,11 +189,11 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         }
         if (my == 1) {
             // -------- top scroll button ---------
-            return (df.TRUE == win.sendMessage(df.SCROLL, df.FALSE, 0));
+            return win.sendMessage(df.SCROLL, df.FALSE, 0);
         }
         if (my == win.ClientHeight()) {
             // -------- bottom scroll button ---------
-            return (df.TRUE == win.sendMessage(df.SCROLL, df.TRUE, 0));
+            return win.sendMessage(df.SCROLL, df.TRUE, 0);
         }
         // ---------- in the scroll bar -----------
         if ((VSliding == false) and (my-1 == wnd.*.VScrollBox)) {
@@ -207,10 +207,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return (df.TRUE == q.SendMessage(null, df.MOUSE_TRAVEL, @intCast(@intFromPtr(&rc)), 0));
         }
         if (my-1 < wnd.*.VScrollBox) {
-            return (df.TRUE == win.sendMessage(df.SCROLLPAGE,df.FALSE,0));
+            return win.sendMessage(df.SCROLLPAGE,df.FALSE,0);
         }
         if (my-1 > wnd.*.VScrollBox) {
-            return (df.TRUE == win.sendMessage(df.SCROLLPAGE,df.TRUE,0));
+            return win.sendMessage(df.SCROLLPAGE,df.TRUE,0);
         }
     }
     if (win.TestAttribute(df.HSCROLLBAR) and
@@ -221,10 +221,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return false;
         }
         if (mx == 1) {
-            return (df.TRUE == win.sendMessage(df.HORIZSCROLL,df.FALSE,0));
+            return win.sendMessage(df.HORIZSCROLL,df.FALSE,0);
         }
         if (mx == win.WindowWidth()-2) {
-            return (df.TRUE == win.sendMessage(df.HORIZSCROLL,df.TRUE,0));
+            return win.sendMessage(df.HORIZSCROLL,df.TRUE,0);
         }
         if ((HSliding == false) and (mx-1 == wnd.*.HScrollBox)) {
             // --- hit the scroll box ---
@@ -240,10 +240,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         }
         if (mx-1 < wnd.*.HScrollBox) {
-            return (df.TRUE == win.sendMessage(df.HORIZPAGE,df.FALSE,0));
+            return win.sendMessage(df.HORIZPAGE,df.FALSE,0);
         }
         if (mx-1 > wnd.*.HScrollBox) {
-            return (df.TRUE == win.sendMessage(df.HORIZPAGE,df.TRUE,0));
+            return win.sendMessage(df.HORIZPAGE,df.TRUE,0);
         }
     }
     return false;
@@ -297,19 +297,19 @@ fn ButtonReleasedMsg(win:*Window) void {
 }
 
 // ------------ SCROLL Message --------------
-fn ScrollMsg(win:*Window,p1:df.PARAM) c_int {
+fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
     const wnd = win.win;
     // ---- vertical scroll one line ----
     if (p1>0) {
         // ----- scroll one line up -----
         if (wnd.*.wtop+win.ClientHeight() >= wnd.*.wlines) {
-            return df.FALSE;
+            return false;
         }
         wnd.*.wtop += 1;
     } else {
         // ----- scroll one line down -----
         if (wnd.*.wtop == 0) {
-            return df.FALSE;
+            return false;
         }
         wnd.*.wtop -= 1;
     }
@@ -339,27 +339,27 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) c_int {
             }
         }
     }
-    return df.TRUE;
+    return true;
 }
 
-fn HorizScrollMsg(win:*Window,p1:df.PARAM) c_int {
+fn HorizScrollMsg(win:*Window,p1:df.PARAM) bool {
     const wnd = win.win;
     // --- horizontal scroll one column ---
     if (p1>0) {
         // --- scroll left ---
         if (wnd.*.wleft + win.ClientWidth()-1 >= wnd.*.textwidth) {
-            return df.FALSE;
+            return false;
         }
         wnd.*.wleft += 1;
     } else {
         // --- scroll right ---
         if (wnd.*.wleft == 0) {
-            return df.FALSE;
+            return false;
         }
         wnd.*.wleft -= 1;
     }
     _ = win.sendMessage(df.PAINT, 0, 0);
-    return df.TRUE;
+    return true;
 }
 
 // ------------  SCROLLPAGE Message --------------
@@ -499,7 +499,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
 }
 
 // ----------- TEXTBOX Message-processing Module -----------
-pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -511,26 +511,25 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_i
             const pp1:usize = @intCast(p1);
             const txt:[*c]u8 = @ptrFromInt(pp1);
             const len = df.strlen(txt);
-            const rtn = AddTextMsg(win, txt[0..len]);
-            return @intCast(rtn);
+            return AddTextMsg(win, txt[0..len]);
         },
         df.DELETETEXT => {
             df.DeleteTextMsg(wnd, @intCast(p1));
-            return df.TRUE;
+            return true;
         },
         df.INSERTTEXT => {
             const pp1:usize = @intCast(p1);
             const txt:[*c]u8 = @ptrFromInt(pp1);
             const len = df.strlen(txt);
             InsertTextMsg(win, txt[0..len], @intCast(p2));
-            return df.TRUE;
+            return true;
         },
         df.SETTEXT => {
             const pp1:usize = @intCast(p1);
             const txt:[*c]u8 = @ptrFromInt(pp1);
             const len = df.strlen(txt);
             SetTextMsg(win, txt[0..len]);
-            return df.TRUE;
+            return true;
         },
         df.CLEARTEXT => {
             ClearTextMsg(win);
@@ -538,21 +537,21 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_i
         df.KEYBOARD => {
             if ((df.WindowMoving == 0) and (df.WindowSizing == 0)) {
                 if (KeyboardMsg(win, p1)) {
-                    return df.TRUE;
+                    return true;
                 }
             }
         },
         df.LEFT_BUTTON => {
             if ((df.WindowMoving > 0) or (df.WindowSizing > 0)) {
-                return df.FALSE;
+                return false;
             }
             if (LeftButtonMsg(win, p1, p2)) {
-                return df.TRUE;
+                return true;
             }
         },
         df.MOUSE_MOVED => {
             if (MouseMovedMsg(win, p1, p2)) {
-                return df.TRUE;
+                return true;
             }
         },
         df.BUTTON_RELEASED => {
@@ -566,20 +565,20 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_i
         },
         df.SCROLLPAGE => {
             ScrollPageMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.HORIZPAGE => {
             HorizScrollPageMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.SCROLLDOC => {
             ScrollDocMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.PAINT => {
             if (df.isVisible(wnd)>0) {
                 PaintMsg(win, p1, p2);
-                return df.FALSE;
+                return false;
             }
         },
         df.CLOSE_WINDOW => {

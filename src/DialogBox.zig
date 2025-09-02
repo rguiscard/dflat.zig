@@ -29,7 +29,7 @@ const TopLevelFields = @This();
 
 // ------- create and execute a dialog box ----------
 pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
-    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int) df.BOOL {
+    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool) c_int {
 
     const box = db;
 
@@ -68,7 +68,7 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
         _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
         _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
     }
-    return rtn;
+    return @intCast(rtn);
 }
 
 // ------- CREATE_WINDOW Message (Control) -----
@@ -165,7 +165,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // -- generic window processor used by dialog box controls --
-pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
+pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     // win can be null ? probably not.
     const wnd = win.win;
     switch(msg) {
@@ -174,7 +174,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int 
         },
         df.KEYBOARD => {
             if (CtlKeyboardMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.PAINT => {
             df.FixColors(wnd);
@@ -191,7 +191,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int 
                 df.inFocus = null;
                 _ = root.DefaultWndProc(wnd, msg, p1, p2);
                 df.inFocus = oldFocus;
-                return df.TRUE;
+                return true;
             }
         },
         df.SETFOCUS => {
@@ -223,7 +223,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int 
                         _ = df.SendMessage(pwnd, df.COMMAND,
                                  df.inFocusCommand(db), df.ENTERFOCUS);
                     }
-                    return df.TRUE;
+                    return true;
                 }
             } else {
                 _ = df.SendMessage(pwnd, df.COMMAND,
@@ -240,10 +240,10 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int 
 }
 
 // -------- CREATE_WINDOW Message ---------
-fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) c_int {
+fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-    var rtn:c_int = df.FALSE;
+    var rtn = false;
     var idx:isize = -1;
 
     const dbs = getDialogBoxes();
@@ -418,7 +418,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ----- window-processing module, DIALOG window class -----
-pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     var p2_new = p2;
 
@@ -428,22 +428,22 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         },
         df.SHIFT_CHANGED => {
             if (win.modal)
-                return df.TRUE;
+                return true;
         },
         df.LEFT_BUTTON => {
             if (LeftButtonMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.KEYBOARD => {
             if (KeyboardMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.CLOSE_POPDOWN => {
             SysMenuOpen = false;
         },
         df.LB_SELECTION, df.LB_CHOOSE => {
             if (SysMenuOpen)
-                return df.TRUE;
+                return true;
             if (wnd.*.extension) |extension| {
                 const db:*df.DBOX = @alignCast(@ptrCast(extension));
                 _ = win.sendMessage(df.COMMAND, df.inFocusCommand(db), msg);
@@ -451,12 +451,12 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         },
         df.SETFOCUS => {
             if ((p1 != 0) and (wnd.*.dfocus != null) and (df.isVisible(wnd) > 0)) {
-                return df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
+                return if (df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0) == df.TRUE) true else false;
             }
         },
         df.COMMAND => {
             if (CommandMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.PAINT => {
             p2_new = df.TRUE;
@@ -470,7 +470,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         df.CLOSE_WINDOW => {
             if (p1 == 0) {
                 _ = win.sendMessage(df.COMMAND, df.ID_CANCEL, 0);
-                return df.TRUE;
+                return true;
             }
         },
         else => {

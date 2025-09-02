@@ -9,7 +9,7 @@ const normal = @import("Normal.zig");
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
 
-wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int,
+wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
 
 // -------------- linked list pointers ----------------
 parent:df.WINDOW = null,       // parent window
@@ -70,7 +70,7 @@ pub fn create(
     height:c_int, width:c_int,  // dimensions
     extension:?*anyopaque,      // pointer to additional data
     parent: df.WINDOW,          // parent of this window
-    wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int,
+    wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
     attrib: c_int) *TopLevelFields {
 
     const title = if (ttl) |t| t.ptr else null;
@@ -170,7 +170,7 @@ pub fn create(
 }
 
 // --------- message prototypes -----------
-pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.PARAM) df.BOOL {
+pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.PARAM) bool {
     // Be sure to send null-terminated string to c.
     if (self.allocator.dupeZ(u8, p1)) |txt| {
         defer self.allocator.free(txt);
@@ -180,13 +180,13 @@ pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.P
     }
 //    const buf:[*c]u8 = p1.ptr;
 //    return self.sendMessage(msg, @intCast(@intFromPtr(buf)), p2);
-    return df.FALSE;
+    return false;
 }
 
 // --------- send a message to a window -----------
-pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) df.BOOL {
+pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = self.win;
-    var rtn:c_int = df.TRUE;
+    var rtn = true;
 
     switch (msg) {
         df.PAINT,
@@ -230,7 +230,8 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
-    return df.ProcessMessage(wnd, msg, p1, p2, rtn);
+    const c_rtn = if (rtn) df.TRUE else df.FALSE;
+    return (df.ProcessMessage(wnd, msg, p1, p2, c_rtn) == df.TRUE);
 }
 
 // ------- window methods -----------

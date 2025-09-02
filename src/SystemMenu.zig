@@ -3,7 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 
-pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
         switch (msg) {
             df.CREATE_WINDOW => {
@@ -16,7 +16,7 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                 const mx = p1 - win.GetLeft();
                 const my = p2 - win.GetTop();
                 if (df.HitControlBox(wnd1, mx, my))
-                    return df.TRUE;
+                    return true;
             },
             df.LB_CHOOSE => {
                 df.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
@@ -26,10 +26,10 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                     df.PostMessage(df.GetParent(wnd), msg, p1, p2);
                     _ = df.SendMessage(wnd, df.CLOSE_WINDOW, df.TRUE, 0);
                 }
-                return df.TRUE;
+                return true;
             },
             df.SHIFT_CHANGED => {
-                return df.TRUE;
+                return true;
             },
             df.CLOSE_WINDOW => {
                 df.ActiveMenuBar = wnd.*.holdmenu;

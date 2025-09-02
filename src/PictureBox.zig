@@ -240,24 +240,24 @@ fn DrawBoxMsg(win:*Window, p1:df.PARAM) void {
     }
 }
 
-pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch (message) {
         df.PAINT => {
             _ = root.zBaseWndProc(df.PICTUREBOX, win, message, p1, p2);
             PaintMsg(win);
-            return df.TRUE;
+            return true;
         },
         df.DRAWVECTOR => {
             DrawVectorMsg(win, p1, df.VECTOR);
-            return df.TRUE;
+            return true;
         },
         df.DRAWBOX => {
             DrawBoxMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.DRAWBAR => {
             DrawVectorMsg(win, p1, @intCast(p2));
-            return df.TRUE;
+            return true;
         },
         df.CLOSE_WINDOW => {
             if (win.VectorList) |list| {

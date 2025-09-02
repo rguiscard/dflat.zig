@@ -63,7 +63,7 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *df.CTLWINDOW) void {
     }
 }
 
-pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     const ct = df.GetControl(wnd);
     if (ct != null)    {
@@ -72,26 +72,26 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
                 _ = root.zBaseWndProc(df.BUTTON, win, msg, p1, p2);
                 // ---- fall through ----
                 PaintMsg(win, ct, null);
-                return df.TRUE;
+                return true;
             },
             df.PAINT => {
                 const ptr:usize = @intCast(p1);
                 PaintMsg(win, ct, @ptrFromInt(ptr));
-                return df.TRUE;
+                return true;
             },
             df.KEYBOARD => {
                 if (p1 == '\r') {
                     // ---- fall through ----
                     LeftButtonMsg(win, msg, ct);
-                    return df.TRUE;
+                    return true;
                 }
             },
             df.LEFT_BUTTON => {
                 LeftButtonMsg(win, msg, ct);
-                return df.TRUE;
+                return true;
             },
             df.HORIZSCROLL => {
-                return df.TRUE;
+                return true;
             },
             else => {
             }

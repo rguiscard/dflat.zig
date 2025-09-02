@@ -10,7 +10,7 @@ var py:c_int = -1;
 var CurrentMenuSelection:c_int = 0;
 
 // ------------ CREATE_WINDOW Message -------------
-fn CreateWindowMsg(win:*Window) c_int {
+fn CreateWindowMsg(win:*Window) bool {
     const wnd = win.win;
     win.ClearAttribute(df.HASTITLEBAR  |
                        df.VSCROLLBAR   |
@@ -107,9 +107,9 @@ fn PaintMsg(win:*Window) void {
     }
 }
 
-fn BorderMsg(win:*Window) c_int {
+fn BorderMsg(win:*Window) bool {
     const wnd = win.win;
-    var rtn = df.TRUE;
+    var rtn = true;
     if (wnd.*.mnu) |_| {
         const currFocus = df.inFocus;
         df.inFocus = null;
@@ -221,7 +221,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ----------- CLOSE_WINDOW Message ----------
-fn CloseWindowMsg(win:*Window) c_int {
+fn CloseWindowMsg(win:*Window) bool {
     const wnd = win.win;
     const pwnd = Window.GetParent(wnd);
     _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
@@ -234,7 +234,7 @@ fn CloseWindowMsg(win:*Window) c_int {
 }
 
 // - Window processing module for POPDOWNMENU window class -
-pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -242,22 +242,22 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_
         },
         df.LEFT_BUTTON => {
             LeftButtonMsg(win, p1, p2);
-            return df.FALSE;
+            return false;
         },
         df.DOUBLE_CLICK => {
-            return df.TRUE;
+            return true;
         },
         df.LB_SELECTION => {
             const sel:c_uint = @intCast(p1);
             const l = df.TextLine(wnd, sel);
             if (l[0] == df.LINE) {
-                return df.TRUE;
+                return true;
             }
             wnd.*.mnu.*.Selection = @intCast(p1);
         },
         df.BUTTON_RELEASED => {
             if (ButtonReleasedMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.BUILD_SELECTIONS => {
             const pp:usize = @intCast(p1);
@@ -266,8 +266,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_
         },
         df.PAINT => {
             if (wnd.*.mnu == null)
-                return df.TRUE;
-//            df.PaintMsg(wnd);
+                return true;
             PaintMsg(win);
         },
         df.BORDER => {
@@ -275,11 +274,11 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_
         },
         df.LB_CHOOSE => {
             LBChooseMsg(win, p1);
-            return df.TRUE;
+            return true;
         },
         df.KEYBOARD => {
             if (KeyboardMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
         },
         df.CLOSE_WINDOW => {
             return CloseWindowMsg(win);

@@ -27,7 +27,8 @@ pub const global_allocator = std.heap.c_allocator;
 
 pub export fn BaseWndProc(klass: df.CLASS, wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     if (Window.get_zin(wnd)) |zin| {
-        return zBaseWndProc(klass, zin, msg, p1, p2);
+        const rtn = zBaseWndProc(klass, zin, msg, p1, p2);
+        return if (rtn) df.TRUE else df.FALSE;
     }
     return df.FALSE;
     // Is it possible that wnd is null ?
@@ -35,22 +36,23 @@ pub export fn BaseWndProc(klass: df.CLASS, wnd: df.WINDOW, msg: df.MESSAGE, p1: 
 
 pub export fn DefaultWndProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     if (Window.get_zin(wnd)) |zin| {
-        return zDefaultWndProc(zin, msg, p1, p2);
+        const rtn = zDefaultWndProc(zin, msg, p1, p2);
+        return if (rtn) df.TRUE else df.FALSE;
     }
     return df.FALSE;
     // Is it possible that wnd is null ?
 }
 
-pub fn zBaseWndProc(klass: df.CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn zBaseWndProc(klass: df.CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const base_class = Klass.defs[@intCast(klass)][1]; // base
     const index:c_int = @intFromEnum(base_class);
     if (Klass.defs[@intCast(index)][2]) |proc| { // wndproc
         return proc(win, msg, p1, p2);
     }
-    return df.FALSE;
+    return false;
 }
 
-pub fn zDefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn zDefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const klass = win.win.*.Class;
     if (Klass.defs[@intCast(klass)][2]) |proc| { // wndproc
         return proc(win, msg, p1, p2);

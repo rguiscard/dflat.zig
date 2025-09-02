@@ -54,7 +54,7 @@ pub fn main() !void {
 
 // ------- window processing module for the
 //                    memopad application window -----
-fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch(msg) {
         df.CREATE_WINDOW => {
             const rtn = mp.zDefaultWndProc(win, msg, p1, p2);
@@ -69,73 +69,73 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
             switch(p1) {
                 df.ID_NEW => {
                     NewFile(win);
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_OPEN => {
                     if (SelectFile(win)) {
-                        return df.TRUE;
+                        return true;
                     } else |_| {
-                        return df.FALSE;
+                        return false;
                     }
                 },
                 df.ID_SAVE => {
                     if (mp.Window.get_zin(df.inFocus)) |w| {
                         SaveFile(w, false);
-                        return df.TRUE;
+                        return true;
                     }
-                    return df.FALSE;
+                    return false;
                 },
                 df.ID_SAVEAS => {
                     if (mp.Window.get_zin(df.inFocus)) |w| {
                         SaveFile(w, true);
-                        return df.TRUE;
+                        return true;
                     }
-                    return df.FALSE;
+                    return false;
                 },
                 df.ID_DELETEFILE => {
                     df.DeleteFile(df.inFocus);
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_EXIT => {
                     const m = "Exit Memopad?";
                     if (mp.MessageBox.YesNoBox(@constCast(m.ptr)) == df.FALSE)
-                        return df.FALSE;
+                        return false;
                 },
                 df.ID_WRAP => {
                     df.cfg.WordWrap = df.GetCommandToggle(@constCast(@ptrCast(&mp.menus.MainMenu)), df.ID_WRAP);
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_INSERT => {
                     df.cfg.InsertMode = df.GetCommandToggle(@constCast(@ptrCast(&mp.menus.MainMenu)), df.ID_INSERT);
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_TAB2 => {
                     df.cfg.Tabs = 2;
                     FixTabMenu();
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_TAB4 => {
                     df.cfg.Tabs = 4;
                     FixTabMenu();
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_TAB6 => {
                     df.cfg.Tabs = 6;
                     FixTabMenu();
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_TAB8 => {
                     df.cfg.Tabs = 8;
                     FixTabMenu();
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_CALENDAR => {
                     mp.Calendar.Calendar(win);
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_BARCHART => {
                     mp.BarChart.BarChart(win);
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_ABOUT => {
                     const t = "About D-Flat and the MemoPad";
@@ -157,7 +157,7 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
                         \\editor that demonstrates D-Flat
                     ;
                     _ = mp.MessageBox.MessageBox(@constCast(t.ptr), @constCast(m.ptr));
-                    return df.TRUE;
+                    return true;
                 },
                 else => {
                 }
@@ -307,9 +307,9 @@ fn FixTabMenu() void {
 }
 
 // ----- window processing module for the editboxes -----
-fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
-    var rtn:c_int = 0;
+    var rtn = false;
     switch (msg) {
         df.SETFOCUS => {
             if (p1 > 0) {
@@ -334,7 +334,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_
                 df.ID_HELP => {
 //                    const helpfile:[:0]const u8 = "MEMOPADDOC";
                     _ = mp.helpbox.DisplayHelp(win, "memopad");
-                    return df.TRUE;
+                    return true;
                 },
                 df.ID_WRAP => {
                     _ = df.SendMessage(mp.Window.GetParent(wnd), df.COMMAND, df.ID_WRAP, 0);

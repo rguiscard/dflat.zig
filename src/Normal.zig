@@ -77,7 +77,7 @@ fn HideWindowMsg(win:*Window) void {
 }
 
 // ----- test if screen coordinates are in a window ----
-fn InsideWindow(win:*Window, x:c_int, y:c_int) c_int {
+fn InsideWindow(win:*Window, x:c_int, y:c_int) bool {
     const wnd = win.win;
     var rc = df.WindowRect(wnd);
     if (win.TestAttribute(df.NOCLIP))    {
@@ -88,9 +88,9 @@ fn InsideWindow(win:*Window, x:c_int, y:c_int) c_int {
         }
     }
     if (rect.InsideRect(x, y, rc)) {
-        return df.TRUE;
+        return true;
     }
-    return df.FALSE;
+    return false;
 }
 
 // --------- KEYBOARD Message ----------
@@ -611,7 +611,7 @@ fn RestoreMsg(win:*Window) void {
     }
 }
 
-pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -628,7 +628,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         },
         df.KEYBOARD => {
             if (KeyboardMsg(win, p1, p2))
-                return df.TRUE;
+                return true;
             // ------- fall through -------
             if (Window.GetParent(wnd) != null)
                 q.PostMessage(Window.GetParent(wnd), msg, p1, p2);
@@ -683,7 +683,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         },
         df.MOUSE_MOVED => {
             if (MouseMovedMsg(win, p1, p2)) {
-                return df.TRUE;
+                return true;
             }
         },
         df.BUTTON_RELEASED => {
@@ -726,14 +726,12 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_in
         df.DISPLAY_HELP => {
             const p1_addr:usize = @intCast(p1);
             const pp1:[*c]u8 = @ptrFromInt(p1_addr);
-//            const rtn = df.DisplayHelp(wnd, pp1);
-            const rtn = helpbox.DisplayHelp(win, std.mem.span(pp1));
-            return @intCast(rtn);
+            return (helpbox.DisplayHelp(win, std.mem.span(pp1)) == df.TRUE);
         },
         else => {
         }
     }
-    return df.TRUE;
+    return true;
 }
 
 // ----- terminate the move or size operation -----
