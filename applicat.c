@@ -52,40 +52,6 @@ static char *Menus[9] = {
 
 char **Argv;
 
-#ifdef INCLUDE_SHELLDOS
-/*
-static void SwitchCursor(void)
-{
-    SendMessage(NULL, SAVE_CURSOR, 0, 0);
-    SwapCursorStack();
-    SendMessage(NULL, RESTORE_CURSOR, 0, 0);
-}
-*/
-/* ------- Shell out to DOS ---------- */
-/*
-void ShellDOS(WINDOW wnd)
-{
-	oldFocus = inFocus;
-    SendMessage(wnd, HIDE_WINDOW, 0, 0);
-    SwitchCursor();
-    if (ScreenHeight != SCREENHEIGHT)
-        SetScreenHeight(ScreenHeight);
-    SendMessage(NULL, HIDE_MOUSE, 0, 0);
-    fflush(stdout);
-    tty_restore();
-    runshell();
-    tty_enable_unikey();
-
-    if (SCREENHEIGHT != cfg.ScreenLines)
-        SetScreenHeight(cfg.ScreenLines);
-    SwitchCursor();
-	SendMessage(wnd, SHOW_WINDOW, 0, 0);
-    SendMessage(oldFocus, SETFOCUS, TRUE, 0);
-    SendMessage(NULL, SHOW_MOUSE, 0, 0);
-}
-*/
-#endif
-
 #ifdef INCLUDE_WINDOWMENU
 /* -------- return the name of a document window ------- */
 static char *WindowName(WINDOW wnd)

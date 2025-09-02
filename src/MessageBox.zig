@@ -14,7 +14,6 @@ const sERROR = "Error";
 const sCONFIRM = "Confirm";
 const sWait = "Wait...";
 
-// InputBox and CancelBox were not used. Port them later.
 pub export fn ErrorMessage(msg: [*c]u8) df.BOOL {
     const result = GenericMessage(null, @constCast(sERROR.ptr), msg, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
     return result;
@@ -104,20 +103,85 @@ pub fn MomentaryMessage(message: []const u8) *Window {
 
 fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
-    return df.cMessageBoxProc(wnd, msg, p1, p2);
+    switch (msg) {
+        df.CREATE_WINDOW => {
+            wnd.*.Class = df.MESSAGEBOX;
+            df.InitWindowColors(wnd);
+            win.ClearAttribute(df.CONTROLBOX);
+        },
+        df.KEYBOARD => {
+              //  This do nothing
+//            if (p1 == '\r' or p1 == df.ESC)
+//                ReturnValue = (int)p1;
+        },
+        else => {
+        }
+    }
+    return root.zBaseWndProc(df.MESSAGEBOX, win, msg, p1, p2);
 }
 
 fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
-    return df.cYesNoBoxProc(wnd, msg, p1, p2);
+    switch (msg) {
+        df.CREATE_WINDOW => {
+            wnd.*.Class = df.MESSAGEBOX;
+            df.InitWindowColors(wnd);
+            win.ClearAttribute(df.CONTROLBOX);
+        },
+        df.KEYBOARD => {
+            if (p1 < 128) {
+                const c = std.ascii.toLower(@intCast(p1));
+                if (c == 'y') {
+                    _ = win.sendMessage(df.COMMAND, df.ID_OK, 0);
+                } else if (c == 'n') {
+                    _ = win.sendMessage(df.COMMAND, df.ID_CANCEL, 0);
+                }
+            }
+        },
+        else => {
+        }
+    }
+    return root.zBaseWndProc(df.MESSAGEBOX, win, msg, p1, p2);
 }
 
 fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
-    return df.cErrorBoxProc(wnd, msg, p1, p2);
+    switch (msg)    {
+        df.CREATE_WINDOW => {
+            wnd.*.Class = df.ERRORBOX;
+            df.InitWindowColors(wnd);
+        },
+        df.KEYBOARD => {
+              //  This do nothing
+//            if (p1 == '\r' or p1 == df.ESC)
+//                ReturnValue = (int)p1;
+        },
+        else => {
+        }
+    }
+    return root.zBaseWndProc(df.ERRORBOX, win, msg, p1, p2);
 }
 
 fn CancelProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-    return df.cErrorBoxProc(wnd, msg, p1, p2);
+    switch (msg) {
+        // There is no CancelWnd.
+//        case CREATE_WINDOW:
+//            CancelWnd = wnd;
+//            SendMessage(wnd, CAPTURE_MOUSE, 0, 0);
+//            SendMessage(wnd, CAPTURE_KEYBOARD, 0, 0);
+//            break;
+//        case COMMAND:
+//            if ((int) p1 == ID_CANCEL && (int) p2 == 0)
+//                SendMessage(GetParent(wnd), msg, p1, p2);
+//            return TRUE;
+//        case CLOSE_WINDOW:
+//            CancelWnd = NULL;
+//            SendMessage(wnd, RELEASE_MOUSE, 0, 0);
+//            SendMessage(wnd, RELEASE_KEYBOARD, 0, 0);
+//            p1 = TRUE;
+//            break;
+        else => {
+        }
+    }
+    return root.zBaseWndProc(df.MESSAGEBOX, win, msg, p1, p2);
 }

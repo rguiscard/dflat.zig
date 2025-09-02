@@ -139,8 +139,10 @@ int cHelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cMemoPadProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cOurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
 
+/*
 int cMessageBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cYesNoBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cErrorBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cCancelBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
+*/
 int cInputBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
