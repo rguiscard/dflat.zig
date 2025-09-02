@@ -427,10 +427,10 @@ BOOL YesNoBox(char*);
 #define YesNoBox(msg)	\
 	GenericMessage(NULL, "Confirm", msg, 2, YesNoBoxProc,   \
 		Yes, No, ID_OK, ID_CANCEL, TRUE)
-*/
 #define CancelBox(wnd, msg) \
 	GenericMessage(wnd, "Wait...", msg, 1, CancelBoxProc, \
 		Cancel, NULL, ID_CANCEL, 0, FALSE)
+*/
 void CloseCancelBox(void);
 WINDOW MomentaryMessage(char *);
 int MsgHeight(char *);

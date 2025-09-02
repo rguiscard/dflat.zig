@@ -100,8 +100,8 @@ pub const defs = [_]struct{
                                                                    df.HASBORDER  |
                                                                    df.NOCLIP     |
                                                                    df.CONTROLBOX},
-    .{"STATUSBAR",   Klass.TEXTBOX,      wp.StatusBarProc,         df.NOCLIP      },
-    .{"EDITOR",      Klass.EDITBOX,      wp.EditorProc,            0              },
+    .{"STATUSBAR",   Klass.TEXTBOX,   statusbar.StatusBarProc,     df.NOCLIP      },
+    .{"EDITOR",      Klass.EDITBOX,      editor.EditorProc,        0              },
 
     // ========> Add new classes here <========
 

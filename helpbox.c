@@ -18,13 +18,19 @@ char *ClassNames[] = {
 #define MAXHELPKEYWORDS 50  /* --- maximum keywords in a window --- */
 #define MAXHELPSTACK 100
 
-static struct helps *FirstHelp;
-static struct helps *ThisHelp;
-static int HelpCount;
-static char HelpFileName[9];
+struct helps *FirstHelp;
+struct helps *ThisHelp;
+int HelpCount;
+char HelpFileName[9];
 
-static int HelpStack[MAXHELPSTACK];
-static int stacked;
+int HelpStack[MAXHELPSTACK];
+int stacked;
+
+void zReFocus(WINDOW wnd);
+int HelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2);
+int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
+int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
+void cReadHelp(WINDOW wnd, WINDOW cwnd);
 
 /* --- keywords in the current help text -------- */
 static struct keywords {
@@ -36,13 +42,13 @@ static struct keywords {
 static struct keywords *thisword;
 static int keywordcount;
 
-static FILE *helpfp;
-static char hline [160];
-static BOOL Helping;
+FILE *helpfp;
+char hline [160];
+BOOL Helping;
 
-static void SelectHelp(WINDOW, struct helps *, BOOL);
-static void ReadHelp(WINDOW);
-static struct helps *FindHelp(char *);
+void SelectHelp(WINDOW, struct helps *, BOOL);
+void ReadHelp(WINDOW);
+struct helps *FindHelp(char *);
 static void DisplayDefinition(WINDOW, char *);
 static void BestFit(WINDOW, DIALOGWINDOW *);
 
@@ -134,12 +140,14 @@ static BOOL KeyboardMsg(WINDOW wnd, PARAM p1)
 int cHelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
+/*
         case CREATE_WINDOW:
             CreateWindowMsg(wnd);
             break;
         case INITIATE_DIALOG:
             ReadHelp(wnd);
             break;
+*/
         case COMMAND:
             if (p2 != 0)
                 break;
@@ -164,7 +172,7 @@ int cHelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 }
 
 /* ---- PAINT message for the helpbox text editbox ---- */
-static int PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
+int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int rtn;
     if (thisword != NULL)    {
@@ -187,7 +195,7 @@ static int PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* ---- LEFT_BUTTON message for the helpbox text editbox ---- */
-static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
+int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int rtn, mx, my, i;
 
@@ -218,6 +226,7 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* --- window processing module for HELPBOX's text EDITBOX -- */
+/*
 int cHelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
@@ -235,19 +244,20 @@ int cHelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     }
     return DefaultWndProc(wnd, msg, p1, p2);
 }
+*/
 
 /* -------- read the help text into the editbox ------- */
-static void ReadHelp(WINDOW wnd)
+void cReadHelp(WINDOW wnd, WINDOW cwnd)
 {
-    WINDOW cwnd = ControlWindow(wnd->extension, ID_HELPTEXT);
+//    WINDOW cwnd = ControlWindow(wnd->extension, ID_HELPTEXT);
     int linectr = 0;
-    if (cwnd == NULL)
-        return;
+//    if (cwnd == NULL)
+//        return;
     thisword = KeyWords;
 	keywordcount = 0;
 //    cwnd->wndproc = HelpTextProc;
-    set_HelpTextProc(cwnd);
-	SendMessage(cwnd, CLEARTEXT, 0, 0);
+//    set_HelpTextProc(cwnd);
+//	SendMessage(cwnd, CLEARTEXT, 0, 0);
     /* ----- read the help text ------- */
     while (TRUE)    {
         unsigned char *cp = hline, *cp1;
@@ -421,7 +431,7 @@ static void BuildHelpBox(WINDOW wnd)
 }
 
 /* ----- select a new help window from its name ----- */
-static void SelectHelp(WINDOW wnd, struct helps *newhelp, BOOL recall)
+void SelectHelp(WINDOW wnd, struct helps *newhelp, BOOL recall)
 {
 	if (newhelp != NULL)	{
 		int i, x, y;
@@ -566,7 +576,7 @@ static BOOL wildcmp(char *s1, char *s2)
 }
 
 /* --- ThisHelp = the help window matching specified name --- */
-static struct helps *FindHelp(char *Help)
+struct helps *FindHelp(char *Help)
 {
 	int i;
 	struct helps *thishelp = NULL;

@@ -6,25 +6,32 @@ const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const WndProc = @import("WndProc.zig");
 
-const sOK  = "   Ok   ";
-const sYES = "   Yes  ";
-const sNO  = "   No   ";
-const sERROR  = "Error";
-const sCONFIRM  = "Confirm";
+const sOK      = "   Ok   ";
+const sYES     = "   Yes  ";
+const sNO      = "   No   ";
+const sCancel  = " Cancel ";
+const sERROR = "Error";
+const sCONFIRM = "Confirm";
+const sWait = "Wait...";
 
 // InputBox and CancelBox were not used. Port them later.
-pub export fn ErrorMessage(message: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, @constCast(sERROR.ptr), message, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
+pub export fn ErrorMessage(msg: [*c]u8) df.BOOL {
+    const result = GenericMessage(null, @constCast(sERROR.ptr), msg, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
     return result;
 }
 
-pub export fn MessageBox(title: [*c]u8, message: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, title, message, 1, MessageBoxProc, sOK, null, df.ID_OK, 0, true);
+pub export fn MessageBox(title: [*c]u8, msg: [*c]u8) df.BOOL {
+    const result = GenericMessage(null, title, msg, 1, MessageBoxProc, sOK, null, df.ID_OK, 0, true);
     return result;
 }
 
-pub export fn YesNoBox(message: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, @constCast(sCONFIRM.ptr), message, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
+pub export fn YesNoBox(msg: [*c]u8) df.BOOL {
+    const result = GenericMessage(null, @constCast(sCONFIRM.ptr), msg, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
+    return result;
+}
+
+pub export fn CancelBox(wnd: df.WINDOW, msg: [*c]u8) df.BOOL {
+    const result = GenericMessage(wnd, @constCast(sWait.ptr), msg, 1, CancelProc, sCancel, null, df.ID_CANCEL, 0, false);
     return result;
 }
 
@@ -106,6 +113,11 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(
 }
 
 fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+    const wnd = win.win;
+    return df.cErrorBoxProc(wnd, msg, p1, p2);
+}
+
+fn CancelProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
     return df.cErrorBoxProc(wnd, msg, p1, p2);
 }

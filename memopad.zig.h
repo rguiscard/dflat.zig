@@ -106,31 +106,57 @@ void PaintPopDownSelection(WINDOW, struct PopDown *, char*);
 int cSetTextMsg(WINDOW, char *);
 void AdjustTab(WINDOW);
 
+// helpbox.c
+struct helps *FindHelp(char *Help);
+void BuildHelpBox(WINDOW wnd);
+extern struct helps *FirstHelp;
+extern struct helps *ThisHelp;
+extern int HelpCount;
+extern char HelpFileName[9];
+
+int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
+int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
+void cReadHelp(WINDOW wnd, WINDOW cwnd);
+
+extern FILE *helpfp;
+extern char hline [160];
+extern BOOL Helping;
+
+#define MAXHELPSTACK 100
+extern int HelpStack[MAXHELPSTACK];
+extern int stacked;
+
+FILE *OpenHelpFile(const char *fn, const char *md);
+int cHelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2);
+void ReadHelp(WINDOW);
+BOOL HelpBoxKeyboardMsg(WINDOW wnd, PARAM p1);
+void SelectHelp(WINDOW, struct helps *, BOOL);
+
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cTextBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cListBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cEditBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cMenuBarProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cPopDownProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cDialogProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cTextBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cListBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cEditBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cMenuBarProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cPopDownProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cDialogProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
 // int cComboProc(WINDOW, MESSAGE, PARAM, PARAM); // not in use. port later.
-int cTextProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cRadioButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cCheckBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cSpinButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cTextProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cRadioButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cCheckBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cSpinButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cHelpBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cStatusBarProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cStatusBarProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
 
 int cHelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cMemoPadProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cOurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cSystemMenuProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cWatchIconProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cSystemMenuProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cWatchIconProc(WINDOW, MESSAGE, PARAM, PARAM);
 
 int cMessageBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cYesNoBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
@@ -139,7 +165,7 @@ int cCancelBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cInputBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 
 // dialbox.c
-int cControlProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int cControlProc(WINDOW, MESSAGE, PARAM, PARAM);
 
 // slidebox.c, which is not currently used.
 // int cGenericProc(WINDOW, MESSAGE, PARAM, PARAM);

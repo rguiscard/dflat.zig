@@ -441,11 +441,11 @@ pub export fn set_modal(wnd:df.WINDOW, val:df.BOOL) void {
     }
 }
 
-pub export fn set_HelpTextProc(wnd:df.WINDOW) void {
-    if (get_zin(wnd)) |win| {
-        win.wndproc = WndProc.HelpTextProc;
-    }
-}
+//pub export fn set_HelpTextProc(wnd:df.WINDOW) void {
+//    if (get_zin(wnd)) |win| {
+//        win.wndproc = WndProc.HelpTextProc;
+//    }
+//}
 
 pub export fn set_NormalProc(wnd:df.WINDOW) void {
     if (get_zin(wnd)) |win| {

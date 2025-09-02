@@ -140,6 +140,7 @@ BOOL InputBox(WINDOW wnd,char *ttl,char *msg,char *text,int len,int wd)
     return DialogBox(wnd, &InputBoxDB, TRUE, InputBoxProc);
 }
 
+/*
 BOOL GenericMessage(WINDOW wnd,char *ttl,char *msg,int buttonct,
       int (*wndproc)(struct window *,enum messages,PARAM,PARAM),
       char *b1, char *b2, int c1, int c2, int isModal)
@@ -171,7 +172,9 @@ BOOL GenericMessage(WINDOW wnd,char *ttl,char *msg,int buttonct,
     MsgBox.ctl[2].Class = 0;
     return rtn;
 }
+*/
 
+/*
 WINDOW MomentaryMessage(char *msg)
 {
     WINDOW wnd = CreateWindow(
@@ -188,6 +191,7 @@ WINDOW MomentaryMessage(char *msg)
     SendMessage(wnd, SHOW_WINDOW, 0, 0);
     return wnd;
 }
+*/
 
 int MsgHeight(char *msg)
 {
