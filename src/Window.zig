@@ -9,7 +9,7 @@ const normal = @import("Normal.zig");
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
 
-wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
+wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int,
 
 // -------------- linked list pointers ----------------
 parent:df.WINDOW = null,       // parent window
@@ -43,7 +43,6 @@ pub export fn CreateWindow(
     height:c_int, width:c_int,   // dimensions
     extension:?*anyopaque,       // pointer to additional data
     parent:df.WINDOW,            // parent of this window
-//    wndproc:?*const fn (wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
     attrib:c_int)                // window attribute
     callconv(.c) df.WINDOW
 {
@@ -71,7 +70,7 @@ pub fn create(
     height:c_int, width:c_int,  // dimensions
     extension:?*anyopaque,      // pointer to additional data
     parent: df.WINDOW,          // parent of this window
-    wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int,
+    wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int,
     attrib: c_int) *TopLevelFields {
 
     const title = if (ttl) |t| t.ptr else null;

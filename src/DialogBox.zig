@@ -6,6 +6,7 @@ const Dialogs = @import("Dialogs.zig");
 const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
 const helpbox = @import("HelpBox.zig");
+const sysmenu = @import("SystemMenu.zig");
 
 var SysMenuOpen = false;
 const MAXCONTROLS = 30;
@@ -28,7 +29,7 @@ const TopLevelFields = @This();
 
 // ------- create and execute a dialog box ----------
 pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
-    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int) df.BOOL {
+    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int) df.BOOL {
 
     const box = db;
 
@@ -164,7 +165,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // -- generic window processor used by dialog box controls --
-pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
     // win can be null ? probably not.
     const wnd = win.win;
     switch(msg) {
@@ -360,7 +361,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         ' ' => {
             if (((p2 & df.ALTKEY)>0) and win.TestAttribute(df.CONTROLBOX)) {
                 SysMenuOpen = true;
-                df.BuildSystemMenu(wnd);
+                sysmenu.BuildSystemMenu(win);
                 return true;
             }
         },
@@ -417,7 +418,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ----- window-processing module, DIALOG window class -----
-pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     var p2_new = p2;
 

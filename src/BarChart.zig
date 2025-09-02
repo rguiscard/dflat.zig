@@ -24,7 +24,7 @@ const ProjChart = [_]struct{[]const u8, isize, isize} {
 const Title =  "              PROJECT SCHEDULE";
 const Months = "           Jan Feb Mar Apr May Jun";
 
-fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     switch (message) {
         df.COMMAND => {
             if (p1 == df.ID_HELP) {

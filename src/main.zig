@@ -54,7 +54,7 @@ pub fn main() !void {
 
 // ------- window processing module for the
 //                    memopad application window -----
-fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     switch(msg) {
         df.CREATE_WINDOW => {
             const rtn = mp.zDefaultWndProc(win, msg, p1, p2);
@@ -307,7 +307,7 @@ fn FixTabMenu() void {
 }
 
 // ----- window processing module for the editboxes -----
-fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     var rtn:c_int = 0;
     switch (msg) {

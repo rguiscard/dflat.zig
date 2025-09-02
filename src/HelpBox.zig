@@ -67,7 +67,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
     return false;
 }
 
-pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -100,7 +100,7 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
 }
 
 // --- window processing module for HELPBOX's text EDITBOX --
-pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
         df.KEYBOARD => {

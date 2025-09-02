@@ -7,6 +7,7 @@ const rect = @import("Rect.zig");
 const Klass = @import("Classes.zig");
 const q = @import("Message.zig");
 const helpbox = @import("HelpBox.zig");
+const sysmenu = @import("SystemMenu.zig");
 
 var dummyWnd:?Window = null;
 //var px:c_int = -1;
@@ -142,7 +143,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             if ((p2_i & df.ALTKEY) > 0) {
                 if (win.TestAttribute(df.HASTITLEBAR)) {
                     if (win.TestAttribute(df.CONTROLBOX)) {
-                        df.BuildSystemMenu(wnd);
+                        sysmenu.BuildSystemMenu(win);
                     }
                 }
             }
@@ -327,7 +328,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if ((df.WindowSizing>0) or (df.WindowMoving>0))
         return;
     if (df.HitControlBox(wnd, mx, my)) {
-        df.BuildSystemMenu(wnd);
+        sysmenu.BuildSystemMenu(win);
         return;
     }
     if ((my == 0) and (mx > -1) and (mx < win.WindowWidth())) {
@@ -610,7 +611,7 @@ fn RestoreMsg(win:*Window) void {
     }
 }
 
-pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {

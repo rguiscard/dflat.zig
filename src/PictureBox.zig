@@ -240,7 +240,7 @@ fn DrawBoxMsg(win:*Window, p1:df.PARAM) void {
     }
 }
 
-pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     switch (message) {
         df.PAINT => {
             _ = root.zBaseWndProc(df.PICTUREBOX, win, message, p1, p2);

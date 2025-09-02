@@ -499,7 +499,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
 }
 
 // ----------- TEXTBOX Message-processing Module -----------
-pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {

@@ -639,7 +639,7 @@ fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) c_int {
     return rtn;
 }
 
-pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {

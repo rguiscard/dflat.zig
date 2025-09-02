@@ -18,11 +18,11 @@ const helpbox = @import("HelpBox.zig");
 // - zDefaultWndProc(*Window)
 // - EveneQueue(*Window)
 
-pub export fn NormalProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn NormalProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
     return normal.NormalProc(win, msg, p1, p2);
 }
 
-pub export fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
     const wnd = win.win;
     _ = wnd;
     _ = msg;
@@ -33,7 +33,7 @@ pub export fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c
 //    return df.cComboProc(wnd, msg, p1, p2);
 }
 
-pub export fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
     const wnd = win.win;
     _ = wnd;
     _ = msg;
@@ -44,7 +44,7 @@ pub export fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 //    return df.cSpinButtonProc(wnd, msg, p1, p2);
 }
 
-pub export fn InputBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub export fn InputBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
     const wnd = win.win;
     return df.cInputBoxProc(wnd, msg, p1, p2);
 }

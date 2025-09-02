@@ -63,7 +63,7 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *df.CTLWINDOW) void {
     }
 }
 
-pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     const ct = df.GetControl(wnd);
     if (ct != null)    {

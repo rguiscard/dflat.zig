@@ -143,7 +143,7 @@ fn DisplayDates(wnd:df.WINDOW) void {
 //}
 
 
-pub export fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
@@ -175,7 +175,7 @@ pub export fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PA
     return root.zDefaultWndProc(win, msg, p1, p2);
 }
 
-pub export fn Calendar(pwin: *Window) void {
+pub fn Calendar(pwin: *Window) void {
     const pwnd = pwin.win;
     if (Cwnd == null)    {
         const tim = ctime.time(null);

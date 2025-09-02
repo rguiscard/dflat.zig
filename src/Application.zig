@@ -7,6 +7,7 @@ const lists = @import("Lists.zig");
 const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const helpbox = @import("HelpBox.zig");
+const sysmenu = @import("SystemMenu.zig");
 
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
@@ -118,7 +119,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) c_int {
         },
         df.ALT_HYPHEN => {
             if (win.TestAttribute(df.CONTROLBOX)) {
-                df.BuildSystemMenu(wnd);
+                sysmenu.BuildSystemMenu(win);
             }
             return df.TRUE;
         },
@@ -241,7 +242,7 @@ fn CloseWindowMsg(win:*Window) c_int {
     return rtn;
 }
 
-pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
 
     switch (msg) {

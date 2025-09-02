@@ -4,7 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 
-pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
     const ct:?*df.CTLWINDOW = df.GetControl(wnd);
     if (ct) |ctl| {

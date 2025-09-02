@@ -3,7 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 
-pub export fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
     const wnd = win.win;
         switch (msg) {
             df.CREATE_WINDOW => {
@@ -41,8 +41,8 @@ pub export fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.
 }
 
 // ------- Build a system menu --------
-pub export fn BuildSystemMenu(wnd: df.WINDOW) callconv(.c) void {
-    const win:*Window = @constCast(@fieldParentPtr("win", &wnd));
+pub fn BuildSystemMenu(win: *Window) void {
+    const wnd = win.win;
 
     var lf:c_int = @intCast(win.GetLeft()+1);
     var tp:c_int = @intCast(win.GetTop()+1);

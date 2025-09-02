@@ -98,7 +98,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ------- Window processing module for EDITBOX class ------ 
-pub fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
+pub fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
     switch (msg) {
         df.KEYBOARD => {
             if (KeyboardMsg(win, p1, p2))
