@@ -244,8 +244,8 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
         df.COMMAND => {
             switch(p1) {
                 df.ID_HELP => {
-                    const helpfile:[:0]const u8 = "MEMOPADDOC";
-                    _ = df.DisplayHelp(wnd, @constCast(helpfile.ptr));
+//                    const helpfile:[:0]const u8 = "MEMOPADDOC";
+                    _ = mp.helpbox.DisplayHelp(win, "memopad");
                     return df.TRUE;
                 },
                 df.ID_WRAP => {

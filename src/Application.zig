@@ -6,6 +6,7 @@ const q = @import("Message.zig");
 const lists = @import("Lists.zig");
 const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
+const helpbox = @import("HelpBox.zig");
 
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
@@ -150,23 +151,23 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
         },
         df.ID_HELP => {
-            _ = df.DisplayHelp(wnd, df.DFlatApplication);
+            _ = helpbox.DisplayHelp(win, std.mem.span(df.DFlatApplication));
         },
         df.ID_HELPHELP => {
             const help = "HelpHelp";
-            _ = df.DisplayHelp(wnd, @constCast(help.ptr));
+            _ = helpbox.DisplayHelp(win, help);
         },
         df.ID_EXTHELP => {
             const help = "ExtHelp";
-            _ = df.DisplayHelp(wnd, @constCast(help.ptr));
+            _ = helpbox.DisplayHelp(win, help);
         },
         df.ID_KEYSHELP => {
             const help = "KeysHelp";
-            _ = df.DisplayHelp(wnd, @constCast(help.ptr));
+            _ = helpbox.DisplayHelp(win, help);
         },
         df.ID_HELPINDEX => {
             const help = "HelpIndex";
-            _ = df.DisplayHelp(wnd, @constCast(help.ptr));
+            _ = helpbox.DisplayHelp(win, help);
         },
         df.ID_LOG => {
             df.MessageLog(wnd);

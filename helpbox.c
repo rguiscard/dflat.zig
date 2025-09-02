@@ -54,40 +54,6 @@ static void BestFit(WINDOW, DIALOGWINDOW *);
 
 int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 
-/* ------------- CREATE_WINDOW message ------------ */
-/*
-static void CreateWindowMsg(WINDOW wnd)
-{
-    Helping = TRUE;
-    GetClass(wnd) = HELPBOX;
-    InitWindowColors(wnd);
-    if (ThisHelp != NULL)
-        ThisHelp->hwnd = wnd;
-}
-*/
-
-/* ------------- COMMAND message ------------ */
-static BOOL CommandMsg(WINDOW wnd, PARAM p1)
-{
-    switch ((int)p1)    {
-        case ID_PREV:
-            if (ThisHelp  != NULL)
-                SelectHelp(wnd, FirstHelp+(ThisHelp->prevhlp), TRUE);
-            return TRUE;
-        case ID_NEXT:
-            if (ThisHelp != NULL)
-                SelectHelp(wnd, FirstHelp+(ThisHelp->nexthlp), TRUE);
-            return TRUE;
-        case ID_BACK:
-			if (stacked)
-				SelectHelp(wnd, FirstHelp+HelpStack[--stacked], FALSE);
-            return TRUE;
-        default:
-            break;
-    }
-    return FALSE;
-}
-
 /* ------------- KEYBOARD message ------------ */
 BOOL HelpBoxKeyboardMsg(WINDOW wnd, PARAM p1)
 {
@@ -136,41 +102,6 @@ BOOL HelpBoxKeyboardMsg(WINDOW wnd, PARAM p1)
     }
     SendMessage(cwnd, PAINT, 0, 0);
     return TRUE;
-}
-
-/* ---- window processing module for the HELPBOX ------- */
-int cHelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
-{
-    switch (msg)    {
-/*
-        case CREATE_WINDOW:
-            CreateWindowMsg(wnd);
-            break;
-        case INITIATE_DIALOG:
-            ReadHelp(wnd);
-            break;
-        case COMMAND:
-            if (p2 != 0)
-                break;
-            if (CommandMsg(wnd, p1))
-                return TRUE;
-            break;
-        case KEYBOARD:
-            if (WindowMoving)
-                break;
-            if (KeyboardMsg(wnd, p1))
-                return TRUE;
-            break;
-        case CLOSE_WINDOW:
-            if (ThisHelp != NULL)
-                ThisHelp->hwnd = NULL;
-            Helping = FALSE;
-            break;
-*/
-        default:
-            break;
-    }
-    return BaseWndProc(HELPBOX, wnd, msg, p1, p2);
 }
 
 /* ---- PAINT message for the helpbox text editbox ---- */
@@ -227,39 +158,13 @@ int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
     return rtn;
 }
 
-/* --- window processing module for HELPBOX's text EDITBOX -- */
-/*
-int cHelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
-{
-    switch (msg)    {
-		case KEYBOARD:
-			break;
-        case PAINT:
-            return PaintMsg(wnd, p1, p2);
-        case LEFT_BUTTON:
-            return LeftButtonMsg(wnd, p1, p2);
-        case DOUBLE_CLICK:
-            PostMessage(wnd, KEYBOARD, '\r', 0);
-            break;
-        default:
-            break;
-    }
-    return DefaultWndProc(wnd, msg, p1, p2);
-}
-*/
-
 /* -------- read the help text into the editbox ------- */
 void cReadHelp(WINDOW wnd, WINDOW cwnd)
 {
-//    WINDOW cwnd = ControlWindow(wnd->extension, ID_HELPTEXT);
     int linectr = 0;
-//    if (cwnd == NULL)
-//        return;
     thisword = KeyWords;
 	keywordcount = 0;
-//    cwnd->wndproc = HelpTextProc;
-//    set_HelpTextProc(cwnd);
-//	SendMessage(cwnd, CLEARTEXT, 0, 0);
+
     /* ----- read the help text ------- */
     while (TRUE)    {
         unsigned char *cp = hline, *cp1;
@@ -393,7 +298,7 @@ void UnLoadHelpFile(void)
 	HelpTree = NULL;
 }
 
-static void BuildHelpBox(WINDOW wnd)
+void BuildHelpBox(WINDOW wnd)
 {
     int offset, i;
 
