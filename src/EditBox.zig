@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
 const textbox = @import("TextBox.zig");
+const search = @import("Search.zig");
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -564,15 +565,15 @@ fn CommandMsg(win:*Window,p1:df.PARAM) bool {
     const wnd = win.win;
     switch (p1) {
         df.ID_SEARCH => {
-            df.SearchText(wnd);
+            search.SearchText(win);
             return true;
         },
         df.ID_REPLACE => {
-            df.ReplaceText(wnd);
+            search.ReplaceText(win);
             return true;
         },
         df.ID_SEARCHNEXT => {
-            df.SearchNext(wnd);
+            search.SearchNext(win);
             return true;
         },
         df.ID_CUT => {

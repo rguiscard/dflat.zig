@@ -319,7 +319,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         df.HORIZPAGE,
         df.SCROLLDOC => {
             _ = root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
-            df. WriteSelection(wnd,wnd.*.selection,df.TRUE,null);
+            df.WriteSelection(wnd,wnd.*.selection,df.TRUE,null);
             return true;
         },
         df.LB_CHOOSE => {
@@ -333,7 +333,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.LB_CURRENTSELECTION => {
-            return (wnd.*.selection>0);
+            return (wnd.*.selection!=0);
         },
         df.LB_SETSELECTION => {
             df.ChangeSelection(wnd, @intCast(p1), 0);
