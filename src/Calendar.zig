@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
+const helpbox = @import("HelpBox.zig");
 
 const ctime = @cImport({
     @cInclude("time.h");
@@ -142,11 +143,11 @@ fn DisplayDates(wnd:df.WINDOW) void {
 //}
 
 
-pub export fn CalendarProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+pub export fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
-    switch (message) {
+    switch (msg) {
         df.CREATE_WINDOW => {
-            _ = root.zDefaultWndProc(win, message, p1, p2);
+            _ = root.zDefaultWndProc(win, msg, p1, p2);
             CreateWindowMsg(wnd);
             return df.TRUE;
         },
@@ -155,15 +156,15 @@ pub export fn CalendarProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: d
 //                return TRUE;
         },
         df.PAINT => {
-            _ = root.zDefaultWndProc(win, message, p1, p2);
+            _ = root.zDefaultWndProc(win, msg, p1, p2);
             DisplayDates(wnd);
             return df.TRUE;
         },
         df.COMMAND => {
-//            if ((int)p1 == ID_HELP)    {
-//                DisplayHelp(wnd, "Calendar");
-//                return TRUE;
-//            }
+            if (p1 == df.ID_HELP) {
+                _ = helpbox.DisplayHelp(win, "Calendar");
+                return df.TRUE;
+            }
         },
         df.CLOSE_WINDOW => {
             Cwnd = null;
@@ -171,7 +172,7 @@ pub export fn CalendarProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: d
         else => {
         }
     }
-    return root.zDefaultWndProc(win, message, p1, p2);
+    return root.zDefaultWndProc(win, msg, p1, p2);
 }
 
 pub export fn Calendar(pwnd: df.WINDOW) void {

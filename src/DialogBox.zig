@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
 const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
+const helpbox = @import("HelpBox.zig");
 
 var SysMenuOpen = false;
 const MAXCONTROLS = 30;
@@ -103,7 +104,8 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         df.F1 => {
             if ((df.WindowMoving==0) and (df.WindowSizing==0)) {
                 const ct = df.GetControl(wnd);
-                if (df.DisplayHelp(wnd, ct.*.help) == 0) {
+//                if (df.DisplayHelp(wnd, ct.*.help) == 0) {
+                if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help)) == 0) {
                     _ = df.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
                 }
                 return true;
@@ -369,7 +371,8 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         df.F1 => {
             const ct = df.GetControl(df.inFocus);
             if (ct != null) {
-                if (df.DisplayHelp(wnd, ct.*.help)>0) {
+//                if (df.DisplayHelp(wnd, ct.*.help)>0) {
+                if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help))>0) {
                     return true;
                 }
             }
@@ -403,7 +406,8 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
 
             const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-            const rtn = df.DisplayHelp(wnd, db.*.HelpName);
+//            const rtn = df.DisplayHelp(wnd, db.*.HelpName);
+            const rtn = helpbox.DisplayHelp(win, std.mem.span(db.*.HelpName));
             return (rtn == df.TRUE);
         },
         else => {

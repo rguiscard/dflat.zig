@@ -6,6 +6,7 @@ const lists = @import("Lists.zig");
 const rect = @import("Rect.zig");
 const Klass = @import("Classes.zig");
 const q = @import("Message.zig");
+const helpbox = @import("HelpBox.zig");
 
 var dummyWnd:?Window = null;
 //var px:c_int = -1;
@@ -197,7 +198,8 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
         },
         df.ID_HELP => {
             const name = Klass.defs[@intCast(df.GetClass(wnd))][0];
-            _ = df.DisplayHelp(wnd, @constCast(name.ptr));
+//            _ = df.DisplayHelp(wnd, @constCast(name.ptr));
+            _ = helpbox.DisplayHelp(win, name);
         },
         else => {
         }
@@ -723,7 +725,8 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) call
         df.DISPLAY_HELP => {
             const p1_addr:usize = @intCast(p1);
             const pp1:[*c]u8 = @ptrFromInt(p1_addr);
-            const rtn = df.DisplayHelp(wnd, pp1);
+//            const rtn = df.DisplayHelp(wnd, pp1);
+            const rtn = helpbox.DisplayHelp(win, std.mem.span(pp1));
             return @intCast(rtn);
         },
         else => {

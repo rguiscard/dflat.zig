@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
+const helpbox = @import("HelpBox.zig");
 
 var py:c_int = -1;
 var CurrentMenuSelection:c_int = 0;
@@ -175,7 +176,8 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             if (wnd.*.mnu.*.Selections[0].SelectionTitle == null) {
                 _ = q.SendMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
             } else {
-                _ = df.DisplayHelp(wnd, wnd.*.mnu.*.Selections[@intCast(wnd.*.selection)].help);
+                const helpName = std.mem.span(wnd.*.mnu.*.Selections[@intCast(wnd.*.selection)].help);
+                _ = helpbox.DisplayHelp(win, helpName);
             }
             return true;
         },

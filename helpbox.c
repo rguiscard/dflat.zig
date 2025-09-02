@@ -398,6 +398,7 @@ char *HelpComment(char *Help)
 	return NULL;
 }
 /* ---------- display help text ----------- */
+/*
 BOOL DisplayHelp(WINDOW wnd, char *Help)
 {
 	char FixedHelp[30];
@@ -412,7 +413,7 @@ BOOL DisplayHelp(WINDOW wnd, char *Help)
         if ((helpfp = OpenHelpFile(HelpFileName, "rb")) != NULL)    {
 			BuildHelpBox(wnd);
 		    DisableButton(&HelpBox, ID_BACK);
-            /* ------- display the help window ----- */
+            // ------- display the help window ----- 
             DialogBox(NULL, &HelpBox, TRUE, HelpBoxProc);
             free(HelpBox.dwnd.title);
 			HelpBox.dwnd.title = NULL;
@@ -424,6 +425,7 @@ BOOL DisplayHelp(WINDOW wnd, char *Help)
 	--wnd->isHelping;
     return rtn;
 }
+*/
 
 /* ------- display a definition window --------- */
 static void DisplayDefinition(WINDOW wnd, char *def)

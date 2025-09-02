@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
+const helpbox = @import("HelpBox.zig");
 
 const BCHEIGHT = 12;
 const BCWIDTH = 44;
@@ -25,12 +26,12 @@ const Months = "           Jan Feb Mar Apr May Jun";
 
 fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     switch (message) {
-//        case COMMAND:
-//            if ((int)p1 == ID_HELP)    {
-//                DisplayHelp(wnd, "BarChart");
-//                return TRUE;
-//            }
-//            break;
+        df.COMMAND => {
+            if (p1 == df.ID_HELP) {
+                _ = helpbox.DisplayHelp(win, "BarChart");
+                return df.TRUE;
+            }
+        },
         df.CLOSE_WINDOW => {
             Bwnd = null;
         },
