@@ -55,6 +55,7 @@ static void BestFit(WINDOW, DIALOGWINDOW *);
 int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 
 /* ------------- CREATE_WINDOW message ------------ */
+/*
 static void CreateWindowMsg(WINDOW wnd)
 {
     Helping = TRUE;
@@ -63,6 +64,7 @@ static void CreateWindowMsg(WINDOW wnd)
     if (ThisHelp != NULL)
         ThisHelp->hwnd = wnd;
 }
+*/
 
 /* ------------- COMMAND message ------------ */
 static BOOL CommandMsg(WINDOW wnd, PARAM p1)
@@ -87,7 +89,7 @@ static BOOL CommandMsg(WINDOW wnd, PARAM p1)
 }
 
 /* ------------- KEYBOARD message ------------ */
-static BOOL KeyboardMsg(WINDOW wnd, PARAM p1)
+BOOL HelpBoxKeyboardMsg(WINDOW wnd, PARAM p1)
 {
     WINDOW cwnd;
 
@@ -147,7 +149,6 @@ int cHelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case INITIATE_DIALOG:
             ReadHelp(wnd);
             break;
-*/
         case COMMAND:
             if (p2 != 0)
                 break;
@@ -165,6 +166,7 @@ int cHelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
                 ThisHelp->hwnd = NULL;
             Helping = FALSE;
             break;
+*/
         default:
             break;
     }

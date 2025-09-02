@@ -30,42 +30,42 @@ pub export fn ReadHelp(wnd:df.WINDOW) callconv(.c) void {
     if (Window.get_zin(cwnd)) |cwin| {
         cwin.wndproc = WndProc.HelpTextProc;
     }
-//    cwnd.*.wndproc = WndProc.HelpTextProc;
     _ = q.SendMessage(cwnd, df.CLEARTEXT, 0, 0);
     df.cReadHelp(wnd, cwnd);
 }
 
 // ------------- COMMAND message ------------
-//fn CommandMsg(wnd:df.WINDOW, p1:df.PARAM) bool {
-//    switch (p1) {
-//        df.ID_PREV => {
-//            if (df.ThisHelp != null) {
-//                const prevhlp:usize = @intCast(df.ThisHelp.*.prevhlp);
-//                df.SelectHelp(wnd, df.FirstHelp+prevhlp, df.TRUE);
-//            }
-//            return true;
-//        },
-//        df.ID_NEXT => {
-//            if (df.ThisHelp != null) {
-//                const nexthlp:usize = @intCast(df.ThisHelp.*.nexthlp);
-//                df.SelectHelp(wnd, df.FirstHelp+nexthlp, df.TRUE);
-//            }
-//            return true;
-//        },
-//        df.ID_BACK => {
-//            if (df.stacked > 0) {
-//                df.stacked -= 1;
-//                const stacked:usize = @intCast(df.stacked);
-//                const helpstack:usize = @intCast(df.HelpStack[stacked]);
-//                df.SelectHelp(wnd, df.FirstHelp+helpstack, df.FALSE);
-//            }
-//            return true;
-//        },
-//        else => {
-//        }
-//    }
-//    return false;
-//}
+fn CommandMsg(win: *Window, p1:df.PARAM) bool {
+    const wnd = win.win;
+    switch (p1) {
+        df.ID_PREV => {
+            if (df.ThisHelp != null) {
+                const prevhlp:usize = @intCast(df.ThisHelp.*.prevhlp);
+                df.SelectHelp(wnd, df.FirstHelp+prevhlp, df.TRUE);
+            }
+            return true;
+        },
+        df.ID_NEXT => {
+            if (df.ThisHelp != null) {
+                const nexthlp:usize = @intCast(df.ThisHelp.*.nexthlp);
+                df.SelectHelp(wnd, df.FirstHelp+nexthlp, df.TRUE);
+            }
+            return true;
+        },
+        df.ID_BACK => {
+            if (df.stacked > 0) {
+                df.stacked -= 1;
+                const stacked:usize = @intCast(df.stacked);
+                const helpstack:usize = @intCast(df.HelpStack[stacked]);
+                df.SelectHelp(wnd, df.FirstHelp+helpstack, df.FALSE);
+            }
+            return true;
+        },
+        else => {
+        }
+    }
+    return false;
+}
 
 pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
@@ -74,28 +74,26 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
             CreateWindowMsg(win);
         },
         df.INITIATE_DIALOG => {
-//            df.ReadHelp(wnd);
             ReadHelp(wnd);
         },
-//        df.COMMAND => {
-//            if (p2 == 0) {
-//                if (CommandMsg(wnd, p1))
-//                    return df.TRUE;
-//            }
-//        },
-//        df.KEYBOARD => {
-//            if (df.WindowMoving == 0) {
-//                if (df.HelpBoxKeyboardMsg(wnd, p1) > 0)
-//                return df.TRUE;
-//            }
-//        },
-//        df.CLOSE_WINDOW => {
-//            if (df.ThisHelp != null)
-//                df.ThisHelp.*.hwnd = null;
-//            df.Helping = df.FALSE;
-//        },
+        df.COMMAND => {
+            if (p2 == 0) {
+                if (CommandMsg(win, p1))
+                    return df.TRUE;
+            }
+        },
+        df.KEYBOARD => {
+            if (df.WindowMoving == 0) {
+                if (df.HelpBoxKeyboardMsg(wnd, p1) > 0)
+                    return df.TRUE;
+            }
+        },
+        df.CLOSE_WINDOW => {
+            if (df.ThisHelp != null)
+                df.ThisHelp.*.hwnd = null;
+            df.Helping = df.FALSE;
+        },
         else => {
-            return df.cHelpBoxProc(wnd, msg, p1, p2);
         }
     }
     return root.zBaseWndProc(df.HELPBOX, win, msg, p1, p2);

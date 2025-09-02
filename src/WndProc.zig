@@ -1,21 +1,6 @@
 const df = @import("ImportC.zig").df;
 const Window = @import("Window.zig");
-const picture = @import("PictureBox.zig");
 const normal = @import("Normal.zig");
-const app = @import("Application.zig");
-const dialbox = @import("DialogBox.zig");
-const box = @import("Box.zig");
-const textbox = @import("TextBox.zig");
-const menubar = @import("MenuBar.zig");
-const listbox = @import("ListBox.zig");
-const editbox = @import("EditBox.zig");
-const button = @import("Button.zig");
-const text = @import("Text.zig");
-const radio = @import("RadioButton.zig");
-const checkbox = @import("CheckBox.zig");
-const statusbar = @import("StatusBar.zig");
-const popdown = @import("PopDown.zig");
-const editor = @import("Editor.zig");
 const helpbox = @import("HelpBox.zig");
 
 // This is temporarily put all wndproc together.
