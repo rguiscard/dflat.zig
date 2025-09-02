@@ -10,7 +10,7 @@ const helpbox = @import("HelpBox.zig");
 
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
-var oldFocus:?df.WINDOW = null;
+var oldFocus:df.WINDOW = null;
 
 // --------------- CREATE_WINDOW Message --------------
 fn CreateWindowMsg(win: *Window) c_int {
@@ -39,7 +39,7 @@ fn CreateWindowMsg(win: *Window) c_int {
         df.PushRadioButton(&df.Display, df.ID_COLOR);
     }
     if (df.SCREENHEIGHT != df.cfg.ScreenLines) {
-        df.SetScreenHeight(df.cfg.ScreenLines);
+        SetScreenHeight(df.cfg.ScreenLines);
         if ((win.WindowHeight() == ScreenHeight) or
                 (df.SCREENHEIGHT-1 < win.GetBottom()))    {
             win.SetWindowHeight(df.SCREENHEIGHT);
@@ -54,10 +54,10 @@ fn CreateWindowMsg(win: *Window) c_int {
 
     const rtn = root.zBaseWndProc(df.APPLICATION, win, df.CREATE_WINDOW, 0, 0);
     if (wnd.*.extension != null) {
-        df.CreateMenu(wnd);
+        CreateMenu(win);
     }
 
-    df.CreateStatusBar(wnd);
+    CreateStatusBar(win);
 
     _ = q.SendMessage(null, df.SHOW_MOUSE, 0, 0);
     return rtn;
@@ -95,8 +95,8 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if (p1-win.GetLeft() < 30)
         p1_new = win.GetLeft() + 30;
     _ = root.zBaseWndProc(df.APPLICATION, win, df.SIZE, p1_new, p2);
-    df.CreateMenu(wnd);
-    df.CreateStatusBar(wnd);
+    CreateMenu(win);
+    CreateStatusBar(win);
     if (WasVisible)
         _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
 }
@@ -173,7 +173,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             df.MessageLog(wnd);
         },
         df.ID_DOS => {
-            df.ShellDOS(wnd);
+            ShellDOS(win);
         },
         df.ID_DISPLAY => {
             if (DialogBox.DialogBox(wnd, &df.Display, df.TRUE, null)>0) {
@@ -189,8 +189,8 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 df.SelectTitle(wnd);
                 df.SelectStatusBar(wnd);
                 df.SelectTexture();
-                df.CreateMenu(wnd);
-                df.CreateStatusBar(wnd);
+                CreateMenu(win);
+                CreateStatusBar(win);
                 _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
                 if (oldFocus) |focus| { // cannot sure old focus can be null
                     _ = q.SendMessage(focus, df.SETFOCUS, df.TRUE, 0);
@@ -351,4 +351,81 @@ fn SetScreenHeight(height: c_int) void {
 //        SendMessage(NULL, SHOW_MOUSE, 0, 0);
 //    }
 //#endif
+}
+
+// -------- Create the menu bar --------
+fn CreateMenu(win: *Window) void {
+    const wnd = win.win;
+    win.AddAttribute(df.HASMENUBAR);
+    if (wnd.*.MenuBarWnd != null) {
+        _ = q.SendMessage(wnd.*.MenuBarWnd, df.CLOSE_WINDOW, 0, 0);
+    }
+    var mwnd = Window.create(df.MENUBAR,
+                        null,
+                        @intCast(win.GetClientLeft()),
+                        @intCast(win.GetClientTop()-1),
+                        1,
+                        @intCast(win.ClientWidth()),
+                        null,
+                        wnd,
+                        null,
+                        0);
+
+    win.win.*.MenuBarWnd = mwnd.win;
+
+    const ext:df.PARAM = @intCast(@intFromPtr(wnd.*.extension));
+    _ = mwnd.sendMessage(df.BUILDMENU, ext,0);
+    mwnd.AddAttribute(df.VISIBLE);
+}
+
+
+// ----------- Create the status bar -------------
+fn CreateStatusBar(win: *Window) void {
+    const wnd = win.win;
+    if (wnd.*.StatusBar != null)    {
+        _ = q.SendMessage(wnd.*.StatusBar, df.CLOSE_WINDOW, 0, 0);
+        win.win.*.StatusBar = null;
+    }
+    if (win.TestAttribute(df.HASSTATUSBAR)) {
+        var sbar = Window.create(df.STATUSBAR,
+                            null,
+                            @intCast(win.GetClientLeft()),
+                            @intCast(win.GetBottom()),
+                            1,
+                            @intCast(win.ClientWidth()),
+                            null,
+                            wnd,
+                            null,
+                            0);
+        win.win.*.StatusBar = sbar.win;
+        sbar.AddAttribute(df.VISIBLE);
+    }
+}
+
+// SHELLDOS
+fn SwitchCursor() void {
+    _ = q.SendMessage(null, df.SAVE_CURSOR, 0, 0);
+    df.SwapCursorStack();
+    _ = q.SendMessage(null, df.RESTORE_CURSOR, 0, 0);
+}
+
+// ------- Shell out to DOS ----------
+fn ShellDOS(win:*Window) void {
+    oldFocus = df.inFocus;
+    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+    SwitchCursor();
+    if (ScreenHeight != df.SCREENHEIGHT)
+        SetScreenHeight(ScreenHeight);
+    _ = q.SendMessage(null, df.HIDE_MOUSE, 0, 0);
+    _ = df.fflush(df.stdout);
+    df.tty_restore();
+    _ = df.runshell();
+    df.tty_enable_unikey();
+
+    if (df.SCREENHEIGHT != df.cfg.ScreenLines)
+        SetScreenHeight(df.cfg.ScreenLines);
+    SwitchCursor();
+    _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    _ = q.SendMessage(oldFocus, df.SETFOCUS, df.TRUE, 0);
+    _ = q.SendMessage(null, df.SHOW_MOUSE, 0, 0);
 }

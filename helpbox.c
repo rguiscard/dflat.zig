@@ -397,35 +397,6 @@ char *HelpComment(char *Help)
 		return ThisHelp->comment;
 	return NULL;
 }
-/* ---------- display help text ----------- */
-/*
-BOOL DisplayHelp(WINDOW wnd, char *Help)
-{
-	char FixedHelp[30];
-	BOOL rtn = FALSE;
-
-    if (Helping)
-        return TRUE;
-	StripTildes(FixedHelp, Help);
-	stacked = 0;
-	wnd->isHelping++;
-    if ((ThisHelp = FindHelp(FixedHelp)) != NULL)	{
-        if ((helpfp = OpenHelpFile(HelpFileName, "rb")) != NULL)    {
-			BuildHelpBox(wnd);
-		    DisableButton(&HelpBox, ID_BACK);
-            // ------- display the help window ----- 
-            DialogBox(NULL, &HelpBox, TRUE, HelpBoxProc);
-            free(HelpBox.dwnd.title);
-			HelpBox.dwnd.title = NULL;
-            fclose(helpfp);
-			helpfp = NULL;
-            rtn = TRUE;
-        }
-    }
-	--wnd->isHelping;
-    return rtn;
-}
-*/
 
 /* ------- display a definition window --------- */
 static void DisplayDefinition(WINDOW wnd, char *def)

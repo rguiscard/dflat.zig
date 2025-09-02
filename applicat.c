@@ -53,14 +53,16 @@ static char *Menus[9] = {
 char **Argv;
 
 #ifdef INCLUDE_SHELLDOS
+/*
 static void SwitchCursor(void)
 {
     SendMessage(NULL, SAVE_CURSOR, 0, 0);
     SwapCursorStack();
     SendMessage(NULL, RESTORE_CURSOR, 0, 0);
 }
-
+*/
 /* ------- Shell out to DOS ---------- */
+/*
 void ShellDOS(WINDOW wnd)
 {
 	oldFocus = inFocus;
@@ -81,48 +83,8 @@ void ShellDOS(WINDOW wnd)
     SendMessage(oldFocus, SETFOCUS, TRUE, 0);
     SendMessage(NULL, SHOW_MOUSE, 0, 0);
 }
+*/
 #endif
-
-/* -------- Create the menu bar -------- */
-void CreateMenu(WINDOW wnd)
-{
-    AddAttribute(wnd, HASMENUBAR);
-    if (wnd->MenuBarWnd != NULL)
-        SendMessage(wnd->MenuBarWnd, CLOSE_WINDOW, 0, 0);
-    wnd->MenuBarWnd = CreateWindow(MENUBAR,
-                        NULL,
-                        GetClientLeft(wnd),
-                        GetClientTop(wnd)-1,
-                        1,
-                        ClientWidth(wnd),
-                        NULL,
-                        wnd,
-                        0);
-    SendMessage(wnd->MenuBarWnd,BUILDMENU,
-        (PARAM)wnd->extension,0);
-    AddAttribute(wnd->MenuBarWnd, VISIBLE);
-}
-
-/* ----------- Create the status bar ------------- */
-void CreateStatusBar(WINDOW wnd)
-{
-    if (wnd->StatusBar != NULL)    {
-        SendMessage(wnd->StatusBar, CLOSE_WINDOW, 0, 0);
-        wnd->StatusBar = NULL;
-    }
-    if (TestAttribute(wnd, HASSTATUSBAR))    {
-        wnd->StatusBar = CreateWindow(STATUSBAR,
-                            NULL,
-                            GetClientLeft(wnd),
-                            GetBottom(wnd),
-                            1,
-                            ClientWidth(wnd),
-                            NULL,
-                            wnd,
-                            0);
-        AddAttribute(wnd->StatusBar, VISIBLE);
-    }
-}
 
 #ifdef INCLUDE_WINDOWMENU
 /* -------- return the name of a document window ------- */
