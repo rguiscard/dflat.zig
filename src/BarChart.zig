@@ -41,7 +41,8 @@ fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) ca
     return root.zDefaultWndProc(win, message, p1, p2);
 }
 
-pub export fn BarChart(pwnd: df.WINDOW) void {
+pub export fn BarChart(pwin: *Window) void {
+    const pwnd = pwin.win;
     const pct = ProjChart.len;
 
     if (Bwnd == null) {

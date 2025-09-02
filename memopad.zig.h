@@ -1,5 +1,6 @@
 // main.c
 void LoadFile(WINDOW);
+void DeleteFile(WINDOW);
 char *NameComponent(char *);
 void ShowPosition(WINDOW);
 

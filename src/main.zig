@@ -55,12 +55,18 @@ pub fn main() !void {
 // ------- window processing module for the
 //                    memopad application window -----
 fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
-    const wnd = win.win;
-
     switch(msg) {
+        df.CREATE_WINDOW => {
+            const rtn = mp.zDefaultWndProc(win, msg, p1, p2);
+            if (df.cfg.InsertMode == df.TRUE)
+                df.SetCommandToggle(@constCast(@ptrCast(&mp.menus.MainMenu)), df.ID_INSERT);
+            if (df.cfg.WordWrap == df.TRUE)
+                df.SetCommandToggle(@constCast(@ptrCast(&mp.menus.MainMenu)), df.ID_WRAP);
+            FixTabMenu();
+            return rtn;
+        },
         df.COMMAND => {
-            const cmd:c_int = @intCast(p1);
-            switch(cmd) {
+            switch(p1) {
                 df.ID_NEW => {
                     NewFile(win);
                     return df.TRUE;
@@ -86,13 +92,78 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) call
                     }
                     return df.FALSE;
                 },
+                df.ID_DELETEFILE => {
+                    df.DeleteFile(df.inFocus);
+                    return df.TRUE;
+                },
+                df.ID_EXIT => {
+                    const m = "Exit Memopad?";
+                    if (mp.MessageBox.YesNoBox(@constCast(m.ptr)) == df.FALSE)
+                        return df.FALSE;
+                },
+                df.ID_WRAP => {
+                    df.cfg.WordWrap = df.GetCommandToggle(@constCast(@ptrCast(&mp.menus.MainMenu)), df.ID_WRAP);
+                    return df.TRUE;
+                },
+                df.ID_INSERT => {
+                    df.cfg.InsertMode = df.GetCommandToggle(@constCast(@ptrCast(&mp.menus.MainMenu)), df.ID_INSERT);
+                    return df.TRUE;
+                },
+                df.ID_TAB2 => {
+                    df.cfg.Tabs = 2;
+                    FixTabMenu();
+                    return df.TRUE;
+                },
+                df.ID_TAB4 => {
+                    df.cfg.Tabs = 4;
+                    FixTabMenu();
+                    return df.TRUE;
+                },
+                df.ID_TAB6 => {
+                    df.cfg.Tabs = 6;
+                    FixTabMenu();
+                    return df.TRUE;
+                },
+                df.ID_TAB8 => {
+                    df.cfg.Tabs = 8;
+                    FixTabMenu();
+                    return df.TRUE;
+                },
+                df.ID_CALENDAR => {
+                    mp.Calendar.Calendar(win);
+                    return df.TRUE;
+                },
+                df.ID_BARCHART => {
+                    mp.BarChart.BarChart(win);
+                    return df.TRUE;
+                },
+                df.ID_ABOUT => {
+                    const t = "About D-Flat and the MemoPad";
+                    const m =
+                        \\About D-Flat and the MemoPad
+                        \\   ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+                        \\   ³    ÜÜÜ   ÜÜÜ     Ü    ³
+                        \\   ³    Û  Û  Û  Û    Û    ³
+                        \\   ³    Û  Û  Û  Û    Û    ³
+                        \\   ³    Û  Û  Û  Û Û  Û    ³
+                        \\   ³    ßßß   ßßß   ßß     ³
+                        \\   ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+                        \\D-Flat implements the SAA/CUA
+                        \\interface in a public domain
+                        \\C language library originally
+                        \\published in Dr. Dobb's Journal
+                        \\    ------------------------
+                        \\MemoPad is a multiple document
+                        \\editor that demonstrates D-Flat
+                    ;
+                    _ = mp.MessageBox.MessageBox(@constCast(t.ptr), @constCast(m.ptr));
+                    return df.TRUE;
+                },
                 else => {
-                    return df.cMemoPadProc(wnd, msg, p1, p2);
                 }
             }
         },
         else => {
-            return df.cMemoPadProc(wnd, msg, p1, p2);
         }
     }
     return mp.zDefaultWndProc(win, msg, p1, p2);
@@ -215,6 +286,23 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
         }
 
         _ = mwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
+    }
+}
+
+fn FixTabMenu() void {
+    const cp:[*c]u8 = df.GetCommandText(&df.MainMenu, df.ID_TABS);
+    if (cp) |c| {
+        const cmd = std.mem.span(c);
+        if (std.mem.indexOfScalar(u8, cmd, '(')) |_| {
+            if ((df.inFocus != 0) and (df.GetClass(df.inFocus) == df.POPDOWNMENU)) {
+                _ = mp.q.SendMessage(df.inFocus, df.PAINT, 0, 0);
+            }
+        }
+//        cp = strchr(cp, '(');
+//        if (cp != null) {
+//            if (inFocus && (GetClass(inFocus) == POPDOWNMENU))
+//                SendMessage(inFocus, PAINT, 0, 0);
+//        }
     }
 }
 

@@ -21,6 +21,8 @@ pub const MessageBox = @import("MessageBox.zig");
 pub const fileopen = @import("FileOpen.zig");
 pub const helpbox = @import("HelpBox.zig");
 
+pub const q = @import("Message.zig");
+
 pub const global_allocator = std.heap.c_allocator;
 
 pub export fn BaseWndProc(klass: df.CLASS, wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {

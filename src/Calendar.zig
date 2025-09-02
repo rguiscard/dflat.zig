@@ -175,7 +175,8 @@ pub export fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PA
     return root.zDefaultWndProc(win, msg, p1, p2);
 }
 
-pub export fn Calendar(pwnd: df.WINDOW) void {
+pub export fn Calendar(pwin: *Window) void {
+    const pwnd = pwin.win;
     if (Cwnd == null)    {
         const tim = ctime.time(null);
         ttm = ctime.localtime(&tim).*;
