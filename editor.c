@@ -110,6 +110,7 @@ void AdjustTab(WINDOW wnd)
 	wnd->CurrCol = col;
 }
 
+/*
 static void TurnOffDisplay(WINDOW wnd)
 {
 	SendMessage(NULL, HIDE_CURSOR, 0, 0);
@@ -127,8 +128,10 @@ static void RepaintLine(WINDOW wnd)
 	SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
 	WriteTextLine(wnd, NULL, wnd->CurrLine, FALSE);
 }
+*/
 
 /* --------- KEYBOARD Message ---------- */
+/*
 static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int c = (int) p1;
@@ -187,6 +190,7 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 	}
     return FALSE;
 }
+*/
 
 /* ------- Window processing module for EDITBOX class ------ */
 /*

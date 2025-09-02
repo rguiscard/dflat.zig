@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Klass = @import("Classes.zig");
 const WndProc = @import("WndProc.zig");
+const normal = @import("Normal.zig");
 
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
@@ -448,6 +449,6 @@ pub export fn set_HelpTextProc(wnd:df.WINDOW) void {
 
 pub export fn set_NormalProc(wnd:df.WINDOW) void {
     if (get_zin(wnd)) |win| {
-        win.wndproc = WndProc.NormalProc;
+        win.wndproc = normal.NormalProc;
     }
 }

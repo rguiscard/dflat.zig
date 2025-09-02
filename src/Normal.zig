@@ -608,7 +608,7 @@ fn RestoreMsg(win:*Window) void {
     }
 }
 
-pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) c_int {
+pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
