@@ -19,7 +19,7 @@ fn EditBufLen(win:*Window) c_uint {
     return if (df.isMultiLine(wnd)>0) df.EDITLEN else df.ENTRYLEN;
 }
 
-fn WndCol(win:*Window) c_int {
+pub fn WndCol(win:*Window) c_int {
     const wnd = win.win;
     return wnd.*.CurrCol-wnd.*.wleft;
 }

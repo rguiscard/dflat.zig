@@ -5,7 +5,7 @@
 #define sTab ('\f' + 0x80)
 
 /* ---------- SETTEXT Message ------------ */
-static int SetTextMsg(WINDOW wnd, char *Buf)
+int cSetTextMsg(WINDOW wnd, char *Buf)
 {
    	unsigned char *tp, *ep, *ttp;
    	int x = 0;
@@ -91,7 +91,7 @@ void ExpandTabs(WINDOW wnd)
 }
 
 /* --- When inserting or deleting, adjust next following tab, same line --- */
-static void AdjustTab(WINDOW wnd)
+void AdjustTab(WINDOW wnd)
 {
     /* ---- test if there is a tab beyond this character ---- */
 	int col = wnd->CurrCol;
@@ -189,6 +189,7 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* ------- Window processing module for EDITBOX class ------ */
+/*
 int cEditorProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     switch (msg)    {
@@ -203,3 +204,4 @@ int cEditorProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     }
     return BaseWndProc(EDITOR, wnd, msg, p1, p2);
 }
+*/

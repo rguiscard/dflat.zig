@@ -102,6 +102,10 @@ void drawText(WINDOW);
 void PaintMsg(WINDOW);
 void PaintPopDownSelection(WINDOW, struct PopDown *, char*);
 
+// editor.c
+int cSetTextMsg(WINDOW, char *);
+void AdjustTab(WINDOW);
+
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);
