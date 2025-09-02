@@ -17,6 +17,7 @@ const checkbox = @import("CheckBox.zig");
 const statusbar = @import("StatusBar.zig");
 const popdown = @import("PopDown.zig");
 const editor = @import("Editor.zig");
+const helpbox = @import("HelpBox.zig");
 
 // ----------- classes.h ------------
 //
@@ -90,12 +91,12 @@ pub const defs = [_]struct{
     .{"TEXT",        Klass.TEXTBOX,        text.TextProc,          0              },
     .{"RADIOBUTTON", Klass.TEXTBOX,       radio.RadioButtonProc,   0              },
     .{"CHECKBOX",    Klass.TEXTBOX,    checkbox.CheckBoxProc,      0              },
-    .{"SPINBUTTON",  Klass.LISTBOX,      wp.SpinButtonProc,        0              },
+    .{"SPINBUTTON",  Klass.LISTBOX,          wp.SpinButtonProc,    0              },
     .{"ERRORBOX",    Klass.DIALOG,       null,                     df.SHADOW     |
                                                                    df.HASBORDER   },
     .{"MESSAGEBOX",  Klass.DIALOG,       null,                     df.SHADOW     |
                                                                    df.HASBORDER   },
-    .{"HELPBOX",     Klass.DIALOG,       wp.HelpBoxProc,           df.MOVEABLE   |
+    .{"HELPBOX",     Klass.DIALOG,      helpbox.HelpBoxProc,       df.MOVEABLE   |
                                                                    df.SAVESELF   |
                                                                    df.HASBORDER  |
                                                                    df.NOCLIP     |

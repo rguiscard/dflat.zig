@@ -28,7 +28,7 @@ pub export fn ReadHelp(wnd:df.WINDOW) callconv(.c) void {
     if (cwnd == null)
         return;
     if (Window.get_zin(cwnd)) |cwin| {
-        cwin.wndproc = WndProc.HelpTextProc;
+        cwin.wndproc = HelpTextProc;
     }
     _ = q.SendMessage(cwnd, df.CLEARTEXT, 0, 0);
     df.cReadHelp(wnd, cwnd);

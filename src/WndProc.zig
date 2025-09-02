@@ -44,21 +44,6 @@ pub export fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 //    return df.cSpinButtonProc(wnd, msg, p1, p2);
 }
 
-pub export fn HelpBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    return helpbox.HelpBoxProc(win, msg, p1, p2);
-}
-
-// Those are called directly by CreateWindow()
-pub export fn HelpTextProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-    return helpbox.HelpTextProc(win, msg, p1, p2);
-}
-
-// For DialogBox, called in dflat.h
-//pub export fn CancelBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
-//    const wnd = win.win;
-//    return df.cCancelBoxProc(wnd, msg, p1, p2);
-//}
-
 pub export fn InputBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) c_int {
     const wnd = win.win;
     return df.cInputBoxProc(wnd, msg, p1, p2);
