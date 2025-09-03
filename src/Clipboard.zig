@@ -6,6 +6,14 @@ const Window = @import("Window.zig");
 pub var Clipboard:?[]u8 = null;
 pub var ClipboardLength:usize = 0;
 
+pub export fn ContentInClipboard() callconv(.c) df.BOOL {
+    if ((Clipboard == null) or (Clipboard.?.len == 0) or (ClipboardLength == 0)) {
+        return df.FALSE;
+    }
+    return df.TRUE;
+}
+
+// seems not in use
 //pub fn CopyTextToClipboard(text:[*c]u8) void {
 //    const txt = std.mem.span(text);
 //    const ClipboardLength = txt.len;
@@ -60,7 +68,6 @@ pub fn ClearClipboard() void {
 }
 
 pub fn PasteFromClipboard(win: *Window) bool {
-//    const text:[*c]u8 = Clipboard.items.ptr;
     if (Clipboard) |c| {
         return PasteText(win, c, @intCast(c.len));
     }

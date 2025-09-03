@@ -10,6 +10,7 @@ void LoadFile(WINDOW);
 void DeleteFile(WINDOW);
 char *NameComponent(char *);
 void ShowPosition(WINDOW wnd);
+BOOL ContentInClipboard(void);
 
 #define CHARSLINE 80
 #define LINESPAGE 66
@@ -123,6 +124,8 @@ void PrepEditMenu(void *w, struct Menu *mnu)
 			ActivateCommand(&MainMenu, ID_PARAGRAPH);
 //			if (!TestAttribute(wnd, READONLY) &&
 //						Clipboard != NULL)
+			if (!TestAttribute(wnd, READONLY) &&
+						ContentInClipboard() != FALSE)
 				ActivateCommand(&MainMenu, ID_PASTE);
 			if (wnd->DeletedText != NULL)
 				ActivateCommand(&MainMenu, ID_UNDO);

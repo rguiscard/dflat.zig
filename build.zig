@@ -79,7 +79,6 @@ pub fn build(b: *std.Build) void {
             // "slidebox.c", // currently not in use. port later.
             "fileopen.c",
             "direct.c",
-            "clipbord.c",
             "helpbox.c",
             "decomp.c",
 

@@ -531,7 +531,8 @@ fn ClearCmd(win:*Window) void {
 fn UndoCmd(win:*Window) void {
     const wnd = win.win;
     if (win.DeletedText) |text| {
-        _ = df.PasteText(wnd, wnd.*.DeletedText, wnd.*.DeletedLength);
+//        _ = df.PasteText(wnd, wnd.*.DeletedText, wnd.*.DeletedLength);
+        _ = clipboard.PasteText(win, text, @intCast(text.len));
         root.global_allocator.free(text);
         win.DeletedText = null;
         win.*.DeletedText = null;
