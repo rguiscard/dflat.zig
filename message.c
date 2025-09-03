@@ -27,44 +27,9 @@ static WINDOW Cwnd;
 
 BOOL cProcessMessage(WINDOW, MESSAGE, PARAM, PARAM);
 
-/*
-void StopMsg(void)
-{
-#ifndef BUILD_SMALL_DFLAT
-	ClearClipboard();
-	ClearDialogBoxes();
-#endif
-	restorecursor();	
-	unhidecursor();
-    hide_mousecursor();
-}
-*/
-
 /* ------------ initialize the message system --------- */
 BOOL init_messages(void)
 {
-/*
-    int cols, rows;
-
-	AllocTesting = TRUE;
-	if (setjmp(AllocError) != 0)	{
-		StopMsg();
-		return FALSE;
-	}
-    tty_init(MouseTracking|CatchISig|ExitLastLine|FullBuffer);
-    if (tty_getsize(&cols, &rows) > 0) {
-        SCREENWIDTH = min(cols, MAXCOLS-1);
-        SCREENHEIGHT = rows - 1;
-    }
-    resetmouse();
-	set_mousetravel(0, SCREENWIDTH-1, 0, SCREENHEIGHT-1);
-	savecursor();
-	hidecursor();
-    px = py = -1;
-    pmx = pmy = -1;
-    mx = my = 0;
-    CaptureMouse = CaptureKeyboard = NULL;
-*/
     NoChildCaptureMouse = FALSE;
     NoChildCaptureKeyboard = FALSE;
     PostMessage(NULL,START,0,0);

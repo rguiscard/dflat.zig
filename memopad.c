@@ -4,62 +4,12 @@
 
 char DFlatApplication[] = "memopad";
 
-static char Untitled[] = "Untitled";
-
-void LoadFile(WINDOW);
-void DeleteFile(WINDOW);
-char *NameComponent(char *);
-void ShowPosition(WINDOW wnd);
+//char *NameComponent(char *);
+//void ShowPosition(WINDOW wnd);
 BOOL ContentInClipboard(void);
 
-#define CHARSLINE 80
-#define LINESPAGE 66
-
-/* --- Load the notepad file into the editor text buffer --- */
-/*
-void LoadFile(WINDOW wnd)
-{
-    char *Buf = NULL;
-	int recptr = 0;
-    FILE *fp;
-
-    if ((fp = fopen(wnd->extension, "rt")) != NULL)    {
-		while (!feof(fp))	{
-//			handshake();
-			Buf = DFrealloc(Buf, recptr+150);       //FIXME rewrite for ELKS
-			memset(Buf+recptr, 0, 150);
-        	fgets(Buf+recptr, 150, fp);
-			recptr += strlen(Buf+recptr);
-		}
-        fclose(fp);
-		if (Buf != NULL)	{
-	        SendMessage(wnd, SETTEXT, (PARAM) Buf, 0);
-		    free(Buf);
-		}
-    }
-}
-*/
-
-/* -------- delete a file ------------ */
-/*
-void DeleteFile(WINDOW wnd)
-{
-    if (wnd->extension != NULL)    {
-        if (strcmp(wnd->extension, Untitled))    {
-            char *fn = NameComponent(wnd->extension);
-            if (fn != NULL)    {
-                char msg[30];
-                sprintf(msg, "Delete %s?", fn);
-                if (YesNoBox(msg))    {
-                    unlink(wnd->extension);
-                    SendMessage(wnd, CLOSE_WINDOW, 0, 0);
-                }
-            }
-        }
-    }
-}
-*/
 /* ------ display the row and column in the statusbar ------ */
+/*
 void ShowPosition(WINDOW wnd)
 {
     char status[30];
@@ -67,8 +17,10 @@ void ShowPosition(WINDOW wnd)
         wnd->CurrLine, wnd->CurrCol);
     SendMessage(GetParent(wnd), ADDSTATUS, (PARAM) status, 0);
 }
+*/
 
 /* -- point to the name component of a file specification -- */
+/*
 char *NameComponent(char *FileName)
 {
     char *Fname;
@@ -76,6 +28,7 @@ char *NameComponent(char *FileName)
         Fname = FileName-1;
     return Fname + 1;
 }
+*/
 
 void PrepFileMenu(void *w, struct Menu *mnu)
 {

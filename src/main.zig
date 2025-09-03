@@ -279,7 +279,8 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
                     wnd.*.extension = @ptrCast(buf.ptr);
                 } else |_| {
                 }
-                df.AddTitle(wnd, df.NameComponent(&filename));
+//                df.AddTitle(wnd, df.NameComponent(&filename));
+                df.AddTitle(wnd, ptr);
                 _ = df.SendMessage(wnd, df.BORDER, 0, 0);
             } else |_| {
             }
@@ -355,13 +356,13 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             if (p1 == 0) {
                 _ = df.SendMessage(mp.Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
             } else {
-                df.ShowPosition(wnd);
+                ShowPosition(win);
             }
             return rtn;
         },
         df.KEYBOARD_CURSOR => {
             rtn = mp.zDefaultWndProc(win, msg, p1, p2);
-            df.ShowPosition(wnd);
+            ShowPosition(win);
             return rtn;
         },
         df.COMMAND => {
@@ -408,6 +409,19 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         }
     }
     return mp.zDefaultWndProc(win, msg, p1, p2);
+}
+
+// ------ display the row and column in the statusbar ------
+fn ShowPosition(win:*mp.Window) void {
+    const wnd = win.win;
+    const l:u32 = @intCast(wnd.*.CurrLine);
+    const c:u32 = @intCast(wnd.*.CurrCol);
+    if (std.fmt.allocPrintSentinel(mp.global_allocator, "Line:{d:4} Column: {d:2}", .{l, c}, 0)) |m| {
+        defer mp.global_allocator.free(m);
+        _ = df.SendMessage(mp.Window.GetParent(wnd), df.ADDSTATUS, @intCast(@intFromPtr(m.ptr)), 0);
+    } else |_| {
+        // error
+    }
 }
 
 const std = @import("std");

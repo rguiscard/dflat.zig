@@ -1,11 +1,8 @@
 // main.c
-void LoadFile(WINDOW);
-void DeleteFile(WINDOW);
 char *NameComponent(char *);
 void ShowPosition(WINDOW);
 
 // fileopen.c
-//int DlgFnOpen(WINDOW, MESSAGE, PARAM, PARAM);
 BOOL BuildFileList(WINDOW, char *);
 void BuildDirectoryList(WINDOW);
 void BuildPathDisplay(WINDOW);
@@ -13,7 +10,6 @@ void BuildPathDisplay(WINDOW);
 // message.c
 void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my);
 BOOL cProcessMessage(WINDOW, MESSAGE, PARAM, PARAM);
-void StopMsg(void);
 extern BOOL AllocTesting;
 extern jmp_buf AllocError;
 
@@ -57,9 +53,7 @@ extern BOOL AltDown;
 void cDisplay(WINDOW, PARAM, PARAM);
 
 // textbox.c
-//BOOL AddTextMsg(WINDOW, char *);
 void DeleteTextMsg(WINDOW, int);
-//void InsertTextMsg(WINDOW, char *, int);
 void InsertTextAt(WINDOW, char *, int);
 void CloseWindowMsg(WINDOW);
 void ComputeWindowTop(WINDOW);
@@ -92,8 +86,6 @@ void SetAnchor(WINDOW, int, int);
 int CommandMsg(WINDOW, PARAM);
 void TextBlockToN(char *, char *);
 void ParagraphCmd(WINDOW);
-//void DoMultiLines(WINDOW, int, PARAM);
-//int DoScrolling(WINDOW, int, PARAM);
 void DoKeyStroke(WINDOW, int, PARAM);
 int ScrollingKey(WINDOW, int, PARAM);
 int GetTextMsg(WINDOW, PARAM, PARAM);
@@ -138,15 +130,4 @@ void SelectHelp(WINDOW, struct helps *, BOOL);
 
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
-
-int cHelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cMemoPadProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cOurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
-
-/*
-int cMessageBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cYesNoBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cErrorBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-int cCancelBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
-*/
 int cInputBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
