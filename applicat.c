@@ -11,15 +11,6 @@ extern DBOX Display;
 extern DBOX Windows;
 #endif
 
-#ifdef INCLUDE_LOGGING
-extern DBOX Log;
-#endif
-
-#ifdef INCLUDE_SHELLDOS
-void ShellDOS(WINDOW);
-#endif
-void CreateMenu(WINDOW);
-void CreateStatusBar(WINDOW);
 void SelectColors(WINDOW);
 void SetScreenHeight(int);
 void SelectLines(WINDOW);
@@ -33,7 +24,6 @@ void SelectStatusBar(WINDOW);
 
 static WINDOW oldFocus;
 #ifdef INCLUDE_MULTI_WINDOWS
-static void CloseAll(WINDOW, int);
 static void MoreWindows(WINDOW);
 static void ChooseWindow(WINDOW, int);
 static int WindowSel;

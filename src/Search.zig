@@ -95,9 +95,9 @@ fn SearchTextBox(win:*Window, incr:bool) void {
         var index:?usize = null;
         // FIXME: original code is whitespace normalized ('\n' -> ' ')
         if (CheckCase) {
-            index = std.ascii.indexOfIgnoreCase(zp1, zp);
-        } else {
             index = std.mem.indexOf(u8, zp1, zp);
+        } else {
+            index = std.ascii.indexOfIgnoreCase(zp1, zp);
         }
         if (index) |i| {
             // ----- match at *cp1 -------

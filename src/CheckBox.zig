@@ -49,3 +49,17 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
     }
     return root.zBaseWndProc(df.CHECKBOX, win, msg, p1, p2);
 }
+
+
+pub export fn CheckBoxSetting(db:*df.DBOX, cmd:c_uint) callconv(.c) c_uint {
+    const ct:?*df.CTLWINDOW = df.FindCommand(db, @intCast(cmd), df.CHECKBOX);
+    if (ct) |ctl| {
+        if (ctl.*.wnd) |_| {
+            return if (ctl.*.setting == df.ON) df.TRUE else df.FALSE;
+        } else {
+            return if (ctl.*.isetting == df.ON) df.TRUE else df.FALSE;
+        }
+    }
+    return df.FALSE;
+//    return ct ? (ct->wnd ? (ct->setting==ON) : (ct->isetting==ON)) : FALSE;
+}
