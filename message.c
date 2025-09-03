@@ -73,9 +73,7 @@ BOOL ProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2, int val)
     int rtn = TRUE, x, y;
     rtn = val;
 
-#ifdef INCLUDE_LOGGING
-	LogMessages(wnd, msg, p1, p2);
-#endif
+    LogMessages(wnd, msg, p1, p2);
 
     /* ----- window processor returned true or the message was sent
         to no window at all (NULL) ----- */

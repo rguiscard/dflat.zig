@@ -82,7 +82,6 @@ pub fn build(b: *std.Build) void {
             "clipbord.c",
             "helpbox.c",
             "decomp.c",
-            "log.c",
 
             "video.c",
             "events-unix.c",

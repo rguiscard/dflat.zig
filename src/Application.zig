@@ -8,6 +8,7 @@ const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
+const log = @import("Log.zig");
 
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
@@ -171,7 +172,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             _ = helpbox.DisplayHelp(win, help);
         },
         df.ID_LOG => {
-            df.MessageLog(wnd);
+            log.MessageLog(win);
         },
         df.ID_DOS => {
             ShellDOS(win);
