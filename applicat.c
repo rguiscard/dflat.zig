@@ -148,11 +148,15 @@ static int WindowPrep(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
         case COMMAND:
             switch ((int) p1)    {
                 case ID_OK:
-                    if ((int)p2 == 0)
-                        WindowSel = SendMessage(
+                    if ((int)p2 == 0) {
+			int val = -1;
+                        SendMessage(
                                     ControlWindow(&Windows,
                                     ID_WINDOWLIST),
-                                    LB_CURRENTSELECTION, 0, 0);
+                                    LB_CURRENTSELECTION, (PARAM)&val, 0);
+			WindowSel = val;
+
+	            }
                     break;
                 case ID_WINDOWLIST:
                     if ((int) p2 == LB_CHOOSE)

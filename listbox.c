@@ -35,7 +35,8 @@ static void AddModeKey(WINDOW wnd)
 static void SpacebarKey(WINDOW wnd, PARAM p2)
 {
     if (isMultiLine(wnd))    {
-        int sel = SendMessage(wnd, LB_CURRENTSELECTION, 0, 0);
+	int sel = -1;
+        SendMessage(wnd, LB_CURRENTSELECTION, (PARAM)&sel, 0);
         if (sel != -1)    {
             if (wnd->AddMode)
                 FlipSelection(wnd, sel);

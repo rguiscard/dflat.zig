@@ -242,7 +242,8 @@ void GetItemText(WINDOW wnd, enum commands cmd,
 void GetDlgListText(WINDOW wnd, char *text, enum commands cmd)
 {
     CTLWINDOW *ct = FindCommand(wnd->extension, cmd, LISTBOX);
-    int sel = SendMessage(ct->wnd, LB_CURRENTSELECTION, 0, 0);
+    int sel = -1;
+    SendMessage(ct->wnd, LB_CURRENTSELECTION, (PARAM)&sel, 0);
     SendMessage(ct->wnd, LB_GETTEXT, (PARAM) text, sel);
 }
 

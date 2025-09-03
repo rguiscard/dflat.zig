@@ -149,6 +149,9 @@ message:
 Following are the messages that an application program would use.
 There are other messages, but they are used by D-Flat only.
 
+ZIG: now message processing functions (SendMessage) always return 
+boolean value. Therefore, some API may changed in zig version.
+
 Process Communication Messages  
 
 START                  start message processing (not used now)
@@ -597,6 +600,9 @@ LB_CURRENTSELECTION    return the current selection
   P2:      
   Returns: selection number: 0, 1, ..., or -1 if listbox is empty or
            no line is selected.
+  ZIG: This is now changed that P1 will be address of int value to
+       receive current selection. Returns are boolean true for
+       success and false for no selection (P1 returns -1).
 
 LB_GETTEXT             return the text of selection   
   Sent:    To get a copy of the text at a specified line

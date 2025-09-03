@@ -333,7 +333,13 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.LB_CURRENTSELECTION => {
-            return (wnd.*.selection!=0);
+            if (p1 > 0) {
+                const pp:usize = @intCast(p1);
+                const a:*c_int = @ptrFromInt(pp);
+                a.* = wnd.*.selection;
+                return if (wnd.*.selection == -1) false else true;
+            }
+            return false;
         },
         df.LB_SETSELECTION => {
             df.ChangeSelection(wnd, @intCast(p1), 0);
