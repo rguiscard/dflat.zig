@@ -2,7 +2,10 @@
 
 #include "dflat.h"
 
-static struct PopDown *FindCmd(MBAR *mn, int cmd)
+struct PopDown *FindCmd(MBAR *, int);
+
+/*
+struct PopDown *FindCmd(MBAR *mn, int cmd)
 {
     MENU *mnu = mn->PullDown;
     while (mnu->Title != NULL)    {
@@ -83,3 +86,4 @@ void InvertCommandToggle(MBAR *mn, int cmd)
     if (pd != NULL)
         pd->Attrib ^= CHECKED;
 }
+*/

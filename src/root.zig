@@ -20,6 +20,7 @@ pub const DialogBox = @import("DialogBox.zig");
 pub const MessageBox = @import("MessageBox.zig");
 pub const fileopen = @import("FileOpen.zig");
 pub const helpbox = @import("HelpBox.zig");
+pub const menu = @import("Menu.zig");
 
 pub const q = @import("Message.zig");
 

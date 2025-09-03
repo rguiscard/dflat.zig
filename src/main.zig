@@ -11,13 +11,9 @@ pub fn main() !void {
     const argv = std.os.argv.ptr; // already C-compatible
 
     // Force zig to load, otherwise, it is lazy.
-    _ = mp.dialogs.HelpBox;
-    _ = mp.menus.SystemMenu;
-    _ = mp.Message;
-    _ = mp.BarChart;
-    _ = mp.Calendar;
     _ = mp.list;
     _ = mp.SystemMenu;
+    _ = mp.menu;
 
     if (mp.q.init_messages() == false) {
         return;

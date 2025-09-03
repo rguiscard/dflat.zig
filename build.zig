@@ -63,7 +63,6 @@ pub fn build(b: *std.Build) void {
             "applicat.c",
             "textbox.c",
             "menubar.c",
-            "menu.c",
             "popdown.c",
             "listbox.c",
             "editbox.c",
