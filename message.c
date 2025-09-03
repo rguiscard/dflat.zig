@@ -25,9 +25,10 @@ char time_string[] = "         ";
 
 static WINDOW Cwnd;
 
-BOOL ProcessMessage(WINDOW, MESSAGE, PARAM, PARAM, int);
+BOOL cProcessMessage(WINDOW, MESSAGE, PARAM, PARAM);
 
-static void StopMsg(void)
+/*
+void StopMsg(void)
 {
 #ifndef BUILD_SMALL_DFLAT
 	ClearClipboard();
@@ -37,10 +38,12 @@ static void StopMsg(void)
 	unhidecursor();
     hide_mousecursor();
 }
+*/
 
 /* ------------ initialize the message system --------- */
 BOOL init_messages(void)
 {
+/*
     int cols, rows;
 
 	AllocTesting = TRUE;
@@ -61,29 +64,26 @@ BOOL init_messages(void)
     pmx = pmy = -1;
     mx = my = 0;
     CaptureMouse = CaptureKeyboard = NULL;
+*/
     NoChildCaptureMouse = FALSE;
     NoChildCaptureKeyboard = FALSE;
     PostMessage(NULL,START,0,0);
     lagdelay = FIRSTDELAY;
-	return TRUE;
+    return TRUE;
 }
 
-BOOL ProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2, int val)
+BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn = TRUE, x, y;
-    rtn = val;
 
-    LogMessages(wnd, msg, p1, p2);
-
-    /* ----- window processor returned true or the message was sent
-        to no window at all (NULL) ----- */
-    if (rtn != FALSE)    {
         /* --------- process messages that a window sends to the
             system itself ---------- */
         switch (msg)    {
+/*
             case STOP:
 				StopMsg();
                 break;
+*/
             /* ------- clock messages --------- */
             case CAPTURE_CLOCK:
 				if (Cwnd == NULL)
@@ -230,7 +230,7 @@ BOOL ProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2, int val)
             default:
                 break;
         }
-    }
+
     return rtn;
 }
 

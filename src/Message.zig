@@ -2,6 +2,8 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
+const log = @import("Log.zig");
+const clipboard = @import("Clipboard.zig");
 
 const MAXMESSAGES = 100;
 
@@ -31,6 +33,43 @@ var MsgQueue = [_]Msg{.{.win=null, .msg=0, .p1=0, .p2=0}}**MAXMESSAGES;
 var MsgQueueOnCtr:usize = 0;
 var MsgQueueOffCtr:usize = 0;
 var MsgQueueCtr:usize = 0;
+
+// ------------ initialize the message system ---------
+pub fn init_messages() bool {
+    var cols:c_int = 0;
+    var rows:c_int = 0;
+
+    df.AllocTesting = df.TRUE;
+    if (df.setjmp(&df.AllocError) != 0) {
+        StopMsg();
+        return false;
+    }
+
+    _ = df.tty_init(df.MouseTracking|df.CatchISig|df.ExitLastLine|df.FullBuffer);
+    if (df.tty_getsize(&cols, &rows) > 0) {
+        df.SCREENWIDTH = @min(cols, df.MAXCOLS-1);
+        df.SCREENHEIGHT = rows - 1;
+    }
+
+    df.resetmouse();
+    df.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
+    df.savecursor();
+    df.hidecursor();
+
+    df.CaptureMouse = null;
+    df.CaptureKeyboard = null;
+
+    _ = df.init_messages();
+    return true;
+}
+
+fn StopMsg() void {
+    clipboard.ClearClipboard();
+    df.ClearDialogBoxes();
+    df.restorecursor();
+    df.unhidecursor();
+    df.hide_mousecursor();
+}
 
 // ----- post an event and parameters to event queue ----
 pub export fn PostEvent(event:df.MESSAGE, p1:c_int, p2:c_int) callconv(.c) void {
@@ -67,7 +106,7 @@ pub export fn PostMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARA
 
 // --------- send a message to a window -----------
 pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) df.BOOL {
-    const rtn:df.BOOL = df.TRUE;
+    const rtn = true;
 
     if (wnd != null) {
         if (Window.get_zin(wnd)) |zin| {
@@ -94,7 +133,29 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
-    return df.ProcessMessage(wnd, msg, p1, p2, rtn);
+    return if (ProcessMessage(wnd, msg, p1, p2, rtn)) df.TRUE else df.FALSE;
+}
+
+pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rtn:bool) bool {
+    // wnd could be null
+    log.LogMessages(wnd, msg, p1, p2);
+
+    // ----- window processor returned true or the message was sent
+    //  to no window at all (NULL) -----
+    if (rtn) {
+        // --------- process messages that a window sends to the
+        //  system itself ----------
+        switch (msg) {
+            df.STOP => {
+                StopMsg();
+            },
+            else => {
+                return (df.cProcessMessage(wnd, msg, p1, p2) == df.TRUE);
+            }
+        }
+
+    }
+    return true;
 }
 
 // ---- dispatch messages to the message proc function ----

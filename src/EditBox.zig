@@ -6,6 +6,7 @@ const q = @import("Message.zig");
 const rect = @import("Rect.zig");
 const textbox = @import("TextBox.zig");
 const search = @import("Search.zig");
+const clipboard = @import("Clipboard.zig");
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -562,7 +563,6 @@ fn ParagraphCmd(win:*Window) void {
 
 // ----------- COMMAND Message ----------
 fn CommandMsg(win:*Window,p1:df.PARAM) bool {
-    const wnd = win.win;
     switch (p1) {
         df.ID_SEARCH => {
             search.SearchText(win);
@@ -577,19 +577,19 @@ fn CommandMsg(win:*Window,p1:df.PARAM) bool {
             return true;
         },
         df.ID_CUT => {
-            df.CopyToClipboard(wnd);
+            clipboard.CopyToClipboard(win);
             _ = win.sendMessage(df.COMMAND, df.ID_DELETETEXT, 0);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },
         df.ID_COPY => {
-            df.CopyToClipboard(wnd);
+            clipboard.CopyToClipboard(win);
             textbox.ClearTextBlock(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },
         df.ID_PASTE => {
-            _ = df.PasteFromClipboard(wnd);
+            _ = clipboard.PasteFromClipboard(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },

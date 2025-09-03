@@ -12,7 +12,10 @@ void BuildPathDisplay(WINDOW);
 
 // message.c
 void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my);
-BOOL ProcessMessage(WINDOW, MESSAGE, PARAM, PARAM, int);
+BOOL cProcessMessage(WINDOW, MESSAGE, PARAM, PARAM);
+void StopMsg(void);
+extern BOOL AllocTesting;
+extern jmp_buf AllocError;
 
 // dialbox.c
 void FirstFocus(DBOX *);

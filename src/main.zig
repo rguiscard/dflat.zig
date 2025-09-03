@@ -19,7 +19,7 @@ pub fn main() !void {
     _ = mp.list;
     _ = mp.SystemMenu;
 
-    if (df.init_messages() == df.FALSE) {
+    if (mp.q.init_messages() == false) {
         return;
     }
 

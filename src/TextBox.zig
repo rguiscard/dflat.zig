@@ -63,8 +63,10 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         // ---- append the text ----
         if (std.mem.indexOfScalar(u8, buf, 0)) |idx| {
             @memcpy(buf.ptr[idx..idx+txt.len], txt);
-            @memcpy(buf.ptr[idx+txt.len..idx+txt.len+1], "\n");
-            @memcpy(buf.ptr[idx+txt.len+1..idx+txt.len+2], "\x00");
+//            @memcpy(buf.ptr[idx+txt.len..idx+txt.len+1], "\n");
+//            @memcpy(buf.ptr[idx+txt.len+1..idx+txt.len+2], "\x00");
+            buf.ptr[idx+txt.len] = '\n';
+            buf.ptr[idx+txt.len+1] = 0;
         }
 //        strcat(wnd->text, txt);
 //        strcat(wnd->text, "\n");
@@ -90,7 +92,7 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:c_int) void {
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
     const wnd = win.win;
     // -- assign new text value to textbox buffer --
-    const len = txt.len;
+    const len = txt.len+1;
     _ = win.sendMessage(df.CLEARTEXT, 0, 0);
     
     if (win.text) |t| {
@@ -107,7 +109,8 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
     }
 
     if (win.text) |buf| {
-        @memcpy(buf[0..len], txt);
+        @memset(buf, 0);
+        @memcpy(buf[0..len-1], txt);
         wnd.*.textlen = @intCast(len);
         win.textlen = @intCast(len);
         wnd.*.text = buf.ptr;

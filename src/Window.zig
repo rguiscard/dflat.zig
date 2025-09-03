@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Klass = @import("Classes.zig");
 const WndProc = @import("WndProc.zig");
 const normal = @import("Normal.zig");
+const q = @import("Message.zig");
 
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
@@ -230,8 +231,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
-    const c_rtn = if (rtn) df.TRUE else df.FALSE;
-    return (df.ProcessMessage(wnd, msg, p1, p2, c_rtn) == df.TRUE);
+    return q.ProcessMessage(wnd, msg, p1, p2, rtn);
 }
 
 // ------- window methods -----------

@@ -121,8 +121,8 @@ void PrepEditMenu(void *w, struct Menu *mnu)
 				ActivateCommand(&MainMenu, ID_DELETETEXT);
 			}
 			ActivateCommand(&MainMenu, ID_PARAGRAPH);
-			if (!TestAttribute(wnd, READONLY) &&
-						Clipboard != NULL)
+//			if (!TestAttribute(wnd, READONLY) &&
+//						Clipboard != NULL)
 				ActivateCommand(&MainMenu, ID_PASTE);
 			if (wnd->DeletedText != NULL)
 				ActivateCommand(&MainMenu, ID_UNDO);
