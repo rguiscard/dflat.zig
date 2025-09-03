@@ -16,6 +16,7 @@ BOOL ContentInClipboard(void);
 #define LINESPAGE 66
 
 /* --- Load the notepad file into the editor text buffer --- */
+/*
 void LoadFile(WINDOW wnd)
 {
     char *Buf = NULL;
@@ -37,8 +38,10 @@ void LoadFile(WINDOW wnd)
 		}
     }
 }
+*/
 
 /* -------- delete a file ------------ */
+/*
 void DeleteFile(WINDOW wnd)
 {
     if (wnd->extension != NULL)    {
@@ -55,6 +58,7 @@ void DeleteFile(WINDOW wnd)
         }
     }
 }
+*/
 /* ------ display the row and column in the statusbar ------ */
 void ShowPosition(WINDOW wnd)
 {

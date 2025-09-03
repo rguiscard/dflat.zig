@@ -75,7 +75,6 @@ pub fn build(b: *std.Build) void {
             // "spinbutt.c", // currently not in use. port later.
             // "combobox.c", // currently not in use. port later.
             // "slidebox.c", // currently not in use. port later.
-            "fileopen.c",
             "direct.c",
             "helpbox.c",
             "decomp.c",

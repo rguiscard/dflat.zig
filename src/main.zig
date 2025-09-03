@@ -89,7 +89,7 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                     return false;
                 },
                 df.ID_DELETEFILE => {
-                    df.DeleteFile(df.inFocus);
+                    DeleteFile(df.inFocus);
                     return true;
                 },
                 df.ID_EXIT => {
@@ -232,17 +232,31 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
                 df.MULTILINE);
 
     if (std.mem.eql(u8, fname, sUntitled) == false) {
-        win1.win.*.extension = df.DFmalloc(fname.len+1);
-        const ext:[*c]u8 = @ptrCast(win1.win.*.extension);
+        if (mp.global_allocator.allocSentinel(u8, fname.len, 0)) |buf| {
+            @memcpy(buf[0..fname.len], fname);
+            win1.win.*.extension = @ptrCast(buf.ptr);
+        } else |_| {
+        }
         // wnd.extension is used to store filename.
         // it is also be used to compared already opened files.
-        _ = df.strcpy(ext, fname.ptr); // may use std.mem.copyForwards in the future ?
-
-        df.LoadFile(win1.win);
+        LoadFile(win1);
     }
 
     _ = wwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
     _ = win1.sendMessage(df.SETFOCUS, df.TRUE, 0);
+}
+
+// --- Load the notepad file into the editor text buffer ---
+fn LoadFile(win: *mp.Window) void {
+    if (win.win.*.extension) |ext| {
+        const ptr = @as([*:0]u8, @ptrCast(ext));
+        const filename = std.mem.span(ptr);
+        if (std.fs.cwd().readFileAlloc(mp.global_allocator, filename, 1_048_576)) |content| {
+            defer mp.global_allocator.free(content);
+            _ = win.sendTextMessage(df.SETTEXT, content, 0);
+        } else |_| {
+        }
+    }
 }
 
 // ---------- save a file to disk ------------
@@ -252,14 +266,19 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
     var filename = std.mem.zeroes([df.MAXPATH]u8);
     if ((wnd.*.extension == null) or (Saveas == true)) {
         if (mp.fileopen.SaveAsDialogBox(fspec, null, &filename)) {
-            if (wnd.*.extension != df.NULL) {
-                df.free(wnd.*.extension);
+            if (wnd.*.extension) |ext| {
+                const ptr = @as([*:0]u8, @ptrCast(ext));
+                const fname = std.mem.span(ptr);
+                mp.global_allocator.free(fname);
             }
             if (std.fs.cwd().realpathAlloc(mp.global_allocator, ".")) |_| {
-                // should free
-                wnd.*.extension = df.DFmalloc(df.strlen(&filename)+1);
-                const ext:[*c]u8 = @ptrCast(wnd.*.extension);
-                _ = df.strcpy(ext, &filename);
+                const ptr = @as([*:0]u8, @ptrCast(&filename));
+                const fname = std.mem.span(ptr);
+                if (mp.global_allocator.allocSentinel(u8, fname.len, 0)) |buf| {
+                    @memcpy(buf[0..fname.len], fname);
+                    wnd.*.extension = @ptrCast(buf.ptr);
+                } else |_| {
+                }
                 df.AddTitle(wnd, df.NameComponent(&filename));
                 _ = df.SendMessage(wnd, df.BORDER, 0, 0);
             } else |_| {
@@ -268,20 +287,40 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
             return;
         }
     }
-    if (wnd.*.extension != df.NULL) {
+    if (wnd.*.extension) |ext| {
         const m:[]const u8 = "Saving the file";
         var mwin = mp.MessageBox.MomentaryMessage(m);
 
-        const extension:[*c]u8 = @ptrCast(wnd.*.extension);
-        const path:[:0]const u8 = std.mem.span(extension);
-        const text:[*c]u8 = @ptrCast(wnd.*.text);
-        const data:[]const u8 = std.mem.span(text);
+        const ptr = @as([*:0]u8, @ptrCast(ext));
+        const path = std.mem.span(ptr);
+        const text = @as([*:0]u8, @ptrCast(wnd.*.text));
+        const data:[]const u8 = std.mem.span(text); // save data up to \0
         if (std.fs.cwd().writeFile(.{.sub_path = path, .data = data})) {
             wnd.*.TextChanged = df.FALSE;
         } else |_| {
         }
 
         _ = mwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
+    }
+}
+
+// -------- delete a file ------------
+fn DeleteFile(wnd:df.WINDOW) void {
+    if (wnd.*.extension) |ext| {
+        const ptr = @as([*:0]u8, @ptrCast(ext));
+        const path = std.mem.span(ptr);
+        if (std.mem.eql(u8, path, sUntitled) == false) {
+            if (std.fmt.allocPrintSentinel(mp.global_allocator, "Delete {s} ?", .{path}, 0)) |m| {
+                defer mp.global_allocator.free(m);
+                if (mp.MessageBox.YesNoBox(m) == df.TRUE) {
+                    if (std.fs.cwd().deleteFileZ(path)) |_| {
+                    } else |_| {
+                    }
+                    _ = mp.q.SendMessage(wnd, df.CLOSE_WINDOW, 0, 0);
+                }
+            } else |_| {
+            }
+        }
     }
 }
 
