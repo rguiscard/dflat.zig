@@ -4,7 +4,7 @@ This is a version of D-Flag for Unix ported in Zig language. Please see original
 
 ## Know bugs:
 
-- Text field in search box does not work properly. This bug was introduced when converting Menu in c struct to zig struct, between commit 600c7497ab8bc7d853a500c9856f7af0a6fea89f and 899ac08b07eda4cc0d267bb9cc193b544c0cd293.
+- Text field in search box does not work properly when modifying search text after first one. This is a bug from original dflat.
 - Keyboard message in search box does not work. This bug was introduced when porting DialogBox to zig between commit 826c5f24c23993cdfa8d85cc9775eae5ef4e91fc and 8a8d9f5255078d888020f5670c4b3068740ba8a4.
 
 ========
