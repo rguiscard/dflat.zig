@@ -25,14 +25,6 @@ static short *Bsave;
 static int Bht, Bwd;
 BOOL WindowMoving;
 BOOL WindowSizing;
-/* -------- array of class definitions -------- */
-/*
-CLASSDEFS classdefs[] = {
-    #undef ClassDef
-    #define ClassDef(c,b,a) {b,a},
-    #include "classes.h"
-};
-*/
 WINDOW HiddenWindow;
 
 #ifdef INCLUDE_MINIMIZE
