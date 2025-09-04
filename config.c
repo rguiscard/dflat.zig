@@ -2,6 +2,8 @@
 
 #include "dflat.h"
 
+char DFlatApplication[] = "memopad";
+
 /* ----- default colors for color video system ----- */
 unsigned char color[CLASSCOUNT] [4] [2] = {
     /* ------------ NORMAL ------------ */

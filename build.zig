@@ -100,12 +100,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
-    memopad_mod.addCSourceFiles(.{ .files = &.{
-            "memopad.c",
-        },
-        .flags = &flags,
-    });
-    memopad_mod.addIncludePath(b.path("."));
+    memopad_mod.addIncludePath(b.path(".")); // for dflat.h in cImport
 
     // Here we define an executable. An executable needs to have a root module
     // which needs to expose a `main` function. While we could add a main function

@@ -1,7 +1,3 @@
-// main.c
-char *NameComponent(char *);
-void ShowPosition(WINDOW);
-
 // fileopen.c
 BOOL BuildFileList(WINDOW, char *);
 void BuildDirectoryList(WINDOW);
