@@ -32,7 +32,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         }
     } else {
         // ------ 1st text appended ------
-        if (root.global_allocator.alloc(u8, adln+3)) |buf| {
+        if (root.global_allocator.allocSentinel(u8, adln+3, 0)) |buf| {
             @memset(buf, 0);
             win.text = buf;
             wnd.*.text = buf.ptr;
@@ -101,7 +101,7 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
         } else |_| {
         }
     } else {
-        if (root.global_allocator.alloc(u8, @intCast(len+1))) |buf| {
+        if (root.global_allocator.allocSentinel(u8, @intCast(len+1), 0)) |buf| {
             @memset(buf, 0);
             win.text = buf;
         } else |_| {

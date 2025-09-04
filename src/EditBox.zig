@@ -90,7 +90,7 @@ fn ClearTextMsg(win:*Window) bool {
         } else |_| {
         }
     } else {
-        if (root.global_allocator.alloc(u8, blen)) |buf| {
+        if (root.global_allocator.allocSentinel(u8, blen, 0)) |buf| {
             win.text = buf;
         } else |_| {
         }
@@ -127,7 +127,7 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
                 } else |_| {
                 }
             } else {
-                if (root.global_allocator.alloc(u8, @intCast(len+2))) |buf| {
+                if (root.global_allocator.allocSentinel(u8, @intCast(len+2), 0)) |buf| {
                     @memset(buf, 0);
                     win.text = buf;
                 } else |_| {
@@ -317,7 +317,11 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         const sel:c_uint = @intCast(MouseY+wnd.*.wtop);
         const lp = df.TextLine(wnd, sel);
-        const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
+        const pos = df.strchr(lp, '\n');
+        var len:c_int = 0;
+        if (pos != null) {
+            len = @intCast(df.strchr(lp, '\n') - lp);
+        }
 
         MouseX = @min(MouseX, len);
         if (MouseX < wnd.*.wleft) {
@@ -806,7 +810,7 @@ fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
         } else |_| {
         }
     } else {
-        if (root.global_allocator.alloc(u8, len)) |buf| {
+        if (root.global_allocator.allocSentinel(u8, len, 0)) |buf| {
             @memset(buf, 0);
             win.DeletedText = buf;
         } else |_| {

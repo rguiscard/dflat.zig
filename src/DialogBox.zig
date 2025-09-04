@@ -163,6 +163,89 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
+fn FixColors(win:*Window) void {
+    const wnd = win.win;
+    const ct = wnd.*.ct;
+    if (ct.*.Class != df.BUTTON) {
+        if ((ct.*.Class != df.SPINBUTTON) and (ct.*.Class != df.COMBOBOX)) {
+            if ((ct.*.Class != df.EDITBOX) and (ct.*.Class != df.LISTBOX)) {
+                wnd.*.WindowColors[df.FRAME_COLOR][df.FG] =
+                                        df.GetParent(wnd).*.WindowColors[df.FRAME_COLOR][df.FG];
+                wnd.*.WindowColors[df.FRAME_COLOR][df.BG] =
+                                        df.GetParent(wnd).*.WindowColors[df.FRAME_COLOR][df.BG];
+                wnd.*.WindowColors[df.STD_COLOR][df.FG] =
+                                        df.GetParent(wnd).*.WindowColors[df.STD_COLOR][df.FG];
+                wnd.*.WindowColors[df.STD_COLOR][df.BG] =
+                                        df.GetParent(wnd).*.WindowColors[df.STD_COLOR][df.BG];
+            }
+        }
+    }
+}
+
+// --- dynamically add or remove scroll bars
+//                            from a control window ----
+fn SetScrollBars(win:*Window) void {
+    const wnd = win.win;
+    const oldattr = win.GetAttribute();
+    if (wnd.*.wlines > win.ClientHeight()) {
+        win.AddAttribute(df.VSCROLLBAR);
+    } else {
+        win.ClearAttribute(df.VSCROLLBAR);
+    }
+    if (wnd.*.textwidth > win.ClientWidth()) {
+        win.AddAttribute(df.HSCROLLBAR);
+    } else {
+        win.ClearAttribute(df.HSCROLLBAR);
+    }
+    if (win.GetAttribute() != oldattr)
+        _ = win.sendMessage(df.BORDER, 0, 0);
+}
+
+// ------- CLOSE_WINDOW Message (Control) -----
+fn CtlCloseWindowMsg(win:*Window) void {
+    const wnd = win.win;
+//    CTLWINDOW *ct = GetControl(wnd);
+    const ct = df.GetControl(wnd);
+    if (ct != null)    {
+        ct.*.wnd = null;
+        if (Window.GetParent(wnd).*.ReturnCode == df.ID_OK) {
+            if (ct.*.Class == df.EDITBOX or ct.*.Class == df.COMBOBOX)  {
+                // should use strlen() instead ?
+                const len = wnd.*.textlen;
+                if (ct.*.itext != null) {
+                    if(root.global_allocator.realloc(ct.*.itext[0..len], len)) |buf| {
+                        @memcpy(buf, wnd.*.text[0..len]);
+                        ct.*.itext = buf.ptr;
+                    } else |_| {
+                    }
+                } else {
+                    if(root.global_allocator.allocSentinel(u8, len, 0)) |buf| {
+                        @memset(buf, 0);
+                        @memcpy(buf, wnd.*.text[0..len]);
+                        ct.*.itext = buf.ptr;
+                    } else |_| {
+                    }
+                } 
+                if (df.isMultiLine(wnd) == df.FALSE) {
+                    // remove last \n
+                    if (ct.*.itext[len-2] == '\n') {
+                        ct.*.itext[len-2] = 0;
+                    }
+                }
+//                ct->itext=DFrealloc(ct->itext,strlen(wnd->text)+1);
+//                strcpy(ct->itext, wnd->text);
+//                if (!isMultiLine(wnd))    {
+//                        char *cp = ct->itext+strlen(ct->itext)-1;
+//                        if (*cp == '\n')
+//                        *cp = '\0';
+//                }
+            } else if (ct.*.Class == df.RADIOBUTTON or ct.*.Class == df.CHECKBOX) {
+                ct.*.isetting = ct.*.setting;
+            }
+        }
+    }
+}
+
 // -- generic window processor used by dialog box controls --
 pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     // win can be null ? probably not.
@@ -176,15 +259,15 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
         },
         df.PAINT => {
-            df.FixColors(wnd);
+            FixColors(win);
             if ((df.GetClass(wnd) == df.EDITBOX) or
                 (df.GetClass(wnd) == df.LISTBOX) or
                 (df.GetClass(wnd) == df.TEXTBOX)) {
-                df.SetScrollBars(wnd);
+                SetScrollBars(win);
             }
         },
         df.BORDER => {
-            df.FixColors(wnd);
+            FixColors(win);
             if (df.GetClass(wnd) == df.EDITBOX) {
                 const oldFocus = df.inFocus;
                 df.inFocus = null;
@@ -230,7 +313,8 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             }
         },
         df.CLOSE_WINDOW => {
-            df.CtlCloseWindowMsg(wnd);
+//            df.CtlCloseWindowMsg(wnd);
+            CtlCloseWindowMsg(win);
         },
         else => {
         }

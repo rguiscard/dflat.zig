@@ -298,6 +298,7 @@ BOOL dbShortcutKeys(DBOX *db, int ky)
 
 /* --- dynamically add or remove scroll bars
                             from a control window ---- */
+/*
 void SetScrollBars(WINDOW wnd)
 {
     int oldattr = GetAttribute(wnd);
@@ -312,8 +313,10 @@ void SetScrollBars(WINDOW wnd)
     if (GetAttribute(wnd) != oldattr)
         SendMessage(wnd, BORDER, 0, 0);
 }
+*/
 
 /* ------- CLOSE_WINDOW Message (Control) ----- */
+/*
 void CtlCloseWindowMsg(WINDOW wnd)
 {
     CTLWINDOW *ct = GetControl(wnd);
@@ -334,7 +337,9 @@ void CtlCloseWindowMsg(WINDOW wnd)
         }
     }
 }
+*/
 
+/*
 void FixColors(WINDOW wnd)
 {
     CTLWINDOW *ct = wnd->ct;
@@ -353,6 +358,7 @@ void FixColors(WINDOW wnd)
 		}
 	}
 }
+*/
 
 /* -- generic window processor used by dialog box controls -- */
 /*
