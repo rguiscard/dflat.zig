@@ -7,6 +7,7 @@ const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
+const Normal = @import("Normal.zig");
 
 var SysMenuOpen = false;
 const MAXCONTROLS = 30;
@@ -128,36 +129,34 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     switch (p1) {
 // does not seem to do anything ?
 //        df.UP => {
-//            if (df.isDerivedFrom(wnd, df.LISTBOX) == 0) {
+//            if (Normal.isDerivedFrom(win, df.LISTBOX) == false) {
 //                p1 = CTRL_FIVE;
 //                p2 = LEFTSHIFT;
 //            }
 //        },
 //        case BS:
-//            if (!isDerivedFrom(wnd, EDITBOX))    {
+//            if (Normal.isDerivedFrom(win, df.EDITBOX) == false)    {
 //                p1 = CTRL_FIVE;
 //                p2 = LEFTSHIFT;
 //            }
 //            break;
 //        case DN:
-//            if (!isDerivedFrom(wnd, LISTBOX) &&
-//                    !isDerivedFrom(wnd, COMBOBOX))
+//            if ((Normal.isDerivedFrom(win, df.LISTBOX) == false) and
+//                    (Normal.isDerivedFrom(win, df.COMBOBOX) == false))
 //                p1 = '\t';
 //            break;
 //        case FWD:
-//            if (!isDerivedFrom(wnd, EDITBOX))
+//            if (Normal.isDerivedFrom(win, df.EDITBOX) == false)
 //                p1 = '\t';
 //            break;
-//        case '\r':
-//            if (isDerivedFrom(wnd, EDITBOX))
-//                if (isMultiLine(wnd))
-//                    break;
-//            if (isDerivedFrom(wnd, BUTTON))
-//                break;
-//            if (isDerivedFrom(wnd, LISTBOX))
-//                break;
-//            SendMessage(GetParent(wnd), COMMAND, ID_OK, 0);
-//            return TRUE;
+        '\r' => {
+            if (((Normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) or
+                (Normal.isDerivedFrom(win, df.BUTTON) == false) or
+                (Normal.isDerivedFrom(win, df.LISTBOX) == false)) {
+                _ = q.SendMessage(Window.GetParent(wnd), df.COMMAND, df.ID_OK, 0);
+                return true;
+            }
+        },
         else => {
         }
     }

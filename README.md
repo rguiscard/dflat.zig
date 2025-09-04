@@ -5,7 +5,6 @@ This is a version of D-Flat for Unix ported in Zig language. Please see original
 ## Know bugs:
 
 - Text field in search box does not work properly when modifying search text after first one. This is a bug from original dflat.
-- Keyboard message in search box does not work. This bug was introduced when porting DialogBox to zig between commit 826c5f24c23993cdfa8d85cc9775eae5ef4e91fc and 8a8d9f5255078d888020f5670c4b3068740ba8a4.
 - Pasting into empty document will crash.
 - The first item in menubar is not disabled when it should be, e.g. Undo in Edit and Search in Search.
 

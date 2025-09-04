@@ -26,11 +26,13 @@ static int Bht, Bwd;
 BOOL WindowMoving;
 BOOL WindowSizing;
 /* -------- array of class definitions -------- */
+/*
 CLASSDEFS classdefs[] = {
     #undef ClassDef
     #define ClassDef(c,b,a) {b,a},
     #include "classes.h"
 };
+*/
 WINDOW HiddenWindow;
 
 #ifdef INCLUDE_MINIMIZE
@@ -329,6 +331,7 @@ void RestoreBorder(RECT rc)
     }
 }
 
+/*
 BOOL isDerivedFrom(WINDOW wnd, CLASS Class)
 {
     CLASS tclass = GetClass(wnd);
@@ -339,6 +342,7 @@ BOOL isDerivedFrom(WINDOW wnd, CLASS Class)
     }
     return FALSE;
 }
+*/
 
 /* -- find the oldest document window ancestor of a window -- */
 WINDOW GetAncestor(WINDOW wnd)

@@ -3,12 +3,14 @@
 #ifndef CLASSDEF_H
 #define CLASSDEF_H
 
+/*
 typedef struct classdefs {
-    CLASS base;                         /* base window class */
+    CLASS base;                         // base window class
     int attrib;
 } CLASSDEFS;
 
 extern CLASSDEFS classdefs[];
+*/
 
 #define SHADOW       0x0001
 #define MOVEABLE     0x0002

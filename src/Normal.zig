@@ -8,6 +8,7 @@ const Klass = @import("Classes.zig");
 const q = @import("Message.zig");
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
+const Classes = @import("Classes.zig");
 
 var dummyWnd:?Window = null;
 //var px:c_int = -1;
@@ -745,4 +746,17 @@ fn TerminateMoveSize() void {
     df.RestoreBorder(dwnd.*.rc);
     df.WindowMoving = df.FALSE;
     df.WindowSizing = df.FALSE;
+}
+
+pub fn isDerivedFrom(win:*Window, klass:df.CLASS) bool {
+    const wnd = win.win;
+    var tclass = df.GetClass(wnd);
+    while (tclass != -1) {
+        if (tclass == klass) {
+            return true;
+        }
+        const cls = Classes.defs[@intCast(tclass)];
+        tclass = @intFromEnum(cls[1]);
+    }
+    return false;
 }
