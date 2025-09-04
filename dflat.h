@@ -153,7 +153,6 @@ typedef struct window {
 } * WINDOW;
 
 #include "video.h"
-#include "classdef.h"
 
 void LogMessages (WINDOW, MESSAGE, PARAM, PARAM);
 void MessageLog(WINDOW);

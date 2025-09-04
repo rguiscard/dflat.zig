@@ -23,6 +23,7 @@ void drawText(WINDOW wnd)
 //                     *np = '\0';
 // #endif
                 mlen = strlen(cp);
+		printf("mlen %d\n", mlen);
                 while ((cp1=strchr(cp1,SHORTCUTCHAR)) != NULL) {
                     mlen += 3;
                     cp1++;
@@ -39,4 +40,5 @@ void drawText(WINDOW wnd)
                     cp++;
                 free(txt);
             }
+	    while(1) {}
 }

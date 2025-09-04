@@ -70,7 +70,6 @@ pub fn build(b: *std.Build) void {
 
             "dialbox.c",
             "msgbox.c",
-            "text.c",
             "radio.c",
             // "spinbutt.c", // currently not in use. port later.
             // "combobox.c", // currently not in use. port later.
