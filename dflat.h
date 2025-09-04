@@ -101,7 +101,7 @@ typedef struct window {
 	BOOL wasCleared;
     int restored_attrib;        /* attributes when restored */
     void *extension;      /* menus, dialogs, documents, etc */
-	void *wrapper;             /* used by C++ wrapper class */
+//	void *wrapper;             /* used by C++ wrapper class. not in use. */
     struct window *PrevMouse;   /* previous mouse capture   */
     struct window *PrevKeyboard;/* previous keyboard capture*/
 	struct window *PrevClock;   /* previous clock capture   */

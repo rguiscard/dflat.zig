@@ -19,25 +19,21 @@ fn drawText(win:*Window) void {
     const content = std.mem.span(ptr);
     var iter = std.mem.splitScalar(u8, content, '\n');
     while (iter.next()) |line| {
-        _ = win.sendTextMessage(df.ADDTEXT, @constCast(line), 0);
+        const count = std.mem.count(u8, line, &[_]u8{df.SHORTCUTCHAR});
+        if (count > 0) {
+            const mlen:usize = @intCast(line.len+3*count);
+            if (root.global_allocator.allocSentinel(u8, mlen, 0)) |buf| {
+                _ = df.CopyCommand(buf.ptr, @constCast(line.ptr), df.FALSE, df.WndBackground(wnd));
+                _ = win.sendTextMessage(df.ADDTEXT, @constCast(buf), 0);
+            } else |_| {
+            }
+        } else {
+            _ = win.sendTextMessage(df.ADDTEXT, @constCast(line), 0);
+        }
         if (idx >= height)
             break;
         idx += 1;
     }
-
-    // original code check shortcut in text. not sure why ?
-    //
-    //          mlen = strlen(cp);
-    //          printf("mlen %d\n", mlen);
-    //          while ((cp1=strchr(cp1,SHORTCUTCHAR)) != NULL) {
-    //              mlen += 3;
-    //              cp1++;
-    //          }
-    //          ...
-    //          txt = DFmalloc(mlen+1);
-    //          CopyCommand(txt, cp, FALSE, WndBackground(wnd));
-    //          txt[mlen] = '\0';
-
 }
 
 pub fn TextProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
