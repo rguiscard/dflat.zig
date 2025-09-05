@@ -103,7 +103,7 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
     if (Modal == df.TRUE) {
         _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
         _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
-        while (df.dispatch_message()>0) {
+        while (q.dispatch_message()) {
         }
         rtn = if (DialogWnd.*.ReturnCode == df.ID_OK) df.TRUE else df.FALSE;
         _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);

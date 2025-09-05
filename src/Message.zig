@@ -60,7 +60,7 @@ pub fn init_messages() bool {
     df.CaptureMouse = null;
     df.CaptureKeyboard = null;
 
-    _ = df.init_messages();
+    _ = init_messages();
     return true;
 }
 
@@ -160,7 +160,7 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
 }
 
 // ---- dispatch messages to the message proc function ----
-pub export fn dispatch_message() callconv(.c) df.BOOL {
+pub fn dispatch_message() bool {
     // -------- collect mouse and keyboard events -------
     df.collect_events();
 
@@ -191,16 +191,16 @@ pub export fn dispatch_message() callconv(.c) df.BOOL {
         }
 
         if (mq.msg == df.ENDDIALOG) {
-            return df.FALSE;
+            return false;
         }
         if (mq.msg == df.STOP) {
             PostMessage(null, df.STOP, 0, 0);
-            return df.FALSE;
+            return false;
         }
     }
 
     // #define VIDEO_FB 1
     df.convert_screen_to_ansi();
 
-    return df.TRUE;
+    return true;
 }

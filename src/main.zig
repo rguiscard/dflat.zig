@@ -44,7 +44,7 @@ pub fn main() !void {
 //        --argc;
 //        argv++;
 //    }
-    while (df.dispatch_message()>0) {
+    while (mp.Message.dispatch_message()) {
     }
 }
 
