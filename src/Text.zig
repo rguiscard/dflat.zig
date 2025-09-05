@@ -23,6 +23,7 @@ fn drawText(win:*Window) void {
         if (count > 0) {
             const mlen:usize = @intCast(line.len+3*count);
             if (root.global_allocator.allocSentinel(u8, mlen, 0)) |buf| {
+                defer root.global_allocator.free(buf);
                 _ = df.CopyCommand(buf.ptr, @constCast(line.ptr), df.FALSE, df.WndBackground(wnd));
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(buf), 0);
             } else |_| {

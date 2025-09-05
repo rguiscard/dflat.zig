@@ -15,6 +15,8 @@ void CloseCancelBox(void)
 }
 */
 
+/* Current not in use. Port later */
+/*
 static char *InputText;
 static int TextLength;
 
@@ -59,6 +61,7 @@ BOOL InputBox(WINDOW wnd,char *ttl,char *msg,char *text,int len,int wd)
     InputBoxDB.ctl[3].isetting = ON;
     return DialogBox(wnd, &InputBoxDB, TRUE, InputBoxProc);
 }
+*/
 
 int MsgHeight(char *msg)
 {

@@ -4,22 +4,14 @@
 
 int inFocusCommand(DBOX *);
 BOOL dbShortcutKeys(DBOX *, int);
-static int ControlProc(WINDOW, MESSAGE, PARAM, PARAM);
 void FirstFocus(DBOX *db);
 void NextFocus(DBOX *db);
 void PrevFocus(DBOX *db);
 void FixColors(WINDOW wnd);
-void SetScrollBars(WINDOW wnd);
-void CtlCloseWindowMsg(WINDOW wnd);
 static CTLWINDOW *AssociatedControl(DBOX *, enum commands);
-
-BOOL SysMenuOpen;
 
 static DBOX **dbs = NULL;
 static int dbct = 0;
-
-BOOL get_modal(WINDOW wnd);
-void set_modal(WINDOW wnd, BOOL val);
 
 /* --- clear all heap allocations to control text fields --- */
 void ClearDialogBoxes(void)
@@ -46,6 +38,7 @@ void ClearDialogBoxes(void)
 }
 
 /* ----- return command code of in-focus control window ---- */
+/*
 int inFocusCommand(DBOX *db)
 {
     CTLWINDOW *ct = db->ctl;
@@ -56,6 +49,7 @@ int inFocusCommand(DBOX *db)
     }
     return -1;
 }
+*/
 
 /* -------- find a specified control structure ------- */
 CTLWINDOW *FindCommand(DBOX *db, enum commands cmd, int Class)
@@ -114,6 +108,7 @@ BOOL isControlOn(DBOX *db, enum commands cmd, int Class)
 }
 
 /* ---- return pointer to the text of a control window ---- */
+/*
 char *GetDlgTextString(DBOX *db,enum commands cmd,CLASS Class)
 {
     CTLWINDOW *ct = FindCommand(db, cmd, Class);
@@ -122,8 +117,10 @@ char *GetDlgTextString(DBOX *db,enum commands cmd,CLASS Class)
     else
         return NULL;
 }
+*/
 
 /* ------- set the text of a control specification ------ */
+/*
 void SetDlgTextString(DBOX *db, enum commands cmd,
                                     char *text, CLASS Class)
 {
@@ -131,7 +128,7 @@ void SetDlgTextString(DBOX *db, enum commands cmd,
     if (ct != NULL)    {
 		if (text != NULL)	{
 			if (ct->Class == TEXT)
-				ct->itext = text;  /* text may not go out of scope */
+				ct->itext = text;  // text may not go out of scope
 			else 	{
 		        ct->itext = DFrealloc(ct->itext, strlen(text)+1);
     		    strcpy(ct->itext, text);
@@ -154,6 +151,7 @@ void SetDlgTextString(DBOX *db, enum commands cmd,
 		}
     }
 }
+*/
 
 /* ------- set the text of a control window ------ */
 void PutItemText(WINDOW wnd, enum commands cmd, char *text)
@@ -295,144 +293,6 @@ BOOL dbShortcutKeys(DBOX *db, int ky)
     }
 	return FALSE;
 }
-
-/* --- dynamically add or remove scroll bars
-                            from a control window ---- */
-/*
-void SetScrollBars(WINDOW wnd)
-{
-    int oldattr = GetAttribute(wnd);
-    if (wnd->wlines > ClientHeight(wnd))
-        AddAttribute(wnd, VSCROLLBAR);
-    else 
-        ClearAttribute(wnd, VSCROLLBAR);
-    if (wnd->textwidth > ClientWidth(wnd))
-        AddAttribute(wnd, HSCROLLBAR);
-    else 
-        ClearAttribute(wnd, HSCROLLBAR);
-    if (GetAttribute(wnd) != oldattr)
-        SendMessage(wnd, BORDER, 0, 0);
-}
-*/
-
-/* ------- CLOSE_WINDOW Message (Control) ----- */
-/*
-void CtlCloseWindowMsg(WINDOW wnd)
-{
-    CTLWINDOW *ct = GetControl(wnd);
-    if (ct != NULL)    {
-        ct->wnd = NULL;
-        if (GetParent(wnd)->ReturnCode == ID_OK)	{
-            if (ct->Class == EDITBOX || ct->Class == COMBOBOX)	{
-               	ct->itext=DFrealloc(ct->itext,strlen(wnd->text)+1);
-               	strcpy(ct->itext, wnd->text);
-               	if (!isMultiLine(wnd))    {
-                   	char *cp = ct->itext+strlen(ct->itext)-1;
-                   	if (*cp == '\n')
-                       	*cp = '\0';
-            	}
-			}
-            else if (ct->Class == RADIOBUTTON || ct->Class == CHECKBOX)
-                ct->isetting = ct->setting;
-        }
-    }
-}
-*/
-
-/*
-void FixColors(WINDOW wnd)
-{
-    CTLWINDOW *ct = wnd->ct;
-	if (ct->Class != BUTTON)	{
-		if (ct->Class != SPINBUTTON && ct->Class != COMBOBOX)	{
-			if (ct->Class != EDITBOX && ct->Class != LISTBOX)	{
-				wnd->WindowColors[FRAME_COLOR][FG] = 
-					GetParent(wnd)->WindowColors[FRAME_COLOR][FG];
-				wnd->WindowColors[FRAME_COLOR][BG] = 
-					GetParent(wnd)->WindowColors[FRAME_COLOR][BG];
-				wnd->WindowColors[STD_COLOR][FG] = 
-					GetParent(wnd)->WindowColors[STD_COLOR][FG];
-				wnd->WindowColors[STD_COLOR][BG] = 
-					GetParent(wnd)->WindowColors[STD_COLOR][BG];
-			}
-		}
-	}
-}
-*/
-
-/* -- generic window processor used by dialog box controls -- */
-/*
-int cControlProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
-{
-    DBOX *db;
-
-    if (wnd == NULL)
-        return FALSE;
-    db = GetParent(wnd) ? GetParent(wnd)->extension : NULL;
-
-    switch (msg)    {
-//        case CREATE_WINDOW:
-//            CtlCreateWindowMsg(wnd);
-//            break;
-//        case KEYBOARD:
-//            if (CtlKeyboardMsg(wnd, p1, p2))
-//                return TRUE;
-//            break;
-//        case PAINT:
-//			FixColors(wnd);
-//            if (GetClass(wnd) == EDITBOX ||
-//                    GetClass(wnd) == LISTBOX ||
-//                        GetClass(wnd) == TEXTBOX)
-//                SetScrollBars(wnd);
-//            break;
-//        case BORDER:
-//FixColors(wnd);
-//            if (GetClass(wnd) == EDITBOX)    {
-//                WINDOW oldFocus = inFocus;
-//                inFocus = NULL;
-//                DefaultWndProc(wnd, msg, p1, p2);
-//                inFocus = oldFocus;
-//                return TRUE;
-//            }
-//            break;
-        case SETFOCUS:	{
-			WINDOW pwnd = GetParent(wnd);
-            if (p1)    {
-				WINDOW oldFocus = inFocus;
-				if (pwnd && GetClass(oldFocus) != APPLICATION &&
-						!isAncestor(inFocus, pwnd))	{
-					inFocus = NULL;
-					SendMessage(oldFocus, BORDER, 0, 0);
-					SendMessage(pwnd, SHOW_WINDOW, 0, 0);
-					inFocus = oldFocus;
-					ClearVisible(oldFocus);
-				}
-				if (GetClass(oldFocus) == APPLICATION &&
-						NextWindow(pwnd) != NULL)
-					pwnd->wasCleared = FALSE;
-                DefaultWndProc(wnd, msg, p1, p2);
-				SetVisible(oldFocus);
-				if (pwnd != NULL)	{
-					pwnd->dfocus = wnd;
-	                SendMessage(pwnd, COMMAND,
-    	                inFocusCommand(db), ENTERFOCUS);
-				}
-                return TRUE;
-            }
-            else
-                SendMessage(pwnd, COMMAND,
-                    inFocusCommand(db), LEAVEFOCUS);
-            break;
-		}
-        case CLOSE_WINDOW:
-            CtlCloseWindowMsg(wnd);
-            break;
-        default:
-            break;
-    }
-    return DefaultWndProc(wnd, msg, p1, p2);
-}
-*/
 
 /* ---- change the focus to the first control --- */
 void FirstFocus(DBOX *db)

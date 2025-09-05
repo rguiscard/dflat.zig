@@ -228,8 +228,8 @@ fn CtlCloseWindowMsg(win:*Window) void {
                 } 
                 if (df.isMultiLine(wnd) == df.FALSE) {
                     // remove last \n
-                    if (ct.*.itext[len-2] == '\n') {
-                        ct.*.itext[len-2] = 0;
+                    if (std.mem.indexOfScalar(u8, ct.*.itext[0..len], '\n')) |pos| {
+                        ct.*.itext[pos] = 0;
                     }
                 }
 //                ct->itext=DFrealloc(ct->itext,strlen(wnd->text)+1);
@@ -303,13 +303,13 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     if (pwnd != null) {
                         pwnd.*.dfocus = wnd;
                         _ = df.SendMessage(pwnd, df.COMMAND,
-                                 df.inFocusCommand(db), df.ENTERFOCUS);
+                                 inFocusCommand(db), df.ENTERFOCUS);
                     }
                     return true;
                 }
             } else {
                 _ = df.SendMessage(pwnd, df.COMMAND,
-                            df.inFocusCommand(db), df.LEAVEFOCUS);
+                            inFocusCommand(db), df.LEAVEFOCUS);
             }
         },
         df.CLOSE_WINDOW => {
@@ -529,7 +529,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                 return true;
             if (wnd.*.extension) |extension| {
                 const db:*df.DBOX = @alignCast(@ptrCast(extension));
-                _ = win.sendMessage(df.COMMAND, df.inFocusCommand(db), msg);
+                _ = win.sendMessage(df.COMMAND, inFocusCommand(db), msg);
             }
         },
         df.SETFOCUS => {
@@ -561,4 +561,83 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
     }
     // Note, p2 will be changed.
     return root.zBaseWndProc(df.DIALOG, win, msg, p1, p2_new);
+}
+
+// ---- return pointer to the text of a control window ----
+pub export fn GetDlgTextString(db:*df.DBOX, cmd:c_uint, Class:df.CLASS) callconv(.c) [*c]u8 {
+//    CTLWINDOW *ct = FindCommand(db, cmd, Class);
+    const ct = df.FindCommand(db, cmd, Class);
+    return if (ct) |c| c.*.itext else null;
+//    if (ct == null) {
+//        return null;
+//    } else {
+//        return ct.*.itext;
+//    }
+}
+
+// ------- set the text of a control specification ------
+pub export fn SetDlgTextString(db:*df.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLASS) callconv(.c) void {
+//    CTLWINDOW *ct = FindCommand(db, cmd, Class);
+    const control = df.FindCommand(db, cmd, Class);
+    if (control) |ct| {
+        if (text != null) {
+            if (ct.*.Class == df.TEXT) {
+                ct.*.itext = text;  // text may not go out of scope
+            } else {
+                if (ct.*.itext) |_| {
+                    const ilen = df.strlen(ct.*.itext);
+                    const len = df.strlen(text);
+                    if(root.global_allocator.realloc(ct.*.itext[0..ilen], len)) |buf| {
+                        @memcpy(buf, text[0..len]);
+                        ct.*.itext = buf.ptr;
+                    } else |_| {
+                    }
+                } else {
+                    const len = df.strlen(text);
+                    if(root.global_allocator.allocSentinel(u8, len, 0)) |buf| {
+                        @memset(buf, 0);
+                        @memcpy(buf, text[0..len]);
+                        ct.*.itext = buf.ptr;
+                    } else |_| {
+                    }
+                }
+//                ct.*.itext = df.DFrealloc(ct.*.itext, df.strlen(text)+1);
+//                df.strcpy(ct.*.itext, text);
+            }
+        } else {
+            if (ct.*.Class == df.TEXT) {
+                ct.*.itext = @constCast(&[_]u8{0});
+            } else {
+                const ilen = df.strlen(ct.*.itext);
+                root.global_allocator.free(ct.*.itext[0..ilen]);
+//                root.global_allocator.free(ct.*.itext);
+//                df.free(ct.*.itext);
+                ct.*.itext = null;
+            }
+        }
+        if (ct.*.wnd != null) {
+            const w:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+            if (text != null) {
+                _ = q.SendMessage(w, df.SETTEXT, @intCast(@intFromPtr(text)), 0);
+            } else {
+                _ = q.SendMessage(w, df.CLEARTEXT, 0, 0);
+            }
+            _ = q.SendMessage(w, df.PAINT, 0, 0);
+        }
+    }
+}
+
+// ----- return command code of in-focus control window ----
+fn inFocusCommand(db:?*df.DBOX) c_int {
+    if (db) |box| {
+        for(box.*.ctl) |ctl| {
+            if (ctl.Class == 0)
+                break;
+            const w:df.WINDOW = @alignCast(@ptrCast(ctl.wnd));
+            if (w == df.inFocus) {
+                return ctl.command;
+            }
+        }
+    }
+    return -1;
 }

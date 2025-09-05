@@ -17,7 +17,7 @@ fn PaintMsg(win: *Window, ct: *df.CTLWINDOW, rc: ?*df.RECT) void {
             df.wputch(wnd, 220, @intCast(win.WindowWidth()), 0);
         }
         if (ct.*.itext != null) {
-            if(root.global_allocator.alloc(u8, df.strlen(ct.*.itext)+10)) |txt| {
+            if(root.global_allocator.allocSentinel(u8, df.strlen(ct.*.itext)+10, 0)) |txt| {
                 defer root.global_allocator.free(txt);
                 @memset(txt, 0);
                 var start:usize = 0;

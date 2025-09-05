@@ -44,7 +44,7 @@ pub fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) boo
 //    return df.cSpinButtonProc(wnd, msg, p1, p2);
 }
 
-pub export fn InputBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
-    const wnd = win.win;
-    return df.cInputBoxProc(wnd, msg, p1, p2);
-}
+//pub export fn InputBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
+//    const wnd = win.win;
+//    return df.cInputBoxProc(wnd, msg, p1, p2);
+//}

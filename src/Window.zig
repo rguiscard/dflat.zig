@@ -425,22 +425,6 @@ pub export fn PrevWindow(wnd:df.WINDOW) df.WINDOW {
     return null;
 }
 
-pub export fn get_modal(wnd:df.WINDOW) df.BOOL {
-    var rtn:df.BOOL = df.FALSE;
-    if (get_zin(wnd)) |win| {
-        if (win.modal) {
-            rtn = df.TRUE;
-        }
-    }
-    return rtn;
-}
-
-pub export fn set_modal(wnd:df.WINDOW, val:df.BOOL) void {
-    if (get_zin(wnd)) |win| {
-        win.modal = if (val == df.TRUE) true else false;
-    }
-}
-
 pub export fn set_NormalProc(wnd:df.WINDOW) void {
     if (get_zin(wnd)) |win| {
         win.wndproc = normal.NormalProc;
