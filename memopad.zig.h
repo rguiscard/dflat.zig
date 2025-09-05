@@ -124,6 +124,9 @@ void ReadHelp(WINDOW);
 BOOL HelpBoxKeyboardMsg(WINDOW wnd, PARAM p1);
 void SelectHelp(WINDOW, struct helps *, BOOL);
 
+// radio.c
+void cPushRadioButton(DBOX *, enum commands, BOOL);
+
 // all wndproc
 int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
 int cInputBoxProc(WINDOW, MESSAGE, PARAM, PARAM);

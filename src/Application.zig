@@ -9,6 +9,7 @@ const DialogBox = @import("DialogBox.zig");
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
 const log = @import("Log.zig");
+const radio = @import("RadioButton.zig");
 
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
@@ -34,11 +35,11 @@ fn CreateWindowMsg(win: *Window) bool {
         df.SetCheckBox(&df.Display, df.ID_TEXTURE);
     }
     if (df.cfg.mono == 1) {
-        df.PushRadioButton(&df.Display, df.ID_MONO);
+        radio.PushRadioButton(&df.Display, df.ID_MONO);
     } else if (df.cfg.mono == 2) {
-        df.PushRadioButton(&df.Display, df.ID_REVERSE);
+        radio.PushRadioButton(&df.Display, df.ID_REVERSE);
     } else {
-        df.PushRadioButton(&df.Display, df.ID_COLOR);
+        radio.PushRadioButton(&df.Display, df.ID_COLOR);
     }
     if (df.SCREENHEIGHT != df.cfg.ScreenLines) {
         SetScreenHeight(df.cfg.ScreenLines);

@@ -3,6 +3,20 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const DialogBox = @import("DialogBox.zig");
+
+var Setting:bool = true;
+
+pub export fn SetRadioButton(db:*df.DBOX, ct:*df.CTLWINDOW) callconv(.c) void {
+    Setting = false;
+    PushRadioButton(db, @intCast(ct.*.command));
+    Setting = true;
+}
+
+pub export fn PushRadioButton(db:*df.DBOX, cmd:c_uint) void {
+    const setting = if (Setting) df.TRUE else df.FALSE;
+    df.cPushRadioButton(db, cmd, @intCast(setting));
+}
 
 pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -46,4 +60,10 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
         }
     }
     return root.zBaseWndProc(df.RADIOBUTTON, win, msg, p1, p2);
+}
+
+pub export fn RadioButtonSetting(db:*df.DBOX, cmd:c_uint) callconv(.c) df.BOOL {
+    const ctl = DialogBox.FindCommand(db, cmd, df.RADIOBUTTON);
+    const rtn = if (ctl) |ct| (if (ct.*.wnd != null) (ct.*.setting==df.ON) else (ct.*.isetting==df.ON)) else false;
+    return if (rtn) df.TRUE else df.FALSE;
 }

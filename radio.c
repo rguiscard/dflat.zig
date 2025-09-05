@@ -3,16 +3,18 @@
 #include "dflat.h"
 
 static CTLWINDOW *rct[MAXRADIOS];
+/*
 static BOOL Setting = TRUE;
 
 void SetRadioButton(DBOX *db, CTLWINDOW *ct)
 {
 	Setting = FALSE;
-	PushRadioButton(db, ct->command);
+	PushRadioButton(db, ct->command, Setting);
 	Setting = TRUE;
 }
+*/
 
-void PushRadioButton(DBOX *db, enum commands cmd)
+void cPushRadioButton(DBOX *db, enum commands cmd, BOOL setting)
 {
     CTLWINDOW *ctt = db->ctl;
     CTLWINDOW *ct = FindCommand(db, cmd, RADIOBUTTON);
@@ -55,7 +57,7 @@ void PushRadioButton(DBOX *db, enum commands cmd)
         if (rct[i] != NULL)    {
             int wason = rct[i]->setting;
             rct[i]->setting = OFF;
-			if (Setting)
+			if (setting)
 	            rct[i]->isetting = OFF;
             if (wason)
                 SendMessage(rct[i]->wnd, PAINT, 0, 0);
@@ -63,13 +65,15 @@ void PushRadioButton(DBOX *db, enum commands cmd)
     }
 	/* ----- set the specified radio button on ----- */
     ct->setting = ON;
-	if (Setting)
+	if (setting)
 	    ct->isetting = ON;
     SendMessage(ct->wnd, PAINT, 0, 0);
 }
 
+/*
 BOOL RadioButtonSetting(DBOX *db, enum commands cmd)
 {
     CTLWINDOW *ct = FindCommand(db, cmd, RADIOBUTTON);
     return ct ? (ct->wnd ? (ct->setting==ON) : (ct->isetting==ON)) : FALSE;
 }
+*/

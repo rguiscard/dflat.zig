@@ -443,7 +443,7 @@ BOOL OpenFileDialogBox(char *, char *);
 BOOL SaveAsDialogBox(char *, char *, char *);
 void GetDlgListText(WINDOW, char *, enum commands);
 BOOL RadioButtonSetting(DBOX *, enum commands);
-void PushRadioButton(DBOX *, enum commands);
+void PushRadioButton(DBOX *, enum commands, BOOL setting);
 void PutItemText(WINDOW, enum commands, char *);
 void PutComboListText(WINDOW, enum commands, char *);
 void GetItemText(WINDOW, enum commands, char *, int);
