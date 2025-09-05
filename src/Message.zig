@@ -60,7 +60,7 @@ pub fn init_messages() bool {
     df.CaptureMouse = null;
     df.CaptureKeyboard = null;
 
-    _ = init_messages();
+    _ = df.init_messages();
     return true;
 }
 

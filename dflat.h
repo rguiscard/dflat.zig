@@ -285,7 +285,7 @@ extern int CurrentMenuSelection;
 #define RESETCOLOR   (unsigned char) 175 /* reset colors to default  */
 #define LISTSELECTOR   4    /* selected list box entry      */
 /* --------- message prototypes ----------- */
-//BOOL init_messages(void);
+BOOL init_messages(void);
 void PostMessage(WINDOW, MESSAGE, PARAM, PARAM);
 int SendMessage(WINDOW, MESSAGE, PARAM, PARAM);
 void PostEvent(MESSAGE event, int p1, int p2);
