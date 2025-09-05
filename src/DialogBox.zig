@@ -108,7 +108,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 const ct = df.GetControl(wnd);
 //                if (df.DisplayHelp(wnd, ct.*.help) == 0) {
                 if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help)) == 0) {
-                    _ = df.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
+                    _ = q.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
                 }
                 return true;
             }
@@ -289,8 +289,8 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     if ((pwnd != null) and (df.GetClass(oldFocus) != df.APPLICATION) and
                                        (df.isAncestor(df.inFocus, pwnd) == 0)) {
                         df.inFocus = null;
-                        _ = df.SendMessage(oldFocus, df.BORDER, 0, 0);
-                        _ = df.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);
+                        _ = q.SendMessage(oldFocus, df.BORDER, 0, 0);
+                        _ = q.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);
                         df.inFocus = oldFocus;
                         oldWin.ClearVisible();
                     }
@@ -302,13 +302,13 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     oldWin.SetVisible();
                     if (pwnd != null) {
                         pwnd.*.dfocus = wnd;
-                        _ = df.SendMessage(pwnd, df.COMMAND,
+                        _ = q.SendMessage(pwnd, df.COMMAND,
                                  inFocusCommand(db), df.ENTERFOCUS);
                     }
                     return true;
                 }
             } else {
-                _ = df.SendMessage(pwnd, df.COMMAND,
+                _ = q.SendMessage(pwnd, df.COMMAND,
                             inFocusCommand(db), df.LEAVEFOCUS);
             }
         },
@@ -534,7 +534,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         },
         df.SETFOCUS => {
             if ((p1 != 0) and (wnd.*.dfocus != null) and (df.isVisible(wnd) > 0)) {
-                return if (df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0) == df.TRUE) true else false;
+                return if (q.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0) == df.TRUE) true else false;
             }
         },
         df.COMMAND => {
@@ -547,7 +547,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         df.MOVE, df.SIZE => {
             const rtn = root.zBaseWndProc(df.DIALOG, win, msg, p1, p2);
             if ((wnd.*.dfocus != null) and (df.isVisible(wnd) > 0))
-                _ = df.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
+                _ = q.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
             return rtn;
         },
         df.CLOSE_WINDOW => {
@@ -625,6 +625,122 @@ pub export fn SetDlgTextString(db:*df.DBOX, cmd:c_uint, text: [*c]u8, Class:df.C
             _ = q.SendMessage(w, df.PAINT, 0, 0);
         }
     }
+}
+
+// ------- set the text of a control window ------
+pub export fn PutItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8) callconv(.c) void {
+//    CTLWINDOW *ct = FindCommand(wnd->extension, cmd, EDITBOX);
+  
+    const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
+    var control = df.FindCommand(db, cmd, df.EDITBOX);
+
+    if (control == null)
+        control = df.FindCommand(db, cmd, df.TEXTBOX);
+    if (control == null)
+        control = df.FindCommand(db, cmd, df.COMBOBOX);
+    if (control == null)
+        control = df.FindCommand(db, cmd, df.LISTBOX);
+    if (control == null)
+        control = df.FindCommand(db, cmd, df.SPINBUTTON);
+    if (control == null)
+        control = df.FindCommand(db, cmd, df.TEXT);
+    if (control) |ct| {
+        // assume cwnd cannot be null ?
+        const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+        switch (ct.*.Class) {
+            df.COMBOBOX,
+            df.EDITBOX => {
+                _ = q.SendMessage(cwnd, df.CLEARTEXT, 0, 0);
+                _ = q.SendMessage(cwnd, df.ADDTEXT, @intCast(@intFromPtr(text)), 0);
+                if (df.isMultiLine(cwnd) == df.FALSE) {
+                    _ = q.SendMessage(cwnd, df.PAINT, 0, 0);
+                }
+            },
+            df.LISTBOX,
+            df.TEXTBOX,
+            df.SPINBUTTON => {
+                _ = q.SendMessage(cwnd, df.ADDTEXT, @intCast(@intFromPtr(text)), 0);
+            },
+            df.TEXT => {
+                _ = q.SendMessage(cwnd, df.CLEARTEXT, 0, 0);
+                _ = q.SendMessage(cwnd, df.ADDTEXT, @intCast(@intFromPtr(text)), 0);
+                _ = q.SendMessage(cwnd, df.PAINT, 0, 0);
+            },
+            else => {
+            }
+        }
+    }
+}
+
+// ------- get the text of a control window ------
+pub export fn GetItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8, len:c_int) callconv(.c) void {
+//    CTLWINDOW *ct = FindCommand(wnd->extension, cmd, EDITBOX);
+//    unsigned char *cp;
+
+    const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
+    var control = df.FindCommand(db, cmd, df.EDITBOX);
+
+    if (control == null)
+        control = df.FindCommand(db, cmd, df.COMBOBOX);
+    if (control == null)
+        control = df.FindCommand(db, cmd, df.TEXTBOX);
+    if (control == null)
+        control = df.FindCommand(db, cmd, df.TEXT);
+    if (control) |ct| {
+        if (ct.*.wnd != null) {
+            const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+            if (Window.get_zin(cwnd)) |cwin| {
+                const cwin_text = cwin.text;
+                switch (ct.*.Class) {
+                    df.TEXT => {
+                        if (cwin_text) |t| {
+                            if (std.mem.indexOfScalar(u8, t, '\n')) |pos| {
+                                @memcpy(text[0..pos], t[0..pos]);
+                            } else {
+                                // no text;
+                                text.* = 0;
+                            }
+//                            cp = strchr(cwnd_text, '\n');
+//                            if (cp != null)
+//                                len = (int) (cp - cwnd_text);
+//                            strncpy(text, cwnd_text, len);
+//                            *(text+len) = '\0';
+                        }
+                    },
+                    df.TEXTBOX => {
+                        if (cwin_text) |t| {
+                            var l:usize = @intCast(len);
+                            if (std.mem.indexOfScalar(u8, t, 0)) |pos| {
+                                if (pos < len)
+                                    l = pos; // be sure length is the small one.
+                            }
+                            @memcpy(text[0..l], t[0..l]);
+                        }
+//                        if (cwnd_text != null)
+//                            strncpy(text, cwnd_text, len);
+                    },
+                    df.COMBOBOX,
+                    df.EDITBOX => {
+                        _ = q.SendMessage(cwnd,df.GETTEXT,@intCast(@intFromPtr(text)),len);
+                    },
+                    else => {
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ------- set the text of a listbox control window ------
+pub export fn GetDlgListText(wnd:df.WINDOW, text:[*c]u8, cmd:c_uint) callconv(.c) void {
+//    CTLWINDOW *ct = FindCommand(wnd->extension, cmd, LISTBOX);
+    const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
+    const ct = df.FindCommand(db, cmd, df.LISTBOX);
+    const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+
+    var sel:c_int = -1; // cannot use isize here, otherwise, ListBox.zig GetTextMsg will fail
+    _ = q.SendMessage(cwnd, df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&sel)), 0);
+    _ = q.SendMessage(cwnd, df.LB_GETTEXT, @intCast(@intFromPtr(text)), @intCast(sel));
 }
 
 // ----- return command code of in-focus control window ----

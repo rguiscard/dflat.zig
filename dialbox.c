@@ -154,6 +154,7 @@ void SetDlgTextString(DBOX *db, enum commands cmd,
 */
 
 /* ------- set the text of a control window ------ */
+/*
 void PutItemText(WINDOW wnd, enum commands cmd, char *text)
 {
     CTLWINDOW *ct = FindCommand(wnd->extension, cmd, EDITBOX);
@@ -194,8 +195,10 @@ void PutItemText(WINDOW wnd, enum commands cmd, char *text)
         }
     }
 }
+*/
 
 /* ------- get the text of a control window ------ */
+/*
 void GetItemText(WINDOW wnd, enum commands cmd,
                                 char *text, int len)
 {
@@ -235,8 +238,10 @@ void GetItemText(WINDOW wnd, enum commands cmd,
         }
     }
 }
+*/
 
 /* ------- set the text of a listbox control window ------ */
+/*
 void GetDlgListText(WINDOW wnd, char *text, enum commands cmd)
 {
     CTLWINDOW *ct = FindCommand(wnd->extension, cmd, LISTBOX);
@@ -244,6 +249,7 @@ void GetDlgListText(WINDOW wnd, char *text, enum commands cmd)
     SendMessage(ct->wnd, LB_CURRENTSELECTION, (PARAM)&sel, 0);
     SendMessage(ct->wnd, LB_GETTEXT, (PARAM) text, sel);
 }
+*/
 
 /* -- find control structure associated with text control -- */
 static CTLWINDOW *AssociatedControl(DBOX *db,enum commands Tcmd)
