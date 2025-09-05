@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const log = @import("Log.zig");
 const clipboard = @import("Clipboard.zig");
+const DialogBox = @import("DialogBox.zig");
 
 const MAXMESSAGES = 100;
 
@@ -65,7 +66,7 @@ pub fn init_messages() bool {
 
 fn StopMsg() void {
     clipboard.ClearClipboard();
-    df.ClearDialogBoxes();
+    DialogBox.ClearDialogBoxes();
     df.restorecursor();
     df.unhidecursor();
     df.hide_mousecursor();

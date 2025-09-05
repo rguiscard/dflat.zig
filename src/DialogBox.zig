@@ -28,6 +28,47 @@ fn getDialogBoxes() *std.ArrayList(*df.DBOX) {
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
 
+// --- clear all heap allocations to control text fields ---
+pub fn ClearDialogBoxes() void {
+    if (dialogboxes) |dbs| {
+        for(dbs.items) |db| {
+            for (&db.*.ctl) |*ct| {
+                if (ct.*.Class == 0)
+                    break;
+                if (((ct.*.Class == df.EDITBOX) or (ct.*.Class == df.TEXTBOX) or
+                      (ct.*.Class == df.COMBOBOX)) and
+                      ct.*.itext != null) {
+                    const ptr = @as([*:0]u8, ct.*.itext);
+                    const content = std.mem.span(ptr);
+                    root.global_allocator.free(content);
+                    ct.*.itext = null;
+                }
+            }
+        }
+        dialogboxes.?.deinit(root.global_allocator);
+        dialogboxes = null;
+    }
+//    int i;
+//    for (i = 0; i < dbct; i++)    {
+//        CTLWINDOW *ct = (*(dbs+i))->ctl;
+//        while (ct->Class)    {
+//            if ((ct->Class == EDITBOX ||
+//                                 ct->Class == TEXTBOX ||
+//                 ct->Class == COMBOBOX) &&
+//                    ct->itext != NULL)  {
+//                free(ct->itext);
+//                                ct->itext = NULL;
+//                        }
+//            ct++;
+//        }
+//    }
+//    if (dbs != NULL)    {
+//        free(dbs);
+//        dbs = NULL;
+//    }
+//    dbct = 0;
+}
+
 // ------- create and execute a dialog box ----------
 pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
     wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool) c_int {
@@ -563,13 +604,13 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
 
 // ---- return pointer to the text of a control window ----
 pub export fn GetDlgTextString(db:*df.DBOX, cmd:c_uint, Class:df.CLASS) callconv(.c) [*c]u8 {
-    const ct = df.FindCommand(db, cmd, Class);
+    const ct = FindCommand(db, cmd, Class);
     return if (ct) |c| c.*.itext else null;
 }
 
 // ------- set the text of a control specification ------
 pub export fn SetDlgTextString(db:*df.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLASS) callconv(.c) void {
-    const control = df.FindCommand(db, cmd, Class);
+    const control = FindCommand(db, cmd, Class);
     if (control) |ct| {
         if (text != null) {
             if (ct.*.Class == df.TEXT) {
@@ -621,18 +662,18 @@ pub export fn SetDlgTextString(db:*df.DBOX, cmd:c_uint, text: [*c]u8, Class:df.C
 // ------- set the text of a control window ------
 pub export fn PutItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8) callconv(.c) void {
     const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-    var control = df.FindCommand(db, cmd, df.EDITBOX);
+    var control = FindCommand(db, cmd, df.EDITBOX);
 
     if (control == null)
-        control = df.FindCommand(db, cmd, df.TEXTBOX);
+        control = FindCommand(db, cmd, df.TEXTBOX);
     if (control == null)
-        control = df.FindCommand(db, cmd, df.COMBOBOX);
+        control = FindCommand(db, cmd, df.COMBOBOX);
     if (control == null)
-        control = df.FindCommand(db, cmd, df.LISTBOX);
+        control = FindCommand(db, cmd, df.LISTBOX);
     if (control == null)
-        control = df.FindCommand(db, cmd, df.SPINBUTTON);
+        control = FindCommand(db, cmd, df.SPINBUTTON);
     if (control == null)
-        control = df.FindCommand(db, cmd, df.TEXT);
+        control = FindCommand(db, cmd, df.TEXT);
     if (control) |ct| {
         // assume cwnd cannot be null ?
         const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
@@ -664,14 +705,14 @@ pub export fn PutItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8) callconv(.c) v
 // ------- get the text of a control window ------
 pub export fn GetItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8, len:c_int) callconv(.c) void {
     const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-    var control = df.FindCommand(db, cmd, df.EDITBOX);
+    var control = FindCommand(db, cmd, df.EDITBOX);
 
     if (control == null)
-        control = df.FindCommand(db, cmd, df.COMBOBOX);
+        control = FindCommand(db, cmd, df.COMBOBOX);
     if (control == null)
-        control = df.FindCommand(db, cmd, df.TEXTBOX);
+        control = FindCommand(db, cmd, df.TEXTBOX);
     if (control == null)
-        control = df.FindCommand(db, cmd, df.TEXT);
+        control = FindCommand(db, cmd, df.TEXT);
     if (control) |ct| {
         if (ct.*.wnd != null) {
             const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
@@ -720,12 +761,14 @@ pub export fn GetItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8, len:c_int) cal
 // ------- set the text of a listbox control window ------
 pub export fn GetDlgListText(wnd:df.WINDOW, text:[*c]u8, cmd:c_uint) callconv(.c) void {
     const db:*df.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-    const ct = df.FindCommand(db, cmd, df.LISTBOX);
-    const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+    const control = FindCommand(db, cmd, df.LISTBOX);
+    if (control) |ct| {
+        const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
 
-    var sel:c_int = -1; // cannot use isize here, otherwise, ListBox.zig GetTextMsg will fail
-    _ = q.SendMessage(cwnd, df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&sel)), 0);
-    _ = q.SendMessage(cwnd, df.LB_GETTEXT, @intCast(@intFromPtr(text)), @intCast(sel));
+        var sel:c_int = -1; // cannot use isize here, otherwise, ListBox.zig GetTextMsg will fail
+        _ = q.SendMessage(cwnd, df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&sel)), 0);
+        _ = q.SendMessage(cwnd, df.LB_GETTEXT, @intCast(@intFromPtr(text)), @intCast(sel));
+    }
 }
 
 // ----- return command code of in-focus control window ----
@@ -784,7 +827,7 @@ pub export fn WindowControl(db:*df.DBOX, wnd:df.WINDOW) ?*df.CTLWINDOW {
 
 // ---- set a control ON or OFF -----
 pub export fn ControlSetting(db:*df.DBOX, cmd: c_uint, Class: c_int, setting: c_int) void {
-    const control = df.FindCommand(db, cmd, Class);
+    const control = FindCommand(db, cmd, Class);
     if (control) |ct| {
         ct.*.isetting = @intCast(setting);
         if (ct.*.wnd != null)
@@ -794,6 +837,6 @@ pub export fn ControlSetting(db:*df.DBOX, cmd: c_uint, Class: c_int, setting: c_
 
 // ----- test if a control is on or off -----
 pub export fn isControlOn(db:*df.DBOX, cmd: c_uint, Class: c_int) df.BOOL {
-    const control = df.FindCommand(db, cmd, Class);
+    const control = FindCommand(db, cmd, Class);
     return if (control) |ct| (if (ct.*.wnd) |_| ct.*.setting else ct.*.isetting) else df.FALSE;
 }

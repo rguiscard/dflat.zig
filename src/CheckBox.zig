@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const DialogBox = @import("DialogBox.zig");
 
 pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -52,7 +53,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
 
 
 pub export fn CheckBoxSetting(db:*df.DBOX, cmd:c_uint) callconv(.c) c_uint {
-    const ct:?*df.CTLWINDOW = df.FindCommand(db, @intCast(cmd), df.CHECKBOX);
+    const ct:?*df.CTLWINDOW = DialogBox.FindCommand(db, @intCast(cmd), df.CHECKBOX);
     if (ct) |ctl| {
         if (ctl.*.wnd) |_| {
             return if (ctl.*.setting == df.ON) df.TRUE else df.FALSE;

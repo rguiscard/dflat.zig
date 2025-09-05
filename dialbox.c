@@ -2,7 +2,7 @@
 
 #include "dflat.h"
 
-int inFocusCommand(DBOX *);
+//int inFocusCommand(DBOX *);
 BOOL dbShortcutKeys(DBOX *, int);
 void FirstFocus(DBOX *db);
 void NextFocus(DBOX *db);
@@ -11,10 +11,11 @@ void FixColors(WINDOW wnd);
 CTLWINDOW *WindowControl(DBOX *, WINDOW);
 static CTLWINDOW *AssociatedControl(DBOX *, enum commands);
 
-static DBOX **dbs = NULL;
-static int dbct = 0;
+//static DBOX **dbs = NULL;
+//static int dbct = 0;
 
 /* --- clear all heap allocations to control text fields --- */
+/*
 void ClearDialogBoxes(void)
 {
     int i;
@@ -36,85 +37,6 @@ void ClearDialogBoxes(void)
         dbs = NULL;
     }
     dbct = 0;
-}
-
-/* ----- return command code of in-focus control window ---- */
-/*
-int inFocusCommand(DBOX *db)
-{
-    CTLWINDOW *ct = db->ctl;
-    while (ct->Class)    {
-        if (ct->wnd == inFocus)
-            return ct->command;
-        ct++;
-    }
-    return -1;
-}
-*/
-
-/* -------- find a specified control structure ------- */
-/*
-CTLWINDOW *FindCommand(DBOX *db, enum commands cmd, int Class)
-{
-    CTLWINDOW *ct = db->ctl;
-    while (ct->Class)    {
-        if (Class == -1 || ct->Class == Class)
-            if (cmd == ct->command)
-                return ct;
-        ct++;
-    }
-    return NULL;
-}
-*/
-
-/* ---- return the window handle of a specified command ---- */
-/*
-WINDOW ControlWindow(const DBOX *db, enum commands cmd)
-{
-    const CTLWINDOW *ct = db->ctl;
-    while (ct->Class)    {
-        if (ct->Class != TEXT && cmd == ct->command)
-            return ct->wnd;
-        ct++;
-    }
-    return NULL;
-}
-*/
-
-/* --- return a pointer to the control structure that matches a window --- */
-/*
-CTLWINDOW *WindowControl(DBOX *db, WINDOW wnd)
-{
-    CTLWINDOW *ct = db->ctl;
-    while (ct->Class)    {
-        if (ct->wnd == wnd)
-            return ct;
-        ct++;
-    }
-    return NULL;
-}
-*/
-
-/* ---- set a control ON or OFF ----- */
-/*
-void ControlSetting(DBOX *db, enum commands cmd,
-                                int Class, int setting)
-{
-    CTLWINDOW *ct = FindCommand(db, cmd, Class);
-    if (ct != NULL)	{
-        ct->isetting = setting;
-		if (ct->wnd != NULL)
-			ct->setting = setting;
-	}
-}
-*/
-
-/* ----- test if a control is on or off ----- */
-/*
-BOOL isControlOn(DBOX *db, enum commands cmd, int Class)
-{
-    const CTLWINDOW *ct = FindCommand(db, cmd, Class);
-    return ct ? (ct->wnd ? ct->setting : ct->isetting) : FALSE;
 }
 */
 
