@@ -354,7 +354,6 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             }
         },
         df.CLOSE_WINDOW => {
-//            df.CtlCloseWindowMsg(wnd);
             CtlCloseWindowMsg(win);
         },
         else => {
@@ -503,7 +502,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         },
         else => {
             // ------ search all the shortcut keys -----
-            if (df.dbShortcutKeys(db, @intCast(p1))>0)
+            if (dbShortcutKeys(db, @intCast(p1)))
                 return true;
         }
     }
@@ -839,4 +838,159 @@ pub export fn ControlSetting(db:*df.DBOX, cmd: c_uint, Class: c_int, setting: c_
 pub export fn isControlOn(db:*df.DBOX, cmd: c_uint, Class: c_int) df.BOOL {
     const control = FindCommand(db, cmd, Class);
     return if (control) |ct| (if (ct.*.wnd) |_| ct.*.setting else ct.*.isetting) else df.FALSE;
+}
+
+// -- find control structure associated with text control --
+fn AssociatedControl(db:*df.DBOX, Tcmd: c_uint) *df.CTLWINDOW {
+    for(&db.*.ctl) |*ct| {
+        if (ct.*.Class == 0)
+            break;
+        if (ct.*.Class != df.TEXT) {
+            if (ct.*.command == Tcmd) {
+                return ct;
+            }
+        }
+    }
+    return &db.*.ctl[0]; // FIXME
+}
+
+// --- process dialog box shortcut keys ---
+pub fn dbShortcutKeys(db:*df.DBOX, ky: c_int) bool {
+    const ch = df.AltConvert(@intCast(ky));
+
+    if (ch != 0) {
+        for (&db.*.ctl) |*ctl| {
+            var ct = ctl;
+            if (ct.*.Class == 0)
+                break;
+            if (ct.*.itext) |itext| {
+                const ptr = @as([*:0]u8, itext);
+                const text = std.mem.span(ptr);
+                if (std.mem.indexOfScalar(u8, text, df.SHORTCUTCHAR)) |pos| {
+                    if ((pos < text.len-1) and (std.ascii.toLower(ptr[pos+1]) == ch)) {
+                        const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+                        if (ct.*.Class == df.TEXT) {
+                            ct = AssociatedControl(db, @intCast(ct.*.command));
+                        }
+                        if (ct.*.Class == df.RADIOBUTTON) {
+                            df.SetRadioButton(db, ct);
+                        } else if (ct.*.Class == df.CHECKBOX) {
+                            ct.*.setting ^= df.ON;
+                            _ = q.SendMessage(cwnd, df.PAINT, 0, 0);
+                        }  else if (ct.*.Class != 0) { // this IF is not necessary
+                            _ = q.SendMessage(cwnd, df.SETFOCUS, df.TRUE, 0);
+                            if (ct.*.Class == df.BUTTON)
+                               _ = q.SendMessage(cwnd,df.KEYBOARD, '\r',0);
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// ---- change the focus to the first control ---
+pub export fn FirstFocus(db:*df.DBOX) callconv(.c) void {
+    const len = db.*.ctl.len;
+    for (0..len) |idx| {
+        const ct = &db.*.ctl[idx];
+        if (idx >= len-1)
+            break;
+        if ((ct.*.Class == df.TEXT) or (ct.*.Class == df.BOX)) {
+            const next = &db.*.ctl[idx+1];
+            if (next.*.Class == 0)
+                return;
+            const nwnd:df.WINDOW = @ptrCast(@alignCast(next.*.wnd));
+            _ = q.SendMessage(nwnd, df.SETFOCUS, df.TRUE, 0);
+        }
+    }
+}
+
+// ---- change the focus to the next control ---
+pub export fn NextFocus(db:*df.DBOX) callconv(.c) void {
+    const control = WindowControl(db, df.inFocus);
+    if (control) |ctl| {
+        const len = db.*.ctl.len;
+        var start:usize = 0;
+        for(&db.*.ctl, 0..) |*ct, idx| {
+            if (ct == ctl) {
+                start = idx;
+                break;
+            }
+        }
+    
+        var pos = start;
+        var ct = &db.*.ctl[pos];
+        for (0..len) |_| {
+            pos += 1;
+            ct = &db.*.ctl[pos];
+            if (ct.*.Class == 0) {
+                pos = 0;
+                ct = &db.*.ctl[pos];
+            }
+            if ((ct.*.Class == df.TEXT) and (ct.*.Class != df.BOX)) {
+                continue;
+            }
+            const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+            _ = q.SendMessage(cwnd, df.SETFOCUS, df.TRUE, 0);
+            break;
+        }
+    }
+}
+
+// ---- change the focus to the previous control ---
+// FIXME: not tested.
+pub export fn PrevFocus(db:*df.DBOX) callconv(.c) void {
+    const control = WindowControl(db, df.inFocus);
+    if (control) |ctl| {
+        const len = db.*.ctl.len;
+        var start:usize = 0;
+        var last:usize = 0;
+        for(&db.*.ctl, 0..) |*ct, idx| {
+            if (ct == ctl) {
+                start = idx;
+            }
+            last = idx; // find last valid control
+            if (ct.*.Class == 0)
+                break;
+        }
+    
+        var pos = start;
+        var ct = &db.*.ctl[pos];
+        for (0..len) |_| {
+            if (pos == 0) {
+                pos = last;
+            } else {
+                pos -= 1;
+            }
+           
+            ct = &db.*.ctl[pos];
+            if ((ct.*.Class == df.TEXT) and (ct.*.Class != df.BOX)) {
+                continue;
+            }
+            const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+            _ = q.SendMessage(cwnd, df.SETFOCUS, df.TRUE, 0);
+            break;
+        }
+    }
+//                do      {
+//                        if (ct == db->ctl)      {
+//                                if (looped)
+//                                        return;
+//                                looped++;
+//                                while (ct->Class)
+//                                        ct++;
+//                        }
+//                        --ct;
+//                } while (ct->Class == TEXT || ct->Class == BOX);
+//                SendMessage(ct->wnd, SETFOCUS, TRUE, 0);
+}
+
+pub export fn SetFocusCursor(wnd:df.WINDOW) void {
+    if (wnd == df.inFocus) {
+        _ = q.SendMessage(null, df.SHOW_CURSOR, 0, 0);
+        _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, 1, 0);
+    }
 }

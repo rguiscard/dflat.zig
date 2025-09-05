@@ -9,7 +9,7 @@ void NextFocus(DBOX *db);
 void PrevFocus(DBOX *db);
 void FixColors(WINDOW wnd);
 CTLWINDOW *WindowControl(DBOX *, WINDOW);
-static CTLWINDOW *AssociatedControl(DBOX *, enum commands);
+CTLWINDOW *AssociatedControl(DBOX *, enum commands);
 
 //static DBOX **dbs = NULL;
 //static int dbct = 0;
@@ -41,6 +41,7 @@ void ClearDialogBoxes(void)
 */
 
 /* -- find control structure associated with text control -- */
+/*
 static CTLWINDOW *AssociatedControl(DBOX *db,enum commands Tcmd)
 {
     CTLWINDOW *ct = db->ctl;
@@ -52,8 +53,10 @@ static CTLWINDOW *AssociatedControl(DBOX *db,enum commands Tcmd)
     }
     return ct;
 }
+*/
 
 /* --- process dialog box shortcut keys --- */
+/*
 BOOL dbShortcutKeys(DBOX *db, int ky)
 {
     CTLWINDOW *ct;
@@ -88,8 +91,10 @@ BOOL dbShortcutKeys(DBOX *db, int ky)
     }
 	return FALSE;
 }
+*/
 
 /* ---- change the focus to the first control --- */
+/*
 void FirstFocus(DBOX *db)
 {
     CTLWINDOW *ct = db->ctl;
@@ -102,8 +107,10 @@ void FirstFocus(DBOX *db)
 		SendMessage(ct->wnd, SETFOCUS, TRUE, 0);
 	}
 }
+*/
 
 /* ---- change the focus to the next control --- */
+/*
 void NextFocus(DBOX *db)
 {
     CTLWINDOW *ct = WindowControl(db, inFocus);
@@ -121,8 +128,10 @@ void NextFocus(DBOX *db)
 		SendMessage(ct->wnd, SETFOCUS, TRUE, 0);
 	}
 }
+*/
 
 /* ---- change the focus to the previous control --- */
+/*
 void PrevFocus(DBOX *db)
 {
     CTLWINDOW *ct = WindowControl(db, inFocus);
@@ -141,7 +150,9 @@ void PrevFocus(DBOX *db)
 		SendMessage(ct->wnd, SETFOCUS, TRUE, 0);
 	}
 }
+*/
 
+/*
 void SetFocusCursor(WINDOW wnd)
 {
     if (wnd == inFocus)    {
@@ -149,3 +160,4 @@ void SetFocusCursor(WINDOW wnd)
         SendMessage(wnd, KEYBOARD_CURSOR, 1, 0);
     }
 }
+*/
