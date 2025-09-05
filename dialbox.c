@@ -8,6 +8,7 @@ void FirstFocus(DBOX *db);
 void NextFocus(DBOX *db);
 void PrevFocus(DBOX *db);
 void FixColors(WINDOW wnd);
+CTLWINDOW *WindowControl(DBOX *, WINDOW);
 static CTLWINDOW *AssociatedControl(DBOX *, enum commands);
 
 static DBOX **dbs = NULL;
@@ -81,6 +82,7 @@ WINDOW ControlWindow(const DBOX *db, enum commands cmd)
 */
 
 /* --- return a pointer to the control structure that matches a window --- */
+/*
 CTLWINDOW *WindowControl(DBOX *db, WINDOW wnd)
 {
     CTLWINDOW *ct = db->ctl;
@@ -91,8 +93,10 @@ CTLWINDOW *WindowControl(DBOX *db, WINDOW wnd)
     }
     return NULL;
 }
+*/
 
 /* ---- set a control ON or OFF ----- */
+/*
 void ControlSetting(DBOX *db, enum commands cmd,
                                 int Class, int setting)
 {
@@ -103,13 +107,16 @@ void ControlSetting(DBOX *db, enum commands cmd,
 			ct->setting = setting;
 	}
 }
+*/
 
 /* ----- test if a control is on or off ----- */
+/*
 BOOL isControlOn(DBOX *db, enum commands cmd, int Class)
 {
     const CTLWINDOW *ct = FindCommand(db, cmd, Class);
     return ct ? (ct->wnd ? ct->setting : ct->isetting) : FALSE;
 }
+*/
 
 /* -- find control structure associated with text control -- */
 static CTLWINDOW *AssociatedControl(DBOX *db,enum commands Tcmd)
