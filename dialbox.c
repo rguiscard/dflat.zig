@@ -52,6 +52,7 @@ int inFocusCommand(DBOX *db)
 */
 
 /* -------- find a specified control structure ------- */
+/*
 CTLWINDOW *FindCommand(DBOX *db, enum commands cmd, int Class)
 {
     CTLWINDOW *ct = db->ctl;
@@ -63,8 +64,10 @@ CTLWINDOW *FindCommand(DBOX *db, enum commands cmd, int Class)
     }
     return NULL;
 }
+*/
 
 /* ---- return the window handle of a specified command ---- */
+/*
 WINDOW ControlWindow(const DBOX *db, enum commands cmd)
 {
     const CTLWINDOW *ct = db->ctl;
@@ -75,6 +78,7 @@ WINDOW ControlWindow(const DBOX *db, enum commands cmd)
     }
     return NULL;
 }
+*/
 
 /* --- return a pointer to the control structure that matches a window --- */
 CTLWINDOW *WindowControl(DBOX *db, WINDOW wnd)
@@ -106,150 +110,6 @@ BOOL isControlOn(DBOX *db, enum commands cmd, int Class)
     const CTLWINDOW *ct = FindCommand(db, cmd, Class);
     return ct ? (ct->wnd ? ct->setting : ct->isetting) : FALSE;
 }
-
-/* ---- return pointer to the text of a control window ---- */
-/*
-char *GetDlgTextString(DBOX *db,enum commands cmd,CLASS Class)
-{
-    CTLWINDOW *ct = FindCommand(db, cmd, Class);
-    if (ct != NULL)
-        return ct->itext;
-    else
-        return NULL;
-}
-*/
-
-/* ------- set the text of a control specification ------ */
-/*
-void SetDlgTextString(DBOX *db, enum commands cmd,
-                                    char *text, CLASS Class)
-{
-    CTLWINDOW *ct = FindCommand(db, cmd, Class);
-    if (ct != NULL)    {
-		if (text != NULL)	{
-			if (ct->Class == TEXT)
-				ct->itext = text;  // text may not go out of scope
-			else 	{
-		        ct->itext = DFrealloc(ct->itext, strlen(text)+1);
-    		    strcpy(ct->itext, text);
-			}
-		}
-		else	{
-			if (ct->Class == TEXT)
-				ct->itext = "";
-			else 	{
-				free(ct->itext);
-				ct->itext = NULL;
-			}
-		}
-		if (ct->wnd != NULL)	{
-			if (text != NULL)
-	            SendMessage(ct->wnd, SETTEXT, (PARAM) text, 0);
-			else
-	            SendMessage(ct->wnd, CLEARTEXT, 0, 0);
-			SendMessage(ct->wnd, PAINT, 0, 0);
-		}
-    }
-}
-*/
-
-/* ------- set the text of a control window ------ */
-/*
-void PutItemText(WINDOW wnd, enum commands cmd, char *text)
-{
-    CTLWINDOW *ct = FindCommand(wnd->extension, cmd, EDITBOX);
-
-    if (ct == NULL)
-        ct = FindCommand(wnd->extension, cmd, TEXTBOX);
-    if (ct == NULL)
-        ct = FindCommand(wnd->extension, cmd, COMBOBOX);
-    if (ct == NULL)
-        ct = FindCommand(wnd->extension, cmd, LISTBOX);
-    if (ct == NULL)
-        ct = FindCommand(wnd->extension, cmd, SPINBUTTON);
-    if (ct == NULL)
-        ct = FindCommand(wnd->extension, cmd, TEXT);
-    if (ct != NULL)        {
-        WINDOW cwnd = (WINDOW) (ct->wnd);
-        switch (ct->Class)    {
-            case COMBOBOX:
-            case EDITBOX:
-                SendMessage(cwnd, CLEARTEXT, 0, 0);
-                SendMessage(cwnd, ADDTEXT, (PARAM) text, 0);
-                if (!isMultiLine(cwnd))
-                    SendMessage(cwnd, PAINT, 0, 0);
-                break;
-            case LISTBOX:
-            case TEXTBOX:
-            case SPINBUTTON:
-                SendMessage(cwnd, ADDTEXT, (PARAM) text, 0);
-                break;
-            case TEXT:    {
-                SendMessage(cwnd, CLEARTEXT, 0, 0);
-                SendMessage(cwnd, ADDTEXT, (PARAM) text, 0);
-                SendMessage(cwnd, PAINT, 0, 0);
-                break;
-            }
-            default:
-                break;
-        }
-    }
-}
-*/
-
-/* ------- get the text of a control window ------ */
-/*
-void GetItemText(WINDOW wnd, enum commands cmd,
-                                char *text, int len)
-{
-    CTLWINDOW *ct = FindCommand(wnd->extension, cmd, EDITBOX);
-    unsigned char *cp;
-
-    if (ct == NULL)
-        ct = FindCommand(wnd->extension, cmd, COMBOBOX);
-    if (ct == NULL)
-        ct = FindCommand(wnd->extension, cmd, TEXTBOX);
-    if (ct == NULL)
-        ct = FindCommand(wnd->extension, cmd, TEXT);
-    if (ct != NULL)    {
-        WINDOW cwnd = (WINDOW) (ct->wnd);
-        if (cwnd != NULL)    {
-            switch (ct->Class)    {
-                case TEXT:
-                    if (GetText(cwnd) != NULL)    {
-                        cp = strchr(GetText(cwnd), '\n');
-                        if (cp != NULL)
-                            len = (int) (cp - GetText(cwnd));
-                        strncpy(text, GetText(cwnd), len);
-                        *(text+len) = '\0';
-                    }
-                    break;
-                case TEXTBOX:
-                    if (GetText(cwnd) != NULL)
-                        strncpy(text, GetText(cwnd), len);
-                    break;
-                case COMBOBOX:
-                case EDITBOX:
-                    SendMessage(cwnd,GETTEXT,(PARAM)text,len);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-}
-*/
-
-/* ------- set the text of a listbox control window ------ */
-/*
-void GetDlgListText(WINDOW wnd, char *text, enum commands cmd)
-{
-    CTLWINDOW *ct = FindCommand(wnd->extension, cmd, LISTBOX);
-    int sel = -1;
-    SendMessage(ct->wnd, LB_CURRENTSELECTION, (PARAM)&sel, 0);
-    SendMessage(ct->wnd, LB_GETTEXT, (PARAM) text, sel);
-}
-*/
 
 /* -- find control structure associated with text control -- */
 static CTLWINDOW *AssociatedControl(DBOX *db,enum commands Tcmd)

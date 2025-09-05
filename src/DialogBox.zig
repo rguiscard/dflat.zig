@@ -150,8 +150,8 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 //                p1 = '\t';
 //            break;
         '\r' => {
-            if (((Normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) or
-                (Normal.isDerivedFrom(win, df.BUTTON) == false) or
+            if (((Normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) and
+                (Normal.isDerivedFrom(win, df.BUTTON) == false) and
                 (Normal.isDerivedFrom(win, df.LISTBOX) == false)) {
                 _ = q.SendMessage(Window.GetParent(wnd), df.COMMAND, df.ID_OK, 0);
                 return true;
@@ -461,11 +461,11 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 }
             }
         },
-         else => {
-             // ------ search all the shortcut keys -----
-             if (df.dbShortcutKeys(db, @intCast(p1))>0)
-                 return true;
-         }
+        else => {
+            // ------ search all the shortcut keys -----
+            if (df.dbShortcutKeys(db, @intCast(p1))>0)
+                return true;
+        }
     }
     return win.modal;
 }
@@ -746,14 +746,55 @@ pub export fn GetDlgListText(wnd:df.WINDOW, text:[*c]u8, cmd:c_uint) callconv(.c
 // ----- return command code of in-focus control window ----
 fn inFocusCommand(db:?*df.DBOX) c_int {
     if (db) |box| {
-        for(box.*.ctl) |ctl| {
-            if (ctl.Class == 0)
+        for(&box.*.ctl) |*ctl| {
+            if (ctl.*.Class == 0)
                 break;
-            const w:df.WINDOW = @alignCast(@ptrCast(ctl.wnd));
+            const w:df.WINDOW = @alignCast(@ptrCast(ctl.*.wnd));
             if (w == df.inFocus) {
-                return ctl.command;
+                return ctl.*.command;
             }
         }
     }
     return -1;
+}
+
+// -------- find a specified control structure -------
+pub export fn FindCommand(db:*df.DBOX, cmd:c_uint, Class:df.CLASS) callconv(.c) ?*df.CTLWINDOW {
+    for(&db.*.ctl) |*ct| {
+        if (ct.*.Class != 0) {
+            if (Class == -1 or ct.*.Class == Class) {
+                if (cmd == ct.*.command) {
+                    return @constCast(ct);
+                }
+            }
+        }
+    }
+    return null;
+//    CTLWINDOW *ct = db->ctl;
+//    while (ct->Class)    {
+//        if (Class == -1 || ct->Class == Class)
+//            if (cmd == ct->command)
+//                return ct;
+//        ct++;
+//    }
+//    return NULL;
+}
+
+// ---- return the window handle of a specified command ----
+pub export fn ControlWindow(db:*df.DBOX, cmd:c_uint) callconv(.c) df.WINDOW {
+    for(&db.*.ctl) |*ct| {
+        if (ct.*.Class == 0)
+            break;
+        if (ct.*.Class != df.TEXT and cmd == ct.*.command) {
+                return @ptrCast(@alignCast(ct.*.wnd));
+        }
+    }
+    return null;
+//    const CTLWINDOW *ct = db->ctl;
+//    while (ct->Class)    {
+//        if (ct->Class != TEXT && cmd == ct->command)
+//            return ct->wnd;
+//        ct++;
+//    }
+//    return NULL;
 }
