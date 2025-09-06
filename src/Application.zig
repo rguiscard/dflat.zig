@@ -10,6 +10,7 @@ const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
 const log = @import("Log.zig");
 const radio = @import("RadioButton.zig");
+const checkbox = @import("CheckBox.zig");
 
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
@@ -50,10 +51,10 @@ fn CreateWindowMsg(win: *Window) bool {
             wnd.*.RestoredRC = win.WindowRect();
         }
     }
-    df.SelectColors(wnd);
-    df.SelectBorder(wnd);
-    df.SelectTitle(wnd);
-    df.SelectStatusBar(wnd);
+    SelectColors(win);
+    SelectBorder(win);
+    SelectTitle(win);
+    SelectStatusBar(win);
 
     const rtn = root.zBaseWndProc(df.APPLICATION, win, df.CREATE_WINDOW, 0, 0);
     if (wnd.*.extension != null) {
@@ -186,12 +187,12 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                     oldFocus = df.inFocus;
                 }
                 _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
-                df.SelectColors(wnd);
-                df.SelectLines(wnd);
-                df.SelectBorder(wnd);
-                df.SelectTitle(wnd);
-                df.SelectStatusBar(wnd);
-                df.SelectTexture();
+                SelectColors(win);
+                SelectLines(win);
+                SelectBorder(win);
+                SelectTitle(win);
+                SelectStatusBar(win);
+                SelectTexture();
                 CreateMenu(win);
                 CreateStatusBar(win);
                 _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
@@ -340,6 +341,63 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
     }
 }
 
+fn DoWindowColors(wnd: df.WINDOW) void {
+    df.InitWindowColors(wnd);
+    var cwnd:df.WINDOW = df.FirstWindow(wnd);
+    while (cwnd != null) {
+        DoWindowColors(cwnd);
+        if ((df.GetClass(cwnd) == df.TEXT) and df.GetText(cwnd) != null) {
+            _ = df.SendMessage(cwnd, df.CLEARTEXT, 0, 0);
+        }
+        cwnd = df.NextWindow(cwnd);
+    }
+}
+
+// ----- set up colors for the application window ------
+fn SelectColors(win: *Window) void {
+    if (radio.RadioButtonSetting(&df.Display, df.ID_MONO)>0) {
+        df.cfg.mono = 1;   // mono
+    } else if (radio.RadioButtonSetting(&df.Display, df.ID_REVERSE)>0) {
+        df.cfg.mono = 2;   // mono reverse
+    } else {
+        df.cfg.mono = 0;   // color
+    }
+
+    if (df.cfg.mono == 1) {
+        @memcpy(&df.cfg.clr, &df.bw);
+    } else if (df.cfg.mono == 2) {
+        @memcpy(&df.cfg.clr, &df.reverse);
+    } else {
+        @memcpy(&df.cfg.clr, &df.color);
+    }
+    DoWindowColors(win.win);
+}
+
+// ---- select screen lines ----
+fn SelectLines(win:*Window) void {
+    const wnd = win.win;
+    df.cfg.ScreenLines = df.SCREENHEIGHT;
+    if (df.SCREENHEIGHT != df.cfg.ScreenLines) {
+        SetScreenHeight(df.cfg.ScreenLines);
+        // ---- re-maximize ----
+        if (wnd.*.condition == df.ISMAXIMIZED) {
+            _ = win.sendMessage(df.SIZE, @intCast(win.GetRight()), @intCast(df.SCREENHEIGHT-1));
+            return;
+        }
+        // --- adjust if current size does not fit ---
+        if (win.WindowHeight() > df.SCREENHEIGHT) {
+            _ = win.sendMessage(df.SIZE, @intCast(win.GetRight()),
+                @intCast(win.GetTop()+df.SCREENHEIGHT-1));
+        }
+        // --- if window is off-screen, move it on-screen ---
+        if (win.GetTop() >= df.SCREENHEIGHT-1) {
+            _ = win.sendMessage(df.MOVE, @intCast(win.GetLeft()),
+                    @intCast(df.SCREENHEIGHT-win.WindowHeight()));
+        }
+    }
+}
+
+
 // ---- set the screen height in the video hardware ----
 fn SetScreenHeight(height: c_int) void {
     _ = height;
@@ -354,6 +412,41 @@ fn SetScreenHeight(height: c_int) void {
 //        SendMessage(NULL, SHOW_MOUSE, 0, 0);
 //    }
 //#endif
+}
+
+// ----- select the screen texture -----
+fn SelectTexture() void {
+    df.cfg.Texture = checkbox.CheckBoxSetting(&df.Display, df.ID_TEXTURE);
+}
+
+// -- select whether the application screen has a border --
+fn SelectBorder(win: *Window) void {
+    df.cfg.Border = checkbox.CheckBoxSetting(&df.Display, df.ID_BORDER);
+    if (df.cfg.Border > 0) {
+        win.AddAttribute(df.HASBORDER);
+    } else {
+        win.ClearAttribute(df.HASBORDER);
+    }
+}
+
+// select whether the application screen has a status bar
+fn SelectStatusBar(win: *Window) void {
+    df.cfg.StatusBar = checkbox.CheckBoxSetting(&df.Display, df.ID_STATUSBAR);
+    if (df.cfg.StatusBar > 0) {
+        win.AddAttribute(df.HASSTATUSBAR);
+    } else {
+        win.ClearAttribute(df.HASSTATUSBAR);
+    }
+}
+
+// select whether the application screen has a title bar
+fn SelectTitle(win: *Window) void {
+    df.cfg.Title = checkbox.CheckBoxSetting(&df.Display, df.ID_TITLE);
+    if (df.cfg.Title > 0) {
+        win.AddAttribute(df.HASTITLEBAR);
+    } else {
+        win.ClearAttribute(df.HASTITLEBAR);
+    }
 }
 
 // -------- Create the menu bar --------

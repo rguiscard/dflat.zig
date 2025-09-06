@@ -191,6 +191,7 @@ static void ChooseWindow(WINDOW wnd, int WindowNo)
 
 #endif    /* #ifdef INCLUDE_WINDOWMENU */
 
+/*
 static void DoWindowColors(WINDOW wnd)
 {
     WINDOW cwnd;
@@ -205,17 +206,19 @@ static void DoWindowColors(WINDOW wnd)
 		cwnd = NextWindow(cwnd);
     }
 }
+*/
 
 /* ----- set up colors for the application window ------ */
+/*
 void SelectColors(WINDOW wnd)
 {
 #ifdef INCLUDE_WINDOWMENU
     if (RadioButtonSetting(&Display, ID_MONO))
-        cfg.mono = 1;   /* mono */
+        cfg.mono = 1;   // mono 
     else if (RadioButtonSetting(&Display, ID_REVERSE))
-        cfg.mono = 2;   /* mono reverse */
+        cfg.mono = 2;   // mono reverse 
     else
-        cfg.mono = 0;   /* color */
+        cfg.mono = 0;   // color 
     printf("color %d\n", cfg.mono);
 
     if (cfg.mono == 1)
@@ -227,37 +230,41 @@ void SelectColors(WINDOW wnd)
         memcpy(cfg.clr, color, sizeof color);
     DoWindowColors(wnd);
 }
+*/
 
 /* ---- select screen lines ---- */
+/*
 void SelectLines(WINDOW wnd)
 {
     cfg.ScreenLines = SCREENHEIGHT;
     if (SCREENHEIGHT != cfg.ScreenLines)    {
         SetScreenHeight(cfg.ScreenLines);
-		/* ---- re-maximize ---- */
+		// ---- re-maximize ---- 
         if (wnd->condition == ISMAXIMIZED)	{
             SendMessage(wnd, SIZE, (PARAM) GetRight(wnd),
                 SCREENHEIGHT-1);
 			return;
 		}
-		/* --- adjust if current size does not fit --- */
+		// --- adjust if current size does not fit --- 
 		if (WindowHeight(wnd) > SCREENHEIGHT)
             SendMessage(wnd, SIZE, (PARAM) GetRight(wnd),
                 (PARAM) GetTop(wnd)+SCREENHEIGHT-1);
-		/* --- if window is off-screen, move it on-screen --- */
+		// --- if window is off-screen, move it on-screen --- 
 		if (GetTop(wnd) >= SCREENHEIGHT-1)
 			SendMessage(wnd, MOVE, (PARAM) GetLeft(wnd),
 				(PARAM) SCREENHEIGHT-WindowHeight(wnd));
     }
 }
+*/
 
 /* ---- set the screen height in the video hardware ---- */
+/*
 void SetScreenHeight(int height)
 {
-#if 0	/* display size changes not supported */
+#if 0	// display size changes not supported 
         SendMessage(NULL, SAVE_CURSOR, 0, 0);
 
-        /* change display size here */
+        // change display size here 
 
         SendMessage(NULL, RESTORE_CURSOR, 0, 0);
         SendMessage(NULL, RESET_MOUSE, 0, 0);
@@ -265,16 +272,20 @@ void SetScreenHeight(int height)
     }
 #endif
 }
+*/
 
 #ifdef INCLUDE_WINDOWMENU
 
 /* ----- select the screen texture ----- */
+/*
 void SelectTexture(void)
 {
     cfg.Texture = CheckBoxSetting(&Display, ID_TEXTURE);
 }
+*/
 
 /* -- select whether the application screen has a border -- */
+/*
 void SelectBorder(WINDOW wnd)
 {
     cfg.Border = CheckBoxSetting(&Display, ID_BORDER);
@@ -283,8 +294,10 @@ void SelectBorder(WINDOW wnd)
     else
         ClearAttribute(wnd, HASBORDER);
 }
+*/
 
 /* select whether the application screen has a status bar */
+/*
 void SelectStatusBar(WINDOW wnd)
 {
     cfg.StatusBar = CheckBoxSetting(&Display, ID_STATUSBAR);
@@ -293,8 +306,10 @@ void SelectStatusBar(WINDOW wnd)
     else
         ClearAttribute(wnd, HASSTATUSBAR);
 }
+*/
 
 /* select whether the application screen has a title bar */
+/*
 void SelectTitle(WINDOW wnd)
 {
     cfg.Title = CheckBoxSetting(&Display, ID_TITLE);
@@ -303,5 +318,6 @@ void SelectTitle(WINDOW wnd)
     else
         ClearAttribute(wnd, HASTITLEBAR);
 }
+*/
 
 #endif
