@@ -15,6 +15,17 @@ const checkbox = @import("CheckBox.zig");
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
 var oldFocus:df.WINDOW = null;
+var Menus = [_][]u8{
+    @constCast("~1.                      "),
+    @constCast("~2.                      "),
+    @constCast("~3.                      "),
+    @constCast("~4.                      "),
+    @constCast("~5.                      "),
+    @constCast("~6.                      "),
+    @constCast("~7.                      "),
+    @constCast("~8.                      "),
+    @constCast("~9.                      "),
+};
 
 // --------------- CREATE_WINDOW Message --------------
 fn CreateWindowMsg(win: *Window) bool {
@@ -338,6 +349,77 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
         _ = win.sendMessage(df.BORDER, 0, 0);
     } else {
         _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    }
+}
+
+// -------- return the name of a document window -------
+fn WindowName(wnd:df.Window) ?[]const u8 {
+    if (df.GetTitle(wnd) == null) {
+        if (df.GetClass(wnd) == df.DIALOG) {
+            if (wnd.*.extension) |ext| {
+                const dbox:*df.DBOX = @ptrCast(@alignCast(ext));
+                return dbox.*.HelpName;
+            }
+        } else {
+            return "Untitled";
+        }
+    } else {
+        return std.mem.span(df.GetTitle(wnd));
+    }
+    return null;
+}
+
+// ----------- Prepare the Window menu ------------
+// FIXME: it does not work as expected.
+pub export fn PrepWindowMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
+    if (w) |ww| {
+        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
+        const p0 = &mnu.*.Selections[0];
+        var pd = &mnu.*.Selections[2];
+//        const ca = &mnu.*.Selections[13];
+        var MenuNo:usize = 0;
+        mnu.*.Selection = 0;
+        oldFocus = null;
+        if (df.GetClass(wnd) != df.APPLICATION)    {
+            oldFocus = wnd;
+            // ----- point to the APPLICATION window -----
+            if (df.ApplicationWindow == null)
+                return;
+            var cwnd = Window.FirstWindow(df.ApplicationWindow);
+            // ----- get the first 9 document windows ----- 
+            for (0..9) |idx| {
+                MenuNo = idx;
+                if (cwnd == null)
+                    break;
+                if (df.isVisible(cwnd)>0 and df.GetClass(cwnd) != df.MENUBAR and
+                        df.GetClass(cwnd) != df.STATUSBAR) {
+                    // --- add the document window to the menu ---
+                    // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
+                    pd.*.SelectionTitle = Menus[MenuNo].ptr;
+                    if (cwnd == oldFocus) {
+                        // -- mark the current document --
+                        pd.*.Attrib |= df.CHECKED;
+                        mnu.*.Selection = @intCast(MenuNo+2);
+                    } else {
+                        pd.*.Attrib &= ~df.CHECKED;
+                    }
+                    pd = &mnu.*.Selections[idx+2];
+                }
+                cwnd = Window.NextWindow(cwnd);
+            }
+        }
+        if (MenuNo > 0) {
+            const txt = "~Close all";
+            p0.*.SelectionTitle = @constCast(txt.ptr);
+        } else {
+            p0.*.SelectionTitle = null;
+        }
+        if (MenuNo >= 9) {
+//            *pd++ = *ca;
+//            if (mnu.*.Selection == 0)
+//                mnu.*.Selection = 11;
+        }
+        pd.*.SelectionTitle = null;
     }
 }
 

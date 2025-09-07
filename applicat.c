@@ -5,21 +5,8 @@
 static int ScreenHeight;
 WINDOW ApplicationWindow;
 
-extern DBOX Display;
-
 #ifdef INCLUDE_MULTI_WINDOWS
 extern DBOX Windows;
-#endif
-
-void SelectColors(WINDOW);
-void SetScreenHeight(int);
-void SelectLines(WINDOW);
-
-#ifdef INCLUDE_WINDOWOPTIONS
-void SelectTexture(void);
-void SelectBorder(WINDOW);
-void SelectTitle(WINDOW);
-void SelectStatusBar(WINDOW);
 #endif
 
 static WINDOW oldFocus;
@@ -44,6 +31,7 @@ char **Argv;
 
 #ifdef INCLUDE_WINDOWMENU
 /* -------- return the name of a document window ------- */
+/*
 static char *WindowName(WINDOW wnd)
 {
     if (GetTitle(wnd) == NULL)    {
@@ -55,9 +43,11 @@ static char *WindowName(WINDOW wnd)
     else
         return GetTitle(wnd);
 }
+*/
 
 /* ----------- Prepare the Window menu ------------ */
-void PrepWindowMenu(void *w, struct Menu *mnu)
+/* This is left to later fix zig version
+void cPrepWindowMenu(void *w, struct Menu *mnu)
 {
     WINDOW wnd = w;
     struct PopDown *p0 = mnu->Selections;
@@ -69,21 +59,21 @@ void PrepWindowMenu(void *w, struct Menu *mnu)
     oldFocus = NULL;
     if (GetClass(wnd) != APPLICATION)    {
         oldFocus = wnd;
-        /* ----- point to the APPLICATION window ----- */
+        // ----- point to the APPLICATION window ----- 
 		if (ApplicationWindow == NULL)
 			return;
 		cwnd = FirstWindow(ApplicationWindow);
-        /* ----- get the first 9 document windows ----- */
+        // ----- get the first 9 document windows ----- 
         while (cwnd != NULL && MenuNo < 9)    {
             if (isVisible(cwnd) && GetClass(cwnd) != MENUBAR &&
                     GetClass(cwnd) != STATUSBAR) {
-                /* --- add the document window to the menu --- */
+                // --- add the document window to the menu --- 
 #if MSDOS | ELKS
                 strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20);
 #endif
                 pd->SelectionTitle = Menus[MenuNo];
                 if (cwnd == oldFocus)    {
-                    /* -- mark the current document -- */
+                    // -- mark the current document -- 
                     pd->Attrib |= CHECKED;
                     mnu->Selection = MenuNo+2;
                 }
@@ -106,6 +96,7 @@ void PrepWindowMenu(void *w, struct Menu *mnu)
     }
     pd->SelectionTitle = NULL;
 }
+*/
 
 /* window processing module for the More Windows dialog box */
 static int WindowPrep(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
@@ -190,134 +181,3 @@ static void ChooseWindow(WINDOW wnd, int WindowNo)
 }
 
 #endif    /* #ifdef INCLUDE_WINDOWMENU */
-
-/*
-static void DoWindowColors(WINDOW wnd)
-{
-    WINDOW cwnd;
-    InitWindowColors(wnd);
-	cwnd = FirstWindow(wnd);
-	while (cwnd != NULL)	{
-        DoWindowColors(cwnd);
-#ifndef BUILD_SMALL_DFLAT
-        if (GetClass(cwnd) == TEXT && GetText(cwnd) != NULL)
-            SendMessage(cwnd, CLEARTEXT, 0, 0);
-#endif
-		cwnd = NextWindow(cwnd);
-    }
-}
-*/
-
-/* ----- set up colors for the application window ------ */
-/*
-void SelectColors(WINDOW wnd)
-{
-#ifdef INCLUDE_WINDOWMENU
-    if (RadioButtonSetting(&Display, ID_MONO))
-        cfg.mono = 1;   // mono 
-    else if (RadioButtonSetting(&Display, ID_REVERSE))
-        cfg.mono = 2;   // mono reverse 
-    else
-        cfg.mono = 0;   // color 
-    printf("color %d\n", cfg.mono);
-
-    if (cfg.mono == 1)
-        memcpy(cfg.clr, bw, sizeof bw);
-    else if (cfg.mono == 2)
-        memcpy(cfg.clr, reverse, sizeof reverse);
-    else
-#endif
-        memcpy(cfg.clr, color, sizeof color);
-    DoWindowColors(wnd);
-}
-*/
-
-/* ---- select screen lines ---- */
-/*
-void SelectLines(WINDOW wnd)
-{
-    cfg.ScreenLines = SCREENHEIGHT;
-    if (SCREENHEIGHT != cfg.ScreenLines)    {
-        SetScreenHeight(cfg.ScreenLines);
-		// ---- re-maximize ---- 
-        if (wnd->condition == ISMAXIMIZED)	{
-            SendMessage(wnd, SIZE, (PARAM) GetRight(wnd),
-                SCREENHEIGHT-1);
-			return;
-		}
-		// --- adjust if current size does not fit --- 
-		if (WindowHeight(wnd) > SCREENHEIGHT)
-            SendMessage(wnd, SIZE, (PARAM) GetRight(wnd),
-                (PARAM) GetTop(wnd)+SCREENHEIGHT-1);
-		// --- if window is off-screen, move it on-screen --- 
-		if (GetTop(wnd) >= SCREENHEIGHT-1)
-			SendMessage(wnd, MOVE, (PARAM) GetLeft(wnd),
-				(PARAM) SCREENHEIGHT-WindowHeight(wnd));
-    }
-}
-*/
-
-/* ---- set the screen height in the video hardware ---- */
-/*
-void SetScreenHeight(int height)
-{
-#if 0	// display size changes not supported 
-        SendMessage(NULL, SAVE_CURSOR, 0, 0);
-
-        // change display size here 
-
-        SendMessage(NULL, RESTORE_CURSOR, 0, 0);
-        SendMessage(NULL, RESET_MOUSE, 0, 0);
-        SendMessage(NULL, SHOW_MOUSE, 0, 0);
-    }
-#endif
-}
-*/
-
-#ifdef INCLUDE_WINDOWMENU
-
-/* ----- select the screen texture ----- */
-/*
-void SelectTexture(void)
-{
-    cfg.Texture = CheckBoxSetting(&Display, ID_TEXTURE);
-}
-*/
-
-/* -- select whether the application screen has a border -- */
-/*
-void SelectBorder(WINDOW wnd)
-{
-    cfg.Border = CheckBoxSetting(&Display, ID_BORDER);
-    if (cfg.Border)
-        AddAttribute(wnd, HASBORDER);
-    else
-        ClearAttribute(wnd, HASBORDER);
-}
-*/
-
-/* select whether the application screen has a status bar */
-/*
-void SelectStatusBar(WINDOW wnd)
-{
-    cfg.StatusBar = CheckBoxSetting(&Display, ID_STATUSBAR);
-    if (cfg.StatusBar)
-        AddAttribute(wnd, HASSTATUSBAR);
-    else
-        ClearAttribute(wnd, HASSTATUSBAR);
-}
-*/
-
-/* select whether the application screen has a title bar */
-/*
-void SelectTitle(WINDOW wnd)
-{
-    cfg.Title = CheckBoxSetting(&Display, ID_TITLE);
-    if (cfg.Title)
-        AddAttribute(wnd, HASTITLEBAR);
-    else
-        ClearAttribute(wnd, HASTITLEBAR);
-}
-*/
-
-#endif
