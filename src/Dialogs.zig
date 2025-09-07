@@ -1,6 +1,12 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 
+const DBOX = struct {
+    HelpName:[*c]u8,
+    dwnd:df.DIALOGWINDOW,
+    ctl:[df.MAXCONTROLS+1]df.CTLWINDOW,
+};
+
 // This needs to be var because some values will change.
 
 // -------------- the File Open dialog box --------------- 

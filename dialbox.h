@@ -38,6 +38,7 @@ typedef struct {
 } DBOX;
 
 /* -------- macros for dialog box resource compile -------- */
+/*
 #define DIALOGBOX(db) DBOX db={ #db,
 #define DB_TITLE(ttl,x,y,h,w) {ttl,x,y,h,w},{
 #define CONTROL(ty,tx,x,y,h,w,c) 						\
@@ -46,6 +47,7 @@ typedef struct {
 				c,#c,(ty==BUTTON?ON:OFF),OFF,NULL},
 
 #define ENDDB {{NULL}} }};
+*/
 
 #define Cancel  " Cancel "
 #define Ok      "   OK   "
