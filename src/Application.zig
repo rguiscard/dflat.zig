@@ -215,13 +215,13 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             }
         },
         df.ID_WINDOW => {
-//-            df.ChooseWindow(wnd, df.CurrentMenuSelection-2);
+            ChooseWindow(win, df.CurrentMenuSelection-2);
         },
         df.ID_CLOSEALL => {
             CloseAll(win, false);
         },
         df.ID_MOREWINDOWS => {
-//-            df.MoreWindows(wnd);
+            MoreWindows(win);
         },
         df.ID_SAVEOPTIONS => {
             df.SaveConfig();
@@ -353,12 +353,12 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
 }
 
 // -------- return the name of a document window -------
-fn WindowName(wnd:df.Window) ?[]const u8 {
+fn WindowName(wnd:df.WINDOW) ?[]const u8 {
     if (df.GetTitle(wnd) == null) {
         if (df.GetClass(wnd) == df.DIALOG) {
             if (wnd.*.extension) |ext| {
                 const dbox:*df.DBOX = @ptrCast(@alignCast(ext));
-                return dbox.*.HelpName;
+                return std.mem.span(dbox.*.HelpName);
             }
         } else {
             return "Untitled";
@@ -370,7 +370,7 @@ fn WindowName(wnd:df.Window) ?[]const u8 {
 }
 
 // ----------- Prepare the Window menu ------------
-// FIXME: it does not work as expected.
+// FIXME: All "more windows" functsion are not texted. it does not work as expected now.
 pub export fn PrepWindowMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
     if (w) |ww| {
         const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
@@ -420,6 +420,95 @@ pub export fn PrepWindowMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
 //                mnu.*.Selection = 11;
         }
         pd.*.SelectionTitle = null;
+    }
+}
+
+fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
+    const wnd = win.win;
+    switch (msg) {
+        df.INITIATE_DIALOG => {
+            const cwnd = DialogBox.ControlWindow(&Dialogs.Windows,df.ID_WINDOWLIST);
+            var sel:c_int = 0;
+            if (cwnd == null)
+                return false;
+            var wnd1 = Window.FirstWindow(df.ApplicationWindow);
+            while (wnd1 != null) {
+                if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
+                                                (df.GetClass(wnd1) != df.MENUBAR) and
+                                df.GetClass(wnd1) != df.STATUSBAR) {
+                    if (wnd1 == oldFocus)
+                        WindowSel = sel;
+
+                    const name = WindowName(wnd1);
+                    if (name) |n| {
+                        _ = q.SendMessage(cwnd, df.ADDTEXT, @intCast(@intFromPtr(n.ptr)), 0);
+                    }
+
+                    sel += 1;
+                }
+                wnd1 = Window.NextWindow(wnd1);
+            }
+            _ = q.SendMessage(cwnd, df.LB_SETSELECTION, WindowSel, 0);
+            if (Window.get_zin(cwnd)) |cwin| {
+                cwin.AddAttribute(df.VSCROLLBAR);
+            }
+            q.PostMessage(cwnd, df.SHOW_WINDOW, 0, 0);
+        },
+        df.COMMAND => {
+            switch (p1) {
+                df.ID_OK => {
+                    if (p2 == 0) {
+                        const val:c_int = -1;
+                        _ = q.SendMessage(
+                                    DialogBox.ControlWindow(&Dialogs.Windows,
+                                    df.ID_WINDOWLIST),
+                                    df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&val)), 0);
+                        WindowSel = val;
+
+                    }
+                },
+                df.ID_WINDOWLIST => {
+                    if (p2 == df.LB_CHOOSE)
+                        _ = win.sendMessage(df.COMMAND, df.ID_OK, 0);
+                },
+                else => {
+                }
+            }
+        },
+        else => {
+        }
+    }
+    return root.zDefaultWndProc(win, msg, p1, p2);
+}
+        
+
+// ---- the More Windows command on the Window menu ----
+fn MoreWindows(win:*Window) void {
+    const wnd = win.win;
+    if (DialogBox.DialogBox(wnd, &Dialogs.Windows, df.TRUE, WindowPrep)>0)
+        ChooseWindow(win, WindowSel);
+}
+
+// ----- user chose a window from the Window menu
+//        or the More Window dialog box ----- 
+fn ChooseWindow(win:*Window, WindowNo:c_int) void {
+    const wnd = win.win;
+    var cwnd = Window.FirstWindow(wnd);
+    var counter = WindowNo;
+    while (cwnd != null) {
+        if (df.isVisible(cwnd)>0 and
+                                df.GetClass(cwnd) != df.MENUBAR and
+                        df.GetClass(cwnd) != df.STATUSBAR) {
+            if (counter == 0)
+                break;
+            counter -= 1;
+        }
+        cwnd = Window.NextWindow(cwnd);
+    }
+    if (cwnd != null) {
+        _ = q.SendMessage(cwnd, df.SETFOCUS, df.TRUE, 0);
+        if (cwnd.*.condition == df.ISMINIMIZED)
+            _ = q.SendMessage(cwnd, df.RESTORE, 0, 0);
     }
 }
 

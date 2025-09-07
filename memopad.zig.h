@@ -47,6 +47,7 @@ void ShellDOS(WINDOW);
 extern DBOX Display;
 extern BOOL AltDown;
 void cDisplay(WINDOW, PARAM, PARAM);
+int WindowPrep(WINDOW,MESSAGE,PARAM,PARAM);
 
 // textbox.c
 void DeleteTextMsg(WINDOW, int);

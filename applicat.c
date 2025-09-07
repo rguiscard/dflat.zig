@@ -2,9 +2,10 @@
 
 #include "dflat.h"
 
-static int ScreenHeight;
+//static int ScreenHeight;
 WINDOW ApplicationWindow;
 
+/*
 #ifdef INCLUDE_MULTI_WINDOWS
 extern DBOX Windows;
 #endif
@@ -26,7 +27,7 @@ static char *Menus[9] = {
     "~9.                      "
 };
 #endif
-
+*/
 char **Argv;
 
 #ifdef INCLUDE_WINDOWMENU
@@ -99,7 +100,8 @@ void cPrepWindowMenu(void *w, struct Menu *mnu)
 */
 
 /* window processing module for the More Windows dialog box */
-static int WindowPrep(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
+/*
+int WindowPrep(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 {
     switch (msg)    {
         case INITIATE_DIALOG:    {
@@ -152,16 +154,20 @@ static int WindowPrep(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
     }
     return DefaultWndProc(wnd, msg, p1, p2);
 }
+*/
 
 /* ---- the More Windows command on the Window menu ---- */
+/*
 static void MoreWindows(WINDOW wnd)
 {
     if (DialogBox(wnd, &Windows, TRUE, WindowPrep))
         ChooseWindow(wnd, WindowSel);
 }
+*/
 
 /* ----- user chose a window from the Window menu
         or the More Window dialog box ----- */
+/*
 static void ChooseWindow(WINDOW wnd, int WindowNo)
 {
     WINDOW cwnd = FirstWindow(wnd);
@@ -179,5 +185,6 @@ static void ChooseWindow(WINDOW wnd, int WindowNo)
             SendMessage(cwnd, RESTORE, 0, 0);
     }
 }
+*/
 
 #endif    /* #ifdef INCLUDE_WINDOWMENU */
