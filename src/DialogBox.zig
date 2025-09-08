@@ -602,13 +602,13 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
 }
 
 // ---- return pointer to the text of a control window ----
-pub export fn GetDlgTextString(db:*df.DBOX, cmd:c_uint, Class:df.CLASS) callconv(.c) [*c]u8 {
+pub fn GetDlgTextString(db:*df.DBOX, cmd:c_uint, Class:df.CLASS) [*c]u8 {
     const ct = FindCommand(db, cmd, Class);
     return if (ct) |c| c.*.itext else null;
 }
 
 // ------- set the text of a control specification ------
-pub export fn SetDlgTextString(db:*df.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLASS) callconv(.c) void {
+pub fn SetDlgTextString(db:*df.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLASS) void {
     const control = FindCommand(db, cmd, Class);
     if (control) |ct| {
         if (text != null) {
@@ -786,7 +786,7 @@ fn inFocusCommand(db:?*df.DBOX) c_int {
 }
 
 // -------- find a specified control structure -------
-pub export fn FindCommand(db:*df.DBOX, cmd:c_uint, Class:df.CLASS) callconv(.c) ?*df.CTLWINDOW {
+pub fn FindCommand(db:*df.DBOX, cmd:c_uint, Class:df.CLASS) ?*df.CTLWINDOW {
     for(&db.*.ctl) |*ct| {
         if (ct.*.Class == 0)
             break;
@@ -993,4 +993,42 @@ pub export fn SetFocusCursor(wnd:df.WINDOW) void {
         _ = q.SendMessage(null, df.SHOW_CURSOR, 0, 0);
         _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, 1, 0);
     }
+}
+
+// Accessories
+pub fn GetControl(win:*Window) *df.CTLWINDOW {
+    const wnd = win.win;
+    return wnd.*.ct;
+}
+
+pub fn GetDlgText(db:*df.DBOX, cmd: c_uint) [*c]u8 {
+    return GetDlgTextString(db, cmd, df.TEXT);
+}
+
+pub fn GetDlgTextBox(db:*df.DBOX, cmd: c_uint) [*c]u8 {
+    return GetDlgTextString(db, cmd, df.TEXTBOX);
+}
+
+pub fn GetEditBoxText(db:*df.DBOX, cmd: c_uint) [*c]u8 {
+    return GetDlgTextString(db, cmd, df.EDITBOX);
+}
+
+pub fn GetComboBoxText(db:*df.DBOX, cmd: c_uint) [*c]u8 {
+    return GetDlgTextString(db, cmd, df.COMBOBOX);
+}
+
+pub fn SetDlgText(db:*df.DBOX, cmd: c_uint, s:[*c]u8) void {
+    SetDlgTextString(db, cmd, s, df.TEXT);
+}
+
+pub fn SetDlgTextBox(db:*df.DBOX, cmd: c_uint, s:[*c]u8) void {
+    SetDlgTextString(db, cmd, s, df.TEXTBOX);
+}
+
+pub fn SetEditBoxText(db:*df.DBOX, cmd: c_uint, s:[*c]u8) void {
+    SetDlgTextString(db, cmd, s, df.EDITBOX);
+}
+
+pub fn SetComboBoxText(db:*df.DBOX, cmd: c_uint, s:[*c]u8) void {
+    SetDlgTextString(db, cmd, s, df.COMBOBOX);
 }

@@ -447,10 +447,10 @@ void GetDlgListText(WINDOW, char *, enum commands);
 void PutItemText(WINDOW, enum commands, char *);
 void PutComboListText(WINDOW, enum commands, char *);
 void GetItemText(WINDOW, enum commands, char *, int);
-char *GetDlgTextString(DBOX *, enum commands, CLASS);
-void SetDlgTextString(DBOX *, enum commands, char *, CLASS);
-BOOL CheckBoxSetting(DBOX *, enum commands);
-CTLWINDOW *FindCommand(DBOX *, enum commands, int);
+//char *GetDlgTextString(DBOX *, enum commands, CLASS);
+//void SetDlgTextString(DBOX *, enum commands, char *, CLASS);
+//BOOL CheckBoxSetting(DBOX *, enum commands);
+//CTLWINDOW *FindCommand(DBOX *, enum commands, int);
 WINDOW ControlWindow(const DBOX *, enum commands);
 void SetScrollBars(WINDOW);
 void SetRadioButton(DBOX *, CTLWINDOW *);
@@ -459,14 +459,14 @@ BOOL isControlOn(DBOX *, enum commands, int);
 void SetFocusCursor(WINDOW);
 
 #define GetControl(wnd)             (wnd->ct)
-#define GetDlgText(db, cmd)         GetDlgTextString(db, cmd, TEXT)
-#define GetDlgTextBox(db, cmd)      GetDlgTextString(db, cmd, TEXTBOX)
-#define GetEditBoxText(db, cmd)     GetDlgTextString(db, cmd, EDITBOX)
-#define GetComboBoxText(db, cmd)    GetDlgTextString(db, cmd, COMBOBOX)
-#define SetDlgText(db, cmd, s)      SetDlgTextString(db, cmd, s, TEXT)
-#define SetDlgTextBox(db, cmd, s)   SetDlgTextString(db, cmd, s, TEXTBOX)
-#define SetEditBoxText(db, cmd, s)  SetDlgTextString(db, cmd, s, EDITBOX)
-#define SetComboBoxText(db, cmd, s) SetDlgTextString(db, cmd, s, COMBOBOX)
+//#define GetDlgText(db, cmd)         GetDlgTextString(db, cmd, TEXT)
+//#define GetDlgTextBox(db, cmd)      GetDlgTextString(db, cmd, TEXTBOX)
+//#define GetEditBoxText(db, cmd)     GetDlgTextString(db, cmd, EDITBOX)
+//#define GetComboBoxText(db, cmd)    GetDlgTextString(db, cmd, COMBOBOX)
+//#define SetDlgText(db, cmd, s)      SetDlgTextString(db, cmd, s, TEXT)
+//#define SetDlgTextBox(db, cmd, s)   SetDlgTextString(db, cmd, s, TEXTBOX)
+//#define SetEditBoxText(db, cmd, s)  SetDlgTextString(db, cmd, s, EDITBOX)
+//#define SetComboBoxText(db, cmd, s) SetDlgTextString(db, cmd, s, COMBOBOX)
 #define SetDlgTitle(db, ttl)        ((db)->dwnd.title = ttl)
 #define SetCheckBox(db, cmd)        ControlSetting(db, cmd, CHECKBOX, ON)
 #define ClearCheckBox(db, cmd)      ControlSetting(db, cmd, CHECKBOX, OFF)

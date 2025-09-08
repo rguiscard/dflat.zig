@@ -52,7 +52,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
 }
 
 
-pub export fn CheckBoxSetting(db:*df.DBOX, cmd:c_uint) callconv(.c) c_uint {
+pub fn CheckBoxSetting(db:*df.DBOX, cmd:c_uint) c_uint {
     const ct:?*df.CTLWINDOW = DialogBox.FindCommand(db, @intCast(cmd), df.CHECKBOX);
     if (ct) |ctl| {
         if (ctl.*.wnd) |_| {

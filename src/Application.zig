@@ -35,23 +35,23 @@ fn CreateWindowMsg(win: *Window) bool {
 
     // INCLUDE_WINDOWOPTIONS
     if (df.cfg.Border > 0) {
-        df.SetCheckBox(&df.Display, df.ID_BORDER);
+        df.SetCheckBox(&Dialogs.Display, df.ID_BORDER);
     }
     if (df.cfg.Title > 0) {
-        df.SetCheckBox(&df.Display, df.ID_TITLE);
+        df.SetCheckBox(&Dialogs.Display, df.ID_TITLE);
     }
     if (df.cfg.StatusBar > 0) {
-        df.SetCheckBox(&df.Display, df.ID_STATUSBAR);
+        df.SetCheckBox(&Dialogs.Display, df.ID_STATUSBAR);
     }
     if (df.cfg.Texture > 0) {
-        df.SetCheckBox(&df.Display, df.ID_TEXTURE);
+        df.SetCheckBox(&Dialogs.Display, df.ID_TEXTURE);
     }
     if (df.cfg.mono == 1) {
-        radio.PushRadioButton(&df.Display, df.ID_MONO);
+        radio.PushRadioButton(&Dialogs.Display, df.ID_MONO);
     } else if (df.cfg.mono == 2) {
-        radio.PushRadioButton(&df.Display, df.ID_REVERSE);
+        radio.PushRadioButton(&Dialogs.Display, df.ID_REVERSE);
     } else {
-        radio.PushRadioButton(&df.Display, df.ID_COLOR);
+        radio.PushRadioButton(&Dialogs.Display, df.ID_COLOR);
     }
     if (df.SCREENHEIGHT != df.cfg.ScreenLines) {
         SetScreenHeight(df.cfg.ScreenLines);
@@ -191,7 +191,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             ShellDOS(win);
         },
         df.ID_DISPLAY => {
-            if (DialogBox.DialogBox(wnd, &df.Display, df.TRUE, null)>0) {
+            if (DialogBox.DialogBox(wnd, &Dialogs.Display, df.TRUE, null)>0) {
                 if ((df.inFocus == wnd.*.MenuBarWnd) or (df.inFocus == wnd.*.StatusBar)) {
                     oldFocus = df.ApplicationWindow;
                 } else {
@@ -526,9 +526,9 @@ fn DoWindowColors(wnd: df.WINDOW) void {
 
 // ----- set up colors for the application window ------
 fn SelectColors(win: *Window) void {
-    if (radio.RadioButtonSetting(&df.Display, df.ID_MONO)>0) {
+    if (radio.RadioButtonSetting(&Dialogs.Display, df.ID_MONO)>0) {
         df.cfg.mono = 1;   // mono
-    } else if (radio.RadioButtonSetting(&df.Display, df.ID_REVERSE)>0) {
+    } else if (radio.RadioButtonSetting(&Dialogs.Display, df.ID_REVERSE)>0) {
         df.cfg.mono = 2;   // mono reverse
     } else {
         df.cfg.mono = 0;   // color
@@ -587,12 +587,12 @@ fn SetScreenHeight(height: c_int) void {
 
 // ----- select the screen texture -----
 fn SelectTexture() void {
-    df.cfg.Texture = checkbox.CheckBoxSetting(&df.Display, df.ID_TEXTURE);
+    df.cfg.Texture = checkbox.CheckBoxSetting(&Dialogs.Display, df.ID_TEXTURE);
 }
 
 // -- select whether the application screen has a border --
 fn SelectBorder(win: *Window) void {
-    df.cfg.Border = checkbox.CheckBoxSetting(&df.Display, df.ID_BORDER);
+    df.cfg.Border = checkbox.CheckBoxSetting(&Dialogs.Display, df.ID_BORDER);
     if (df.cfg.Border > 0) {
         win.AddAttribute(df.HASBORDER);
     } else {
@@ -602,7 +602,7 @@ fn SelectBorder(win: *Window) void {
 
 // select whether the application screen has a status bar
 fn SelectStatusBar(win: *Window) void {
-    df.cfg.StatusBar = checkbox.CheckBoxSetting(&df.Display, df.ID_STATUSBAR);
+    df.cfg.StatusBar = checkbox.CheckBoxSetting(&Dialogs.Display, df.ID_STATUSBAR);
     if (df.cfg.StatusBar > 0) {
         win.AddAttribute(df.HASSTATUSBAR);
     } else {
@@ -612,7 +612,7 @@ fn SelectStatusBar(win: *Window) void {
 
 // select whether the application screen has a title bar
 fn SelectTitle(win: *Window) void {
-    df.cfg.Title = checkbox.CheckBoxSetting(&df.Display, df.ID_TITLE);
+    df.cfg.Title = checkbox.CheckBoxSetting(&Dialogs.Display, df.ID_TITLE);
     if (df.cfg.Title > 0) {
         win.AddAttribute(df.HASTITLEBAR);
     } else {

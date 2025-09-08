@@ -1,8 +1,3 @@
-// fileopen.c
-//BOOL BuildFileList(WINDOW, char *);
-//void BuildDirectoryList(WINDOW);
-//void BuildPathDisplay(WINDOW);
-
 // direct.c
 void cBuildList(CTLWINDOW *, char *, BOOL);
 
@@ -37,20 +32,7 @@ extern int py;
 extern int diff;
 
 // applicat.c
-//void CreateStatusBar(WINDOW);
-//void SelectColors(WINDOW);
-//void SetScreenHeight(int);
-//void SelectLines(WINDOW);
-//void SelectTexture(void);
-//void SelectBorder(WINDOW);
-//void SelectTitle(WINDOW);
-//void SelectStatusBar(WINDOW);
-//void CreateMenu(WINDOW);
-//void ShellDOS(WINDOW);
-extern DBOX Display;
 extern BOOL AltDown;
-//void cDisplay(WINDOW, PARAM, PARAM);
-//int WindowPrep(WINDOW,MESSAGE,PARAM,PARAM);
 
 // textbox.c
 void DeleteTextMsg(WINDOW, int);
@@ -91,9 +73,6 @@ int ScrollingKey(WINDOW, int, PARAM);
 int GetTextMsg(WINDOW, PARAM, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
-// text.c
-//void drawText(WINDOW);
-
 // popdown.c
 void PaintMsg(WINDOW);
 void PaintPopDownSelection(WINDOW, struct PopDown *, char*);
@@ -123,14 +102,9 @@ extern int HelpStack[MAXHELPSTACK];
 extern int stacked;
 
 FILE *OpenHelpFile(const char *fn, const char *md);
-// int cHelpBoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2);
 void ReadHelp(WINDOW);
 BOOL HelpBoxKeyboardMsg(WINDOW wnd, PARAM p1);
 void SelectHelp(WINDOW, struct helps *, BOOL);
 
 // radio.c
 void cPushRadioButton(DBOX *, enum commands, BOOL);
-
-// all wndproc
-//int cNormalProc(WINDOW, MESSAGE, PARAM, PARAM);
-//int cInputBoxProc(WINDOW, MESSAGE, PARAM, PARAM);

@@ -112,12 +112,6 @@ static int dircmp(const void *c1, const void *c2)
 
 void cBuildList(CTLWINDOW *ct, char *fspec, BOOL dirs)
 {
-    /*
-    CTLWINDOW *ct = FindCommand(wnd->extension,
-                        dirs? ID_DIRECTORY : ID_FILES,LISTBOX);
-
-    if (ct != NULL)    {
-    */
 	// ct always exists. it is checked on zig side.
 	// make this function private after porting.
         WINDOW lwnd;
@@ -159,36 +153,4 @@ void cBuildList(CTLWINDOW *ct, char *fspec, BOOL dirs)
             free(dirlist);
 		}
         SendMessage(lwnd, SHOW_WINDOW, 0, 0);
-	/*
-    }
-	return TRUE;
-	*/
 }
-
-/*
-BOOL BuildFileList(WINDOW wnd, char *fspec)
-{
-	return BuildList(wnd, fspec, FALSE);
-}
-
-void BuildDirectoryList(WINDOW wnd)
-{
-	BuildList(wnd, "*", TRUE);
-}
-*/
-
-/*
-void BuildPathDisplay(WINDOW wnd)
-{
-    char path[MAXPATH];
-
-    CTLWINDOW *ct = FindCommand(wnd->extension, ID_PATH,TEXT);
-	if (ct != NULL)	{
-		int len;
-	    WINDOW lwnd = ct->wnd;
-		getcwd(path, sizeof(path));
-       	SendMessage(lwnd,SETTEXT,(PARAM)path,0);
-        SendMessage(lwnd, PAINT, 0, 0);
-	}
-}
-*/

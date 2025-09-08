@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const menus = @import("Menus.zig");
+const checkbox = @import("CheckBox.zig");
 
 var log:?*df.FILE = null;
 
@@ -59,7 +60,7 @@ pub fn MessageLog(win:*Window) void {
     const wnd = win.win;
     const Log = &Dialogs.Log;
     if (DialogBox.DialogBox(wnd, Log, df.TRUE, LogProc)>0) {
-        if (df.CheckBoxSetting(Log, df.ID_LOGGING)>0) {
+        if (checkbox.CheckBoxSetting(Log, df.ID_LOGGING)>0) {
             log = df.fopen("DFLAT.LOG", "wt");
             df.SetCommandToggle(&menus.MainMenu, df.ID_LOG);
         } else if (log != null)    {

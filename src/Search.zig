@@ -7,6 +7,7 @@ const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 const textbox = @import("TextBox.zig");
 const editbox = @import("EditBox.zig");
+const checkbox = @import("CheckBox.zig");
 
 var CheckCase = true;
 var Replacing = false;
@@ -72,12 +73,12 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 //    char *s1 = NULL, *s2, *cp1;
     var cp1:[*c]u8 = null;
     const dbox = if (Replacing) &Dialogs.ReplaceTextDB else  &Dialogs.SearchTextDB;
-    const cp = df.GetEditBoxText(dbox, df.ID_SEARCHFOR);
+    const cp = DialogBox.GetEditBoxText(dbox, df.ID_SEARCHFOR);
     var FoundOne = false;
     var rpl = true;
     while ((rpl == true) and (cp != null) and (df.strlen(cp) > 0)) {
         if (Replacing) {
-            rpl = if (df.CheckBoxSetting(&Dialogs.ReplaceTextDB, df.ID_REPLACEALL)>0) true else false;
+            rpl = if (checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, df.ID_REPLACEALL)>0) true else false;
         }
 
         if (df.TextBlockMarked(wnd)) {
@@ -167,7 +168,7 @@ pub fn ReplaceText(win:*Window) void {
         df.SetCheckBox(&Dialogs.ReplaceTextDB, df.ID_MATCHCASE);
     }
     if (DialogBox.DialogBox(null, &Dialogs.ReplaceTextDB, df.TRUE, null)>0) {
-        CheckCase = if (df.CheckBoxSetting(&Dialogs.ReplaceTextDB, df.ID_MATCHCASE) == df.TRUE) true else false;
+        CheckCase = if (checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, df.ID_MATCHCASE) == df.TRUE) true else false;
         SearchTextBox(win, false);
     }
 }
@@ -180,7 +181,7 @@ pub fn SearchText(win:*Window) void {
         df.SetCheckBox(&Dialogs.SearchTextDB, df.ID_MATCHCASE);
     }
     if (DialogBox.DialogBox(null, &Dialogs.SearchTextDB, df.TRUE, null)>0) {
-        CheckCase = if (df.CheckBoxSetting(&Dialogs.SearchTextDB, df.ID_MATCHCASE) == df.TRUE) true else false;
+        CheckCase = if (checkbox.CheckBoxSetting(&Dialogs.SearchTextDB, df.ID_MATCHCASE) == df.TRUE) true else false;
         SearchTextBox(win, false);
     }
 }
