@@ -727,7 +727,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         df.DISPLAY_HELP => {
             const p1_addr:usize = @intCast(p1);
             const pp1:[*c]u8 = @ptrFromInt(p1_addr);
-            return (helpbox.DisplayHelp(win, std.mem.span(pp1)) == df.TRUE);
+            return helpbox.DisplayHelp(win, std.mem.span(pp1));
         },
         else => {
         }

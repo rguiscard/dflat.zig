@@ -14,8 +14,9 @@ fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
                         if (dirs) df.ID_DIRECTORY else df.ID_FILES, df.LISTBOX);
         if (control) |ct| {
             const lwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
-//            _ = df.cBuildList(ct, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
+            _ = q.SendMessage(lwnd, df.CLEARTEXT, 0, 0);
             _ = df.cBuildList(lwnd, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
+            _ = q.SendMessage(lwnd, df.SHOW_WINDOW, 0, 0);
         }
     }
     return true;

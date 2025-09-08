@@ -150,15 +150,15 @@ fn StripTildes(input: []const u8, buffer: *[30]u8) []const u8 {
 }
 
 // ---------- display help text -----------
-pub fn DisplayHelp(win:*Window, Help:[]const u8) c_int {
+pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
     const wnd = win.win;
     var buffer:[30]u8 = undefined;
-    var rtn = df.FALSE;
+    var rtn = false;
 
     @memset(&buffer, 0);
 
     if (df.Helping > 0)
-        return df.TRUE;
+        return true;
 
     const FixedHelp = StripTildes(Help, &buffer);
 
@@ -178,7 +178,7 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) c_int {
             Dialogs.HelpBox.dwnd.title = null;
             _ = df.fclose(df.helpfp);
             df.helpfp = null;
-            rtn = df.TRUE;
+            rtn = true;
         }
     }
     wnd.*.isHelping -= 1;

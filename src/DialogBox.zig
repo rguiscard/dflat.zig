@@ -152,11 +152,11 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.F1 => {
             if ((df.WindowMoving==0) and (df.WindowSizing==0)) {
-//                const ct = df.GetControl(wnd);
-//                if (df.DisplayHelp(wnd, ct.*.help) == 0) {
                 if (win.GetControl()) |ct| {
-                    if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help)) == 0) {
-                        _ = q.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
+                    if (ct.*.help) |help| {
+                        if (helpbox.DisplayHelp(win, help) == false) {
+                            _ = q.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
+                        }
                     }
                 }
                 return true;
@@ -506,8 +506,10 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             if (Window.get_zin(df.inFocus)) |zin| {
 //                const ct = df.GetControl(df.inFocus);
                 if (zin.GetControl()) |ct| {
-                    if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help))>0) {
-                        return true;
+                    if (ct.*.help) |help| {
+                        if (helpbox.DisplayHelp(win, help)) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -541,8 +543,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
 
             const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-            const rtn = helpbox.DisplayHelp(win, db.*.HelpName);
-            return (rtn == df.TRUE);
+            return helpbox.DisplayHelp(win, db.*.HelpName);
         },
         else => {
         }

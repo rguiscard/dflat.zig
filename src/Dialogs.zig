@@ -10,7 +10,7 @@ pub const CTLWINDOW = struct {
     Class:df.CLASS = 0,         // LISTBOX, BUTTON, etc
     itext:[*c]u8 = null,        // initialized text
     command:c_uint = 0,         // command code
-    help:[*c]u8 = null,         // help mnemonic
+    help:?[]const u8 = null,    // help mnemonic
     isetting:df.BOOL = df.OFF,  // initially ON or OFF
     setting:df.BOOL = df.OFF,   // ON or OFF
     wnd:?*anyopaque = null,     // window handle
@@ -241,7 +241,7 @@ fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
             .Class = ty,
             .itext = itext,
             .command = c,
-            .help = if (help) |name| @constCast(name.ptr) else null,
+            .help = help,
             .isetting = if (ty == df.BUTTON) df.ON else df.OFF,
             .setting = df.OFF,
             .wnd = null,

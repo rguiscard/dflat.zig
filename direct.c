@@ -114,15 +114,13 @@ void cBuildList(WINDOW lwnd, char *fspec, BOOL dirs)
 {
 	// ct always exists. it is checked on zig side.
 	// make this function private after porting.
-//        WINDOW lwnd;
         char **dirlist = NULL;
         DIR *dirp;
         int i = 0, j;
         struct dirent *dp;
         struct stat sb;
 
-//        lwnd = ct->wnd;
-        SendMessage(lwnd, CLEARTEXT, 0, 0);
+//        SendMessage(lwnd, CLEARTEXT, 0, 0);
 
         dirp = opendir(".");
         if (dirp) {
@@ -152,5 +150,5 @@ void cBuildList(WINDOW lwnd, char *fspec, BOOL dirs)
             }
             free(dirlist);
 		}
-        SendMessage(lwnd, SHOW_WINDOW, 0, 0);
+//        SendMessage(lwnd, SHOW_WINDOW, 0, 0);
 }
