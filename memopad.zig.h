@@ -92,6 +92,7 @@ extern char HelpFileName[9];
 int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
 int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
 void cReadHelp(WINDOW wnd, WINDOW cwnd);
+void BestFit(WINDOW, DIALOGWINDOW *); // private
 
 extern FILE *helpfp;
 extern char hline [160];
@@ -103,8 +104,12 @@ extern int stacked;
 
 FILE *OpenHelpFile(const char *fn, const char *md);
 void ReadHelp(WINDOW);
-BOOL HelpBoxKeyboardMsg(WINDOW wnd, PARAM p1);
+BOOL cHelpBoxKeyboardMsg(WINDOW, WINDOW, PARAM);
 void SelectHelp(WINDOW, struct helps *, BOOL);
+
+// decomp.c
+void SeekHelpLine(long, int);
+void *GetHelpLine(char *);
 
 // radio.c
 void cPushRadioButton(DBOX *, enum commands, BOOL);

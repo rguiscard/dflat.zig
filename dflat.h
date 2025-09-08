@@ -215,7 +215,7 @@ void InitWindowColors(WINDOW);
 //void SetPrevFocus(void);
 //void RemoveWindow(WINDOW);
 //void AppendWindow(WINDOW);
-void ReFocus(WINDOW);
+//void ReFocus(WINDOW);
 //void SkipApplicationControls(void);
 
 BOOL CharInView(WINDOW, int, int);

@@ -26,7 +26,7 @@ char HelpFileName[9];
 int HelpStack[MAXHELPSTACK];
 int stacked;
 
-void zReFocus(WINDOW wnd);
+//void zReFocus(WINDOW wnd);
 int HelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2);
 int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
 int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
@@ -50,18 +50,20 @@ void SelectHelp(WINDOW, struct helps *, BOOL);
 void ReadHelp(WINDOW);
 struct helps *FindHelp(char *);
 static void DisplayDefinition(WINDOW, char *);
-static void BestFit(WINDOW, DIALOGWINDOW *);
+void BestFit(WINDOW, DIALOGWINDOW *);
 
 int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 
 /* ------------- KEYBOARD message ------------ */
-BOOL HelpBoxKeyboardMsg(WINDOW wnd, PARAM p1)
+BOOL cHelpBoxKeyboardMsg(WINDOW wnd, WINDOW cwnd, PARAM p1)
 {
-    WINDOW cwnd;
+//    WINDOW cwnd;
+//
+//    cwnd = ControlWindow(wnd->extension, ID_HELPTEXT);
+//    if (cwnd == NULL || inFocus != cwnd)
+//        return FALSE;
 
-    cwnd = ControlWindow(wnd->extension, ID_HELPTEXT);
-    if (cwnd == NULL || inFocus != cwnd)
-        return FALSE;
+    // cwnd is not null, checked by zig side
     switch ((int)p1)    {
         case '\r':
 			if (keywordcount)
@@ -298,25 +300,26 @@ void UnLoadHelpFile(void)
 	HelpTree = NULL;
 }
 
+/*
 void BuildHelpBox(WINDOW wnd)
 {
     int offset, i;
 
-    /* -- seek to the first line of the help text -- */
+    // -- seek to the first line of the help text -- 
     SeekHelpLine(ThisHelp->hptr, ThisHelp->bit);
-    /* ----- read the title ----- */
+    // ----- read the title ----- 
     GetHelpLine(hline);
     hline[strlen(hline)-1] = '\0';
 	free(HelpBox.dwnd.title);
     HelpBox.dwnd.title = DFmalloc(strlen(hline)+1);
     strcpy(HelpBox.dwnd.title, hline);
-    /* ----- set the height and width ----- */
+    // ----- set the height and width ----- 
     HelpBox.dwnd.h = min(ThisHelp->hheight, MAXHEIGHT)+7;
     HelpBox.dwnd.w = max(45, ThisHelp->hwidth+6);
-    /* ------ position the help window ----- */
+    // ------ position the help window ----- 
 	if (wnd != NULL)
 	    BestFit(wnd, &HelpBox.dwnd);
-    /* ------- position the command buttons ------ */
+    // ------- position the command buttons ------ 
     HelpBox.ctl[0].dwnd.w = max(40, ThisHelp->hwidth+2);
     HelpBox.ctl[0].dwnd.h =
                 min(ThisHelp->hheight, MAXHEIGHT)+2;
@@ -326,7 +329,7 @@ void BuildHelpBox(WINDOW wnd)
            		min(ThisHelp->hheight, MAXHEIGHT)+3;
    		HelpBox.ctl[i].dwnd.x = (i-1) * 10 + offset;
 	}
-    /* ---- disable ineffective buttons ---- */
+    // ---- disable ineffective buttons ---- 
     if (ThisHelp->nexthlp == -1)
         DisableButton(&HelpBox, ID_NEXT);
 	else
@@ -336,8 +339,10 @@ void BuildHelpBox(WINDOW wnd)
 	else 
         EnableButton(&HelpBox, ID_PREV);
 }
+*/
 
 /* ----- select a new help window from its name ----- */
+/*
 void SelectHelp(WINDOW wnd, struct helps *newhelp, BOOL recall)
 {
 	if (newhelp != NULL)	{
@@ -353,14 +358,14 @@ void SelectHelp(WINDOW wnd, struct helps *newhelp, BOOL recall)
 		    DisableButton(&HelpBox, ID_BACK);
 		BuildHelpBox(NULL);
 		AddTitle(wnd, HelpBox.dwnd.title);
-		/* --- reposition and resize the help window --- */
+		// --- reposition and resize the help window --- 
 		HelpBox.dwnd.x = (SCREENWIDTH-HelpBox.dwnd.w)/2;
 		HelpBox.dwnd.y = (SCREENHEIGHT-HelpBox.dwnd.h)/2;
 		SendMessage(wnd, MOVE, HelpBox.dwnd.x, HelpBox.dwnd.y);
 		SendMessage(wnd, SIZE,
 						HelpBox.dwnd.x + HelpBox.dwnd.w - 1,
 						HelpBox.dwnd.y + HelpBox.dwnd.h - 1);
-		/* --- reposition the controls --- */
+		// --- reposition the controls --- 
 	    for (i = 0; i < 5; i++)    {
 			WINDOW cwnd = HelpBox.ctl[i].wnd;
 			x = HelpBox.ctl[i].dwnd.x+GetClientLeft(wnd);
@@ -372,12 +377,13 @@ void SelectHelp(WINDOW wnd, struct helps *newhelp, BOOL recall)
 				SendMessage(cwnd, SIZE, x, y);
 			}
 		}
-		/* --- read the help text into the help window --- */
+		// --- read the help text into the help window --- 
 		ReadHelp(wnd);
 		ReFocus(wnd);
 		SendMessage(wnd, SHOW_WINDOW, 0, 0);
 	}
 }
+*/
 /* ---- strip tildes from the help name ---- */
 static void StripTildes(char *fh, char *hp)
 {
@@ -478,7 +484,7 @@ static int OverLap(int a, int b)
 }
 
 /* ----- compute the best location for a help dialogbox ----- */
-static void BestFit(WINDOW wnd, DIALOGWINDOW *dwnd)
+void BestFit(WINDOW wnd, DIALOGWINDOW *dwnd)
 {
     int above, below, right, left;
     if (GetClass(wnd) == MENUBAR ||

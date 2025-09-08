@@ -290,7 +290,7 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         if ((that != null) and (df.ValidRect(rc)==false) and (df.isVisible(wnd)>0)) {
             this = null;
         }
-        df.ReFocus(wnd);
+        lists.ReFocus(wnd);
         if ((this != null) and ((df.isVisible(this) == 0) or (df.TestAttribute(this, df.SAVESELF) == 0))) {
             wnd.*.wasCleared = df.FALSE;
             _ = q.SendMessage(this, df.SHOW_WINDOW, 0, 0);

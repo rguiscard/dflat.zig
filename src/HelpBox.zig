@@ -6,8 +6,9 @@ const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
+const lists = @import("Lists.zig");
 
-const MAXHEIGHT  = df.SCREENHEIGHT-10;
+//const MAXHEIGHT = df.SCREENHEIGHT-10;
 const MAXHELPKEYWORDS = 50; // --- maximum keywords in a window ---
 const MAXHELPSTACK = 100;
 
@@ -41,14 +42,14 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
         df.ID_PREV => {
             if (df.ThisHelp != null) {
                 const prevhlp:usize = @intCast(df.ThisHelp.*.prevhlp);
-                df.SelectHelp(wnd, df.FirstHelp+prevhlp, df.TRUE);
+                SelectHelp(wnd, df.FirstHelp+prevhlp, df.TRUE);
             }
             return true;
         },
         df.ID_NEXT => {
             if (df.ThisHelp != null) {
                 const nexthlp:usize = @intCast(df.ThisHelp.*.nexthlp);
-                df.SelectHelp(wnd, df.FirstHelp+nexthlp, df.TRUE);
+                SelectHelp(wnd, df.FirstHelp+nexthlp, df.TRUE);
             }
             return true;
         },
@@ -57,11 +58,25 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
                 df.stacked -= 1;
                 const stacked:usize = @intCast(df.stacked);
                 const helpstack:usize = @intCast(df.HelpStack[stacked]);
-                df.SelectHelp(wnd, df.FirstHelp+helpstack, df.FALSE);
+                SelectHelp(wnd, df.FirstHelp+helpstack, df.FALSE);
             }
             return true;
         },
         else => {
+        }
+    }
+    return false;
+}
+
+fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
+    const wnd = win.win;
+    if (wnd.*.extension) |ext| {
+        const dbox:*df.DBOX = @ptrCast(@alignCast(ext));
+        const ctl_wnd = DialogBox.ControlWindow(dbox, df.ID_HELPTEXT);
+        if (ctl_wnd) |cwnd| {
+            if (df.inFocus == cwnd) {
+                return if (df.cHelpBoxKeyboardMsg(wnd, cwnd, p1) == df.TRUE) true else false;
+            }
         }
     }
     return false;
@@ -84,7 +99,7 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         },
         df.KEYBOARD => {
             if (df.WindowMoving == 0) {
-                if (df.HelpBoxKeyboardMsg(wnd, p1) > 0)
+                if (HelpBoxKeyboardMsg(win, p1))
                     return true;
             }
         },
@@ -153,7 +168,7 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) c_int {
         _ = thisHelp;
         df.helpfp = df.OpenHelpFile(&df.HelpFileName, "rb");
         if (df.helpfp) |_| {
-            df.BuildHelpBox(wnd);
+            BuildHelpBox(win);
             df.DisableButton(&Dialogs.HelpBox, df.ID_BACK);
 
             // ------- display the help window -----
@@ -168,4 +183,98 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) c_int {
     }
     wnd.*.isHelping -= 1;
     return rtn;
+}
+
+fn BuildHelpBox(win:?*Window) void {
+    const MAXHEIGHT = df.SCREENHEIGHT-10;
+
+    // -- seek to the first line of the help text --
+    df.SeekHelpLine(df.ThisHelp.*.hptr, df.ThisHelp.*.bit);
+
+    // ----- read the title -----
+    _ = df.GetHelpLine(&df.hline);
+    df.hline[df.strlen(&df.hline)-1] = 0;
+
+    // FIXME: should replace with zig allocator
+    df.free(Dialogs.HelpBox.dwnd.title);
+    Dialogs.HelpBox.dwnd.title = @ptrCast(@alignCast(df.DFmalloc(df.strlen(&df.hline)+1)));
+    _ = df.strcpy(Dialogs.HelpBox.dwnd.title, &df.hline);
+
+    // ----- set the height and width -----
+    Dialogs.HelpBox.dwnd.h = @min(df.ThisHelp.*.hheight, MAXHEIGHT)+7;
+    Dialogs.HelpBox.dwnd.w = @max(45, df.ThisHelp.*.hwidth+6);
+
+    // ------ position the help window -----
+    if (win) |w| {
+        const wnd = w.win;
+        df.BestFit(wnd, &Dialogs.HelpBox.dwnd);
+    }
+    // ------- position the command buttons ------ 
+    Dialogs.HelpBox.ctl[0].dwnd.w = @max(40, df.ThisHelp.*.hwidth+2);
+    Dialogs.HelpBox.ctl[0].dwnd.h =
+                @min(df.ThisHelp.*.hheight, MAXHEIGHT)+2;
+    const offset = @divFloor(Dialogs.HelpBox.dwnd.w-40, 2);
+    for (1..5) |i| {
+        const ii:c_int = @intCast(i);
+        Dialogs.HelpBox.ctl[i].dwnd.y =
+                        @min(df.ThisHelp.*.hheight, MAXHEIGHT)+3;
+        Dialogs.HelpBox.ctl[i].dwnd.x = (ii-1) * 10 + offset;
+    }
+
+    // ---- disable ineffective buttons ----
+    if (df.ThisHelp.*.nexthlp == -1) {
+        DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_NEXT);
+    } else {
+        DialogBox.EnableButton(&Dialogs.HelpBox, df.ID_NEXT);
+    }
+    if (df.ThisHelp.*.prevhlp == -1) {
+        DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_PREV);
+    } else {
+        DialogBox.EnableButton(&Dialogs.HelpBox, df.ID_PREV);
+    }
+}
+
+// ----- select a new help window from its name -----
+pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) callconv(.c) void {
+    if (newhelp != null) {
+        if (Window.get_zin(wnd)) |win| {
+            _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+            if (recall>0 and df.stacked < df.MAXHELPSTACK) {
+                df.HelpStack[@intCast(df.stacked)] = @intCast(df.ThisHelp-df.FirstHelp);
+                df.stacked += 1;
+            }
+            df.ThisHelp = newhelp;
+            _ = q.SendMessage(df.GetParent(wnd), df.DISPLAY_HELP, @intCast(@intFromPtr(df.ThisHelp.*.hname)), 0);
+            if (df.stacked>0) {
+                DialogBox.EnableButton(&Dialogs.HelpBox, df.ID_BACK);
+            } else {
+                DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_BACK);
+            }
+            BuildHelpBox(null);
+            df.AddTitle(wnd, Dialogs.HelpBox.dwnd.title);
+            // --- reposition and resize the help window ---
+            Dialogs.HelpBox.dwnd.x = @divFloor(df.SCREENWIDTH-Dialogs.HelpBox.dwnd.w, 2);
+            Dialogs.HelpBox.dwnd.y = @divFloor(df.SCREENHEIGHT-Dialogs.HelpBox.dwnd.h, 2);
+            _ = win.sendMessage(df.MOVE, Dialogs.HelpBox.dwnd.x, Dialogs.HelpBox.dwnd.y);
+            _ = win.sendMessage(df.SIZE,
+                                        Dialogs.HelpBox.dwnd.x + Dialogs.HelpBox.dwnd.w - 1,
+                                        Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1);
+            // --- reposition the controls ---
+            for (0..5) |i| {
+                const cwnd:df.WINDOW = @ptrCast(@alignCast(Dialogs.HelpBox.ctl[i].wnd));
+                var x = Dialogs.HelpBox.ctl[i].dwnd.x+win.GetClientLeft();
+                var y = Dialogs.HelpBox.ctl[i].dwnd.y+win.GetClientTop();
+                _ = q.SendMessage(cwnd, df.MOVE, x, y);
+                if (i == 0) {
+                    x += Dialogs.HelpBox.ctl[i].dwnd.w - 1;
+                    y += Dialogs.HelpBox.ctl[i].dwnd.h - 1;
+                    _ = q.SendMessage(cwnd, df.SIZE, x, y);
+                }
+            }
+            // --- read the help text into the help window ---
+            df.ReadHelp(wnd);
+            lists.ReFocus(wnd);
+            _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+        }
+    }
 }

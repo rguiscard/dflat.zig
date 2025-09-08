@@ -28,7 +28,7 @@ fn set_prev_window(wnd:df.WINDOW, child:df.WINDOW) void {
 }
 
 // ----- set focus to the next sibling -----
-pub export fn SetNextFocus() callconv(.c) void {
+pub fn SetNextFocus() void {
     if (df.inFocus != null)    {
         var wnd1 = df.inFocus;
 	var pwnd:df.WINDOW = null;
@@ -62,7 +62,7 @@ pub export fn SetNextFocus() callconv(.c) void {
 }
 
 // ----- set focus to the previous sibling -----
-pub export fn SetPrevFocus() callconv(.c) void {
+pub fn SetPrevFocus() void {
     if (df.inFocus != null) {
         var wnd1 = df.inFocus;
 	var pwnd:df.WINDOW = null;
@@ -96,7 +96,7 @@ pub export fn SetPrevFocus() callconv(.c) void {
 }
 
 // ------- move a window to the end of its parents list -----
-pub export fn ReFocus(wnd:df.WINDOW) callconv(.c) void {
+pub fn ReFocus(wnd:df.WINDOW) void {
 	if (df.GetParent(wnd) != null)	{
 		RemoveWindow(wnd);
 		AppendWindow(wnd);
@@ -105,7 +105,7 @@ pub export fn ReFocus(wnd:df.WINDOW) callconv(.c) void {
 }
 
 // ---- remove a window from the linked list ----
-pub export fn RemoveWindow(wnd:df.WINDOW) callconv(.c) void {
+pub fn RemoveWindow(wnd:df.WINDOW) void {
     if (wnd != null)    {
         const pwnd = df.GetParent(wnd);
         if (Window.PrevWindow(wnd) != null) {
@@ -128,7 +128,7 @@ pub export fn RemoveWindow(wnd:df.WINDOW) callconv(.c) void {
 }
 
 // ---- append a window to the linked list ----
-pub export fn AppendWindow(wnd:df.WINDOW) callconv(.c) void {
+pub fn AppendWindow(wnd:df.WINDOW) void {
     if (wnd != null) {
         const pwnd = df.GetParent(wnd);
         if (pwnd != null) {
@@ -148,7 +148,7 @@ pub export fn AppendWindow(wnd:df.WINDOW) callconv(.c) void {
 
 // ----- if document windows and statusbar or menubar get the focus,
 //              pass it on -------
-pub export fn SkipApplicationControls() callconv(.c) void {
+pub fn SkipApplicationControls() void {
     var EmptyAppl = false;
     var ct:isize = 0;
     while (!EmptyAppl and (df.inFocus != null))	{
