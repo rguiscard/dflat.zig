@@ -358,7 +358,7 @@ fn WindowName(wnd:df.WINDOW) ?[]const u8 {
         if (df.GetClass(wnd) == df.DIALOG) {
             if (wnd.*.extension) |ext| {
                 const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
-                return std.mem.span(dbox.*.HelpName);
+                return dbox.*.HelpName;
             }
         } else {
             return "Untitled";

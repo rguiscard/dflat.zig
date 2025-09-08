@@ -1,10 +1,13 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 
+pub const MAXCONTROLS = 30;
+pub const MAXRADIOS = 20;
+
 pub const DBOX = struct {
-    HelpName:[*c]u8,
+    HelpName:[]const u8,
     dwnd:df.DIALOGWINDOW,
-    ctl:[df.MAXCONTROLS+1]df.CTLWINDOW,
+    ctl:[MAXCONTROLS+1]df.CTLWINDOW,
 };
 
 // This needs to be var because some values will change.
@@ -192,7 +195,7 @@ fn buildDialog(comptime help:[]const u8, comptime window:anytype, comptime contr
     ttl, x, y, h, w = window;
 
     result = .{
-        .HelpName = @constCast(help.ptr),
+        .HelpName = help,
         .dwnd = .{
             .title = if (ttl) |t| @constCast(t.ptr) else null,
             .x = x,
@@ -206,8 +209,8 @@ fn buildDialog(comptime help:[]const u8, comptime window:anytype, comptime contr
     return result;
 }
 
-fn buildControls(comptime controls:anytype) [df.MAXCONTROLS+1]df.CTLWINDOW {
-    var result = [_]df.CTLWINDOW{.{.Class = 0}}**(df.MAXCONTROLS+1);
+fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]df.CTLWINDOW {
+    var result = [_]df.CTLWINDOW{.{.Class = 0}}**(MAXCONTROLS+1);
     inline for(controls, 0..) |control, idx| {
         var ty: c_int = undefined ;
         var tx: ?[]const u8 = undefined;

@@ -530,7 +530,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
 
             const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-            const rtn = helpbox.DisplayHelp(win, std.mem.span(db.*.HelpName));
+            const rtn = helpbox.DisplayHelp(win, db.*.HelpName);
             return (rtn == df.TRUE);
         },
         else => {

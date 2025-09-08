@@ -5,8 +5,8 @@
 
 #include <stdio.h>
 
-#define MAXCONTROLS 30
-#define MAXRADIOS 20
+//#define MAXCONTROLS 30
+//#define MAXRADIOS 20
 
 #define OFF FALSE
 #define ON  TRUE
@@ -51,9 +51,11 @@ typedef struct {
 #define ENDDB {{NULL}} }};
 */
 
+/*
 #define Cancel  " Cancel "
 #define Ok      "   OK   "
 #define Yes     "  Yes   "
 #define No      "   No   "
+*/
 
 #endif

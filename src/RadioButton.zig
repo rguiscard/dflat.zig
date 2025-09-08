@@ -6,8 +6,7 @@ const q = @import("Message.zig");
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
-var rct = [_]?*df.CTLWINDOW{null}**df.MAXRADIOS;
-
+var rct = [_]?*df.CTLWINDOW{null}**Dialogs.MAXRADIOS;
 var Setting:bool = true;
 
 pub fn SetRadioButton(db:*Dialogs.DBOX, ct:*df.CTLWINDOW) void {
@@ -53,16 +52,16 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c_uint) void {
 
         // ----- find the end of the radiobutton group ----
         i = @intCast(ct.*.dwnd.y);
-        while (i < df.MAXRADIOS and rct[i] != null) {
+        while (i < Dialogs.MAXRADIOS and rct[i] != null) {
             i += 1;
         }
         // ---- ignore everthing past the group ------
-        while (i < df.MAXRADIOS) {
+        while (i < Dialogs.MAXRADIOS) {
           rct[i] = null;
           i += 1;
         }
 
-        for (0..df.MAXRADIOS) |idx| {
+        for (0..Dialogs.MAXRADIOS) |idx| {
             if (rct[idx]) |ctl| {
                 const wason = ctl.*.setting;
                 ctl.*.setting = df.OFF;
