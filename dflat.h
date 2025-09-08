@@ -140,8 +140,8 @@ typedef struct window {
 	unsigned int MaxTextLength; /* maximum text length      */
     /* ---------------- dialog box fields ----------------- */
     int ReturnCode;        /* return code from a dialog box */
-//	BOOL Modal;		       /* True if a modeless dialog box */
-	CTLWINDOW *ct;		   /* control structure             */
+//	BOOL Modal;		       // True if a modeless dialog box
+//	CTLWINDOW *ct;		   /* control structure             
 	struct window *dfocus; /* control window that has focus */
 	/* -------------- popdownmenu fields ------------------ */
 	MENU *mnu;		/* points to menu structure             */
@@ -458,7 +458,7 @@ void SetScrollBars(WINDOW);
 //BOOL isControlOn(DBOX *, enum commands, int);
 void SetFocusCursor(WINDOW);
 
-#define GetControl(wnd)             (wnd->ct)
+//#define GetControl(wnd)             (wnd->ct)
 //#define GetDlgText(db, cmd)         GetDlgTextString(db, cmd, TEXT)
 //#define GetDlgTextBox(db, cmd)      GetDlgTextString(db, cmd, TEXTBOX)
 //#define GetEditBoxText(db, cmd)     GetDlgTextString(db, cmd, EDITBOX)

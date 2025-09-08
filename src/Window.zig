@@ -28,7 +28,8 @@ DeletedText:?[]u8 = null,    // for undo
 DeletedLength:usize = 0,     // Length of deleted field
 
 // ---------------- dialog box fields ----------------- 
-modal: bool = false, // True if a modeless dialog box
+modal: bool = false,       // True if a modeless dialog box
+ct:?*df.CTLWINDOW = null,  // control structure
 
 // ------------- picture box fields -------------------
 VectorList:?[]df.VECT = null, // list of picture box vectors
@@ -429,4 +430,9 @@ pub export fn set_NormalProc(wnd:df.WINDOW) void {
     if (get_zin(wnd)) |win| {
         win.wndproc = normal.NormalProc;
     }
+}
+
+// Accessories
+pub fn GetControl(self:*TopLevelFields) ?*df.CTLWINDOW {
+    return self.ct;
 }

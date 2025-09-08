@@ -85,8 +85,8 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c_uint) void {
 
 pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
-    const control = df.GetControl(wnd);
-    if (control) |ct| {
+//    const control = df.GetControl(wnd);
+    if (win.GetControl()) |ct| {
         switch (msg) {
             df.SETFOCUS => {
                 if (p1 == 0)

@@ -118,12 +118,17 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*Dialogs.DBOX, Modal:df.BOOL,
 fn CtlCreateWindowMsg(win:*Window) void {
     const wnd = win.win;
     if (wnd.*.extension) |extension| {
-        wnd.*.ct = @alignCast(@ptrCast(extension));
-
-        const ct = wnd.*.ct;
-        ct.*.wnd = wnd;
+//        wnd.*.ct = @alignCast(@ptrCast(extension));
+//        const ct = wnd.*.ct;
+//        ct.*.wnd = wnd;
+        win.ct = @alignCast(@ptrCast(extension));
+        if (win.ct) |ctl| {
+            const ct = ctl;
+            ct.*.wnd = wnd;
+        }
     } else {
-        wnd.*.ct = null;
+//        wnd.*.ct = null;
+        win.ct = null;
     }
     wnd.*.extension = null;
 }
@@ -147,10 +152,12 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.F1 => {
             if ((df.WindowMoving==0) and (df.WindowSizing==0)) {
-                const ct = df.GetControl(wnd);
+//                const ct = df.GetControl(wnd);
 //                if (df.DisplayHelp(wnd, ct.*.help) == 0) {
-                if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help)) == 0) {
-                    _ = q.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
+                if (win.GetControl()) |ct| {
+                    if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help)) == 0) {
+                        _ = q.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
+                    }
                 }
                 return true;
             }
@@ -207,18 +214,20 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 fn FixColors(win:*Window) void {
     const wnd = win.win;
-    const ct = wnd.*.ct;
-    if (ct.*.Class != df.BUTTON) {
-        if ((ct.*.Class != df.SPINBUTTON) and (ct.*.Class != df.COMBOBOX)) {
-            if ((ct.*.Class != df.EDITBOX) and (ct.*.Class != df.LISTBOX)) {
-                wnd.*.WindowColors[df.FRAME_COLOR][df.FG] =
-                                        df.GetParent(wnd).*.WindowColors[df.FRAME_COLOR][df.FG];
-                wnd.*.WindowColors[df.FRAME_COLOR][df.BG] =
-                                        df.GetParent(wnd).*.WindowColors[df.FRAME_COLOR][df.BG];
-                wnd.*.WindowColors[df.STD_COLOR][df.FG] =
-                                        df.GetParent(wnd).*.WindowColors[df.STD_COLOR][df.FG];
-                wnd.*.WindowColors[df.STD_COLOR][df.BG] =
-                                        df.GetParent(wnd).*.WindowColors[df.STD_COLOR][df.BG];
+//    const ct = wnd.*.ct;
+    if (win.GetControl()) |ct| {
+        if (ct.*.Class != df.BUTTON) {
+            if ((ct.*.Class != df.SPINBUTTON) and (ct.*.Class != df.COMBOBOX)) {
+                if ((ct.*.Class != df.EDITBOX) and (ct.*.Class != df.LISTBOX)) {
+                    wnd.*.WindowColors[df.FRAME_COLOR][df.FG] =
+                                            df.GetParent(wnd).*.WindowColors[df.FRAME_COLOR][df.FG];
+                    wnd.*.WindowColors[df.FRAME_COLOR][df.BG] =
+                                            df.GetParent(wnd).*.WindowColors[df.FRAME_COLOR][df.BG];
+                    wnd.*.WindowColors[df.STD_COLOR][df.FG] =
+                                            df.GetParent(wnd).*.WindowColors[df.STD_COLOR][df.FG];
+                    wnd.*.WindowColors[df.STD_COLOR][df.BG] =
+                                            df.GetParent(wnd).*.WindowColors[df.STD_COLOR][df.BG];
+                }
             }
         }
     }
@@ -247,8 +256,8 @@ fn SetScrollBars(win:*Window) void {
 fn CtlCloseWindowMsg(win:*Window) void {
     const wnd = win.win;
 //    CTLWINDOW *ct = GetControl(wnd);
-    const ct = df.GetControl(wnd);
-    if (ct != null)    {
+//    const ct = df.GetControl(wnd);
+    if (win.GetControl()) |ct| {
         ct.*.wnd = null;
         if (Window.GetParent(wnd).*.ReturnCode == df.ID_OK) {
             if (ct.*.Class == df.EDITBOX or ct.*.Class == df.COMBOBOX)  {
@@ -494,10 +503,12 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             _ = win.sendMessage(df.COMMAND, df.ID_CANCEL, 0);
         },
         df.F1 => {
-            const ct = df.GetControl(df.inFocus);
-            if (ct != null) {
-                if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help))>0) {
-                    return true;
+            if (Window.get_zin(df.inFocus)) |zin| {
+//                const ct = df.GetControl(df.inFocus);
+                if (zin.GetControl()) |ct| {
+                    if (helpbox.DisplayHelp(win, std.mem.span(ct.*.help))>0) {
+                        return true;
+                    }
                 }
             }
         },
@@ -1000,9 +1011,8 @@ pub export fn SetFocusCursor(wnd:df.WINDOW) void {
 }
 
 // Accessories
-pub fn GetControl(win:*Window) *df.CTLWINDOW {
-    const wnd = win.win;
-    return wnd.*.ct;
+pub fn GetControl(win:*Window) ?*df.CTLWINDOW {
+    return win.ct;
 }
 
 pub fn GetDlgText(db:*Dialogs.DBOX, cmd: c_uint) [*c]u8 {

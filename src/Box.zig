@@ -5,8 +5,8 @@ const Window = @import("Window.zig");
 
 pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
-    const ct:?*df.CTLWINDOW = df.GetControl(wnd);
-    if (ct) |ctl| {
+//    const ct:?*df.CTLWINDOW = df.GetControl(wnd);
+    if (win.GetControl()) |ct| {
         switch (msg) {
             df.SETFOCUS, df.PAINT => {
                 return false;
@@ -16,7 +16,7 @@ pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             },
             df.BORDER => {
                 const rtn = root.zBaseWndProc(df.BOX, win, msg, p1, p2);
-                if (ctl.*.itext) |txt| {
+                if (ct.*.itext) |txt| {
                     df.writeline(wnd, txt, 1, 0, df.FALSE);
                 }
                 return rtn;

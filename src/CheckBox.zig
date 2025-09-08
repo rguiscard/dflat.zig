@@ -8,8 +8,8 @@ const Dialogs = @import("Dialogs.zig");
 
 pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
-    const ct:?*df.CTLWINDOW = df.GetControl(wnd);
-    if (ct) |ctl| {
+//    const ct:?*df.CTLWINDOW = df.GetControl(wnd);
+    if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
                 if (p1 == 0)
@@ -26,7 +26,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             },
             df.PAINT => {
                 var cb = "[ ]";
-                if (ctl.*.setting > 0)
+                if (ct.*.setting > 0)
                     cb = "[X]";
                 _ = win.sendMessage(df.CLEARTEXT, 0, 0);
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(cb), 0);
@@ -35,13 +35,13 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             df.KEYBOARD => {
                 if (p1 == ' ') {
                     // fall through
-                    ctl.*.setting ^= df.ON;
+                    ct.*.setting ^= df.ON;
                     _ = win.sendMessage(df.PAINT, 0, 0);
                     return true;
                 }
             },
             df.LEFT_BUTTON => {
-                ctl.*.setting ^= df.ON;
+                ct.*.setting ^= df.ON;
                 _ = win.sendMessage(df.PAINT, 0, 0);
                 return true;
             },

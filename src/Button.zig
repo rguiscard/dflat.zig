@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const q = @import("Message.zig");
 const Window = @import("Window.zig");
+const DialogBox = @import("DialogBox.zig");
 
 fn PaintMsg(win: *Window, ct: *df.CTLWINDOW, rc: ?*df.RECT) void {
     const wnd = win.win;
@@ -64,9 +65,9 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *df.CTLWINDOW) void {
 }
 
 pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
-    const ct = df.GetControl(wnd);
-    if (ct != null)    {
+//    const wnd = win.win;
+//    const ct = df.GetControl(wnd);
+    if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
                 _ = root.zBaseWndProc(df.BUTTON, win, msg, p1, p2);

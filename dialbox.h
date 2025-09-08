@@ -13,21 +13,21 @@
 
 /* -------- dialog box and control window structure ------- */
 typedef struct  {
-    char *title;    /* window title         */
-    int x, y;       /* relative coordinates */
-    int h, w;       /* size                 */
+    char *title;    // window title
+    int x, y;       // relative coordinates
+    int h, w;       // size
 } DIALOGWINDOW;
 
 /* ------ one of these for each control window ------- */
 typedef struct {
     DIALOGWINDOW dwnd;
-    CLASS Class;    /* LISTBOX, BUTTON, etc */
-    char *itext;    /* initialized text     */
-    int command;    /* command code         */
-    char *help;     /* help mnemonic        */
-    BOOL isetting;  /* initially ON or OFF  */
-    BOOL setting;   /* ON or OFF            */
-    void *wnd;      /* window handle        */
+    CLASS Class;    // LISTBOX, BUTTON, etc
+    char *itext;    // initialized text
+    int command;    // command code
+    char *help;     // help mnemonic
+    BOOL isetting;  // initially ON or OFF
+    BOOL setting;   // ON or OFF
+    void *wnd;      // window handle
 } CTLWINDOW;
 
 /* --------- one of these for each dialog box ------- */

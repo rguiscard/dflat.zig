@@ -4,6 +4,7 @@ const df = @import("ImportC.zig").df;
 pub const MAXCONTROLS = 30;
 pub const MAXRADIOS = 20;
 
+// --------- one of these for each dialog box -------
 pub const DBOX = struct {
     HelpName:[]const u8,
     dwnd:df.DIALOGWINDOW,
