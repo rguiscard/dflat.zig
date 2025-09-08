@@ -31,11 +31,13 @@ typedef struct {
 } CTLWINDOW;
 
 /* --------- one of these for each dialog box ------- */
+/*
 typedef struct {
     char *HelpName;
     DIALOGWINDOW dwnd;
     CTLWINDOW ctl[MAXCONTROLS+1];
 } DBOX;
+*/
 
 /* -------- macros for dialog box resource compile -------- */
 /*

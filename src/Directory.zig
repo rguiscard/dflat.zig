@@ -2,13 +2,14 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const DialogBox = @import("DialogBox.zig");
+const Dialogs = @import("Dialogs.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 
 fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
     const wnd = win.win;
     if (wnd.*.extension) |ext| {
-        const dbox:*df.DBOX = @ptrCast(@alignCast(ext));
+        const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
         const control = DialogBox.FindCommand(dbox,
                         if (dirs) df.ID_DIRECTORY else df.ID_FILES, df.LISTBOX);
         if (control) |ct| {
@@ -30,7 +31,7 @@ pub fn BuildDirectoryList(win:*Window) void {
 pub fn BuildPathDisplay(win:*Window) void {
     const wnd = win.win;
     if (wnd.*.extension) |ext| {
-        const dbox:*df.DBOX = @ptrCast(@alignCast(ext));
+        const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
         const control = DialogBox.FindCommand(dbox, df.ID_PATH, df.TEXT);
         if (control) |ct| {
             const path = std.mem.zeroes([df.MAXPATH]u8);

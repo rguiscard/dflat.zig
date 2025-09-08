@@ -30,7 +30,7 @@ pub export fn LogMessages (wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 }
 
 pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const cwnd = df.ControlWindow(&Dialogs.Log, df.ID_LOGLIST);
+    const cwnd = DialogBox.ControlWindow(&Dialogs.Log, df.ID_LOGLIST);
     switch (msg)    {
         df.INITIATE_DIALOG => {
             if (Window.get_zin(cwnd)) |cwin| {

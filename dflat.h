@@ -451,10 +451,10 @@ void GetItemText(WINDOW, enum commands, char *, int);
 //void SetDlgTextString(DBOX *, enum commands, char *, CLASS);
 //BOOL CheckBoxSetting(DBOX *, enum commands);
 //CTLWINDOW *FindCommand(DBOX *, enum commands, int);
-WINDOW ControlWindow(const DBOX *, enum commands);
+///WINDOW ControlWindow(const DBOX *, enum commands);
 void SetScrollBars(WINDOW);
 //void SetRadioButton(DBOX *, CTLWINDOW *);
-void ControlSetting(DBOX *, enum commands, int, int);
+//void ControlSetting(DBOX *, enum commands, int, int);
 //BOOL isControlOn(DBOX *, enum commands, int);
 void SetFocusCursor(WINDOW);
 
@@ -470,8 +470,8 @@ void SetFocusCursor(WINDOW);
 //#define SetDlgTitle(db, ttl)        ((db)->dwnd.title = ttl)
 //#define SetCheckBox(db, cmd)        ControlSetting(db, cmd, CHECKBOX, ON)
 //#define ClearCheckBox(db, cmd)      ControlSetting(db, cmd, CHECKBOX, OFF)
-#define EnableButton(db, cmd)       ControlSetting(db, cmd, BUTTON, ON)
-#define DisableButton(db, cmd)      ControlSetting(db, cmd, BUTTON, OFF)
+//#define EnableButton(db, cmd)       ControlSetting(db, cmd, BUTTON, ON)
+//#define DisableButton(db, cmd)      ControlSetting(db, cmd, BUTTON, OFF)
 //#define ButtonEnabled(db, cmd)      isControlOn(db, cmd, BUTTON)
 //#define CheckBoxEnabled(db, cmd)    isControlOn(db, cmd, CHECKBOX)
 

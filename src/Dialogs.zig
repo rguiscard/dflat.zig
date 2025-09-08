@@ -1,7 +1,7 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 
-const DBOX = struct {
+pub const DBOX = struct {
     HelpName:[*c]u8,
     dwnd:df.DIALOGWINDOW,
     ctl:[df.MAXCONTROLS+1]df.CTLWINDOW,
@@ -10,7 +10,7 @@ const DBOX = struct {
 // This needs to be var because some values will change.
 
 // -------------- the File Open dialog box --------------- 
-pub export var FileOpen:df.DBOX = buildDialog(
+pub var FileOpen:DBOX = buildDialog(
     "FileOpen",
     .{"Open File", -1, -1, 19, 57},
     .{
@@ -28,7 +28,7 @@ pub export var FileOpen:df.DBOX = buildDialog(
 );
 
 // -------------- the Save As dialog box ---------------
-pub export var SaveAs:df.DBOX = buildDialog(
+pub var SaveAs:DBOX = buildDialog(
     "SaveAs",
     .{"Save As", -1, -1, 19, 57},
     .{
@@ -46,7 +46,7 @@ pub export var SaveAs:df.DBOX = buildDialog(
 );
 
 // -------------- the Search Text dialog box ---------------
-pub export var SearchTextDB:df.DBOX = buildDialog(
+pub var SearchTextDB:DBOX = buildDialog(
     "SearchTextDB",
     .{"Search Text", -1, -1, 9, 48},
     .{
@@ -61,7 +61,7 @@ pub export var SearchTextDB:df.DBOX = buildDialog(
 );
 
 // -------------- the Replace Text dialog box ---------------
-pub export var ReplaceTextDB:df.DBOX = buildDialog(
+pub var ReplaceTextDB:DBOX = buildDialog(
     "ReplaceTextDB",
     .{"Replace Text", -1, -1, 12, 50},
     .{
@@ -80,7 +80,7 @@ pub export var ReplaceTextDB:df.DBOX = buildDialog(
 );
 
 // -------------- generic message dialog box ---------------
-pub export var MsgBox:df.DBOX = buildDialog(
+pub var MsgBox:DBOX = buildDialog(
     "MsgBox",
     .{null, -1, -1, 0, 0},
     .{
@@ -91,7 +91,7 @@ pub export var MsgBox:df.DBOX = buildDialog(
 );
 
 // ----------- InputBox Dialog Box ------------
-pub export var InputBoxDB:df.DBOX = buildDialog(
+pub var InputBoxDB:DBOX = buildDialog(
     "InputBoxDB",
     .{null, -1, -1, 9, 0},
     .{
@@ -103,7 +103,7 @@ pub export var InputBoxDB:df.DBOX = buildDialog(
 );
 
 // ----------- SliderBox Dialog Box -------------
-pub export var SliderBoxDB:df.DBOX = buildDialog(
+pub var SliderBoxDB:DBOX = buildDialog(
     "SliderBoxDB",
     .{null, -1, -1, 9, 0},
     .{
@@ -114,7 +114,7 @@ pub export var SliderBoxDB:df.DBOX = buildDialog(
 );
 
 // ------------ Display dialog box --------------
-pub export var Display:df.DBOX = buildDialog(
+pub var Display:DBOX = buildDialog(
     "Display",
     .{"Display", -1, -1, 19, 35},
     .{
@@ -141,7 +141,7 @@ pub export var Display:df.DBOX = buildDialog(
 );
 
 // ------------ Windows dialog box -------------- 
-pub export var Windows:df.DBOX = buildDialog(
+pub var Windows:DBOX = buildDialog(
     "Windows",
     .{"Windows", -1, -1, 19, 24},
     .{
@@ -153,7 +153,7 @@ pub export var Windows:df.DBOX = buildDialog(
 );
 
 // ------------ Message Log dialog box --------------
-pub export var Log:df.DBOX = buildDialog(
+pub var Log:DBOX = buildDialog(
     "Log",
     .{"D-Flat Message Log", -1, -1,18,41},
     .{
@@ -169,7 +169,7 @@ pub export var Log:df.DBOX = buildDialog(
 
 // ------------ the Help window dialog box --------------
 // This need to be mutable because it will be modified at runtime.
-pub export var HelpBox:df.DBOX = buildDialog( // remove export after porting other c code
+pub var HelpBox:DBOX = buildDialog(
     "HelpBox",
     .{null, -1, -1,0,45},
     .{
@@ -181,8 +181,8 @@ pub export var HelpBox:df.DBOX = buildDialog( // remove export after porting oth
     },
 );
 
-fn buildDialog(comptime help:[]const u8, comptime window:anytype, comptime controls:anytype) df.DBOX {
-    var result:df.DBOX = undefined;
+fn buildDialog(comptime help:[]const u8, comptime window:anytype, comptime controls:anytype) DBOX {
+    var result:DBOX = undefined;
 
     var ttl: ?[]const u8 = undefined;
     var x: c_int = undefined;

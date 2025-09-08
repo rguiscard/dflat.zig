@@ -3,19 +3,6 @@
 #include "dflat.h"
 #include "htree.h"
 
-//extern DBOX HelpBox;
-
-/* -------- strings of D-Flat classes for calling default
-      help text collections -------- */
-/*
-char *ClassNames[] = {
-    #undef ClassDef
-    #define ClassDef(c,b,a) #c,
-    #include "classes.h"
-    NULL
-};
-*/
-
 #define MAXHEIGHT (SCREENHEIGHT-10)
 #define MAXHELPKEYWORDS 50  /* --- maximum keywords in a window --- */
 #define MAXHELPSTACK 100
@@ -28,7 +15,6 @@ char HelpFileName[9];
 int HelpStack[MAXHELPSTACK];
 int stacked;
 
-//void zReFocus(WINDOW wnd);
 int HelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2);
 int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
 int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
@@ -59,12 +45,6 @@ int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 /* ------------- KEYBOARD message ------------ */
 BOOL cHelpBoxKeyboardMsg(WINDOW wnd, WINDOW cwnd, PARAM p1)
 {
-//    WINDOW cwnd;
-//
-//    cwnd = ControlWindow(wnd->extension, ID_HELPTEXT);
-//    if (cwnd == NULL || inFocus != cwnd)
-//        return FALSE;
-
     // cwnd is not null, checked by zig side
     switch ((int)p1)    {
         case '\r':
@@ -302,90 +282,6 @@ void UnLoadHelpFile(void)
 	HelpTree = NULL;
 }
 
-/*
-void BuildHelpBox(WINDOW wnd)
-{
-    int offset, i;
-
-    // -- seek to the first line of the help text -- 
-    SeekHelpLine(ThisHelp->hptr, ThisHelp->bit);
-    // ----- read the title ----- 
-    GetHelpLine(hline);
-    hline[strlen(hline)-1] = '\0';
-	free(HelpBox.dwnd.title);
-    HelpBox.dwnd.title = DFmalloc(strlen(hline)+1);
-    strcpy(HelpBox.dwnd.title, hline);
-    // ----- set the height and width ----- 
-    HelpBox.dwnd.h = min(ThisHelp->hheight, MAXHEIGHT)+7;
-    HelpBox.dwnd.w = max(45, ThisHelp->hwidth+6);
-    // ------ position the help window ----- 
-	if (wnd != NULL)
-	    BestFit(wnd, &HelpBox.dwnd);
-    // ------- position the command buttons ------ 
-    HelpBox.ctl[0].dwnd.w = max(40, ThisHelp->hwidth+2);
-    HelpBox.ctl[0].dwnd.h =
-                min(ThisHelp->hheight, MAXHEIGHT)+2;
-    offset = (HelpBox.dwnd.w-40) / 2;
-	for (i = 1; i < 5; i++)    {
-   		HelpBox.ctl[i].dwnd.y =
-           		min(ThisHelp->hheight, MAXHEIGHT)+3;
-   		HelpBox.ctl[i].dwnd.x = (i-1) * 10 + offset;
-	}
-    // ---- disable ineffective buttons ---- 
-    if (ThisHelp->nexthlp == -1)
-        DisableButton(&HelpBox, ID_NEXT);
-	else
-        EnableButton(&HelpBox, ID_NEXT);
-    if (ThisHelp->prevhlp == -1)
-        DisableButton(&HelpBox, ID_PREV);
-	else 
-        EnableButton(&HelpBox, ID_PREV);
-}
-*/
-
-/* ----- select a new help window from its name ----- */
-/*
-void SelectHelp(WINDOW wnd, struct helps *newhelp, BOOL recall)
-{
-	if (newhelp != NULL)	{
-		int i, x, y;
-		SendMessage(wnd, HIDE_WINDOW, 0, 0);
-		if (recall && stacked < MAXHELPSTACK)
-			HelpStack[stacked++] = ThisHelp-FirstHelp;
-		ThisHelp = newhelp;
-		SendMessage(GetParent(wnd), DISPLAY_HELP, (PARAM) ThisHelp->hname, 0);
-		if (stacked)
-		    EnableButton(&HelpBox, ID_BACK);
-		else 
-		    DisableButton(&HelpBox, ID_BACK);
-		BuildHelpBox(NULL);
-		AddTitle(wnd, HelpBox.dwnd.title);
-		// --- reposition and resize the help window --- 
-		HelpBox.dwnd.x = (SCREENWIDTH-HelpBox.dwnd.w)/2;
-		HelpBox.dwnd.y = (SCREENHEIGHT-HelpBox.dwnd.h)/2;
-		SendMessage(wnd, MOVE, HelpBox.dwnd.x, HelpBox.dwnd.y);
-		SendMessage(wnd, SIZE,
-						HelpBox.dwnd.x + HelpBox.dwnd.w - 1,
-						HelpBox.dwnd.y + HelpBox.dwnd.h - 1);
-		// --- reposition the controls --- 
-	    for (i = 0; i < 5; i++)    {
-			WINDOW cwnd = HelpBox.ctl[i].wnd;
-			x = HelpBox.ctl[i].dwnd.x+GetClientLeft(wnd);
-			y = HelpBox.ctl[i].dwnd.y+GetClientTop(wnd);
-			SendMessage(cwnd, MOVE, x, y);
-			if (i == 0)	{
-				x += HelpBox.ctl[i].dwnd.w - 1;
-				y += HelpBox.ctl[i].dwnd.h - 1;
-				SendMessage(cwnd, SIZE, x, y);
-			}
-		}
-		// --- read the help text into the help window --- 
-		ReadHelp(wnd);
-		ReFocus(wnd);
-		SendMessage(wnd, SHOW_WINDOW, 0, 0);
-	}
-}
-*/
 /* ---- strip tildes from the help name ---- */
 static void StripTildes(char *fh, char *hp)
 {

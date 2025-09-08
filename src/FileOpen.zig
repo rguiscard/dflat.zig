@@ -53,7 +53,7 @@ pub fn SaveAsDialogBox(Fspec:[]const u8, Sspec:?[]const u8, Fname:[*c]u8) bool {
 }
 
 // --------- generic file open ----------
-pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *df.DBOX) bool {
+pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *Dialogs.DBOX) bool {
     // Keep a copy of Fspec, Sspec; Fname is returned value
     set_fileSpec(Fspec);
     set_srchSpec(Sspec);
@@ -74,10 +74,10 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch (msg) {
         df.CREATE_WINDOW => {
             const rtn = root.zDefaultWndProc(win, msg, p1, p2);
-            var db:*df.DBOX = undefined;
+            var db:*Dialogs.DBOX = undefined;
             if (wnd.*.extension) |extension| {
                 db = @ptrCast(@alignCast(extension));
-                const cwnd = df.ControlWindow(db, df.ID_FILENAME);
+                const cwnd = DialogBox.ControlWindow(db, df.ID_FILENAME);
                 _ = df.SendMessage(cwnd, df.SETTEXTLENGTH, 64, 0);
             }
             return rtn;
@@ -100,11 +100,11 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                         }
                         if (IncompleteFilename(&fName)) {
                             // --- no file name yet ---
-                            var db:*df.DBOX = undefined;
+                            var db:*Dialogs.DBOX = undefined;
                             if (wnd.*.extension) |extension| {
                                 db = @ptrCast(@alignCast(extension));
                             }
-                            const cwnd = df.ControlWindow(db, df.ID_FILENAME);
+                            const cwnd = DialogBox.ControlWindow(db, df.ID_FILENAME);
                             set_fileSpec(&fName);
                             set_srchSpec(&fName);
                             InitDlgBox(win);

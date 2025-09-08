@@ -4,18 +4,19 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const DialogBox = @import("DialogBox.zig");
+const Dialogs = @import("Dialogs.zig");
 
 var rct = [_]?*df.CTLWINDOW{null}**df.MAXRADIOS;
 
 var Setting:bool = true;
 
-pub fn SetRadioButton(db:*df.DBOX, ct:*df.CTLWINDOW) void {
+pub fn SetRadioButton(db:*Dialogs.DBOX, ct:*df.CTLWINDOW) void {
     Setting = false;
     PushRadioButton(db, @intCast(ct.*.command));
     Setting = true;
 }
 
-pub fn PushRadioButton(db:*df.DBOX, cmd:c_uint) void {
+pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c_uint) void {
     const control = DialogBox.FindCommand(db, cmd, df.RADIOBUTTON);
     if (control) |ct| {
         // --- clear all the radio buttons
@@ -109,14 +110,14 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
                 if (p1 == ' ') {
                     // fall through
                     if (Window.GetParent(wnd).*.extension) |extension| {
-                        const db:*df.DBOX = @alignCast(@ptrCast(extension));
+                        const db:*Dialogs.DBOX = @alignCast(@ptrCast(extension));
                         SetRadioButton(db, ct);
                     }
                 }
             },
             df.LEFT_BUTTON => {
                 if (Window.GetParent(wnd).*.extension) |extension| {
-                    const db:*df.DBOX = @alignCast(@ptrCast(extension));
+                    const db:*Dialogs.DBOX = @alignCast(@ptrCast(extension));
                     SetRadioButton(db, ct);
                 }
             },
@@ -127,7 +128,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
     return root.zBaseWndProc(df.RADIOBUTTON, win, msg, p1, p2);
 }
 
-pub fn RadioButtonSetting(db:*df.DBOX, cmd:c_uint) bool {
+pub fn RadioButtonSetting(db:*Dialogs.DBOX, cmd:c_uint) bool {
     const ctl = DialogBox.FindCommand(db, cmd, df.RADIOBUTTON);
     const rtn = if (ctl) |ct| (if (ct.*.wnd != null) (ct.*.setting==df.ON) else (ct.*.isetting==df.ON)) else false;
     return rtn;

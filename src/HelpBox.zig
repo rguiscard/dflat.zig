@@ -24,8 +24,8 @@ fn CreateWindowMsg(win:*Window) void {
 
 // -------- read the help text into the editbox -------
 pub export fn ReadHelp(wnd:df.WINDOW) callconv(.c) void {
-    const dbox:*df.DBOX = @ptrCast(@alignCast(wnd.*.extension));
-    const cwnd = df.ControlWindow(dbox, df.ID_HELPTEXT);
+    const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(wnd.*.extension));
+    const cwnd = DialogBox.ControlWindow(dbox, df.ID_HELPTEXT);
     if (cwnd == null)
         return;
     if (Window.get_zin(cwnd)) |cwin| {
@@ -71,7 +71,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
 fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
     const wnd = win.win;
     if (wnd.*.extension) |ext| {
-        const dbox:*df.DBOX = @ptrCast(@alignCast(ext));
+        const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
         const ctl_wnd = DialogBox.ControlWindow(dbox, df.ID_HELPTEXT);
         if (ctl_wnd) |cwnd| {
             if (df.inFocus == cwnd) {
@@ -169,7 +169,7 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) c_int {
         df.helpfp = df.OpenHelpFile(&df.HelpFileName, "rb");
         if (df.helpfp) |_| {
             BuildHelpBox(win);
-            df.DisableButton(&Dialogs.HelpBox, df.ID_BACK);
+            DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_BACK);
 
             // ------- display the help window -----
             _ = DialogBox.DialogBox(null, &Dialogs.HelpBox, df.TRUE, HelpBoxProc);

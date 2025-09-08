@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const DialogBox = @import("DialogBox.zig");
+const Dialogs = @import("Dialogs.zig");
 
 pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -52,7 +53,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
 }
 
 
-pub fn CheckBoxSetting(db:*df.DBOX, cmd:c_uint) c_uint {
+pub fn CheckBoxSetting(db:*Dialogs.DBOX, cmd:c_uint) c_uint {
     const ct:?*df.CTLWINDOW = DialogBox.FindCommand(db, @intCast(cmd), df.CHECKBOX);
     if (ct) |ctl| {
         if (ctl.*.wnd) |_| {
