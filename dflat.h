@@ -442,13 +442,13 @@ BOOL DialogBox(WINDOW, DBOX *, BOOL,
 //BOOL OpenFileDialogBox(char *, char *);
 //BOOL SaveAsDialogBox(char *, char *, char *);
 void GetDlgListText(WINDOW, char *, enum commands);
-BOOL RadioButtonSetting(DBOX *, enum commands);
+//BOOL RadioButtonSetting(DBOX *, enum commands);
 //void PushRadioButton(DBOX *, enum commands, BOOL setting);
 void PutItemText(WINDOW, enum commands, char *);
 void PutComboListText(WINDOW, enum commands, char *);
 void GetItemText(WINDOW, enum commands, char *, int);
 char *GetDlgTextString(DBOX *, enum commands, CLASS);
-//void SetDlgTextString(DBOX *, enum commands, char *, CLASS);
+void SetDlgTextString(DBOX *, enum commands, char *, CLASS);
 BOOL CheckBoxSetting(DBOX *, enum commands);
 CTLWINDOW *FindCommand(DBOX *, enum commands, int);
 WINDOW ControlWindow(const DBOX *, enum commands);

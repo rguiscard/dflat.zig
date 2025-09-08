@@ -2,11 +2,11 @@
 
 #include "dflat.h"
 
-extern DBOX MsgBox;
-extern DBOX InputBoxDB;
-WINDOW CancelWnd;
+//extern DBOX MsgBox;
+//extern DBOX InputBoxDB;
+//WINDOW CancelWnd;
 
-static int ReturnValue;
+//static int ReturnValue;
 /* does nothing
 void CloseCancelBox(void)
 {

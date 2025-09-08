@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
+const dir = @import("Directory.zig");
 
 var _fileSpec:?[:0]const u8 = null;
 var _srchSpec:?[:0]const u8 = null;
@@ -167,18 +168,19 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
 fn InitDlgBox(win:*Window) void {
     const wnd = win.win;
     var sspec:[*c]u8 = null;
+    var rtn = df.FALSE;
     if (_fileSpec) |f| {
         df.PutItemText(wnd, df.ID_FILENAME, @constCast(f.ptr));
     }
     if (_srchSpec) |s| {
         sspec = @constCast(s.ptr);
+        rtn = dir.BuildFileList(win, s);
     }
 
-    const rtn = df.BuildFileList(wnd, sspec);
     if (rtn == df.TRUE) {
-        df.BuildDirectoryList(wnd);
+        dir.BuildDirectoryList(win);
     }
-    df.BuildPathDisplay(wnd);
+    dir.BuildPathDisplay(win);
 }
 
 fn IncompleteFilename(s: *[df.MAXPATH]u8) bool {
