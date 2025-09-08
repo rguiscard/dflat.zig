@@ -8,6 +8,7 @@ const q = @import("Message.zig");
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
 const Normal = @import("Normal.zig");
+const radio = @import("RadioButton.zig");
 
 var SysMenuOpen = false;
 const MAXCONTROLS = 30;
@@ -873,7 +874,7 @@ pub fn dbShortcutKeys(db:*df.DBOX, ky: c_int) bool {
                             ct = AssociatedControl(db, @intCast(ct.*.command));
                         }
                         if (ct.*.Class == df.RADIOBUTTON) {
-                            df.SetRadioButton(db, ct);
+                            radio.SetRadioButton(db, ct);
                         } else if (ct.*.Class == df.CHECKBOX) {
                             ct.*.setting ^= df.ON;
                             _ = q.SendMessage(cwnd, df.PAINT, 0, 0);
@@ -1032,3 +1033,40 @@ pub fn SetEditBoxText(db:*df.DBOX, cmd: c_uint, s:[*c]u8) void {
 pub fn SetComboBoxText(db:*df.DBOX, cmd: c_uint, s:[*c]u8) void {
     SetDlgTextString(db, cmd, s, df.COMBOBOX);
 }
+
+pub fn SetDlgTitle(db:*df.DBOX, ttl:[*c]u8) void {
+    // currently not in use
+    db.*.dwnd.title = ttl;
+}
+
+pub fn SetCheckBox(db:*df.DBOX, cmd: c_uint) void {
+    ControlSetting(db, cmd, df.CHECKBOX, df.ON);
+}
+
+pub fn ClearCheckBox(db:*df.DBOX, cmd: c_uint) void {
+    ControlSetting(db, cmd, df.CHECKBOX, df.OFF);
+}
+
+pub fn EnableButton(db:*df.DBOX, cmd: c_uint) void {
+    ControlSetting(db, cmd, df.BUTTON, df.ON);
+}
+
+pub fn DisableButton(db:*df.DBOX, cmd: c_uint) void {
+    ControlSetting(db, cmd, df.BUTTON, df.OFF);
+}
+
+pub fn ButtonEnabled(db:*df.DBOX, cmd: c_uint) df.BOOL {
+    return isControlOn(db, cmd, df.BUTTON);
+}
+
+pub fn CheckBoxEnabled(db:*df.DBOX, cmd: c_uint) df.BOOL {
+    return isControlOn(db, cmd, df.CHECKBOX);
+}
+
+//#define SetDlgTitle(db, ttl)        ((db)->dwnd.title = ttl)
+//#define SetCheckBox(db, cmd)        ControlSetting(db, cmd, CHECKBOX, ON)
+//#define ClearCheckBox(db, cmd)      ControlSetting(db, cmd, CHECKBOX, OFF)
+//#define EnableButton(db, cmd)       ControlSetting(db, cmd, BUTTON, ON)
+//#define DisableButton(db, cmd)      ControlSetting(db, cmd, BUTTON, OFF)
+//#define ButtonEnabled(db, cmd)      isControlOn(db, cmd, BUTTON)
+//#define CheckBoxEnabled(db, cmd)    isControlOn(db, cmd, CHECKBOX)

@@ -35,16 +35,16 @@ fn CreateWindowMsg(win: *Window) bool {
 
     // INCLUDE_WINDOWOPTIONS
     if (df.cfg.Border > 0) {
-        df.SetCheckBox(&Dialogs.Display, df.ID_BORDER);
+        DialogBox.SetCheckBox(&Dialogs.Display, df.ID_BORDER);
     }
     if (df.cfg.Title > 0) {
-        df.SetCheckBox(&Dialogs.Display, df.ID_TITLE);
+        DialogBox.SetCheckBox(&Dialogs.Display, df.ID_TITLE);
     }
     if (df.cfg.StatusBar > 0) {
-        df.SetCheckBox(&Dialogs.Display, df.ID_STATUSBAR);
+        DialogBox.SetCheckBox(&Dialogs.Display, df.ID_STATUSBAR);
     }
     if (df.cfg.Texture > 0) {
-        df.SetCheckBox(&Dialogs.Display, df.ID_TEXTURE);
+        DialogBox.SetCheckBox(&Dialogs.Display, df.ID_TEXTURE);
     }
     if (df.cfg.mono == 1) {
         radio.PushRadioButton(&Dialogs.Display, df.ID_MONO);
@@ -526,9 +526,9 @@ fn DoWindowColors(wnd: df.WINDOW) void {
 
 // ----- set up colors for the application window ------
 fn SelectColors(win: *Window) void {
-    if (radio.RadioButtonSetting(&Dialogs.Display, df.ID_MONO)>0) {
+    if (radio.RadioButtonSetting(&Dialogs.Display, df.ID_MONO)) {
         df.cfg.mono = 1;   // mono
-    } else if (radio.RadioButtonSetting(&Dialogs.Display, df.ID_REVERSE)>0) {
+    } else if (radio.RadioButtonSetting(&Dialogs.Display, df.ID_REVERSE)) {
         df.cfg.mono = 2;   // mono reverse
     } else {
         df.cfg.mono = 0;   // color

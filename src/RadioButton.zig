@@ -9,14 +9,13 @@ var rct = [_]?*df.CTLWINDOW{null}**df.MAXRADIOS;
 
 var Setting:bool = true;
 
-pub export fn SetRadioButton(db:*df.DBOX, ct:*df.CTLWINDOW) callconv(.c) void {
+pub fn SetRadioButton(db:*df.DBOX, ct:*df.CTLWINDOW) void {
     Setting = false;
     PushRadioButton(db, @intCast(ct.*.command));
     Setting = true;
 }
 
-pub export fn PushRadioButton(db:*df.DBOX, cmd:c_uint) void {
-    const setting = if (Setting) df.TRUE else df.FALSE;
+pub fn PushRadioButton(db:*df.DBOX, cmd:c_uint) void {
     const control = DialogBox.FindCommand(db, cmd, df.RADIOBUTTON);
     if (control) |ct| {
         // --- clear all the radio buttons
@@ -66,7 +65,7 @@ pub export fn PushRadioButton(db:*df.DBOX, cmd:c_uint) void {
             if (rct[idx]) |ctl| {
                 const wason = ctl.*.setting;
                 ctl.*.setting = df.OFF;
-                if (setting>0) {
+                if (Setting) {
                     ctl.*.isetting = df.OFF;
                 }
                 if (wason > 0) {
@@ -77,7 +76,7 @@ pub export fn PushRadioButton(db:*df.DBOX, cmd:c_uint) void {
         }
         // ----- set the specified radio button on -----
         ct.*.setting = df.ON;
-        if (setting>0)
+        if (Setting)
             ct.*.isetting = df.ON;
         const ctwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
         _ = q.SendMessage(ctwnd, df.PAINT, 0, 0);
@@ -111,14 +110,14 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
                     // fall through
                     if (Window.GetParent(wnd).*.extension) |extension| {
                         const db:*df.DBOX = @alignCast(@ptrCast(extension));
-                        df.SetRadioButton(db, ct);
+                        SetRadioButton(db, ct);
                     }
                 }
             },
             df.LEFT_BUTTON => {
                 if (Window.GetParent(wnd).*.extension) |extension| {
                     const db:*df.DBOX = @alignCast(@ptrCast(extension));
-                    df.SetRadioButton(db, ct);
+                    SetRadioButton(db, ct);
                 }
             },
             else => { 
@@ -128,8 +127,9 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
     return root.zBaseWndProc(df.RADIOBUTTON, win, msg, p1, p2);
 }
 
-pub export fn RadioButtonSetting(db:*df.DBOX, cmd:c_uint) callconv(.c) df.BOOL {
+pub fn RadioButtonSetting(db:*df.DBOX, cmd:c_uint) bool {
     const ctl = DialogBox.FindCommand(db, cmd, df.RADIOBUTTON);
     const rtn = if (ctl) |ct| (if (ct.*.wnd != null) (ct.*.setting==df.ON) else (ct.*.isetting==df.ON)) else false;
-    return if (rtn) df.TRUE else df.FALSE;
+    return rtn;
+//    return if (rtn) df.TRUE else df.FALSE;
 }

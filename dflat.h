@@ -436,8 +436,8 @@ int MsgHeight(char *);
 int MsgWidth(char *);
 
 /* ------------- dialog box prototypes -------------- */
-BOOL DialogBox(WINDOW, DBOX *, BOOL,
-       int (*)(struct window *, enum messages, PARAM, PARAM));
+//BOOL DialogBox(WINDOW, DBOX *, BOOL,
+//       int (*)(struct window *, enum messages, PARAM, PARAM));
 //void ClearDialogBoxes(void);
 //BOOL OpenFileDialogBox(char *, char *);
 //BOOL SaveAsDialogBox(char *, char *, char *);
@@ -453,9 +453,9 @@ void GetItemText(WINDOW, enum commands, char *, int);
 //CTLWINDOW *FindCommand(DBOX *, enum commands, int);
 WINDOW ControlWindow(const DBOX *, enum commands);
 void SetScrollBars(WINDOW);
-void SetRadioButton(DBOX *, CTLWINDOW *);
+//void SetRadioButton(DBOX *, CTLWINDOW *);
 void ControlSetting(DBOX *, enum commands, int, int);
-BOOL isControlOn(DBOX *, enum commands, int);
+//BOOL isControlOn(DBOX *, enum commands, int);
 void SetFocusCursor(WINDOW);
 
 #define GetControl(wnd)             (wnd->ct)
@@ -467,13 +467,13 @@ void SetFocusCursor(WINDOW);
 //#define SetDlgTextBox(db, cmd, s)   SetDlgTextString(db, cmd, s, TEXTBOX)
 //#define SetEditBoxText(db, cmd, s)  SetDlgTextString(db, cmd, s, EDITBOX)
 //#define SetComboBoxText(db, cmd, s) SetDlgTextString(db, cmd, s, COMBOBOX)
-#define SetDlgTitle(db, ttl)        ((db)->dwnd.title = ttl)
-#define SetCheckBox(db, cmd)        ControlSetting(db, cmd, CHECKBOX, ON)
-#define ClearCheckBox(db, cmd)      ControlSetting(db, cmd, CHECKBOX, OFF)
+//#define SetDlgTitle(db, ttl)        ((db)->dwnd.title = ttl)
+//#define SetCheckBox(db, cmd)        ControlSetting(db, cmd, CHECKBOX, ON)
+//#define ClearCheckBox(db, cmd)      ControlSetting(db, cmd, CHECKBOX, OFF)
 #define EnableButton(db, cmd)       ControlSetting(db, cmd, BUTTON, ON)
 #define DisableButton(db, cmd)      ControlSetting(db, cmd, BUTTON, OFF)
-#define ButtonEnabled(db, cmd)      isControlOn(db, cmd, BUTTON)
-#define CheckBoxEnabled(db, cmd)    isControlOn(db, cmd, CHECKBOX)
+//#define ButtonEnabled(db, cmd)      isControlOn(db, cmd, BUTTON)
+//#define CheckBoxEnabled(db, cmd)    isControlOn(db, cmd, CHECKBOX)
 
 /* ---- types of vectors that can be in a picture box ------- */
 enum VectTypes {VECTOR, SOLIDBAR, HEAVYBAR, CROSSBAR, LIGHTBAR};
