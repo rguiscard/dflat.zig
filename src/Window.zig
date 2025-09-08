@@ -5,6 +5,7 @@ const Klass = @import("Classes.zig");
 const WndProc = @import("WndProc.zig");
 const normal = @import("Normal.zig");
 const q = @import("Message.zig");
+const Dialogs = @import("Dialogs.zig");
 
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
@@ -29,7 +30,7 @@ DeletedLength:usize = 0,     // Length of deleted field
 
 // ---------------- dialog box fields ----------------- 
 modal: bool = false,       // True if a modeless dialog box
-ct:?*df.CTLWINDOW = null,  // control structure
+ct:?*Dialogs.CTLWINDOW = null,  // control structure
 
 // ------------- picture box fields -------------------
 VectorList:?[]df.VECT = null, // list of picture box vectors
@@ -433,6 +434,6 @@ pub export fn set_NormalProc(wnd:df.WINDOW) void {
 }
 
 // Accessories
-pub fn GetControl(self:*TopLevelFields) ?*df.CTLWINDOW {
+pub fn GetControl(self:*TopLevelFields) ?*Dialogs.CTLWINDOW {
     return self.ct;
 }

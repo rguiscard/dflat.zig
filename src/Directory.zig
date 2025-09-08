@@ -13,7 +13,9 @@ fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
         const control = DialogBox.FindCommand(dbox,
                         if (dirs) df.ID_DIRECTORY else df.ID_FILES, df.LISTBOX);
         if (control) |ct| {
-            _ = df.cBuildList(ct, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
+            const lwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+//            _ = df.cBuildList(ct, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
+            _ = df.cBuildList(lwnd, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
         }
     }
     return true;

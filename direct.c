@@ -110,18 +110,18 @@ static int dircmp(const void *c1, const void *c2)
     return strcasecmp(*(char **)c1, *(char **)c2);
 }
 
-void cBuildList(CTLWINDOW *ct, char *fspec, BOOL dirs)
+void cBuildList(WINDOW lwnd, char *fspec, BOOL dirs)
 {
 	// ct always exists. it is checked on zig side.
 	// make this function private after porting.
-        WINDOW lwnd;
+//        WINDOW lwnd;
         char **dirlist = NULL;
         DIR *dirp;
         int i = 0, j;
         struct dirent *dp;
         struct stat sb;
 
-        lwnd = ct->wnd;
+//        lwnd = ct->wnd;
         SendMessage(lwnd, CLEARTEXT, 0, 0);
 
         dirp = opendir(".");

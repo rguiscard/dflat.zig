@@ -4,8 +4,9 @@ const root = @import("root.zig");
 const q = @import("Message.zig");
 const Window = @import("Window.zig");
 const DialogBox = @import("DialogBox.zig");
+const Dialogs = @import("Dialogs.zig");
 
-fn PaintMsg(win: *Window, ct: *df.CTLWINDOW, rc: ?*df.RECT) void {
+fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
     const wnd = win.win;
     if (df.isVisible(wnd) > 0) {
         if (win.TestAttribute(df.SHADOW) and (df.cfg.mono == 0)) {
@@ -39,7 +40,7 @@ fn PaintMsg(win: *Window, ct: *df.CTLWINDOW, rc: ?*df.RECT) void {
     }
 }
 
-fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *df.CTLWINDOW) void {
+fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     const wnd = win.win;
     if (df.cfg.mono == 0) {
         // --------- draw a pushed button --------

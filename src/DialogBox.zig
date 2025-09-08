@@ -396,7 +396,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
     rtn = root.zBaseWndProc(df.DIALOG, win, df.CREATE_WINDOW, p1, p2);
 
     for(0..MAXCONTROLS) |i| {
-        const ctl:*df.CTLWINDOW = @ptrCast(&db.*.ctl[i]);
+        const ctl:*Dialogs.CTLWINDOW = @ptrCast(&db.*.ctl[i]);
         if (ctl.*.Class == 0) { // Class as 0 is used as end of array
             break;
         }
@@ -790,7 +790,7 @@ fn inFocusCommand(db:?*Dialogs.DBOX) c_int {
                 break;
             const w:df.WINDOW = @alignCast(@ptrCast(ctl.*.wnd));
             if (w == df.inFocus) {
-                return ctl.*.command;
+                return @intCast(ctl.*.command);
             }
         }
     }
@@ -798,7 +798,7 @@ fn inFocusCommand(db:?*Dialogs.DBOX) c_int {
 }
 
 // -------- find a specified control structure -------
-pub fn FindCommand(db:*Dialogs.DBOX, cmd:c_uint, Class:df.CLASS) ?*df.CTLWINDOW {
+pub fn FindCommand(db:*Dialogs.DBOX, cmd:c_uint, Class:df.CLASS) ?*Dialogs.CTLWINDOW {
     for(&db.*.ctl) |*ct| {
         if (ct.*.Class == 0)
             break;
@@ -824,7 +824,7 @@ pub fn ControlWindow(db:*Dialogs.DBOX, cmd:c_uint) df.WINDOW {
 }
 
 // --- return a pointer to the control structure that matches a window ---
-pub export fn WindowControl(db:*Dialogs.DBOX, wnd:df.WINDOW) ?*df.CTLWINDOW {
+pub export fn WindowControl(db:*Dialogs.DBOX, wnd:df.WINDOW) ?*Dialogs.CTLWINDOW {
     for(&db.*.ctl) |*ct| {
         const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
         if (ct.*.Class == 0)
@@ -853,7 +853,7 @@ pub export fn isControlOn(db:*Dialogs.DBOX, cmd: c_uint, Class: c_int) df.BOOL {
 }
 
 // -- find control structure associated with text control --
-fn AssociatedControl(db:*Dialogs.DBOX, Tcmd: c_uint) *df.CTLWINDOW {
+fn AssociatedControl(db:*Dialogs.DBOX, Tcmd: c_uint) *Dialogs.CTLWINDOW {
     for(&db.*.ctl) |*ct| {
         if (ct.*.Class == 0)
             break;
@@ -1011,7 +1011,7 @@ pub export fn SetFocusCursor(wnd:df.WINDOW) void {
 }
 
 // Accessories
-pub fn GetControl(win:*Window) ?*df.CTLWINDOW {
+pub fn GetControl(win:*Window) ?*Dialogs.CTLWINDOW {
     return win.ct;
 }
 

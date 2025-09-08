@@ -6,10 +6,10 @@ const q = @import("Message.zig");
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
-var rct = [_]?*df.CTLWINDOW{null}**Dialogs.MAXRADIOS;
+var rct = [_]?*Dialogs.CTLWINDOW{null}**Dialogs.MAXRADIOS;
 var Setting:bool = true;
 
-pub fn SetRadioButton(db:*Dialogs.DBOX, ct:*df.CTLWINDOW) void {
+pub fn SetRadioButton(db:*Dialogs.DBOX, ct:*Dialogs.CTLWINDOW) void {
     Setting = false;
     PushRadioButton(db, @intCast(ct.*.command));
     Setting = true;

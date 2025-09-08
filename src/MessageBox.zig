@@ -66,8 +66,8 @@ fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, message:[*c]u8, buttonct: c_int
     mBox.ctl[0].itext = m;
     mBox.ctl[1].itext = if (button1) |b| @constCast(b.ptr) else null;
     mBox.ctl[2].itext = if (button2) |b| @constCast(b.ptr) else null;
-    mBox.ctl[1].command = c1;
-    mBox.ctl[2].command = c2;
+    mBox.ctl[1].command = @intCast(c1);
+    mBox.ctl[2].command = @intCast(c2);
     mBox.ctl[1].isetting = df.ON;
     mBox.ctl[2].isetting = df.ON;
 

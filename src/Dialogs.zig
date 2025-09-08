@@ -4,11 +4,23 @@ const df = @import("ImportC.zig").df;
 pub const MAXCONTROLS = 30;
 pub const MAXRADIOS = 20;
 
+// ------ one of these for each control window -------
+pub const CTLWINDOW = struct {
+    dwnd:df.DIALOGWINDOW = .{.title = null, .x = 0, .y = 0, .h = 0, .w = 0},
+    Class:df.CLASS = 0,         // LISTBOX, BUTTON, etc
+    itext:[*c]u8 = null,        // initialized text
+    command:c_uint = 0,         // command code
+    help:[*c]u8 = null,         // help mnemonic
+    isetting:df.BOOL = df.OFF,  // initially ON or OFF
+    setting:df.BOOL = df.OFF,   // ON or OFF
+    wnd:?*anyopaque = null,     // window handle
+};
+
 // --------- one of these for each dialog box -------
 pub const DBOX = struct {
     HelpName:[]const u8,
     dwnd:df.DIALOGWINDOW,
-    ctl:[MAXCONTROLS+1]df.CTLWINDOW,
+    ctl:[MAXCONTROLS+1]CTLWINDOW,
 };
 
 // This needs to be var because some values will change.
@@ -210,8 +222,8 @@ fn buildDialog(comptime help:[]const u8, comptime window:anytype, comptime contr
     return result;
 }
 
-fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]df.CTLWINDOW {
-    var result = [_]df.CTLWINDOW{.{.Class = 0}}**(MAXCONTROLS+1);
+fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
+    var result = [_]CTLWINDOW{.{.Class = 0}}**(MAXCONTROLS+1);
     inline for(controls, 0..) |control, idx| {
         var ty: c_int = undefined ;
         var tx: ?[]const u8 = undefined;

@@ -1,5 +1,5 @@
 // direct.c
-void cBuildList(CTLWINDOW *, char *, BOOL);
+void cBuildList(WINDOW, char *, BOOL);
 
 // message.c
 void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my);
