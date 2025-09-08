@@ -8,14 +8,14 @@ extern BOOL AllocTesting;
 extern jmp_buf AllocError;
 
 // dialbox.c
-void FirstFocus(DBOX *);
-void NextFocus(DBOX *db);
-void PrevFocus(DBOX *db);
-BOOL dbShortcutKeys(DBOX *, int);
-int inFocusCommand(DBOX *);
-void FixColors(WINDOW);
-void SetScrollBars(WINDOW);
-void CtlCloseWindowMsg(WINDOW);
+//void FirstFocus(DBOX *);
+//void NextFocus(DBOX *db);
+//void PrevFocus(DBOX *db);
+//BOOL dbShortcutKeys(DBOX *, int);
+//int inFocusCommand(DBOX *);
+//void FixColors(WINDOW);
+//void SetScrollBars(WINDOW);
+//void CtlCloseWindowMsg(WINDOW);
 
 // normal.c
 extern struct window dwnd;
@@ -112,4 +112,4 @@ void SeekHelpLine(long, int);
 void *GetHelpLine(char *);
 
 // radio.c
-void cPushRadioButton(DBOX *, enum commands, BOOL);
+//void cPushRadioButton(DBOX *, enum commands, BOOL);

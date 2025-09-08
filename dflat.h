@@ -490,7 +490,7 @@ void UnLoadHelpFile(void);
 //BOOL DisplayHelp(WINDOW, char *);
 char *HelpComment(char *);
 
-extern char *ClassNames[];
+//extern char *ClassNames[];
 
 void BuildFileName(char *path, const char *fn, const char *ext);
 

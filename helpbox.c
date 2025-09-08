@@ -3,16 +3,18 @@
 #include "dflat.h"
 #include "htree.h"
 
-extern DBOX HelpBox;
+//extern DBOX HelpBox;
 
 /* -------- strings of D-Flat classes for calling default
       help text collections -------- */
+/*
 char *ClassNames[] = {
     #undef ClassDef
     #define ClassDef(c,b,a) #c,
     #include "classes.h"
     NULL
 };
+*/
 
 #define MAXHEIGHT (SCREENHEIGHT-10)
 #define MAXHELPKEYWORDS 50  /* --- maximum keywords in a window --- */

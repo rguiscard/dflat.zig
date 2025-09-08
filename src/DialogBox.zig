@@ -99,7 +99,7 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*df.DBOX, Modal:df.BOOL,
 
     _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
     win.*.modal = (Modal == df.TRUE);
-    df.FirstFocus(db);
+    FirstFocus(db);
     q.PostMessage(DialogWnd, df.INITIATE_DIALOG, 0, 0);
     if (Modal == df.TRUE) {
         _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
@@ -474,13 +474,13 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         df.SHIFT_HT,
         df.BS,
         df.UP => {
-            df.PrevFocus(db);
+            PrevFocus(db);
         },
         df.ALT_F6,
         '\t',
         df.FWD,
         df.DN => {
-            df.NextFocus(db);
+            NextFocus(db);
         },
         ' ' => {
             if (((p2 & df.ALTKEY)>0) and win.TestAttribute(df.CONTROLBOX)) {
@@ -893,24 +893,27 @@ pub fn dbShortcutKeys(db:*df.DBOX, ky: c_int) bool {
 }
 
 // ---- change the focus to the first control ---
-pub export fn FirstFocus(db:*df.DBOX) callconv(.c) void {
+pub fn FirstFocus(db:*df.DBOX) void {
     const len = db.*.ctl.len;
     for (0..len) |idx| {
         const ct = &db.*.ctl[idx];
-        if (idx >= len-1)
-            break;
-        if ((ct.*.Class == df.TEXT) or (ct.*.Class == df.BOX)) {
-            const next = &db.*.ctl[idx+1];
-            if (next.*.Class == 0)
+        if (ct.*.Class != 0) {
+            if ((ct.*.Class != df.TEXT) and (ct.*.Class != df.BOX)) {
+                const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
+                _ = q.SendMessage(cwnd, df.SETFOCUS, df.TRUE, 0);
                 return;
-            const nwnd:df.WINDOW = @ptrCast(@alignCast(next.*.wnd));
-            _ = q.SendMessage(nwnd, df.SETFOCUS, df.TRUE, 0);
+            }
+            if (idx < len-2) {
+                const next = &db.*.ctl[idx+1];
+                if (next.*.Class == 0)
+                    return;
+            }
         }
     }
 }
 
 // ---- change the focus to the next control ---
-pub export fn NextFocus(db:*df.DBOX) callconv(.c) void {
+pub fn NextFocus(db:*df.DBOX) void {
     const control = WindowControl(db, df.inFocus);
     if (control) |ctl| {
         const len = db.*.ctl.len;
@@ -943,7 +946,7 @@ pub export fn NextFocus(db:*df.DBOX) callconv(.c) void {
 
 // ---- change the focus to the previous control ---
 // FIXME: not tested.
-pub export fn PrevFocus(db:*df.DBOX) callconv(.c) void {
+pub fn PrevFocus(db:*df.DBOX) void {
     const control = WindowControl(db, df.inFocus);
     if (control) |ctl| {
         const len = db.*.ctl.len;

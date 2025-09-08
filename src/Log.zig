@@ -6,6 +6,7 @@ const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const menus = @import("Menus.zig");
 const checkbox = @import("CheckBox.zig");
+const Class = @import("Classes.zig");
 
 var log:?*df.FILE = null;
 
@@ -13,16 +14,17 @@ pub export fn LogMessages (wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
     if (log) |L| {
         const m = messages[@intCast(msg)];
         if (m[0] != ' ') {
-            var class:[*c]u8 = 0;
+            var class:[]const u8 = "";
             var title:[*c]u8 = 0;
             if (wnd) |w| {
                 const idx:usize = @intCast(df.GetClass(w));
                 if (idx < 128) {
-                    class = df.ClassNames[idx];
+//                    class = df.ClassNames[idx];
+                    class = Class.defs[idx][0]; // name
                     title = df.GetTitle(w);
                 }
             }
-            _ = df.fprintf(L, "%-20.20s %-12.12s %-20.20s, %5.5ld, %5.5ld\n", title, class, m, p1, p2);
+            _ = df.fprintf(L, "%-20.20s %-12.12s %-20.20s, %5.5ld, %5.5ld\n", title, @constCast(class.ptr), m, p1, p2);
         }
     }
 }
