@@ -191,7 +191,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             ShellDOS(win);
         },
         df.ID_DISPLAY => {
-            if (DialogBox.DialogBox(wnd, &Dialogs.Display, df.TRUE, null)>0) {
+            if (DialogBox.DialogBox(wnd, &Dialogs.Display, df.TRUE, null)) {
                 if ((df.inFocus == wnd.*.MenuBarWnd) or (df.inFocus == wnd.*.StatusBar)) {
                     oldFocus = df.ApplicationWindow;
                 } else {
@@ -485,7 +485,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
 // ---- the More Windows command on the Window menu ----
 fn MoreWindows(win:*Window) void {
     const wnd = win.win;
-    if (DialogBox.DialogBox(wnd, &Dialogs.Windows, df.TRUE, WindowPrep)>0)
+    if (DialogBox.DialogBox(wnd, &Dialogs.Windows, df.TRUE, WindowPrep))
         ChooseWindow(win, WindowSel);
 }
 

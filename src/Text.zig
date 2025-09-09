@@ -19,12 +19,13 @@ fn drawText(win:*Window) void {
 //        const ptr = @as([*:0]u8, ct.*.itext);
 //        const content = std.mem.span(ptr);
         if (ct.*.itext) |content| {
-            var iter = std.mem.splitScalar(u8, content, '\n');
+            var iter = std.mem.splitScalar(u8, content, '\n'); // split do not include '\n'
             while (iter.next()) |line| {
                 const count = std.mem.count(u8, line, &[_]u8{df.SHORTCUTCHAR});
                 if (count > 0) {
                     const mlen:usize = @intCast(line.len+3*count);
                     if (root.global_allocator.allocSentinel(u8, mlen, 0)) |buf| {
+                        @memset(buf, 0);
                         defer root.global_allocator.free(buf);
                         _ = df.CopyCommand(buf.ptr, @constCast(line.ptr), df.FALSE, df.WndBackground(wnd));
                         _ = win.sendTextMessage(df.ADDTEXT, @constCast(buf), 0);

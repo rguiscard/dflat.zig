@@ -94,7 +94,7 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                 },
                 df.ID_EXIT => {
                     const m = "Exit Memopad?";
-                    if (mp.MessageBox.YesNoBox(@constCast(m.ptr)) == df.FALSE)
+                    if (mp.MessageBox.YesNoBox(m) == false)
                         return false;
                 },
                 df.ID_WRAP => {
@@ -152,7 +152,7 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                         \\MemoPad is a multiple document
                         \\editor that demonstrates D-Flat
                     ;
-                    _ = mp.MessageBox.MessageBox(@constCast(t.ptr), @constCast(m.ptr));
+                    _ = mp.MessageBox.MessageBox(@constCast(t.ptr), m);
                     return true;
                 },
                 else => {
@@ -313,7 +313,7 @@ fn DeleteFile(wnd:df.WINDOW) void {
         if (std.mem.eql(u8, path, sUntitled) == false) {
             if (std.fmt.allocPrintSentinel(mp.global_allocator, "Delete {s} ?", .{path}, 0)) |m| {
                 defer mp.global_allocator.free(m);
-                if (mp.MessageBox.YesNoBox(m) == df.TRUE) {
+                if (mp.MessageBox.YesNoBox(m)) {
                     if (std.fs.cwd().deleteFileZ(path)) |_| {
                     } else |_| {
                     }
@@ -392,7 +392,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 const title = std.mem.span(tl);
                 if (std.fmt.allocPrintSentinel(mp.global_allocator, "{s}\nText changed. Save it ?", .{title}, 0)) |m| {
                     defer mp.global_allocator.free(m);
-                    if (mp.MessageBox.YesNoBox(m) > 0) {
+                    if (mp.MessageBox.YesNoBox(m)) {
                         _ = df.SendMessage(mp.Window.GetParent(wnd), df.COMMAND, df.ID_SAVE, 0);
                     }
                 } else |_| {

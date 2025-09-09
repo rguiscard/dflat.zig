@@ -14,35 +14,30 @@ const sERROR = "Error";
 const sCONFIRM = "Confirm";
 const sWait = "Wait...";
 
-pub export fn ErrorMessage(msg: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, @constCast(sERROR.ptr), msg, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
-    return result;
+pub fn ErrorMessage(msg: []const u8) bool {
+    return GenericMessage(null, @constCast(sERROR.ptr), msg, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
 }
 
-pub export fn MessageBox(title: [*c]u8, msg: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, title, msg, 1, MessageBoxProc, sOK, null, df.ID_OK, 0, true);
-    return result;
+pub fn MessageBox(title: [*c]u8, msg: []const u8) bool {
+    return GenericMessage(null, title, msg, 1, MessageBoxProc, sOK, null, df.ID_OK, 0, true);
 }
 
-pub export fn YesNoBox(msg: [*c]u8) df.BOOL {
-    const result = GenericMessage(null, @constCast(sCONFIRM.ptr), msg, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
-    return result;
+pub fn YesNoBox(msg: []const u8) bool {
+    return GenericMessage(null, @constCast(sCONFIRM.ptr), msg, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
 }
 
-pub export fn CancelBox(wnd: df.WINDOW, msg: [*c]u8) df.BOOL {
-    const result = GenericMessage(wnd, @constCast(sWait.ptr), msg, 1, CancelProc, sCancel, null, df.ID_CANCEL, 0, false);
-    return result;
+pub fn CancelBox(wnd: df.WINDOW, msg: []const u8) bool {
+    return GenericMessage(wnd, @constCast(sWait.ptr), msg, 1, CancelProc, sCancel, null, df.ID_CANCEL, 0, false);
 }
 
-fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, message:[*c]u8, buttonct: c_int,
+fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, msg:[]const u8, buttonct: c_int,
                   wndproc: *const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
-                  button1: ?[:0]const u8, button2: ?[:0]const u8, c1: c_int, c2: c_int, isModal: bool) df.BOOL {
+                  button1: ?[:0]const u8, button2: ?[:0]const u8, c1: c_int, c2: c_int, isModal: bool) bool {
     var mBox = Dialogs.MsgBox;
 
-//    const m:[*c]u8 = @constCast(message.ptr);
-//    const m:[*c]u8 = message;
-    const ptr = @as([*:0]u8, message);
+    const ptr:[*c]u8 = @constCast(msg.ptr);
     const m = std.mem.span(ptr);
+
     var ttl_w:c_int = 0;
     if (title) |t| {
       const tt = std.mem.span(t);
@@ -65,7 +60,7 @@ fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, message:[*c]u8, buttonct: c_int
 
     mBox.ctl[1].dwnd.y = mBox.dwnd.h - 4;
     mBox.ctl[2].dwnd.y = mBox.dwnd.h - 4;
-    mBox.ctl[0].itext = m;
+    mBox.ctl[0].itext = @constCast(m);
     mBox.ctl[1].itext = if (button1) |b| @constCast(b) else null;
     mBox.ctl[2].itext = if (button2) |b| @constCast(b) else null;
     mBox.ctl[1].command = @intCast(c1);
@@ -78,11 +73,11 @@ fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, message:[*c]u8, buttonct: c_int
     const rtn = DialogBox.DialogBox(wnd, &mBox, c_modal, wndproc);
 
     mBox.ctl[2].Class = 0;
-    return @intCast(rtn);
+    return rtn;
 }
 
-pub fn MomentaryMessage(message: []const u8) *Window {
-    const m:[*c]u8 = @constCast(message.ptr);
+pub fn MomentaryMessage(msg: []const u8) *Window {
+    const m:[*c]u8 = @constCast(msg.ptr);
 
     var win = Window.create(
                     df.TEXTBOX,
@@ -92,7 +87,7 @@ pub fn MomentaryMessage(message: []const u8) *Window {
                     df.HASBORDER | df.SHADOW | df.SAVESELF);
     const wnd = win.*.win;
 
-    _ = win.sendTextMessage(df.SETTEXT, @constCast(message), 0);
+    _ = win.sendTextMessage(df.SETTEXT, @constCast(msg), 0);
     if (df.cfg.mono == 0) {
         wnd.*.WindowColors[df.STD_COLOR][df.FG] = df.WHITE;
         wnd.*.WindowColors[df.STD_COLOR][df.BG] = df.GREEN;

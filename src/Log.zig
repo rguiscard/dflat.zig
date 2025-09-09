@@ -61,7 +61,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
 pub fn MessageLog(win:*Window) void {
     const wnd = win.win;
     const Log = &Dialogs.Log;
-    if (DialogBox.DialogBox(wnd, Log, df.TRUE, LogProc)>0) {
+    if (DialogBox.DialogBox(wnd, Log, df.TRUE, LogProc)) {
         if (checkbox.CheckBoxSetting(Log, df.ID_LOGGING)>0) {
             log = df.fopen("DFLAT.LOG", "wt");
             df.SetCommandToggle(&menus.MainMenu, df.ID_LOG);

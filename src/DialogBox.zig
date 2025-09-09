@@ -59,7 +59,14 @@ pub fn ClearDialogBoxes() void {
                     break;
                 if (ct.*.itext) |itext| {
                     if (ct.*.itext_allocated) {
-                        root.global_allocator.free(itext);
+                      if ((ct.*.Class == df.EDITBOX or
+                                 ct.*.Class == df.TEXTBOX or
+                                 ct.*.Class == df.COMBOBOX)) {
+                           // FIXME: itext_allocated should save guard already.
+                           // Why only apply to these classes?
+                           // Memory leak if no safe guard here.
+                           root.global_allocator.free(itext);
+                        }
                         ct.*.itext = null;
                         ct.*.itext_allocated = false;
                     }
@@ -74,11 +81,11 @@ pub fn ClearDialogBoxes() void {
 
 // ------- create and execute a dialog box ----------
 pub export fn DialogBox(wnd:df.WINDOW, db:*Dialogs.DBOX, Modal:df.BOOL,
-    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool) c_int {
+    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool) bool {
 
     const box = db;
 
-    var rtn:df.BOOL = df.FALSE;
+    var rtn = false;
     const x = box.*.dwnd.x;
     const y = box.*.dwnd.y;
 
@@ -108,12 +115,12 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*Dialogs.DBOX, Modal:df.BOOL,
         _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
         while (q.dispatch_message()) {
         }
-        rtn = if (DialogWnd.*.ReturnCode == df.ID_OK) df.TRUE else df.FALSE;
+        rtn = (DialogWnd.*.ReturnCode == df.ID_OK);
         _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
         _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
         _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
     }
-    return @intCast(rtn);
+    return rtn;
 }
 
 // ------- CREATE_WINDOW Message (Control) -----
@@ -617,12 +624,12 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLA
         } else {
             if (ct.*.itext_allocated) {
                 root.global_allocator.free(ct.*.itext);
+                ct.*.itext_allocated = false;
             }
 
             // FIXME: not sure the logic is right
             if (ct.*.Class == df.TEXT) {
                 ct.*.itext = @constCast(&[_]u8{0});
-                ct.*.itext_allocated = false;
 //            } else if (ct.*.itext_allocated) {
 //                const ilen = df.strlen(ct.*.itext);
 //                root.global_allocator.free(ct.*.itext[0..ilen]);
@@ -633,7 +640,6 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLA
 //                ct.*.itext_allocated = false;
             } else {
                 ct.*.itext = null;
-                ct.*.itext_allocated = false;
             }
         }
         if (ct.*.wnd != null) {

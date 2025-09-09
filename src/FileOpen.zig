@@ -58,15 +58,13 @@ pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *Dial
     set_fileSpec(Fspec);
     set_srchSpec(Sspec);
 
-//    var box = DialogBox.init(@constCast(db));
-//    const rtn = box.create(null, true, DlgFnOpen);
     const rtn = DialogBox.DialogBox(null, db, df.TRUE, DlgFnOpen);
-    if (rtn>0) {
+    if (rtn) {
         if (_fileName) |n| {
             _ = df.strcpy(Fname, n.ptr);
         }
     }
-    return if (rtn>0) true else false;
+    return rtn;
 }
 
 fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
