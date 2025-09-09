@@ -2,8 +2,10 @@
 
 #include "dflat.h"
 
+/*
 MBAR *ActiveMenuBar;
 MENU *ActiveMenu;
+*/
 
 // return FALSE to break;
 BOOL cBuildMenu(WINDOW wnd, char *title, int offset, char **buf) {
@@ -29,6 +31,7 @@ void cPaintMenu(WINDOW wnd, int offset, int offset1, int selection) {
     GetText(wnd)[offset1] = ' ';
 }
 
+/*
 WINDOW GetDocFocus(void)
 {
 	WINDOW wnd = ApplicationWindow;
@@ -43,3 +46,4 @@ WINDOW GetDocFocus(void)
 	}
 	return wnd ? wnd : ApplicationWindow;
 }
+*/

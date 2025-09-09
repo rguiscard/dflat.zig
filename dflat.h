@@ -48,6 +48,9 @@ void *DFrealloc(void *, size_t);
 
 typedef enum {FALSE, TRUE} BOOL;
 
+#define OFF FALSE
+#define ON  TRUE
+
 #define MAXMESSAGES 100
 #define DELAYTICKS 1
 #define FIRSTDELAY 7
@@ -68,7 +71,6 @@ typedef enum {FALSE, TRUE} BOOL;
 #include "menu.h"
 #include "keys.h"
 #include "commands.h"
-#include "dialbox.h"
 #include "helpbox.h"
 
 /* ------ integer type for message parameters ----- */

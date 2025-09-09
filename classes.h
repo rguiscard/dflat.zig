@@ -68,7 +68,6 @@ ClassDef(  HELPBOX,     DIALOG,  MOVEABLE  |
 
 ClassDef(  STATUSBAR,   TEXTBOX, NOCLIP     )
 ClassDef(  EDITOR,      EDITBOX, 0          )
-
 /*
  *  ========> Add new classes here <========
  */

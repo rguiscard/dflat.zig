@@ -12,6 +12,8 @@ var mwnd:df.WINDOW = null;
 var Selecting:bool = false;
 var Cascaders = [_]df.WINDOW{0}**df.MAXCASCADES;
 var casc:usize = 0;
+export var ActiveMenuBar:?*df.MBAR = null;
+export var ActiveMenu:?*df.MENU = null;
 
 // ----------- SETFOCUS Message -----------
 fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
@@ -114,7 +116,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
     for (df.ActiveMenuBar.*.PullDown) |mnu| {
         if (mnu.Title != null) {
             if (mnu.PrepMenu) |proc| {
-                proc(df.GetDocFocus(), @constCast(&mnu));
+                proc(GetDocFocus(), @constCast(&mnu));
             }
             for (mnu.Selections) |pd| {
                 if (pd.SelectionTitle) |_| {
@@ -124,7 +126,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
                         } else {
 //                            if (pd.Attrib & df.TOGGLE > 0)
 //                                pd.Attrib ^= df.CHECKED;
-                            _ = q.SendMessage(df.GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+                            _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
                             q.PostMessage(df.GetParent(wnd), df.COMMAND, pd.ActionId, 0);
                         }
                     }
@@ -254,7 +256,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     // should use Menu or Menu* ?
     const mnu = &df.ActiveMenu[@intCast(p1)];
     if (mnu.*.PrepMenu) |proc| {
-        proc(df.GetDocFocus(), @constCast(mnu));
+        proc(GetDocFocus(), @constCast(mnu));
     }
     const wd = df.MenuWidth(@constCast(&mnu.*.Selections));
     if (p2>0) {
@@ -326,7 +328,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (mwnd) |mm| {
             _ = q.SendMessage(mm, df.CLOSE_WINDOW, 0, 0);
         }
-        _ = q.SendMessage(df.GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+        _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
         q.PostMessage(Window.GetParent(wnd), df.COMMAND, p1, p2);
     }
 }
@@ -340,7 +342,7 @@ fn ClosePopdownMsg(win:*Window) void {
         mwnd = null;
         df.ActiveMenuBar.*.ActiveSelection = -1;
         if (Selecting == false) {
-            _ = q.SendMessage(df.GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+            _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
             _ = win.sendMessage(df.PAINT, 0, 0);
         }
     }
@@ -440,4 +442,21 @@ fn reset_menubar(win:*Window) void {
         wnd.*.text[text.len-1] = 0;
     }
     wnd.*.text[@intCast(win.WindowWidth())] = 0;
+}
+
+fn GetDocFocus() df.WINDOW {
+    var wnd = df.ApplicationWindow;
+    if (wnd != null) {
+        wnd = Window.LastWindow(wnd);
+        while (wnd != null and (df.GetClass(wnd) == df.MENUBAR or
+                                df.GetClass(wnd) == df.STATUSBAR)) {
+            wnd = Window.PrevWindow(wnd);
+        }
+        if (wnd != null) {
+            while (wnd.*.childfocus != null) {
+                wnd = wnd.*.childfocus;
+            }
+        }
+    }
+    return if (wnd != null) wnd else df.ApplicationWindow;
 }
