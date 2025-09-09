@@ -66,8 +66,6 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
 }
 
 pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-//    const wnd = win.win;
-//    const ct = df.GetControl(wnd);
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {

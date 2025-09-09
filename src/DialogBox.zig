@@ -57,14 +57,6 @@ pub fn ClearDialogBoxes() void {
             for (&db.*.ctl) |*ct| {
                 if (ct.*.Class == 0)
                     break;
-//                if (((ct.*.Class == df.EDITBOX) or (ct.*.Class == df.TEXTBOX) or
-//                      (ct.*.Class == df.COMBOBOX)) and
-//                      ct.*.itext != null) {
-//                    const ptr = @as([*:0]u8, ct.*.itext);
-//                    const content = std.mem.span(ptr);
-//                    root.global_allocator.free(content);
-//                    ct.*.itext = null;
-//                }
                 if (ct.*.itext) |itext| {
                     if (ct.*.itext_allocated) {
                         root.global_allocator.free(itext);
@@ -78,25 +70,6 @@ pub fn ClearDialogBoxes() void {
         dialogboxes.?.deinit(root.global_allocator);
         dialogboxes = null;
     }
-//    int i;
-//    for (i = 0; i < dbct; i++)    {
-//        CTLWINDOW *ct = (*(dbs+i))->ctl;
-//        while (ct->Class)    {
-//            if ((ct->Class == EDITBOX ||
-//                                 ct->Class == TEXTBOX ||
-//                 ct->Class == COMBOBOX) &&
-//                    ct->itext != NULL)  {
-//                free(ct->itext);
-//                                ct->itext = NULL;
-//                        }
-//            ct++;
-//        }
-//    }
-//    if (dbs != NULL)    {
-//        free(dbs);
-//        dbs = NULL;
-//    }
-//    dbct = 0;
 }
 
 // ------- create and execute a dialog box ----------
@@ -147,16 +120,12 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*Dialogs.DBOX, Modal:df.BOOL,
 fn CtlCreateWindowMsg(win:*Window) void {
     const wnd = win.win;
     if (wnd.*.extension) |extension| {
-//        wnd.*.ct = @alignCast(@ptrCast(extension));
-//        const ct = wnd.*.ct;
-//        ct.*.wnd = wnd;
         win.ct = @alignCast(@ptrCast(extension));
         if (win.ct) |ctl| {
             const ct = ctl;
             ct.*.wnd = wnd;
         }
     } else {
-//        wnd.*.ct = null;
         win.ct = null;
     }
     wnd.*.extension = null;
@@ -243,7 +212,6 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 fn FixColors(win:*Window) void {
     const wnd = win.win;
-//    const ct = wnd.*.ct;
     if (win.GetControl()) |ct| {
         if (ct.*.Class != df.BUTTON) {
             if ((ct.*.Class != df.SPINBUTTON) and (ct.*.Class != df.COMBOBOX)) {
@@ -284,8 +252,6 @@ fn SetScrollBars(win:*Window) void {
 // ------- CLOSE_WINDOW Message (Control) -----
 fn CtlCloseWindowMsg(win:*Window) void {
     const wnd = win.win;
-//    CTLWINDOW *ct = GetControl(wnd);
-//    const ct = df.GetControl(wnd);
     if (win.GetControl()) |ct| {
         ct.*.wnd = null;
         if (Window.GetParent(wnd).*.ReturnCode == df.ID_OK) {
@@ -295,20 +261,6 @@ fn CtlCloseWindowMsg(win:*Window) void {
                 if (itextAllocateSentinel(ct, len)) {
                     @memcpy(ct.*.itext.?, wnd.*.text[0..len:0]);
                 }
-//                if (ct.*.itext != null) {
-//                    if(root.global_allocator.realloc(ct.*.itext[0..len], len)) |buf| {
-//                        @memcpy(buf, wnd.*.text[0..len]);
-//                        ct.*.itext = buf.ptr;
-//                    } else |_| {
-//                    }
-//                } else {
-//                    if(root.global_allocator.allocSentinel(u8, len, 0)) |buf| {
-//                        @memset(buf, 0);
-//                        @memcpy(buf, wnd.*.text[0..len]);
-//                        ct.*.itext = buf.ptr;
-//                    } else |_| {
-//                    }
-//                } 
                 if (df.isMultiLine(wnd) == df.FALSE) {
                     // remove last \n
                     if (ct.*.itext) |itext| {
@@ -317,13 +269,6 @@ fn CtlCloseWindowMsg(win:*Window) void {
                         }
                     }
                 }
-//                ct->itext=DFrealloc(ct->itext,strlen(wnd->text)+1);
-//                strcpy(ct->itext, wnd->text);
-//                if (!isMultiLine(wnd))    {
-//                        char *cp = ct->itext+strlen(ct->itext)-1;
-//                        if (*cp == '\n')
-//                        *cp = '\0';
-//                }
             } else if (ct.*.Class == df.RADIOBUTTON or ct.*.Class == df.CHECKBOX) {
                 ct.*.isetting = ct.*.setting;
             }
@@ -539,7 +484,6 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.F1 => {
             if (Window.get_zin(df.inFocus)) |zin| {
-//                const ct = df.GetControl(df.inFocus);
                 if (zin.GetControl()) |ct| {
                     if (ct.*.help) |help| {
                         if (helpbox.DisplayHelp(win, help)) {
@@ -670,34 +614,6 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLA
             if (itextAllocateSentinel(ct, len)) {
                 @memcpy(ct.*.itext.?, text[0..len:0]);
             }
-//            if (ct.*.Class == df.TEXT) {
-//                ct.*.itext = text;  // text may not go out of scope
-//            } else {
-//                const len = df.strlen(text);
-//                if (itextAllocateSentinel(ct, len)) {
-//                    @memcpy(ct.*.itext.?, text[0..len:0]);
-//                }
-//
-//                if (ct.*.itext) |_| {
-//                    const ilen = df.strlen(ct.*.itext);
-//                    const len = df.strlen(text);
-//                    if(root.global_allocator.realloc(ct.*.itext[0..ilen], len)) |buf| {
-//                        @memcpy(buf, text[0..len]);
-//                        ct.*.itext = buf.ptr;
-//                    } else |_| {
-//                    }
-//                } else {
-//                    const len = df.strlen(text);
-//                    if(root.global_allocator.allocSentinel(u8, len, 0)) |buf| {
-//                        @memset(buf, 0);
-//                        @memcpy(buf, text[0..len]);
-//                        ct.*.itext = buf.ptr;
-//                    } else |_| {
-//                    }
-//                }
-//                ct.*.itext = df.DFrealloc(ct.*.itext, df.strlen(text)+1);
-//                df.strcpy(ct.*.itext, text);
-//            }
         } else {
             if (ct.*.itext_allocated) {
                 root.global_allocator.free(ct.*.itext);
@@ -938,11 +854,8 @@ pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: c_int) bool {
             if (ct.*.Class == 0)
                 break;
             if (ct.*.itext) |itext| {
-//                const ptr = @as([*:0]u8, itext);
-//                const text = std.mem.span(ptr);
                 const text = itext;
                 if (std.mem.indexOfScalar(u8, text, df.SHORTCUTCHAR)) |pos| {
-//                    if ((pos < text.len-1) and (std.ascii.toLower(ptr[pos+1]) == ch)) {
                     if ((pos < text.len-1) and (std.ascii.toLower(text[pos+1]) == ch)) {
                         const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
                         if (ct.*.Class == df.TEXT) {
