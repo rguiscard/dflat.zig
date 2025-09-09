@@ -12,11 +12,13 @@
 #define ON  TRUE
 
 /* -------- dialog box and control window structure ------- */
+/*
 typedef struct  {
     char *title;    // window title
     int x, y;       // relative coordinates
     int h, w;       // size
 } DIALOGWINDOW;
+*/
 
 /* ------ one of these for each control window ------- */
 /*

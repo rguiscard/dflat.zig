@@ -155,7 +155,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
     if (FoundOne == false) {
         const t = "Search/Replace Text";
         const m = "No match found";
-        _ = MessageBox.MessageBox(@constCast(t.ptr), m);
+        _ = MessageBox.MessageBox(t, m);
     }
 }
 

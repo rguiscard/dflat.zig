@@ -38,7 +38,6 @@ void SelectHelp(WINDOW, struct helps *, BOOL);
 void ReadHelp(WINDOW);
 struct helps *FindHelp(char *);
 static void DisplayDefinition(WINDOW, char *);
-void BestFit(WINDOW, DIALOGWINDOW *);
 
 int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 

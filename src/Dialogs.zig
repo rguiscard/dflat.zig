@@ -4,9 +4,18 @@ const df = @import("ImportC.zig").df;
 pub const MAXCONTROLS = 30;
 pub const MAXRADIOS = 20;
 
+// -------- dialog box and control window structure -------
+pub const DIALOGWINDOW = struct  {
+    title:?[:0]const u8,  // window title
+    x:c_int,              // relative coordinates
+    y:c_int,
+    h:c_int,              // size
+    w:c_int,
+};
+
 // ------ one of these for each control window -------
 pub const CTLWINDOW = struct {
-    dwnd:df.DIALOGWINDOW = .{.title = null, .x = 0, .y = 0, .h = 0, .w = 0},
+    dwnd:DIALOGWINDOW = .{.title = null, .x = 0, .y = 0, .h = 0, .w = 0},
     Class:df.CLASS = 0,           // LISTBOX, BUTTON, etc
     itext:?[:0]u8 = null,         // initialized text
     itext_allocated:bool = false, // itext is allocated in heap (true) or in stack (false)
@@ -20,7 +29,7 @@ pub const CTLWINDOW = struct {
 // --------- one of these for each dialog box -------
 pub const DBOX = struct {
     HelpName:[]const u8,
-    dwnd:df.DIALOGWINDOW,
+    dwnd:DIALOGWINDOW,
     ctl:[MAXCONTROLS+1]CTLWINDOW,
 };
 
@@ -211,7 +220,7 @@ fn buildDialog(comptime help:[]const u8, comptime window:anytype, comptime contr
     result = .{
         .HelpName = help,
         .dwnd = .{
-            .title = if (ttl) |t| @constCast(t.ptr) else null,
+            .title = if (ttl) |t| @constCast(t[0..:0]) else null,
             .x = x,
             .y = y,
             .h = h,

@@ -59,14 +59,14 @@ pub fn ClearDialogBoxes() void {
                     break;
                 if (ct.*.itext) |itext| {
                     if (ct.*.itext_allocated) {
-                      if ((ct.*.Class == df.EDITBOX or
-                                 ct.*.Class == df.TEXTBOX or
-                                 ct.*.Class == df.COMBOBOX)) {
+//                      if ((ct.*.Class == df.EDITBOX or
+//                                 ct.*.Class == df.TEXTBOX or
+//                                 ct.*.Class == df.COMBOBOX)) {
                            // FIXME: itext_allocated should save guard already.
                            // Why only apply to these classes?
                            // Memory leak if no safe guard here.
                            root.global_allocator.free(itext);
-                        }
+//                        }
                         ct.*.itext = null;
                         ct.*.itext_allocated = false;
                     }
@@ -94,9 +94,8 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*Dialogs.DBOX, Modal:df.BOOL,
         save = df.SAVESELF;
     }
 
-    const ttl:[]const u8 =  std.mem.span(box.*.dwnd.title);
     var win = Window.create(df.DIALOG,
-                        ttl,
+                        box.*.dwnd.title,
                         x, y,
                         box.*.dwnd.h,
                         box.*.dwnd.w,
@@ -398,7 +397,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
             attrib = attrib | df.HASBORDER;
         }
         var cwnd = Window.create(ctl.*.Class,
-                        if (ctl.*.dwnd.title) |t| std.mem.span(t) else null,
+                        ctl.*.dwnd.title,
                         @intCast(ctl.*.dwnd.x+win.GetClientLeft()),
                         @intCast(ctl.*.dwnd.y+win.GetClientTop()),
                         ctl.*.dwnd.h,
@@ -1032,7 +1031,9 @@ pub fn SetComboBoxText(db:*Dialogs.DBOX, cmd: c_uint, s:[*c]u8) void {
 
 pub fn SetDlgTitle(db:*Dialogs.DBOX, ttl:[*c]u8) void {
     // currently not in use
-    db.*.dwnd.title = ttl;
+    if (ttl) |t| {
+      db.*.dwnd.title = std.mem.span(t);
+    }
 }
 
 pub fn SetCheckBox(db:*Dialogs.DBOX, cmd: c_uint) void {

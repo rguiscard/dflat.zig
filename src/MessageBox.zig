@@ -14,40 +14,42 @@ const sERROR = "Error";
 const sCONFIRM = "Confirm";
 const sWait = "Wait...";
 
-pub fn ErrorMessage(msg: []const u8) bool {
-    return GenericMessage(null, @constCast(sERROR.ptr), msg, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
+pub fn ErrorMessage(msg: [:0]const u8) bool {
+    return GenericMessage(null, sERROR, msg, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
 }
 
-pub fn MessageBox(title: [*c]u8, msg: []const u8) bool {
+pub fn MessageBox(title: [:0]const u8, msg: [:0]const u8) bool {
     return GenericMessage(null, title, msg, 1, MessageBoxProc, sOK, null, df.ID_OK, 0, true);
 }
 
-pub fn YesNoBox(msg: []const u8) bool {
-    return GenericMessage(null, @constCast(sCONFIRM.ptr), msg, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
+pub fn YesNoBox(msg: [:0]const u8) bool {
+    return GenericMessage(null, sCONFIRM, msg, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
 }
 
-pub fn CancelBox(wnd: df.WINDOW, msg: []const u8) bool {
-    return GenericMessage(wnd, @constCast(sWait.ptr), msg, 1, CancelProc, sCancel, null, df.ID_CANCEL, 0, false);
+pub fn CancelBox(wnd: df.WINDOW, msg: [:0]const u8) bool {
+    return GenericMessage(wnd, sWait, msg, 1, CancelProc, sCancel, null, df.ID_CANCEL, 0, false);
 }
 
-fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, msg:[]const u8, buttonct: c_int,
+fn GenericMessage(wnd: df.WINDOW, title: ?[:0]const u8, msg:[:0]const u8, buttonct: c_int,
                   wndproc: *const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
                   button1: ?[:0]const u8, button2: ?[:0]const u8, c1: c_int, c2: c_int, isModal: bool) bool {
     var mBox = Dialogs.MsgBox;
 
-    const ptr:[*c]u8 = @constCast(msg.ptr);
-    const m = std.mem.span(ptr);
+//    const ptr:[*c]u8 = @constCast(msg.ptr);
+//    const m = std.mem.span(ptr);
+    const m = msg;
 
     var ttl_w:c_int = 0;
+    mBox.dwnd.title = null;
     if (title) |t| {
-      const tt = std.mem.span(t);
-      ttl_w = @intCast(tt.len+2);
+        ttl_w = @intCast(t.len+2);
+//        const pp:[*c]u8 = @constCast(t.ptr);
+//        mBox.dwnd.title = std.mem.span(pp);
+        mBox.dwnd.title = t;
     }
 
-//    mBox.dwnd.title = if (title) |t| @constCast(t.ptr) else null;
-    mBox.dwnd.title = title; // need a copy ?
-    mBox.ctl[0].dwnd.h = df.MsgHeight(m);
-    mBox.ctl[0].dwnd.w = @max(@max(df.MsgWidth(m), buttonct*8+buttonct+2),ttl_w);
+    mBox.ctl[0].dwnd.h = df.MsgHeight(@constCast(m.ptr));
+    mBox.ctl[0].dwnd.w = @max(@max(df.MsgWidth(@constCast(m.ptr)), buttonct*8+buttonct+2),ttl_w);
     mBox.dwnd.h = mBox.ctl[0].dwnd.h+6;
     mBox.dwnd.w = mBox.ctl[0].dwnd.w+4;
     if (buttonct == 1) {

@@ -152,7 +152,7 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                         \\MemoPad is a multiple document
                         \\editor that demonstrates D-Flat
                     ;
-                    _ = mp.MessageBox.MessageBox(@constCast(t.ptr), m);
+                    _ = mp.MessageBox.MessageBox(t, m);
                     return true;
                 },
                 else => {

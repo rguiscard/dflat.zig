@@ -174,8 +174,11 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
             // ------- display the help window -----
             _ = DialogBox.DialogBox(null, &Dialogs.HelpBox, df.TRUE, HelpBoxProc);
 
-            df.free(Dialogs.HelpBox.dwnd.title);
-            Dialogs.HelpBox.dwnd.title = null;
+//            df.free(Dialogs.HelpBox.dwnd.title);
+            if (Dialogs.HelpBox.dwnd.title) |ttl| {
+                root.global_allocator.free(ttl);
+                Dialogs.HelpBox.dwnd.title = null;
+            }
             _ = df.fclose(df.helpfp);
             df.helpfp = null;
             rtn = true;
@@ -193,12 +196,23 @@ fn BuildHelpBox(win:?*Window) void {
 
     // ----- read the title -----
     _ = df.GetHelpLine(&df.hline);
-    df.hline[df.strlen(&df.hline)-1] = 0;
+    const len:usize = df.strlen(&df.hline);
+    df.hline[len-1] = 0;
 
     // FIXME: should replace with zig allocator
-    df.free(Dialogs.HelpBox.dwnd.title);
-    Dialogs.HelpBox.dwnd.title = @ptrCast(@alignCast(df.DFmalloc(df.strlen(&df.hline)+1)));
-    _ = df.strcpy(Dialogs.HelpBox.dwnd.title, &df.hline);
+    if (Dialogs.HelpBox.dwnd.title) |ttl| {
+        root.global_allocator.free(ttl);
+        Dialogs.HelpBox.dwnd.title = null;
+    }
+
+    if (root.global_allocator.dupeZ(u8, df.hline[0..len])) |buf| {
+        Dialogs.HelpBox.dwnd.title = buf;
+    } else |_| {
+    }
+
+//    df.free(Dialogs.HelpBox.dwnd.title);
+//    Dialogs.HelpBox.dwnd.title = @ptrCast(@alignCast(df.DFmalloc(len+1)));
+//    _ = df.strcpy(Dialogs.HelpBox.dwnd.title, &df.hline);
 
     // ----- set the height and width -----
     Dialogs.HelpBox.dwnd.h = @min(df.ThisHelp.*.hheight, MAXHEIGHT)+7;
@@ -250,7 +264,9 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
                 DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_BACK);
             }
             BuildHelpBox(null);
-            df.AddTitle(wnd, Dialogs.HelpBox.dwnd.title);
+            if (Dialogs.HelpBox.dwnd.title) |ttl| {
+                df.AddTitle(wnd, ttl.ptr);
+            } // handle null title ?
             // --- reposition and resize the help window ---
             Dialogs.HelpBox.dwnd.x = @divFloor(df.SCREENWIDTH-Dialogs.HelpBox.dwnd.w, 2);
             Dialogs.HelpBox.dwnd.y = @divFloor(df.SCREENHEIGHT-Dialogs.HelpBox.dwnd.h, 2);
@@ -288,7 +304,7 @@ fn OverLap(a: c_int, b: c_int) c_int {
 
 
 // ----- compute the best location for a help dialogbox -----
-fn BestFit(win:*Window, dwnd:*df.DIALOGWINDOW) void {
+fn BestFit(win:*Window, dwnd:*Dialogs.DIALOGWINDOW) void {
     const wnd = win.win;
     if (df.GetClass(wnd) == df.MENUBAR or
                 df.GetClass(wnd) == df.APPLICATION) {
