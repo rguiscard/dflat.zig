@@ -373,6 +373,7 @@ struct helps *FindHelp(char *Help)
 	return thishelp;
 }
 
+/*
 static int OverLap(int a, int b)
 {
     int ov = a - b;
@@ -381,7 +382,7 @@ static int OverLap(int a, int b)
     return ov;
 }
 
-/* ----- compute the best location for a help dialogbox ----- */
+// ----- compute the best location for a help dialogbox -----
 void BestFit(WINDOW wnd, DIALOGWINDOW *dwnd)
 {
     int above, below, right, left;
@@ -390,13 +391,13 @@ void BestFit(WINDOW wnd, DIALOGWINDOW *dwnd)
         dwnd->x = dwnd->y = -1;
         return;
     }
-    /* --- compute above overlap ---- */
+    // --- compute above overlap ----
     above = OverLap(dwnd->h, GetTop(wnd));
-    /* --- compute below overlap ---- */
+    // --- compute below overlap ----
     below = OverLap(GetBottom(wnd), SCREENHEIGHT-dwnd->h);
-    /* --- compute right overlap ---- */
+    // --- compute right overlap ----
     right = OverLap(GetRight(wnd), SCREENWIDTH-dwnd->w);
-    /* --- compute left  overlap ---- */
+    // --- compute left  overlap ----
     left = OverLap(dwnd->w, GetLeft(wnd));
 
     if (above < below)
@@ -415,3 +416,4 @@ void BestFit(WINDOW wnd, DIALOGWINDOW *dwnd)
             dwnd->y == GetBottom(wnd)+2)
         dwnd->x = -1;
 }
+*/

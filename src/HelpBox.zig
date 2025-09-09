@@ -206,8 +206,7 @@ fn BuildHelpBox(win:?*Window) void {
 
     // ------ position the help window -----
     if (win) |w| {
-        const wnd = w.win;
-        df.BestFit(wnd, &Dialogs.HelpBox.dwnd);
+        BestFit(w, &Dialogs.HelpBox.dwnd);
     }
     // ------- position the command buttons ------ 
     Dialogs.HelpBox.ctl[0].dwnd.w = @max(40, df.ThisHelp.*.hwidth+2);
@@ -278,3 +277,53 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
         }
     }
 }
+
+fn OverLap(a: c_int, b: c_int) c_int {
+    const ov = a - b;
+    return if (ov < 0) 0 else ov;
+//    if (ov < 0)
+//        ov = 0;
+//    return ov;
+}
+
+
+// ----- compute the best location for a help dialogbox -----
+fn BestFit(win:*Window, dwnd:*df.DIALOGWINDOW) void {
+    const wnd = win.win;
+    if (df.GetClass(wnd) == df.MENUBAR or
+                df.GetClass(wnd) == df.APPLICATION) {
+        dwnd.*.x = -1;
+        dwnd.*.y = -1;
+        return;
+    }
+
+    // --- compute above overlap ----
+    const above:c_int = OverLap(dwnd.*.h, @intCast(win.GetTop()));
+    // --- compute below overlap ----
+    const below:c_int = OverLap(@intCast(win.GetBottom()), df.SCREENHEIGHT-dwnd.*.h);
+    // --- compute right overlap ----
+    const right:c_int = OverLap(@intCast(win.GetRight()), df.SCREENWIDTH-dwnd.*.w);
+    // --- compute left  overlap ----
+    const left:c_int = OverLap(dwnd.*.w, @intCast(win.GetLeft()));
+
+    if (above < below) {
+        dwnd.*.y = @intCast(@max(0, win.GetTop()-dwnd.*.h-2));
+    } else {
+        dwnd.*.y = @intCast(@min(df.SCREENHEIGHT-dwnd.*.h, win.GetBottom()+2));
+    }
+    if (right < left) {
+        dwnd.*.x = @intCast(@min(win.GetRight()+2, df.SCREENWIDTH-dwnd.*.w));
+    } else {
+        dwnd.*.x = @intCast(@max(0, win.GetLeft()-dwnd.*.w-2));
+    }
+
+    if (dwnd.*.x == win.GetRight()+2 or
+            dwnd.*.x == win.GetLeft()-dwnd.*.w-2) {
+        dwnd.*.y = -1;
+    }
+    if (dwnd.*.y == win.GetTop()-dwnd.*.h-2 or
+            dwnd.*.y == win.GetBottom()+2) {
+        dwnd.*.x = -1;
+    }
+}
+ 

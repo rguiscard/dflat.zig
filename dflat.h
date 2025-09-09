@@ -241,8 +241,8 @@ extern BOOL WindowSizing;
 extern BOOL VSliding;
 extern BOOL HSliding;
 extern char DFlatApplication[];
-extern char *Clipboard;
-extern unsigned ClipboardLength;
+//extern char *Clipboard;
+//extern unsigned ClipboardLength;
 extern BOOL ClipString;
 extern int CurrentMenuSelection;
 /* --------- space between menubar labels --------- */
