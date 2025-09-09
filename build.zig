@@ -60,7 +60,6 @@ pub fn build(b: *std.Build) void {
             "window.c",
             "rect.c",
             "normal.c",
-            "applicat.c",
             "textbox.c",
             "menubar.c",
             "popdown.c",
