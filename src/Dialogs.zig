@@ -7,13 +7,14 @@ pub const MAXRADIOS = 20;
 // ------ one of these for each control window -------
 pub const CTLWINDOW = struct {
     dwnd:df.DIALOGWINDOW = .{.title = null, .x = 0, .y = 0, .h = 0, .w = 0},
-    Class:df.CLASS = 0,         // LISTBOX, BUTTON, etc
-    itext:[*c]u8 = null,        // initialized text
-    command:c_uint = 0,         // command code
-    help:?[]const u8 = null,    // help mnemonic
-    isetting:df.BOOL = df.OFF,  // initially ON or OFF
-    setting:df.BOOL = df.OFF,   // ON or OFF
-    wnd:?*anyopaque = null,     // window handle
+    Class:df.CLASS = 0,           // LISTBOX, BUTTON, etc
+    itext:?[:0]u8 = null,         // initialized text
+    itext_allocated:bool = false, // itext is allocated in heap (true) or in stack (false)
+    command:c_uint = 0,           // command code
+    help:?[]const u8 = null,      // help mnemonic
+    isetting:df.BOOL = df.OFF,    // initially ON or OFF
+    setting:df.BOOL = df.OFF,     // ON or OFF
+    wnd:?*anyopaque = null,       // window handle
 };
 
 // --------- one of these for each dialog box -------
@@ -235,11 +236,13 @@ fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
         var help: ?[]const u8 = undefined;
         ty, tx, x, y, h, w, c, help = control;
 
-        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t.ptr) else null;
+//        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t.ptr) else null;
+        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t[0..t.len:0]) else null;
         result[idx] = .{
             .dwnd = .{.title = null, .x = x, .y = y, .h = h, .w = w},
             .Class = ty,
             .itext = itext,
+            .itext_allocated = false, // everything is in stack at this poing.
             .command = c,
             .help = help,
             .isetting = if (ty == df.BUTTON) df.ON else df.OFF,

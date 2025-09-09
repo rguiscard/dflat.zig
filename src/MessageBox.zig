@@ -40,7 +40,9 @@ fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, message:[*c]u8, buttonct: c_int
     var mBox = Dialogs.MsgBox;
 
 //    const m:[*c]u8 = @constCast(message.ptr);
-    const m:[*c]u8 = message;
+//    const m:[*c]u8 = message;
+    const ptr = @as([*:0]u8, message);
+    const m = std.mem.span(ptr);
     var ttl_w:c_int = 0;
     if (title) |t| {
       const tt = std.mem.span(t);
@@ -64,8 +66,30 @@ fn GenericMessage(wnd: df.WINDOW, title: [*c]u8, message:[*c]u8, buttonct: c_int
     mBox.ctl[1].dwnd.y = mBox.dwnd.h - 4;
     mBox.ctl[2].dwnd.y = mBox.dwnd.h - 4;
     mBox.ctl[0].itext = m;
-    mBox.ctl[1].itext = if (button1) |b| @constCast(b.ptr) else null;
-    mBox.ctl[2].itext = if (button2) |b| @constCast(b.ptr) else null;
+    // FIXME: cannot cast, out of bound. It works in Dialogs.zig
+//    mBox.ctl[1].itext = if (button1) |b| @constCast(b[0..b.len:0]) else null;
+//    mBox.ctl[2].itext = if (button2) |b| @constCast(b[0..b.len:0]) else null;
+    // This version works.
+//    mBox.ctl[1].itext = if (button1) |_| @constCast(&[_:0]u8{'1','2','3','4','5','6', '7', '8', '9', 0}) else null;
+//    mBox.ctl[2].itext = if (button2) |_| @constCast(&[_:0]u8{'A','B',0}) else null;
+    if (button1) |b| {
+        if (root.global_allocator.dupeZ(u8, b)) |buf| {
+            mBox.ctl[1].itext = buf;
+            mBox.ctl[1].itext_allocated = true;
+        } else |_| {
+        }
+    } else {
+        mBox.ctl[1].itext = null;
+    }
+    if (button2) |b| {
+        if (root.global_allocator.dupeZ(u8, b)) |buf| {
+            mBox.ctl[2].itext = buf;
+            mBox.ctl[2].itext_allocated = true;
+        } else |_| {
+        }
+    } else {
+        mBox.ctl[2].itext = null;
+    }
     mBox.ctl[1].command = @intCast(c1);
     mBox.ctl[2].command = @intCast(c2);
     mBox.ctl[1].isetting = df.ON;
