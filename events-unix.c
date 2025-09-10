@@ -8,6 +8,7 @@
 
 int mouse_x, mouse_y;
 int mouse_button;
+char time_string[] = "         ";
 
 /* ------ collect mouse, clock, and keyboard events ----- */
 void collect_events(void)

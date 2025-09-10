@@ -19,6 +19,8 @@ export var CaptureKeyboard:df.WINDOW = null;
 var NoChildCaptureMouse = df.FALSE;
 var NoChildCaptureKeyboard = df.TRUE;
 
+export var AltDown:df.BOOL = df.FALSE;
+
 // ---------- event queue ----------
 const Evt = struct {
     event:df.MESSAGE,
@@ -71,7 +73,6 @@ pub fn init_messages() bool {
     CaptureMouse = null;
     CaptureKeyboard = null;
 
-//    _ = df.init_messages();
     NoChildCaptureMouse = df.FALSE;
     NoChildCaptureKeyboard = df.FALSE;
     PostMessage(null,df.START,0,0);
@@ -432,8 +433,6 @@ pub fn dispatch_message() bool {
         if (EventQueueOffCtr == MAXMESSAGES)
             EventQueueOffCtr = 0;
         EventQueueCtr -= 1;
-
-//        df.c_dispatch_message(ev.event, ev.mx, ev.my);
 
         // ------ get the window in which a
         //              keyboard event occurred ------

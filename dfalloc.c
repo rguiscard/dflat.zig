@@ -2,6 +2,9 @@
 
 #include "dflat.h"
 
+BOOL AllocTesting = FALSE;
+jmp_buf AllocError;
+
 static void AllocationError(void)
 {
 	WINDOW wnd;

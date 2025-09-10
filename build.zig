@@ -53,7 +53,7 @@ pub fn build(b: *std.Build) void {
     });
 
     lib_mod.addCSourceFiles(.{ .files = &.{
-            "message.c",
+            //"message.c",
             "keys.c",
             "config.c",
             "dfalloc.c",
