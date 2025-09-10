@@ -12,6 +12,7 @@ const log = @import("Log.zig");
 const radio = @import("RadioButton.zig");
 const checkbox = @import("CheckBox.zig");
 
+export var ApplicationWindow:df.WINDOW = null;
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
 var oldFocus:df.WINDOW = null;

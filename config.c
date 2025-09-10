@@ -3,7 +3,6 @@
 #include "dflat.h"
 
 char DFlatApplication[] = "memopad";
-WINDOW ApplicationWindow;
 char **Argv;
 
 /* ----- default colors for color video system ----- */

@@ -2,11 +2,6 @@
 
 #include "dflat.h"
 
-/*
-MBAR *ActiveMenuBar;
-MENU *ActiveMenu;
-*/
-
 // return FALSE to break;
 BOOL cBuildMenu(WINDOW wnd, char *title, int offset, char **buf) {
     if (strlen(*buf+offset) < strlen(title)+3)
@@ -30,20 +25,3 @@ void cPaintMenu(WINDOW wnd, int offset, int offset1, int selection) {
     wputs(wnd, sel, offset-selection*4, 0);
     GetText(wnd)[offset1] = ' ';
 }
-
-/*
-WINDOW GetDocFocus(void)
-{
-	WINDOW wnd = ApplicationWindow;
-	if (wnd != NULL)	{
-		wnd = LastWindow(wnd);
-		while (wnd != NULL && (GetClass(wnd) == MENUBAR ||
-							GetClass(wnd) == STATUSBAR))
-			wnd = PrevWindow(wnd);
-		if (wnd != NULL)
-			while (wnd->childfocus != NULL)
-				wnd = wnd->childfocus;
-	}
-	return wnd ? wnd : ApplicationWindow;
-}
-*/

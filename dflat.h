@@ -51,7 +51,7 @@ typedef enum {FALSE, TRUE} BOOL;
 #define OFF FALSE
 #define ON  TRUE
 
-#define MAXMESSAGES 100
+//#define MAXMESSAGES 100
 #define DELAYTICKS 1
 #define FIRSTDELAY 7
 #define DOUBLETICKS 5

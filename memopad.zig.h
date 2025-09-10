@@ -6,6 +6,8 @@ void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my);
 BOOL cProcessMessage(WINDOW, MESSAGE, PARAM, PARAM);
 extern BOOL AllocTesting;
 extern jmp_buf AllocError;
+extern BOOL NoChildCaptureMouse; // should be private
+extern BOOL NoChildCaptureKeyboard; // should be private
 
 // dialbox.c
 //void FirstFocus(DBOX *);

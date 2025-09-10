@@ -2,32 +2,35 @@
 
 #include "dflat.h"
 
+/*
 static int px = -1, py = -1;
 static int pmx = -1, pmy = -1;
 static int mx, my;
+*/
 //static int handshaking = 0;
 BOOL AllocTesting = FALSE;
 jmp_buf AllocError;
 BOOL AltDown = FALSE;
 
-static int lagdelay = FIRSTDELAY;
+//static int lagdelay = FIRSTDELAY;
 
 static volatile int keyportvalue;	/* for watching for key release */
 
-WINDOW CaptureMouse;
-WINDOW CaptureKeyboard;
-static BOOL NoChildCaptureMouse;
-static BOOL NoChildCaptureKeyboard;
+//WINDOW CaptureMouse;
+//WINDOW CaptureKeyboard;
+//BOOL NoChildCaptureMouse; // should be private
+//BOOL NoChildCaptureKeyboard; // should be private
 
-static volatile int delaytimer  = -1;
-static volatile int clocktimer  = -1;
+//static volatile int delaytimer  = -1;
+//static volatile int clocktimer  = -1;
 char time_string[] = "         ";
 
-static WINDOW Cwnd;
+//static WINDOW Cwnd;
 
-BOOL cProcessMessage(WINDOW, MESSAGE, PARAM, PARAM);
+//BOOL cProcessMessage(WINDOW, MESSAGE, PARAM, PARAM);
 
 /* ------------ initialize the message system --------- */
+/*
 BOOL init_messages(void)
 {
     NoChildCaptureMouse = FALSE;
@@ -36,6 +39,7 @@ BOOL init_messages(void)
     lagdelay = FIRSTDELAY;
     return TRUE;
 }
+*/
 
 BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
@@ -50,6 +54,7 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
                 break;
 */
             /* ------- clock messages --------- */
+		/*
             case CAPTURE_CLOCK:
 				if (Cwnd == NULL)
 	                set_timer(clocktimer, 0);
@@ -61,7 +66,9 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 				if (Cwnd == NULL)
 	                disable_timer(clocktimer);
                 break;
+		*/
             /* -------- keyboard messages ------- */
+		/*
             case KEYBOARD_CURSOR:
                 if (wnd == NULL)
                     cursor((int)p1, (int)p2);
@@ -69,6 +76,8 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
                     cursor(GetClientLeft(wnd)+(int)p1,
                                 GetClientTop(wnd)+(int)p2);
                 break;
+		*/
+		/*
             case CAPTURE_KEYBOARD:
                 if (p2)
                     ((WINDOW)p2)->PrevKeyboard=CaptureKeyboard;
@@ -99,6 +108,8 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 					CaptureKeyboard = NULL;
                 NoChildCaptureKeyboard = FALSE;
                 break;
+		*/
+		/*
             case CURRENT_KEYBOARD_CURSOR:
                 curr_cursor(&x, &y);
                 *(int*)p1 = x;
@@ -124,11 +135,15 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 			case WAITKEYBOARD:
 				waitforkeyboard();
 				break;
+				*/
             /* -------- mouse messages -------- */
+		/*
 			case RESET_MOUSE:
 				resetmouse();
 				set_mousetravel(0, SCREENWIDTH-1, 0, SCREENHEIGHT-1);
 				break;
+				*/
+		/*
             case MOUSE_INSTALLED:
                 rtn = mouse_installed();
                 break;
@@ -150,6 +165,8 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             case HIDE_MOUSE:
                 hide_mousecursor();
                 break;
+		*/
+		/*
             case MOUSE_CURSOR:
                 set_mouseposition((int)p1, (int)p2);
                 break;
@@ -162,6 +179,8 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             case TESTMOUSE:
                 rtn = mousebuttons();
                 break;
+		*/
+		/*
             case CAPTURE_MOUSE:
                 if (p2)
                     ((WINDOW)p2)->PrevMouse = CaptureMouse;
@@ -192,6 +211,7 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 					CaptureMouse = NULL;
                 NoChildCaptureMouse = FALSE;
                 break;
+		*/
             default:
                 break;
         }
@@ -199,6 +219,7 @@ BOOL cProcessMessage(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
     return rtn;
 }
 
+/*
 static RECT VisibleRect(WINDOW wnd)
 {
 	RECT rc = WindowRect(wnd);
@@ -220,8 +241,10 @@ static RECT VisibleRect(WINDOW wnd)
 	}
 	return rc;
 }
+*/
 
 /* ----- find window that mouse coordinates are in --- */
+/*
 static WINDOW inWindow(WINDOW wnd, int x, int y)
 {
 	WINDOW Hit = NULL;
@@ -240,13 +263,15 @@ static WINDOW inWindow(WINDOW wnd, int x, int y)
 	}
 	return Hit;
 }
+*/
 
+/*
 static WINDOW MouseWindow(int x, int y)
 {
-    /* ------ get the window in which a
-                    mouse event occurred ------ */
+    // ------ get the window in which a
+                    mouse event occurred ------ 
     WINDOW Mwnd = inWindow(ApplicationWindow, x, y);
-    /* ---- process mouse captures ----- */
+    // ---- process mouse captures ----- 
     if (CaptureMouse != NULL)	{
         if (NoChildCaptureMouse ||
 				Mwnd == NULL 	||
@@ -255,6 +280,7 @@ static WINDOW MouseWindow(int x, int y)
 	}
 	return Mwnd;
 }
+*/
 
 /*
 void handshake(void)
@@ -268,22 +294,23 @@ void handshake(void)
 */
 
 /* ---- dispatch messages to the message proc function ---- */
+/*
 void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my)
 {
     WINDOW Mwnd, Kwnd;
-        /* ------ get the window in which a
-                        keyboard event occurred ------ */
+        // ------ get the window in which a
+                        keyboard event occurred ------ 
         Kwnd = inFocus;
 
-        /* ---- process keyboard captures ----- */
+        // ---- process keyboard captures ----- 
         if (CaptureKeyboard != NULL)
             if (Kwnd == NULL ||
                     NoChildCaptureKeyboard ||
 						!isAncestor(Kwnd, CaptureKeyboard))
                 Kwnd = CaptureKeyboard;
 
-        /* -------- send mouse and keyboard messages to the
-            window that should get them -------- */
+        // -------- send mouse and keyboard messages to the
+            window that should get them -------- 
         switch (ev_event)    {
             case SHIFT_CHANGED:
             case KEYBOARD:
@@ -320,3 +347,4 @@ void c_dispatch_message(MESSAGE ev_event, int ev_mx, int ev_my)
                 break;
         }
 }
+*/

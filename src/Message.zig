@@ -5,8 +5,19 @@ const Window = @import("Window.zig");
 const log = @import("Log.zig");
 const clipboard = @import("Clipboard.zig");
 const DialogBox = @import("DialogBox.zig");
+const rect = @import("Rect.zig");
 
 const MAXMESSAGES = 100;
+
+var Cwnd:df.WINDOW = null;
+var clocktimer:c_int = -1;
+var lagdelay:c_int = df.FIRSTDELAY; // not in use
+var handshaking = false; // not in use
+
+export var CaptureMouse:df.WINDOW = null;
+export var CaptureKeyboard:df.WINDOW = null;
+var NoChildCaptureMouse = df.FALSE;
+var NoChildCaptureKeyboard = df.TRUE;
 
 // ---------- event queue ----------
 const Evt = struct {
@@ -57,10 +68,14 @@ pub fn init_messages() bool {
     df.savecursor();
     df.hidecursor();
 
-    df.CaptureMouse = null;
-    df.CaptureKeyboard = null;
+    CaptureMouse = null;
+    CaptureKeyboard = null;
 
-    _ = df.init_messages();
+//    _ = df.init_messages();
+    NoChildCaptureMouse = df.FALSE;
+    NoChildCaptureKeyboard = df.FALSE;
+    PostMessage(null,df.START,0,0);
+//    lagdelay = FIRSTDELAY; // not in use
     return true;
 }
 
@@ -141,23 +156,269 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
     // wnd could be null
     log.LogMessages(wnd, msg, p1, p2);
 
+    var rrtn = rtn;
+
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
-    if (rtn) {
+    if (rrtn) {
         // --------- process messages that a window sends to the
         //  system itself ----------
         switch (msg) {
             df.STOP => {
                 StopMsg();
             },
+            // ------- clock messages ---------
+            df.CAPTURE_CLOCK => {
+                if (Cwnd == null) {
+                     const secs:c_int = 0;
+                     clocktimer=(secs)*182/10+1;
+//                    df.set_timer(clocktimer, 0);
+                }
+                wnd.*.PrevClock = Cwnd;
+                Cwnd = wnd;
+            },
+            df.RELEASE_CLOCK => {
+                Cwnd = wnd.*.PrevClock;
+                if (Cwnd == null)
+                    clocktimer = -1;
+//                    df.disable_timer(df.clocktimer);
+            },
+            // -------- keyboard messages -------
+            df.KEYBOARD_CURSOR => {
+                if (wnd == null) {
+                    df.cursor(@intCast(p1), @intCast(p2));
+                } else if (wnd == df.inFocus) {
+                    if (Window.get_zin(wnd)) |w| {
+                        df.cursor(@intCast(w.GetClientLeft()+p1),
+                                  @intCast(w.GetClientTop()+p2));
+                    }
+                }
+            },
+            df.CAPTURE_KEYBOARD => {
+                if (p2 > 0) {
+                    const pp2:usize = @intCast(p2);
+                    const wp2:df.WINDOW = @ptrFromInt(pp2);
+                    wp2.*.PrevKeyboard=CaptureKeyboard;
+//                    ((WINDOW)p2)->PrevKeyboard=CaptureKeyboard;
+                } else {
+                    wnd.*.PrevKeyboard = CaptureKeyboard;
+                }
+                CaptureKeyboard = wnd;
+                NoChildCaptureKeyboard = if (p1>0) df.TRUE else df.FALSE;
+            },
+            df.RELEASE_KEYBOARD => {
+                if (wnd != null) {
+                    if (CaptureKeyboard == wnd or (p1>0)) {
+                        CaptureKeyboard = wnd.*.PrevKeyboard;
+                    } else {
+                        var twnd:df.WINDOW = CaptureKeyboard;
+                        while (twnd != null) {
+                            if (twnd.*.PrevKeyboard == wnd)  {
+                                twnd.*.PrevKeyboard = wnd.*.PrevKeyboard;
+                                break;
+                            }
+                            twnd = twnd.*.PrevKeyboard;
+                        }
+                        if (twnd == null) {
+                            CaptureKeyboard = null;
+                        }
+                    }
+                    wnd.*.PrevKeyboard = null;
+                } else {
+                    CaptureKeyboard = null;
+                }
+                NoChildCaptureKeyboard = df.FALSE;
+            },
+            df.CURRENT_KEYBOARD_CURSOR => {
+                var x:c_int = 0;
+                var y:c_int = 0;
+                df.curr_cursor(&x, &y);
+                const pp1:usize = @intCast(p1);
+                const pp1_ptr:*c_int = @ptrFromInt(pp1);
+                const pp2:usize = @intCast(p2);
+                const pp2_ptr:*c_int = @ptrFromInt(pp2);
+                pp1_ptr.* = x;
+                pp2_ptr.* = y;
+//                *(int*)p1 = x;
+//                *(int*)p2 = y;
+            },
+            df.SAVE_CURSOR => {
+                df.savecursor();
+            },
+            df.RESTORE_CURSOR => {
+                df.restorecursor();
+            },
+            df.HIDE_CURSOR => {
+                df.normalcursor();
+                df.hidecursor();
+            },
+            df.SHOW_CURSOR => {
+                if (p1>0) {
+                    df.set_cursor_type(0x0106);
+                } else {
+                    df.set_cursor_type(0x0607);
+                }
+                df.unhidecursor();
+            },
+            df.WAITKEYBOARD => {
+                // This one does nothing and is marked as FIXME originally.
+                // df.waitforkeyboard();
+            },
+            // -------- mouse messages --------
+            df.RESET_MOUSE => {
+                df.resetmouse();
+                df.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
+            },
+            df.MOUSE_INSTALLED => {
+                rrtn = if (df.mouse_installed()>0) true else false;
+            },
+            df.MOUSE_TRAVEL => {
+                var rc:df.RECT = .{.lf = 0, .tp = 0, .rt = 0, .bt = 0};
+                if (p1 == 0) {
+                    rc.lf = 0;
+                    rc.tp = 0;
+                    rc.rt = df.SCREENWIDTH-1;
+                    rc.bt = df.SCREENHEIGHT-1;
+                } else {
+                    const pp1:usize = @intCast(p1);
+                    const rc_ptr:*df.RECT = @ptrFromInt(pp1);
+                    rc = rc_ptr.*;
+                }
+                df.set_mousetravel(rc.lf, rc.rt, rc.tp, rc.bt);
+            },
+            df.SHOW_MOUSE => {
+                df.show_mousecursor();
+            },
+            df.HIDE_MOUSE => {
+                df.hide_mousecursor();
+            },
+            df.MOUSE_CURSOR => {
+                df.set_mouseposition(@intCast(p1), @intCast(p2));
+            },
+            df.CURRENT_MOUSE_CURSOR => {
+                // df.get_mouseposition((int*)p1,(int*)p2); // do nothing in original code
+            },
+            df.WAITMOUSE => {
+                df.waitformouse();
+            },
+            df.TESTMOUSE => {
+                rrtn = if (df.mousebuttons()>0) true else false;
+            },
+            df.CAPTURE_MOUSE => {
+                if (p2>0) {
+                    const pp2:usize = @intCast(p2);
+                    const pp2_ptr:df.WINDOW = @ptrFromInt(pp2);
+                    pp2_ptr.*.PrevMouse = CaptureMouse;
+//                    ((WINDOW)p2)->PrevMouse = CaptureMouse;
+                } else {
+                    wnd.*.PrevMouse = CaptureMouse;
+                }
+                CaptureMouse = wnd;
+                NoChildCaptureMouse = if (p1>0) df.TRUE else df.FALSE;
+            },
+            df.RELEASE_MOUSE => {
+                if (wnd != null) {
+                    if (CaptureMouse == wnd or (p1>0)) {
+                        CaptureMouse = wnd.*.PrevMouse;
+                    } else {
+                        var twnd:df.WINDOW = CaptureMouse;
+                        while (twnd != null) {
+                            if (twnd.*.PrevMouse == wnd) {
+                                twnd.*.PrevMouse = wnd.*.PrevMouse;
+                                break;
+                            }
+                            twnd = twnd.*.PrevMouse;
+                        }
+                        if (twnd == null) {
+                            CaptureMouse = null;
+                        }
+                    }
+                    wnd.*.PrevMouse = null;
+                } else {
+                    CaptureMouse = null;
+                }
+                NoChildCaptureMouse = df.FALSE;
+            },
             else => {
-                return (df.cProcessMessage(wnd, msg, p1, p2) == df.TRUE);
             }
         }
 
     }
-    return true;
+    return rrtn;
 }
+
+fn VisibleRect(win:*Window) df.RECT {
+    const wnd = win.win;
+    var rc = win.WindowRect();
+    if (!win.TestAttribute(df.NOCLIP)) {
+        var pwnd = df.GetParent(wnd);
+        if (pwnd == null)
+            return rc;
+        var prc:df.RECT = undefined;
+        if (Window.get_zin(pwnd)) |pwin| {
+            prc = rect.ClientRect(pwin);
+        }
+        while (pwnd != null) {
+            if (Window.get_zin(pwnd)) |pwin| {
+                if (pwin.TestAttribute(df.NOCLIP))
+                    break;
+                rc = df.subRectangle(rc, prc);
+                if (df.ValidRect(rc) == false)
+                    break;
+                pwnd = df.GetParent(pwnd);
+                if (pwnd != null)
+                    prc = rect.ClientRect(pwin);
+            }
+        }
+    }
+    return rc;
+}
+
+
+// ----- find window that mouse coordinates are in ---
+fn inWindow(w:df.WINDOW, x:c_int, y:c_int) df.WINDOW {
+    var wnd = w;
+    var Hit:df.WINDOW = null;
+    while (wnd != null) {
+        if (Window.get_zin(wnd)) |win| {
+            if (df.isVisible(wnd)>0) {
+                const rc = VisibleRect(win);
+                if (rect.InsideRect(x, y, rc))
+                    Hit = wnd;
+                const wnd1 = inWindow(Window.LastWindow(wnd), x, y);
+                if (wnd1 != null)
+                    Hit = wnd1;
+                if (Hit != null)
+                    break;
+            }
+        }
+        wnd = Window.PrevWindow(wnd);
+    }
+    return Hit;
+}
+
+fn MouseWindow(x:c_int, y:c_int) df.WINDOW {
+    // ------ get the window in which a
+    //              mouse event occurred ------
+    var Mwnd = inWindow(df.ApplicationWindow, x, y);
+    // ---- process mouse captures -----
+    if (CaptureMouse != null) {
+        if (NoChildCaptureMouse == df.TRUE or
+                                Mwnd == null  or
+                                df.isAncestor(Mwnd, CaptureMouse) == df.FALSE)
+            Mwnd = CaptureMouse;
+    }
+    return Mwnd;
+}
+
+//void handshake(void)
+//{
+//#if MSDOS
+//        handshaking++;
+//        dispatch_message();
+//        --handshaking;
+//#endif
+//}
 
 // ---- dispatch messages to the message proc function ----
 pub fn dispatch_message() bool {
@@ -172,7 +433,63 @@ pub fn dispatch_message() bool {
             EventQueueOffCtr = 0;
         EventQueueCtr -= 1;
 
-        df.c_dispatch_message(ev.event, ev.mx, ev.my);
+//        df.c_dispatch_message(ev.event, ev.mx, ev.my);
+
+        // ------ get the window in which a
+        //              keyboard event occurred ------
+        var Kwnd:df.WINDOW = df.inFocus;
+
+        // ---- process keyboard captures -----
+        if (CaptureKeyboard != null) {
+            if (Kwnd == null or
+                    NoChildCaptureKeyboard == df.TRUE or
+                    df.isAncestor(Kwnd, CaptureKeyboard) == df.FALSE ) {
+                Kwnd = CaptureKeyboard;
+            }
+        }
+
+        // -------- send mouse and keyboard messages to the
+        //    window that should get them -------- 
+        switch (ev.event) {
+            df.SHIFT_CHANGED,
+            df.KEYBOARD => {
+                if (!handshaking)
+                    _ = SendMessage(Kwnd, ev.event, ev.mx, ev.my);
+            },
+            df.LEFT_BUTTON => {
+                if (!handshaking) {
+                    const Mwnd = MouseWindow(ev.mx, ev.my);
+                    if (CaptureMouse == null or
+                                (NoChildCaptureMouse == df.FALSE and
+                                  df.isAncestor(Mwnd, CaptureMouse) == df.TRUE)) {
+                        if (Mwnd != df.inFocus)
+                            _ = SendMessage(Mwnd, df.SETFOCUS, df.TRUE, 0);
+                    }
+                    _ = df.SendMessage(Mwnd, df.LEFT_BUTTON, ev.mx, ev.my);
+                }
+            },
+            df.BUTTON_RELEASED,
+            df.DOUBLE_CLICK,
+            df.RIGHT_BUTTON => {
+                if (!handshaking) {
+                    // Fall through
+                    const Mwnd = MouseWindow(ev.mx, ev.my);
+                    _ = SendMessage(Mwnd, ev.event, ev.mx, ev.my);
+                }
+            },
+            df.MOUSE_MOVED => {
+                const Mwnd = MouseWindow(ev.mx, ev.my);
+                _ = SendMessage(Mwnd, ev.event, ev.mx, ev.my);
+            },
+//#if MSDOS       // FIXME add MK_FP
+//            case CLOCKTICK:
+//                SendMessage(Cwnd, ev_event,
+//                    (PARAM) MK_FP(ev_mx, ev_my), 0);
+//                                break;
+//#endif
+            else => {
+            }
+        }
     }
 
     // ------ dequeue and process messages -----
