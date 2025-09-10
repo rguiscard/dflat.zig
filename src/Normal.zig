@@ -35,7 +35,7 @@ fn CreateWindowMsg(win:*Window) void {
         win.ClearAttribute(df.VSCROLLBAR | df.HSCROLLBAR);
     }
     if (win.TestAttribute(df.SAVESELF) and df.isVisible(wnd)>0) {
-        df.GetVideoBuffer(wnd);
+        GetVideoBuffer(win);
     }
 }
 
@@ -45,7 +45,7 @@ fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if (Window.GetParent(wnd) == null or df.isVisible(Window.GetParent(wnd))>0) {
         if (win.TestAttribute(df.SAVESELF) and
                         (wnd.*.videosave == null)) {
-            df.GetVideoBuffer(wnd);
+            GetVideoBuffer(win);
         }
         win.SetVisible();
 
@@ -69,7 +69,7 @@ fn HideWindowMsg(win:*Window) void {
         win.ClearVisible();
         // --- paint what this window covered ---
         if (win.TestAttribute(df.SAVESELF)) {
-            df.PutVideoBuffer(wnd);
+            PutVideoBuffer(win);
         } else {
             df.PaintOverLappers(wnd);
         }
@@ -276,7 +276,7 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
                 if (df.ApplicationWindow != null) {
                     var ffwnd = Window.FirstWindow(df.ApplicationWindow);
                     while (ffwnd != null) {
-                        if (df.isAncestor(wnd, ffwnd) == 0) {
+                        if (isAncestor(wnd, ffwnd) == false) {
                             rc = df.subRectangle(df.WindowRect(wnd),df.WindowRect(ffwnd));
                             if (df.ValidRect(rc)) {
                                 break;
@@ -757,6 +757,65 @@ pub fn isDerivedFrom(win:*Window, klass:df.CLASS) bool {
         }
         const cls = Classes.defs[@intCast(tclass)];
         tclass = @intFromEnum(cls[1]);
+    }
+    return false;
+}
+
+// -- adjust a window's rectangle to clip it to its parent -
+fn ClipRect(win:*Window) df.RECT {
+    const wnd = win.win;
+    var rc = win.WindowRect();
+    if (win.TestAttribute(df.SHADOW)) {
+        rc.bt += 1;
+        rc.rt += 1;
+//        RectBottom(rc)++;
+//        RectRight(rc)++;
+    }
+    return df.ClipRectangle(wnd, rc);
+}
+
+// -- get the video memory that is to be used by a window --
+fn GetVideoBuffer(win:*Window) void {
+    const wnd = win.win;
+    const rc = ClipRect(win);
+    const ht = df.RectBottom(rc) - df.RectTop(rc) + 1;
+    const wd = df.RectRight(rc) - df.RectLeft(rc) + 1;
+    wnd.*.videosave = @ptrCast(df.DFrealloc(wnd.*.videosave, @intCast(ht * wd * 2)));
+//    if (wnd.*.videosave == null) {
+//        if (root.global_allocator.alloc(u8, @intCast(ht * wd * 2))) |buf| {
+//            wnd.*.videosave = @ptrCast(buf);
+//        } else |_| {
+//        }
+//    } else {
+//        if (root.global_allocator.realloc(wnd.*.videosave, @intCast(ht * wd * 2))) |buf| {
+//            wnd.*.videosave = @ptrCast(buf);
+//        } else |_| {
+//        }
+//    }
+    df.get_videomode();
+    df.getvideo(rc, wnd.*.videosave);
+}
+
+// -- put the video memory that is used by a window --
+fn PutVideoBuffer(win:*Window) void {
+    const wnd = win.win;
+    if (wnd.*.videosave != null) {
+        const rc = ClipRect(win);
+        df.get_videomode();
+        df.storevideo(rc, wnd.*.videosave);
+        df.free(wnd.*.videosave);
+//        root.global_allocator.free(wnd.*.videosave);
+        wnd.*.videosave = null;
+    }
+}
+
+// ------- return TRUE if awnd is an ancestor of wnd -------
+pub fn isAncestor(w: df.WINDOW, awnd: df.WINDOW) bool {
+    var wnd = w;
+    while (wnd != null) {
+        if (wnd == awnd)
+            return true;
+        wnd = df.GetParent(wnd);
     }
     return false;
 }

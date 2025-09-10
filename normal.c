@@ -360,6 +360,7 @@ BOOL isVisible(WINDOW wnd)
 }
 
 /* -- adjust a window's rectangle to clip it to its parent - */
+/*
 static RECT near ClipRect(WINDOW wnd)
 {
     RECT rc;
@@ -370,8 +371,10 @@ static RECT near ClipRect(WINDOW wnd)
     }
 	return ClipRectangle(wnd, rc);
 }
+*/
 
 /* -- get the video memory that is to be used by a window -- */
+/*
 void GetVideoBuffer(WINDOW wnd)
 {
     RECT rc;
@@ -385,8 +388,10 @@ void GetVideoBuffer(WINDOW wnd)
     get_videomode();
     getvideo(rc, wnd->videosave);
 }
+*/
 
 /* -- put the video memory that is used by a window -- */
+/*
 void PutVideoBuffer(WINDOW wnd)
 {
     if (wnd->videosave != NULL)    {
@@ -398,8 +403,10 @@ void PutVideoBuffer(WINDOW wnd)
     	wnd->videosave = NULL;
 	}
 }
+*/
 
 /* ------- return TRUE if awnd is an ancestor of wnd ------- */
+/*
 BOOL isAncestor(WINDOW wnd, WINDOW awnd)
 {
 	while (wnd != NULL)	{
@@ -409,3 +416,4 @@ BOOL isAncestor(WINDOW wnd, WINDOW awnd)
 	}
 	return FALSE;
 }
+*/

@@ -323,7 +323,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 // we assume df.inFocus is not null
                 if (Window.get_zin(oldFocus)) |oldWin| {
                     if ((pwnd != null) and (df.GetClass(oldFocus) != df.APPLICATION) and
-                                       (df.isAncestor(df.inFocus, pwnd) == 0)) {
+                                       (Normal.isAncestor(df.inFocus, pwnd) == false)) {
                         df.inFocus = null;
                         _ = q.SendMessage(oldFocus, df.BORDER, 0, 0);
                         _ = q.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);

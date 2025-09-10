@@ -6,6 +6,7 @@ const log = @import("Log.zig");
 const clipboard = @import("Clipboard.zig");
 const DialogBox = @import("DialogBox.zig");
 const rect = @import("Rect.zig");
+const normal = @import("Normal.zig");
 
 const MAXMESSAGES = 100;
 
@@ -409,7 +410,7 @@ fn MouseWindow(x:c_int, y:c_int) df.WINDOW {
     if (CaptureMouse != null) {
         if (NoChildCaptureMouse or
                                 Mwnd == null  or
-                                df.isAncestor(Mwnd, CaptureMouse) == df.FALSE)
+                                normal.isAncestor(Mwnd, CaptureMouse) == false)
             Mwnd = CaptureMouse;
     }
     return Mwnd;
@@ -445,7 +446,7 @@ pub fn dispatch_message() bool {
         if (CaptureKeyboard != null) {
             if (Kwnd == null or
                     NoChildCaptureKeyboard or
-                    df.isAncestor(Kwnd, CaptureKeyboard) == df.FALSE ) {
+                    normal.isAncestor(Kwnd, CaptureKeyboard) == false) {
                 Kwnd = CaptureKeyboard;
             }
         }
@@ -463,7 +464,7 @@ pub fn dispatch_message() bool {
                     const Mwnd = MouseWindow(ev.mx, ev.my);
                     if (CaptureMouse == null or
                                 (NoChildCaptureMouse == false and
-                                  df.isAncestor(Mwnd, CaptureMouse) == df.TRUE)) {
+                                  normal.isAncestor(Mwnd, CaptureMouse) == true)) {
                         if (Mwnd != df.inFocus)
                             _ = SendMessage(Mwnd, df.SETFOCUS, df.TRUE, 0);
                     }

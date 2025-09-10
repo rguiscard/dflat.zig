@@ -2,12 +2,7 @@
 
 #include "dflat.h"
 
-//extern DBOX MsgBox;
-//extern DBOX InputBoxDB;
-//WINDOW CancelWnd;
-
-//static int ReturnValue;
-/* does nothing
+/* nothing use this function.
 void CloseCancelBox(void)
 {
     if (CancelWnd != NULL)
@@ -17,6 +12,9 @@ void CloseCancelBox(void)
 
 /* Current not in use. Port later */
 #if NOT_IN_USE 
+
+extern DBOX InputBoxDB;
+
 static char *InputText;
 static int TextLength;
 
@@ -62,26 +60,3 @@ BOOL InputBox(WINDOW wnd,char *ttl,char *msg,char *text,int len,int wd)
     return DialogBox(wnd, &InputBoxDB, TRUE, InputBoxProc);
 }
 #endif
-
-/*
-int MsgHeight(char *msg)
-{
-    int h = 1;
-    while ((msg = strchr(msg, '\n')) != NULL)    {
-        h++;
-        msg++;
-    }
-    return min(h, SCREENHEIGHT-10);
-}
-
-int MsgWidth(char *msg)
-{
-    int w = 0;
-    char *cp = msg;
-    while ((cp = strchr(msg, '\n')) != NULL)    {
-        w = max(w, (int) (cp-msg));
-        msg = cp+1;
-    }
-    return min(max(strlen(msg),w), SCREENWIDTH-10);
-}
-*/
