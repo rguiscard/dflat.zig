@@ -16,8 +16,8 @@ RECT PositionIcon(WINDOW);
 #endif
 //void dragborder(WINDOW, int, int);
 //void sizeborder(WINDOW, int, int);
-int px = -1, py = -1;
-int diff;
+//int px = -1, py = -1;
+//int diff;
 struct window dwnd = {DUMMY, NULL, NormalProc,
                                 {-1,-1,-1,-1}};
 void SetParent(WINDOW, WINDOW);
@@ -137,6 +137,7 @@ void sizeborder(WINDOW wnd, int rt, int bt)
 }
 */
 
+#if 0
 #ifdef INCLUDE_MULTI_WINDOWS
 /* ----- adjust a rectangle to include the shadow ----- */
 static RECT adjShadow(WINDOW wnd)
@@ -283,6 +284,7 @@ void near PaintUnderLappers(WINDOW wnd)
     }
 }
 #endif /* #ifdef INCLUDE_MULTI_WINDOWS */
+#endif
 
 /* --- save video area to be used by dummy window border --- */
 void SaveBorder(RECT rc) // should be private

@@ -11,9 +11,11 @@ const sysmenu = @import("SystemMenu.zig");
 const Classes = @import("Classes.zig");
 
 var dummyWnd:?Window = null;
-//var px:c_int = -1;
-//var py:c_int = -1;
-//var diff:c_int = 0;
+var px:c_int = -1;
+var py:c_int = -1;
+var diff:c_int = 0;
+
+var HiddenWindow:*Window = undefined; // seems initialized before use ?
 
 fn getDummy() df.WINDOW {
     if(dummyWnd == null) {
@@ -71,7 +73,7 @@ fn HideWindowMsg(win:*Window) void {
         if (win.TestAttribute(df.SAVESELF)) {
             PutVideoBuffer(win);
         } else {
-            df.PaintOverLappers(wnd);
+            PaintOverLappers(win);
         }
         wnd.*.wasCleared = df.FALSE;
     }
@@ -359,9 +361,9 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         }
         if (win.TestAttribute(df.MOVEABLE))    {
             df.WindowMoving = df.TRUE;
-            df.px = @intCast(mx);
-            df.py = @intCast(my);
-            df.diff = @intCast(mx);
+            px = @intCast(mx);
+            py = @intCast(my);
+            diff = @intCast(mx);
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(dwnd)));
 //            df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
@@ -402,7 +404,7 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         var topmost:c_int = 0;
         var bottommost:c_int = df.SCREENHEIGHT-2;
         var rightmost:c_int = df.SCREENWIDTH-2;
-        var x:c_int = @intCast(p1 - df.diff);
+        var x:c_int = @intCast(p1 - diff);
         var y:c_int = @intCast(p2);
         if ((Window.GetParent(wnd) != null) and
                 (win.TestAttribute(df.NOCLIP) == false)) {
@@ -420,18 +422,17 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             x = @min(x, rightmost);
             y = @max(y, topmost);
             y = @min(y, bottommost);
-            _ = q.SendMessage(null,df.MOUSE_CURSOR,x+df.diff,y);
+            _ = q.SendMessage(null,df.MOUSE_CURSOR,x+diff,y);
         }
-        if ((x != df.px) or  (y != df.py))    {
-            df.px = x;
-            df.py = y;
-//            df.dragborder(wnd, x, y);
+        if ((x != px) or  (y != py))    {
+            px = x;
+            py = y;
             dragborder(win, x, y);
         }
         return true;
     }
     if (df.WindowSizing>0) {
-        sizeborder(wnd, @intCast(p1), @intCast(p2));
+        sizeborder(win, @intCast(p1), @intCast(p2));
         return true;
     }
     return false;
@@ -644,7 +645,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         df.PAINT => {
             if (df.isVisible(wnd)>0) {
                 if (wnd.*.wasCleared > 0) {
-                    df.PaintUnderLappers(wnd);
+                    PaintUnderLappers(win);
                 } else {
                     wnd.*.wasCleared = df.TRUE;
 
@@ -741,9 +742,9 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
 // ----- terminate the move or size operation -----
 fn TerminateMoveSize() void {
     const dwnd = getDummy();
-    df.px = -1;
-    df.py = -1;
-    df.diff = 0;
+    px = -1;
+    py = -1;
+    diff = 0;
     _ = q.SendMessage(dwnd, df.RELEASE_MOUSE, df.TRUE, 0);
     _ = q.SendMessage(dwnd, df.RELEASE_KEYBOARD, df.TRUE, 0);
     df.RestoreBorder(dwnd.*.rc);
@@ -773,41 +774,200 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
 }
 
 // ---- write the dummy window border for sizing ----
-fn sizeborder(wnd:df.WINDOW, rt:c_int, bt:c_int) void {
+fn sizeborder(win:*Window, rt:c_int, bt:c_int) void {
+    const wnd = win.win;
     const dwnd = getDummy();
 
-    if (Window.get_zin(wnd)) |win| {
-        const leftmost:c_int = @intCast(win.GetLeft()+10);
-        const topmost:c_int = @intCast(win.GetTop()+3);
-        var bottommost:c_int = @intCast(df.SCREENHEIGHT-1);
-        var rightmost:c_int = @intCast(df.SCREENWIDTH-1);
-        if (df.GetParent(wnd) > 0) {
-            const pwnd = df.GetParent(wnd);
-            if (Window.get_zin(pwnd)) |pwin| {
-                bottommost = @intCast(@min(bottommost, pwin.GetClientBottom()));
-                rightmost  = @intCast(@min(rightmost, pwin.GetClientRight()));
+    const leftmost:c_int = @intCast(win.GetLeft()+10);
+    const topmost:c_int = @intCast(win.GetTop()+3);
+    var bottommost:c_int = @intCast(df.SCREENHEIGHT-1);
+    var rightmost:c_int = @intCast(df.SCREENWIDTH-1);
+    if (df.GetParent(wnd) > 0) {
+        const pwnd = df.GetParent(wnd);
+        if (Window.get_zin(pwnd)) |pwin| {
+            bottommost = @intCast(@min(bottommost, pwin.GetClientBottom()));
+            rightmost  = @intCast(@min(rightmost, pwin.GetClientRight()));
+        }
+    }
+    var new_rt:c_int = @min(rt, rightmost);
+    var new_bt:c_int = @min(bt, bottommost);
+    new_rt = @max(new_rt, leftmost);
+    new_bt = @max(new_bt, topmost);
+    _ = df.SendMessage(null, df.MOUSE_CURSOR, new_rt, new_bt);
+
+    if ((new_rt != px) or (new_bt != py))
+        df.RestoreBorder(dwnd.*.rc);
+
+    // ------- change the dummy window --------
+    dwnd.*.ht = bt-dwnd.*.rc.tp+1;
+    dwnd.*.wd = rt-dwnd.*.rc.lf+1;
+    dwnd.*.rc.rt = new_rt;
+    dwnd.*.rc.bt = new_bt;
+    if ((new_rt != px) or (new_bt != py)) {
+        px = new_rt;
+        py = new_bt;
+        df.SaveBorder(dwnd.*.rc);
+        df.RepaintBorder(dwnd, null);
+    }
+}
+
+// ----- adjust a rectangle to include the shadow -----
+fn adjShadow(win:*Window) df.RECT {
+    const wnd = win.win;
+    var rc = wnd.*.rc;
+    if (win.TestAttribute(df.SHADOW)) {
+        if (rc.rt < df.SCREENWIDTH-1)
+            rc.rt += 1;
+        if (rc.bt < df.SCREENHEIGHT-1)
+            rc.bt += 1;
+    }
+    return rc;
+}
+
+// --- repaint a rectangular subsection of a window ---
+fn PaintOverLap(win:*Window, rc:df.RECT) void {
+    const wnd = win.win;
+    if (isVisible(win)) {
+        var isBorder = false;
+        var isTitle = false;
+        var isData = true;
+        if (win.TestAttribute(df.HASBORDER)) {
+            isBorder =  rc.lf == 0 and
+                        rc.tp < win.WindowHeight();
+            isBorder |= rc.lf < win.WindowWidth() and
+                        rc.rt >= win.WindowWidth()-1 and
+                        rc.tp < win.WindowHeight();
+            isBorder |= rc.tp == 0 and
+                        rc.lf < win.WindowWidth();
+            isBorder |= rc.tp < win.WindowHeight() and
+                        rc.bt >= win.WindowHeight()-1 and
+                        rc.lf < win.WindowWidth();
+        } else if (win.TestAttribute(df.HASTITLEBAR)) {
+            isTitle = rc.tp == 0 and
+                      rc.rt > 0 and
+                      rc.lf < win.WindowWidth()-win.BorderAdj();
+        }
+
+        if (rc.lf >= win.WindowWidth()-win.BorderAdj())
+            isData = false;
+        if (rc.tp >= win.WindowHeight()-win.BottomBorderAdj())
+            isData = false;
+        if (win.TestAttribute(df.HASBORDER)) {
+            if (rc.rt == 0)
+                isData = false;
+            if (rc.bt == 0)
+                isData = false;
+        }
+        if (win.TestAttribute(df.SHADOW))
+            isBorder |= rc.rt == win.WindowWidth() or
+                        rc.bt == win.WindowHeight();
+        if (isData) {
+            wnd.*.wasCleared = df.FALSE;
+            _ = win.sendMessage(df.PAINT, @intCast(@intFromPtr(&rc)), df.TRUE);
+        }
+        if (isBorder) {
+            _ = win.sendMessage(df.BORDER, @intCast(@intFromPtr(&rc)), 0);
+        } else if (isTitle) {
+            df.DisplayTitle(wnd, @constCast(&rc));
+        }
+    }
+}
+
+// ------ paint the part of a window that is overlapped
+//            by another window that is being hidden -------
+fn PaintOver(win:*Window) void {
+    const wnd = win.win;
+    const wrc = adjShadow(HiddenWindow);
+    var rc = adjShadow(win);
+    rc = df.subRectangle(rc, wrc);
+    if (df.ValidRect(rc))
+        PaintOverLap(win, df.RelativeWindowRect(wnd, rc));
+}
+
+// --- paint the overlapped parts of all children ---
+fn PaintOverChildren(pwin:*Window) void {
+    const pwnd = pwin.win;
+    var cwnd = Window.FirstWindow(pwnd);
+    while (cwnd != null)    {
+        if (cwnd != HiddenWindow.win) {
+            if (Window.get_zin(cwnd)) |cwin| {
+                PaintOver(cwin);
+                PaintOverChildren(cwin);
             }
         }
-        var new_rt:c_int = @min(rt, rightmost);
-        var new_bt:c_int = @min(bt, bottommost);
-        new_rt = @max(new_rt, leftmost);
-        new_bt = @max(new_bt, topmost);
-        _ = df.SendMessage(null, df.MOUSE_CURSOR, new_rt, new_bt);
+        cwnd = Window.NextWindow(cwnd);
+    }
+}
 
-        if ((new_rt != df.px) or (new_bt != df.py))
-            df.RestoreBorder(dwnd.*.rc);
-
-        // ------- change the dummy window --------
-        dwnd.*.ht = bt-dwnd.*.rc.tp+1;
-        dwnd.*.wd = rt-dwnd.*.rc.lf+1;
-        dwnd.*.rc.rt = new_rt;
-        dwnd.*.rc.bt = new_bt;
-        if ((new_rt != df.px) or (new_bt != df.py)) {
-            df.px = new_rt;
-            df.py = new_bt;
-            df.SaveBorder(dwnd.*.rc);
-            df.RepaintBorder(dwnd, null);
+// -- recursive overlapping paint of parents --
+fn PaintOverParents(win:*Window) void {
+    const wnd = win.win;
+    const pwnd = df.GetParent(wnd);
+    if (pwnd != null) {
+        if (Window.get_zin(pwnd)) |pwin| {
+            PaintOverParents(pwin);
+            PaintOver(pwin);
+            PaintOverChildren(pwin);
         }
+    }
+}
+
+// - paint the parts of all windows that a window is over -
+fn PaintOverLappers(win:*Window) void {
+    HiddenWindow = win;
+    PaintOverParents(win);
+}
+
+// --- paint those parts of a window that are overlapped ---
+fn PaintUnderLappers(win:*Window) void {
+    const wnd = win.win;
+    var hwnd = Window.NextWindow(wnd);
+    while (hwnd != null) {
+        if (Window.get_zin(hwnd)) |hwin| {
+            // ------- test only at document window level ------
+            var pwnd = df.GetParent(hwnd);
+            // if (pwnd == NULL || GetClass(pwnd) == APPLICATION) {
+            // ---- don't bother testing self -----
+            if (isVisible(hwin) and hwnd != wnd) {
+                // --- see if other window is descendent ---
+                while (pwnd != null) {
+                    if (pwnd == wnd)
+                        break;
+                    pwnd = Window.GetParent(pwnd);
+                }
+                // ----- don't test descendent overlaps -----
+                if (pwnd == null) {
+                    // -- see if other window is ancestor ---
+                    pwnd = df.GetParent(wnd);
+                    while (pwnd != null) {
+                        if (pwnd == hwnd)
+                            break;
+                        pwnd = df.GetParent(pwnd);
+                    }
+                    // --- don't test ancestor overlaps ---
+                    if (pwnd == null) {
+                        if (GetAncestor(hwin)) |w| {
+                           // Could HiddenWindow be null ?
+                           //HiddenWindow = GetAncestor(hwnd);
+                           HiddenWindow = w;
+                           HiddenWindow.ClearVisible();
+                           PaintOver(win);
+                           HiddenWindow.SetVisible();
+                        }
+                    }
+                }
+            }
+        }
+        hwnd = Window.NextWindow(hwnd);
+    }
+    // --------- repaint all children of this window
+    //    the same way -----------
+    hwnd = Window.FirstWindow(wnd);
+    while (hwnd != null) {
+        if (Window.get_zin(hwnd)) |hwin| {
+            PaintUnderLappers(hwin);
+        }
+        hwnd = Window.NextWindow(hwnd);
     }
 }
 
@@ -825,8 +985,8 @@ pub fn isDerivedFrom(win:*Window, klass:df.CLASS) bool {
 }
 
 // -- find the oldest document window ancestor of a window --
-fn GetAncestor(w: df.WINDOW) df.WINDOW {
-    var wnd = w;
+fn GetAncestor(win:*Window) ?*Window {
+    var wnd = win.win;
     if (wnd != null) {
         while (df.GetParent(wnd) != null) {
             if (df.GetClass(df.GetParent(wnd)) == df.APPLICATION)
@@ -834,7 +994,8 @@ fn GetAncestor(w: df.WINDOW) df.WINDOW {
             wnd = df.GetParent(wnd);
         }
     }
-    return wnd;
+    return Window.get_zin(wnd);
+//    return wnd;
 }
 
 // this should be go Window ?
