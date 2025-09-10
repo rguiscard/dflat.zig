@@ -63,6 +63,7 @@ BOOL InputBox(WINDOW wnd,char *ttl,char *msg,char *text,int len,int wd)
 }
 #endif
 
+/*
 int MsgHeight(char *msg)
 {
     int h = 1;
@@ -83,3 +84,4 @@ int MsgWidth(char *msg)
     }
     return min(max(strlen(msg),w), SCREENWIDTH-10);
 }
+*/

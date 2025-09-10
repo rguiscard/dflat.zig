@@ -53,7 +53,6 @@ pub fn build(b: *std.Build) void {
     });
 
     lib_mod.addCSourceFiles(.{ .files = &.{
-            //"message.c",
             "keys.c",
             "config.c",
             "dfalloc.c",
@@ -67,7 +66,7 @@ pub fn build(b: *std.Build) void {
             "editbox.c",
             "editor.c",
 
-            "msgbox.c",
+            //"msgbox.c",
             // "spinbutt.c", // currently not in use. port later.
             // "combobox.c", // currently not in use. port later.
             // "slidebox.c", // currently not in use. port later.

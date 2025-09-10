@@ -16,8 +16,8 @@ var handshaking = false; // not in use
 
 export var CaptureMouse:df.WINDOW = null;
 export var CaptureKeyboard:df.WINDOW = null;
-var NoChildCaptureMouse = df.FALSE;
-var NoChildCaptureKeyboard = df.TRUE;
+var NoChildCaptureMouse = false;
+var NoChildCaptureKeyboard = false;
 
 export var AltDown:df.BOOL = df.FALSE;
 
@@ -73,8 +73,8 @@ pub fn init_messages() bool {
     CaptureMouse = null;
     CaptureKeyboard = null;
 
-    NoChildCaptureMouse = df.FALSE;
-    NoChildCaptureKeyboard = df.FALSE;
+    NoChildCaptureMouse = false;
+    NoChildCaptureKeyboard = false;
     PostMessage(null,df.START,0,0);
 //    lagdelay = FIRSTDELAY; // not in use
     return true;
@@ -126,8 +126,8 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
     const rtn = true;
 
     if (wnd != null) {
-        if (Window.get_zin(wnd)) |zin| {
-            return if (zin.sendMessage(msg, p1, p2)) df.TRUE else df.FALSE;
+        if (Window.get_zin(wnd)) |win| {
+            return if (win.sendMessage(msg, p1, p2)) df.TRUE else df.FALSE;
         } else {
             // This shouldn't happen, except dummy window at normal.c for now.
             // Or we can create a Window instance for it here.
@@ -135,6 +135,8 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
                 win.* = Window.init(wnd, root.global_allocator);
                 wnd.*.zin = @constCast(win);
                 // Should call sendMessage() for it ?
+                // Segment fault if call sendMessage(), seems ok to call ProcessMessage().
+                return if (ProcessMessage(wnd, msg, p1, p2, rtn)) df.TRUE else df.FALSE;
             } else |_| {
                 // error
             }
@@ -144,6 +146,7 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
                 // Try to catch any window which is not dummy nor created by Window.create()
                 _ = df.printf("Not dummy !! \n");
                 while(true) {}
+                return df.FALSE;
             }
         }
     }
@@ -205,7 +208,7 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
                     wnd.*.PrevKeyboard = CaptureKeyboard;
                 }
                 CaptureKeyboard = wnd;
-                NoChildCaptureKeyboard = if (p1>0) df.TRUE else df.FALSE;
+                NoChildCaptureKeyboard = (p1>0);
             },
             df.RELEASE_KEYBOARD => {
                 if (wnd != null) {
@@ -228,7 +231,7 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
                 } else {
                     CaptureKeyboard = null;
                 }
-                NoChildCaptureKeyboard = df.FALSE;
+                NoChildCaptureKeyboard = false;
             },
             df.CURRENT_KEYBOARD_CURSOR => {
                 var x:c_int = 0;
@@ -315,7 +318,7 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
                     wnd.*.PrevMouse = CaptureMouse;
                 }
                 CaptureMouse = wnd;
-                NoChildCaptureMouse = if (p1>0) df.TRUE else df.FALSE;
+                NoChildCaptureMouse = (p1>0);
             },
             df.RELEASE_MOUSE => {
                 if (wnd != null) {
@@ -338,7 +341,7 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
                 } else {
                     CaptureMouse = null;
                 }
-                NoChildCaptureMouse = df.FALSE;
+                NoChildCaptureMouse = false;
             },
             else => {
             }
@@ -404,7 +407,7 @@ fn MouseWindow(x:c_int, y:c_int) df.WINDOW {
     var Mwnd = inWindow(df.ApplicationWindow, x, y);
     // ---- process mouse captures -----
     if (CaptureMouse != null) {
-        if (NoChildCaptureMouse == df.TRUE or
+        if (NoChildCaptureMouse or
                                 Mwnd == null  or
                                 df.isAncestor(Mwnd, CaptureMouse) == df.FALSE)
             Mwnd = CaptureMouse;
@@ -441,7 +444,7 @@ pub fn dispatch_message() bool {
         // ---- process keyboard captures -----
         if (CaptureKeyboard != null) {
             if (Kwnd == null or
-                    NoChildCaptureKeyboard == df.TRUE or
+                    NoChildCaptureKeyboard or
                     df.isAncestor(Kwnd, CaptureKeyboard) == df.FALSE ) {
                 Kwnd = CaptureKeyboard;
             }
@@ -459,7 +462,7 @@ pub fn dispatch_message() bool {
                 if (!handshaking) {
                     const Mwnd = MouseWindow(ev.mx, ev.my);
                     if (CaptureMouse == null or
-                                (NoChildCaptureMouse == df.FALSE and
+                                (NoChildCaptureMouse == false and
                                   df.isAncestor(Mwnd, CaptureMouse) == df.TRUE)) {
                         if (Mwnd != df.inFocus)
                             _ = SendMessage(Mwnd, df.SETFOCUS, df.TRUE, 0);

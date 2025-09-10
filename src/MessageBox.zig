@@ -48,8 +48,8 @@ fn GenericMessage(wnd: df.WINDOW, title: ?[:0]const u8, msg:[:0]const u8, button
         mBox.dwnd.title = t;
     }
 
-    mBox.ctl[0].dwnd.h = df.MsgHeight(@constCast(m.ptr));
-    mBox.ctl[0].dwnd.w = @max(@max(df.MsgWidth(@constCast(m.ptr)), buttonct*8+buttonct+2),ttl_w);
+    mBox.ctl[0].dwnd.h = MsgHeight(m);
+    mBox.ctl[0].dwnd.w = @max(@max(MsgWidth(m), buttonct*8+buttonct+2),ttl_w);
     mBox.dwnd.h = mBox.ctl[0].dwnd.h+6;
     mBox.dwnd.w = mBox.ctl[0].dwnd.w+4;
     if (buttonct == 1) {
@@ -78,13 +78,11 @@ fn GenericMessage(wnd: df.WINDOW, title: ?[:0]const u8, msg:[:0]const u8, button
     return rtn;
 }
 
-pub fn MomentaryMessage(msg: []const u8) *Window {
-    const m:[*c]u8 = @constCast(msg.ptr);
-
+pub fn MomentaryMessage(msg: [:0]const u8) *Window {
     var win = Window.create(
                     df.TEXTBOX,
                     null,
-                    -1,-1,df.MsgHeight(m)+2,df.MsgWidth(m)+2,
+                    -1,-1,MsgHeight(msg)+2,MsgWidth(msg)+2,
                     df.NULL,null,null,
                     df.HASBORDER | df.SHADOW | df.SAVESELF);
     const wnd = win.*.win;
@@ -183,4 +181,18 @@ fn CancelProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         }
     }
     return root.zBaseWndProc(df.MESSAGEBOX, win, msg, p1, p2);
+}
+
+pub fn MsgHeight(msg:[:0]const u8) c_int {
+    const h:c_int =  @intCast(std.mem.count(u8, msg, "\n")+1);
+    return @min(h, df.SCREENHEIGHT-10);
+}
+
+pub fn MsgWidth(msg:[:0]const u8) c_int {
+    var w:c_int = 0;
+    var iter = std.mem.splitScalar(u8, msg, '\n'); // split do not include '\n'
+    while (iter.next()) |line| {
+        w = @intCast(@max(w, line.len));
+    }
+    return @min(w, df.SCREENWIDTH-10);
 }

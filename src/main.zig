@@ -289,7 +289,7 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
         }
     }
     if (wnd.*.extension) |ext| {
-        const m:[]const u8 = "Saving the file";
+        const m:[:0]const u8 = "Saving the file";
         var mwin = mp.MessageBox.MomentaryMessage(m);
 
         const ptr = @as([*:0]u8, @ptrCast(ext));
