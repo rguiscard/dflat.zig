@@ -174,16 +174,16 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.MOUSE_CURSOR, df.GetLeft(wnd), df.GetTop(wnd));
             df.WindowMoving = df.TRUE;
-            df.dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
-//            dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
+//            df.dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
+            dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         df.ID_SYSSIZE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.MOUSE_CURSOR, df.GetRight(wnd), df.GetBottom(wnd));
             df.WindowSizing = df.TRUE;
-            df.dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
-//            dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
+//            df.dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
+            dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         df.ID_SYSCLOSE => {
             _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
@@ -363,7 +363,8 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             df.py = @intCast(my);
             df.diff = @intCast(mx);
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(dwnd)));
-            df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+//            df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+            dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         }
         return;
     }
@@ -388,7 +389,8 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         }
         df.WindowSizing = df.TRUE;
         _ = q.SendMessage(wnd, df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
-        df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+//        df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+        dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
     }
 }
 
@@ -423,12 +425,13 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         if ((x != df.px) or  (y != df.py))    {
             df.px = x;
             df.py = y;
-            df.dragborder(wnd, x, y);
+//            df.dragborder(wnd, x, y);
+            dragborder(win, x, y);
         }
         return true;
     }
     if (df.WindowSizing>0) {
-        df.sizeborder(wnd, @intCast(p1), @intCast(p2));
+        sizeborder(wnd, @intCast(p1), @intCast(p2));
         return true;
     }
     return false;
@@ -748,6 +751,66 @@ fn TerminateMoveSize() void {
     df.WindowSizing = df.FALSE;
 }
 
+// ---- build a dummy window border for moving or sizing ---
+fn dragborder(win:*Window, x:c_int, y:c_int) void {
+    const wnd = win.win;
+    const dwnd = getDummy();
+
+    df.RestoreBorder(dwnd.*.rc);
+    // ------- build the dummy window --------
+    dwnd.*.rc.lf = x;
+    dwnd.*.rc.tp = y;
+    dwnd.*.rc.rt = dwnd.*.rc.lf+df.WindowWidth(wnd)-1;
+    dwnd.*.rc.bt = dwnd.*.rc.tp+df.WindowHeight(wnd)-1;
+    dwnd.*.ht = df.WindowHeight(wnd);
+    dwnd.*.wd = df.WindowWidth(wnd);
+//    dwnd.*.parent = df.GetParent(wnd);
+    Window.SetParent(@constCast(dwnd), df.GetParent(wnd));
+    dwnd.*.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
+    df.InitWindowColors(dwnd);
+    df.SaveBorder(dwnd.*.rc);
+    df.RepaintBorder(dwnd, null);
+}
+
+// ---- write the dummy window border for sizing ----
+fn sizeborder(wnd:df.WINDOW, rt:c_int, bt:c_int) void {
+    const dwnd = getDummy();
+
+    if (Window.get_zin(wnd)) |win| {
+        const leftmost:c_int = @intCast(win.GetLeft()+10);
+        const topmost:c_int = @intCast(win.GetTop()+3);
+        var bottommost:c_int = @intCast(df.SCREENHEIGHT-1);
+        var rightmost:c_int = @intCast(df.SCREENWIDTH-1);
+        if (df.GetParent(wnd) > 0) {
+            const pwnd = df.GetParent(wnd);
+            if (Window.get_zin(pwnd)) |pwin| {
+                bottommost = @intCast(@min(bottommost, pwin.GetClientBottom()));
+                rightmost  = @intCast(@min(rightmost, pwin.GetClientRight()));
+            }
+        }
+        var new_rt:c_int = @min(rt, rightmost);
+        var new_bt:c_int = @min(bt, bottommost);
+        new_rt = @max(new_rt, leftmost);
+        new_bt = @max(new_bt, topmost);
+        _ = df.SendMessage(null, df.MOUSE_CURSOR, new_rt, new_bt);
+
+        if ((new_rt != df.px) or (new_bt != df.py))
+            df.RestoreBorder(dwnd.*.rc);
+
+        // ------- change the dummy window --------
+        dwnd.*.ht = bt-dwnd.*.rc.tp+1;
+        dwnd.*.wd = rt-dwnd.*.rc.lf+1;
+        dwnd.*.rc.rt = new_rt;
+        dwnd.*.rc.bt = new_bt;
+        if ((new_rt != df.px) or (new_bt != df.py)) {
+            df.px = new_rt;
+            df.py = new_bt;
+            df.SaveBorder(dwnd.*.rc);
+            df.RepaintBorder(dwnd, null);
+        }
+    }
+}
+
 pub fn isDerivedFrom(win:*Window, klass:df.CLASS) bool {
     const wnd = win.win;
     var tclass = df.GetClass(wnd);
@@ -759,6 +822,30 @@ pub fn isDerivedFrom(win:*Window, klass:df.CLASS) bool {
         tclass = @intFromEnum(cls[1]);
     }
     return false;
+}
+
+// -- find the oldest document window ancestor of a window --
+fn GetAncestor(w: df.WINDOW) df.WINDOW {
+    var wnd = w;
+    if (wnd != null) {
+        while (df.GetParent(wnd) != null) {
+            if (df.GetClass(df.GetParent(wnd)) == df.APPLICATION)
+                break;
+            wnd = df.GetParent(wnd);
+        }
+    }
+    return wnd;
+}
+
+// this should be go Window ?
+pub fn isVisible(win:*Window) bool {
+    var wnd = win.win;
+    while (wnd != null)    {
+        if (df.isHidden(wnd))
+            return false;
+        wnd = df.GetParent(wnd);
+    }
+    return true;
 }
 
 // -- adjust a window's rectangle to clip it to its parent -

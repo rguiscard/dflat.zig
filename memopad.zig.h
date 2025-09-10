@@ -21,12 +21,13 @@ extern BOOL NoChildCaptureKeyboard; // should be private
 
 // normal.c
 extern struct window dwnd;
-void GetVideoBuffer(WINDOW);
-void PutVideoBuffer(WINDOW);
+//void GetVideoBuffer(WINDOW);
+//void PutVideoBuffer(WINDOW);
 void PaintOverLappers(WINDOW);
 void PaintUnderLappers(WINDOW);
 void dragborder(WINDOW, int, int);
 void sizeborder(WINDOW, int, int);
+void SaveBorder(RECT);
 void RestoreBorder(RECT);
 RECT PositionIcon(WINDOW);
 extern int px;

@@ -7,15 +7,15 @@ void PaintOverLappers(WINDOW wnd);
 void PaintUnderLappers(WINDOW wnd);
 #endif
 
-static void SaveBorder(RECT);
+void SaveBorder(RECT);
 void RestoreBorder(RECT);
-void GetVideoBuffer(WINDOW);
-void PutVideoBuffer(WINDOW);
+//void GetVideoBuffer(WINDOW);
+//void PutVideoBuffer(WINDOW);
 #ifdef INCLUDE_MINIMIZE
 RECT PositionIcon(WINDOW);
 #endif
-void dragborder(WINDOW, int, int);
-void sizeborder(WINDOW, int, int);
+//void dragborder(WINDOW, int, int);
+//void sizeborder(WINDOW, int, int);
 int px = -1, py = -1;
 int diff;
 struct window dwnd = {DUMMY, NULL, NormalProc,
@@ -81,10 +81,11 @@ RECT PositionIcon(WINDOW wnd)
 #endif
 
 /* ---- build a dummy window border for moving or sizing --- */
+/*
 void dragborder(WINDOW wnd, int x, int y)
 {
     RestoreBorder(dwnd.rc);
-    /* ------- build the dummy window -------- */
+    // ------- build the dummy window -------- 
     dwnd.rc.lf = x;
     dwnd.rc.tp = y;
     dwnd.rc.rt = dwnd.rc.lf+WindowWidth(wnd)-1;
@@ -98,7 +99,9 @@ void dragborder(WINDOW wnd, int x, int y)
     SaveBorder(dwnd.rc);
     RepaintBorder(&dwnd, NULL);
 }
+*/
 /* ---- write the dummy window border for sizing ---- */
+/*
 void sizeborder(WINDOW wnd, int rt, int bt)
 {
     int leftmost = GetLeft(wnd)+10;
@@ -120,7 +123,7 @@ void sizeborder(WINDOW wnd, int rt, int bt)
     if (rt != px || bt != py)
         RestoreBorder(dwnd.rc);
 
-    /* ------- change the dummy window -------- */
+    // ------- change the dummy window --------
     dwnd.ht = bt-dwnd.rc.tp+1;
     dwnd.wd = rt-dwnd.rc.lf+1;
     dwnd.rc.rt = rt;
@@ -132,6 +135,7 @@ void sizeborder(WINDOW wnd, int rt, int bt)
         RepaintBorder(&dwnd, NULL);
     }
 }
+*/
 
 #ifdef INCLUDE_MULTI_WINDOWS
 /* ----- adjust a rectangle to include the shadow ----- */
@@ -281,7 +285,7 @@ void near PaintUnderLappers(WINDOW wnd)
 #endif /* #ifdef INCLUDE_MULTI_WINDOWS */
 
 /* --- save video area to be used by dummy window border --- */
-static void SaveBorder(RECT rc)
+void SaveBorder(RECT rc) // should be private
 {
     RECT lrc;
     int i;
@@ -302,7 +306,7 @@ static void SaveBorder(RECT rc)
     }
 }
 /* ---- restore video area used by dummy window border ---- */
-void RestoreBorder(RECT rc)
+void RestoreBorder(RECT rc) // should be private
 {
     if (Bsave != NULL)    {
         RECT lrc;
@@ -358,62 +362,3 @@ BOOL isVisible(WINDOW wnd)
     }
     return TRUE;
 }
-
-/* -- adjust a window's rectangle to clip it to its parent - */
-/*
-static RECT near ClipRect(WINDOW wnd)
-{
-    RECT rc;
-    rc = WindowRect(wnd);
-    if (TestAttribute(wnd, SHADOW))    {
-        RectBottom(rc)++;
-        RectRight(rc)++;
-    }
-	return ClipRectangle(wnd, rc);
-}
-*/
-
-/* -- get the video memory that is to be used by a window -- */
-/*
-void GetVideoBuffer(WINDOW wnd)
-{
-    RECT rc;
-    int ht;
-    int wd;
-
-    rc = ClipRect(wnd);
-    ht = RectBottom(rc) - RectTop(rc) + 1;
-    wd = RectRight(rc) - RectLeft(rc) + 1;
-    wnd->videosave = DFrealloc(wnd->videosave, (ht * wd * 2));
-    get_videomode();
-    getvideo(rc, wnd->videosave);
-}
-*/
-
-/* -- put the video memory that is used by a window -- */
-/*
-void PutVideoBuffer(WINDOW wnd)
-{
-    if (wnd->videosave != NULL)    {
-    	RECT rc;
-    	rc = ClipRect(wnd);
-    	get_videomode();
-    	storevideo(rc, wnd->videosave);
-    	free(wnd->videosave);
-    	wnd->videosave = NULL;
-	}
-}
-*/
-
-/* ------- return TRUE if awnd is an ancestor of wnd ------- */
-/*
-BOOL isAncestor(WINDOW wnd, WINDOW awnd)
-{
-	while (wnd != NULL)	{
-		if (wnd == awnd)
-			return TRUE;
-		wnd = GetParent(wnd);
-	}
-	return FALSE;
-}
-*/

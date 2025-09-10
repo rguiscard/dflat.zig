@@ -11,6 +11,7 @@ const sysmenu = @import("SystemMenu.zig");
 const log = @import("Log.zig");
 const radio = @import("RadioButton.zig");
 const checkbox = @import("CheckBox.zig");
+const normal = @import("Normal.zig");
 
 export var ApplicationWindow:df.WINDOW = null;
 var ScreenHeight:c_int = 0;
@@ -294,7 +295,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
             return true;
         },
         df.PAINT => {
-            if (df.isVisible(wnd) > 0)    {
+            if (normal.isVisible(win))    {
                 const cl:u8 = if (df.cfg.Texture > 0) df.APPLCHAR else ' ';
                 const pptr:usize = @intCast(p1);
                 df.ClearWindow(wnd, @ptrFromInt(pptr), cl);
