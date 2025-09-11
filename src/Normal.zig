@@ -276,17 +276,6 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         if ((that != null) and (df.isVisible(wnd)>0)) {
             rc = df.subRectangle(df.WindowRect(that), df.WindowRect(this));
             if (df.ValidRect(rc) == false) {
-//                if (df.ApplicationWindow != null) {
-//                    var ffwnd = Window.FirstWindow(df.ApplicationWindow);
-//                    while (ffwnd != null) {
-//                        if (isAncestor(wnd, ffwnd) == false) {
-//                            rc = df.subRectangle(df.WindowRect(wnd),df.WindowRect(ffwnd));
-//                            if (df.ValidRect(rc)) {
-//                                break;
-//                            }
-//                        }
-//                        ffwnd = Window.NextWindow(ffwnd);
-//                    }
                 if (app.ApplicationWindow) |awin| {
                     var ffwin = awin.firstWindow();
                     while (ffwin) |ff| {
@@ -474,10 +463,11 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         wnd.*.RestoredRC = wnd.*.rc;
     }
 
-    var cwnd = Window.FirstWindow(wnd);
-    while (cwnd) |cw| {
-        _ = q.SendMessage(cw, df.MOVE, cwnd.*.rc.lf+xdif, cwnd.*.rc.tp+ydif);
-        cwnd = Window.NextWindow(cw);
+    var cwin = win.firstWindow();
+    while (cwin) |cw| {
+        const cwnd = cw.win;
+        _ = cw.sendMessage(df.MOVE, cwnd.*.rc.lf+xdif, cwnd.*.rc.tp+ydif);
+        cwin = cw.nextWindow();
     }
     if (wasVisible)
         _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
@@ -508,12 +498,12 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
     const rc = rect.ClientRect(win);
 
-    var cwnd = Window.FirstWindow(wnd);
-    while (cwnd != null) {
-        if (cwnd.*.condition == df.ISMAXIMIZED) {
-            _ = q.SendMessage(cwnd, df.SIZE, df.RectRight(rc), df.RectBottom(rc));
+    var cwin = win.firstWindow();
+    while (cwin) |cw| {
+        if (cw.win.*.condition == df.ISMAXIMIZED) {
+            _ = cw.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
         }
-        cwnd = Window.NextWindow(cwnd);
+        cwin = cw.nextWindow();
     }
 
     if (wasVisible)
@@ -783,29 +773,27 @@ fn PositionIcon(win:*Window) df.RECT {
 
     if (Window.get_zin(pwnd)) |pwin| {
         const prc = pwin.WindowRect();
-        var cwnd = Window.FirstWindow(pwnd);
+        var cwin = pwin.firstWindow();
         rc = LowerRight(prc); // this makes previosu assignment useless ?
         // - search for icon available location -
-        while (cwnd != null) {
-            if (Window.get_zin(cwnd)) |cwin| {
-                if (cwnd.*.condition == df.ISMINIMIZED) {
-                    const rc1 = cwin.WindowRect();
-                    if (rc1.lf == rc.lf and rc1.tp == rc.tp) {
-                        rc.lf -= df.ICONWIDTH;
-                        rc.rt -= df.ICONWIDTH;
-                        if (rc.lf < prc.lf+1) {
-                            rc.lf = prc.rt-df.ICONWIDTH;
-                            rc.rt = rc.lf+df.ICONWIDTH-1;
-                            rc.tp -= df.ICONHEIGHT;
-                            rc.bt -= df.ICONHEIGHT;
-                            if (rc.tp < prc.tp+1)
-                                return LowerRight(prc);
-                        }
-                        break;
+        while (cwin) |cw| {
+            if (cw.win.*.condition == df.ISMINIMIZED) {
+                const rc1 = cw.WindowRect();
+                if (rc1.lf == rc.lf and rc1.tp == rc.tp) {
+                    rc.lf -= df.ICONWIDTH;
+                    rc.rt -= df.ICONWIDTH;
+                    if (rc.lf < prc.lf+1) {
+                        rc.lf = prc.rt-df.ICONWIDTH;
+                        rc.rt = rc.lf+df.ICONWIDTH-1;
+                        rc.tp -= df.ICONHEIGHT;
+                        rc.bt -= df.ICONHEIGHT;
+                        if (rc.tp < prc.tp+1)
+                            return LowerRight(prc);
                     }
+                    break;
                 }
             }
-            cwnd = Window.NextWindow(cwnd);
+            cwin = cw.nextWindow();
         }
     }
     return rc;
@@ -958,16 +946,13 @@ fn PaintOver(win:*Window) void {
 
 // --- paint the overlapped parts of all children ---
 fn PaintOverChildren(pwin:*Window) void {
-    const pwnd = pwin.win;
-    var cwnd = Window.FirstWindow(pwnd);
-    while (cwnd != null)    {
-        if (cwnd != HiddenWindow.win) {
-            if (Window.get_zin(cwnd)) |cwin| {
-                PaintOver(cwin);
-                PaintOverChildren(cwin);
-            }
+    var cwin = pwin.firstWindow();
+    while (cwin) |cw| {
+        if (cw != HiddenWindow) {
+            PaintOver(cw);
+            PaintOverChildren(cw);
         }
-        cwnd = Window.NextWindow(cwnd);
+        cwin = cw.nextWindow();
     }
 }
 
@@ -975,12 +960,10 @@ fn PaintOverChildren(pwin:*Window) void {
 fn PaintOverParents(win:*Window) void {
     const wnd = win.win;
     const pwnd = df.GetParent(wnd);
-    if (pwnd != null) {
-        if (Window.get_zin(pwnd)) |pwin| {
-            PaintOverParents(pwin);
-            PaintOver(pwin);
-            PaintOverChildren(pwin);
-        }
+    if (Window.get_zin(pwnd)) |pwin| {
+        PaintOverParents(pwin);
+        PaintOver(pwin);
+        PaintOverChildren(pwin);
     }
 }
 
