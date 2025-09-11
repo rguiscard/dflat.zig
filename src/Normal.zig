@@ -577,7 +577,7 @@ fn MaximizeMsg(win:*Window) void {
 fn MinimizeMsg(win:*Window) void {
     const wnd = win.win;
     const holdrc = wnd.*.RestoredRC;
-    const rc = df.PositionIcon(wnd);
+    const rc = PositionIcon(win);
     wnd.*.oldcondition = wnd.*.condition;
     wnd.*.condition = df.ISMINIMIZED;
     wnd.*.wasCleared = df.FALSE;
@@ -737,6 +737,65 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         }
     }
     return true;
+}
+
+// ---- compute lower right icon space in a rectangle ----
+fn LowerRight(prc:df.RECT) df.RECT {
+    const rc = df.RECT{
+        .lf = prc.rt - df.ICONWIDTH,
+        .tp = prc.bt - df.ICONHEIGHT,
+        .rt = prc.rt - 1,
+        .bt = prc.bt - 1,
+    };
+    return rc;
+
+//    RECT rc;
+//    RectLeft(rc) = RectRight(prc) - ICONWIDTH;
+//    RectTop(rc) = RectBottom(prc) - ICONHEIGHT;
+//    RectRight(rc) = RectLeft(rc)+ICONWIDTH-1;
+//    RectBottom(rc) = RectTop(rc)+ICONHEIGHT-1;
+//    return rc;
+}
+
+// ----- compute a position for a minimized window icon ----
+fn PositionIcon(win:*Window) df.RECT {
+    const wnd = win.win;
+    const pwnd = df.GetParent(wnd);
+    var rc = df.RECT{
+        .lf = df.SCREENWIDTH-df.ICONWIDTH,
+        .tp = df.SCREENHEIGHT-df.ICONHEIGHT,
+        .rt = df.SCREENWIDTH-1,
+        .bt = df.SCREENHEIGHT-1
+    };
+
+    if (Window.get_zin(pwnd)) |pwin| {
+        const prc = pwin.WindowRect();
+        var cwnd = Window.FirstWindow(pwnd);
+        rc = LowerRight(prc); // this makes previosu assignment useless ?
+        // - search for icon available location -
+        while (cwnd != null) {
+            if (Window.get_zin(cwnd)) |cwin| {
+                if (cwnd.*.condition == df.ISMINIMIZED) {
+                    const rc1 = cwin.WindowRect();
+                    if (rc1.lf == rc.lf and rc1.tp == rc.tp) {
+                        rc.lf -= df.ICONWIDTH;
+                        rc.rt -= df.ICONWIDTH;
+                        if (rc.lf < prc.lf+1) {
+                            rc.lf = prc.rt-df.ICONWIDTH;
+                            rc.rt = rc.lf+df.ICONWIDTH-1;
+                            rc.tp -= df.ICONHEIGHT;
+                            rc.bt -= df.ICONHEIGHT;
+                            if (rc.tp < prc.tp+1)
+                                return LowerRight(prc);
+                        }
+                        break;
+                    }
+                }
+            }
+            cwnd = Window.NextWindow(cwnd);
+        }
+    }
+    return rc;
 }
 
 // ----- terminate the move or size operation -----

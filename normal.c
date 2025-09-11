@@ -2,31 +2,19 @@
 
 #include "dflat.h"
 
-#ifdef INCLUDE_MULTI_WINDOWS
-void PaintOverLappers(WINDOW wnd);
-void PaintUnderLappers(WINDOW wnd);
-#endif
-
 void SaveBorder(RECT);
 void RestoreBorder(RECT);
-//void GetVideoBuffer(WINDOW);
-//void PutVideoBuffer(WINDOW);
 #ifdef INCLUDE_MINIMIZE
-RECT PositionIcon(WINDOW);
+//RECT PositionIcon(WINDOW);
 #endif
-//void dragborder(WINDOW, int, int);
-//void sizeborder(WINDOW, int, int);
-//int px = -1, py = -1;
-//int diff;
 struct window dwnd = {DUMMY, NULL, NormalProc,
                                 {-1,-1,-1,-1}};
-void SetParent(WINDOW, WINDOW);
 static short *Bsave;
 static int Bht, Bwd;
 BOOL WindowMoving;
 BOOL WindowSizing;
-WINDOW HiddenWindow;
 
+#if 0
 #ifdef INCLUDE_MINIMIZE
 /* ---- compute lower right icon space in a rectangle ---- */
 static RECT LowerRight(RECT prc)
@@ -79,211 +67,6 @@ RECT PositionIcon(WINDOW wnd)
     return rc;
 }
 #endif
-
-/* ---- build a dummy window border for moving or sizing --- */
-/*
-void dragborder(WINDOW wnd, int x, int y)
-{
-    RestoreBorder(dwnd.rc);
-    // ------- build the dummy window -------- 
-    dwnd.rc.lf = x;
-    dwnd.rc.tp = y;
-    dwnd.rc.rt = dwnd.rc.lf+WindowWidth(wnd)-1;
-    dwnd.rc.bt = dwnd.rc.tp+WindowHeight(wnd)-1;
-    dwnd.ht = WindowHeight(wnd);
-    dwnd.wd = WindowWidth(wnd);
-//    dwnd.parent = GetParent(wnd);
-    SetParent(&dwnd, GetParent(wnd));
-    dwnd.attrib = VISIBLE | HASBORDER | NOCLIP;
-    InitWindowColors(&dwnd);
-    SaveBorder(dwnd.rc);
-    RepaintBorder(&dwnd, NULL);
-}
-*/
-/* ---- write the dummy window border for sizing ---- */
-/*
-void sizeborder(WINDOW wnd, int rt, int bt)
-{
-    int leftmost = GetLeft(wnd)+10;
-    int topmost = GetTop(wnd)+3;
-    int bottommost = SCREENHEIGHT-1;
-    int rightmost  = SCREENWIDTH-1;
-    if (GetParent(wnd))    {
-        bottommost = min(bottommost,
-            GetClientBottom(GetParent(wnd)));
-        rightmost  = min(rightmost,
-            GetClientRight(GetParent(wnd)));
-    }
-    rt = min(rt, rightmost);
-    bt = min(bt, bottommost);
-    rt = max(rt, leftmost);
-    bt = max(bt, topmost);
-    SendMessage(NULL, MOUSE_CURSOR, rt, bt);
-
-    if (rt != px || bt != py)
-        RestoreBorder(dwnd.rc);
-
-    // ------- change the dummy window --------
-    dwnd.ht = bt-dwnd.rc.tp+1;
-    dwnd.wd = rt-dwnd.rc.lf+1;
-    dwnd.rc.rt = rt;
-    dwnd.rc.bt = bt;
-    if (rt != px || bt != py)    {
-        px = rt;
-        py = bt;
-        SaveBorder(dwnd.rc);
-        RepaintBorder(&dwnd, NULL);
-    }
-}
-*/
-
-#if 0
-#ifdef INCLUDE_MULTI_WINDOWS
-/* ----- adjust a rectangle to include the shadow ----- */
-static RECT adjShadow(WINDOW wnd)
-{
-    RECT rc;
-    rc = wnd->rc;
-    if (TestAttribute(wnd, SHADOW))    {
-        if (RectRight(rc) < SCREENWIDTH-1)
-            RectRight(rc)++;           
-        if (RectBottom(rc) < SCREENHEIGHT-1)
-            RectBottom(rc)++;
-    }
-    return rc;
-}
-/* --- repaint a rectangular subsection of a window --- */
-static void near PaintOverLap(WINDOW wnd, RECT rc)
-{
-    if (isVisible(wnd))    {
-        int isBorder, isTitle, isData;
-        isBorder = isTitle = FALSE;
-        isData = TRUE;
-        if (TestAttribute(wnd, HASBORDER))    {
-            isBorder =  RectLeft(rc) == 0 &&
-                        RectTop(rc) < WindowHeight(wnd);
-            isBorder |= RectLeft(rc) < WindowWidth(wnd) &&
-                        RectRight(rc) >= WindowWidth(wnd)-1 &&
-                        RectTop(rc) < WindowHeight(wnd);
-            isBorder |= RectTop(rc) == 0 &&
-                        RectLeft(rc) < WindowWidth(wnd);
-            isBorder |= RectTop(rc) < WindowHeight(wnd) &&
-                        RectBottom(rc) >= WindowHeight(wnd)-1 &&
-                        RectLeft(rc) < WindowWidth(wnd);
-        }
-        else if (TestAttribute(wnd, HASTITLEBAR))
-            isTitle = RectTop(rc) == 0 &&
-                      RectRight(rc) > 0 &&
-                      RectLeft(rc)<WindowWidth(wnd)-BorderAdj(wnd);
-
-        if (RectLeft(rc) >= WindowWidth(wnd)-BorderAdj(wnd))
-            isData = FALSE;
-        if (RectTop(rc) >= WindowHeight(wnd)-BottomBorderAdj(wnd))
-            isData = FALSE;
-        if (TestAttribute(wnd, HASBORDER))    {
-            if (RectRight(rc) == 0)
-                isData = FALSE;
-            if (RectBottom(rc) == 0)
-                isData = FALSE;
-        }
-        if (TestAttribute(wnd, SHADOW))
-            isBorder |= RectRight(rc) == WindowWidth(wnd) ||
-                        RectBottom(rc) == WindowHeight(wnd);
-        if (isData)	{
-			wnd->wasCleared = FALSE;
-            SendMessage(wnd, PAINT, (PARAM) &rc, TRUE);
-		}
-        if (isBorder)
-            SendMessage(wnd, BORDER, (PARAM) &rc, 0);
-        else if (isTitle)
-            DisplayTitle(wnd, &rc);
-    }
-}
-/* ------ paint the part of a window that is overlapped
-            by another window that is being hidden ------- */
-static void PaintOver(WINDOW wnd)
-{
-    RECT wrc, rc;
-    wrc = adjShadow(HiddenWindow);
-    rc = adjShadow(wnd);
-    rc = subRectangle(rc, wrc);
-    if (ValidRect(rc))
-        PaintOverLap(wnd, RelativeWindowRect(wnd, rc));
-}
-/* --- paint the overlapped parts of all children --- */
-static void PaintOverChildren(WINDOW pwnd)
-{
-    WINDOW cwnd = FirstWindow(pwnd);
-    while (cwnd != NULL)    {
-        if (cwnd != HiddenWindow)    {
-            PaintOver(cwnd);
-            PaintOverChildren(cwnd);
-        }
-        cwnd = NextWindow(cwnd);
-    }
-}
-/* -- recursive overlapping paint of parents -- */
-static void PaintOverParents(WINDOW wnd)
-{
-    WINDOW pwnd = GetParent(wnd);
-    if (pwnd != NULL)    {
-        PaintOverParents(pwnd);
-        PaintOver(pwnd);
-        PaintOverChildren(pwnd);
-    }
-}
-/* - paint the parts of all windows that a window is over - */
-void PaintOverLappers(WINDOW wnd)
-{
-    HiddenWindow = wnd;
-    PaintOverParents(wnd);
-}
-/* --- paint those parts of a window that are overlapped --- */
-void near PaintUnderLappers(WINDOW wnd)
-{
-    WINDOW hwnd = NextWindow(wnd);
-    while (hwnd != NULL)    {
-        /* ------- test only at document window level ------ */
-        WINDOW pwnd = GetParent(hwnd);
-/*        if (pwnd == NULL || GetClass(pwnd) == APPLICATION)  */  {
-            /* ---- don't bother testing self ----- */
-            if (isVisible(hwnd) && hwnd != wnd)    {
-                /* --- see if other window is descendent --- */
-                while (pwnd != NULL)    {
-                    if (pwnd == wnd)
-                        break;
-                    pwnd = GetParent(pwnd);
-                }
-                /* ----- don't test descendent overlaps ----- */
-                if (pwnd == NULL)    {
-                    /* -- see if other window is ancestor --- */
-                    pwnd = GetParent(wnd);
-                    while (pwnd != NULL)    {
-                        if (pwnd == hwnd)
-                            break;
-                        pwnd = GetParent(pwnd);
-                    }
-                    /* --- don't test ancestor overlaps --- */
-                    if (pwnd == NULL)    {
-                        HiddenWindow = GetAncestor(hwnd);
-                        ClearVisible(HiddenWindow);
-                        PaintOver(wnd);
-                        SetVisible(HiddenWindow);
-                    }
-                }
-            }
-        }
-        hwnd = NextWindow(hwnd);
-    }
-    /* --------- repaint all children of this window
-        the same way ----------- */
-    hwnd = FirstWindow(wnd);
-    while (hwnd != NULL)    {
-        PaintUnderLappers(hwnd);
-        hwnd = NextWindow(hwnd);
-    }
-}
-#endif /* #ifdef INCLUDE_MULTI_WINDOWS */
 #endif
 
 /* --- save video area to be used by dummy window border --- */
@@ -327,32 +110,6 @@ void RestoreBorder(RECT rc) // should be private
         free(Bsave);
         Bsave = NULL;
     }
-}
-
-/*
-BOOL isDerivedFrom(WINDOW wnd, CLASS Class)
-{
-    CLASS tclass = GetClass(wnd);
-    while (tclass != -1)    {
-        if (tclass == Class)
-            return TRUE;
-        tclass = (classdefs[tclass].base);
-    }
-    return FALSE;
-}
-*/
-
-/* -- find the oldest document window ancestor of a window -- */
-WINDOW GetAncestor(WINDOW wnd)
-{
-    if (wnd != NULL)    {
-        while (GetParent(wnd) != NULL)    {
-            if (GetClass(GetParent(wnd)) == APPLICATION)
-                break;
-            wnd = GetParent(wnd);
-        }
-    }
-    return wnd;
 }
 
 BOOL isVisible(WINDOW wnd)
