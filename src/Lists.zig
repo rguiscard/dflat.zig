@@ -5,25 +5,41 @@ const Window = @import("Window.zig");
 // temperory function for porting
 fn set_first_window(wnd:df.WINDOW, child:df.WINDOW) void {
     if (Window.get_zin(wnd)) |zin| {
-        zin.firstchild = child;
+        if (Window.get_zin(child)) |cin| {
+            zin.firstchild = cin;
+        } else {
+            zin.firstchild = null;
+        }
     }
 }
 
 fn set_last_window(wnd:df.WINDOW, child:df.WINDOW) void {
     if (Window.get_zin(wnd)) |zin| {
-        zin.lastchild = child;
+        if (Window.get_zin(child)) |cin| {
+            zin.lastchild = cin;
+        } else {
+            zin.lastchild = null;
+        }
     }
 }
 
 fn set_next_window(wnd:df.WINDOW, child:df.WINDOW) void {
     if (Window.get_zin(wnd)) |zin| {
-        zin.nextsibling = child;
+        if (Window.get_zin(child)) |cin| {
+            zin.nextsibling = cin;
+        } else {
+            zin.nextsibling = null;
+        }
     }
 }
 
 fn set_prev_window(wnd:df.WINDOW, child:df.WINDOW) void {
     if (Window.get_zin(wnd)) |zin| {
-        zin.prevsibling = child;
+        if (Window.get_zin(child)) |cin| {
+            zin.prevsibling = cin;
+        } else {
+            zin.prevsibling = null;
+        }
     }
 }
 
@@ -96,17 +112,22 @@ pub fn SetPrevFocus() void {
 }
 
 // ------- move a window to the end of its parents list -----
-pub fn ReFocus(wnd:df.WINDOW) void {
-	if (df.GetParent(wnd) != null)	{
-		RemoveWindow(wnd);
-		AppendWindow(wnd);
-		ReFocus(df.GetParent(wnd));
-	}
+pub fn ReFocus(win:*Window) void {
+    const wnd = win.win;
+    if (df.GetParent(wnd) != null) {
+        RemoveWindow(win);
+        AppendWindow(win);
+        const pwnd = df.GetParent(wnd);
+        if (Window.get_zin(pwnd)) |pwin| {
+            ReFocus(pwin);
+        }
+    }
 }
 
 // ---- remove a window from the linked list ----
-pub fn RemoveWindow(wnd:df.WINDOW) void {
-    if (wnd != null)    {
+pub fn RemoveWindow(win:?*Window) void {
+    if (win) |w| {
+        const wnd = w.win;
         const pwnd = df.GetParent(wnd);
         if (Window.PrevWindow(wnd) != null) {
             const pw = Window.PrevWindow(wnd);
@@ -128,8 +149,9 @@ pub fn RemoveWindow(wnd:df.WINDOW) void {
 }
 
 // ---- append a window to the linked list ----
-pub fn AppendWindow(wnd:df.WINDOW) void {
-    if (wnd != null) {
+pub fn AppendWindow(win:?*Window) void {
+    if (win) |w| {
+        const wnd = w.win;
         const pwnd = df.GetParent(wnd);
         if (pwnd != null) {
             if (Window.FirstWindow(pwnd) == null) {

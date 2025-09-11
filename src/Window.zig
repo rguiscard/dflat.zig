@@ -15,10 +15,10 @@ wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.
 
 // -------------- linked list pointers ----------------
 parent:df.WINDOW = null,       // parent window
-firstchild:df.WINDOW = null,   // first child this parent
-lastchild:df.WINDOW = null,    // last child this parent
-nextsibling:df.WINDOW = null,  // next sibling
-prevsibling:df.WINDOW = null,  // previous sibling
+firstchild:?*TopLevelFields = null,   // first child this parent
+lastchild:?*TopLevelFields = null,    // last child this parent
+nextsibling:?*TopLevelFields = null,  // next sibling
+prevsibling:?*TopLevelFields = null,  // previous sibling
 
 // ----------------- text box fields ------------------
 text:?[]u8 = null,   // window text
@@ -374,6 +374,22 @@ pub fn ClearVisible(self: *TopLevelFields) void {
     wnd.*.attrib &= ~df.VISIBLE;
 }
 
+pub fn firstWindow(self: *TopLevelFields) ?*TopLevelFields {
+    return self.firstchild;
+}
+
+pub fn lastWindow(self: *TopLevelFields) ?*TopLevelFields {
+    return self.lastchild;
+}
+
+pub fn nextWindow(self: *TopLevelFields) ?*TopLevelFields {
+    return self.nextsibling;
+}
+
+pub fn prevWindow(self: *TopLevelFields) ?*TopLevelFields {
+    return self.prevsibling;
+}
+
 // Accessories for c
 pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
     // @fieldParentPtr is not yet reliable at this stage. Therefore, use zin inserted into WINDOW in c.
@@ -401,28 +417,28 @@ pub export fn SetParent(wnd:df.WINDOW, parent:df.WINDOW) void {
 
 pub export fn FirstWindow(wnd:df.WINDOW) df.WINDOW {
     if (get_zin(wnd)) |win| {
-        return win.firstchild;
+        return if (win.firstchild) |w| w.win else null;
     }
     return null;
 }
 
 pub export fn LastWindow(wnd:df.WINDOW) df.WINDOW {
     if (get_zin(wnd)) |win| {
-        return win.lastchild;
+        return if (win.lastchild) |w| w.win else null;
     }
     return null;
 }
 
 pub export fn NextWindow(wnd:df.WINDOW) df.WINDOW {
     if (get_zin(wnd)) |win| {
-        return win.nextsibling;
+        return if (win.nextsibling) |w| w.win else null;
     }
     return null;
 }
 
 pub export fn PrevWindow(wnd:df.WINDOW) df.WINDOW {
     if (get_zin(wnd)) |win| {
-        return win.prevsibling;
+        return if (win.prevsibling) |w| w.win else null;
     }
     return null;
 }

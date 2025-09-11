@@ -31,7 +31,7 @@ fn getDummy() df.WINDOW {
 // --------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) void {
     const wnd = win.win;
-    lists.AppendWindow(wnd);
+    lists.AppendWindow(win);
     const rtn = q.SendMessage(null, df.MOUSE_INSTALLED, 0, 0);
     if (rtn == 0) {
         win.ClearAttribute(df.VSCROLLBAR | df.HSCROLLBAR);
@@ -292,7 +292,7 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         if ((that != null) and (df.ValidRect(rc)==false) and (df.isVisible(wnd)>0)) {
             this = null;
         }
-        lists.ReFocus(wnd);
+        lists.ReFocus(win);
         if ((this != null) and ((df.isVisible(this) == 0) or (df.TestAttribute(this, df.SAVESELF) == 0))) {
             wnd.*.wasCleared = df.FALSE;
             _ = q.SendMessage(this, df.SHOW_WINDOW, 0, 0);
@@ -540,7 +540,7 @@ fn CloseWindowMsg(win:*Window) void {
     if (wnd.*.videosave != null)
         df.free(wnd.*.videosave);
     // -- remove window from parent's list of children --
-        lists.RemoveWindow(wnd);
+        lists.RemoveWindow(win);
     if (wnd == df.inFocus)
         df.inFocus = null;
     df.free(wnd);

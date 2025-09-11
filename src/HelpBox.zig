@@ -288,7 +288,7 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
             }
             // --- read the help text into the help window ---
             df.ReadHelp(wnd);
-            lists.ReFocus(wnd);
+            lists.ReFocus(win);
             _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
         }
     }
