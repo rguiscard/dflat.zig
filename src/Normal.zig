@@ -222,21 +222,41 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         var that:df.WINDOW = null;
         var thatpar:df.WINDOW = null;
 
-        var cwnd = wnd;
+//        var cwnd = wnd;
+//        var fwnd = Window.GetParent(wnd);
+//
+//        // ---- post focus in ancestors ----
+//        while (fwnd != null) {
+//            fwnd.*.childfocus = cwnd;
+//            cwnd = fwnd;
+//            fwnd = Window.GetParent(fwnd);
+//        }
+//        // ---- de-post focus in self and children ----
+//        fwnd = wnd;
+//        while (fwnd != null) {
+//            cwnd = fwnd.*.childfocus;
+//            fwnd.*.childfocus = null;
+//            fwnd = cwnd;
+//        }
+        var cwin:?*Window = win;
         var fwnd = Window.GetParent(wnd);
 
         // ---- post focus in ancestors ----
-        while (fwnd != null) {
-            fwnd.*.childfocus = cwnd;
-            cwnd = fwnd;
-            fwnd = Window.GetParent(fwnd);
+        if (Window.get_zin(fwnd)) |fwin| {
+            var ff:?*Window = fwin;
+            while (ff) |ffwin| {
+                fwnd = ffwin.win;
+                ffwin.*.childfocus = cwin;
+                cwin = ffwin;
+                ff = Window.get_zin(Window.GetParent(fwnd));
+            }
         }
         // ---- de-post focus in self and children ----
-        fwnd = wnd;
-        while (fwnd != null) {
-            cwnd = fwnd.*.childfocus;
-            fwnd.*.childfocus = null;
-            fwnd = cwnd;
+        var fff:?*Window = win;
+        while (fff) |ffwin| {
+            cwin = ffwin.*.childfocus;
+            ffwin.*.childfocus = null;
+            fff = cwin;
         }
 
         this = wnd;
@@ -518,13 +538,14 @@ fn CloseWindowMsg(win:*Window) void {
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
 
     // --- close the children of this window ---
-    var cwnd = Window.LastWindow(wnd);
-    while (cwnd != null) {
+    var cwin = win.lastWindow();
+    while (cwin) |cw| {
+        const cwnd = cw.win;
         if (df.inFocus == cwnd) {
             df.inFocus = wnd;
         }
-        _ = q.SendMessage(cwnd,df.CLOSE_WINDOW,0,0);
-        cwnd = Window.LastWindow(wnd);
+        _ = cw.sendMessage(df.CLOSE_WINDOW,0,0);
+        cwin = win.lastWindow();
     }
 
     // ----- release captured resources ------

@@ -94,7 +94,7 @@ typedef struct window {
 	char WindowColors[4][2];
     /* -------------- linked list pointers ---------------- */
 
-	struct window *childfocus;	/* child that ha(s/d) focus */
+//	struct window *childfocus;	// child that ha(s/d) focus
     int attrib;                 /* Window attributes        */
     char *videosave;            /* video save buffer        */
     enum Condition condition;   /* Restored, Maximized,

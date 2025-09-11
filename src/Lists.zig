@@ -67,8 +67,13 @@ pub fn SetNextFocus() void {
             }
         }
         if (wnd1 != null) {
-            while (wnd1.*.childfocus != null) {
-                wnd1 = wnd1.*.childfocus;
+//            while (wnd1.*.childfocus != null) {
+//                wnd1 = wnd1.*.childfocus;
+//            }
+            var win1:*Window = Window.get_zin(wnd1).?;
+            while (win1.*.childfocus) |w1| {
+                win1 = w1;
+                wnd1 = w1.win;
             }
             if (wnd1.*.condition != df.ISCLOSING) {
                 _ = df.SendMessage(wnd1, df.SETFOCUS, df.TRUE, 0);
@@ -101,8 +106,13 @@ pub fn SetPrevFocus() void {
             }
         }
         if (wnd1 != null) {
-            while (wnd1.*.childfocus != null) {
-                wnd1 = wnd1.*.childfocus;
+//            while (wnd1.*.childfocus != null) {
+//                wnd1 = wnd1.*.childfocus;
+//            }
+            var win1:*Window = Window.get_zin(wnd1).?;
+            while (win1.*.childfocus) |w1| {
+                win1 = w1;
+                wnd1 = w1.win;
             }
             if (wnd1.*.condition != df.ISCLOSING) {
                 _ = df.SendMessage(wnd1, df.SETFOCUS, df.TRUE, 0);

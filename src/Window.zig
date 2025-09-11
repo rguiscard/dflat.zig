@@ -20,6 +20,7 @@ firstchild:?*TopLevelFields = null,   // first child this parent
 lastchild:?*TopLevelFields = null,    // last child this parent
 nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
+childfocus:?*TopLevelFields = null,   // child that ha(s/d) focus
 
 // ----------------- text box fields ------------------
 text:?[]u8 = null,   // window text

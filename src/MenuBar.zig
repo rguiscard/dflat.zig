@@ -455,8 +455,13 @@ fn GetDocFocus() df.WINDOW {
                 wnd = Window.PrevWindow(wnd);
             }
             if (wnd != null) {
-                while (wnd.*.childfocus != null) {
-                    wnd = wnd.*.childfocus;
+//                while (wnd.*.childfocus != null) {
+//                    wnd = wnd.*.childfocus;
+//                }
+                var win:*Window = Window.get_zin(wnd).?;
+                while (win.*.childfocus) |cf| {
+                    win = cf;
+                    wnd = cf.win;
                 }
             }
         }
