@@ -976,53 +976,50 @@ fn PaintOverLappers(win:*Window) void {
 // --- paint those parts of a window that are overlapped ---
 fn PaintUnderLappers(win:*Window) void {
     const wnd = win.win;
-    var hwnd = Window.NextWindow(wnd);
-    while (hwnd != null) {
-        if (Window.get_zin(hwnd)) |hwin| {
-            // ------- test only at document window level ------
-            var pwnd = df.GetParent(hwnd);
-            // if (pwnd == NULL || GetClass(pwnd) == APPLICATION) {
-            // ---- don't bother testing self -----
-            if (isVisible(hwin) and hwnd != wnd) {
-                // --- see if other window is descendent ---
+    var hw = win.nextWindow();
+    while (hw) |hwin| {
+        const hwnd = hwin.win;
+        // ------- test only at document window level ------
+        var pwnd = df.GetParent(hwnd);
+        // if (pwnd == NULL || GetClass(pwnd) == APPLICATION) {
+        // ---- don't bother testing self -----
+        if (isVisible(hwin) and hwnd != wnd) {
+            // --- see if other window is descendent ---
+            while (pwnd != null) {
+                if (pwnd == wnd)
+                    break;
+                pwnd = Window.GetParent(pwnd);
+            }
+            // ----- don't test descendent overlaps -----
+            if (pwnd == null) {
+                // -- see if other window is ancestor ---
+                pwnd = df.GetParent(wnd);
                 while (pwnd != null) {
-                    if (pwnd == wnd)
+                    if (pwnd == hwnd)
                         break;
-                    pwnd = Window.GetParent(pwnd);
+                    pwnd = df.GetParent(pwnd);
                 }
-                // ----- don't test descendent overlaps -----
+                // --- don't test ancestor overlaps ---
                 if (pwnd == null) {
-                    // -- see if other window is ancestor ---
-                    pwnd = df.GetParent(wnd);
-                    while (pwnd != null) {
-                        if (pwnd == hwnd)
-                            break;
-                        pwnd = df.GetParent(pwnd);
-                    }
-                    // --- don't test ancestor overlaps ---
-                    if (pwnd == null) {
-                        if (GetAncestor(hwin)) |w| {
-                           // Could HiddenWindow be null ?
-                           //HiddenWindow = GetAncestor(hwnd);
-                           HiddenWindow = w;
-                           HiddenWindow.ClearVisible();
-                           PaintOver(win);
-                           HiddenWindow.SetVisible();
-                        }
+                    if (GetAncestor(hwin)) |w| {
+                       // Could HiddenWindow be null ?
+                       //HiddenWindow = GetAncestor(hwnd);
+                       HiddenWindow = w;
+                       HiddenWindow.ClearVisible();
+                       PaintOver(win);
+                       HiddenWindow.SetVisible();
                     }
                 }
             }
         }
-        hwnd = Window.NextWindow(hwnd);
+        hw = hwin.nextWindow();
     }
     // --------- repaint all children of this window
     //    the same way -----------
-    hwnd = Window.FirstWindow(wnd);
-    while (hwnd != null) {
-        if (Window.get_zin(hwnd)) |hwin| {
-            PaintUnderLappers(hwin);
-        }
-        hwnd = Window.NextWindow(hwnd);
+    hw = win.firstWindow();
+    while (hw) |hwin| {
+        PaintUnderLappers(hwin);
+        hw = hwin.nextWindow();
     }
 }
 

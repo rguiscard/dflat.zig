@@ -129,20 +129,18 @@ pub fn RemoveWindow(win:?*Window) void {
     if (win) |w| {
         const wnd = w.win;
         const pwnd = df.GetParent(wnd);
-        if (Window.PrevWindow(wnd) != null) {
-            const pw = Window.PrevWindow(wnd);
-	    set_next_window(pw, Window.NextWindow(wnd));
+        if (w.prevWindow()) |pw| {
+            pw.*.nextsibling = w.nextWindow();
         }
-        if (Window.NextWindow(wnd) != null) {
-            const nw = Window.NextWindow(wnd);
-            set_prev_window(nw, Window.PrevWindow(wnd));
+        if (w.nextWindow()) |nw| {
+            nw.*.prevsibling = w.prevWindow();
         }
-        if (pwnd != null) {
-            if (wnd == Window.FirstWindow(pwnd)) {
-		set_first_window(pwnd, Window.NextWindow(wnd));
+        if (Window.get_zin(pwnd)) |pwin| { // pwnd != null
+            if (w == pwin.firstWindow()) {
+                pwin.*.firstchild = w.nextWindow();
             }
-            if (wnd == Window.LastWindow(pwnd)) {
-                set_last_window(pwnd, Window.PrevWindow(wnd));
+            if (w == pwin.lastWindow()) {
+                pwin.*.lastchild = w.prevWindow();
             }
         }
     }
@@ -153,18 +151,17 @@ pub fn AppendWindow(win:?*Window) void {
     if (win) |w| {
         const wnd = w.win;
         const pwnd = df.GetParent(wnd);
-        if (pwnd != null) {
-            if (Window.FirstWindow(pwnd) == null) {
-                set_first_window(pwnd, wnd);
+        if (Window.get_zin(pwnd)) |pwin| { // pwnd != null
+            if (pwin.firstWindow() == null) {
+                pwin.*.firstchild = w;
             }
-            if (Window.LastWindow(pwnd) != null) {
-                const lw = Window.LastWindow(pwnd);
-		set_next_window(lw, wnd);
+            if (pwin.lastWindow()) |lw| {
+                lw.*.nextsibling = w;
             }
-            set_prev_window(wnd, Window.LastWindow(pwnd));
-            set_last_window(pwnd, wnd);
+            w.*.prevsibling = pwin.lastWindow();
+            pwin.*.lastchild = w;
         }
-        set_next_window(wnd, null);
+        w.*.nextsibling = null;
     }
 }
 
