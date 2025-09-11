@@ -382,23 +382,22 @@ fn VisibleRect(win:*Window) df.RECT {
 
 
 // ----- find window that mouse coordinates are in ---
-fn inWindow(w:df.WINDOW, x:c_int, y:c_int) df.WINDOW {
-    var wnd = w;
+fn inWindow(w:?*Window, x:c_int, y:c_int) df.WINDOW {
+    var ww = w;
     var Hit:df.WINDOW = null;
-    while (wnd != null) {
-        if (Window.get_zin(wnd)) |win| {
-            if (df.isVisible(wnd)>0) {
-                const rc = VisibleRect(win);
-                if (rect.InsideRect(x, y, rc))
-                    Hit = wnd;
-                const wnd1 = inWindow(Window.LastWindow(wnd), x, y);
-                if (wnd1 != null)
-                    Hit = wnd1;
-                if (Hit != null)
-                    break;
-            }
+    while (ww) |win| {
+        const wnd = win.win;
+        if (df.isVisible(wnd)>0) {
+            const rc = VisibleRect(win);
+            if (rect.InsideRect(x, y, rc))
+                Hit = wnd;
+            const wnd1 = inWindow(win.lastWindow(), x, y);
+            if (wnd1 != null)
+                Hit = wnd1;
+            if (Hit != null)
+                break;
         }
-        wnd = Window.PrevWindow(wnd);
+        ww = win.prevWindow();
     }
     return Hit;
 }
@@ -407,7 +406,7 @@ fn MouseWindow(x:c_int, y:c_int) df.WINDOW {
     // ------ get the window in which a
     //              mouse event occurred ------
     if (app.ApplicationWindow) |awin| {
-        var Mwnd = inWindow(awin.win, x, y);
+        var Mwnd = inWindow(awin, x, y);
         // ---- process mouse captures -----
         if (CaptureMouse != null) {
             if (NoChildCaptureMouse or

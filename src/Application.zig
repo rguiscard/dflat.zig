@@ -317,21 +317,17 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
 
 // ----- Close all document windows -----
 fn CloseAll(win:*Window, closing:bool) void {
-    const wnd = win.win;
     _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
-
-    var wnd1 = Window.LastWindow(wnd);
-    while (wnd1) |w1| {
-        const wnd2 = Window.PrevWindow(w1);
-        if ((df.isVisible(w1)>0) and
-                                (df.GetClass(w1) != df.MENUBAR) and 
-                                        (df.GetClass(w1) != df.STATUSBAR)) {
-            if (Window.get_zin(w1)) |zin| {
-                zin.ClearVisible();
-                _ = zin.sendMessage(df.CLOSE_WINDOW, 0, 0);
-            }
+    var win1 = win.lastWindow();
+    while (win1) |w1| {
+        const wnd1 = w1.win;
+        if ((df.isVisible(wnd1)>0) and
+                       (df.GetClass(wnd1) != df.MENUBAR) and 
+                       (df.GetClass(wnd1) != df.STATUSBAR)) {
+            w1.ClearVisible();
+            _ = w1.sendMessage(df.CLOSE_WINDOW, 0, 0);
         }
-        wnd1 = wnd2;
+        win1 = w1.prevWindow();
     }
 
     if (closing == false)
@@ -372,7 +368,7 @@ fn WindowName(wnd:df.WINDOW) ?[]const u8 {
 }
 
 // ----------- Prepare the Window menu ------------
-// FIXME: All "more windows" functsion are not texted. it does not work as expected now.
+// FIXME: All "more windows" functsion are not tested. it does not work as expected now.
 pub export fn PrepWindowMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
     if (w) |ww| {
         const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
@@ -386,28 +382,30 @@ pub export fn PrepWindowMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
             oldFocus = wnd;
             // ----- point to the APPLICATION window -----
             if (ApplicationWindow) |awin| {
-//            var cwnd = Window.FirstWindow(df.ApplicationWindow);
-                var cwnd = Window.FirstWindow(awin.win);
+                var cwin = awin.firstWindow();
                 // ----- get the first 9 document windows -----
                 for (0..9) |idx| {
                     MenuNo = idx;
-                    if (cwnd == null)
-                        break;
-                    if (df.isVisible(cwnd)>0 and df.GetClass(cwnd) != df.MENUBAR and
-                            df.GetClass(cwnd) != df.STATUSBAR) {
-                        // --- add the document window to the menu ---
-                        // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
-                        pd.*.SelectionTitle = Menus[MenuNo].ptr;
-                        if (cwnd == oldFocus) {
-                            // -- mark the current document --
-                            pd.*.Attrib |= df.CHECKED;
-                            mnu.*.Selection = @intCast(MenuNo+2);
-                        } else {
-                            pd.*.Attrib &= ~df.CHECKED;
+                    if (cwin) |cw| {
+                        const cwnd = cw.win;
+                        if (df.isVisible(cwnd)>0 and df.GetClass(cwnd) != df.MENUBAR and
+                                df.GetClass(cwnd) != df.STATUSBAR) {
+                            // --- add the document window to the menu ---
+                            // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
+                            pd.*.SelectionTitle = Menus[MenuNo].ptr;
+                            if (cwnd == oldFocus) {
+                                // -- mark the current document --
+                                pd.*.Attrib |= df.CHECKED;
+                                mnu.*.Selection = @intCast(MenuNo+2);
+                            } else {
+                                pd.*.Attrib &= ~df.CHECKED;
+                            }
+                            pd = &mnu.*.Selections[idx+2];
                         }
-                        pd = &mnu.*.Selections[idx+2];
+                        cwin = cw.nextWindow();
+                    } else {
+                        break;
                     }
-                    cwnd = Window.NextWindow(cwnd);
                 }
             } else {
                 return;
@@ -420,6 +418,7 @@ pub export fn PrepWindowMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
             p0.*.SelectionTitle = null;
         }
         if (MenuNo >= 9) {
+// FIXME
 //            *pd++ = *ca;
 //            if (mnu.*.Selection == 0)
 //                mnu.*.Selection = 11;
@@ -437,8 +436,9 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
             if (cwnd == null)
                 return false;
             if (ApplicationWindow) |awin| {
-                var wnd1 = Window.FirstWindow(awin.win);
-                while (wnd1 != null) {
+                var win1 = awin.firstWindow();
+                while (win1) |w1| {
+                    const wnd1 = w1.win;
                     if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
                                                     (df.GetClass(wnd1) != df.MENUBAR) and
                                     df.GetClass(wnd1) != df.STATUSBAR) {
@@ -452,7 +452,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
 
                         sel += 1;
                     }
-                    wnd1 = Window.NextWindow(wnd1);
+                    win1 = w1.nextWindow();
                 }
             } else {
                 // do something ?
@@ -501,35 +501,37 @@ fn MoreWindows(win:*Window) void {
 // ----- user chose a window from the Window menu
 //        or the More Window dialog box ----- 
 fn ChooseWindow(win:*Window, WindowNo:c_int) void {
-    const wnd = win.win;
-    var cwnd = Window.FirstWindow(wnd);
     var counter = WindowNo;
-    while (cwnd != null) {
+    var cwin = win.firstWindow();
+    while (cwin) |cw| {
+        const cwnd = cw.win;
         if (df.isVisible(cwnd)>0 and
-                                df.GetClass(cwnd) != df.MENUBAR and
+                        df.GetClass(cwnd) != df.MENUBAR and
                         df.GetClass(cwnd) != df.STATUSBAR) {
             if (counter == 0)
                 break;
             counter -= 1;
         }
-        cwnd = Window.NextWindow(cwnd);
+        cwin = cw.nextWindow();
     }
-    if (cwnd != null) {
-        _ = q.SendMessage(cwnd, df.SETFOCUS, df.TRUE, 0);
-        if (cwnd.*.condition == df.ISMINIMIZED)
-            _ = q.SendMessage(cwnd, df.RESTORE, 0, 0);
+    if (cwin) |cw| {
+        _ = cw.sendMessage(df.SETFOCUS, df.TRUE, 0);
+        if (cw.win.*.condition == df.ISMINIMIZED)
+            _ = cw.sendMessage(df.RESTORE, 0, 0);
     }
 }
 
-fn DoWindowColors(wnd: df.WINDOW) void {
+fn DoWindowColors(win:*Window) void {
+    const wnd = win.win;
     df.InitWindowColors(wnd);
-    var cwnd:df.WINDOW = df.FirstWindow(wnd);
-    while (cwnd != null) {
-        DoWindowColors(cwnd);
+    var cwin = win.firstWindow();
+    while (cwin) |cw| {
+        const cwnd = cw.win;
+        DoWindowColors(cw);
         if ((df.GetClass(cwnd) == df.TEXT) and df.GetText(cwnd) != null) {
-            _ = df.SendMessage(cwnd, df.CLEARTEXT, 0, 0);
+            _ = cw.sendMessage(df.CLEARTEXT, 0, 0);
         }
-        cwnd = df.NextWindow(cwnd);
+        cwin = cw.nextWindow();
     }
 }
 
@@ -550,7 +552,7 @@ fn SelectColors(win: *Window) void {
     } else {
         @memcpy(&df.cfg.clr, &df.color);
     }
-    DoWindowColors(win.win);
+    DoWindowColors(win);
 }
 
 // ---- select screen lines ----
