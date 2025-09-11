@@ -7,6 +7,7 @@ const clipboard = @import("Clipboard.zig");
 const DialogBox = @import("DialogBox.zig");
 const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
+const app = @import("Application.zig");
 
 const MAXMESSAGES = 100;
 
@@ -405,15 +406,18 @@ fn inWindow(w:df.WINDOW, x:c_int, y:c_int) df.WINDOW {
 fn MouseWindow(x:c_int, y:c_int) df.WINDOW {
     // ------ get the window in which a
     //              mouse event occurred ------
-    var Mwnd = inWindow(df.ApplicationWindow, x, y);
-    // ---- process mouse captures -----
-    if (CaptureMouse != null) {
-        if (NoChildCaptureMouse or
-                                Mwnd == null  or
-                                normal.isAncestor(Mwnd, CaptureMouse) == false)
-            Mwnd = CaptureMouse;
+    if (app.ApplicationWindow) |awin| {
+        var Mwnd = inWindow(awin.win, x, y);
+        // ---- process mouse captures -----
+        if (CaptureMouse != null) {
+            if (NoChildCaptureMouse or
+                                    Mwnd == null  or
+                                    normal.isAncestor(Mwnd, CaptureMouse) == false)
+                Mwnd = CaptureMouse;
+        }
+        return Mwnd;
     }
-    return Mwnd;
+    return null; // unreachable
 }
 
 //void handshake(void)

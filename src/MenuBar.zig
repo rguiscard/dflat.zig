@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
+const app = @import("Application.zig");
 
 // positions in menu bar & shortcut key value
 var menu = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
@@ -445,18 +446,23 @@ fn reset_menubar(win:*Window) void {
 }
 
 fn GetDocFocus() df.WINDOW {
-    var wnd = df.ApplicationWindow;
-    if (wnd != null) {
-        wnd = Window.LastWindow(wnd);
-        while (wnd != null and (df.GetClass(wnd) == df.MENUBAR or
-                                df.GetClass(wnd) == df.STATUSBAR)) {
-            wnd = Window.PrevWindow(wnd);
-        }
+    if (app.ApplicationWindow) |awin| {
+        var wnd = awin.win;
         if (wnd != null) {
-            while (wnd.*.childfocus != null) {
-                wnd = wnd.*.childfocus;
+            wnd = Window.LastWindow(wnd);
+            while (wnd != null and (df.GetClass(wnd) == df.MENUBAR or
+                                    df.GetClass(wnd) == df.STATUSBAR)) {
+                wnd = Window.PrevWindow(wnd);
+            }
+            if (wnd != null) {
+                while (wnd.*.childfocus != null) {
+                    wnd = wnd.*.childfocus;
+                }
             }
         }
+        return if (wnd != null) wnd else awin.win;
+    } else {
+        // unreachable
+        return null;
     }
-    return if (wnd != null) wnd else df.ApplicationWindow;
 }

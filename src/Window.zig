@@ -6,6 +6,7 @@ const WndProc = @import("WndProc.zig");
 const normal = @import("Normal.zig");
 const q = @import("Message.zig");
 const Dialogs = @import("Dialogs.zig");
+const app = @import("Application.zig");
 
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
@@ -146,7 +147,11 @@ pub fn create(
                 wnd.*.rc.tp = @intCast(@max(wnd.*.rc.tp, pwin.GetClientTop()));
             }
         } else {
-            pt = df.ApplicationWindow;
+            if (app.ApplicationWindow) |awin| {
+                pt = awin.win;
+            } else {
+                pt = null; // unreachable
+            }
         }
 
         wnd.*.Class = klass;

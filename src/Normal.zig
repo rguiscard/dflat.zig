@@ -9,6 +9,7 @@ const q = @import("Message.zig");
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
 const Classes = @import("Classes.zig");
+const app = @import("Application.zig");
 
 var dummyWnd:?Window = null;
 var px:c_int = -1;
@@ -54,12 +55,12 @@ fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         _ = win.sendMessage(df.PAINT, 0, df.TRUE);
         _ = win.sendMessage(df.BORDER, 0, 0);
         // --- show the children of this window ---
-        var cwnd = Window.FirstWindow(wnd);
-        while (cwnd) |cw| {
-            if (cw.*.condition != df.ISCLOSING) {
-                _ = q.SendMessage(cw, df.SHOW_WINDOW, p1, p2);
+        var cwin = win.firstWindow();
+        while (cwin) |cw| {
+            if (cw.win.*.condition != df.ISCLOSING) {
+                _ = cw.sendMessage(df.SHOW_WINDOW, p1, p2);
             }
-            cwnd = Window.NextWindow(cw);
+            cwin = cw.nextWindow();
         }
     }
 }
@@ -275,16 +276,28 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         if ((that != null) and (df.isVisible(wnd)>0)) {
             rc = df.subRectangle(df.WindowRect(that), df.WindowRect(this));
             if (df.ValidRect(rc) == false) {
-                if (df.ApplicationWindow != null) {
-                    var ffwnd = Window.FirstWindow(df.ApplicationWindow);
-                    while (ffwnd != null) {
+//                if (df.ApplicationWindow != null) {
+//                    var ffwnd = Window.FirstWindow(df.ApplicationWindow);
+//                    while (ffwnd != null) {
+//                        if (isAncestor(wnd, ffwnd) == false) {
+//                            rc = df.subRectangle(df.WindowRect(wnd),df.WindowRect(ffwnd));
+//                            if (df.ValidRect(rc)) {
+//                                break;
+//                            }
+//                        }
+//                        ffwnd = Window.NextWindow(ffwnd);
+//                    }
+                if (app.ApplicationWindow) |awin| {
+                    var ffwin = awin.firstWindow();
+                    while (ffwin) |ff| {
+                        const ffwnd = ff.win;
                         if (isAncestor(wnd, ffwnd) == false) {
-                            rc = df.subRectangle(df.WindowRect(wnd),df.WindowRect(ffwnd));
+                            rc = df.subRectangle(win.WindowRect(),ff.WindowRect());
                             if (df.ValidRect(rc)) {
                                 break;
                             }
                         }
-                        ffwnd = Window.NextWindow(ffwnd);
+                        ffwin = ff.nextWindow();
                     }
                 }
             }

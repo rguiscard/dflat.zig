@@ -23,7 +23,8 @@ static void AllocationError(void)
 	if (!OnceIn)	{
 		OnceIn = TRUE;
 		/* ------ close all windows ------ */
-		SendMessage(ApplicationWindow, CLOSE_WINDOW, 0, 0);
+		// FIXME: uncomment after porting.
+		// SendMessage(ApplicationWindow, CLOSE_WINDOW, 0, 0);
         getvideo(rc, savbuf);
 		for (x = 0; x < 18; x++)	{
 			for (y = 0; y < 3; y++)		{

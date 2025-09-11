@@ -13,7 +13,7 @@ const radio = @import("RadioButton.zig");
 const checkbox = @import("CheckBox.zig");
 const normal = @import("Normal.zig");
 
-export var ApplicationWindow:df.WINDOW = null;
+pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
 var oldFocus:df.WINDOW = null;
@@ -32,7 +32,7 @@ var Menus = [_][]u8{
 // --------------- CREATE_WINDOW Message --------------
 fn CreateWindowMsg(win: *Window) bool {
     const wnd = win.win;
-    df.ApplicationWindow = wnd;
+    ApplicationWindow = win;
     ScreenHeight = df.SCREENHEIGHT;
 
     // INCLUDE_WINDOWOPTIONS
@@ -195,7 +195,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         df.ID_DISPLAY => {
             if (DialogBox.DialogBox(wnd, &Dialogs.Display, df.TRUE, null)) {
                 if ((df.inFocus == wnd.*.MenuBarWnd) or (df.inFocus == wnd.*.StatusBar)) {
-                    oldFocus = df.ApplicationWindow;
+                    oldFocus = ApplicationWindow.?.win;
                 } else {
                     oldFocus = df.inFocus;
                 }
@@ -254,7 +254,7 @@ fn CloseWindowMsg(win:*Window) bool {
         SetScreenHeight(ScreenHeight);
 
     df.UnLoadHelpFile();
-    df.ApplicationWindow = null;
+    ApplicationWindow = null;
     return rtn;
 }
 
@@ -385,29 +385,32 @@ pub export fn PrepWindowMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
         if (df.GetClass(wnd) != df.APPLICATION)    {
             oldFocus = wnd;
             // ----- point to the APPLICATION window -----
-            if (df.ApplicationWindow == null)
-                return;
-            var cwnd = Window.FirstWindow(df.ApplicationWindow);
-            // ----- get the first 9 document windows ----- 
-            for (0..9) |idx| {
-                MenuNo = idx;
-                if (cwnd == null)
-                    break;
-                if (df.isVisible(cwnd)>0 and df.GetClass(cwnd) != df.MENUBAR and
-                        df.GetClass(cwnd) != df.STATUSBAR) {
-                    // --- add the document window to the menu ---
-                    // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
-                    pd.*.SelectionTitle = Menus[MenuNo].ptr;
-                    if (cwnd == oldFocus) {
-                        // -- mark the current document --
-                        pd.*.Attrib |= df.CHECKED;
-                        mnu.*.Selection = @intCast(MenuNo+2);
-                    } else {
-                        pd.*.Attrib &= ~df.CHECKED;
+            if (ApplicationWindow) |awin| {
+//            var cwnd = Window.FirstWindow(df.ApplicationWindow);
+                var cwnd = Window.FirstWindow(awin.win);
+                // ----- get the first 9 document windows -----
+                for (0..9) |idx| {
+                    MenuNo = idx;
+                    if (cwnd == null)
+                        break;
+                    if (df.isVisible(cwnd)>0 and df.GetClass(cwnd) != df.MENUBAR and
+                            df.GetClass(cwnd) != df.STATUSBAR) {
+                        // --- add the document window to the menu ---
+                        // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
+                        pd.*.SelectionTitle = Menus[MenuNo].ptr;
+                        if (cwnd == oldFocus) {
+                            // -- mark the current document --
+                            pd.*.Attrib |= df.CHECKED;
+                            mnu.*.Selection = @intCast(MenuNo+2);
+                        } else {
+                            pd.*.Attrib &= ~df.CHECKED;
+                        }
+                        pd = &mnu.*.Selections[idx+2];
                     }
-                    pd = &mnu.*.Selections[idx+2];
+                    cwnd = Window.NextWindow(cwnd);
                 }
-                cwnd = Window.NextWindow(cwnd);
+            } else {
+                return;
             }
         }
         if (MenuNo > 0) {
@@ -433,23 +436,27 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
             var sel:c_int = 0;
             if (cwnd == null)
                 return false;
-            var wnd1 = Window.FirstWindow(df.ApplicationWindow);
-            while (wnd1 != null) {
-                if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
-                                                (df.GetClass(wnd1) != df.MENUBAR) and
-                                df.GetClass(wnd1) != df.STATUSBAR) {
-                    if (wnd1 == oldFocus)
-                        WindowSel = sel;
+            if (ApplicationWindow) |awin| {
+                var wnd1 = Window.FirstWindow(awin.win);
+                while (wnd1 != null) {
+                    if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
+                                                    (df.GetClass(wnd1) != df.MENUBAR) and
+                                    df.GetClass(wnd1) != df.STATUSBAR) {
+                        if (wnd1 == oldFocus)
+                            WindowSel = sel;
 
-                    const name = WindowName(wnd1);
-                    if (name) |n| {
-                        _ = q.SendMessage(cwnd, df.ADDTEXT, @intCast(@intFromPtr(n.ptr)), 0);
+                        const name = WindowName(wnd1);
+                        if (name) |n| {
+                            _ = q.SendMessage(cwnd, df.ADDTEXT, @intCast(@intFromPtr(n.ptr)), 0);
+                        }
+
+                        sel += 1;
                     }
-
-                    sel += 1;
+                    wnd1 = Window.NextWindow(wnd1);
                 }
-                wnd1 = Window.NextWindow(wnd1);
-            }
+            } else {
+                // do something ?
+            } 
             _ = q.SendMessage(cwnd, df.LB_SETSELECTION, WindowSel, 0);
             if (Window.get_zin(cwnd)) |cwin| {
                 cwin.AddAttribute(df.VSCROLLBAR);
