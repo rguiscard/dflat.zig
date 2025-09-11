@@ -67,6 +67,7 @@ void PutVideoChar(int x, int y, int c)
     }
 }
 
+#if 0 // ported
 BOOL CharInView(WINDOW wnd, int x, int y)
 {
 	WINDOW nwnd = NextWindow(wnd);
@@ -109,6 +110,7 @@ BOOL CharInView(WINDOW wnd, int x, int y)
 	}
     return (x1 < SCREENWIDTH && y1 < SCREENHEIGHT);
 }
+#endif
 
 /* -------- write a character to a window ------- */
 void wputch(WINDOW wnd, int c, int x, int y)

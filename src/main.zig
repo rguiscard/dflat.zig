@@ -14,6 +14,7 @@ pub fn main() !void {
     _ = mp.list;
     _ = mp.SystemMenu;
     _ = mp.menu;
+    _ = mp.video;
 
     if (mp.q.init_messages() == false) {
         return;
