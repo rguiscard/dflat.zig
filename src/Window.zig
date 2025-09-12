@@ -196,8 +196,6 @@ pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.P
     } else |_| {
         // error
     }
-//    const buf:[*c]u8 = p1.ptr;
-//    return self.sendMessage(msg, @intCast(@intFromPtr(buf)), p2);
     return false;
 }
 
@@ -390,8 +388,8 @@ pub fn ClearVisible(self: *TopLevelFields) void {
 }
 
 // parent cannot be null theoretically
-// but dummy for drag do not have parent.
-// application window also do not have parent.
+// dummy for drag do have parent (see dragborder()).
+// application window do not have parent.
 pub fn getParent(self: *TopLevelFields) *TopLevelFields {
     return self.parent orelse unreachable;
 }
@@ -431,14 +429,6 @@ pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
         }
     }
     return null; // unreachable
-}
-
-pub export fn SetParent(wnd:df.WINDOW, parent:df.WINDOW) void {
-    if (get_zin(wnd)) |win| {
-        if (TopLevelFields.get_zin(parent)) |pw| {
-            win.parent = pw;
-        }
-    }
 }
 
 pub export fn set_NormalProc(wnd:df.WINDOW) void {

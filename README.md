@@ -8,6 +8,7 @@ This is a version of D-Flat for Unix ported in Zig language. Please see original
 - Pasting into empty document will crash. (seems fixed).
 - The first item in menubar is not disabled when it should be, e.g. Undo in Edit and Search in Search.
 - Keep open 'Display' dialog and close it by "ok" several time will result in black in menubar.
+- Position of help box from dialogbox seems off.
 
 --------
 

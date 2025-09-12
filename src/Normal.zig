@@ -818,8 +818,9 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
     dwnd.*.rc.bt = dwnd.*.rc.tp+df.WindowHeight(wnd)-1;
     dwnd.*.ht = df.WindowHeight(wnd);
     dwnd.*.wd = df.WindowWidth(wnd);
-//    dwnd.*.parent = df.GetParent(wnd);
-    Window.SetParent(@constCast(dwnd), df.GetParent(wnd));
+    if (Window.get_zin(dwnd)) |dwin| {
+        dwin.parent = win.parent;
+    }
     dwnd.*.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
     df.InitWindowColors(dwnd);
     df.SaveBorder(dwnd.*.rc);
