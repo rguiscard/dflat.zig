@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
+const normal = @import("Normal.zig");
 
 pub var VSliding = false; // also used in ListBox
 var HSliding = false;
@@ -316,11 +317,11 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
         }
         wnd.*.wtop -= 1;
     }
-    if (df.isVisible(wnd)>0) {
+    if (normal.isVisible(win)) {
         const rc = df.ClipRectangle(wnd, rect.ClientRect(win));
         if (df.ValidRect(rc))    {
             // ---- scroll the window ----- 
-            if (wnd != df.inFocus) {
+            if (win != Window.inFocus) {
                 _ = win.sendMessage(df.PAINT, 0, 0);
             } else {
                 df.scroll_window(wnd, rc, @intCast(p1));
@@ -447,7 +448,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
     }
     const rcc = df.AdjustRectangle(wnd, rc);
 
-    if ((p2 == 0) and (wnd != df.inFocus)) {
+    if ((p2 == 0) and (win != Window.inFocus)) {
         df.ClipString += 1;
     }
 
@@ -496,7 +497,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
             _ = win.sendMessage(df.BORDER, p1, 0);
         }
     }
-    if ((p2 == 0) and (wnd != df.inFocus)) {
+    if ((p2 == 0) and (win != Window.inFocus)) {
         df.ClipString -= 1;
     }
 }

@@ -213,7 +213,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
 fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
     const wnd = win.win;
     var rc:df.RECT = .{.lf=0, .tp=0, .rt=0, .bt=0};
-    if ((p1>0) and (df.inFocus != wnd)) {
+    if ((p1>0) and (Window.inFocus != win)) {
         // set focus
         var this:df.WINDOW = null;
         var thispar:df.WINDOW = null;
@@ -237,8 +237,8 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         }
 
         this = wnd;
-        that = df.inFocus;
-        thatpar = df.inFocus;
+        that = Window.inFocusWnd();
+        thatpar = Window.inFocusWnd();
         // ---- find common ancestor of prev focus and this window ---
         while (thatpar != null) {
             thispar = wnd;
@@ -266,11 +266,11 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
             that = thatpar;
             thatpar = Window.GetParent(thatpar);
         }
-        if (df.inFocus != null) {
-            _ = q.SendMessage(df.inFocus, df.SETFOCUS, df.FALSE, 0);
+        if (Window.inFocus) |focus| {
+            _ = focus.sendMessage(df.SETFOCUS, df.FALSE, 0);
         }
-        df.inFocus = wnd;
-        if ((that != null) and (df.isVisible(wnd)>0)) {
+        Window.inFocus = win;
+        if ((that != null) and (isVisible(win))) {
             rc = df.subRectangle(df.WindowRect(that), df.WindowRect(this));
             if (df.ValidRect(rc) == false) {
                 if (app.ApplicationWindow) |awin| {
@@ -301,9 +301,9 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
             _ = q.SendMessage(wnd, df.BORDER, 0, 0);
         }
     }
-    else if ((p1 == 0) and (df.inFocus == wnd)) {
+    else if ((p1 == 0) and (Window.inFocus == win)) {
         // -------- clearing focus ---------
-        df.inFocus = null;
+        Window.inFocus = null;
         _ = win.sendMessage(df.BORDER, 0, 0);
     }
 }
@@ -516,9 +516,8 @@ fn CloseWindowMsg(win:*Window) void {
     // --- close the children of this window ---
     var cwin = win.lastWindow();
     while (cwin) |cw| {
-        const cwnd = cw.win;
-        if (df.inFocus == cwnd) {
-            df.inFocus = wnd;
+        if (Window.inFocus == cw) {
+            Window.inFocus = win;
         }
         _ = cw.sendMessage(df.CLOSE_WINDOW,0,0);
         cwin = win.lastWindow();
@@ -532,7 +531,7 @@ fn CloseWindowMsg(win:*Window) void {
     if (wnd.*.PrevKeyboard != null)
         _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
     // --- change focus if this window had it --
-    if (wnd == df.inFocus)
+    if (win == Window.inFocus)
         lists.SetPrevFocus();
     // -- free memory allocated to this window --
     if (wnd.*.title != null)
@@ -541,8 +540,8 @@ fn CloseWindowMsg(win:*Window) void {
         df.free(wnd.*.videosave);
     // -- remove window from parent's list of children --
         lists.RemoveWindow(win);
-    if (wnd == df.inFocus)
-        df.inFocus = null;
+    if (win == Window.inFocus)
+        Window.inFocus = null;
     df.free(wnd);
     // FIXME: should also free parent win
 }
@@ -582,7 +581,7 @@ fn MinimizeMsg(win:*Window) void {
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
     _ = win.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
-    if (wnd == df.inFocus) {
+    if (win == Window.inFocus) {
         lists.SetNextFocus();
     }
     if (wnd.*.restored_attrib == 0) {
@@ -607,7 +606,7 @@ fn RestoreMsg(win:*Window) void {
     _ = win.sendMessage(df.MOVE, wnd.*.RestoredRC.lf, wnd.*.RestoredRC.tp);
     wnd.*.RestoredRC = holdrc;
     _ = win.sendMessage(df.SIZE, wnd.*.RestoredRC.rt, wnd.*.RestoredRC.bt);
-    if (wnd != df.inFocus) {
+    if (win != Window.inFocus) {
         _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
     } else {
         _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);

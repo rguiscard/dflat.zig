@@ -193,7 +193,7 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
             df.KEYBOARD_CURSOR => {
                 if (wnd == null) {
                     df.cursor(@intCast(p1), @intCast(p2));
-                } else if (wnd == df.inFocus) {
+                } else if (wnd == Window.inFocusWnd()) {
                     if (Window.get_zin(wnd)) |w| {
                         df.cursor(@intCast(w.GetClientLeft()+p1),
                                   @intCast(w.GetClientTop()+p2));
@@ -443,7 +443,7 @@ pub fn dispatch_message() bool {
 
         // ------ get the window in which a
         //              keyboard event occurred ------
-        var Kwnd:df.WINDOW = df.inFocus;
+        var Kwnd:df.WINDOW = Window.inFocusWnd();
 
         // ---- process keyboard captures -----
         if (CaptureKeyboard != null) {
@@ -468,7 +468,7 @@ pub fn dispatch_message() bool {
                     if (CaptureMouse == null or
                                 (NoChildCaptureMouse == false and
                                   normal.isAncestor(Mwnd, CaptureMouse) == true)) {
-                        if (Mwnd != df.inFocus)
+                        if (Mwnd != Window.inFocusWnd())
                             _ = SendMessage(Mwnd, df.SETFOCUS, df.TRUE, 0);
                     }
                     _ = df.SendMessage(Mwnd, df.LEFT_BUTTON, ev.mx, ev.my);

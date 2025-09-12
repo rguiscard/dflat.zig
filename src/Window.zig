@@ -11,6 +11,7 @@ const app = @import("Application.zig");
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
+pub var inFocus:?*TopLevelFields = null;
 
 wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
 
@@ -435,6 +436,13 @@ pub export fn set_NormalProc(wnd:df.WINDOW) void {
     if (get_zin(wnd)) |win| {
         win.wndproc = normal.NormalProc;
     }
+}
+
+pub export fn inFocusWnd() df.WINDOW {
+    if (inFocus) |focus| {
+        return focus.win;
+    }
+    return null;
 }
 
 // Accessories

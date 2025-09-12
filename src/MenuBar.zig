@@ -69,14 +69,14 @@ fn PaintMsg(win:*Window) void {
     const wnd = win.win;
     if (Selecting)
         return;
-    if (wnd == df.inFocus) {
+    if (win == Window.inFocus) {
         _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
     }
     df.SetStandardColor(wnd);
     df.wputs(wnd, wnd.*.text, 0, 0);
 
     if ((df.ActiveMenuBar != null) and (df.ActiveMenuBar.*.ActiveSelection != -1) and
-            ((wnd == df.inFocus) or (mwnd != null))) {
+            ((win == Window.inFocus) or (mwnd != null))) {
 
         const idx:usize = @intCast(df.ActiveMenuBar.*.ActiveSelection);
         const offset=menu[idx].x1;
@@ -86,7 +86,7 @@ fn PaintMsg(win:*Window) void {
         df.SetReverseColor(wnd);
         df.cPaintMenu(wnd, @intCast(offset), @intCast(offset1), df.ActiveMenuBar.*.ActiveSelection);
 
-        if ((mwnd == null) and (wnd == df.inFocus)) {
+        if ((mwnd == null) and (win == Window.inFocus)) {
             const st = df.ActiveMenu[idx].StatusText;
             if (st) |txt| {
                 _ = win.getParent().sendMessage(df.ADDSTATUS, @intCast(@intFromPtr(txt)), 0);
@@ -97,13 +97,12 @@ fn PaintMsg(win:*Window) void {
 
 // ------------ KEYBOARD Message -------------
 fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
-    const wnd = win.win;
     if ((mwnd == null) and (p1 < 256)) {
         // ----- search for menu bar shortcut keys ----
         const c = std.ascii.toLower(@intCast(p1));
         const a = df.AltConvert(@intCast(p1));
         for (menu, 0..) |m, idx| {
-            if (((df.inFocus == wnd) and (m.sc == c)) or
+            if (((Window.inFocus == win) and (m.sc == c)) or
                 ((a > 0) and (m.sc == a))) {
                 _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
                 _ = win.sendMessage(df.MB_SELECTION, @intCast(idx), 0);

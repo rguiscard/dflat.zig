@@ -154,7 +154,7 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
         df.AltDown = df.TRUE;
     } else if (df.AltDown > 0)    {
         df.AltDown = df.FALSE;
-        if (wnd.*.MenuBarWnd != df.inFocus) {
+        if (wnd.*.MenuBarWnd != Window.inFocusWnd()) {
             _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
         }
         _ = q.SendMessage(wnd.*.MenuBarWnd, df.KEYBOARD, df.F10, 0);
@@ -195,10 +195,10 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         },
         df.ID_DISPLAY => {
             if (DialogBox.create(win, &Dialogs.Display, df.TRUE, null)) {
-                if ((df.inFocus == wnd.*.MenuBarWnd) or (df.inFocus == wnd.*.StatusBar)) {
+                if ((Window.inFocusWnd() == wnd.*.MenuBarWnd) or (Window.inFocusWnd() == wnd.*.StatusBar)) {
                     oldFocus = ApplicationWindow.?.win;
                 } else {
-                    oldFocus = df.inFocus;
+                    oldFocus = Window.inFocusWnd();
                 }
                 _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
                 SelectColors(win);
@@ -237,8 +237,8 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             _ = root.zBaseWndProc(df.APPLICATION, win, df.COMMAND, p1, p2);
         },
         else => {
-            if ((df.inFocus != wnd.*.MenuBarWnd) and (df.inFocus != wnd)) {
-                q.PostMessage(df.inFocus, df.COMMAND, p1, p2);
+            if ((Window.inFocusWnd() != wnd.*.MenuBarWnd) and (Window.inFocus != win)) {
+                q.PostMessage(Window.inFocusWnd(), df.COMMAND, p1, p2);
             }
         }
     }
@@ -267,8 +267,8 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
             return CreateWindowMsg(win);
         },
         df.HIDE_WINDOW => {
-            if (wnd == df.inFocus)
-                df.inFocus = null;
+            if (win == Window.inFocus)
+                Window.inFocus = null;
         },
         df.ADDSTATUS => {
             AddStatusMsg(win, p1);
@@ -276,7 +276,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         },
         df.SETFOCUS => {
             const p1b = (p1 > 0);
-            if (p1b == (df.inFocus != wnd)) {
+            if (p1b == (Window.inFocus != win)) {
                 SetFocusMsg(win, p1b);
                 return true;
             }
@@ -339,9 +339,11 @@ fn CloseAll(win:*Window, closing:bool) void {
 fn SetFocusMsg(win:*Window, p1:bool) void {
     const wnd = win.win;
     if (p1) {
-        _ = q.SendMessage(df.inFocus, df.SETFOCUS, df.FALSE, 0);
+        if (Window.inFocus) |focus| {
+            _ = focus.sendMessage(df.SETFOCUS, df.FALSE, 0);
+        }
     }
-    df.inFocus = if (p1) wnd else null;
+    Window.inFocus = if (p1) win else null;
     _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
 
     if (df.isVisible(wnd)>0) {
@@ -689,7 +691,7 @@ fn SwitchCursor() void {
 
 // ------- Shell out to DOS ----------
 fn ShellDOS(win:*Window) void {
-    oldFocus = df.inFocus;
+    oldFocus = Window.inFocusWnd();
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     SwitchCursor();
     if (ScreenHeight != df.SCREENHEIGHT)

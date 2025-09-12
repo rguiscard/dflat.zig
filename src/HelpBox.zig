@@ -74,7 +74,7 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
         const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
         const ctl_wnd = DialogBox.ControlWindow(dbox, df.ID_HELPTEXT);
         if (ctl_wnd) |cwnd| {
-            if (df.inFocus == cwnd) {
+            if (Window.inFocusWnd() == cwnd) {
                 return if (df.cHelpBoxKeyboardMsg(wnd, cwnd, p1) == df.TRUE) true else false;
             }
         }

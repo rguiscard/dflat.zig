@@ -2,11 +2,12 @@
 
 #include "dflat.h"
 
-WINDOW inFocus = NULL;
+// WINDOW inFocus = NULL;
 
 int foreground, background;   /* current video colors */
 
 static void TopLine(WINDOW, int, RECT);
+WINDOW inFocusWnd();
 
 /* -------- add a title to a window --------- */
 void AddTitle(WINDOW wnd, const char *ttl)
@@ -83,7 +84,7 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
     	rc = AdjustRectangle(wnd, rc);
 
     	if (SendMessage(wnd, TITLE, (PARAM) rcc, 0))    {
-        	if (wnd == inFocus)    {
+        	if (wnd == inFocusWnd())    {
             	foreground = cfg.clr[TITLEBAR] [HILITE_COLOR] [FG];
             	background = cfg.clr[TITLEBAR] [HILITE_COLOR] [BG];
         	}
@@ -129,7 +130,7 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
             	}
         	}
         	line[RectRight(rc)+1] = line[tend+3] = '\0';
-			if (wnd != inFocus)
+			if (wnd != inFocusWnd())
 				ClipString++;
         	writeline(wnd, line+RectLeft(rc),
                        	RectLeft(rc)+BorderAdj(wnd),
@@ -244,7 +245,7 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
 	rc = ParamRect(wnd, rcc);
     clrc = AdjustRectangle(wnd, rc);
 
-    if (wnd == inFocus)    {
+    if (wnd == inFocusWnd())    {
         lin  = FOCUS_LINE;
         side = FOCUS_SIDE;
         ne   = FOCUS_NE;
@@ -326,7 +327,7 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
         	line[WindowWidth(wnd)-2] = line[RectRight(rc)] = '\0';
         	if (RectLeft(rc) != RectRight(rc) ||
 	        	(RectLeft(rc) && RectLeft(rc) < WindowWidth(wnd)-1))	{
-				if (wnd != inFocus)
+				if (wnd != inFocusWnd())
 					ClipString++;
             	writeline(wnd,
                 			line+(RectLeft(clrc)),

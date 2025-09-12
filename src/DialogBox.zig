@@ -306,10 +306,10 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         df.BORDER => {
             FixColors(win);
             if (df.GetClass(wnd) == df.EDITBOX) {
-                const oldFocus = df.inFocus;
-                df.inFocus = null;
-                _ = root.DefaultWndProc(wnd, msg, p1, p2);
-                df.inFocus = oldFocus;
+                const oldFocus = Window.inFocus;
+                Window.inFocus = null;
+                _ = root.zDefaultWndProc(win, msg, p1, p2);
+                Window.inFocus = oldFocus;
                 return true;
             }
         },
@@ -324,23 +324,23 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 db = @alignCast(@ptrCast(pwnd.*.extension));
             }
             if (p1 > 0) {
-                const oldFocus = df.inFocus;
+                const oldFocus = Window.inFocus;
                 // we assume df.inFocus is not null
-                if (Window.get_zin(oldFocus)) |oldWin| {
-                    if ((pwnd != null) and (df.GetClass(oldFocus) != df.APPLICATION) and
-                                       (Normal.isAncestor(df.inFocus, pwnd) == false)) {
-                        df.inFocus = null;
-                        _ = q.SendMessage(oldFocus, df.BORDER, 0, 0);
+                if (oldFocus) |oldWin| {
+                    if ((pwnd != null) and (df.GetClass(oldWin.win) != df.APPLICATION) and
+                                       (Normal.isAncestor(oldWin.win, pwnd) == false)) {
+                        Window.inFocus = null;
+                        _ = oldWin.sendMessage(df.BORDER, 0, 0);
                         _ = q.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);
-                        df.inFocus = oldFocus;
+                        Window.inFocus = oldFocus;
                         oldWin.ClearVisible();
                     }
-                    if (df.GetClass(oldFocus) == df.APPLICATION) {
+                    if (df.GetClass(oldWin.win) == df.APPLICATION) {
                         if (pwin != null and pwin.?.nextWindow() != null) {
                             pwnd.*.wasCleared = df.FALSE;
                         }
                     }
-                    _ = root.DefaultWndProc(wnd, msg, p1, p2);
+                    _ = root.zDefaultWndProc(win, msg, p1, p2);
                     oldWin.SetVisible();
                     if (pwin) |pw| {
                         pw.dfocus = win;
@@ -494,8 +494,8 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             _ = win.sendMessage(df.COMMAND, df.ID_CANCEL, 0);
         },
         df.F1 => {
-            if (Window.get_zin(df.inFocus)) |zin| {
-                if (zin.GetControl()) |ct| {
+            if (Window.inFocus) |focus| {
+                if (focus.GetControl()) |ct| {
                     if (ct.*.help) |help| {
                         if (helpbox.DisplayHelp(win, help)) {
                             return true;
@@ -782,7 +782,7 @@ fn inFocusCommand(db:?*Dialogs.DBOX) c_int {
             if (ctl.*.Class == 0)
                 break;
             const w:df.WINDOW = @alignCast(@ptrCast(ctl.*.wnd));
-            if (w == df.inFocus) {
+            if (w == Window.inFocusWnd()) {
                 return @intCast(ctl.*.command);
             }
         }
@@ -917,7 +917,7 @@ pub fn FirstFocus(db:*Dialogs.DBOX) void {
 
 // ---- change the focus to the next control ---
 pub fn NextFocus(db:*Dialogs.DBOX) void {
-    const control = WindowControl(db, df.inFocus);
+    const control = WindowControl(db, Window.inFocusWnd());
     if (control) |ctl| {
         const len = db.*.ctl.len;
         var start:usize = 0;
@@ -950,7 +950,7 @@ pub fn NextFocus(db:*Dialogs.DBOX) void {
 // ---- change the focus to the previous control ---
 // FIXME: not tested.
 pub fn PrevFocus(db:*Dialogs.DBOX) void {
-    const control = WindowControl(db, df.inFocus);
+    const control = WindowControl(db, Window.inFocusWnd());
     if (control) |ctl| {
         const len = db.*.ctl.len;
         var start:usize = 0;
@@ -996,7 +996,7 @@ pub fn PrevFocus(db:*Dialogs.DBOX) void {
 }
 
 pub export fn SetFocusCursor(wnd:df.WINDOW) void {
-    if (wnd == df.inFocus) {
+    if (wnd == Window.inFocusWnd()) {
         _ = q.SendMessage(null, df.SHOW_CURSOR, 0, 0);
         _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, 1, 0);
     }

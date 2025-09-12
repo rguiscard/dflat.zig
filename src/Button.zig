@@ -36,7 +36,7 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
             }
         }
         // --------- write the button's text -------
-        df.WriteTextLine(wnd, rc, 0, if (wnd == df.inFocus) 1 else 0 );
+        df.WriteTextLine(wnd, rc, 0, if (win == Window.inFocus) 1 else 0 );
     }
 }
 

@@ -158,7 +158,7 @@ fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     wnd.*.CurrCol = @intCast(p1 + wnd.*.wleft);
     wnd.*.WndRow = @intCast(p2);
     wnd.*.CurrLine = @intCast(p2 + wnd.*.wtop);
-    if (wnd == df.inFocus) {
+    if (win == Window.inFocus) {
         if (df.CharInView(wnd, @intCast(p1), @intCast(p2))>0)
             _ = q.SendMessage(null, df.SHOW_CURSOR,
                       if ((wnd.*.InsertMode>0) and (TextMarking == false)) df.TRUE else df.FALSE,

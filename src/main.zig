@@ -76,22 +76,25 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                     }
                 },
                 df.ID_SAVE => {
-                    if (mp.Window.get_zin(df.inFocus)) |w| {
+                    if (mp.Window.inFocus) |w| {
                         SaveFile(w, false);
                         return true;
                     }
                     return false;
                 },
                 df.ID_SAVEAS => {
-                    if (mp.Window.get_zin(df.inFocus)) |w| {
+                    if (mp.Window.inFocus) |w| {
                         SaveFile(w, true);
                         return true;
                     }
                     return false;
                 },
                 df.ID_DELETEFILE => {
-                    DeleteFile(df.inFocus);
-                    return true;
+                    if (mp.Window.inFocus) |w| {
+                        DeleteFile(w);
+                        return true;
+                    }
+                    return false;
                 },
                 df.ID_EXIT => {
                     const m = "Exit Memopad?";
@@ -303,7 +306,8 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
 }
 
 // -------- delete a file ------------
-fn DeleteFile(wnd:df.WINDOW) void {
+fn DeleteFile(win:*mp.Window) void {
+    const wnd = win.win;
     if (wnd.*.extension) |ext| {
         const ptr = @as([*:0]u8, @ptrCast(ext));
         const path = std.mem.span(ptr);
@@ -327,8 +331,10 @@ fn FixTabMenu() void {
     if (cp) |c| {
         const cmd = std.mem.span(c);
         if (std.mem.indexOfScalar(u8, cmd, '(')) |_| {
-            if ((df.inFocus != 0) and (df.GetClass(df.inFocus) == df.POPDOWNMENU)) {
-                _ = mp.q.SendMessage(df.inFocus, df.PAINT, 0, 0);
+            if (mp.Window.inFocus) |focus| {
+                if (df.GetClass(focus.win) == df.POPDOWNMENU) {
+                    _ = focus.sendMessage(df.PAINT, 0, 0);
+                }
             }
         }
 //        cp = strchr(cp, '(');

@@ -4,7 +4,7 @@ const Window = @import("Window.zig");
 
 // ----- set focus to the next sibling -----
 pub fn SetNextFocus() void {
-    if (Window.get_zin(df.inFocus)) |focus| { // df.inFocus != null
+    if (Window.inFocus) |focus| {
         var win1:?*Window = focus;
 	var pwnd:df.WINDOW = null;
 	var pwin:?*Window = null;
@@ -49,7 +49,7 @@ pub fn SetNextFocus() void {
 
 // ----- set focus to the previous sibling -----
 pub fn SetPrevFocus() void {
-    if (Window.get_zin(df.inFocus)) |focus| { // df.inFocus != null
+    if (Window.inFocus) |focus| {
         var win1:?*Window = focus;
 	var pwnd:df.WINDOW = null;
 	var pwin:?*Window = null;
@@ -151,8 +151,8 @@ pub fn AppendWindow(win:?*Window) void {
 pub fn SkipApplicationControls() void {
     var EmptyAppl = false;
     var ct:isize = 0;
-    while (!EmptyAppl and (df.inFocus != null))	{
-        const cl = df.GetClass(df.inFocus);
+    while (!EmptyAppl and (Window.inFocus != null))	{
+        const cl = df.GetClass(Window.inFocusWnd());
         if (cl == df.MENUBAR or cl == df.STATUSBAR) {
 	    SetPrevFocus();
             EmptyAppl = ((cl == df.MENUBAR) and (ct > 0));
