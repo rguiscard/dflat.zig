@@ -77,6 +77,7 @@ fn CreateWindowMsg(win: *Window) bool {
     CreateStatusBar(win);
 
     _ = q.SendMessage(null, df.SHOW_MOUSE, 0, 0);
+
     return rtn;
 }
 

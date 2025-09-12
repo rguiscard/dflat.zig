@@ -391,6 +391,7 @@ pub fn ClearVisible(self: *TopLevelFields) void {
 
 // parent cannot be null theoretically
 // but dummy for drag do not have parent.
+// application window also do not have parent.
 pub fn getParent(self: *TopLevelFields) *TopLevelFields {
     return self.parent orelse unreachable;
 }

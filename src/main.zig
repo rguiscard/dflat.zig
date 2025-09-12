@@ -351,7 +351,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             }
             rtn = mp.zDefaultWndProc(win, msg, p1, p2);
             if (p1 == 0) {
-                _ = df.SendMessage(mp.Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
+                _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
             } else {
                 ShowPosition(win);
             }
@@ -370,11 +370,11 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                     return true;
                 },
                 df.ID_WRAP => {
-                    _ = df.SendMessage(mp.Window.GetParent(wnd), df.COMMAND, df.ID_WRAP, 0);
+                    _ = win.getParent().sendMessage(df.COMMAND, df.ID_WRAP, 0);
                     wnd.*.WordWrapMode = df.cfg.WordWrap;
                 },
                 df.ID_INSERT => {
-                    _ = df.SendMessage(mp.Window.GetParent(wnd), df.COMMAND, df.ID_INSERT, 0);
+                    _ = win.getParent().sendMessage(df.COMMAND, df.ID_INSERT, 0);
                     wnd.*.InsertMode = df.cfg.InsertMode;
                     _ = df.SendMessage(null, df.SHOW_CURSOR, wnd.*.InsertMode, 0);
                 },
@@ -390,7 +390,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 if (std.fmt.allocPrintSentinel(mp.global_allocator, "{s}\nText changed. Save it ?", .{title}, 0)) |m| {
                     defer mp.global_allocator.free(m);
                     if (mp.MessageBox.YesNoBox(m)) {
-                        _ = df.SendMessage(mp.Window.GetParent(wnd), df.COMMAND, df.ID_SAVE, 0);
+                        _ = win.getParent().sendMessage(df.COMMAND, df.ID_SAVE, 0);
                     }
                 } else |_| {
                     // error
@@ -415,7 +415,7 @@ fn ShowPosition(win:*mp.Window) void {
     const c:u32 = @intCast(wnd.*.CurrCol);
     if (std.fmt.allocPrintSentinel(mp.global_allocator, "Line:{d:4} Column: {d:2}", .{l, c}, 0)) |m| {
         defer mp.global_allocator.free(m);
-        _ = df.SendMessage(mp.Window.GetParent(wnd), df.ADDSTATUS, @intCast(@intFromPtr(m.ptr)), 0);
+        _ = win.getParent().sendMessage(df.ADDSTATUS, @intCast(@intFromPtr(m.ptr)), 0);
     } else |_| {
         // error
     }

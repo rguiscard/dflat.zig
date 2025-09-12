@@ -257,7 +257,7 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
                 df.stacked += 1;
             }
             df.ThisHelp = newhelp;
-            _ = q.SendMessage(df.GetParent(wnd), df.DISPLAY_HELP, @intCast(@intFromPtr(df.ThisHelp.*.hname)), 0);
+            _ = win.getParent().sendMessage(df.DISPLAY_HELP, @intCast(@intFromPtr(df.ThisHelp.*.hname)), 0);
             if (df.stacked>0) {
                 DialogBox.EnableButton(&Dialogs.HelpBox, df.ID_BACK);
             } else {

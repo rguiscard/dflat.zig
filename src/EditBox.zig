@@ -430,7 +430,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         df.DoKeyStroke(wnd, @intCast(p1), p2);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
     } else if (p1 == '\t') {
-        q.PostMessage(Window.GetParent(wnd), df.KEYBOARD, @intCast('\t'), p2);
+        q.PostMessage(win.getParent().win, df.KEYBOARD, @intCast('\t'), p2);
     } else {
         df.beep();
     }

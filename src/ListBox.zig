@@ -323,13 +323,12 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.LB_CHOOSE => {
-            _ = q.SendMessage(Window.GetParent(wnd), df.LB_CHOOSE, p1, p2);
+            _ = win.getParent().sendMessage(df.LB_CHOOSE, p1, p2);
             return true;
         },
         df.LB_SELECTION => {
             df.ChangeSelection(wnd, @intCast(p1), @intCast(p2));
-            _ = q.SendMessage(Window.GetParent(wnd), df.LB_SELECTION,
-                wnd.*.selection, 0);
+            _ = win.getParent().sendMessage(df.LB_SELECTION, wnd.*.selection, 0);
             return true;
         },
         df.LB_CURRENTSELECTION => {
@@ -348,7 +347,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         df.CLOSE_WINDOW => {
             if ((df.isMultiLine(wnd) > 0) and (wnd.*.AddMode == df.TRUE)) {
                 wnd.*.AddMode = df.FALSE;
-                _ = q.SendMessage(Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
+                _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
             }
         },
         else => {

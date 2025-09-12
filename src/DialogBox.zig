@@ -144,14 +144,14 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         ' ' => {
             if ((p2 & df.ALTKEY) > 0) {
                 // it didn't break. Fall through
-                q.PostMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
+                q.PostMessage(win.getParent().win, df.KEYBOARD, p1, p2);
                 return true;
             }
         },
         df.ALT_F6,
         df.CTRL_F4,
         df.ALT_F4 => {
-            q.PostMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
+            q.PostMessage(win.getParent().win, df.KEYBOARD, p1, p2);
             return true;
         },
         df.F1 => {
@@ -159,7 +159,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 if (win.GetControl()) |ct| {
                     if (ct.*.help) |help| {
                         if (helpbox.DisplayHelp(win, help) == false) {
-                            _ = q.SendMessage(Window.GetParent(wnd),df.COMMAND,df.ID_HELP,0);
+                            _ = win.getParent().sendMessage(df.COMMAND,df.ID_HELP,0);
                         }
                     }
                 }
@@ -206,7 +206,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             if (((Normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) and
                 (Normal.isDerivedFrom(win, df.BUTTON) == false) and
                 (Normal.isDerivedFrom(win, df.LISTBOX) == false)) {
-                _ = q.SendMessage(Window.GetParent(wnd), df.COMMAND, df.ID_OK, 0);
+                _ = win.getParent().sendMessage(df.COMMAND, df.ID_OK, 0);
                 return true;
             }
         },
@@ -222,14 +222,15 @@ fn FixColors(win:*Window) void {
         if (ct.*.Class != df.BUTTON) {
             if ((ct.*.Class != df.SPINBUTTON) and (ct.*.Class != df.COMBOBOX)) {
                 if ((ct.*.Class != df.EDITBOX) and (ct.*.Class != df.LISTBOX)) {
+                    const pwnd = win.getParent().win;
                     wnd.*.WindowColors[df.FRAME_COLOR][df.FG] =
-                                            df.GetParent(wnd).*.WindowColors[df.FRAME_COLOR][df.FG];
+                                            pwnd.*.WindowColors[df.FRAME_COLOR][df.FG];
                     wnd.*.WindowColors[df.FRAME_COLOR][df.BG] =
-                                            df.GetParent(wnd).*.WindowColors[df.FRAME_COLOR][df.BG];
+                                            pwnd.*.WindowColors[df.FRAME_COLOR][df.BG];
                     wnd.*.WindowColors[df.STD_COLOR][df.FG] =
-                                            df.GetParent(wnd).*.WindowColors[df.STD_COLOR][df.FG];
+                                            pwnd.*.WindowColors[df.STD_COLOR][df.FG];
                     wnd.*.WindowColors[df.STD_COLOR][df.BG] =
-                                            df.GetParent(wnd).*.WindowColors[df.STD_COLOR][df.BG];
+                                            pwnd.*.WindowColors[df.STD_COLOR][df.BG];
                 }
             }
         }
@@ -260,7 +261,7 @@ fn CtlCloseWindowMsg(win:*Window) void {
     const wnd = win.win;
     if (win.GetControl()) |ct| {
         ct.*.wnd = null;
-        if (Window.GetParent(wnd).*.ReturnCode == df.ID_OK) {
+        if (win.getParent().win.*.ReturnCode == df.ID_OK) {
             if (ct.*.Class == df.EDITBOX or ct.*.Class == df.COMBOBOX)  {
                 // should use strlen() instead ?
                 const len = wnd.*.textlen;
@@ -313,10 +314,10 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             }
         },
         df.SETFOCUS => {
-            const pwnd = Window.GetParent(wnd);
-            var pwin:?*Window = null;
-            if (Window.get_zin(pwnd)) |pw| {
-                pwin = pw;
+            var pwin = win.parent;
+            var pwnd:df.WINDOW = null;
+            if (pwin) |pw| {
+                pwnd = pw.win; // only dummy and application window is null
             }
             var db:?*Dialogs.DBOX = null;
             if (pwnd != null) {

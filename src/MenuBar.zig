@@ -18,10 +18,9 @@ export var ActiveMenu:?*df.MENU = null;
 
 // ----------- SETFOCUS Message -----------
 fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
-    const wnd = win.win;
     const rtn = root.zBaseWndProc(df.MENUBAR, win, df.SETFOCUS, p1, 0);
     if (p1>0) {
-        _ = q.SendMessage(Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
+        _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
     } else {
         _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
     }
@@ -71,7 +70,7 @@ fn PaintMsg(win:*Window) void {
     if (Selecting)
         return;
     if (wnd == df.inFocus) {
-        _ = q.SendMessage(Window.GetParent(wnd), df.ADDSTATUS, 0, 0);
+        _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
     }
     df.SetStandardColor(wnd);
     df.wputs(wnd, wnd.*.text, 0, 0);
@@ -90,8 +89,7 @@ fn PaintMsg(win:*Window) void {
         if ((mwnd == null) and (wnd == df.inFocus)) {
             const st = df.ActiveMenu[idx].StatusText;
             if (st) |txt| {
-                _ = q.SendMessage(Window.GetParent(wnd), df.ADDSTATUS,
-                    @intCast(@intFromPtr(txt)), 0);
+                _ = win.getParent().sendMessage(df.ADDSTATUS, @intCast(@intFromPtr(txt)), 0);
             }
         }
     }
@@ -128,7 +126,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
 //                            if (pd.Attrib & df.TOGGLE > 0)
 //                                pd.Attrib ^= df.CHECKED;
                             _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
-                            q.PostMessage(df.GetParent(wnd), df.COMMAND, pd.ActionId, 0);
+                            q.PostMessage(win.getParent().win, df.COMMAND, pd.ActionId, 0);
                         }
                     }
                 }
@@ -304,7 +302,6 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
 // --------- COMMAND Message ----------
 fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const wnd = win.win;
     if (p1 == df.ID_HELP) {
         _ = root.zBaseWndProc(df.MENUBAR, win, df.COMMAND, p1, p2);
         return;
@@ -330,7 +327,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             _ = q.SendMessage(mm, df.CLOSE_WINDOW, 0, 0);
         }
         _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
-        q.PostMessage(Window.GetParent(wnd), df.COMMAND, p1, p2);
+        q.PostMessage(win.getParent().win, df.COMMAND, p1, p2);
     }
 }
 

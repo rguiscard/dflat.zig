@@ -12,7 +12,7 @@ pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                 return false;
             },
             df.LEFT_BUTTON, df.BUTTON_RELEASED => {
-                return if (df.SendMessage(Window.GetParent(wnd), msg, p1, p2) == df.TRUE) true else false;
+                return win.getParent().sendMessage(msg, p1, p2);
             },
             df.BORDER => {
                 const rtn = root.zBaseWndProc(df.BOX, win, msg, p1, p2);

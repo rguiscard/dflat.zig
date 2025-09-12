@@ -11,7 +11,7 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
     if (df.isVisible(wnd) > 0) {
         if (win.TestAttribute(df.SHADOW) and (df.cfg.mono == 0)) {
             // -------- draw the button's shadow -------
-            df.background = df.WndBackground(Window.GetParent(wnd));
+            df.background = df.WndBackground(win.getParent().win);
             df.foreground = df.BLACK;
             for(1..@intCast(win.WindowWidth()+1)) |x| {
                 df.wputch(wnd, 223, @intCast(x), 1);
@@ -44,7 +44,7 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     const wnd = win.win;
     if (df.cfg.mono == 0) {
         // --------- draw a pushed button --------
-        df.background = df.WndBackground(Window.GetParent(wnd));
+        df.background = df.WndBackground(win.getParent().win);
         df.foreground = df.WndBackground(wnd);
         df.wputch(wnd, ' ', 0, 0);
         for (0..@intCast(win.WindowWidth())) |x| {
@@ -59,7 +59,7 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     }
     _ = win.sendMessage(df.PAINT, 0, 0);
     if (ct.*.setting == df.ON) {
-        q.PostMessage(Window.GetParent(wnd), df.COMMAND, ct.*.command, 0);
+        q.PostMessage(win.getParent().win, df.COMMAND, ct.*.command, 0);
     } else {
         df.beep();
     }
