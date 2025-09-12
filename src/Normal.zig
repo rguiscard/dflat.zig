@@ -177,7 +177,6 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.MOUSE_CURSOR, df.GetLeft(wnd), df.GetTop(wnd));
             df.WindowMoving = df.TRUE;
-//            df.dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         df.ID_SYSSIZE => {
@@ -185,7 +184,6 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.MOUSE_CURSOR, df.GetRight(wnd), df.GetBottom(wnd));
             df.WindowSizing = df.TRUE;
-//            df.dragborder(wnd, df.GetLeft(wnd), df.GetTop(wnd));
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         df.ID_SYSCLOSE => {
@@ -222,22 +220,6 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         var that:df.WINDOW = null;
         var thatpar:df.WINDOW = null;
 
-//        var cwnd = wnd;
-//        var fwnd = Window.GetParent(wnd);
-//
-//        // ---- post focus in ancestors ----
-//        while (fwnd != null) {
-//            fwnd.*.childfocus = cwnd;
-//            cwnd = fwnd;
-//            fwnd = Window.GetParent(fwnd);
-//        }
-//        // ---- de-post focus in self and children ----
-//        fwnd = wnd;
-//        while (fwnd != null) {
-//            cwnd = fwnd.*.childfocus;
-//            fwnd.*.childfocus = null;
-//            fwnd = cwnd;
-//        }
         var cwin:?*Window = win;
         var fwnd = Window.GetParent(wnd);
 
@@ -387,7 +369,6 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             py = @intCast(my);
             diff = @intCast(mx);
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(dwnd)));
-//            df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         }
         return;
@@ -413,7 +394,6 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         }
         df.WindowSizing = df.TRUE;
         _ = q.SendMessage(wnd, df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
-//        df.dragborder(wnd, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
     }
 }
