@@ -341,10 +341,9 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     }
                     _ = root.DefaultWndProc(wnd, msg, p1, p2);
                     oldWin.SetVisible();
-                    if (pwnd != null) {
-                        pwnd.*.dfocus = wnd;
-                        _ = q.SendMessage(pwnd, df.COMMAND,
-                                 inFocusCommand(db), df.ENTERFOCUS);
+                    if (pwin) |pw| {
+                        pw.dfocus = win;
+                        _ = pw.sendMessage(df.COMMAND, inFocusCommand(db), df.ENTERFOCUS);
                     }
                     return true;
                 }
@@ -574,8 +573,10 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             }
         },
         df.SETFOCUS => {
-            if ((p1 != 0) and (wnd.*.dfocus != null) and (df.isVisible(wnd) > 0)) {
-                return if (q.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0) == df.TRUE) true else false;
+            if ((p1 != 0) and (df.isVisible(wnd) > 0)) {
+                if (win.dfocus) |dfocus| {
+                    return dfocus.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                }
             }
         },
         df.COMMAND => {
@@ -587,8 +588,11 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         },
         df.MOVE, df.SIZE => {
             const rtn = root.zBaseWndProc(df.DIALOG, win, msg, p1, p2);
-            if ((wnd.*.dfocus != null) and (df.isVisible(wnd) > 0))
-                _ = q.SendMessage(wnd.*.dfocus, df.SETFOCUS, df.TRUE, 0);
+            if (df.isVisible(wnd) > 0) {
+                if (win.dfocus) |dfocus| {
+                    _ = dfocus.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                }
+            }
             return rtn;
         },
         df.CLOSE_WINDOW => {

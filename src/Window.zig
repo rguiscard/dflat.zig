@@ -31,8 +31,9 @@ DeletedText:?[]u8 = null,    // for undo
 DeletedLength:usize = 0,     // Length of deleted field
 
 // ---------------- dialog box fields ----------------- 
-modal: bool = false,       // True if a modeless dialog box
+modal: bool = false,            // True if a modeless dialog box
 ct:?*Dialogs.CTLWINDOW = null,  // control structure
+dfocus:?*TopLevelFields = null, // control window that has focus
 
 // ------------- picture box fields -------------------
 VectorList:?[]df.VECT = null, // list of picture box vectors
