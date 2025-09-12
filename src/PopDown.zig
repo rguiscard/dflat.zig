@@ -33,7 +33,7 @@ fn CreateWindowMsg(win:*Window) bool {
     _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
     _ = q.SendMessage(null, df.SAVE_CURSOR, 0, 0);
     _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
-    wnd.*.oldFocus = Window.inFocusWnd();
+    win.oldFocus = Window.inFocus;
     Window.inFocus = win;
     return rtn;
 }
@@ -216,16 +216,10 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 
 // ----------- CLOSE_WINDOW Message ----------
 fn CloseWindowMsg(win:*Window) bool {
-    const wnd = win.win;
     _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
     _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
     _ = q.SendMessage(null, df.RESTORE_CURSOR, 0, 0);
-//    df.inFocus = wnd.*.oldFocus;
-    if (Window.get_zin(wnd.*.oldFocus)) |oldFocus| {
-        Window.inFocus = oldFocus;
-    } else {
-        Window.inFocus = null;
-    }
+    Window.inFocus = win.oldFocus;
 
     const rtn = root.zBaseWndProc(df.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
     _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, 0, 0);

@@ -148,7 +148,7 @@ typedef struct window {
 	/* -------------- popdownmenu fields ------------------ */
 	MENU *mnu;		/* points to menu structure             */
 	MBAR *holdmenu; /* previous active menu                 */
-	struct window *oldFocus;
+//	struct window *oldFocus;
 	/* -------------- status bar fields ------------------- */
 	BOOL TimePosted; /* True if time has been posted        */
     void *zin; /* Point to Window in zig */

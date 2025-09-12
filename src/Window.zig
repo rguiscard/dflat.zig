@@ -36,6 +36,9 @@ modal: bool = false,            // True if a modeless dialog box
 ct:?*Dialogs.CTLWINDOW = null,  // control structure
 dfocus:?*TopLevelFields = null, // control window that has focus
 
+// -------------- popdownmenu fields ------------------
+oldFocus:?*TopLevelFields = null,
+
 // ------------- picture box fields -------------------
 VectorList:?[]df.VECT = null, // list of picture box vectors
 
