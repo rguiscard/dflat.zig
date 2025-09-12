@@ -173,25 +173,22 @@ fn NewFile(win: *mp.Window) void {
 
 // --- The Open... command. Select a file  ---
 fn SelectFile(win: *mp.Window) !void {
-    const wnd = win.win;
     const fspec:[:0]const u8 = "*";
     var filename = std.mem.zeroes([df.MAXPATH]u8);
 
     if (mp.fileopen.OpenFileDialogBox(fspec, &filename)) {
         // --- see if the document is already in a window ---
-        var wnd1:df.WINDOW = mp.Window.FirstWindow(wnd);
-        while (wnd1 != null) {
-            if (wnd1.*.extension) |extension| {
+        var win1 = win.firstWindow();
+        while (win1) |w1| {
+            if (w1.win.*.extension) |extension| {
                 const ext:[*c]const u8 = @ptrCast(extension);
                 if (df.strcasecmp(&filename, ext) == 0) {
-                    if (mp.Window.get_zin(wnd1)) |w| {
-                        _ = w.sendMessage(df.SETFOCUS, df.TRUE, 0);
-                        _ = w.sendMessage(df.RESTORE, 0, 0);
-                    }
+                    _ = w1.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                    _ = w1.sendMessage(df.RESTORE, 0, 0);
                     return;
                 }
             }
-            wnd1 = mp.Window.NextWindow(wnd1);
+            win1 = w1.nextWindow();
         }
 
         const fname = @as([*:0]u8, filename[0..filename.len-1:0]);

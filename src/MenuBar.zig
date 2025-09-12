@@ -447,22 +447,22 @@ fn reset_menubar(win:*Window) void {
 
 fn GetDocFocus() df.WINDOW {
     if (app.ApplicationWindow) |awin| {
-        var wnd = awin.win;
-        if (wnd != null) {
-            wnd = Window.LastWindow(wnd);
-            while (wnd != null and (df.GetClass(wnd) == df.MENUBAR or
-                                    df.GetClass(wnd) == df.STATUSBAR)) {
-                wnd = Window.PrevWindow(wnd);
+        var win:?*Window = awin;
+        if (win) |w| {
+            win = w.lastWindow();
+            while (win != null and (df.GetClass(win.?.win) == df.MENUBAR or
+                                    df.GetClass(win.?.win) == df.STATUSBAR)) {
+                win = win.?.prevWindow();
             }
-            if (wnd != null) {
-                var win:*Window = Window.get_zin(wnd).?;
-                while (win.*.childfocus) |cf| {
-                    win = cf;
-                    wnd = cf.win;
+            if (win) |ww| {
+                var w1:*Window = ww;
+                while (w1.*.childfocus) |cf| {
+                    w1 = cf;
+                    win = cf; // win need to keep updated
                 }
             }
         }
-        return if (wnd != null) wnd else awin.win;
+        return if (win != null) win.?.win else awin.win;
     } else {
         // unreachable
         return null;

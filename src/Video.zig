@@ -26,29 +26,27 @@ pub export fn CharInView(wnd:df.WINDOW, x:c_int, y:c_int) callconv(.c) df.BOOL {
             }
         }
 
-        var nwnd = Window.NextWindow(wnd);
-        while (nwnd != null) {
-            if (Window.get_zin(nwnd)) |nwin| {
-                if (nwin.isHidden() == false) { //  && !isAncestor(wnd, nwnd)
-                    var rc = nwin.WindowRect();
-                    if (nwin.TestAttribute(df.SHADOW)) {
-                        rc.bt += 1;
-                        rc.rt += 1;
-                    }
-                    if (nwin.TestAttribute(df.NOCLIP) == false) {
-                        var pwnd = nwnd;
-                        while (df.GetParent(pwnd) != null) {
-                            pwnd = df.GetParent(pwnd);
-                            if (Window.get_zin(pwnd)) |pwin| {
-                                rc = df.subRectangle(rc, rect.ClientRect(pwin));
-                            }
+        var nwin = win.nextWindow();
+        while (nwin) |nw| {
+            if (nw.isHidden() == false) { //  && !isAncestor(wnd, nwnd)
+                var rc = nw.WindowRect();
+                if (nw.TestAttribute(df.SHADOW)) {
+                    rc.bt += 1;
+                    rc.rt += 1;
+                }
+                if (nw.TestAttribute(df.NOCLIP) == false) {
+                    var pwnd = nw.win;
+                    while (df.GetParent(pwnd) != null) {
+                        pwnd = df.GetParent(pwnd);
+                        if (Window.get_zin(pwnd)) |pwin| {
+                            rc = df.subRectangle(rc, rect.ClientRect(pwin));
                         }
                     }
-                    if (rect.InsideRect(x1,y1,rc))
-                        return df.FALSE;
                 }
-             }
-             nwnd = Window.NextWindow(nwnd);
+                if (rect.InsideRect(x1,y1,rc))
+                    return df.FALSE;
+            }
+             nwin = nw.nextWindow();
         }
         return if ((x1 < df.SCREENWIDTH and y1 < df.SCREENHEIGHT)) df.TRUE else df.FALSE;
     }

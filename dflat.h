@@ -183,10 +183,6 @@ typedef struct window {
 #define GetClientRight(w)    (GetRight(w)-BorderAdj(w))
 #define GetTitle(w)          ((w)->title)
 WINDOW GetParent(WINDOW);
-WINDOW FirstWindow(WINDOW);
-WINDOW LastWindow(WINDOW);
-WINDOW NextWindow(WINDOW);
-WINDOW PrevWindow(WINDOW);
 #define GetClass(w)          ((w)->Class)
 #define GetAttribute(w)      ((w)->attrib)
 #define AddAttribute(w,a)    (GetAttribute(w) |= a)

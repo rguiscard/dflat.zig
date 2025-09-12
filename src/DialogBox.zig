@@ -314,6 +314,10 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.SETFOCUS => {
             const pwnd = Window.GetParent(wnd);
+            var pwin:?*Window = null;
+            if (Window.get_zin(pwnd)) |pw| {
+                pwin = pw;
+            }
             var db:?*Dialogs.DBOX = null;
             if (pwnd != null) {
                 db = @alignCast(@ptrCast(pwnd.*.extension));
@@ -330,9 +334,10 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                         df.inFocus = oldFocus;
                         oldWin.ClearVisible();
                     }
-                    if ((df.GetClass(oldFocus) == df.APPLICATION) and
-                            df.NextWindow(pwnd) != null) {
-                        pwnd.*.wasCleared = df.FALSE;
+                    if (df.GetClass(oldFocus) == df.APPLICATION) {
+                        if (pwin != null and pwin.?.nextWindow() != null) {
+                            pwnd.*.wasCleared = df.FALSE;
+                        }
                     }
                     _ = root.DefaultWndProc(wnd, msg, p1, p2);
                     oldWin.SetVisible();

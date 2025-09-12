@@ -421,34 +421,6 @@ pub export fn SetParent(wnd:df.WINDOW, parent:df.WINDOW) void {
     }
 }
 
-pub export fn FirstWindow(wnd:df.WINDOW) df.WINDOW {
-    if (get_zin(wnd)) |win| {
-        return if (win.firstchild) |w| w.win else null;
-    }
-    return null;
-}
-
-pub export fn LastWindow(wnd:df.WINDOW) df.WINDOW {
-    if (get_zin(wnd)) |win| {
-        return if (win.lastchild) |w| w.win else null;
-    }
-    return null;
-}
-
-pub export fn NextWindow(wnd:df.WINDOW) df.WINDOW {
-    if (get_zin(wnd)) |win| {
-        return if (win.nextsibling) |w| w.win else null;
-    }
-    return null;
-}
-
-pub export fn PrevWindow(wnd:df.WINDOW) df.WINDOW {
-    if (get_zin(wnd)) |win| {
-        return if (win.prevsibling) |w| w.win else null;
-    }
-    return null;
-}
-
 pub export fn set_NormalProc(wnd:df.WINDOW) void {
     if (get_zin(wnd)) |win| {
         win.wndproc = normal.NormalProc;
