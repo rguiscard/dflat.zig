@@ -69,8 +69,9 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c_uint) void {
                     ctl.*.isetting = df.OFF;
                 }
                 if (wason > 0) {
-                    const ctlwnd:df.WINDOW = @ptrCast(@alignCast(ctl.*.wnd));
-                    _ = q.SendMessage(ctlwnd, df.PAINT, 0, 0);
+                    if (ctl.win) |cwin| {
+                       _ = cwin.sendMessage(df.PAINT, 0, 0);
+                    }
                 }
             }
         }
@@ -78,8 +79,9 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c_uint) void {
         ct.*.setting = df.ON;
         if (Setting)
             ct.*.isetting = df.ON;
-        const ctwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
-        _ = q.SendMessage(ctwnd, df.PAINT, 0, 0);
+        if (ct.win) |cwin| {
+            _ = cwin.sendMessage(df.PAINT, 0, 0);
+        }
     }
 }
 
@@ -129,7 +131,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
 
 pub fn RadioButtonSetting(db:*Dialogs.DBOX, cmd:c_uint) bool {
     const ctl = DialogBox.FindCommand(db, cmd, df.RADIOBUTTON);
-    const rtn = if (ctl) |ct| (if (ct.*.wnd != null) (ct.*.setting==df.ON) else (ct.*.isetting==df.ON)) else false;
+    const rtn = if (ctl) |ct| (if (ct.win != null) (ct.*.setting==df.ON) else (ct.*.isetting==df.ON)) else false;
     return rtn;
 //    return if (rtn) df.TRUE else df.FALSE;
 }

@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const Window = @import("Window.zig");
 
 pub const MAXCONTROLS = 30;
 pub const MAXRADIOS = 20;
@@ -23,7 +24,7 @@ pub const CTLWINDOW = struct {
     help:?[]const u8 = null,      // help mnemonic
     isetting:df.BOOL = df.OFF,    // initially ON or OFF
     setting:df.BOOL = df.OFF,     // ON or OFF
-    wnd:?*anyopaque = null,       // window handle
+    win:?*Window = null,          // window handle
 };
 
 // --------- one of these for each dialog box -------
@@ -256,7 +257,7 @@ fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
             .help = help,
             .isetting = if (ty == df.BUTTON) df.ON else df.OFF,
             .setting = df.OFF,
-            .wnd = null,
+            .win = null,
         };
     }
 

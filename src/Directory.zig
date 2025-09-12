@@ -13,10 +13,11 @@ fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
         const control = DialogBox.FindCommand(dbox,
                         if (dirs) df.ID_DIRECTORY else df.ID_FILES, df.LISTBOX);
         if (control) |ct| {
-            const lwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
-            _ = q.SendMessage(lwnd, df.CLEARTEXT, 0, 0);
-            _ = df.cBuildList(lwnd, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
-            _ = q.SendMessage(lwnd, df.SHOW_WINDOW, 0, 0);
+            if (ct.win) |cwin| {
+                _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+                _ = df.cBuildList(cwin.win, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
+                _ = cwin.sendMessage(df.SHOW_WINDOW, 0, 0);
+            }
         }
     }
     return true;
@@ -38,10 +39,11 @@ pub fn BuildPathDisplay(win:*Window) void {
         const control = DialogBox.FindCommand(dbox, df.ID_PATH, df.TEXT);
         if (control) |ct| {
             const path = std.mem.zeroes([df.MAXPATH]u8);
-            const lwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
             _ = df.getcwd(@constCast(&path), path.len);
-            _ = q.SendMessage(lwnd, df.SETTEXT, @intCast(@intFromPtr(&path)), 0);
-            _ = q.SendMessage(lwnd, df.PAINT, 0, 0);
+            if (ct.win) |cwin| {
+                _ = cwin.sendMessage(df.SETTEXT, @intCast(@intFromPtr(&path)), 0);
+                _ = cwin.sendMessage(df.PAINT, 0, 0);
+            }
         }
     }
 }

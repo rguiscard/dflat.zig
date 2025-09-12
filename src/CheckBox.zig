@@ -56,7 +56,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
 pub fn CheckBoxSetting(db:*Dialogs.DBOX, cmd:c_uint) c_uint {
     const ct:?*Dialogs.CTLWINDOW = DialogBox.FindCommand(db, @intCast(cmd), df.CHECKBOX);
     if (ct) |ctl| {
-        if (ctl.*.wnd) |_| {
+        if (ctl.win) |_| {
             return if (ctl.*.setting == df.ON) df.TRUE else df.FALSE;
         } else {
             return if (ctl.*.isetting == df.ON) df.TRUE else df.FALSE;

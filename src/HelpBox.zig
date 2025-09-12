@@ -276,14 +276,18 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
                                         Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1);
             // --- reposition the controls ---
             for (0..5) |i| {
-                const cwnd:df.WINDOW = @ptrCast(@alignCast(Dialogs.HelpBox.ctl[i].wnd));
                 var x = Dialogs.HelpBox.ctl[i].dwnd.x+win.GetClientLeft();
                 var y = Dialogs.HelpBox.ctl[i].dwnd.y+win.GetClientTop();
-                _ = q.SendMessage(cwnd, df.MOVE, x, y);
+                const cw = Dialogs.HelpBox.ctl[i].win;
+                if (cw) |cwin| {
+                    _ = cwin.sendMessage(df.MOVE, x, y);
+                }
                 if (i == 0) {
                     x += Dialogs.HelpBox.ctl[i].dwnd.w - 1;
                     y += Dialogs.HelpBox.ctl[i].dwnd.h - 1;
-                    _ = q.SendMessage(cwnd, df.SIZE, x, y);
+                    if (cw) |cwin| {
+                        _ = cwin.sendMessage(df.SIZE, x, y);
+                    }
                 }
             }
             // --- read the help text into the help window ---
