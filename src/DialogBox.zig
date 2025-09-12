@@ -80,7 +80,7 @@ pub fn ClearDialogBoxes() void {
 }
 
 // ------- create and execute a dialog box ----------
-pub export fn DialogBox(wnd:df.WINDOW, db:*Dialogs.DBOX, Modal:df.BOOL,
+pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
     wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool) bool {
 
     const box = db;
@@ -100,7 +100,7 @@ pub export fn DialogBox(wnd:df.WINDOW, db:*Dialogs.DBOX, Modal:df.BOOL,
                         box.*.dwnd.h,
                         box.*.dwnd.w,
                         box,
-                        wnd,
+                        parent,
                         wndproc,
                         save);
     const DialogWnd = win.win;
@@ -407,7 +407,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
                         ctl.*.dwnd.h,
                         ctl.*.dwnd.w,
                         ctl,
-                        wnd,
+                        win,
                         ControlProc,
                         attrib);
         if ((ctl.*.Class == df.EDITBOX or ctl.*.Class == df.TEXTBOX or

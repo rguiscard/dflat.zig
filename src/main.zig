@@ -198,7 +198,6 @@ fn SelectFile(win: *mp.Window) !void {
 
 // --- open a document window and load a file ---
 pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
-    const wnd = win.win;
     const fname = filename;
     if (std.mem.eql(u8, sUntitled, fname) == false) {
         // check for existing
@@ -218,7 +217,7 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
     var win1 = mp.Window.create(df.EDITBOX, // Win
                 fname,
                 (wndpos-1)*2, wndpos, 10, 40,
-                null, wnd, OurEditorProc,
+                null, win, OurEditorProc,
                 df.SHADOW     |
                 df.MINMAXBOX  |
                 df.CONTROLBOX |

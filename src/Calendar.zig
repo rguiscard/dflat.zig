@@ -176,14 +176,13 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
 }
 
 pub fn Calendar(pwin: *Window) void {
-    const pwnd = pwin.win;
     if (Cwnd == null)    {
         const tim = ctime.time(null);
         ttm = ctime.localtime(&tim).*;
         Cwnd = Window.create(df.PICTUREBOX,
             "Calendar",
             -1, -1, CALHEIGHT, CALWIDTH,
-            null, pwnd, CalendarProc,
+            null, pwin, CalendarProc,
             df.SHADOW     |
             df.MINMAXBOX  |
             df.CONTROLBOX |

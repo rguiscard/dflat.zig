@@ -58,7 +58,7 @@ pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *Dial
     set_fileSpec(Fspec);
     set_srchSpec(Sspec);
 
-    const rtn = DialogBox.DialogBox(null, db, df.TRUE, DlgFnOpen);
+    const rtn = DialogBox.create(null, db, df.TRUE, DlgFnOpen);
     if (rtn) {
         if (_fileName) |n| {
             _ = df.strcpy(Fname, n.ptr);

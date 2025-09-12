@@ -172,7 +172,7 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
             DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_BACK);
 
             // ------- display the help window -----
-            _ = DialogBox.DialogBox(null, &Dialogs.HelpBox, df.TRUE, HelpBoxProc);
+            _ = DialogBox.create(null, &Dialogs.HelpBox, df.TRUE, HelpBoxProc);
 
 //            df.free(Dialogs.HelpBox.dwnd.title);
             if (Dialogs.HelpBox.dwnd.title) |ttl| {

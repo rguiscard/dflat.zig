@@ -167,7 +167,7 @@ pub fn ReplaceText(win:*Window) void {
     if (CheckCase) {
         DialogBox.SetCheckBox(&Dialogs.ReplaceTextDB, df.ID_MATCHCASE);
     }
-    if (DialogBox.DialogBox(null, &Dialogs.ReplaceTextDB, df.TRUE, null)) {
+    if (DialogBox.create(null, &Dialogs.ReplaceTextDB, df.TRUE, null)) {
         CheckCase = if (checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, df.ID_MATCHCASE) == df.TRUE) true else false;
         SearchTextBox(win, false);
     }
@@ -180,7 +180,7 @@ pub fn SearchText(win:*Window) void {
     if (CheckCase) {
         DialogBox.SetCheckBox(&Dialogs.SearchTextDB, df.ID_MATCHCASE);
     }
-    if (DialogBox.DialogBox(null, &Dialogs.SearchTextDB, df.TRUE, null)) {
+    if (DialogBox.create(null, &Dialogs.SearchTextDB, df.TRUE, null)) {
         CheckCase = if (checkbox.CheckBoxSetting(&Dialogs.SearchTextDB, df.ID_MATCHCASE) == df.TRUE) true else false;
         SearchTextBox(win, false);
     }

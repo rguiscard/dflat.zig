@@ -26,11 +26,11 @@ pub fn YesNoBox(msg: [:0]const u8) bool {
     return GenericMessage(null, sCONFIRM, msg, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
 }
 
-pub fn CancelBox(wnd: df.WINDOW, msg: [:0]const u8) bool {
-    return GenericMessage(wnd, sWait, msg, 1, CancelProc, sCancel, null, df.ID_CANCEL, 0, false);
+pub fn CancelBox(win:?*Window, msg: [:0]const u8) bool {
+    return GenericMessage(win, sWait, msg, 1, CancelProc, sCancel, null, df.ID_CANCEL, 0, false);
 }
 
-fn GenericMessage(wnd: df.WINDOW, title: ?[:0]const u8, msg:[:0]const u8, buttonct: c_int,
+fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct: c_int,
                   wndproc: *const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
                   button1: ?[:0]const u8, button2: ?[:0]const u8, c1: c_int, c2: c_int, isModal: bool) bool {
     var mBox = Dialogs.MsgBox;
@@ -72,7 +72,7 @@ fn GenericMessage(wnd: df.WINDOW, title: ?[:0]const u8, msg:[:0]const u8, button
 
     
     const c_modal:df.BOOL = if (isModal) df.TRUE else df.FALSE;
-    const rtn = DialogBox.DialogBox(wnd, &mBox, c_modal, wndproc);
+    const rtn = DialogBox.create(win, &mBox, c_modal, wndproc);
 
     mBox.ctl[2].Class = 0;
     return rtn;

@@ -285,7 +285,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 df.MenuHeight(@constCast(&mnu.*.Selections)),
                 wd,
                 null,
-                win.win,
+                win,
                 null,
                 df.SHADOW);
     mwnd = mwin.win;

@@ -61,7 +61,7 @@ pub fn BuildSystemMenu(win: *Window) void {
         tp = (df.SCREENHEIGHT-2) - ht;
 
     const SystemMenuWin = Window.create(df.POPDOWNMENU, null,
-                lf,tp,ht,wd,null,wnd,SystemMenuProc, 0);
+                lf,tp,ht,wd,null,win,SystemMenuProc, 0);
 
     if (wnd.*.condition == df.ISRESTORED) {
         df.DeactivateCommand(&df.SystemMenu, df.ID_SYSRESTORE);

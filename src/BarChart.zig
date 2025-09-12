@@ -42,14 +42,13 @@ fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
 }
 
 pub export fn BarChart(pwin: *Window) void {
-    const pwnd = pwin.win;
     const pct = ProjChart.len;
 
     if (Bwnd == null) {
         Bwnd = Window.create(df.PICTUREBOX,
                     "BarChart",
                     -1, -1, BCHEIGHT, BCWIDTH,
-                    null, pwnd, BarChartProc,
+                    null, pwin, BarChartProc,
                     df.SHADOW     |
                     df.CONTROLBOX |
                     df.MOVEABLE   |

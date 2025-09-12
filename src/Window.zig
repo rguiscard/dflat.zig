@@ -15,7 +15,7 @@ const TopLevelFields = @This();
 wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
 
 // -------------- linked list pointers ----------------
-parent:df.WINDOW = null,       // parent window
+parent:?*TopLevelFields = null,       // parent window
 firstchild:?*TopLevelFields = null,   // first child this parent
 lastchild:?*TopLevelFields = null,    // last child this parent
 nextsibling:?*TopLevelFields = null,  // next sibling
@@ -57,7 +57,13 @@ pub export fn CreateWindow(
     if (ttl) |t| {
         title = std.mem.span(t);
     }
-    const win = self.create(klass, title, left, top, height, width, extension, parent, null, attrib);
+
+    var pwin:?*TopLevelFields = null;
+    if (self.get_zin(parent)) |pw| {
+        pwin = pw;
+    }
+
+    const win = self.create(klass, title, left, top, height, width, extension, pwin, null, attrib);
     return win.*.win;
 }
 
@@ -75,7 +81,7 @@ pub fn create(
     left:c_int, top:c_int,      // upper left coordinates
     height:c_int, width:c_int,  // dimensions
     extension:?*anyopaque,      // pointer to additional data
-    parent: df.WINDOW,          // parent of this window
+    parent: ?*TopLevelFields,   // parent of this window
     wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
     attrib: c_int) *TopLevelFields {
 
@@ -141,16 +147,18 @@ pub fn create(
 
         // ---- adjust position with parent ----
         var pt = parent;
-        if (parent != null) {
+//        if (parent != null) {
+        if (parent) |pw| {
             if (df.TestAttribute(wnd, df.NOCLIP) == 0) {
-                const pwin:*TopLevelFields = @constCast(@fieldParentPtr("win", &parent));
+//                const pwin:*TopLevelFields = @constCast(@fieldParentPtr("win", &parent));
                 // -- keep upper left within borders of parent -
-                wnd.*.rc.lf = @intCast(@max(wnd.*.rc.lf, pwin.GetClientLeft()));
-                wnd.*.rc.tp = @intCast(@max(wnd.*.rc.tp, pwin.GetClientTop()));
+                wnd.*.rc.lf = @intCast(@max(wnd.*.rc.lf, pw.GetClientLeft()));
+                wnd.*.rc.tp = @intCast(@max(wnd.*.rc.tp, pw.GetClientTop()));
             }
         } else {
             if (app.ApplicationWindow) |awin| {
-                pt = awin.win;
+//                pt = awin.win;
+                pt = awin;
             } else {
                 pt = null; // unreachable
             }
@@ -381,6 +389,12 @@ pub fn ClearVisible(self: *TopLevelFields) void {
     wnd.*.attrib &= ~df.VISIBLE;
 }
 
+// parent cannot be null theoretically
+// but dummy for drag do not have parent.
+pub fn getParent(self: *TopLevelFields) *TopLevelFields {
+    return self.parent orelse unreachable;
+}
+
 pub fn firstWindow(self: *TopLevelFields) ?*TopLevelFields {
     return self.firstchild;
 }
@@ -411,14 +425,18 @@ pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
 
 pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
     if (get_zin(wnd)) |win| {
-        return win.parent;
+        if (win.parent) |pw| {
+            return pw.win;
+        }
     }
-    return null;
+    return null; // unreachable
 }
 
 pub export fn SetParent(wnd:df.WINDOW, parent:df.WINDOW) void {
     if (get_zin(wnd)) |win| {
-        win.parent = parent;
+        if (TopLevelFields.get_zin(parent)) |pw| {
+            win.parent = pw;
+        }
     }
 }
 

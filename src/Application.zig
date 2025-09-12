@@ -193,7 +193,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             ShellDOS(win);
         },
         df.ID_DISPLAY => {
-            if (DialogBox.DialogBox(wnd, &Dialogs.Display, df.TRUE, null)) {
+            if (DialogBox.create(win, &Dialogs.Display, df.TRUE, null)) {
                 if ((df.inFocus == wnd.*.MenuBarWnd) or (df.inFocus == wnd.*.StatusBar)) {
                     oldFocus = ApplicationWindow.?.win;
                 } else {
@@ -493,8 +493,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
 
 // ---- the More Windows command on the Window menu ----
 fn MoreWindows(win:*Window) void {
-    const wnd = win.win;
-    if (DialogBox.DialogBox(wnd, &Dialogs.Windows, df.TRUE, WindowPrep))
+    if (DialogBox.create(win, &Dialogs.Windows, df.TRUE, WindowPrep))
         ChooseWindow(win, WindowSel);
 }
 
@@ -645,7 +644,7 @@ fn CreateMenu(win: *Window) void {
                         1,
                         @intCast(win.ClientWidth()),
                         null,
-                        wnd,
+                        win,
                         null,
                         0);
 
@@ -672,7 +671,7 @@ fn CreateStatusBar(win: *Window) void {
                             1,
                             @intCast(win.ClientWidth()),
                             null,
-                            wnd,
+                            win,
                             null,
                             0);
         win.win.*.StatusBar = sbar.win;
