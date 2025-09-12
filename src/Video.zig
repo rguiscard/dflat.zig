@@ -13,16 +13,14 @@ pub export fn CharInView(wnd:df.WINDOW, x:c_int, y:c_int) callconv(.c) df.BOOL {
             return df.FALSE;
 
         if (win.TestAttribute(df.NOCLIP) == false) {
-            var wnd1 = df.GetParent(wnd);
-            while (wnd1 != null) {
-                if (Window.get_zin(wnd1)) |win1| {
-                    // --- clip character to parent's borders --
-                    if (win1.TestAttribute(df.VISIBLE) == false)
-                        return df.FALSE;
-                    if (rect.InsideRect(x1, y1, rect.ClientRect(win1)) == false)
-                        return df.FALSE;
-                }
-                wnd1 = df.GetParent(wnd1);
+            var ww = win.parent;
+            while (ww) |win1| {
+                // --- clip character to parent's borders --
+                if (win1.TestAttribute(df.VISIBLE) == false)
+                    return df.FALSE;
+                if (rect.InsideRect(x1, y1, rect.ClientRect(win1)) == false)
+                    return df.FALSE;
+                ww = win1.parent;
             }
         }
 
@@ -35,12 +33,10 @@ pub export fn CharInView(wnd:df.WINDOW, x:c_int, y:c_int) callconv(.c) df.BOOL {
                     rc.rt += 1;
                 }
                 if (nw.TestAttribute(df.NOCLIP) == false) {
-                    var pwnd = nw.win;
-                    while (df.GetParent(pwnd) != null) {
-                        pwnd = df.GetParent(pwnd);
-                        if (Window.get_zin(pwnd)) |pwin| {
-                            rc = df.subRectangle(rc, rect.ClientRect(pwin));
-                        }
+                    var pp = nw;
+                    while (pp.parent) |pwin| {
+                        pp = pwin;
+                        rc = df.subRectangle(rc, rect.ClientRect(pwin));
                     }
                 }
                 if (rect.InsideRect(x1,y1,rc))
