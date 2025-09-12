@@ -23,6 +23,8 @@ nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
 childfocus:?*TopLevelFields = null,   // child that ha(s/d) focus
 
+StatusBar:?*TopLevelFields = null,    // status bar
+
 // ----------------- text box fields ------------------
 text:?[]u8 = null,   // window text
 textlen:usize = 0,   // text length
@@ -446,6 +448,15 @@ pub export fn inFocusWnd() df.WINDOW {
         return focus.win;
     }
     return null;
+}
+
+pub export fn hasStatusBar(wnd:df.WINDOW) df.BOOL {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        if (win.StatusBar != null) {
+            return df.TRUE;
+        }
+    }
+    return df.FALSE;
 }
 
 // Accessories

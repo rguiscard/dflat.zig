@@ -8,6 +8,7 @@ int foreground, background;   /* current video colors */
 
 static void TopLine(WINDOW, int, RECT);
 WINDOW inFocusWnd();
+BOOL hasStatusBar(WINDOW);
 
 /* -------- add a title to a window --------- */
 void AddTitle(WINDOW wnd, const char *ttl)
@@ -315,7 +316,8 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
                 WindowHeight(wnd)-1);
 
 
-		if (wnd->StatusBar == NULL)	{
+//              if (wnd->StatusBar == NULL)	{
+                if (hasStatusBar(wnd) == FALSE)	{
         	/* ----------- bottom line ------------- */
         	memset(line,lin,WindowWidth(wnd)-1);
         	if (TestAttribute(wnd, HSCROLLBAR))    {

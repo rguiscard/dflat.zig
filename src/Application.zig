@@ -85,8 +85,7 @@ fn CreateWindowMsg(win: *Window) bool {
 // --------- ADDSTATUS Message ----------
 // This want to make sure p1 point to a buffer which contain text.
 fn AddStatusMsg(win: *Window, p1: df.PARAM) void {
-    const wnd = win.win;
-    if (wnd.*.StatusBar) |status_bar| {
+    if (win.StatusBar) |sb| {
         var text:?[]const u8 = null;
         if (p1 > 0) {
             const p:usize = @intCast(p1);
@@ -95,11 +94,11 @@ fn AddStatusMsg(win: *Window, p1: df.PARAM) void {
             text = if (tt.len == 0) null else tt;
         }
         if (text) |_| {
-            _ = q.SendMessage(status_bar, df.SETTEXT, p1, 0);
+            _ = sb.sendMessage(df.SETTEXT, p1, 0);
         } else {
-            _ = q.SendMessage(status_bar, df.CLEARTEXT, 0, 0);
+            _ = sb.sendMessage(df.CLEARTEXT, 0, 0);
         }
-        _ = q.SendMessage(status_bar, df.PAINT, 0, 0);
+        _ = sb.sendMessage(df.PAINT, 0, 0);
     }
 }
 
@@ -195,7 +194,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         },
         df.ID_DISPLAY => {
             if (DialogBox.create(win, &Dialogs.Display, df.TRUE, null)) {
-                if ((Window.inFocusWnd() == wnd.*.MenuBarWnd) or (Window.inFocusWnd() == wnd.*.StatusBar)) {
+                if ((Window.inFocusWnd() == wnd.*.MenuBarWnd) or (Window.inFocus == win.StatusBar)) {
                     oldFocus = ApplicationWindow.?.win;
                 } else {
                     oldFocus = Window.inFocusWnd();
@@ -661,10 +660,9 @@ fn CreateMenu(win: *Window) void {
 
 // ----------- Create the status bar -------------
 fn CreateStatusBar(win: *Window) void {
-    const wnd = win.win;
-    if (wnd.*.StatusBar != null)    {
-        _ = q.SendMessage(wnd.*.StatusBar, df.CLOSE_WINDOW, 0, 0);
-        win.win.*.StatusBar = null;
+    if (win.StatusBar) |sb| {
+        _ = sb.sendMessage(df.CLOSE_WINDOW, 0, 0);
+        win.StatusBar = null;
     }
     if (win.TestAttribute(df.HASSTATUSBAR)) {
         var sbar = Window.create(df.STATUSBAR,
@@ -677,7 +675,7 @@ fn CreateStatusBar(win: *Window) void {
                             win,
                             null,
                             0);
-        win.win.*.StatusBar = sbar.win;
+        win.StatusBar = sbar;
         sbar.AddAttribute(df.VISIBLE);
     }
 }
