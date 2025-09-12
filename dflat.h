@@ -107,7 +107,7 @@ typedef struct window {
     struct window *PrevMouse;   /* previous mouse capture   */
     struct window *PrevKeyboard;/* previous keyboard capture*/
 	struct window *PrevClock;   /* previous clock capture   */
-	struct window *MenuBarWnd;/* menu bar                   */
+//	struct window *MenuBarWnd;/* menu bar                   */
 //	struct window *StatusBar; /* status bar                 */
 	int isHelping;	    /* > 0 when help is being displayed */
     /* ----------------- text box fields ------------------ */

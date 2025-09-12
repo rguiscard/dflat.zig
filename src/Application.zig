@@ -142,21 +142,24 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    q.PostMessage(wnd.*.MenuBarWnd, df.KEYBOARD, p1, p2);
+    if (win.MenuBar) |mb| {
+        q.PostMessage(mb.win, df.KEYBOARD, p1, p2);
+    } // also consider null ?
     return true;
 }
 
 // --------- SHIFT_CHANGED Message --------
 fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
-    const wnd = win.win;
     if ((p1 & df.ALTKEY) > 0) {
         df.AltDown = df.TRUE;
     } else if (df.AltDown > 0)    {
         df.AltDown = df.FALSE;
-        if (wnd.*.MenuBarWnd != Window.inFocusWnd()) {
+        if (win.MenuBar != Window.inFocus) {
             _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
         }
-        _ = q.SendMessage(wnd.*.MenuBarWnd, df.KEYBOARD, df.F10, 0);
+        if (win.MenuBar) |mb| {
+            _ = mb.sendMessage(df.KEYBOARD, df.F10, 0);
+        } // also consider null ?
     }
 }
 
@@ -194,7 +197,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         },
         df.ID_DISPLAY => {
             if (DialogBox.create(win, &Dialogs.Display, df.TRUE, null)) {
-                if ((Window.inFocusWnd() == wnd.*.MenuBarWnd) or (Window.inFocus == win.StatusBar)) {
+                if ((Window.inFocus == win.MenuBar) or (Window.inFocus == win.StatusBar)) {
                     oldFocus = ApplicationWindow.?.win;
                 } else {
                     oldFocus = Window.inFocusWnd();
@@ -236,7 +239,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             _ = root.zBaseWndProc(df.APPLICATION, win, df.COMMAND, p1, p2);
         },
         else => {
-            if ((Window.inFocusWnd() != wnd.*.MenuBarWnd) and (Window.inFocus != win)) {
+            if ((Window.inFocus != win.MenuBar) and (Window.inFocus != win)) {
                 q.PostMessage(Window.inFocusWnd(), df.COMMAND, p1, p2);
             }
         }
@@ -636,8 +639,8 @@ fn SelectTitle(win: *Window) void {
 fn CreateMenu(win: *Window) void {
     const wnd = win.win;
     win.AddAttribute(df.HASMENUBAR);
-    if (wnd.*.MenuBarWnd != null) {
-        _ = q.SendMessage(wnd.*.MenuBarWnd, df.CLOSE_WINDOW, 0, 0);
+    if (win.MenuBar) |mb| {
+        _ = mb.sendMessage(df.CLOSE_WINDOW, 0, 0);
     }
     var mwnd = Window.create(df.MENUBAR,
                         null,
@@ -650,7 +653,7 @@ fn CreateMenu(win: *Window) void {
                         null,
                         0);
 
-    win.win.*.MenuBarWnd = mwnd.win;
+    win.MenuBar = mwnd;
 
     const ext:df.PARAM = @intCast(@intFromPtr(wnd.*.extension));
     _ = mwnd.sendMessage(df.BUILDMENU, ext,0);

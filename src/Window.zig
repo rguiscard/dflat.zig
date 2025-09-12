@@ -23,6 +23,7 @@ nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
 childfocus:?*TopLevelFields = null,   // child that ha(s/d) focus
 
+MenuBar:?*TopLevelFields = null,      // menu bar
 StatusBar:?*TopLevelFields = null,    // status bar
 
 // ----------------- text box fields ------------------
