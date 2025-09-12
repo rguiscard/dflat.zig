@@ -9,7 +9,7 @@ const app = @import("Application.zig");
 // positions in menu bar & shortcut key value
 var menu = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
 var mctr:usize = 0;
-var mwnd:df.WINDOW = null;
+var mwin:?*Window = null;
 var Selecting:bool = false;
 var Cascaders = [_]df.WINDOW{0}**df.MAXCASCADES;
 var casc:usize = 0;
@@ -76,7 +76,7 @@ fn PaintMsg(win:*Window) void {
     df.wputs(wnd, wnd.*.text, 0, 0);
 
     if ((df.ActiveMenuBar != null) and (df.ActiveMenuBar.*.ActiveSelection != -1) and
-            ((win == Window.inFocus) or (mwnd != null))) {
+            ((win == Window.inFocus) or (mwin != null))) {
 
         const idx:usize = @intCast(df.ActiveMenuBar.*.ActiveSelection);
         const offset=menu[idx].x1;
@@ -86,7 +86,7 @@ fn PaintMsg(win:*Window) void {
         df.SetReverseColor(wnd);
         df.cPaintMenu(wnd, @intCast(offset), @intCast(offset1), df.ActiveMenuBar.*.ActiveSelection);
 
-        if ((mwnd == null) and (win == Window.inFocus)) {
+        if ((mwin == null) and (win == Window.inFocus)) {
             const st = df.ActiveMenu[idx].StatusText;
             if (st) |txt| {
                 _ = win.getParent().sendMessage(df.ADDSTATUS, @intCast(@intFromPtr(txt)), 0);
@@ -97,7 +97,7 @@ fn PaintMsg(win:*Window) void {
 
 // ------------ KEYBOARD Message -------------
 fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
-    if ((mwnd == null) and (p1 < 256)) {
+    if ((mwin == null) and (p1 < 256)) {
         // ----- search for menu bar shortcut keys ----
         const c = std.ascii.toLower(@intCast(p1));
         const a = df.AltConvert(@intCast(p1));
@@ -233,7 +233,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM) void {
         const i:isize = @intCast(idx);
         if ((mx >= menu[idx].x1-4*i) and
                (mx <= menu[idx].x2-4*i-5)) {
-            if ((idx != df.ActiveMenuBar.*.ActiveSelection) or (mwnd == null)) {
+            if ((idx != df.ActiveMenuBar.*.ActiveSelection) or (mwin == null)) {
                 _ = win.sendMessage(df.MB_SELECTION, i, 0);
             }
             break;
@@ -259,25 +259,26 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wd = df.MenuWidth(@constCast(&mnu.*.Selections));
     if (p2>0) {
         const brd = win.GetRight();
-        if (Window.get_zin(mwnd)) |zin| { // assume mwnd exist ?
+        if (mwin) |zin| {
             mx = @intCast(zin.GetLeft() + zin.WindowWidth() - 1);
             if (mx + wd > brd) {
                 mx = @intCast(brd - wd);
             }
-            my = @intCast(zin.GetTop() + mwnd.*.selection);
+            my = @intCast(zin.GetTop() + zin.win.*.selection);
         }
     } else {
         var offset = menu[@intCast(p1)].x1 - 4 * p1;
-        if (mwnd != null)
-            _ = q.SendMessage(mwnd, df.CLOSE_WINDOW, 0, 0);
-            df.ActiveMenuBar.*.ActiveSelection = @intCast(p1);
+        if (mwin) |m| {
+            _ = m.sendMessage(df.CLOSE_WINDOW, 0, 0);
+        }
+        df.ActiveMenuBar.*.ActiveSelection = @intCast(p1);
         if (offset > win.WindowWidth()-wd) {
             offset = win.WindowWidth()-wd;
         }
         mx = @intCast(win.GetLeft()+offset);
         my = @intCast(win.GetTop()+1);
     }
-    const mwin = Window.create(df.POPDOWNMENU, null,
+    mwin = Window.create(df.POPDOWNMENU, null,
                 mx, my,
                 df.MenuHeight(@constCast(&mnu.*.Selections)),
                 wd,
@@ -285,16 +286,17 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 win,
                 null,
                 df.SHADOW);
-    mwnd = mwin.win;
     if (p2 == 0) {
         Selecting = false;
         _ = win.sendMessage(df.PAINT, 0, 0);
         Selecting = true;
     }
-    if (mnu.*.Selections[0].SelectionTitle != null)    {
-        _ = mwin.sendMessage(df.BUILD_SELECTIONS, @intCast(@intFromPtr(mnu)), 0);
-        _ = mwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
-        _ = mwin.sendMessage(df.SHOW_WINDOW, 0, 0);
+    if (mnu.*.Selections[0].SelectionTitle != null) {
+        if (mwin) |m| {
+            _ = m.sendMessage(df.BUILD_SELECTIONS, @intCast(@intFromPtr(mnu)), 0);
+            _ = m.sendMessage(df.SETFOCUS, df.TRUE, 0);
+            _ = m.sendMessage(df.SHOW_WINDOW, 0, 0);
+        }
     }
     Selecting = false;
 }
@@ -314,7 +316,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             if ((mnu.CascadeId != -1) and // instead of using -1 for title, check CascadeId.
                 (mnu.CascadeId == p1)) {
                     if (casc < df.MAXCASCADES) {
-                        Cascaders[casc] = mwnd;
+                        Cascaders[casc] = if (mwin) |m| m.win else null;
                         casc += 1;
                         _ = win.sendMessage(df.MB_SELECTION, @intCast(del), df.TRUE);
                     }
@@ -322,8 +324,8 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             }
         }
     } else {
-        if (mwnd) |mm| {
-            _ = q.SendMessage(mm, df.CLOSE_WINDOW, 0, 0);
+        if (mwin) |m| {
+            _ = m.sendMessage(df.CLOSE_WINDOW, 0, 0);
         }
         _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
         q.PostMessage(win.getParent().win, df.COMMAND, p1, p2);
@@ -336,7 +338,7 @@ fn ClosePopdownMsg(win:*Window) void {
         casc -= 1;
         _ = q.SendMessage(Cascaders[casc], df.CLOSE_WINDOW, 0, 0);
     } else {
-        mwnd = null;
+        mwin = null;
         df.ActiveMenuBar.*.ActiveSelection = -1;
         if (Selecting == false) {
             _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
@@ -378,7 +380,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             }
         },
         df.BORDER => {
-            if (mwnd == null) {
+            if (mwin == null) {
                 _ = win.sendMessage(df.PAINT, 0, 0);
             }
             return true;

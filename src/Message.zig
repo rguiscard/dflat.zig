@@ -194,7 +194,7 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
                 if (wnd == null) {
                     df.cursor(@intCast(p1), @intCast(p2));
                 } else if (wnd == Window.inFocusWnd()) {
-                    if (Window.get_zin(wnd)) |w| {
+                    if (Window.inFocus) |w| {
                         df.cursor(@intCast(w.GetClientLeft()+p1),
                                   @intCast(w.GetClientTop()+p2));
                     }
@@ -354,27 +354,24 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
 }
 
 fn VisibleRect(win:*Window) df.RECT {
-    const wnd = win.win;
     var rc = win.WindowRect();
     if (!win.TestAttribute(df.NOCLIP)) {
-        var pwnd = df.GetParent(wnd);
-        if (pwnd == null)
-            return rc;
-        var prc:df.RECT = undefined;
-        if (Window.get_zin(pwnd)) |pwin| {
-            prc = rect.ClientRect(pwin);
-        }
-        while (pwnd != null) {
-            if (Window.get_zin(pwnd)) |pwin| {
+        if (win.parent) |pw| {
+            var prc = rect.ClientRect(pw);
+            var pp:?*Window = pw;
+            while (pp) |pwin| {
                 if (pwin.TestAttribute(df.NOCLIP))
                     break;
                 rc = df.subRectangle(rc, prc);
                 if (df.ValidRect(rc) == false)
                     break;
-                pwnd = df.GetParent(pwnd);
-                if (pwnd != null)
-                    prc = rect.ClientRect(pwin);
+                pp = pwin.parent;
+                if (pp) |ppw| {
+                    prc = rect.ClientRect(ppw);
+                }
             }
+        } else {
+            return rc;
         }
     }
     return rc;

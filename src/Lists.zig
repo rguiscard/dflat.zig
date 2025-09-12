@@ -6,14 +6,10 @@ const Window = @import("Window.zig");
 pub fn SetNextFocus() void {
     if (Window.inFocus) |focus| {
         var win1:?*Window = focus;
-	var pwnd:df.WINDOW = null;
 	var pwin:?*Window = null;
         while (true) {
             if (win1) |w| {
-                pwnd = Window.GetParent(w.win);
-                if (Window.get_zin(pwnd)) |p| {
-                    pwin = p;
-                }
+                pwin = w.parent;
             }
             if ((win1 != null) and (win1.?.nextWindow() != null)) {
                 win1 = win1.?.nextWindow();
@@ -37,7 +33,7 @@ pub fn SetNextFocus() void {
         }
         if (win1) |w| {
             var ww1:*Window = w;
-            while (ww1.*.childfocus) |w1| {
+            while (ww1.childfocus) |w1| {
                 ww1 = w1;
             }
             if (ww1.win.*.condition != df.ISCLOSING) {
@@ -51,14 +47,10 @@ pub fn SetNextFocus() void {
 pub fn SetPrevFocus() void {
     if (Window.inFocus) |focus| {
         var win1:?*Window = focus;
-	var pwnd:df.WINDOW = null;
 	var pwin:?*Window = null;
         while (true) {
             if (win1) |w| {
-                pwnd = Window.GetParent(w.win);
-                if (Window.get_zin(pwnd)) |p| {
-                    pwin = p;
-                }
+                pwin = w.parent;
             }
             if ((win1 != null) and (win1.?.prevWindow() != null)) {
                 win1 = win1.?.prevWindow();
@@ -82,7 +74,7 @@ pub fn SetPrevFocus() void {
         }
         if (win1) |w| {
             var ww1:*Window = w;
-            while (ww1.*.childfocus) |w1| {
+            while (ww1.childfocus) |w1| {
                 ww1 = w1;
             }
             if (ww1.win.*.condition != df.ISCLOSING) {
@@ -94,34 +86,28 @@ pub fn SetPrevFocus() void {
 
 // ------- move a window to the end of its parents list -----
 pub fn ReFocus(win:*Window) void {
-    const wnd = win.win;
-    if (df.GetParent(wnd) != null) {
+    if (win.parent) |pw| {
         RemoveWindow(win);
         AppendWindow(win);
-        const pwnd = df.GetParent(wnd);
-        if (Window.get_zin(pwnd)) |pwin| {
-            ReFocus(pwin);
-        }
+        ReFocus(pw);
     }
 }
 
 // ---- remove a window from the linked list ----
 pub fn RemoveWindow(win:?*Window) void {
     if (win) |w| {
-        const wnd = w.win;
-        const pwnd = df.GetParent(wnd);
         if (w.prevWindow()) |pw| {
-            pw.*.nextsibling = w.nextWindow();
+            pw.nextsibling = w.nextWindow();
         }
         if (w.nextWindow()) |nw| {
-            nw.*.prevsibling = w.prevWindow();
+            nw.prevsibling = w.prevWindow();
         }
-        if (Window.get_zin(pwnd)) |pwin| { // pwnd != null
+        if (w.parent) |pwin| {
             if (w == pwin.firstWindow()) {
-                pwin.*.firstchild = w.nextWindow();
+                pwin.firstchild = w.nextWindow();
             }
             if (w == pwin.lastWindow()) {
-                pwin.*.lastchild = w.prevWindow();
+                pwin.lastchild = w.prevWindow();
             }
         }
     }
@@ -130,19 +116,17 @@ pub fn RemoveWindow(win:?*Window) void {
 // ---- append a window to the linked list ----
 pub fn AppendWindow(win:?*Window) void {
     if (win) |w| {
-        const wnd = w.win;
-        const pwnd = df.GetParent(wnd);
-        if (Window.get_zin(pwnd)) |pwin| { // pwnd != null
+        if (w.parent) |pwin| {
             if (pwin.firstWindow() == null) {
-                pwin.*.firstchild = w;
+                pwin.firstchild = w;
             }
             if (pwin.lastWindow()) |lw| {
-                lw.*.nextsibling = w;
+                lw.nextsibling = w;
             }
-            w.*.prevsibling = pwin.lastWindow();
-            pwin.*.lastchild = w;
+            w.prevsibling = pwin.lastWindow();
+            pwin.lastchild = w;
         }
-        w.*.nextsibling = null;
+        w.nextsibling = null;
     }
 }
 
