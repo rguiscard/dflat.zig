@@ -45,7 +45,7 @@ fn CreateWindowMsg(win:*Window) void {
 // --------- SHOW_WINDOW Message ----------
 fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
-    if (Window.GetParent(wnd) == null or df.isVisible(Window.GetParent(wnd))>0) {
+    if (win.parent == null or isVisible(win.getParent())) {
         if (win.TestAttribute(df.SAVESELF) and
                         (wnd.*.videosave == null)) {
             GetVideoBuffer(win);
@@ -68,7 +68,7 @@ fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 // --------- HIDE_WINDOW Message ----------
 fn HideWindowMsg(win:*Window) void {
     const wnd = win.win;
-    if (df.isVisible(wnd)>0) {
+    if (isVisible(win)) {
         win.ClearVisible();
         // --- paint what this window covered ---
         if (win.TestAttribute(df.SAVESELF)) {
@@ -85,10 +85,10 @@ fn InsideWindow(win:*Window, x:c_int, y:c_int) bool {
     const wnd = win.win;
     var rc = df.WindowRect(wnd);
     if (win.TestAttribute(df.NOCLIP))    {
-        var pwnd = Window.GetParent(wnd);
-        while (pwnd != null) {
-            rc = df.subRectangle(rc, df.ClientRect(pwnd));
-            pwnd = Window.GetParent(pwnd);
+        var pwnd = win.parent;
+        while (pwnd) |pw| {
+            rc = df.subRectangle(rc, rect.ClientRect(pw));
+            pwnd = pw.parent;
         }
     }
     if (rect.InsideRect(x, y, rc)) {
@@ -221,24 +221,19 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         var thatpar:df.WINDOW = null;
 
         var cwin:?*Window = win;
-        var fwnd = Window.GetParent(wnd);
-
+        var fwin = win.parent;
         // ---- post focus in ancestors ----
-        if (Window.get_zin(fwnd)) |fwin| {
-            var ff:?*Window = fwin;
-            while (ff) |ffwin| {
-                fwnd = ffwin.win;
-                ffwin.*.childfocus = cwin;
-                cwin = ffwin;
-                ff = Window.get_zin(Window.GetParent(fwnd));
-            }
+        while (fwin) |ff| {
+            ff.*.childfocus = cwin;
+            cwin = ff;
+            fwin = ff.parent;
         }
         // ---- de-post focus in self and children ----
-        var fff:?*Window = win;
-        while (fff) |ffwin| {
-            cwin = ffwin.*.childfocus;
-            ffwin.*.childfocus = null;
-            fff = cwin;
+        fwin = win;
+        while (fwin) |ff| {
+            cwin = ff.*.childfocus;
+            ff.*.childfocus = null;
+            fwin = cwin;
         }
 
         this = wnd;
@@ -328,7 +323,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
 // --------- LEFT_BUTTON Message ----------
 fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    var wnd = win.win; // this may change
+    const wnd = win.win; // this may change
     const dwnd = getDummy();
     const mx = p1 - win.GetLeft();
     const my = p2 - win.GetTop();
@@ -375,32 +370,35 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
     if ((mx == win.WindowWidth()-1) and
             (my == win.WindowHeight()-1)) {
+        var ww = win; // identity of win may change
         // ------- hit the resize corner -------
         if (wnd.*.condition == df.ISMINIMIZED)
             return;
         if (win.TestAttribute(df.SIZEABLE) == false)
             return;
         if (wnd.*.condition == df.ISMAXIMIZED) {
-            if (Window.GetParent(wnd) == null) {
+            if (win.parent == null) {
                 return;
             }
-            if (df.TestAttribute(Window.GetParent(wnd), df.HASBORDER)>0) {
+            if (win.getParent().TestAttribute(df.HASBORDER)) {
                 return;
             }
             // ----- resizing a maximized window over a borderless parent -----
-            wnd = Window.GetParent(wnd);
-            if (df.TestAttribute(wnd, df.SIZEABLE) == 0)
+
+            // win is changed. it affects the identity of win below.
+            // is it intended to do so?
+            ww = win.getParent();
+            if (ww.TestAttribute(df.SIZEABLE) == false)
                 return;
         }
         df.WindowSizing = df.TRUE;
-        _ = q.SendMessage(wnd, df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
-        dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+        _ = ww.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
+        dragborder(ww, @intCast(ww.GetLeft()), @intCast(ww.GetTop()));
     }
 }
 
 // --------- MOUSE_MOVED Message ----------
 fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     if (df.WindowMoving>0) {
         var leftmost:c_int = 0;
         var topmost:c_int = 0;
@@ -408,15 +406,13 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         var rightmost:c_int = df.SCREENWIDTH-2;
         var x:c_int = @intCast(p1 - diff);
         var y:c_int = @intCast(p2);
-        if ((Window.GetParent(wnd) != null) and
+        if ((win.parent != null) and
                 (win.TestAttribute(df.NOCLIP) == false)) {
-            const wnd1 = Window.GetParent(wnd);
-            if (Window.get_zin(wnd1)) |win1| {
-                topmost    = @intCast(win1.GetClientTop());
-                leftmost   = @intCast(win1.GetClientLeft());
-                bottommost = @intCast(win1.GetClientBottom());
-                rightmost  = @intCast(win1.GetClientRight());
-            } // else error ?
+            const win1 = win.getParent();
+            topmost    = @intCast(win1.GetClientTop());
+            leftmost   = @intCast(win1.GetClientLeft());
+            bottommost = @intCast(win1.GetClientBottom());
+            rightmost  = @intCast(win1.GetClientRight());
         }
         if ((x < leftmost) or (x > rightmost) or
                 (y < topmost) or (y > bottommost))    {
@@ -558,10 +554,8 @@ fn MaximizeMsg(win:*Window) void {
     const holdrc = wnd.*.RestoredRC;
     rc.rt = df.SCREENWIDTH-1;
     rc.bt = df.SCREENHEIGHT-1;
-    if (Window.GetParent(wnd)) |parent| {
-        if (Window.get_zin(parent)) |zin| {
-            rc = rect.ClientRect(zin);
-        }
+    if (win.parent) |pw| {
+        rc = rect.ClientRect(pw);
     }
     wnd.*.oldcondition = wnd.*.condition;
     wnd.*.condition = df.ISMAXIMIZED;
@@ -639,12 +633,12 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             if (KeyboardMsg(win, p1, p2))
                 return true;
             // ------- fall through -------
-            if (Window.GetParent(wnd) != null)
-                q.PostMessage(Window.GetParent(wnd), msg, p1, p2);
+            if (win.parent != null)
+                q.PostMessage(win.getParent().win, msg, p1, p2);
         },
         df.ADDSTATUS, df.SHIFT_CHANGED => {
-            if (Window.GetParent(wnd) != null)
-                q.PostMessage(Window.GetParent(wnd), msg, p1, p2);
+            if (win.parent != null)
+                q.PostMessage(win.getParent().win, msg, p1, p2);
         },
         df.PAINT => {
             if (df.isVisible(wnd)>0) {
@@ -763,8 +757,6 @@ fn LowerRight(prc:df.RECT) df.RECT {
 
 // ----- compute a position for a minimized window icon ----
 fn PositionIcon(win:*Window) df.RECT {
-    const wnd = win.win;
-    const pwnd = df.GetParent(wnd);
     var rc = df.RECT{
         .lf = df.SCREENWIDTH-df.ICONWIDTH,
         .tp = df.SCREENHEIGHT-df.ICONHEIGHT,
@@ -772,7 +764,7 @@ fn PositionIcon(win:*Window) df.RECT {
         .bt = df.SCREENHEIGHT-1
     };
 
-    if (Window.get_zin(pwnd)) |pwin| {
+    if (win.parent) |pwin| {
         const prc = pwin.WindowRect();
         var cwin = pwin.firstWindow();
         rc = LowerRight(prc); // this makes previosu assignment useless ?
@@ -836,19 +828,15 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
 
 // ---- write the dummy window border for sizing ----
 fn sizeborder(win:*Window, rt:c_int, bt:c_int) void {
-    const wnd = win.win;
     const dwnd = getDummy();
 
     const leftmost:c_int = @intCast(win.GetLeft()+10);
     const topmost:c_int = @intCast(win.GetTop()+3);
     var bottommost:c_int = @intCast(df.SCREENHEIGHT-1);
     var rightmost:c_int = @intCast(df.SCREENWIDTH-1);
-    if (df.GetParent(wnd) > 0) {
-        const pwnd = df.GetParent(wnd);
-        if (Window.get_zin(pwnd)) |pwin| {
-            bottommost = @intCast(@min(bottommost, pwin.GetClientBottom()));
-            rightmost  = @intCast(@min(rightmost, pwin.GetClientRight()));
-        }
+    if (win.parent) |pwin| {
+        bottommost = @intCast(@min(bottommost, pwin.GetClientBottom()));
+        rightmost  = @intCast(@min(rightmost, pwin.GetClientRight()));
     }
     var new_rt:c_int = @min(rt, rightmost);
     var new_bt:c_int = @min(bt, bottommost);
@@ -959,9 +947,7 @@ fn PaintOverChildren(pwin:*Window) void {
 
 // -- recursive overlapping paint of parents --
 fn PaintOverParents(win:*Window) void {
-    const wnd = win.win;
-    const pwnd = df.GetParent(wnd);
-    if (Window.get_zin(pwnd)) |pwin| {
+    if (win.parent) |pwin| {
         PaintOverParents(pwin);
         PaintOver(pwin);
         PaintOverChildren(pwin);
@@ -981,27 +967,27 @@ fn PaintUnderLappers(win:*Window) void {
     while (hw) |hwin| {
         const hwnd = hwin.win;
         // ------- test only at document window level ------
-        var pwnd = df.GetParent(hwnd);
+        var pwin = hwin.parent;
         // if (pwnd == NULL || GetClass(pwnd) == APPLICATION) {
         // ---- don't bother testing self -----
         if (isVisible(hwin) and hwnd != wnd) {
             // --- see if other window is descendent ---
-            while (pwnd != null) {
-                if (pwnd == wnd)
+            while (pwin) |pw| {
+                if (pw == win)
                     break;
-                pwnd = Window.GetParent(pwnd);
+                pwin = pw.parent;
             }
             // ----- don't test descendent overlaps -----
-            if (pwnd == null) {
+            if (pwin == null) {
                 // -- see if other window is ancestor ---
-                pwnd = df.GetParent(wnd);
-                while (pwnd != null) {
-                    if (pwnd == hwnd)
+                pwin = win.parent;
+                while (pwin) |pw| {
+                    if (pw == hwin)
                         break;
-                    pwnd = df.GetParent(pwnd);
+                    pwin = pw.parent;
                 }
                 // --- don't test ancestor overlaps ---
-                if (pwnd == null) {
+                if (pwin == null) {
                     if (GetAncestor(hwin)) |w| {
                        // Could HiddenWindow be null ?
                        //HiddenWindow = GetAncestor(hwnd);
@@ -1039,27 +1025,32 @@ pub fn isDerivedFrom(win:*Window, klass:df.CLASS) bool {
 
 // -- find the oldest document window ancestor of a window --
 fn GetAncestor(win:*Window) ?*Window {
-    var wnd = win.win;
-    if (wnd != null) {
-        while (df.GetParent(wnd) != null) {
-            if (df.GetClass(df.GetParent(wnd)) == df.APPLICATION)
-                break;
-            wnd = df.GetParent(wnd);
-        }
+    var ww = win;
+    // don't need to check null for win ?
+    while (ww.parent) |pw| {
+        if (df.GetClass(pw.win) == df.APPLICATION)
+            break;
+        ww = pw;
     }
-    return Window.get_zin(wnd);
-//    return wnd;
+    return ww;
 }
 
 // this should be go Window ?
 pub fn isVisible(win:*Window) bool {
-    var wnd = win.win;
-    while (wnd != null)    {
-        if (df.isHidden(wnd))
+    var ww:?*Window = win;
+    while (ww) |w| {
+        if (w.isHidden())
             return false;
-        wnd = df.GetParent(wnd);
+        ww = w.parent;
     }
     return true;
+//    var wnd = win.win;
+//    while (wnd != null)    {
+//        if (df.isHidden(wnd))
+//            return false;
+//        wnd = df.GetParent(wnd);
+//    }
+//    return true;
 }
 
 // -- adjust a window's rectangle to clip it to its parent -
