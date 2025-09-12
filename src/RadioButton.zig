@@ -108,14 +108,14 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
             df.KEYBOARD => {
                 if (p1 == ' ') {
                     // fall through
-                    if (Window.GetParent(wnd).*.extension) |extension| {
+                    if (win.getParent().win.*.extension) |extension| {
                         const db:*Dialogs.DBOX = @alignCast(@ptrCast(extension));
                         SetRadioButton(db, ct);
                     }
                 }
             },
             df.LEFT_BUTTON => {
-                if (Window.GetParent(wnd).*.extension) |extension| {
+                if (win.getParent().win.*.extension) |extension| {
                     const db:*Dialogs.DBOX = @alignCast(@ptrCast(extension));
                     SetRadioButton(db, ct);
                 }

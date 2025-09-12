@@ -12,19 +12,18 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                 df.SystemMenu.PullDown[0].Selection = 0;
             },
             df.LEFT_BUTTON => {
-                const wnd1 = df.GetParent(wnd);
                 const mx = p1 - win.GetLeft();
                 const my = p2 - win.GetTop();
-                if (df.HitControlBox(wnd1, mx, my))
+                if (df.HitControlBox(win.getParent().win, mx, my))
                     return true;
             },
             df.LB_CHOOSE => {
                 df.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
             },
             df.DOUBLE_CLICK => {
-                if (p2 == df.GetTop(df.GetParent(wnd))) {
-                    df.PostMessage(df.GetParent(wnd), msg, p1, p2);
-                    _ = df.SendMessage(wnd, df.CLOSE_WINDOW, df.TRUE, 0);
+                if (p2 == win.getParent().GetTop()) {
+                    df.PostMessage(win.getParent().win, msg, p1, p2);
+                    _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
                 }
                 return true;
             },

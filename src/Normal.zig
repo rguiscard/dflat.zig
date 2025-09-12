@@ -1044,13 +1044,6 @@ pub fn isVisible(win:*Window) bool {
         ww = w.parent;
     }
     return true;
-//    var wnd = win.win;
-//    while (wnd != null)    {
-//        if (df.isHidden(wnd))
-//            return false;
-//        wnd = df.GetParent(wnd);
-//    }
-//    return true;
 }
 
 // -- adjust a window's rectangle to clip it to its parent -

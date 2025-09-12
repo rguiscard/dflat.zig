@@ -48,14 +48,10 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
                     @intCast(wnd.*.wtop+my-1), df.TRUE);
             py = my;
         }
-    } else {
-        const parent = Window.GetParent(wnd);
-        if (Window.get_zin(parent)) |prt| {
-            if (p2 == prt.GetTop()) {
-                if (df.GetClass(parent) == df.MENUBAR) {
-                    q.PostMessage(parent, df.LEFT_BUTTON, p1, p2);
-                }
-            }
+    } else if (p2 == win.getParent().GetTop()) {
+        const parent = win.getParent().win;
+        if (df.GetClass(parent) == df.MENUBAR) {
+            q.PostMessage(parent, df.LEFT_BUTTON, p1, p2);
         }
     }
 }
@@ -70,13 +66,12 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         if (tl[0] != df.LINE)
             _ = win.sendMessage(df.LB_CHOOSE, @intCast(wnd.*.selection), 0);
     } else {
-        const pwnd = Window.GetParent(wnd);
-        if (Window.get_zin(pwnd)) |ptr| {
-            if ((df.GetClass(pwnd) == df.MENUBAR) and (p2==ptr.GetTop()))
-                return false;
-            if (p1 == ptr.GetLeft()+2)
-                return false;
-        }
+        const pwin = win.getParent();
+        const pwnd = pwin.win;
+        if ((df.GetClass(pwnd) == df.MENUBAR) and (p2==pwin.GetTop()))
+            return false;
+        if (p1 == pwin.GetLeft()+2)
+            return false;
         _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
         return true;
     }
@@ -131,13 +126,12 @@ fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
     const popdown = &wnd.*.mnu.*.Selections[@intCast(p1)];
     wnd.*.mnu.*.Selection = @intCast(p1);
     if ((popdown.*.Attrib & df.INACTIVE) == 0) {
-        const pwnd = Window.GetParent(wnd);
         if ((popdown.*.Attrib & df.TOGGLE) > 0) {
             popdown.*.Attrib ^= df.CHECKED;
         }
-        if (pwnd != null) {
+        if (win.parent) |pw| {
             CurrentMenuSelection = @intCast(p1);
-            q.PostMessage(pwnd, df.COMMAND, popdown.*.ActionId, 0); // p2 was p1
+            q.PostMessage(pw.win, df.COMMAND, popdown.*.ActionId, 0); // p2 was p1
         }
     } else {
         df.beep();
@@ -174,7 +168,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         df.F1 => {
             // if (ActivePopDown == NULL)
             if (wnd.*.mnu.*.Selections[0].SelectionTitle == null) {
-                _ = q.SendMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
+                _ = win.getParent().sendMessage(df.KEYBOARD, p1, p2);
             } else {
                 const helpName = std.mem.span(wnd.*.mnu.*.Selections[@intCast(wnd.*.selection)].help);
                 _ = helpbox.DisplayHelp(win, helpName);
@@ -187,8 +181,8 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.FWD,
         df.BS => {
-            if (df.GetClass(Window.GetParent(wnd)) == df.MENUBAR) {
-                q.PostMessage(Window.GetParent(wnd), df.KEYBOARD, p1, p2);
+            if (df.GetClass(win.getParent().win) == df.MENUBAR) {
+                q.PostMessage(win.getParent().win, df.KEYBOARD, p1, p2);
             }
             return true;
         },
@@ -223,13 +217,12 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 // ----------- CLOSE_WINDOW Message ----------
 fn CloseWindowMsg(win:*Window) bool {
     const wnd = win.win;
-    const pwnd = Window.GetParent(wnd);
     _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
     _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
     _ = q.SendMessage(null, df.RESTORE_CURSOR, 0, 0);
     df.inFocus = wnd.*.oldFocus;
     const rtn = root.zBaseWndProc(df.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
-    _ = q.SendMessage(pwnd, df.CLOSE_POPDOWN, 0, 0);
+    _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, 0, 0);
     return rtn;
 }
 
