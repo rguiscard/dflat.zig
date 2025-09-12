@@ -75,8 +75,9 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             var db:*Dialogs.DBOX = undefined;
             if (wnd.*.extension) |extension| {
                 db = @ptrCast(@alignCast(extension));
-                const cwnd = DialogBox.ControlWindow(db, df.ID_FILENAME);
-                _ = df.SendMessage(cwnd, df.SETTEXTLENGTH, 64, 0);
+                if (DialogBox.ControlWindow(db, df.ID_FILENAME)) |cwin| {
+                    _ = cwin.sendMessage(df.SETTEXTLENGTH, 64, 0);
+                }
             }
             return rtn;
         },
@@ -102,11 +103,12 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                             if (wnd.*.extension) |extension| {
                                 db = @ptrCast(@alignCast(extension));
                             }
-                            const cwnd = DialogBox.ControlWindow(db, df.ID_FILENAME);
                             set_fileSpec(&fName);
                             set_srchSpec(&fName);
                             InitDlgBox(win);
-                            _ = df.SendMessage(cwnd, df.SETFOCUS, df.TRUE, 0);
+                            if (DialogBox.ControlWindow(db, df.ID_FILENAME)) |cwin| {
+                                _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                            }
                             return true;
                         }
                     }

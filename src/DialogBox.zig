@@ -806,13 +806,13 @@ pub fn FindCommand(db:*Dialogs.DBOX, cmd:c_uint, Class:df.CLASS) ?*Dialogs.CTLWI
 }
 
 // ---- return the window handle of a specified command ----
-pub fn ControlWindow(db:*Dialogs.DBOX, cmd:c_uint) df.WINDOW {
+pub fn ControlWindow(db:*Dialogs.DBOX, cmd:c_uint) ?*Window {
     for(&db.*.ctl) |*ct| {
         if (ct.*.Class == 0)
             break;
         if (ct.*.Class != df.TEXT and cmd == ct.*.command) {
             if (ct.win) |cwin| {
-                return cwin.win;
+                return cwin;
             }
         }
     }

@@ -25,14 +25,11 @@ fn CreateWindowMsg(win:*Window) void {
 // -------- read the help text into the editbox -------
 pub export fn ReadHelp(wnd:df.WINDOW) callconv(.c) void {
     const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(wnd.*.extension));
-    const cwnd = DialogBox.ControlWindow(dbox, df.ID_HELPTEXT);
-    if (cwnd == null)
-        return;
-    if (Window.get_zin(cwnd)) |cwin| {
+    if (DialogBox.ControlWindow(dbox, df.ID_HELPTEXT)) |cwin| {
         cwin.wndproc = HelpTextProc;
+        _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+        df.cReadHelp(wnd, cwin.win);
     }
-    _ = q.SendMessage(cwnd, df.CLEARTEXT, 0, 0);
-    df.cReadHelp(wnd, cwnd);
 }
 
 // ------------- COMMAND message ------------
@@ -72,10 +69,9 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
     const wnd = win.win;
     if (wnd.*.extension) |ext| {
         const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
-        const ctl_wnd = DialogBox.ControlWindow(dbox, df.ID_HELPTEXT);
-        if (ctl_wnd) |cwnd| {
-            if (Window.inFocusWnd() == cwnd) {
-                return if (df.cHelpBoxKeyboardMsg(wnd, cwnd, p1) == df.TRUE) true else false;
+        if (DialogBox.ControlWindow(dbox, df.ID_HELPTEXT)) |cwin| {
+            if (Window.inFocus == cwin) {
+                return if (df.cHelpBoxKeyboardMsg(wnd, cwin.win, p1) == df.TRUE) true else false;
             }
         }
     }

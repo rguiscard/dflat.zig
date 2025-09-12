@@ -30,10 +30,10 @@ pub export fn LogMessages (wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 }
 
 pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const cwnd = DialogBox.ControlWindow(&Dialogs.Log, df.ID_LOGLIST);
+    const control = DialogBox.ControlWindow(&Dialogs.Log, df.ID_LOGLIST);
     switch (msg)    {
         df.INITIATE_DIALOG => {
-            if (Window.get_zin(cwnd)) |cwin| {
+            if (control) |cwin| {
                 cwin.AddAttribute(df.MULTILINE | df.VSCROLLBAR);
                 for (messages) |m| {
                     const x = std.mem.span(m);
@@ -43,11 +43,14 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             }
         },
         df.COMMAND => {
-            if (p1 == df.ID_OK)    {
-                const tl = df.GetTextLines(cwnd);
-                for(0..@intCast(tl)) |item| {
-                    if (df.ItemSelected(cwnd, @intCast(item))>0) {
-                        messages[item][0] = df.LISTSELECTOR;
+            if (p1 == df.ID_OK) {
+                if (control) |cwin| {
+                    const cwnd = cwin.win;
+                    const tl = df.GetTextLines(cwnd);
+                    for(0..@intCast(tl)) |item| {
+                        if (df.ItemSelected(cwnd, @intCast(item))>0) {
+                            messages[item][0] = df.LISTSELECTOR;
+                        }
                     }
                 }
             }

@@ -436,48 +436,48 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.INITIATE_DIALOG => {
-            const cwnd = DialogBox.ControlWindow(&Dialogs.Windows,df.ID_WINDOWLIST);
-            var sel:c_int = 0;
-            if (cwnd == null)
-                return false;
-            if (ApplicationWindow) |awin| {
-                var win1 = awin.firstWindow();
-                while (win1) |w1| {
-                    const wnd1 = w1.win;
-                    if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
-                                                    (df.GetClass(wnd1) != df.MENUBAR) and
-                                    df.GetClass(wnd1) != df.STATUSBAR) {
-                        if (wnd1 == oldFocus)
-                            WindowSel = sel;
-
-                        const name = WindowName(wnd1);
-                        if (name) |n| {
-                            _ = q.SendMessage(cwnd, df.ADDTEXT, @intCast(@intFromPtr(n.ptr)), 0);
+            if (DialogBox.ControlWindow(&Dialogs.Windows,df.ID_WINDOWLIST)) |cwin| {
+                var sel:c_int = 0;
+                if (ApplicationWindow) |awin| {
+                    var win1 = awin.firstWindow();
+                    while (win1) |w1| {
+                        const wnd1 = w1.win;
+                        if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
+                                                        (df.GetClass(wnd1) != df.MENUBAR) and
+                                        df.GetClass(wnd1) != df.STATUSBAR) {
+                            if (wnd1 == oldFocus)
+                                WindowSel = sel;
+    
+                            const name = WindowName(wnd1);
+                            if (name) |n| {
+                                _ = cwin.sendMessage(df.ADDTEXT, @intCast(@intFromPtr(n.ptr)), 0);
+                            }
+    
+                            sel += 1;
                         }
-
-                        sel += 1;
+                        win1 = w1.nextWindow();
                     }
-                    win1 = w1.nextWindow();
-                }
-            } else {
-                // do something ?
-            } 
-            _ = q.SendMessage(cwnd, df.LB_SETSELECTION, WindowSel, 0);
-            if (Window.get_zin(cwnd)) |cwin| {
+                } else {
+                    // do something ?
+                } 
+                _ = cwin.sendMessage(df.LB_SETSELECTION, WindowSel, 0);
                 cwin.AddAttribute(df.VSCROLLBAR);
+                q.PostMessage(cwin.win, df.SHOW_WINDOW, 0, 0);
+            } else {
+                return false;
             }
-            q.PostMessage(cwnd, df.SHOW_WINDOW, 0, 0);
         },
         df.COMMAND => {
             switch (p1) {
                 df.ID_OK => {
                     if (p2 == 0) {
                         const val:c_int = -1;
-                        _ = q.SendMessage(
-                                    DialogBox.ControlWindow(&Dialogs.Windows,
-                                    df.ID_WINDOWLIST),
-                                    df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&val)), 0);
-                        WindowSel = val;
+                        const control = DialogBox.ControlWindow(&Dialogs.Windows, df.ID_WINDOWLIST);
+                        if (control) |cwin| {
+                            _ = cwin.sendMessage(df.LB_CURRENTSELECTION, 
+                                                @intCast(@intFromPtr(&val)), 0);
+                            WindowSel = val;
+                        }
 
                     }
                 },
