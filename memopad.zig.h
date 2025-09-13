@@ -53,8 +53,10 @@ int GetTextMsg(WINDOW, PARAM, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
 // popdown.c
-void PaintMsg(WINDOW);
-void PaintPopDownSelection(WINDOW, struct PopDown *, char*);
+//void PaintMsg(WINDOW);
+void cPaintPopDownSelection(WINDOW, struct PopDown *, char*, int, int); // private
+int MenuWidth(struct PopDown *); // private
+int SelectionWidth(struct PopDown *); // private
 
 // editor.c
 int cSetTextMsg(WINDOW, char *);

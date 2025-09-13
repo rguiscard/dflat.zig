@@ -146,7 +146,7 @@ typedef struct window {
 //	CTLWINDOW *ct;		   // control structure             
 //	struct window *dfocus; // control window that has focus
 	/* -------------- popdownmenu fields ------------------ */
-	MENU *mnu;		/* points to menu structure             */
+//	MENU *mnu;		/* points to menu structure             */
 //	MBAR *holdmenu; /* previous active menu                 */
 //	struct window *oldFocus;
 	/* -------------- status bar fields ------------------- */

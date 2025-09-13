@@ -2,13 +2,13 @@
 
 #include "dflat.h"
 
-static int SelectionWidth(struct PopDown *);
+int SelectionWidth(struct PopDown *);
 static int py = -1;
 int CurrentMenuSelection;
 
-void PaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel) {
-    struct PopDown *ActivePopDown;
-    ActivePopDown = wnd->mnu->Selections;
+void cPaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel, int sel_wd, int m_wd) {
+//    struct PopDown *ActivePopDown;
+//    ActivePopDown = wnd->mnu->Selections;
             int len;
 //            memset(sel, '\0', sizeof sel);
             memset(sel, '\0', MAXPOPWIDTH);
@@ -28,8 +28,7 @@ void PaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel) {
             if (pd1->Accelerator)    {
                 /* ---- paint accelerator key ---- */
                 int i;
-                int wd1 = 2+SelectionWidth(ActivePopDown) -
-                                    strlen(pd1->SelectionTitle);
+                int wd1 = 2+sel_wd - strlen(pd1->SelectionTitle);
 				int key = pd1->Accelerator;
 				if (key > 0 && key < 27)	{
 					/* --- CTRL+ key --- */
@@ -52,7 +51,7 @@ void PaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel) {
             if (pd1->Attrib & CASCADED)    {
                 /* ---- paint cascaded menu token ---- */
                 if (!pd1->Accelerator)    {
-                    int wd = MenuWidth(ActivePopDown)-len+1;
+                    int wd = m_wd-len+1;
                     while (wd--)
                         strcat(sel, " ");
                 }
@@ -65,6 +64,7 @@ void PaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel) {
 }
 
 /* --------- PAINT Message -------- */
+/*
 void PaintMsg(WINDOW wnd)
 {
     int wd;
@@ -90,6 +90,7 @@ void PaintMsg(WINDOW wnd)
         pd1++;
     }
 }
+*/
 
 /* --------- compute menu height -------- */
 int MenuHeight(struct PopDown *pd)
@@ -123,7 +124,7 @@ int MenuWidth(struct PopDown *pd)
 }
 
 /* ---- compute the maximum selection width in a menu ---- */
-static int SelectionWidth(struct PopDown *pd)
+int SelectionWidth(struct PopDown *pd)
 {
     int wd = 0;
     while (pd->SelectionTitle != NULL)    {

@@ -78,25 +78,41 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
+fn PaintPopDownSelection(win:*Window, pd1:*df.PopDown, sel:[*c]u8) void {
+    const wnd = win.win;
+    if (win.mnu) |mnu| {
+        const ActivePopDown = &mnu.*.Selections[0];
+        const sel_wd:c_int = df.SelectionWidth(ActivePopDown);
+        const wd:c_int = df.MenuWidth(ActivePopDown);
+
+        df.cPaintPopDownSelection(wnd, pd1, sel, sel_wd, wd);
+    }
+}
+
 // --------- PAINT Message --------
 fn PaintMsg(win:*Window) void {
-    const wnd = win.win;
-    var sep = [_]u8{0}**df.MAXPOPWIDTH;
-    var sel = [_]u8{0}**df.MAXPOPWIDTH;
-    const wd:usize = @intCast(df.MenuWidth(&wnd.*.mnu.*.Selections[0])-2);
-    for (0..wd) |idx| {
-        sep[idx] = df.LINE;
-    }
+    if (win.mnu) |mnu| {
+        const wnd = win.win;
+        var sep = [_]u8{0}**df.MAXPOPWIDTH;
+        var sel = [_]u8{0}**df.MAXPOPWIDTH;
+        const wd:usize = @intCast(df.MenuWidth(&mnu.*.Selections[0])-2);
+        @memset(&sep, df.LINE);
+        sep[wd] = 0; // minimal of width and maxwidth ?
+//        sep[df.MAXPOPWIDTH-1] = 0;
+//        for (0..wd) |idx| {
+//            sep[idx] = df.LINE;
+//        }
 
-    _ = win.sendMessage(df.CLEARTEXT, 0, 0);
-    wnd.*.selection = wnd.*.mnu.*.Selection;
-    for (wnd.*.mnu.*.Selections) |mnu| {
-        if (mnu.SelectionTitle) |title| {
-            if (title[0] == df.LINE) {
-                _ = win.sendTextMessage(df.ADDTEXT, sep[0..wd], 0);
-            } else {
-                df.PaintPopDownSelection(wnd, @constCast(&mnu), &sel);
-                _ = win.sendTextMessage(df.ADDTEXT, &sel, 0);
+        _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+        wnd.*.selection = mnu.*.Selection;
+        for (mnu.*.Selections) |m| {
+            if (m.SelectionTitle) |title| {
+                if (title[0] == df.LINE) {
+                    _ = win.sendTextMessage(df.ADDTEXT, sep[0..wd], 0);
+                } else {
+                    PaintPopDownSelection(win, @constCast(&m), &sel);
+                    _ = win.sendTextMessage(df.ADDTEXT, &sel, 0);
+                }
             }
         }
     }
@@ -105,7 +121,7 @@ fn PaintMsg(win:*Window) void {
 fn BorderMsg(win:*Window) bool {
     const wnd = win.win;
     var rtn = true;
-    if (wnd.*.mnu) |_| {
+    if (win.mnu) |_| {
         const currFocus = Window.inFocus;
         Window.inFocus = null;
         rtn = root.zBaseWndProc(df.POPDOWNMENU, win, df.BORDER, 0, 0);
@@ -122,32 +138,33 @@ fn BorderMsg(win:*Window) bool {
 
 // -------------- LB_CHOOSE Message --------------
 fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
-    const wnd = win.win;
-    const popdown = &wnd.*.mnu.*.Selections[@intCast(p1)];
-    wnd.*.mnu.*.Selection = @intCast(p1);
-    if ((popdown.*.Attrib & df.INACTIVE) == 0) {
-        if ((popdown.*.Attrib & df.TOGGLE) > 0) {
-            popdown.*.Attrib ^= df.CHECKED;
+    if (win.mnu) |mnu| {
+        const popdown = &mnu.*.Selections[@intCast(p1)];
+        mnu.*.Selection = @intCast(p1);
+        if ((popdown.*.Attrib & df.INACTIVE) == 0) {
+            if ((popdown.*.Attrib & df.TOGGLE) > 0) {
+                popdown.*.Attrib ^= df.CHECKED;
+            }
+            if (win.parent) |pw| {
+                CurrentMenuSelection = @intCast(p1);
+                q.PostMessage(pw.win, df.COMMAND, popdown.*.ActionId, 0); // p2 was p1
+            }
+        } else {
+            df.beep();
         }
-        if (win.parent) |pw| {
-            CurrentMenuSelection = @intCast(p1);
-            q.PostMessage(pw.win, df.COMMAND, popdown.*.ActionId, 0); // p2 was p1
-        }
-    } else {
-        df.beep();
     }
 }
 
 // ---------- KEYBOARD Message ---------
 fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    if (wnd.*.mnu) |_| {
+    if (win.mnu) |mnu| {
         var c:c_uint = @intCast(p1);
         if (c < 128) { // FIXME unicode
             c = std.ascii.toLower(@intCast(c));
         }
         const a = df.AltConvert(c);
-        for(wnd.*.mnu.*.Selections, 0..) |popdown, sel| {
+        for(mnu.*.Selections, 0..) |popdown, sel| {
             if (popdown.SelectionTitle) |title| {
                 if (std.mem.indexOfScalar(u8, std.mem.span(title), df.SHORTCUTCHAR)) |idx| {
                     var sc:u8 = title[idx+1];
@@ -167,12 +184,21 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     switch (p1) {
         df.F1 => {
             // if (ActivePopDown == NULL)
-            if (wnd.*.mnu.*.Selections[0].SelectionTitle == null) {
-                _ = win.getParent().sendMessage(df.KEYBOARD, p1, p2);
-            } else {
-                const helpName = std.mem.span(wnd.*.mnu.*.Selections[@intCast(wnd.*.selection)].help);
-                _ = helpbox.DisplayHelp(win, helpName);
+            if (win.mnu) |mnu| {
+                if (mnu.*.Selections[0].SelectionTitle != null) {
+                    const helpName = std.mem.span(mnu.*.Selections[@intCast(wnd.*.selection)].help);
+                    _ = helpbox.DisplayHelp(win, helpName);
+                    return true;
+                }
             }
+            _ = win.getParent().sendMessage(df.KEYBOARD, p1, p2);
+ 
+//            if (win.mnu.*.Selections[0].SelectionTitle == null) {
+//                _ = win.getParent().sendMessage(df.KEYBOARD, p1, p2);
+//            } else {
+//                const helpName = std.mem.span(win.mnu.*.Selections[@intCast(wnd.*.selection)].help);
+//                _ = helpbox.DisplayHelp(win, helpName);
+//            }
             return true;
         },
         df.ESC => {
@@ -246,7 +272,9 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             if (l[0] == df.LINE) {
                 return true;
             }
-            wnd.*.mnu.*.Selection = @intCast(p1);
+            if (win.mnu) |mnu| {
+                mnu.*.Selection = @intCast(p1);
+            }
         },
         df.BUTTON_RELEASED => {
             if (ButtonReleasedMsg(win, p1, p2))
@@ -254,11 +282,13 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         },
         df.BUILD_SELECTIONS => {
             const pp:usize = @intCast(p1);
-            wnd.*.mnu = @ptrFromInt(pp);
-            wnd.*.selection = wnd.*.mnu.*.Selection;
+            win.mnu = @ptrFromInt(pp);
+            if (win.mnu) |mnu| {
+                wnd.*.selection = mnu.*.Selection;
+            }
         },
         df.PAINT => {
-            if (wnd.*.mnu == null)
+            if (win.mnu == null)
                 return true;
             PaintMsg(win);
         },
