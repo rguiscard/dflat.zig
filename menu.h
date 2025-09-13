@@ -38,7 +38,7 @@ typedef struct MenuBar {
 
 /* --------- macros to define a menu bar with
                  popdowns and selections ------------- */
-#define SEPCHAR "\xc4"
+//#define SEPCHAR "\xc4"
 /*
 #define DEFMENU(m) MBAR m = {-1,{
 #define POPDOWN(ttl,func,stat)     {ttl,func,stat,-1,0,{

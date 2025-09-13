@@ -8,6 +8,7 @@ const menus = @import("Menus.zig");
 const checkbox = @import("CheckBox.zig");
 const Class = @import("Classes.zig");
 const Menu = @import("Menu.zig");
+const menubar = @import("MenuBar.zig");
 
 var log:?*df.FILE = null;
 
@@ -67,11 +68,15 @@ pub fn MessageLog(win:*Window) void {
     if (DialogBox.create(win, Log, df.TRUE, LogProc)) {
         if (checkbox.CheckBoxSetting(Log, df.ID_LOGGING)>0) {
             log = df.fopen("DFLAT.LOG", "wt");
-            Menu.SetCommandToggle(&menus.MainMenu, df.ID_LOG);
+            if (menubar.ActiveMenuBar) |mb| {
+                Menu.SetCommandToggle(mb, df.ID_LOG);
+            }
         } else if (log != null)    {
             _ = df.fclose(log);
             log = null;
-            Menu.ClearCommandToggle(&menus.MainMenu, df.ID_LOG);
+            if (menubar.ActiveMenuBar) |mb| {
+                Menu.ClearCommandToggle(mb, df.ID_LOG);
+            }
         }
     }
 }

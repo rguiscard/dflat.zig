@@ -41,6 +41,7 @@ ct:?*Dialogs.CTLWINDOW = null,  // control structure
 dfocus:?*TopLevelFields = null, // control window that has focus
 
 // -------------- popdownmenu fields ------------------
+mnu:?*menus.MENU = null,           // points to menu structure
 holdmenu:?*menus.MBAR = null,      // previous active menu
 oldFocus:?*TopLevelFields = null,
 
