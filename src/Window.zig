@@ -7,6 +7,7 @@ const normal = @import("Normal.zig");
 const q = @import("Message.zig");
 const Dialogs = @import("Dialogs.zig");
 const app = @import("Application.zig");
+const menus = @import("Menus.zig");
 
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
@@ -40,6 +41,7 @@ ct:?*Dialogs.CTLWINDOW = null,  // control structure
 dfocus:?*TopLevelFields = null, // control window that has focus
 
 // -------------- popdownmenu fields ------------------
+holdmenu:?*menus.MBAR = null,      // previous active menu
 oldFocus:?*TopLevelFields = null,
 
 // ------------- picture box fields -------------------

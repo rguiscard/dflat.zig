@@ -5,8 +5,14 @@ pub const MAXPULLDOWNS  = 15;
 pub const MAXSELECTIONS  = 20;
 pub const MAXCASCADES = 3;  // nesting level of cascaded menus
 
+// ----- one for each menu bar -----
+pub const MBAR = struct {
+    ActiveSelection:c_int,
+    PullDown:[MAXPULLDOWNS+1]df.MENU,
+};
+
 // --------------------- the main menu ---------------------
-pub export var MainMenu:df.MBAR = buildMenuBar(.{
+pub var MainMenu:MBAR = buildMenuBar(.{
     // --------------- the File popdown menu ----------------
     .{"~File", df.PrepFileMenu, "Read/write/print files. Go to DOS", -1, .{
             .{"~New",        df.ID_NEW,       0,       0,          "ID_NEW"       },
@@ -98,7 +104,7 @@ pub export var MainMenu:df.MBAR = buildMenuBar(.{
 });
     
 // ------------- the System Menu ---------------------
-pub export var SystemMenu:df.MBAR = buildMenuBar(.{
+pub var SystemMenu:MBAR = buildMenuBar(.{
     .{"System Menu", null, null, -1, .{
             .{"~Restore",     df.ID_SYSRESTORE,    0,     0,     "ID_SYSRESTORE" },
             .{"~Move",        df.ID_SYSMOVE,       0,     0,     "ID_SYSMOVE"    },
@@ -112,8 +118,8 @@ pub export var SystemMenu:df.MBAR = buildMenuBar(.{
     
 });
 
-fn buildMenuBar(comptime pulldowns:anytype) df.MBAR {
-    const result:df.MBAR = .{
+fn buildMenuBar(comptime pulldowns:anytype) MBAR {
+    const result:MBAR = .{
         .ActiveSelection = -1,
         .PullDown = buildMenu(pulldowns),
     };

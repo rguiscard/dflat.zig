@@ -2,14 +2,17 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
+const menus = @import("Menus.zig");
+const menu = @import("Menu.zig");
+const menubar = @import("MenuBar.zig");
 
 pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
         switch (msg) {
             df.CREATE_WINDOW => {
-                wnd.*.holdmenu = df.ActiveMenuBar;
-                df.ActiveMenuBar = &df.SystemMenu;
-                df.SystemMenu.PullDown[0].Selection = 0;
+                win.holdmenu = menubar.ActiveMenuBar;
+                menubar.ActiveMenuBar = &menus.SystemMenu;
+                menus.SystemMenu.PullDown[0].Selection = 0;
             },
             df.LEFT_BUTTON => {
                 const mx = p1 - win.GetLeft();
@@ -31,7 +34,7 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                 return true;
             },
             df.CLOSE_WINDOW => {
-                df.ActiveMenuBar = wnd.*.holdmenu;
+                menubar.ActiveMenuBar = win.holdmenu;
             },
             else => {
             }
@@ -45,13 +48,13 @@ pub fn BuildSystemMenu(win: *Window) void {
 
     var lf:c_int = @intCast(win.GetLeft()+1);
     var tp:c_int = @intCast(win.GetTop()+1);
-    const ht:c_int = df.MenuHeight(&df.SystemMenu.PullDown[0].Selections);
-    const wd:c_int = df.MenuWidth(&df.SystemMenu.PullDown[0].Selections);
+    const ht:c_int = df.MenuHeight(&menus.SystemMenu.PullDown[0].Selections);
+    const wd:c_int = df.MenuWidth(&menus.SystemMenu.PullDown[0].Selections);
 
     if (df.GetClass(wnd) == df.APPLICATION) {
-        df.SystemMenu.PullDown[0].Selections[6].Accelerator = df.ALT_F4;
+        menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.ALT_F4;
     } else {
-        df.SystemMenu.PullDown[0].Selections[6].Accelerator = df.CTRL_F4;
+        menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.CTRL_F4;
     }
 
     if (lf+wd > df.SCREENWIDTH-1)
@@ -63,41 +66,41 @@ pub fn BuildSystemMenu(win: *Window) void {
                 lf,tp,ht,wd,null,win,SystemMenuProc, 0);
 
     if (wnd.*.condition == df.ISRESTORED) {
-        df.DeactivateCommand(&df.SystemMenu, df.ID_SYSRESTORE);
+        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSRESTORE);
     } else {
-        df.ActivateCommand(&df.SystemMenu, df.ID_SYSRESTORE);
+        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSRESTORE);
     }
 
     if (df.TestAttribute(wnd, df.MOVEABLE)>0
             and (wnd.*.condition != df.ISMAXIMIZED)) {
-        df.ActivateCommand(&df.SystemMenu, df.ID_SYSMOVE);
+        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSMOVE);
     } else {
-        df.DeactivateCommand(&df.SystemMenu, df.ID_SYSMOVE);
+        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSMOVE);
     }
 
     if ((wnd.*.condition != df.ISRESTORED) or
             (df.TestAttribute(wnd, df.SIZEABLE) == df.FALSE)) {
-        df.DeactivateCommand(&df.SystemMenu, df.ID_SYSSIZE);
+        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSSIZE);
     } else {
-        df.ActivateCommand(&df.SystemMenu, df.ID_SYSSIZE);
+        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSSIZE);
     }
 
     if ((wnd.*.condition == df.ISMINIMIZED) or
             (df.TestAttribute(wnd, df.MINMAXBOX) == df.FALSE)) {
-        df.DeactivateCommand(&df.SystemMenu, df.ID_SYSMINIMIZE);
+        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSMINIMIZE);
     } else {
-        df.ActivateCommand(&df.SystemMenu, df.ID_SYSMINIMIZE);
+        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSMINIMIZE);
     }
 
     if ((wnd.*.condition != df.ISRESTORED) or
             (df.TestAttribute(wnd, df.MINMAXBOX) == df.FALSE)) {
-        df.DeactivateCommand(&df.SystemMenu, df.ID_SYSMAXIMIZE);
+        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSMAXIMIZE);
     } else {
-        df.ActivateCommand(&df.SystemMenu, df.ID_SYSMAXIMIZE);
+        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSMAXIMIZE);
     }
 
     _ = SystemMenuWin.sendMessage(df.BUILD_SELECTIONS,
-                  @intCast(@intFromPtr(&df.SystemMenu.PullDown[0])), 0);
+                  @intCast(@intFromPtr(&menus.SystemMenu.PullDown[0])), 0);
     _ = SystemMenuWin.sendMessage(df.SETFOCUS, df.TRUE, 0);
     _ = SystemMenuWin.sendMessage(df.SHOW_WINDOW, 0, 0);
 }

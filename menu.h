@@ -29,14 +29,17 @@ typedef struct Menu {
 } MENU;
 
 /* ----- one for each menu bar ----- */
+/*
 typedef struct MenuBar {
 	int ActiveSelection;
 	MENU PullDown[MAXPULLDOWNS+1];
 } MBAR;
+*/
 
 /* --------- macros to define a menu bar with
                  popdowns and selections ------------- */
 #define SEPCHAR "\xc4"
+/*
 #define DEFMENU(m) MBAR m = {-1,{
 #define POPDOWN(ttl,func,stat)     {ttl,func,stat,-1,0,{
 #define CASCADED_POPDOWN(id,func)  {NULL,func,NULL,id,0,{
@@ -44,6 +47,7 @@ typedef struct MenuBar {
 #define SEPARATOR                     {SEPCHAR},
 #define ENDPOPDOWN                    {NULL}}},
 #define ENDMENU                {(char *)-1} }};
+*/
 
 /* -------- menu selection attributes -------- */
 #define INACTIVE    1
@@ -52,9 +56,9 @@ typedef struct MenuBar {
 #define CASCADED    8    
 
 /* --------- the standard menus ---------- */
-extern MBAR MainMenu;
-extern MBAR SystemMenu;
-extern MBAR *ActiveMenuBar;
+//extern MBAR MainMenu;
+//extern MBAR SystemMenu;
+//extern MBAR *ActiveMenuBar;
 
 int MenuHeight(struct PopDown *);
 int MenuWidth(struct PopDown *);

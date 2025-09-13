@@ -2,8 +2,9 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
+const menus = @import("Menus.zig");
 
-fn FindCmd(mn:*df.MBAR, cmd:c_int) ?*df.PopDown {
+fn FindCmd(mn:*menus.MBAR, cmd:c_int) ?*df.PopDown {
     for(&mn.*.PullDown) |*pulldown| {
         if (pulldown.Title != null) {
             for(&pulldown.Selections) |*selection| {
@@ -18,7 +19,7 @@ fn FindCmd(mn:*df.MBAR, cmd:c_int) ?*df.PopDown {
     return null;
 }
 
-pub export fn GetCommandText(mn:*df.MBAR, cmd:c_int) callconv(.c) [*c]u8 {
+pub fn GetCommandText(mn:*menus.MBAR, cmd:c_int) [*c]u8 {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         return pulldown.*.SelectionTitle;
@@ -26,7 +27,7 @@ pub export fn GetCommandText(mn:*df.MBAR, cmd:c_int) callconv(.c) [*c]u8 {
     return null;
 }
 
-pub export fn isCascadedCommand(mn:*df.MBAR, cmd:c_int) callconv(.c) c_int {
+pub fn isCascadedCommand(mn:*menus.MBAR, cmd:c_int) c_int {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         if (pulldown.*.Attrib & df.CASCADED > 0) {
@@ -36,21 +37,21 @@ pub export fn isCascadedCommand(mn:*df.MBAR, cmd:c_int) callconv(.c) c_int {
     return df.FALSE;
 }
 
-pub export fn ActivateCommand(mn:*df.MBAR, cmd:c_int) callconv(.c) void {
+pub fn ActivateCommand(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         pulldown.*.Attrib &= ~df.INACTIVE;
     }
 }
 
-pub export fn DeactivateCommand(mn:*df.MBAR, cmd:c_int) callconv(.c) void {
+pub fn DeactivateCommand(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         pulldown.*.Attrib |= df.INACTIVE;
     }
 }
 
-pub export fn isActive(mn:*df.MBAR, cmd:c_int) callconv(.c) c_int {
+pub fn isActive(mn:*menus.MBAR, cmd:c_int) c_int {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         if (pulldown.*.Attrib & df.INACTIVE == 0) {
@@ -60,7 +61,7 @@ pub export fn isActive(mn:*df.MBAR, cmd:c_int) callconv(.c) c_int {
     return df.FALSE;
 }
 
-pub export fn GetCommandToggle(mn:*df.MBAR, cmd:c_int) callconv(.c) c_int {
+pub fn GetCommandToggle(mn:*menus.MBAR, cmd:c_int) c_int {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         if (pulldown.*.Attrib & df.CHECKED != 0) {
@@ -70,21 +71,21 @@ pub export fn GetCommandToggle(mn:*df.MBAR, cmd:c_int) callconv(.c) c_int {
     return df.FALSE;
 }
 
-pub export fn SetCommandToggle(mn:*df.MBAR, cmd:c_int) callconv(.c) void {
+pub fn SetCommandToggle(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         pulldown.*.Attrib |= df.CHECKED;
     }
 }
 
-pub export fn ClearCommandToggle(mn:*df.MBAR, cmd:c_int) callconv(.c) void {
+pub fn ClearCommandToggle(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         pulldown.*.Attrib &= ~df.CHECKED;
     }
 }
 
-pub export fn InvertCommandToggle(mn:*df.MBAR, cmd:c_int) callconv(.c) void {
+pub fn InvertCommandToggle(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         pulldown.*.Attrib ^= df.CHECKED;

@@ -147,7 +147,7 @@ typedef struct window {
 //	struct window *dfocus; // control window that has focus
 	/* -------------- popdownmenu fields ------------------ */
 	MENU *mnu;		/* points to menu structure             */
-	MBAR *holdmenu; /* previous active menu                 */
+//	MBAR *holdmenu; /* previous active menu                 */
 //	struct window *oldFocus;
 	/* -------------- status bar fields ------------------- */
 	BOOL TimePosted; /* True if time has been posted        */
@@ -380,14 +380,14 @@ void PrepSearchMenu(void *, struct Menu *);
 void PrepWindowMenu(void *, struct Menu *);
 //void BuildSystemMenu(WINDOW);
 //BOOL isActive(MBAR *, int);
-char *GetCommandText(MBAR *, int);
-BOOL isCascadedCommand(MBAR *,int);
-void ActivateCommand(MBAR *,int);
-void DeactivateCommand(MBAR *,int);
-BOOL GetCommandToggle(MBAR *,int);
-void SetCommandToggle(MBAR *,int);
-void ClearCommandToggle(MBAR *,int);
-void InvertCommandToggle(MBAR *,int);
+//char *GetCommandText(MBAR *, int);
+//BOOL isCascadedCommand(MBAR *,int);
+//void ActivateCommand(MBAR *,int);
+//void DeactivateCommand(MBAR *,int);
+//BOOL GetCommandToggle(MBAR *,int);
+//void SetCommandToggle(MBAR *,int);
+//void ClearCommandToggle(MBAR *,int);
+//void InvertCommandToggle(MBAR *,int);
 //int BarSelection(int);
 /* ------------- list box prototypes -------------- */
 BOOL ItemSelected(WINDOW, int);
