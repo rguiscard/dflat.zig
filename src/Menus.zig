@@ -9,18 +9,18 @@ pub const SEPCHAR = "\xc4";
 // ----------- popdown menu structure
 //       one for each popdown menu on the menu bar --------
 pub const MENU = struct {
-    Title:[*c]u8,           // title on the menu bar
-    PrepMenu:?*const fn (w: ?*anyopaque, mnu: *MENU) void, // function
-    StatusText:[*c]u8,      // text for the status bar
-    CascadeId:c_int,        // command id of cascading selection
-    Selection:c_int,        // most recent selection
+    Title:[*c]u8 = null,           // title on the menu bar
+    PrepMenu:?*const fn (w: ?*anyopaque, mnu: *MENU) void = null, // function
+    StatusText:[*c]u8 = null,      // text for the status bar
+    CascadeId:c_int = 0,           // command id of cascading selection
+    Selection:c_int = 0,           // most recent selection
     Selections:[MAXSELECTIONS+1]df.PopDown,
 };
 
 // ----- one for each menu bar -----
 pub const MBAR = struct {
     ActiveSelection:c_int,
-    PullDown:[MAXPULLDOWNS+1]df.MENU,
+    PullDown:[MAXPULLDOWNS+1]MENU,
 };
 
 // ------------- the System Menu ---------------------
@@ -47,12 +47,26 @@ pub fn buildMenuBar(comptime pulldowns:anytype) MBAR {
     return result;
 }
 
-fn buildMenu(comptime pulldowns:anytype) [df.MAXPULLDOWNS+1]df.MENU {
-    var result = [_]df.MENU{.{.Title = null, .Selection = 0}}**(df.MAXPULLDOWNS+1);
+fn buildMenu(comptime pulldowns:anytype) [MAXPULLDOWNS+1]MENU {
+    var result = [_]MENU{
+         .{
+             .Title = null,
+             .Selection = 0,
+             .Selections = [_]df.PopDown{ // this will be replace later. need better solution.
+                 .{
+                     .SelectionTitle = null,
+                     .ActionId = 0,
+                     .Accelerator = 0,
+                     .Attrib = 0,
+                     .help = null,
+                 }
+             }**(MAXSELECTIONS+1),
+          }
+    }**(MAXPULLDOWNS+1);
 
     inline for(pulldowns, 0..) |pulldown, idx| {
         var title:?[]const u8 = undefined;
-        var PrepMenu:?*const fn (w: ?*anyopaque, mnu: ?*df.MENU) callconv(.c) void = undefined;
+        var PrepMenu:?*const fn (w: ?*anyopaque, mnu: *MENU) void = undefined;
         var StatusText:?[]const u8 = undefined;
         var CascadeId:c_int = -1;
         title, PrepMenu, StatusText, CascadeId, _ = pulldown;
@@ -69,7 +83,7 @@ fn buildMenu(comptime pulldowns:anytype) [df.MAXPULLDOWNS+1]df.MENU {
     return result;
 }
 
-fn buildPopDown(comptime popdowns:anytype) [df.MAXSELECTIONS+1]df.PopDown {
+fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]df.PopDown {
     var result = [_]df.PopDown{
         .{
             .SelectionTitle = null,
@@ -78,7 +92,7 @@ fn buildPopDown(comptime popdowns:anytype) [df.MAXSELECTIONS+1]df.PopDown {
             .Attrib = 0,
             .help = null,
         }
-    }**(df.MAXSELECTIONS+1);
+    }**(MAXSELECTIONS+1);
 
 
     inline for(popdowns, 0..) |popdown, idx| {

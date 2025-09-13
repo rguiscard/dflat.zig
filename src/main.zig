@@ -426,7 +426,7 @@ fn ShowPosition(win:*mp.Window) void {
     }
 }
 
-pub export fn PrepFileMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
+pub fn PrepFileMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     _ = mnu;
     mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_SAVE);
     mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_SAVEAS);
@@ -443,7 +443,7 @@ pub export fn PrepFileMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
     }
 }
 
-pub export fn PrepEditMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
+pub fn PrepEditMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     _ = mnu;
     mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_CUT);
     mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_COPY);
@@ -475,7 +475,7 @@ pub export fn PrepEditMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
     }
 }
 
-pub export fn PrepSearchMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
+pub fn PrepSearchMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     _ = mnu;
     mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_SEARCH);
     mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_REPLACE);

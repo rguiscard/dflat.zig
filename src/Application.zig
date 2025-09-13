@@ -12,6 +12,7 @@ const log = @import("Log.zig");
 const radio = @import("RadioButton.zig");
 const checkbox = @import("CheckBox.zig");
 const normal = @import("Normal.zig");
+const menus = @import("Menus.zig");
 
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
@@ -374,7 +375,7 @@ fn WindowName(wnd:df.WINDOW) ?[]const u8 {
 
 // ----------- Prepare the Window menu ------------
 // FIXME: All "more windows" functsion are not tested. it does not work as expected now.
-pub export fn PrepWindowMenu(w:?*anyopaque, mnu:*df.Menu) callconv(.c) void {
+pub fn PrepWindowMenu(w:?*anyopaque, mnu:*menus.MENU) void {
     if (w) |ww| {
         const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
         const p0 = &mnu.*.Selections[0];

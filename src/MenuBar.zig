@@ -13,10 +13,10 @@ var menupos = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**1
 var mctr:usize = 0;
 var mwin:?*Window = null;
 var Selecting:bool = false;
-var Cascaders = [_]df.WINDOW{0}**df.MAXCASCADES;
+var Cascaders = [_]df.WINDOW{0}**menus.MAXCASCADES;
 var casc:usize = 0;
 pub var ActiveMenuBar:?*menus.MBAR = null;
-export var ActiveMenu:?*df.MENU = null; // this should be private
+var ActiveMenu:?*[menus.MAXPULLDOWNS+1]menus.MENU = null; // this should be private
 
 // ----------- SETFOCUS Message -----------
 fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
@@ -60,7 +60,7 @@ fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
                 }
             }
 
-            df.ActiveMenu = &mbar.*.PullDown;
+            ActiveMenu = &mbar.*.PullDown;
         }
         wnd.*.text = b;
     } else {
@@ -92,9 +92,11 @@ fn PaintMsg(win:*Window) void {
             df.cPaintMenu(wnd, @intCast(offset), @intCast(offset1), mbar.*.ActiveSelection);
 
             if ((mwin == null) and (win == Window.inFocus)) {
-                const st = df.ActiveMenu[idx].StatusText;
-                if (st) |txt| {
-                    _ = win.getParent().sendMessage(df.ADDSTATUS, @intCast(@intFromPtr(txt)), 0);
+                if (ActiveMenu) |amenu| {
+                    const st = amenu[idx].StatusText;
+                    if (st) |txt| {
+                        _ = win.getParent().sendMessage(df.ADDSTATUS, @intCast(@intFromPtr(txt)), 0);
+                    }
                 }
             }
         }
@@ -264,52 +266,55 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
     Selecting = true;
     // should use Menu or Menu* ?
-    const mnu = &df.ActiveMenu[@intCast(p1)];
-    if (mnu.*.PrepMenu) |proc| {
-        proc(GetDocFocus(), @constCast(mnu));
-    }
-    const wd = df.MenuWidth(@constCast(&mnu.*.Selections));
-    if (p2>0) {
-        const brd = win.GetRight();
-        if (mwin) |zin| {
-            mx = @intCast(zin.GetLeft() + zin.WindowWidth() - 1);
-            if (mx + wd > brd) {
-                mx = @intCast(brd - wd);
+    if (ActiveMenu) |amenu| {
+        const mnu = &amenu[@intCast(p1)];
+//        const mnu = &ActiveMenu[@intCast(p1)];
+        if (mnu.*.PrepMenu) |proc| {
+            proc(GetDocFocus(), @constCast(mnu));
+        }
+        const wd = df.MenuWidth(@constCast(&mnu.*.Selections));
+        if (p2>0) {
+            const brd = win.GetRight();
+            if (mwin) |zin| {
+                mx = @intCast(zin.GetLeft() + zin.WindowWidth() - 1);
+                if (mx + wd > brd) {
+                    mx = @intCast(brd - wd);
+                }
+                my = @intCast(zin.GetTop() + zin.win.*.selection);
             }
-            my = @intCast(zin.GetTop() + zin.win.*.selection);
+        } else {
+            var offset = menupos[@intCast(p1)].x1 - 4 * p1;
+            if (mwin) |m| {
+                _ = m.sendMessage(df.CLOSE_WINDOW, 0, 0);
+            }
+            if (ActiveMenuBar) |mbar| { 
+                mbar.*.ActiveSelection = @intCast(p1);
+            }
+            if (offset > win.WindowWidth()-wd) {
+                offset = win.WindowWidth()-wd;
+            }
+            mx = @intCast(win.GetLeft()+offset);
+            my = @intCast(win.GetTop()+1);
         }
-    } else {
-        var offset = menupos[@intCast(p1)].x1 - 4 * p1;
-        if (mwin) |m| {
-            _ = m.sendMessage(df.CLOSE_WINDOW, 0, 0);
+        mwin = Window.create(df.POPDOWNMENU, null,
+                    mx, my,
+                    df.MenuHeight(@constCast(&mnu.*.Selections)),
+                    wd,
+                    null,
+                    win,
+                    null,
+                    df.SHADOW);
+        if (p2 == 0) {
+            Selecting = false;
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            Selecting = true;
         }
-        if (ActiveMenuBar) |mbar| { 
-            mbar.*.ActiveSelection = @intCast(p1);
-        }
-        if (offset > win.WindowWidth()-wd) {
-            offset = win.WindowWidth()-wd;
-        }
-        mx = @intCast(win.GetLeft()+offset);
-        my = @intCast(win.GetTop()+1);
-    }
-    mwin = Window.create(df.POPDOWNMENU, null,
-                mx, my,
-                df.MenuHeight(@constCast(&mnu.*.Selections)),
-                wd,
-                null,
-                win,
-                null,
-                df.SHADOW);
-    if (p2 == 0) {
-        Selecting = false;
-        _ = win.sendMessage(df.PAINT, 0, 0);
-        Selecting = true;
-    }
-    if (mnu.*.Selections[0].SelectionTitle != null) {
-        if (mwin) |m| {
-            _ = m.sendMessage(df.BUILD_SELECTIONS, @intCast(@intFromPtr(mnu)), 0);
-            _ = m.sendMessage(df.SETFOCUS, df.TRUE, 0);
-            _ = m.sendMessage(df.SHOW_WINDOW, 0, 0);
+        if (mnu.*.Selections[0].SelectionTitle != null) {
+            if (mwin) |m| {
+                _ = m.sendMessage(df.BUILD_SELECTIONS, @intCast(@intFromPtr(mnu)), 0);
+                _ = m.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                _ = m.sendMessage(df.SHOW_WINDOW, 0, 0);
+            }
         }
     }
     Selecting = false;
@@ -330,7 +335,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             for(mbar.*.PullDown[mctr..], mctr..) |mnu, del| {
                 if ((mnu.CascadeId != -1) and // instead of using -1 for title, check CascadeId.
                     (mnu.CascadeId == p1)) {
-                        if (casc < df.MAXCASCADES) {
+                        if (casc < menus.MAXCASCADES) {
                             Cascaders[casc] = if (mwin) |m| m.win else null;
                             casc += 1;
                             _ = win.sendMessage(df.MB_SELECTION, @intCast(del), df.TRUE);
@@ -377,7 +382,7 @@ fn CloseWindowMsg(win:*Window) void {
     if (ActiveMenuBar) |mbar| {
         mbar.*.ActiveSelection = -1;
     }
-    df.ActiveMenu = null;
+    ActiveMenu = null;
     ActiveMenuBar = null;
 }
 

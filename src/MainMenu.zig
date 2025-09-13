@@ -3,7 +3,7 @@ const mSEPCHAR = mp.menus.SEPCHAR;
 // --------------------- the main menu ---------------------
 pub var MainMenu:mp.menus.MBAR = mp.menus.buildMenuBar(.{
     // --------------- the File popdown menu ----------------
-    .{"~File", df.PrepFileMenu, "Read/write/print files. Go to DOS", -1, .{
+    .{"~File", main.PrepFileMenu, "Read/write/print files. Go to DOS", -1, .{
             .{"~New",        df.ID_NEW,       0,       0,          "ID_NEW"       },
             .{"~Open...",    df.ID_OPEN,      0,       0,          "ID_OPEN"      },
             .{mSEPCHAR,      0,               0,       0,          null           },
@@ -15,7 +15,7 @@ pub var MainMenu:mp.menus.MBAR = mp.menus.buildMenuBar(.{
             .{"E~xit",       df.ID_EXIT,      df.ALT_X,0,          "ID_EXIT"      },
         },
     },
-    .{"~Edit", df.PrepEditMenu, "Clipboard, delete text, paragraph", -1, .{
+    .{"~Edit", main.PrepEditMenu, "Clipboard, delete text, paragraph", -1, .{
             .{"~Undo",       df.ID_UNDO,  df.ALT_BS,     df.INACTIVE,     "ID_UNDO"   },
             .{mSEPCHAR,      0,               0,           0,          null           },
             .{"Cu~t",        df.ID_CUT,       df.SHIFT_DEL,df.INACTIVE,"ID_CUT"       },
@@ -28,7 +28,7 @@ pub var MainMenu:mp.menus.MBAR = mp.menus.buildMenuBar(.{
             .{"Pa~ragraph",  df.ID_PARAGRAPH, df.ALT_P,    df.INACTIVE,"ID_PARAGRAPH" },
         },
     },
-    .{"~Search", df.PrepSearchMenu, "Search and replace", -1, .{
+    .{"~Search", main.PrepSearchMenu, "Search and replace", -1, .{
             .{"~Search...",   df.ID_SEARCH,      0,     df.INACTIVE,     "ID_SEARCH"    },
             .{"~Replace...",  df.ID_REPLACE,     0,     df.INACTIVE,     "ID_REPLACE"   },
             .{"~Next",        df.ID_SEARCHNEXT,  df.F3, df.INACTIVE,     "ID_SEARCHNEXT"},
@@ -53,7 +53,7 @@ pub var MainMenu:mp.menus.MBAR = mp.menus.buildMenuBar(.{
         },
     },
     // --------------- the Window popdown menu --------------
-    .{"~Window", df.PrepWindowMenu, "Select/close document windows", -1, .{
+    .{"~Window", mp.app.PrepWindowMenu, "Select/close document windows", -1, .{
             .{null,   df.ID_CLOSEALL,    0,     0,     null  },
             .{mSEPCHAR,    0,          0,     0,     null  },
             .{null,   df.ID_WINDOW,      0,     0,     null  },

@@ -3,9 +3,11 @@
 #ifndef MENU_H
 #define MENU_H
 
+#if 0
 #define MAXPULLDOWNS 15
 #define MAXSELECTIONS 20
 #define MAXCASCADES 3  /* nesting level of cascaded menus */
+#endif
 
 /* ----------- popdown menu selection structure
        one for each selection on a popdown menu --------- */
@@ -17,8 +19,10 @@ struct PopDown {
     char *help;            /* Help mnemonic               */
 };
 
+#if 0
 /* ----------- popdown menu structure
        one for each popdown menu on the menu bar -------- */
+
 typedef struct Menu {
     char *Title;           /* title on the menu bar       */
     void (*PrepMenu)(void *, struct Menu *); /* function  */
@@ -27,6 +31,7 @@ typedef struct Menu {
     int Selection;         /* most recent selection       */
     struct PopDown Selections[MAXSELECTIONS+1];
 } MENU;
+#endif
 
 /* ----- one for each menu bar ----- */
 /*

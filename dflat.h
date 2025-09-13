@@ -374,10 +374,10 @@ int TextLineNumber(WINDOW, char *);
 //void ClearClipboard(void);
 /* --------- menu prototypes ---------- */
 int CopyCommand(unsigned char *, unsigned char *, int, int);
-void PrepFileMenu(void *, struct Menu *);
-void PrepEditMenu(void *, struct Menu *);
-void PrepSearchMenu(void *, struct Menu *);
-void PrepWindowMenu(void *, struct Menu *);
+//void PrepFileMenu(void *, struct Menu *);
+//void PrepEditMenu(void *, struct Menu *);
+//void PrepSearchMenu(void *, struct Menu *);
+//void PrepWindowMenu(void *, struct Menu *);
 //void BuildSystemMenu(WINDOW);
 //BOOL isActive(MBAR *, int);
 //char *GetCommandText(MBAR *, int);

@@ -33,7 +33,7 @@ typedef struct {
 BOOL cBuildMenu(WINDOW, char *, int, char **);
 void cPaintMenu(WINDOW, int, int, int);
 WINDOW GetDocFocus(void);
-extern MENU *ActiveMenu;
+//extern MENU *ActiveMenu;
 
 //listbox.c
 void WriteSelection(WINDOW, int, int, RECT *);

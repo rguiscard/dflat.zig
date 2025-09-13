@@ -7,8 +7,6 @@ static int py = -1;
 int CurrentMenuSelection;
 
 void cPaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel, int sel_wd, int m_wd) {
-//    struct PopDown *ActivePopDown;
-//    ActivePopDown = wnd->mnu->Selections;
             int len;
 //            memset(sel, '\0', sizeof sel);
             memset(sel, '\0', MAXPOPWIDTH);
@@ -62,35 +60,6 @@ void cPaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel, int sel_
             strcat(sel, " ");
             sel[strlen(sel)-1] = RESETCOLOR;
 }
-
-/* --------- PAINT Message -------- */
-/*
-void PaintMsg(WINDOW wnd)
-{
-    int wd;
-    unsigned char sep[MAXPOPWIDTH], *cp = sep;
-    unsigned char sel[MAXPOPWIDTH];
-    struct PopDown *ActivePopDown;
-    struct PopDown *pd1;
-
-    ActivePopDown = pd1 = wnd->mnu->Selections;
-    wd = MenuWidth(ActivePopDown)-2;
-    while (wd--)
-        *cp++ = LINE;
-    *cp = '\0';
-    SendMessage(wnd, CLEARTEXT, 0, 0);
-    wnd->selection = wnd->mnu->Selection;
-    while (pd1->SelectionTitle != NULL)    {
-        if (*pd1->SelectionTitle == LINE)
-            SendMessage(wnd, ADDTEXT, (PARAM) sep, 0);
-        else    {
-		PaintPopDownSelection(wnd, pd1, sel);
-                SendMessage(wnd, ADDTEXT, (PARAM) sel, 0);
-        }
-        pd1++;
-    }
-}
-*/
 
 /* --------- compute menu height -------- */
 int MenuHeight(struct PopDown *pd)
