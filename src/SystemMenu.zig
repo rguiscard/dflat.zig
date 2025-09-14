@@ -49,7 +49,7 @@ pub fn BuildSystemMenu(win: *Window) void {
 
     var lf:c_int = @intCast(win.GetLeft()+1);
     var tp:c_int = @intCast(win.GetTop()+1);
-    const selections:[]df.PopDown = &menus.SystemMenu.PullDown[0].Selections;
+    const selections:[]menus.PopDown = &menus.SystemMenu.PullDown[0].Selections;
     const ht:c_int = popdown.MenuHeight(@constCast(&selections));
     const wd:c_int = popdown.MenuWidth(@constCast(&selections));
 

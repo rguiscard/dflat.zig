@@ -13,18 +13,18 @@ pub const PopDown = struct {
     ActionId:c_int = 0,            // the command executed
     Accelerator:c_int = 0,         // the accelerator key
     Attrib:c_int = 0,              // INACTIVE | CHECKED | TOGGLE | CASCADED
-    help:[*c]u8 = null,            // Help mnemonic
+    help:?[]const u8 = null,            // Help mnemonic
 };
 
 // ----------- popdown menu structure
 //       one for each popdown menu on the menu bar --------
 pub const MENU = struct {
-    Title:[*c]u8 = null,           // title on the menu bar
+    Title:?[]const u8 = null,      // title on the menu bar
     PrepMenu:?*const fn (w: ?*anyopaque, mnu: *MENU) void = null, // function
-    StatusText:[*c]u8 = null,      // text for the status bar
+    StatusText:?[]const u8 = null, // text for the status bar
     CascadeId:c_int = 0,           // command id of cascading selection
     Selection:c_int = 0,           // most recent selection
-    Selections:[MAXSELECTIONS+1]df.PopDown,
+    Selections:[MAXSELECTIONS+1]PopDown,
 };
 
 // ----- one for each menu bar -----
@@ -62,7 +62,7 @@ fn buildMenu(comptime pulldowns:anytype) [MAXPULLDOWNS+1]MENU {
          .{
              .Title = null,
              .Selection = 0,
-             .Selections = [_]df.PopDown{ // this will be replace later. need better solution.
+             .Selections = [_]PopDown{ // this will be replace later. need better solution.
                  .{
                      .SelectionTitle = null,
                      .ActionId = 0,
@@ -82,9 +82,9 @@ fn buildMenu(comptime pulldowns:anytype) [MAXPULLDOWNS+1]MENU {
         title, PrepMenu, StatusText, CascadeId, _ = pulldown;
 
         result[idx] = .{
-            .Title = if (title) |t| @constCast(t.ptr) else null,
+            .Title = title,
             .PrepMenu = PrepMenu,
-            .StatusText = if (StatusText) |s| @constCast(s.ptr) else null,
+            .StatusText = StatusText,
             .CascadeId = CascadeId,
             .Selections = buildPopDown(pulldown[4])
         };
@@ -93,8 +93,8 @@ fn buildMenu(comptime pulldowns:anytype) [MAXPULLDOWNS+1]MENU {
     return result;
 }
 
-fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]df.PopDown {
-    var result = [_]df.PopDown{
+fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
+    var result = [_]PopDown{
         .{
             .SelectionTitle = null,
             .ActionId = 0,
@@ -118,7 +118,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]df.PopDown {
             .ActionId = ActionId,
             .Accelerator = Accelerator,
             .Attrib = Attrib,
-            .help = if (help) |name| @constCast(name.ptr) else null,
+            .help = help,
         };
     }
 

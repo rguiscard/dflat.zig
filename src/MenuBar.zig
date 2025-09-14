@@ -44,16 +44,15 @@ fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
             for(mbar.*.PullDown) |m| {
                 if (m.Title) |title| {
                     // FIX: this method realloc buf, may cause memory leak.
-                    const rtn = df.cBuildMenu(wnd, title, @intCast(offset), @constCast(&b));
+                    const rtn = df.cBuildMenu(wnd, @constCast(title.ptr), @intCast(offset), @constCast(&b));
                     if (rtn == df.FALSE) {
                         break;
                     }
                     menupos[idx].x1 = offset;
-                    offset += @intCast(df.strlen(title) + (3+df.MSPACE));
+                    offset += @intCast(title.len + (3+df.MSPACE));
                     menupos[idx].x2 = offset-df.MSPACE;
 
-                    const l = df.strlen(title);
-                    if (std.mem.indexOfScalar(u8, title[0..l], df.SHORTCUTCHAR)) |pos| {
+                    if (std.mem.indexOfScalar(u8, title, df.SHORTCUTCHAR)) |pos| {
                         menupos[idx].sc = std.ascii.toLower(title[pos+1]);
                     }
                     idx += 1;
@@ -96,7 +95,7 @@ fn PaintMsg(win:*Window) void {
                 if (ActiveMenu) |amenu| {
                     const st = amenu[idx].StatusText;
                     if (st) |txt| {
-                        _ = win.getParent().sendMessage(df.ADDSTATUS, @intCast(@intFromPtr(txt)), 0);
+                        _ = win.getParent().sendTextMessage(df.ADDSTATUS, @constCast(txt), 0);
                     }
                 }
             }
@@ -273,7 +272,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (mnu.*.PrepMenu) |proc| {
             proc(GetDocFocus(), @constCast(mnu));
         }
-        const selections:[]df.PopDown = &mnu.*.Selections;
+        const selections:[]menus.PopDown = &mnu.*.Selections;
         const wd = popdown.MenuWidth(@constCast(&selections));
         if (p2>0) {
             const brd = win.GetRight();

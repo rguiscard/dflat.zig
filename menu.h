@@ -3,6 +3,7 @@
 #ifndef MENU_H
 #define MENU_H
 
+#if 0
 /* ----------- popdown menu selection structure
        one for each selection on a popdown menu --------- */
 struct PopDown {
@@ -12,6 +13,7 @@ struct PopDown {
     int Attrib;  /* INACTIVE | CHECKED | TOGGLE | CASCADED*/
     char *help;            /* Help mnemonic               */
 };
+#endif
 
 /* -------- menu selection attributes -------- */
 #define INACTIVE    1

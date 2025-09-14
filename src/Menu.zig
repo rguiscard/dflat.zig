@@ -4,7 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const menus = @import("Menus.zig");
 
-fn FindCmd(mn:*menus.MBAR, cmd:c_int) ?*df.PopDown {
+fn FindCmd(mn:*menus.MBAR, cmd:c_int) ?*menus.PopDown {
     for(&mn.*.PullDown) |*pulldown| {
         if (pulldown.Title != null) {
             for(&pulldown.Selections) |*selection| {
