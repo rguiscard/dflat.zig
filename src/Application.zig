@@ -399,7 +399,7 @@ pub fn PrepWindowMenu(w:?*anyopaque, mnu:*menus.MENU) void {
                                 df.GetClass(cwnd) != df.STATUSBAR) {
                             // --- add the document window to the menu ---
                             // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
-                            pd.*.SelectionTitle = Menus[MenuNo].ptr;
+                            pd.*.SelectionTitle = Menus[MenuNo];
                             if (cwnd == oldFocus) {
                                 // -- mark the current document --
                                 pd.*.Attrib |= df.CHECKED;
@@ -419,8 +419,7 @@ pub fn PrepWindowMenu(w:?*anyopaque, mnu:*menus.MENU) void {
             }
         }
         if (MenuNo > 0) {
-            const txt = "~Close all";
-            p0.*.SelectionTitle = @constCast(txt.ptr);
+            p0.*.SelectionTitle = "~Close all";
         } else {
             p0.*.SelectionTitle = null;
         }

@@ -326,9 +326,8 @@ fn DeleteFile(win:*mp.Window) void {
 }
 
 fn FixTabMenu() void {
-    const cp:[*c]u8 = mp.menu.GetCommandText(&menu.MainMenu, df.ID_TABS);
-    if (cp) |c| {
-        const cmd = std.mem.span(c);
+    const cp = mp.menu.GetCommandText(&menu.MainMenu, df.ID_TABS);
+    if (cp) |cmd| {
         if (std.mem.indexOfScalar(u8, cmd, '(')) |_| {
             if (mp.Window.inFocus) |focus| {
                 if (df.GetClass(focus.win) == df.POPDOWNMENU) {

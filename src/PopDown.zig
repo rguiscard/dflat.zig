@@ -107,14 +107,14 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
                 buf[idx-1] = checkmark;
         }
 
-        var len=df.CopyCommand(&buf[idx], pd1.*.SelectionTitle,
+        var len=df.CopyCommand(&buf[idx], @constCast(pd1.*.SelectionTitle.?.ptr),
                  pd1.*.Attrib & df.INACTIVE,
                  wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
         idx += @intCast(len);
 
         if (pd1.*.Accelerator>0) {
             // ---- paint accelerator key ----
-            const str_len:c_int = @intCast(df.strlen(pd1.*.SelectionTitle));
+            const str_len:c_int = @intCast(pd1.*.SelectionTitle.?.len);
             const wd1:usize = @intCast(2+sel_wd-str_len);
             const key = pd1.*.Accelerator;
             if (key > 0 and key < 27) {
@@ -238,7 +238,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         const a = df.AltConvert(c);
         for(mnu.*.Selections, 0..) |popdown, sel| {
             if (popdown.SelectionTitle) |title| {
-                if (std.mem.indexOfScalar(u8, std.mem.span(title), df.SHORTCUTCHAR)) |idx| {
+                if (std.mem.indexOfScalar(u8, title, df.SHORTCUTCHAR)) |idx| {
                     var sc:u8 = title[idx+1];
                     if (sc < 256) {
                         sc = std.ascii.toLower(sc);
@@ -426,10 +426,10 @@ pub fn MenuWidth(pd:*[]menus.PopDown) c_int {
 pub fn SelectionWidth(pd:*[]menus.PopDown) c_int {
     var wd:c_int = 0;
     for (pd.*) |popdown| {
-        if (popdown.SelectionTitle == null)
-            break; 
-        const len:c_int = @intCast(df.strlen(popdown.SelectionTitle)-1);
-        wd = @max(wd, len);
+        if (popdown.SelectionTitle) |title| {
+            const len:c_int = @intCast(title.len-1);
+            wd = @max(wd, len);
+        }
     }
     return wd;
 }

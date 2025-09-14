@@ -9,11 +9,11 @@ pub const SEPCHAR = "\xc4";
 // ----------- popdown menu selection structure
 //       one for each selection on a popdown menu ---------
 pub const PopDown = struct {
-    SelectionTitle:[*c]u8 = null,  // title of the selection
-    ActionId:c_int = 0,            // the command executed
-    Accelerator:c_int = 0,         // the accelerator key
-    Attrib:c_int = 0,              // INACTIVE | CHECKED | TOGGLE | CASCADED
-    help:?[]const u8 = null,            // Help mnemonic
+    SelectionTitle:?[]const u8 = null, // title of the selection
+    ActionId:c_int = 0,                // the command executed
+    Accelerator:c_int = 0,             // the accelerator key
+    Attrib:c_int = 0,                  // INACTIVE | CHECKED | TOGGLE | CASCADED
+    help:?[]const u8 = null,           // Help mnemonic
 };
 
 // ----------- popdown menu structure
@@ -114,7 +114,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
         SelectTitle, ActionId, Accelerator, Attrib, help = popdown;
 
         result[idx] = .{
-            .SelectionTitle = if (SelectTitle) |t| @constCast(t.ptr) else null,
+            .SelectionTitle = SelectTitle,
             .ActionId = ActionId,
             .Accelerator = Accelerator,
             .Attrib = Attrib,

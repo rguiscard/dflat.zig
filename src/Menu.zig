@@ -19,10 +19,12 @@ fn FindCmd(mn:*menus.MBAR, cmd:c_int) ?*menus.PopDown {
     return null;
 }
 
-pub fn GetCommandText(mn:*menus.MBAR, cmd:c_int) [*c]u8 {
+pub fn GetCommandText(mn:*menus.MBAR, cmd:c_int) ?[]const u8 {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        return pulldown.*.SelectionTitle;
+        if (pulldown.*.SelectionTitle) |title| {
+            return title;
+        }
     }
     return null;
 }
