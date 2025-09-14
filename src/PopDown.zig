@@ -90,7 +90,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
         var idx:usize = 0;
 
         @memset(buf, 0);
-        if ((pd1.*.Attrib & df.INACTIVE)>0) {
+        if (pd1.*.Attrib.INACTIVE) {
             // ------ inactive menu selection -----
             buf[0] = df.CHANGECOLOR;
             buf[1] = wnd.*.WindowColors [df.HILITE_COLOR] [df.FG]|0x80;
@@ -100,7 +100,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
         buf[idx] = ' ';
         idx += 1;
 
-        if ((pd1.*.Attrib & df.CHECKED)>0) {
+        if (pd1.*.Attrib.CHECKED) {
                 // ---- paint the toggle checkmark ----
                 // #define CHECKMARK      (unsigned char) (SCREENHEIGHT==25?251:4)
                 const checkmark:u8 = if (df.SCREENHEIGHT == 25) 251 else 4;
@@ -108,7 +108,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
         }
 
         var len=df.CopyCommand(&buf[idx], @constCast(pd1.*.SelectionTitle.?.ptr),
-                 pd1.*.Attrib & df.INACTIVE,
+                 if (pd1.*.Attrib.INACTIVE) df.TRUE else df.FALSE,
                  wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
         idx += @intCast(len);
 
@@ -144,7 +144,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
                 }
             }
         }
-        if ((pd1.*.Attrib & df.CASCADED)>0) {
+        if (pd1.*.Attrib.CASCADED) {
             // ---- paint cascaded menu token ----
             if (pd1.*.Accelerator == 0) {
                 const wd:usize = @intCast(m_wd-len+1);
@@ -213,9 +213,9 @@ fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
     if (win.mnu) |mnu| {
         const popdown = &mnu.*.Selections[@intCast(p1)];
         mnu.*.Selection = @intCast(p1);
-        if ((popdown.*.Attrib & df.INACTIVE) == 0) {
-            if ((popdown.*.Attrib & df.TOGGLE) > 0) {
-                popdown.*.Attrib ^= df.CHECKED;
+        if (popdown.*.Attrib.INACTIVE == false) {
+            if (popdown.*.Attrib.TOGGLE) {
+                popdown.*.Attrib.CHECKED = !popdown.*.Attrib.CHECKED;
             }
             if (win.parent) |pw| {
                 CurrentMenuSelection = @intCast(p1);
@@ -415,7 +415,7 @@ pub fn MenuWidth(pd:*[]menus.PopDown) c_int {
                 i += 1;
             }
         }
-        if ((popdown.Attrib & df.CASCADED) > 0) {
+        if (popdown.Attrib.CASCADED) {
             len = @max(len, 2);
         }
     }

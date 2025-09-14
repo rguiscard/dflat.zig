@@ -32,7 +32,7 @@ pub fn GetCommandText(mn:*menus.MBAR, cmd:c_int) ?[]const u8 {
 pub fn isCascadedCommand(mn:*menus.MBAR, cmd:c_int) c_int {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        if (pulldown.*.Attrib & df.CASCADED > 0) {
+        if (pulldown.*.Attrib.CASCADED) {
             return df.TRUE;
         }
     }
@@ -42,21 +42,23 @@ pub fn isCascadedCommand(mn:*menus.MBAR, cmd:c_int) c_int {
 pub fn ActivateCommand(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        pulldown.*.Attrib &= ~df.INACTIVE;
+//        pulldown.*.Attrib &= ~df.INACTIVE;
+        pulldown.*.Attrib.INACTIVE = false;
     }
 }
 
 pub fn DeactivateCommand(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        pulldown.*.Attrib |= df.INACTIVE;
+//        pulldown.*.Attrib |= df.INACTIVE;
+        pulldown.*.Attrib.INACTIVE = true;
     }
 }
 
 pub fn isActive(mn:*menus.MBAR, cmd:c_int) c_int {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        if (pulldown.*.Attrib & df.INACTIVE == 0) {
+        if (pulldown.*.Attrib.INACTIVE == false) {
             return df.TRUE;
         }
     }
@@ -66,7 +68,7 @@ pub fn isActive(mn:*menus.MBAR, cmd:c_int) c_int {
 pub fn GetCommandToggle(mn:*menus.MBAR, cmd:c_int) c_int {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        if (pulldown.*.Attrib & df.CHECKED != 0) {
+        if (pulldown.*.Attrib.CHECKED) {
             return df.TRUE;
         }
     }
@@ -76,20 +78,22 @@ pub fn GetCommandToggle(mn:*menus.MBAR, cmd:c_int) c_int {
 pub fn SetCommandToggle(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        pulldown.*.Attrib |= df.CHECKED;
+//        pulldown.*.Attrib |= df.CHECKED;
+        pulldown.*.Attrib.CHECKED = true;
     }
 }
 
 pub fn ClearCommandToggle(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        pulldown.*.Attrib &= ~df.CHECKED;
+        pulldown.*.Attrib.CHECKED = false;
     }
 }
 
 pub fn InvertCommandToggle(mn:*menus.MBAR, cmd:c_int) void {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
-        pulldown.*.Attrib ^= df.CHECKED;
+//        pulldown.*.Attrib ^= df.CHECKED;
+        pulldown.*.Attrib.CHECKED = !pulldown.*.Attrib.CHECKE;
     }
 }

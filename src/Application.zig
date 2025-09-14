@@ -402,10 +402,10 @@ pub fn PrepWindowMenu(w:?*anyopaque, mnu:*menus.MENU) void {
                             pd.*.SelectionTitle = Menus[MenuNo];
                             if (cwnd == oldFocus) {
                                 // -- mark the current document --
-                                pd.*.Attrib |= df.CHECKED;
+                                pd.*.Attrib.CHECKED = true;
                                 mnu.*.Selection = @intCast(MenuNo+2);
                             } else {
-                                pd.*.Attrib &= ~df.CHECKED;
+                                pd.*.Attrib.CHECKED = false;
                             }
                             pd = &mnu.*.Selections[idx+2];
                         }

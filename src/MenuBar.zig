@@ -120,17 +120,20 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
     }
     // -------- search for accelerator keys --------
     if (ActiveMenuBar) |mbar| {
-        for (mbar.*.PullDown) |mnu| {
+        for (&mbar.*.PullDown) |*mnu| {
             if (mnu.Title != null) {
                 if (mnu.PrepMenu) |proc| {
-                    proc(GetDocFocus(), @constCast(&mnu));
+                    proc(GetDocFocus(), @constCast(mnu));
                 }
-                for (mnu.Selections) |pd| {
+                for (&mnu.Selections) |*pd| {
                     if (pd.SelectionTitle) |_| {
                         if (pd.Accelerator == p1) {
-                            if (pd.Attrib & df.INACTIVE > 0) {
+                            if (pd.Attrib.INACTIVE) {
                                 df.beep();
                             } else {
+                                if (pd.Attrib.TOGGLE) {
+                                    pd.Attrib.CHECKED = !pd.Attrib.CHECKED;
+                                }
 //                                if (pd.Attrib & df.TOGGLE > 0)
 //                                    pd.Attrib ^= df.CHECKED;
                                 _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
