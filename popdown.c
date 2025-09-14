@@ -3,8 +3,8 @@
 #include "dflat.h"
 
 int SelectionWidth(struct PopDown *);
-static int py = -1;
-int CurrentMenuSelection;
+//static int py = -1;
+//int CurrentMenuSelection;
 
 void cPaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel, int sel_wd, int m_wd) {
             int len;
@@ -62,6 +62,7 @@ void cPaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel, int sel_
 }
 
 /* --------- compute menu height -------- */
+/*
 int MenuHeight(struct PopDown *pd)
 {
     int ht = 0;
@@ -69,8 +70,10 @@ int MenuHeight(struct PopDown *pd)
         ht++;
     return ht+2;
 }
+*/
 
 /* --------- compute menu width -------- */
+/*
 int MenuWidth(struct PopDown *pd)
 {
     int wd = 0, i;
@@ -91,8 +94,10 @@ int MenuWidth(struct PopDown *pd)
     }
     return wd+5+len;
 }
+*/
 
 /* ---- compute the maximum selection width in a menu ---- */
+/*
 int SelectionWidth(struct PopDown *pd)
 {
     int wd = 0;
@@ -103,6 +108,7 @@ int SelectionWidth(struct PopDown *pd)
     }
     return wd;
 }
+*/
 
 /* ----- copy a menu command to a display buffer ---- */
 int CopyCommand(unsigned char *dest, unsigned char *src,

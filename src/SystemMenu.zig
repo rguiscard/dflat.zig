@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const menus = @import("Menus.zig");
 const menu = @import("Menu.zig");
 const menubar = @import("MenuBar.zig");
+const popdown = @import("PopDown.zig");
 
 pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -48,8 +49,9 @@ pub fn BuildSystemMenu(win: *Window) void {
 
     var lf:c_int = @intCast(win.GetLeft()+1);
     var tp:c_int = @intCast(win.GetTop()+1);
-    const ht:c_int = df.MenuHeight(&menus.SystemMenu.PullDown[0].Selections);
-    const wd:c_int = df.MenuWidth(&menus.SystemMenu.PullDown[0].Selections);
+    const selections:[]df.PopDown = &menus.SystemMenu.PullDown[0].Selections;
+    const ht:c_int = popdown.MenuHeight(@constCast(&selections));
+    const wd:c_int = popdown.MenuWidth(@constCast(&selections));
 
     if (df.GetClass(wnd) == df.APPLICATION) {
         menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.ALT_F4;

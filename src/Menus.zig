@@ -6,6 +6,16 @@ pub const MAXSELECTIONS  = 20;
 pub const MAXCASCADES = 3;  // nesting level of cascaded menus
 pub const SEPCHAR = "\xc4";
 
+// ----------- popdown menu selection structure
+//       one for each selection on a popdown menu ---------
+pub const PopDown = struct {
+    SelectionTitle:[*c]u8 = null,  // title of the selection
+    ActionId:c_int = 0,            // the command executed
+    Accelerator:c_int = 0,         // the accelerator key
+    Attrib:c_int = 0,              // INACTIVE | CHECKED | TOGGLE | CASCADED
+    help:[*c]u8 = null,            // Help mnemonic
+};
+
 // ----------- popdown menu structure
 //       one for each popdown menu on the menu bar --------
 pub const MENU = struct {

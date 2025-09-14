@@ -13,6 +13,7 @@ const radio = @import("RadioButton.zig");
 const checkbox = @import("CheckBox.zig");
 const normal = @import("Normal.zig");
 const menus = @import("Menus.zig");
+const popdown = @import("PopDown.zig");
 
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
@@ -221,7 +222,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             }
         },
         df.ID_WINDOW => {
-            ChooseWindow(win, df.CurrentMenuSelection-2);
+            ChooseWindow(win, popdown.CurrentMenuSelection-2);
         },
         df.ID_CLOSEALL => {
             CloseAll(win, false);

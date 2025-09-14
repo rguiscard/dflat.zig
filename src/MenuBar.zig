@@ -7,6 +7,7 @@ const rect = @import("Rect.zig");
 const app = @import("Application.zig");
 const menu = @import("Menu.zig");
 const menus = @import("Menus.zig");
+const popdown = @import("PopDown.zig");
 
 // positions in menu bar & shortcut key value
 var menupos = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
@@ -272,7 +273,8 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (mnu.*.PrepMenu) |proc| {
             proc(GetDocFocus(), @constCast(mnu));
         }
-        const wd = df.MenuWidth(@constCast(&mnu.*.Selections));
+        const selections:[]df.PopDown = &mnu.*.Selections;
+        const wd = popdown.MenuWidth(@constCast(&selections));
         if (p2>0) {
             const brd = win.GetRight();
             if (mwin) |zin| {
@@ -298,7 +300,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         }
         mwin = Window.create(df.POPDOWNMENU, null,
                     mx, my,
-                    df.MenuHeight(@constCast(&mnu.*.Selections)),
+                    popdown.MenuHeight(@constCast(&selections)),
                     wd,
                     null,
                     win,
