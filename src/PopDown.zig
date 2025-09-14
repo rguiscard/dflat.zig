@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
 const helpbox = @import("HelpBox.zig");
+const menus = @import("Menus.zig");
 
 var py:c_int = -1;
 pub var CurrentMenuSelection:c_int = 0;
@@ -80,13 +81,86 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 fn PaintPopDownSelection(win:*Window, pd1:*df.PopDown, sel:[*c]u8) void {
     const wnd = win.win;
+    const buf = sel[0..df.MAXPOPWIDTH];
     if (win.mnu) |mnu| {
 //        const ActivePopDown = &mnu.*.Selections[0];
         const selections:[]df.PopDown = &mnu.*.Selections;
         const sel_wd:c_int = SelectionWidth(@constCast(&selections));
-        const wd:c_int = MenuWidth(@constCast(&selections));
+        const m_wd:c_int = MenuWidth(@constCast(&selections));
+        var idx:usize = 0;
 
-        df.cPaintPopDownSelection(wnd, pd1, sel, sel_wd, wd);
+        @memset(buf, 0);
+        if ((pd1.*.Attrib & df.INACTIVE)>0) {
+            // ------ inactive menu selection -----
+            buf[0] = df.CHANGECOLOR;
+            buf[1] = wnd.*.WindowColors [df.HILITE_COLOR] [df.FG]|0x80;
+            buf[2] = wnd.*.WindowColors [df.STD_COLOR] [df.BG]|0x80;
+            idx += 3;
+        }
+        buf[idx] = ' ';
+        idx += 1;
+
+        if ((pd1.*.Attrib & df.CHECKED)>0) {
+                // ---- paint the toggle checkmark ----
+                // #define CHECKMARK      (unsigned char) (SCREENHEIGHT==25?251:4)
+                const checkmark:u8 = if (df.SCREENHEIGHT == 25) 251 else 4;
+                buf[idx-1] = checkmark;
+        }
+
+        var len=df.CopyCommand(&buf[idx], pd1.*.SelectionTitle,
+                 pd1.*.Attrib & df.INACTIVE,
+                 wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
+        idx += @intCast(len);
+
+        if (pd1.*.Accelerator>0) {
+            // ---- paint accelerator key ----
+            const str_len:c_int = @intCast(df.strlen(pd1.*.SelectionTitle));
+            const wd1:usize = @intCast(2+sel_wd-str_len);
+            const key = pd1.*.Accelerator;
+            if (key > 0 and key < 27) {
+                // --- CTRL+ key ---
+                for(0..wd1) |_| {
+                    buf[idx] = ' ';
+                    idx += 1;
+                }
+                len = df.sprintf(&buf[idx], "[Ctrl+%c]", key-1+'A');
+                idx += @intCast(len);
+            } else {
+                var i:usize = 0;
+                while(true) {
+                    const k = df.keys[i];
+                    if (k.keylabel == null)
+                        break;
+                    if (k.keycode == key) {
+                        for(0..wd1) |_| {
+                            buf[idx] = ' ';
+                            idx += 1;
+                        }
+                        len = df.sprintf(&buf[idx], "[%s]", k.keylabel);
+                        idx += @intCast(len);
+                        break;
+                    }
+                    i += 1;
+                }
+            }
+        }
+        if ((pd1.*.Attrib & df.CASCADED)>0) {
+            // ---- paint cascaded menu token ----
+            if (pd1.*.Accelerator == 0) {
+                const wd:usize = @intCast(m_wd-len+1);
+                for(0..wd) |_| {
+                    buf[idx] = ' ';
+                    idx += 1;
+                }
+            }
+            buf[idx-1] = df.CASCADEPOINTER;
+        } else {
+            buf[idx] = ' ';
+            idx += 1;
+        }
+        buf[idx] = ' ';
+        buf[idx+1] = df.RESETCOLOR;
+        buf[idx+2] = 0;
     }
 }
 
@@ -100,10 +174,6 @@ fn PaintMsg(win:*Window) void {
         const wd:usize = @intCast(MenuWidth(@constCast(&selections))-2);
         @memset(&sep, df.LINE);
         sep[wd] = 0; // minimal of width and maxwidth ?
-//        sep[df.MAXPOPWIDTH-1] = 0;
-//        for (0..wd) |idx| {
-//            sep[idx] = df.LINE;
-//        }
 
         _ = win.sendMessage(df.CLEARTEXT, 0, 0);
         wnd.*.selection = mnu.*.Selection;
@@ -349,19 +419,6 @@ pub fn MenuWidth(pd:*[]df.PopDown) c_int {
         }
     }
     return wd+5+len;
-//    while (pd->SelectionTitle != NULL)    {
-//        if (pd->Accelerator)    {
-//            for (i = 0; keys[i].keylabel; i++)
-//                if (keys[i].keycode == pd->Accelerator)    {
-//                    len = max(len, 2+strlen(keys[i].keylabel));
-//                    break;
-//                }
-//        }
-//        if (pd->Attrib & CASCADED)
-//            len = max(len, 2);
-//        pd++;
-//    }
-//    return wd+5+len;
 }
 
 // ---- compute the maximum selection width in a menu ----
@@ -374,11 +431,4 @@ pub fn SelectionWidth(pd:*[]df.PopDown) c_int {
         wd = @max(wd, len);
     }
     return wd;
-//    int wd = 0;
-//    while (pd->SelectionTitle != NULL)    {
-//        int len = strlen(pd->SelectionTitle)-1;
-//        wd = max(wd, len);
-//        pd++;
-//    }
-//    return wd;
 }

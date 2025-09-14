@@ -6,6 +6,7 @@ int SelectionWidth(struct PopDown *);
 //static int py = -1;
 //int CurrentMenuSelection;
 
+#if 0
 void cPaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel, int sel_wd, int m_wd) {
             int len;
 //            memset(sel, '\0', sizeof sel);
@@ -60,6 +61,7 @@ void cPaintPopDownSelection(WINDOW wnd, struct PopDown *pd1, char* sel, int sel_
             strcat(sel, " ");
             sel[strlen(sel)-1] = RESETCOLOR;
 }
+#endif
 
 /* --------- compute menu height -------- */
 /*

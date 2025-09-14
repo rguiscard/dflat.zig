@@ -19,7 +19,7 @@ struct PopDown {
 #define TOGGLE      4
 #define CASCADED    8    
 
-int MenuHeight(struct PopDown *);
-int MenuWidth(struct PopDown *);
+//int MenuHeight(struct PopDown *);
+//int MenuWidth(struct PopDown *);
 
 #endif
