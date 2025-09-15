@@ -11,7 +11,8 @@ const sysmenu = @import("SystemMenu.zig");
 const Classes = @import("Classes.zig");
 const app = @import("Application.zig");
 
-var dummyWnd:?Window = null;
+var dummyWin:?Window = null;
+var dummy:df.window = undefined;
 var px:c_int = -1;
 var py:c_int = -1;
 var diff:c_int = 0;
@@ -19,14 +20,16 @@ var diff:c_int = 0;
 var HiddenWindow:*Window = undefined; // seems initialized before use ?
 
 fn getDummy() df.WINDOW {
-    if(dummyWnd == null) {
-        dummyWnd = Window.init(&df.dwnd, root.global_allocator);
-        df.dwnd.zin = @ptrCast(@alignCast(&dummyWnd.?));
-        Window.set_NormalProc(&df.dwnd); // doesn't seem necessary
-
-//        dummyWnd = Window.create(df.DUMMY, null, -1, -1, -1, -1, null, null, NormalProc, 0);
+    if(dummyWin == null) {
+//        dummyWin = Window.init(&df.dwnd, root.global_allocator);
+//        df.dwnd.zin = @ptrCast(@alignCast(&dummyWin.?));
+//        Window.set_NormalProc(&df.dwnd); // doesn't seem necessary
+        dummy = std.mem.zeroInit(df.window, .{.Class = df.DUMMY, .rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
+        dummyWin = Window.init(&dummy, root.global_allocator);
+        dummyWin.?.wndproc = NormalProc; // doesn't seem necessary
+        dummy.zin = &dummyWin.?;
     }
-    return &df.dwnd;
+    return &dummy;
 }
 
 // --------- CREATE_WINDOW Message ----------

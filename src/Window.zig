@@ -441,11 +441,11 @@ pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
     return null; // unreachable
 }
 
-pub export fn set_NormalProc(wnd:df.WINDOW) void {
-    if (get_zin(wnd)) |win| {
-        win.wndproc = normal.NormalProc;
-    }
-}
+//pub export fn set_NormalProc(wnd:df.WINDOW) void {
+//    if (get_zin(wnd)) |win| {
+//        win.wndproc = normal.NormalProc;
+//    }
+//}
 
 pub export fn inFocusWnd() df.WINDOW {
     if (inFocus) |focus| {

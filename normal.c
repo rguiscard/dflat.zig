@@ -4,8 +4,10 @@
 
 void SaveBorder(RECT);
 void RestoreBorder(RECT);
+#if 0
 struct window dwnd = {DUMMY, NULL, NormalProc,
                                 {-1,-1,-1,-1}};
+#endif
 static short *Bsave;
 static int Bht, Bwd;
 BOOL WindowMoving;
