@@ -118,14 +118,14 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                         df.ENTERFOCUS, df.LB_SELECTION => {
                             // selected a different filename
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            df.GetDlgListText(wnd, &fName, df.ID_FILES);
-                            df.PutItemText(wnd, df.ID_FILENAME, &fName);
+                            DialogBox.GetDlgListText(wnd, &fName, df.ID_FILES);
+                            DialogBox.PutItemText(wnd, df.ID_FILENAME, &fName);
                             set_fileName(&fName);
                         },
                         df.LB_CHOOSE => {
                             // chose a file name
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            df.GetDlgListText(wnd, &fName, df.ID_FILES);
+                            DialogBox.GetDlgListText(wnd, &fName, df.ID_FILES);
                             _ = df.SendMessage(wnd, df.COMMAND, df.ID_OK, 0);
                             set_fileName(&fName);
                         },
@@ -138,12 +138,12 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                     switch (subcmd) {
                         df.ENTERFOCUS => {
                             if (_fileSpec) |f| {
-                                df.PutItemText(wnd, df.ID_FILENAME, @constCast(f.ptr));
+                                DialogBox.PutItemText(wnd, df.ID_FILENAME, @constCast(f.ptr));
                             }
                         },
                         df.LB_CHOOSE => {
                             var dd = std.mem.zeroes([df.MAXPATH]u8);
-                            df.GetDlgListText(wnd, &dd, df.ID_DIRECTORY);
+                            DialogBox.GetDlgListText(wnd, &dd, df.ID_DIRECTORY);
                             _ = df.chdir(&dd);
                             InitDlgBox(win);
                             _ = df.SendMessage(wnd, df.COMMAND, df.ID_OK, 0);

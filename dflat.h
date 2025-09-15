@@ -69,7 +69,7 @@ typedef enum {FALSE, TRUE} BOOL;
 #include "config.h"
 #include "rect.h"
 #include "keys.h"
-#include "commands.h"
+//#include "commands.h"
 #include "helpbox.h"
 
 /* ------ integer type for message parameters ----- */
@@ -442,12 +442,12 @@ void CloseCancelBox(void);
 //void ClearDialogBoxes(void);
 //BOOL OpenFileDialogBox(char *, char *);
 //BOOL SaveAsDialogBox(char *, char *, char *);
-void GetDlgListText(WINDOW, char *, enum commands);
+//void GetDlgListText(WINDOW, char *, enum commands);
 //BOOL RadioButtonSetting(DBOX *, enum commands);
 //void PushRadioButton(DBOX *, enum commands, BOOL setting);
-void PutItemText(WINDOW, enum commands, char *);
-void PutComboListText(WINDOW, enum commands, char *);
-void GetItemText(WINDOW, enum commands, char *, int);
+void PutItemText(WINDOW, int, char *);
+void PutComboListText(WINDOW, int, char *);
+void GetItemText(WINDOW, int, char *, int);
 //char *GetDlgTextString(DBOX *, enum commands, CLASS);
 //void SetDlgTextString(DBOX *, enum commands, char *, CLASS);
 //BOOL CheckBoxSetting(DBOX *, enum commands);

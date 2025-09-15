@@ -41,6 +41,8 @@ static void DisplayDefinition(WINDOW, char *);
 
 int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 
+extern int ID_HELPTEXT; // from zig side
+
 /* ------------- KEYBOARD message ------------ */
 BOOL cHelpBoxKeyboardMsg(WINDOW wnd, WINDOW cwnd, PARAM p1)
 {

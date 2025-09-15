@@ -19,6 +19,8 @@ static void ModTextPointers(WINDOW, int, int);
 void SetAnchor(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
 
+extern int ID_DELETETEXT; // from zig side
+
 /* ----------- GETTEXT Message ---------- */
 int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
