@@ -147,7 +147,6 @@ fn StripTildes(input: []const u8, buffer: *[30]u8) []const u8 {
 
 // ---------- display help text -----------
 pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
-    const wnd = win.win;
     var buffer:[30]u8 = undefined;
     var rtn = false;
 
@@ -158,7 +157,7 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
 
     const FixedHelp = StripTildes(Help, &buffer);
 
-    wnd.*.isHelping += 1;
+    win.isHelping += 1;
     df.ThisHelp = df.FindHelp(@constCast(FixedHelp.ptr));
     if (df.ThisHelp) |thisHelp| {
         _ = thisHelp;
@@ -180,7 +179,7 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
             rtn = true;
         }
     }
-    wnd.*.isHelping -= 1;
+    win.isHelping -= 1;
     return rtn;
 }
 

@@ -31,6 +31,7 @@ PrevKeyboard:?*TopLevelFields = null, // previous keyboard capture
 PrevClock:?*TopLevelFields = null,    // previous clock capture
 MenuBar:?*TopLevelFields = null,      // menu bar
 StatusBar:?*TopLevelFields = null,    // status bar
+isHelping:u32 = 0,                    // > 0 when help is being displayed
 
 // ----------------- text box fields ------------------
 text:?[]u8 = null,   // window text
@@ -41,6 +42,7 @@ DeletedText:?[]u8 = null,    // for undo
 DeletedLength:usize = 0,     // Length of deleted field
 
 // ---------------- dialog box fields ----------------- 
+ReturnCode:u32 = 0,             // return code from a dialog box
 modal: bool = false,            // True if a modeless dialog box
 ct:?*Dialogs.CTLWINDOW = null,  // control structure
 dfocus:?*TopLevelFields = null, // control window that has focus

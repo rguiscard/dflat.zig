@@ -103,18 +103,17 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
                         parent,
                         wndproc,
                         save);
-    const DialogWnd = win.win;
 
     _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
     win.*.modal = (Modal == df.TRUE);
     FirstFocus(db);
-    q.PostMessage(DialogWnd, df.INITIATE_DIALOG, 0, 0);
+    q.PostMessage(win.win, df.INITIATE_DIALOG, 0, 0);
     if (Modal == df.TRUE) {
         _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
         _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
         while (q.dispatch_message()) {
         }
-        rtn = (DialogWnd.*.ReturnCode == df.ID_OK);
+        rtn = (win.ReturnCode == df.ID_OK);
         _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
         _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
         _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
@@ -261,7 +260,7 @@ fn CtlCloseWindowMsg(win:*Window) void {
     const wnd = win.win;
     if (win.GetControl()) |ct| {
         ct.win = null;
-        if (win.getParent().win.*.ReturnCode == df.ID_OK) {
+        if (win.getParent().ReturnCode == df.ID_OK) {
             if (ct.*.Class == df.EDITBOX or ct.*.Class == df.COMBOBOX)  {
                 // should use strlen() instead ?
                 const len = wnd.*.textlen;
@@ -519,7 +518,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
         df.ID_OK, df.ID_CANCEL => {
             if (p2 != 0)
                 return true;
-            wnd.*.ReturnCode = @intCast(p1);
+            win.ReturnCode = @intCast(p1);
             if (win.modal) {
                 _ = q.PostMessage(wnd, df.ENDDIALOG, 0, 0);
             } else {

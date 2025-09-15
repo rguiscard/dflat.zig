@@ -108,7 +108,7 @@ typedef struct window {
 //	struct window *PrevClock;   /* previous clock capture   */
 //	struct window *MenuBarWnd;/* menu bar                   */
 //	struct window *StatusBar; /* status bar                 */
-	int isHelping;	    /* > 0 when help is being displayed */
+//    int isHelping;	    /* > 0 when help is being displayed */
     /* ----------------- text box fields ------------------ */
     int wlines;     /* number of lines of text              */
     int wtop;       /* text line that is on the top display */
@@ -140,7 +140,7 @@ typedef struct window {
 	BOOL WordWrapMode; /* TRUE or FALSE for word wrap       */
 	unsigned int MaxTextLength; /* maximum text length      */
     /* ---------------- dialog box fields ----------------- */
-    int ReturnCode;        /* return code from a dialog box */
+//    int ReturnCode;        /* return code from a dialog box */
 //	BOOL Modal;		       // True if a modeless dialog box
 //	CTLWINDOW *ct;		   // control structure             
 //	struct window *dfocus; // control window that has focus
@@ -232,8 +232,8 @@ int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM);
 
 extern WINDOW ApplicationWindow;
 extern WINDOW inFocus;
-extern WINDOW CaptureMouse;
-extern WINDOW CaptureKeyboard;
+//extern WINDOW CaptureMouse;
+//extern WINDOW CaptureKeyboard;
 extern int foreground, background;
 extern BOOL WindowMoving;
 extern BOOL WindowSizing;

@@ -25,7 +25,7 @@ fn getDummy() df.WINDOW {
         dummyWin = Window.init(&dummy, root.global_allocator);
         dummyWin.?.Class = df.DUMMY;
         dummyWin.?.wndproc = NormalProc; // doesn't seem necessary
-        dummy.zin = &dummyWin.?;
+        dummy.zin = @ptrCast(@alignCast(&dummyWin.?));
     }
     return &dummy;
 }
@@ -393,7 +393,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 return;
         }
         df.WindowSizing = df.TRUE;
-        _ = ww.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(&dwnd)));
+        _ = ww.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(dwnd)));
         dragborder(ww, @intCast(ww.GetLeft()), @intCast(ww.GetTop()));
     }
 }
