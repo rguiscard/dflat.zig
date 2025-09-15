@@ -261,7 +261,8 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
             }
             BuildHelpBox(null);
             if (Dialogs.HelpBox.dwnd.title) |ttl| {
-                df.AddTitle(wnd, ttl.ptr);
+//                df.AddTitle(wnd, ttl.ptr);
+                win.AddTitle(ttl);
             } // handle null title ?
             // --- reposition and resize the help window ---
             Dialogs.HelpBox.dwnd.x = @divFloor(df.SCREENWIDTH-Dialogs.HelpBox.dwnd.w, 2);

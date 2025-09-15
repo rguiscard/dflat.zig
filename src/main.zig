@@ -217,7 +217,7 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
     if (wndpos == 20)
         wndpos = 2;
     var win1 = mp.Window.create(df.EDITBOX, // Win
-                fname,
+                @ptrCast(fname),
                 (wndpos-1)*2, wndpos, 10, 40,
                 null, win, OurEditorProc,
                 df.SHADOW     |
@@ -279,7 +279,8 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
                 } else |_| {
                 }
 //                df.AddTitle(wnd, df.NameComponent(&filename));
-                df.AddTitle(wnd, ptr);
+//                df.AddTitle(wnd, ptr);
+                win.AddTitle(@ptrCast(fname));
                 _ = df.SendMessage(wnd, df.BORDER, 0, 0);
             } else |_| {
             }
@@ -389,8 +390,9 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         df.CLOSE_WINDOW => {
             if (wnd.*.TextChanged > 0)    {
                 _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
-                const tl:[*c]u8 = @ptrCast(wnd.*.title);
-                const title = std.mem.span(tl);
+//                const tl:[*c]u8 = @ptrCast(wnd.*.title);
+//                const title = std.mem.span(tl);
+                const title = win.title orelse "";
                 if (std.fmt.allocPrintSentinel(mp.global_allocator, "{s}\nText changed. Save it ?", .{title}, 0)) |m| {
                     defer mp.global_allocator.free(m);
                     if (mp.MessageBox.YesNoBox(m)) {

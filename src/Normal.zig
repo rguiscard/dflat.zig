@@ -534,8 +534,9 @@ fn CloseWindowMsg(win:*Window) void {
     if (win == Window.inFocus)
         lists.SetPrevFocus();
     // -- free memory allocated to this window --
-    if (wnd.*.title != null)
-        df.free(wnd.*.title);
+    if (win.title) |t| {
+        win.allocator.free(t);
+    }
     if (wnd.*.videosave != null)
         df.free(wnd.*.videosave);
     // -- remove window from parent's list of children --

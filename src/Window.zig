@@ -14,7 +14,8 @@ const menus = @import("Menus.zig");
 const TopLevelFields = @This();
 pub var inFocus:?*TopLevelFields = null;
 
-Class:df.CLASS,           // window class
+Class:df.CLASS,            // window class
+title:?[:0]const u8 = null,  // window title
 wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
 
 // -------------- linked list pointers ----------------
@@ -64,7 +65,7 @@ pub export fn CreateWindow(
     callconv(.c) df.WINDOW
 {
     const self = TopLevelFields;
-    var title:?[]const u8 = null;
+    var title:?[:0]const u8 = null;
     if (ttl) |t| {
         title = std.mem.span(t);
     }
@@ -89,7 +90,7 @@ pub fn init(wnd: df.WINDOW, allocator: std.mem.Allocator) TopLevelFields {
 
 pub fn create(
     klass: df.CLASS,            // class of this window
-    ttl: ?[]const u8,           // title or NULL
+    ttl: ?[:0]const u8,           // title or NULL
     left:c_int, top:c_int,      // upper left coordinates
     height:c_int, width:c_int,  // dimensions
     extension:?*anyopaque,      // pointer to additional data
@@ -97,7 +98,7 @@ pub fn create(
     wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
     attrib: c_int) *TopLevelFields {
 
-    const title = if (ttl) |t| t.ptr else null;
+    const title = ttl;
     const wnd:df.WINDOW = @ptrCast(@alignCast(df.DFcalloc(1, @sizeOf(df.window))));
 
     var self:*TopLevelFields = undefined;
@@ -169,14 +170,12 @@ pub fn create(
             }
         } else {
             if (app.ApplicationWindow) |awin| {
-//                pt = awin.win;
                 pt = awin;
             } else {
                 pt = null; // unreachable
             }
         }
 
-//        wnd.*.Class = klass;
         self.Class = klass;
         wnd.*.extension = extension;
         wnd.*.rc.rt = df.GetLeft(wnd)+wt-1;
@@ -184,7 +183,7 @@ pub fn create(
         wnd.*.ht = ht;
         wnd.*.wd = wt;
         if (ttl != null) {
-            df.InsertTitle(wnd, title);
+            InsertTitle(self, title);
         }
         self.parent = pt;
         wnd.*.oldcondition = df.ISRESTORED;
@@ -260,6 +259,28 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
     return q.ProcessMessage(wnd, msg, p1, p2, rtn);
+}
+
+// -------- add a title to a window ---------
+pub fn AddTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
+    InsertTitle(self, ttl);
+    _ = self.sendMessage(df.BORDER, 0, 0);
+}
+
+// ----- insert a title into a window ----------
+pub fn InsertTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
+    if (self.title) |t| {
+        self.allocator.free(t);
+        self.title = null;
+    }
+    if (ttl) |title| {
+        if (self.allocator.dupeZ(u8, title)) |t| {
+            self.title = t;
+        } else |_| {
+        }
+    }
+//    wnd->title=DFrealloc(wnd->title,strlen(ttl)+1);
+//    strcpy(wnd->title, ttl);
 }
 
 // ------- window methods -----------
@@ -429,6 +450,15 @@ pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
         if (w.*.zin) |z| {
             const win:*TopLevelFields = @ptrCast(@alignCast(z));
             return win;
+        }
+    }
+    return null;
+}
+
+pub export fn GetTitle(wnd:df.WINDOW) [*c]u8 {
+    if (get_zin(wnd)) |win| {
+        if (win.title) |t| {
+            return @constCast(t.ptr);
         }
     }
     return null;

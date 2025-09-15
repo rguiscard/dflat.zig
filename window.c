@@ -11,18 +11,22 @@ WINDOW inFocusWnd();
 BOOL hasStatusBar(WINDOW);
 
 /* -------- add a title to a window --------- */
+/*
 void AddTitle(WINDOW wnd, const char *ttl)
 {
     InsertTitle(wnd, ttl);
     SendMessage(wnd, BORDER, 0, 0);
 }
+*/
 
 /* ----- insert a title into a window ---------- */
+/*
 void InsertTitle(WINDOW wnd, const char *ttl)
 {
     wnd->title=DFrealloc(wnd->title,strlen(ttl)+1);
     strcpy(wnd->title, ttl);
 }
+*/
 
 static unsigned char line[MAXCOLS];
 
@@ -98,7 +102,7 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
         	if (wnd->condition != ISMINIMIZED)
 #endif
             	strncpy(line + ((WindowWidth(wnd)-2 - tlen) / 2),
-                	wnd->title, tlen);
+                	GetTitle(wnd), tlen);
         	if (TestAttribute(wnd, CONTROLBOX))
             	line[2-BorderAdj(wnd)] = CONTROLBOXCHAR;
         	if (TestAttribute(wnd, MINMAXBOX))    {

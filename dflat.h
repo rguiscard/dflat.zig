@@ -81,7 +81,7 @@ enum Condition     {
 
 typedef struct window {
 //    CLASS Class;           /* window class                  */
-    char *title;           /* window title                  */
+//    char *title;           /* window title                  */
 //    int (*wndproc)
 //        (struct window *, enum messages, PARAM, PARAM);
     /* ---------------- window dimensions ----------------- */
@@ -180,7 +180,8 @@ typedef struct window {
 #define GetClientBottom(w)   (GetBottom(w)-BottomBorderAdj(w))
 #define GetClientLeft(w)     (GetLeft(w)+BorderAdj(w))
 #define GetClientRight(w)    (GetRight(w)-BorderAdj(w))
-#define GetTitle(w)          ((w)->title)
+//#define GetTitle(w)          ((w)->title)
+char *GetTitle(WINDOW);
 WINDOW GetParent(WINDOW);
 CLASS GetClass(WINDOW);
 // #define GetClass(w)          ((w)->Class)
