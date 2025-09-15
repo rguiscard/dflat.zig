@@ -6,7 +6,7 @@ pub const MAXPULLDOWNS  = 15;
 pub const MAXSELECTIONS  = 20;
 pub const MAXCASCADES = 3;  // nesting level of cascaded menus
 pub const SEPCHAR = "\xc4";
-pub const Separator = .{SEPCHAR,        c.ID_NULL,          0,     Default,     null            };
+pub const Separator = .{SEPCHAR,        c.ID_NULL,          0,     Default};
 
 pub const PopDownAttrib = packed struct {
     INACTIVE: bool = false,
@@ -49,13 +49,13 @@ pub const MBAR = struct {
 // ------------- the System Menu ---------------------
 pub var SystemMenu:MBAR = buildMenuBar(.{
     .{"System Menu", null, null, -1, .{
-            .{"~Restore",     c.ID_SYSRESTORE,    0,     Default,     "ID_SYSRESTORE" },
-            .{"~Move",        c.ID_SYSMOVE,       0,     Default,     "ID_SYSMOVE"    },
-            .{"~Size",        c.ID_SYSSIZE,       0,     Default,     "ID_SYSMOVE"    },
-            .{"Mi~nimize",    c.ID_SYSMINIMIZE,   0,     Default,     "ID_SYSMINIMIZE"},
-            .{"Ma~Ximize",    c.ID_SYSMAXIMIZE,   0,     Default,     "ID_SYSMAXIMIZE"},
+            .{"~Restore",     c.ID_SYSRESTORE,    0,     Default},
+            .{"~Move",        c.ID_SYSMOVE,       0,     Default},
+            .{"~Size",        c.ID_SYSSIZE,       0,     Default},
+            .{"Mi~nimize",    c.ID_SYSMINIMIZE,   0,     Default},
+            .{"Ma~Ximize",    c.ID_SYSMAXIMIZE,   0,     Default},
             Separator,
-            .{"~Close",       c.ID_SYSCLOSE,      0,     Default,     "ID_SYSCLOSE"   },
+            .{"~Close",       c.ID_SYSCLOSE,      0,     Default},
         },
     },
     
@@ -123,8 +123,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
         var ActionId: c = undefined;
         var Accelerator: c_int = undefined;
         var Attrib:PopDownAttrib = undefined;
-//        var help:?[:0]const u8= undefined;
-        SelectTitle, ActionId, Accelerator, Attrib, _ = popdown;
+        SelectTitle, ActionId, Accelerator, Attrib = popdown;
 
 
         result[idx] = .{
@@ -132,7 +131,6 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
             .ActionId = ActionId,
             .Accelerator = Accelerator,
             .Attrib = Attrib,
-//            .help = help,
             .help = if (ActionId == c.ID_NULL) null else @tagName(ActionId),
         };
     }
