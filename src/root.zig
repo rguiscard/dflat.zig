@@ -57,7 +57,7 @@ pub fn zBaseWndProc(klass: df.CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM,
 }
 
 pub fn zDefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const klass = win.win.*.Class;
+    const klass = win.Class;
     if (Klass.defs[@intCast(klass)][2]) |proc| { // wndproc
         return proc(win, msg, p1, p2);
     }

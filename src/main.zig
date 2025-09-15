@@ -330,7 +330,7 @@ fn FixTabMenu() void {
     if (cp) |cmd| {
         if (std.mem.indexOfScalar(u8, cmd, '(')) |_| {
             if (mp.Window.inFocus) |focus| {
-                if (df.GetClass(focus.win) == df.POPDOWNMENU) {
+                if (focus.getClass() == df.POPDOWNMENU) {
                     _ = focus.sendMessage(df.PAINT, 0, 0);
                 }
             }

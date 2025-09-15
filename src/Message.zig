@@ -144,7 +144,7 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             }
 
             // Should rtn be TRUE or FALSE or call sendMessage() ?
-            if (wnd.*.Class != df.DUMMY) {
+            if (Window.GetClass(wnd) != df.DUMMY) {
                 // Try to catch any window which is not dummy nor created by Window.create()
                 _ = df.printf("Not dummy !! \n");
                 while(true) {}

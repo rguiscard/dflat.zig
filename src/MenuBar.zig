@@ -477,8 +477,8 @@ fn GetDocFocus() df.WINDOW {
         var win:?*Window = awin;
         if (win) |w| {
             win = w.lastWindow();
-            while (win != null and (df.GetClass(win.?.win) == df.MENUBAR or
-                                    df.GetClass(win.?.win) == df.STATUSBAR)) {
+            while (win != null and (win.?.getClass() == df.MENUBAR or
+                                    win.?.getClass() == df.STATUSBAR)) {
                 win = win.?.prevWindow();
             }
             if (win) |ww| {

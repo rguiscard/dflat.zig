@@ -21,7 +21,7 @@ pub fn SetNextFocus() void {
                 break;
             }
             if (win1) |w| {
-                if (df.GetClass(w.win) == df.STATUSBAR or df.GetClass(w.win) == df.MENUBAR) {
+                if (w.getClass() == df.STATUSBAR or w.getClass() == df.MENUBAR) {
                     continue;
                 }
                 // isVisible is true when win is null in original code.
@@ -62,7 +62,7 @@ pub fn SetPrevFocus() void {
                 break;
             }
             if (win1) |w| {
-                if (df.GetClass(w.win) == df.STATUSBAR or df.GetClass(w.win) == df.MENUBAR) {
+                if (w.getClass() == df.STATUSBAR or w.getClass() == df.MENUBAR) {
                     continue;
                 }
                 // isVisible is true when win is null in original code.
@@ -136,7 +136,7 @@ pub fn SkipApplicationControls() void {
     var EmptyAppl = false;
     var ct:isize = 0;
     while (!EmptyAppl and (Window.inFocus != null))	{
-        const cl = df.GetClass(Window.inFocusWnd());
+        const cl = Window.inFocus.?.getClass();
         if (cl == df.MENUBAR or cl == df.STATUSBAR) {
 	    SetPrevFocus();
             EmptyAppl = ((cl == df.MENUBAR) and (ct > 0));

@@ -53,7 +53,7 @@ pub fn BuildSystemMenu(win: *Window) void {
     const ht:c_int = popdown.MenuHeight(@constCast(&selections));
     const wd:c_int = popdown.MenuWidth(@constCast(&selections));
 
-    if (df.GetClass(wnd) == df.APPLICATION) {
+    if (win.getClass() == df.APPLICATION) {
         menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.ALT_F4;
     } else {
         menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.CTRL_F4;

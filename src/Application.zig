@@ -327,8 +327,8 @@ fn CloseAll(win:*Window, closing:bool) void {
     while (win1) |w1| {
         const wnd1 = w1.win;
         if ((df.isVisible(wnd1)>0) and
-                       (df.GetClass(wnd1) != df.MENUBAR) and 
-                       (df.GetClass(wnd1) != df.STATUSBAR)) {
+                       (w1.getClass() != df.MENUBAR) and
+                       (w1.getClass() != df.STATUSBAR)) {
             w1.ClearVisible();
             _ = w1.sendMessage(df.CLOSE_WINDOW, 0, 0);
         }
@@ -395,8 +395,8 @@ pub fn PrepWindowMenu(w:?*anyopaque, mnu:*menus.MENU) void {
                     MenuNo = idx;
                     if (cwin) |cw| {
                         const cwnd = cw.win;
-                        if (df.isVisible(cwnd)>0 and df.GetClass(cwnd) != df.MENUBAR and
-                                df.GetClass(cwnd) != df.STATUSBAR) {
+                        if (df.isVisible(cwnd)>0 and cw.getClass() != df.MENUBAR and
+                                cw.getClass() != df.STATUSBAR) {
                             // --- add the document window to the menu ---
                             // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
                             pd.*.SelectionTitle = Menus[MenuNo];
@@ -444,8 +444,8 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
                     while (win1) |w1| {
                         const wnd1 = w1.win;
                         if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
-                                                        (df.GetClass(wnd1) != df.MENUBAR) and
-                                        df.GetClass(wnd1) != df.STATUSBAR) {
+                                        (w1.getClass() != df.MENUBAR) and
+                                        w1.getClass() != df.STATUSBAR) {
                             if (wnd1 == oldFocus)
                                 WindowSel = sel;
     
@@ -511,8 +511,8 @@ fn ChooseWindow(win:*Window, WindowNo:c_int) void {
     while (cwin) |cw| {
         const cwnd = cw.win;
         if (df.isVisible(cwnd)>0 and
-                        df.GetClass(cwnd) != df.MENUBAR and
-                        df.GetClass(cwnd) != df.STATUSBAR) {
+                        cw.getClass() != df.MENUBAR and
+                        cw.getClass() != df.STATUSBAR) {
             if (counter == 0)
                 break;
             counter -= 1;
@@ -533,7 +533,7 @@ fn DoWindowColors(win:*Window) void {
     while (cwin) |cw| {
         const cwnd = cw.win;
         DoWindowColors(cw);
-        if ((df.GetClass(cwnd) == df.TEXT) and df.GetText(cwnd) != null) {
+        if ((cw.getClass() == df.TEXT) and df.GetText(cwnd) != null) {
             _ = cw.sendMessage(df.CLEARTEXT, 0, 0);
         }
         cwin = cw.nextWindow();

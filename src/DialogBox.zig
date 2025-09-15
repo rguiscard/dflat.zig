@@ -169,12 +169,12 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    if (df.GetClass(wnd) == df.EDITBOX) {
+    if (win.getClass() == df.EDITBOX) {
         if (df.isMultiLine(wnd)>0) {
             return false;
         }
     }
-    if (df.GetClass(wnd) == df.TEXTBOX) {
+    if (win.getClass() == df.TEXTBOX) {
         if (win.WindowHeight() > 1) {
             return false;
         }
@@ -286,7 +286,6 @@ fn CtlCloseWindowMsg(win:*Window) void {
 // -- generic window processor used by dialog box controls --
 pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     // win can be null ? probably not.
-    const wnd = win.win;
     switch(msg) {
         df.CREATE_WINDOW => {
             CtlCreateWindowMsg(win);
@@ -297,15 +296,15 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.PAINT => {
             FixColors(win);
-            if ((df.GetClass(wnd) == df.EDITBOX) or
-                (df.GetClass(wnd) == df.LISTBOX) or
-                (df.GetClass(wnd) == df.TEXTBOX)) {
+            if ((win.getClass() == df.EDITBOX) or
+                (win.getClass() == df.LISTBOX) or
+                (win.getClass() == df.TEXTBOX)) {
                 SetScrollBars(win);
             }
         },
         df.BORDER => {
             FixColors(win);
-            if (df.GetClass(wnd) == df.EDITBOX) {
+            if (win.getClass() == df.EDITBOX) {
                 const oldFocus = Window.inFocus;
                 Window.inFocus = null;
                 _ = root.zDefaultWndProc(win, msg, p1, p2);
@@ -327,7 +326,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 const oldFocus = Window.inFocus;
                 // we assume df.inFocus is not null
                 if (oldFocus) |oldWin| {
-                    if ((pwnd != null) and (df.GetClass(oldWin.win) != df.APPLICATION) and
+                    if ((pwnd != null) and (oldWin.getClass() != df.APPLICATION) and
                                        (Normal.isAncestor(oldWin.win, pwnd) == false)) {
                         Window.inFocus = null;
                         _ = oldWin.sendMessage(df.BORDER, 0, 0);
@@ -335,7 +334,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                         Window.inFocus = oldFocus;
                         oldWin.ClearVisible();
                     }
-                    if (df.GetClass(oldWin.win) == df.APPLICATION) {
+                    if (oldWin.getClass() == df.APPLICATION) {
                         if (pwin != null and pwin.?.nextWindow() != null) {
                             pwnd.*.wasCleared = df.FALSE;
                         }

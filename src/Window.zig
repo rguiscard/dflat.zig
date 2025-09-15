@@ -14,6 +14,7 @@ const menus = @import("Menus.zig");
 const TopLevelFields = @This();
 pub var inFocus:?*TopLevelFields = null;
 
+Class:df.CLASS,           // window class
 wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
 
 // -------------- linked list pointers ----------------
@@ -79,6 +80,7 @@ pub export fn CreateWindow(
 
 pub fn init(wnd: df.WINDOW, allocator: std.mem.Allocator) TopLevelFields {
     return .{
+        .Class = df.FORCEINTTYPE,
         .win = wnd,
         .wndproc = null,
         .allocator = allocator,
@@ -174,7 +176,8 @@ pub fn create(
             }
         }
 
-        wnd.*.Class = klass;
+//        wnd.*.Class = klass;
+        self.Class = klass;
         wnd.*.extension = extension;
         wnd.*.rc.rt = df.GetLeft(wnd)+wt-1;
         wnd.*.rc.bt = df.GetTop(wnd)+ht-1;
@@ -356,9 +359,8 @@ pub fn GetClientRight(self: *TopLevelFields) isize {
     return self.GetRight() - self.TopBorderAdj();
 }
 
-pub fn GetClass(self: *TopLevelFields) df.CLASS {
-    const wnd = self.win;
-    return wnd.*.Class;
+pub fn getClass(self: *TopLevelFields) df.CLASS {
+    return self.Class;
 }
 
 pub fn GetAttribute(self: *TopLevelFields) c_int {
@@ -432,6 +434,13 @@ pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
     return null;
 }
 
+pub export fn GetClass(wnd:df.WINDOW) df.CLASS {
+    if (get_zin(wnd)) |win| {
+        return win.Class;
+    }
+    return df.FORCEINTTYPE; // unreachable
+}
+
 pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
     if (get_zin(wnd)) |win| {
         if (win.parent) |pw| {
@@ -440,12 +449,6 @@ pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
     }
     return null; // unreachable
 }
-
-//pub export fn set_NormalProc(wnd:df.WINDOW) void {
-//    if (get_zin(wnd)) |win| {
-//        win.wndproc = normal.NormalProc;
-//    }
-//}
 
 pub export fn inFocusWnd() df.WINDOW {
     if (inFocus) |focus| {

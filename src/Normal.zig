@@ -21,11 +21,9 @@ var HiddenWindow:*Window = undefined; // seems initialized before use ?
 
 fn getDummy() df.WINDOW {
     if(dummyWin == null) {
-//        dummyWin = Window.init(&df.dwnd, root.global_allocator);
-//        df.dwnd.zin = @ptrCast(@alignCast(&dummyWin.?));
-//        Window.set_NormalProc(&df.dwnd); // doesn't seem necessary
-        dummy = std.mem.zeroInit(df.window, .{.Class = df.DUMMY, .rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
+        dummy = std.mem.zeroInit(df.window, .{.rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
         dummyWin = Window.init(&dummy, root.global_allocator);
+        dummyWin.?.Class = df.DUMMY;
         dummyWin.?.wndproc = NormalProc; // doesn't seem necessary
         dummy.zin = &dummyWin.?;
     }
@@ -203,8 +201,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
             _ = win.sendMessage(df.MAXIMIZE, 0, 0);
         },
         df.ID_HELP => {
-            const name = Klass.defs[@intCast(df.GetClass(wnd))][0];
-//            _ = df.DisplayHelp(wnd, @constCast(name.ptr));
+            const name = Klass.defs[@intCast(win.getClass())][0];
             _ = helpbox.DisplayHelp(win, name);
         },
         else => {
@@ -1014,8 +1011,7 @@ fn PaintUnderLappers(win:*Window) void {
 }
 
 pub fn isDerivedFrom(win:*Window, klass:df.CLASS) bool {
-    const wnd = win.win;
-    var tclass = df.GetClass(wnd);
+    var tclass = win.getClass();
     while (tclass != -1) {
         if (tclass == klass) {
             return true;
@@ -1031,7 +1027,7 @@ fn GetAncestor(win:*Window) ?*Window {
     var ww = win;
     // don't need to check null for win ?
     while (ww.parent) |pw| {
-        if (df.GetClass(pw.win) == df.APPLICATION)
+        if (pw.getClass() == df.APPLICATION)
             break;
         ww = pw;
     }

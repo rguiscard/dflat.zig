@@ -102,7 +102,7 @@ fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
-            wnd.*.Class = df.MESSAGEBOX;
+            win.Class = df.MESSAGEBOX;
             df.InitWindowColors(wnd);
             win.ClearAttribute(df.CONTROLBOX);
         },
@@ -121,7 +121,7 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
-            wnd.*.Class = df.MESSAGEBOX;
+            win.Class = df.MESSAGEBOX;
             df.InitWindowColors(wnd);
             win.ClearAttribute(df.CONTROLBOX);
         },
@@ -145,7 +145,7 @@ fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     switch (msg)    {
         df.CREATE_WINDOW => {
-            wnd.*.Class = df.ERRORBOX;
+            win.Class = df.ERRORBOX;
             df.InitWindowColors(wnd);
         },
         df.KEYBOARD => {

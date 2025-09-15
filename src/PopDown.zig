@@ -50,9 +50,9 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
             py = my;
         }
     } else if (p2 == win.getParent().GetTop()) {
-        const parent = win.getParent().win;
-        if (df.GetClass(parent) == df.MENUBAR) {
-            q.PostMessage(parent, df.LEFT_BUTTON, p1, p2);
+        const parent = win.getParent();
+        if (parent.getClass() == df.MENUBAR) {
+            q.PostMessage(parent.win, df.LEFT_BUTTON, p1, p2);
         }
     }
 }
@@ -68,8 +68,7 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             _ = win.sendMessage(df.LB_CHOOSE, @intCast(wnd.*.selection), 0);
     } else {
         const pwin = win.getParent();
-        const pwnd = pwin.win;
-        if ((df.GetClass(pwnd) == df.MENUBAR) and (p2==pwin.GetTop()))
+        if ((pwin.getClass() == df.MENUBAR) and (p2==pwin.GetTop()))
             return false;
         if (p1 == pwin.GetLeft()+2)
             return false;
@@ -280,7 +279,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.FWD,
         df.BS => {
-            if (df.GetClass(win.getParent().win) == df.MENUBAR) {
+            if (win.getParent().getClass() == df.MENUBAR) {
                 q.PostMessage(win.getParent().win, df.KEYBOARD, p1, p2);
             }
             return true;

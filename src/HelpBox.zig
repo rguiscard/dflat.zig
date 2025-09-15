@@ -16,7 +16,7 @@ const MAXHELPSTACK = 100;
 fn CreateWindowMsg(win:*Window) void {
     const wnd = win.win;
     df.Helping = df.TRUE;
-    wnd.*.Class = df.HELPBOX;
+    win.Class = df.HELPBOX;
     df.InitWindowColors(wnd);
     if (df.ThisHelp != null)
         df.ThisHelp.*.hwnd = wnd;
@@ -305,9 +305,8 @@ fn OverLap(a: c_int, b: c_int) c_int {
 
 // ----- compute the best location for a help dialogbox -----
 fn BestFit(win:*Window, dwnd:*Dialogs.DIALOGWINDOW) void {
-    const wnd = win.win;
-    if (df.GetClass(wnd) == df.MENUBAR or
-                df.GetClass(wnd) == df.APPLICATION) {
+    if (win.getClass() == df.MENUBAR or
+        win.getClass() == df.APPLICATION) {
         dwnd.*.x = -1;
         dwnd.*.y = -1;
         return;
