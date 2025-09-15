@@ -409,9 +409,11 @@ BOOL InputBox(WINDOW, char *, char *, char *, int, int);
 //BOOL GenericMessage(WINDOW, char *, char *, int,
 //    int (*)(struct window *, enum messages, PARAM, PARAM),
 //    char *, char *, int, int, int);
+#if 0 // not in use
 #define TestErrorMessage(msg)	\
 	GenericMessage(NULL, "Error", msg, 2, ErrorBoxProc,	  \
 		Ok, Cancel, ID_OK, ID_CANCEL, TRUE)
+#endif
 //BOOL ErrorMessage(char*);
 //BOOL MessageBox(char*, char*);
 //BOOL YesNoBox(char*);
@@ -431,8 +433,8 @@ BOOL InputBox(WINDOW, char *, char *, char *, int, int);
 */
 void CloseCancelBox(void);
 //WINDOW MomentaryMessage(char *);
-int MsgHeight(char *);
-int MsgWidth(char *);
+//int MsgHeight(char *);
+//int MsgWidth(char *);
 
 /* ------------- dialog box prototypes -------------- */
 //BOOL DialogBox(WINDOW, DBOX *, BOOL,

@@ -62,81 +62,82 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             return rtn;
         },
         df.COMMAND => {
-            switch(p1) {
-                df.ID_NEW => {
+            const cmd:mp.Command = @enumFromInt(p1);
+            switch(cmd) {
+                .ID_NEW => {
                     NewFile(win);
                     return true;
                 },
-                df.ID_OPEN => {
+                .ID_OPEN => {
                     if (SelectFile(win)) {
                         return true;
                     } else |_| {
                         return false;
                     }
                 },
-                df.ID_SAVE => {
+                .ID_SAVE => {
                     if (mp.Window.inFocus) |w| {
                         SaveFile(w, false);
                         return true;
                     }
                     return false;
                 },
-                df.ID_SAVEAS => {
+                .ID_SAVEAS => {
                     if (mp.Window.inFocus) |w| {
                         SaveFile(w, true);
                         return true;
                     }
                     return false;
                 },
-                df.ID_DELETEFILE => {
+                .ID_DELETEFILE => {
                     if (mp.Window.inFocus) |w| {
                         DeleteFile(w);
                         return true;
                     }
                     return false;
                 },
-                df.ID_EXIT => {
+                .ID_EXIT => {
                     const m = "Exit Memopad?";
                     if (mp.MessageBox.YesNoBox(m) == false)
                         return false;
                 },
-                df.ID_WRAP => {
+                .ID_WRAP => {
                     df.cfg.WordWrap = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), df.ID_WRAP));
                     return true;
                 },
-                df.ID_INSERT => {
+                .ID_INSERT => {
                     df.cfg.InsertMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), df.ID_INSERT));
                     return true;
                 },
-                df.ID_TAB2 => {
+                .ID_TAB2 => {
                     df.cfg.Tabs = 2;
                     FixTabMenu();
                     return true;
                 },
-                df.ID_TAB4 => {
+                .ID_TAB4 => {
                     df.cfg.Tabs = 4;
                     FixTabMenu();
                     return true;
                 },
-                df.ID_TAB6 => {
+                .ID_TAB6 => {
                     df.cfg.Tabs = 6;
                     FixTabMenu();
                     return true;
                 },
-                df.ID_TAB8 => {
+                .ID_TAB8 => {
                     df.cfg.Tabs = 8;
                     FixTabMenu();
                     return true;
                 },
-                df.ID_CALENDAR => {
+                .ID_CALENDAR => {
                     mp.Calendar.Calendar(win);
                     return true;
                 },
-                df.ID_BARCHART => {
+                .ID_BARCHART => {
                     mp.BarChart.BarChart(win);
                     return true;
                 },
-                df.ID_ABOUT => {
+                .ID_ABOUT => {
                     const t = "About D-Flat and the MemoPad";
                     const m =
                         \\About D-Flat and the MemoPad
@@ -366,17 +367,18 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             return rtn;
         },
         df.COMMAND => {
-            switch(p1) {
-                df.ID_HELP => {
+            const cmd:mp.Command = @enumFromInt(p1);
+            switch(cmd) {
+                .ID_HELP => {
 //                    const helpfile:[:0]const u8 = "MEMOPADDOC";
                     _ = mp.helpbox.DisplayHelp(win, "memopad");
                     return true;
                 },
-                df.ID_WRAP => {
+                .ID_WRAP => {
                     _ = win.getParent().sendMessage(df.COMMAND, df.ID_WRAP, 0);
                     wnd.*.WordWrapMode = df.cfg.WordWrap;
                 },
-                df.ID_INSERT => {
+                .ID_INSERT => {
                     _ = win.getParent().sendMessage(df.COMMAND, df.ID_INSERT, 0);
                     wnd.*.InsertMode = df.cfg.InsertMode;
                     _ = df.SendMessage(null, df.SHOW_CURSOR, wnd.*.InsertMode, 0);
@@ -415,9 +417,9 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
 // ------ display the row and column in the statusbar ------
 fn ShowPosition(win:*mp.Window) void {
     const wnd = win.win;
-    const l:u32 = @intCast(wnd.*.CurrLine);
-    const c:u32 = @intCast(wnd.*.CurrCol);
-    if (std.fmt.allocPrintSentinel(mp.global_allocator, "Line:{d:4} Column: {d:2}", .{l, c}, 0)) |m| {
+    const ln:u32 = @intCast(wnd.*.CurrLine);
+    const cl:u32 = @intCast(wnd.*.CurrCol);
+    if (std.fmt.allocPrintSentinel(mp.global_allocator, "Line:{d:4} Column: {d:2}", .{ln, cl}, 0)) |m| {
         defer mp.global_allocator.free(m);
         _ = win.getParent().sendMessage(df.ADDSTATUS, @intCast(@intFromPtr(m.ptr)), 0);
     } else |_| {
@@ -496,4 +498,5 @@ const std = @import("std");
 /// This imports the separate module containing `root.zig`. Take a look in `build.zig` for details.
 const mp = @import("memopad");
 const df = mp.df;
+const c = mp.Command;
 const menu = @import("MainMenu.zig");

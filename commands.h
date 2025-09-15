@@ -11,6 +11,7 @@
 #define COMMANDS_H
 
 enum commands {
+    ID_NULL = 0,
     /* --------------- File menu ---------------- */
     ID_OPEN,
     ID_NEW,

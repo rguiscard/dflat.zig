@@ -6,7 +6,6 @@ extern BOOL AllocTesting;
 extern jmp_buf AllocError;
 
 // normal.c
-extern struct window dwnd;
 void SaveBorder(RECT);
 void RestoreBorder(RECT);
 
@@ -33,7 +32,6 @@ typedef struct {
 BOOL cBuildMenu(WINDOW, char *, int, char **);
 void cPaintMenu(WINDOW, int, int, int);
 WINDOW GetDocFocus(void);
-//extern MENU *ActiveMenu;
 
 //listbox.c
 void WriteSelection(WINDOW, int, int, RECT *);
@@ -52,12 +50,6 @@ int ScrollingKey(WINDOW, int, PARAM);
 int GetTextMsg(WINDOW, PARAM, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
-// popdown.c
-//void PaintMsg(WINDOW);
-void cPaintPopDownSelection(WINDOW, struct PopDown *, char*, int, int); // private
-int MenuWidth(struct PopDown *); // private
-int SelectionWidth(struct PopDown *); // private
-
 // editor.c
 int cSetTextMsg(WINDOW, char *);
 void AdjustTab(WINDOW);
@@ -73,7 +65,6 @@ extern char HelpFileName[9];
 int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
 int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
 void cReadHelp(WINDOW wnd, WINDOW cwnd);
-//void BestFit(WINDOW, DIALOGWINDOW *); // private
 
 extern FILE *helpfp;
 extern char hline [160];

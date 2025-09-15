@@ -1,10 +1,12 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const c = @import("Commands.zig").Command;
 
 pub const MAXPULLDOWNS  = 15;
 pub const MAXSELECTIONS  = 20;
 pub const MAXCASCADES = 3;  // nesting level of cascaded menus
 pub const SEPCHAR = "\xc4";
+pub const Separator = .{SEPCHAR,        c.ID_NULL,          0,     Default,     null            };
 
 pub const PopDownAttrib = packed struct {
     INACTIVE: bool = false,
@@ -24,7 +26,7 @@ pub const PopDown = struct {
     ActionId:c_int = 0,                // the command executed
     Accelerator:c_int = 0,             // the accelerator key
     Attrib:PopDownAttrib = .{},         // INACTIVE | CHECKED | TOGGLE | CASCADED
-    help:?[]const u8 = null,           // Help mnemonic
+    help:?[:0]const u8 = null,           // Help mnemonic
 };
 
 // ----------- popdown menu structure
@@ -47,13 +49,13 @@ pub const MBAR = struct {
 // ------------- the System Menu ---------------------
 pub var SystemMenu:MBAR = buildMenuBar(.{
     .{"System Menu", null, null, -1, .{
-            .{"~Restore",     df.ID_SYSRESTORE,    0,     Default,     "ID_SYSRESTORE" },
-            .{"~Move",        df.ID_SYSMOVE,       0,     Default,     "ID_SYSMOVE"    },
-            .{"~Size",        df.ID_SYSSIZE,       0,     Default,     "ID_SYSMOVE"    },
-            .{"Mi~nimize",    df.ID_SYSMINIMIZE,   0,     Default,     "ID_SYSMINIMIZE"},
-            .{"Ma~Ximize",    df.ID_SYSMAXIMIZE,   0,     Default,     "ID_SYSMAXIMIZE"},
-            .{SEPCHAR,        0,                   0,     Default,     null            },
-            .{"~Close",       df.ID_SYSCLOSE,      0,     Default,     "ID_SYSCLOSE"   },
+            .{"~Restore",     c.ID_SYSRESTORE,    0,     Default,     "ID_SYSRESTORE" },
+            .{"~Move",        c.ID_SYSMOVE,       0,     Default,     "ID_SYSMOVE"    },
+            .{"~Size",        c.ID_SYSSIZE,       0,     Default,     "ID_SYSMOVE"    },
+            .{"Mi~nimize",    c.ID_SYSMINIMIZE,   0,     Default,     "ID_SYSMINIMIZE"},
+            .{"Ma~Ximize",    c.ID_SYSMAXIMIZE,   0,     Default,     "ID_SYSMAXIMIZE"},
+            Separator,
+            .{"~Close",       c.ID_SYSCLOSE,      0,     Default,     "ID_SYSCLOSE"   },
         },
     },
     
@@ -118,26 +120,20 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
 
     inline for(popdowns, 0..) |popdown, idx| {
         var SelectTitle: ?[]const u8 = undefined;
-        var ActionId: c_int= undefined;
+        var ActionId: c = undefined;
         var Accelerator: c_int = undefined;
         var Attrib:PopDownAttrib = undefined;
-//        var Attrib:c_int = undefined;
-        var help:?[]const u8= undefined;
-        SelectTitle, ActionId, Accelerator, Attrib, help = popdown;
+//        var help:?[:0]const u8= undefined;
+        SelectTitle, ActionId, Accelerator, Attrib, _ = popdown;
 
-//        const attr:PopDownAttrib = .{
-//            .INACTIVE = (Attrib & df.INACTIVE)>0,
-//            .CHECKED  = (Attrib & df.CHECKED)>0,
-//            .TOGGLE   = (Attrib & df.TOGGLE)>0,
-//            .CASCADED = (Attrib & df.CASCADED)>0,
-//        };
 
         result[idx] = .{
             .SelectionTitle = SelectTitle,
-            .ActionId = ActionId,
+            .ActionId = @intFromEnum(ActionId),
             .Accelerator = Accelerator,
             .Attrib = Attrib,
-            .help = help,
+//            .help = help,
+            .help = if (ActionId == c.ID_NULL) null else @tagName(ActionId),
         };
     }
 
