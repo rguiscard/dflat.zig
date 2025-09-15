@@ -43,12 +43,15 @@ ct:?*Dialogs.CTLWINDOW = null,  // control structure
 dfocus:?*TopLevelFields = null, // control window that has focus
 
 // -------------- popdownmenu fields ------------------
-mnu:?*menus.MENU = null,           // points to menu structure
+mnu:?*menus.MENU = null,        // points to menu structure
 holdmenu:?*menus.MBAR = null,   // previous active menu
 oldFocus:?*TopLevelFields = null,
 
+// -------------- status bar fields -------------------
+TimePosted:bool = false,        // True if time has been posted
+
 // ------------- picture box fields -------------------
-VectorList:?[]df.VECT = null, // list of picture box vectors
+VectorList:?[]df.VECT = null,   // list of picture box vectors
 
 allocator: std.mem.Allocator,
 win: df.WINDOW,

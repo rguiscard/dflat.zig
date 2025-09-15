@@ -34,7 +34,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                         }
                     }
 
-                    if (wnd.*.TimePosted > 0) {
+                    if (win.TimePosted) {
                         sb[@intCast(win.WindowWidth()-8)] = 0;
                     } else {
 //                        strncpy(statusbar+WindowWidth(wnd)-8, time_string, 9);
@@ -75,7 +75,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
             df.SetStandardColor(wnd);
             const pp:usize = @intCast(p1);
             df.PutWindowLine(wnd, @ptrFromInt(pp), @intCast(win.WindowWidth()-8), 0);
-            wnd.*.TimePosted = df.TRUE;
+            win.TimePosted = true;
             _ = q.SendMessage(wnd.*.PrevClock, msg, p1, p2);
             return true;
         },
