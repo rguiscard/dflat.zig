@@ -55,9 +55,9 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         df.CREATE_WINDOW => {
             const rtn = mp.zDefaultWndProc(win, msg, p1, p2);
             if (df.cfg.InsertMode == df.TRUE)
-                mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), df.ID_INSERT);
+                mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT);
             if (df.cfg.WordWrap == df.TRUE)
-                mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), df.ID_WRAP);
+                mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP);
             FixTabMenu();
             return rtn;
         },
@@ -102,11 +102,11 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                         return false;
                 },
                 .ID_WRAP => {
-                    df.cfg.WordWrap = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), df.ID_WRAP));
+                    df.cfg.WordWrap = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP));
                     return true;
                 },
                 .ID_INSERT => {
-                    df.cfg.InsertMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), df.ID_INSERT));
+                    df.cfg.InsertMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT));
                     return true;
                 },
                 .ID_TAB2 => {
@@ -326,7 +326,7 @@ fn DeleteFile(win:*mp.Window) void {
 }
 
 fn FixTabMenu() void {
-    const cp = mp.menu.GetCommandText(&menu.MainMenu, df.ID_TABS);
+    const cp = mp.menu.GetCommandText(&menu.MainMenu, c.ID_TABS);
     if (cp) |cmd| {
         if (std.mem.indexOfScalar(u8, cmd, '(')) |_| {
             if (mp.Window.inFocus) |focus| {
@@ -350,8 +350,8 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
     switch (msg) {
         df.SETFOCUS => {
             if (p1 > 0) {
-                wnd.*.InsertMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), df.ID_INSERT));
-                wnd.*.WordWrapMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), df.ID_WRAP));
+                wnd.*.InsertMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT));
+                wnd.*.WordWrapMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP));
             }
             rtn = mp.zDefaultWndProc(win, msg, p1, p2);
             if (p1 == 0) {
@@ -429,16 +429,16 @@ fn ShowPosition(win:*mp.Window) void {
 
 pub fn PrepFileMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     _ = mnu;
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_SAVE);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_SAVEAS);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_DELETEFILE);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVE);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVEAS);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_DELETEFILE);
     if (w) |ww| {
         const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
         if (df.GetClass(wnd) == df.EDITBOX) {
             if (df.isMultiLine(wnd)>0) {
-                mp.menu.ActivateCommand(&menu.MainMenu, df.ID_SAVE);
-                mp.menu.ActivateCommand(&menu.MainMenu, df.ID_SAVEAS);
-                mp.menu.ActivateCommand(&menu.MainMenu, df.ID_DELETEFILE);
+                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVE);
+                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVEAS);
+                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_DELETEFILE);
             }
         }
     }
@@ -446,31 +446,31 @@ pub fn PrepFileMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
 
 pub fn PrepEditMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     _ = mnu;
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_CUT);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_COPY);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_CLEAR);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_DELETETEXT);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_PARAGRAPH);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_PASTE);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_UNDO);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_CUT);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_COPY);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_CLEAR);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_DELETETEXT);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_PARAGRAPH);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_PASTE);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_UNDO);
     if (w) |ww| {
         const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
         if (df.GetClass(wnd) == df.EDITBOX) {
            if (df.isMultiLine(wnd)>0) {
                if (df.TextBlockMarked(wnd)) {
-                   mp.menu.ActivateCommand(&menu.MainMenu, df.ID_CUT);
-                   mp.menu.ActivateCommand(&menu.MainMenu, df.ID_COPY);
-                   mp.menu.ActivateCommand(&menu.MainMenu, df.ID_CLEAR);
-                   mp.menu.ActivateCommand(&menu.MainMenu, df.ID_DELETETEXT);
+                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_CUT);
+                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_COPY);
+                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_CLEAR);
+                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_DELETETEXT);
                }
-               mp.menu.ActivateCommand(&menu.MainMenu, df.ID_PARAGRAPH);
+               mp.menu.ActivateCommand(&menu.MainMenu, c.ID_PARAGRAPH);
                if ((df.TestAttribute(wnd, df.READONLY) == 0)) {
                    if (mp.clipboard.Clipboard) |_| {
-                       mp.menu.ActivateCommand(&menu.MainMenu, df.ID_PASTE);
+                       mp.menu.ActivateCommand(&menu.MainMenu, c.ID_PASTE);
                    }
                }
                if (wnd.*.DeletedText != null)
-                   mp.menu.ActivateCommand(&menu.MainMenu, df.ID_UNDO);
+                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_UNDO);
            }
         }
     }
@@ -478,16 +478,16 @@ pub fn PrepEditMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
 
 pub fn PrepSearchMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     _ = mnu;
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_SEARCH);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_REPLACE);
-    mp.menu.DeactivateCommand(&menu.MainMenu, df.ID_SEARCHNEXT);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCH);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_REPLACE);
+    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCHNEXT);
     if (w) |ww| {
         const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
         if (df.GetClass(wnd) == df.EDITBOX) {
             if (df.isMultiLine(wnd)>0) {
-                mp.menu.ActivateCommand(&menu.MainMenu, df.ID_SEARCH);
-                mp.menu.ActivateCommand(&menu.MainMenu, df.ID_REPLACE);
-                mp.menu.ActivateCommand(&menu.MainMenu, df.ID_SEARCHNEXT);
+                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SEARCH);
+                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_REPLACE);
+                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SEARCHNEXT);
             }
         }
     }

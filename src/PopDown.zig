@@ -218,7 +218,7 @@ fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
             }
             if (win.parent) |pw| {
                 CurrentMenuSelection = @intCast(p1);
-                q.PostMessage(pw.win, df.COMMAND, popdown.*.ActionId, 0); // p2 was p1
+                q.PostMessage(pw.win, df.COMMAND, @intFromEnum(popdown.*.ActionId), 0); // p2 was p1
             }
         } else {
             df.beep();

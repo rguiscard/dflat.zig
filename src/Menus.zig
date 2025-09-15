@@ -23,10 +23,10 @@ pub const Cascaded:PopDownAttrib = .{.CASCADED = true};
 //       one for each selection on a popdown menu ---------
 pub const PopDown = struct {
     SelectionTitle:?[]const u8 = null, // title of the selection
-    ActionId:c_int = 0,                // the command executed
+    ActionId:c = c.ID_NULL,            // the command executed
     Accelerator:c_int = 0,             // the accelerator key
-    Attrib:PopDownAttrib = .{},         // INACTIVE | CHECKED | TOGGLE | CASCADED
-    help:?[:0]const u8 = null,           // Help mnemonic
+    Attrib:PopDownAttrib = .{},        // INACTIVE | CHECKED | TOGGLE | CASCADED
+    help:?[:0]const u8 = null,         // Help mnemonic
 };
 
 // ----------- popdown menu structure
@@ -78,7 +78,7 @@ fn buildMenu(comptime pulldowns:anytype) [MAXPULLDOWNS+1]MENU {
              .Selections = [_]PopDown{ // this will be replace later. need better solution.
                  .{
                      .SelectionTitle = null,
-                     .ActionId = 0,
+                     .ActionId = c.ID_NULL,
                      .Accelerator = 0,
                      .Attrib = .{},
                      .help = null,
@@ -110,7 +110,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
     var result = [_]PopDown{
         .{
             .SelectionTitle = null,
-            .ActionId = 0,
+            .ActionId = c.ID_NULL,
             .Accelerator = 0,
             .Attrib = .{},
             .help = null,
@@ -129,7 +129,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
 
         result[idx] = .{
             .SelectionTitle = SelectTitle,
-            .ActionId = @intFromEnum(ActionId),
+            .ActionId = ActionId,
             .Accelerator = Accelerator,
             .Attrib = Attrib,
 //            .help = help,

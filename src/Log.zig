@@ -9,6 +9,7 @@ const checkbox = @import("CheckBox.zig");
 const Class = @import("Classes.zig");
 const Menu = @import("Menu.zig");
 const menubar = @import("MenuBar.zig");
+const c = @import("Commands.zig").Command;
 
 var log:?*df.FILE = null;
 
@@ -69,13 +70,13 @@ pub fn MessageLog(win:*Window) void {
         if (checkbox.CheckBoxSetting(Log, df.ID_LOGGING)>0) {
             log = df.fopen("DFLAT.LOG", "wt");
             if (menubar.ActiveMenuBar) |mb| {
-                Menu.SetCommandToggle(mb, df.ID_LOG);
+                Menu.SetCommandToggle(mb, c.ID_LOG);
             }
         } else if (log != null)    {
             _ = df.fclose(log);
             log = null;
             if (menubar.ActiveMenuBar) |mb| {
-                Menu.ClearCommandToggle(mb, df.ID_LOG);
+                Menu.ClearCommandToggle(mb, c.ID_LOG);
             }
         }
     }

@@ -137,7 +137,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
 //                                if (pd.Attrib & df.TOGGLE > 0)
 //                                    pd.Attrib ^= df.CHECKED;
                                 _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
-                                q.PostMessage(win.getParent().win, df.COMMAND, pd.ActionId, 0);
+                                q.PostMessage(win.getParent().win, df.COMMAND, @intFromEnum(pd.ActionId), 0);
                             }
                         }
                     }
@@ -331,7 +331,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         return;
     }
     if (ActiveMenuBar) |mbar| {
-        if (menu.isCascadedCommand(mbar, @intCast(p1))>0) {
+        if (menu.isCascadedCommand(mbar, @enumFromInt(p1))>0) {
             // FIXME: Cascade menu will show, but command will not be sent.
             // Could possibly to title is not (void*)-1, but null.
             //

@@ -6,6 +6,7 @@ const menus = @import("Menus.zig");
 const menu = @import("Menu.zig");
 const menubar = @import("MenuBar.zig");
 const popdown = @import("PopDown.zig");
+const c = @import("Commands.zig").Command;
 
 pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -68,37 +69,37 @@ pub fn BuildSystemMenu(win: *Window) void {
                 lf,tp,ht,wd,null,win,SystemMenuProc, 0);
 
     if (wnd.*.condition == df.ISRESTORED) {
-        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSRESTORE);
+        menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSRESTORE);
     } else {
-        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSRESTORE);
+        menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSRESTORE);
     }
 
     if (df.TestAttribute(wnd, df.MOVEABLE)>0
             and (wnd.*.condition != df.ISMAXIMIZED)) {
-        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSMOVE);
+        menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSMOVE);
     } else {
-        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSMOVE);
+        menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSMOVE);
     }
 
     if ((wnd.*.condition != df.ISRESTORED) or
             (df.TestAttribute(wnd, df.SIZEABLE) == df.FALSE)) {
-        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSSIZE);
+        menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSSIZE);
     } else {
-        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSSIZE);
+        menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSSIZE);
     }
 
     if ((wnd.*.condition == df.ISMINIMIZED) or
             (df.TestAttribute(wnd, df.MINMAXBOX) == df.FALSE)) {
-        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSMINIMIZE);
+        menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSMINIMIZE);
     } else {
-        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSMINIMIZE);
+        menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSMINIMIZE);
     }
 
     if ((wnd.*.condition != df.ISRESTORED) or
             (df.TestAttribute(wnd, df.MINMAXBOX) == df.FALSE)) {
-        menu.DeactivateCommand(&menus.SystemMenu, df.ID_SYSMAXIMIZE);
+        menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSMAXIMIZE);
     } else {
-        menu.ActivateCommand(&menus.SystemMenu, df.ID_SYSMAXIMIZE);
+        menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSMAXIMIZE);
     }
 
     _ = SystemMenuWin.sendMessage(df.BUILD_SELECTIONS,
