@@ -7,6 +7,7 @@ const rect = @import("Rect.zig");
 const textbox = @import("TextBox.zig");
 const search = @import("Search.zig");
 const clipboard = @import("Clipboard.zig");
+const normal = @import("Normal.zig");
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -271,7 +272,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const rc = rect.ClientRect(win);
     if (KeyBoardMarking)
         return true;
-    if (df.WindowMoving>0 or df.WindowSizing>0)
+    if (normal.WindowMoving or normal.WindowSizing)
         return false;
 
     if (TextMarking) {
@@ -364,7 +365,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         _ = q.SendMessage(null,df.MOUSE_TRAVEL,@intCast(@intFromPtr(&rc)), 0);
         ButtonDown = false;
     }
-    if (TextMarking and !(df.WindowMoving>0 or df.WindowSizing>0)) {
+    if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
         df.ExtendBlock(wnd, MouseX, MouseY);
         return true;
     }
@@ -374,7 +375,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 // ----------- BUTTON_RELEASED Message ----------
 fn ButtonReleasedMsg(win:*Window) bool {
     ButtonDown = false;
-    if (TextMarking and !(df.WindowMoving>0 or df.WindowSizing>0)) {
+    if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
         // release the mouse ouside the edit box
         _ = q.SendMessage(null, df.MOUSE_TRAVEL, 0, 0);
         StopMarking(win);
@@ -387,7 +388,7 @@ fn ButtonReleasedMsg(win:*Window) bool {
 // ----------- KEYBOARD Message ----------
 fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    if (df.WindowMoving>0 or df.WindowSizing>0 or ((p2 & df.ALTKEY)>0))
+    if (normal.WindowMoving or normal.WindowSizing or ((p2 & df.ALTKEY)>0))
         return false;
     switch (p1) {
         // --- these keys get processed by lower classes ---

@@ -7,7 +7,7 @@ const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
-const Normal = @import("Normal.zig");
+const normal = @import("Normal.zig");
 const radio = @import("RadioButton.zig");
 
 var SysMenuOpen = false;
@@ -154,7 +154,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.F1 => {
-            if ((df.WindowMoving==0) and (df.WindowSizing==0)) {
+            if (normal.WindowMoving==false and normal.WindowSizing==false) {
                 if (win.GetControl()) |ct| {
                     if (ct.*.help) |help| {
                         if (helpbox.DisplayHelp(win, help) == false) {
@@ -181,30 +181,30 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     switch (p1) {
 // does not seem to do anything ?
 //        df.UP => {
-//            if (Normal.isDerivedFrom(win, df.LISTBOX) == false) {
+//            if (normal.isDerivedFrom(win, df.LISTBOX) == false) {
 //                p1 = CTRL_FIVE;
 //                p2 = LEFTSHIFT;
 //            }
 //        },
 //        case BS:
-//            if (Normal.isDerivedFrom(win, df.EDITBOX) == false)    {
+//            if (normal.isDerivedFrom(win, df.EDITBOX) == false)    {
 //                p1 = CTRL_FIVE;
 //                p2 = LEFTSHIFT;
 //            }
 //            break;
 //        case DN:
-//            if ((Normal.isDerivedFrom(win, df.LISTBOX) == false) and
-//                    (Normal.isDerivedFrom(win, df.COMBOBOX) == false))
+//            if ((normal.isDerivedFrom(win, df.LISTBOX) == false) and
+//                    (normal.isDerivedFrom(win, df.COMBOBOX) == false))
 //                p1 = '\t';
 //            break;
 //        case FWD:
-//            if (Normal.isDerivedFrom(win, df.EDITBOX) == false)
+//            if (normal.isDerivedFrom(win, df.EDITBOX) == false)
 //                p1 = '\t';
 //            break;
         '\r' => {
-            if (((Normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) and
-                (Normal.isDerivedFrom(win, df.BUTTON) == false) and
-                (Normal.isDerivedFrom(win, df.LISTBOX) == false)) {
+            if (((normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) and
+                (normal.isDerivedFrom(win, df.BUTTON) == false) and
+                (normal.isDerivedFrom(win, df.LISTBOX) == false)) {
                 _ = win.getParent().sendMessage(df.COMMAND, df.ID_OK, 0);
                 return true;
             }
@@ -326,7 +326,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 // we assume df.inFocus is not null
                 if (oldFocus) |oldWin| {
                     if ((pwnd != null) and (oldWin.getClass() != df.APPLICATION) and
-                                       (Normal.isAncestor(oldWin.win, pwnd) == false)) {
+                                       (normal.isAncestor(oldWin.win, pwnd) == false)) {
                         Window.inFocus = null;
                         _ = oldWin.sendMessage(df.BORDER, 0, 0);
                         _ = q.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);
@@ -423,7 +423,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
 fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
 
-    if ((df.WindowSizing>0) or (df.WindowMoving>0))
+    if (normal.WindowSizing or normal.WindowMoving)
         return true;
 
     if (df.HitControlBox(wnd, p1-win.GetLeft(), p2-win.GetTop())) {
@@ -463,7 +463,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.*.win;
 
-    if ((df.WindowMoving>0) or (df.WindowSizing>0))
+    if (normal.WindowMoving or normal.WindowSizing)
         return false;
 
     const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));

@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const editbox = @import("EditBox.zig");
+const normal = @import("Normal.zig");
 
 const pTab = '\t' + 0x80;
 const sTab = 0x0C + 0x80; // '\f'
@@ -20,7 +21,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
 
     var pn:df.PARAM = p1;
-    if ((df.WindowMoving>0) or (df.WindowSizing>0) or ((p2 & df.ALTKEY)>0))
+    if (normal.WindowMoving or normal.WindowSizing or ((p2 & df.ALTKEY)>0))
         return false;
 
     switch (p1) {

@@ -18,9 +18,9 @@ const helpbox = @import("HelpBox.zig");
 // - zDefaultWndProc(*Window)
 // - EveneQueue(*Window)
 
-pub export fn NormalProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
-    return if (normal.NormalProc(win, msg, p1, p2)) df.TRUE else df.FALSE;
-}
+//pub export fn NormalProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) c_int {
+//    return if (normal.NormalProc(win, msg, p1, p2)) df.TRUE else df.FALSE;
+//}
 
 pub fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;

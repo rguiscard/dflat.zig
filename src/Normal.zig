@@ -16,6 +16,8 @@ var dummy:df.window = undefined;
 var px:c_int = -1;
 var py:c_int = -1;
 var diff:c_int = 0;
+pub var WindowMoving = false;
+pub var WindowSizing = false;
 
 var HiddenWindow:*Window = undefined; // seems initialized before use ?
 
@@ -102,10 +104,10 @@ fn InsideWindow(win:*Window, x:c_int, y:c_int) bool {
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     const dwnd = getDummy();
-    if ((df.WindowMoving>0) or (df.WindowSizing>0)) {
+    if (WindowMoving or WindowSizing) {
         // -- move or size a window with keyboard --
-        var x = if (df.WindowMoving>0) df.GetLeft(dwnd) else df.GetRight(dwnd);
-        var y = if (df.WindowMoving>0) df.GetTop(dwnd) else df.GetBottom(dwnd);
+        var x = if (WindowMoving) df.GetLeft(dwnd) else df.GetRight(dwnd);
+        var y = if (WindowMoving) df.GetTop(dwnd) else df.GetBottom(dwnd);
         switch (p1)    {
             df.ESC => {
                 TerminateMoveSize();
@@ -177,14 +179,14 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.MOUSE_CURSOR, df.GetLeft(wnd), df.GetTop(wnd));
-            df.WindowMoving = df.TRUE;
+            WindowMoving = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         df.ID_SYSSIZE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.MOUSE_CURSOR, df.GetRight(wnd), df.GetBottom(wnd));
-            df.WindowSizing = df.TRUE;
+            WindowSizing = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         df.ID_SYSCLOSE => {
@@ -314,7 +316,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
     const mx = p1 - win.GetLeft();
     const my = p2 - win.GetTop();
-    if ((df.WindowSizing == 0) and (df.WindowMoving==0)) {
+    if ((WindowSizing == false) and (WindowMoving == false)) {
         if (df.HitControlBox(wnd, mx, my)) {
             q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
             lists.SkipApplicationControls();
@@ -328,7 +330,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const dwnd = getDummy();
     const mx = p1 - win.GetLeft();
     const my = p2 - win.GetTop();
-    if ((df.WindowSizing>0) or (df.WindowMoving>0))
+    if (WindowSizing or WindowMoving)
         return;
     if (df.HitControlBox(wnd, mx, my)) {
         sysmenu.BuildSystemMenu(win);
@@ -359,8 +361,8 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (wnd.*.condition == df.ISMAXIMIZED) {
             return;
         }
-        if (win.TestAttribute(df.MOVEABLE))    {
-            df.WindowMoving = df.TRUE;
+        if (win.TestAttribute(df.MOVEABLE)) {
+            WindowMoving = true;
             px = @intCast(mx);
             py = @intCast(my);
             diff = @intCast(mx);
@@ -392,7 +394,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             if (ww.TestAttribute(df.SIZEABLE) == false)
                 return;
         }
-        df.WindowSizing = df.TRUE;
+        WindowSizing = true;
         _ = ww.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(dwnd)));
         dragborder(ww, @intCast(ww.GetLeft()), @intCast(ww.GetTop()));
     }
@@ -400,7 +402,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
 // --------- MOUSE_MOVED Message ----------
 fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    if (df.WindowMoving>0) {
+    if (WindowMoving) {
         var leftmost:c_int = 0;
         var topmost:c_int = 0;
         var bottommost:c_int = df.SCREENHEIGHT-2;
@@ -430,7 +432,7 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         }
         return true;
     }
-    if (df.WindowSizing>0) {
+    if (WindowSizing) {
         sizeborder(win, @intCast(p1), @intCast(p2));
         return true;
     }
@@ -694,9 +696,9 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             }
         },
         df.BUTTON_RELEASED => {
-            if ((df.WindowMoving>0) or (df.WindowSizing>0)) {
+            if (WindowMoving or WindowSizing) {
                 const dwnd = getDummy();
-                if (df.WindowMoving > 0) {
+                if (WindowMoving) {
                     q.PostMessage(wnd,df.MOVE,dwnd.*.rc.lf,dwnd.*.rc.tp);
                 } else {
                     q.PostMessage(wnd,df.SIZE,dwnd.*.rc.rt,dwnd.*.rc.bt);
@@ -805,8 +807,8 @@ fn TerminateMoveSize() void {
     _ = q.SendMessage(dwnd, df.RELEASE_MOUSE, df.TRUE, 0);
     _ = q.SendMessage(dwnd, df.RELEASE_KEYBOARD, df.TRUE, 0);
     df.RestoreBorder(dwnd.*.rc);
-    df.WindowMoving = df.FALSE;
-    df.WindowSizing = df.FALSE;
+    WindowMoving = false;
+    WindowSizing = false;
 }
 
 // ---- build a dummy window border for moving or sizing ---

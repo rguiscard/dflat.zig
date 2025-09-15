@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
+const normal = @import("Normal.zig");
 
 var py:c_int = -1;    // the previous y mouse coordinate
 
@@ -217,7 +218,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 // ------------- DOUBLE_CLICK Message ------------
 fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    if (df.WindowMoving>0 or df.WindowSizing>0)
+    if (normal.WindowMoving or normal.WindowSizing)
         return false;
     if (wnd.*.wlines>0) {
         _ = root.zBaseWndProc(df.LISTBOX, win, df.DOUBLE_CLICK, p1, p2);
@@ -264,7 +265,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.KEYBOARD => {
-            if ((df.WindowMoving == 0) and (df.WindowSizing == 0)) {
+            if ((normal.WindowMoving == false) and (normal.WindowSizing == false)) {
                 if (KeyboardMsg(win, p1, p2))
                     return true;
             }
@@ -278,7 +279,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
         },
         df.BUTTON_RELEASED => {
-            if (df.WindowMoving>0 or df.WindowSizing>0 or df.VSliding>0) {
+            if (normal.WindowMoving or normal.WindowSizing or df.VSliding>0) {
             } else {
                 py = -1;
                 return true;

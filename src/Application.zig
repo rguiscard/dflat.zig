@@ -122,7 +122,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    if ((df.WindowMoving > 0) or (df.WindowSizing>0) or (p1 == df.F1))
+    if (normal.WindowMoving or normal.WindowSizing or (p1 == df.F1))
         return root.zBaseWndProc(df.APPLICATION, win, df.KEYBOARD, p1, p2);
     switch (p1)  {
         df.ALT_F4 => {

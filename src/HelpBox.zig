@@ -7,6 +7,7 @@ const DialogBox = @import("DialogBox.zig");
 const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
 const lists = @import("Lists.zig");
+const normal = @import("Normal.zig");
 
 //const MAXHEIGHT = df.SCREENHEIGHT-10;
 const MAXHELPKEYWORDS = 50; // --- maximum keywords in a window ---
@@ -94,7 +95,7 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             }
         },
         df.KEYBOARD => {
-            if (df.WindowMoving == 0) {
+            if (normal.WindowMoving == false) {
                 if (HelpBoxKeyboardMsg(win, p1))
                     return true;
             }

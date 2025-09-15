@@ -539,14 +539,14 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
             ClearTextMsg(win);
         },
         df.KEYBOARD => {
-            if ((df.WindowMoving == 0) and (df.WindowSizing == 0)) {
+            if ((normal.WindowMoving == false) and (normal.WindowSizing == false)) {
                 if (KeyboardMsg(win, p1)) {
                     return true;
                 }
             }
         },
         df.LEFT_BUTTON => {
-            if ((df.WindowMoving > 0) or (df.WindowSizing > 0)) {
+            if (normal.WindowMoving or normal.WindowSizing) {
                 return false;
             }
             if (LeftButtonMsg(win, p1, p2)) {

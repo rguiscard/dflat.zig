@@ -230,13 +230,13 @@ void PutWindowLine(WINDOW, void *,int,int);
 int BaseWndProc(CLASS, WINDOW, MESSAGE, PARAM, PARAM);
 int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM); 
 
-extern WINDOW ApplicationWindow;
-extern WINDOW inFocus;
+//extern WINDOW ApplicationWindow;
+//extern WINDOW inFocus;
 //extern WINDOW CaptureMouse;
 //extern WINDOW CaptureKeyboard;
 extern int foreground, background;
-extern BOOL WindowMoving;
-extern BOOL WindowSizing;
+//extern BOOL WindowMoving;
+//extern BOOL WindowSizing;
 extern BOOL VSliding;
 extern BOOL HSliding;
 extern char DFlatApplication[];
@@ -293,7 +293,7 @@ void near collect_events(void);
 //void handshake(void);
 /* ---- standard window message processing prototypes ----- */
 //int ApplicationProc(WINDOW, MESSAGE, PARAM, PARAM);
-int NormalProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int NormalProc(WINDOW, MESSAGE, PARAM, PARAM);
 //int TextBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 //int ListBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 //int EditBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
