@@ -11,13 +11,13 @@ const app = @import("Application.zig");
 
 const MAXMESSAGES = 100;
 
-var Cwnd:df.WINDOW = null;
+var Cwnd:?*Window = null;
 var clocktimer:c_int = -1;
 var lagdelay:c_int = df.FIRSTDELAY; // not in use
 var handshaking = false; // not in use
 
-export var CaptureMouse:df.WINDOW = null;
-export var CaptureKeyboard:df.WINDOW = null;
+pub var CaptureMouse:?*Window = null;
+pub var CaptureKeyboard:?*Window = null;
 var NoChildCaptureMouse = false;
 var NoChildCaptureKeyboard = false;
 
@@ -180,11 +180,15 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
                      clocktimer=(secs)*182/10+1;
 //                    df.set_timer(clocktimer, 0);
                 }
-                wnd.*.PrevClock = Cwnd;
-                Cwnd = wnd;
+                if (Window.get_zin(wnd)) |win| {
+                    win.PrevClock = Cwnd;
+                    Cwnd = win;
+                }
             },
             df.RELEASE_CLOCK => {
-                Cwnd = wnd.*.PrevClock;
+                if (Window.get_zin(wnd)) |win| {
+                    Cwnd = win.PrevClock;
+                }
                 if (Cwnd == null)
                     clocktimer = -1;
 //                    df.disable_timer(df.clocktimer);
@@ -201,35 +205,52 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
                 }
             },
             df.CAPTURE_KEYBOARD => {
-                if (p2 > 0) {
-                    const pp2:usize = @intCast(p2);
-                    const wp2:df.WINDOW = @ptrFromInt(pp2);
-                    wp2.*.PrevKeyboard=CaptureKeyboard;
-//                    ((WINDOW)p2)->PrevKeyboard=CaptureKeyboard;
-                } else {
-                    wnd.*.PrevKeyboard = CaptureKeyboard;
+                if (Window.get_zin(wnd)) |win| { // wnd is not null
+                    if (p2 > 0) {
+                        const pp2:usize = @intCast(p2);
+                        const wp2:df.WINDOW = @ptrFromInt(pp2);
+                        if (Window.get_zin(wp2)) |p2win| {
+                            p2win.PrevKeyboard=CaptureKeyboard;
+//                            wp2.*.PrevKeyboard=CaptureKeyboard;
+//                            ((WINDOW)p2)->PrevKeyboard=CaptureKeyboard;
+                        }
+                    } else {
+                        win.PrevKeyboard = CaptureKeyboard;
+                    }
+                    CaptureKeyboard = win;
+                    NoChildCaptureKeyboard = (p1>0);
+                } else { // is this necessary
+                    CaptureKeyboard = null;
+                    NoChildCaptureKeyboard = false;
                 }
-                CaptureKeyboard = wnd;
-                NoChildCaptureKeyboard = (p1>0);
             },
             df.RELEASE_KEYBOARD => {
-                if (wnd != null) {
-                    if (CaptureKeyboard == wnd or (p1>0)) {
-                        CaptureKeyboard = wnd.*.PrevKeyboard;
+//                if (wnd != null) {
+                if (Window.get_zin(wnd)) |win| { // wnd is not null
+                    if (CaptureKeyboard == win or (p1>0)) {
+                        CaptureKeyboard = win.PrevKeyboard;
                     } else {
-                        var twnd:df.WINDOW = CaptureKeyboard;
-                        while (twnd != null) {
-                            if (twnd.*.PrevKeyboard == wnd)  {
-                                twnd.*.PrevKeyboard = wnd.*.PrevKeyboard;
+                        var twnd = CaptureKeyboard;
+                        while (twnd) |tw| {
+                            if (tw.PrevKeyboard == win)  {
+                                tw.PrevKeyboard = win.PrevKeyboard;
                                 break;
                             }
-                            twnd = twnd.*.PrevKeyboard;
+                            twnd = tw.PrevKeyboard;
                         }
+//                        var twnd:df.WINDOW = CaptureKeyboard;
+//                        while (twnd != null) {
+//                            if (twnd.*.PrevKeyboard == wnd)  {
+//                                twnd.*.PrevKeyboard = wnd.*.PrevKeyboard;
+//                                break;
+//                            }
+//                            twnd = twnd.*.PrevKeyboard;
+//                        }
                         if (twnd == null) {
                             CaptureKeyboard = null;
                         }
                     }
-                    wnd.*.PrevKeyboard = null;
+                    win.PrevKeyboard = null;
                 } else {
                     CaptureKeyboard = null;
                 }
@@ -311,35 +332,51 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
                 rrtn = if (df.mousebuttons()>0) true else false;
             },
             df.CAPTURE_MOUSE => {
-                if (p2>0) {
-                    const pp2:usize = @intCast(p2);
-                    const pp2_ptr:df.WINDOW = @ptrFromInt(pp2);
-                    pp2_ptr.*.PrevMouse = CaptureMouse;
-//                    ((WINDOW)p2)->PrevMouse = CaptureMouse;
-                } else {
-                    wnd.*.PrevMouse = CaptureMouse;
+                if (Window.get_zin(wnd)) |win| { // wnd is not null
+                    if (p2>0) {
+                        const pp2:usize = @intCast(p2);
+                        const pp2_ptr:df.WINDOW = @ptrFromInt(pp2);
+                        if (Window.get_zin(pp2_ptr)) |p2win| {
+                            p2win.PrevMouse = CaptureMouse;
+//                        pp2_ptr.*.PrevMouse = CaptureMouse;
+//                        ((WINDOW)p2)->PrevMouse = CaptureMouse;
+                        }
+                    } else {
+                        win.PrevMouse = CaptureMouse;
+                    }
+                    CaptureMouse = win;
+                    NoChildCaptureMouse = (p1>0);
+                } else { // is this necessary ?
+                    CaptureMouse = null;
+                    NoChildCaptureMouse = false;
                 }
-                CaptureMouse = wnd;
-                NoChildCaptureMouse = (p1>0);
             },
             df.RELEASE_MOUSE => {
-                if (wnd != null) {
-                    if (CaptureMouse == wnd or (p1>0)) {
-                        CaptureMouse = wnd.*.PrevMouse;
+//                if (wnd != null) {
+                if (Window.get_zin(wnd)) |win| {
+                    if (CaptureMouse == win or (p1>0)) {
+                        CaptureMouse = win.PrevMouse;
                     } else {
-                        var twnd:df.WINDOW = CaptureMouse;
-                        while (twnd != null) {
-                            if (twnd.*.PrevMouse == wnd) {
-                                twnd.*.PrevMouse = wnd.*.PrevMouse;
+                        var twnd = CaptureMouse;
+                        while (twnd) |tw| {
+                            if (tw.PrevMouse == win) {
+                                tw.PrevMouse = win.PrevMouse;
                                 break;
                             }
-                            twnd = twnd.*.PrevMouse;
+                            twnd = tw.PrevMouse;
                         }
+//                        while (twnd != null) {
+//                            if (twnd.PrevMouse == win) {
+//                                twnd.PrevMouse = win.PrevMouse;
+//                                break;
+//                            }
+//                            twnd = twnd.PrevMouse;
+//                        }
                         if (twnd == null) {
                             CaptureMouse = null;
                         }
                     }
-                    wnd.*.PrevMouse = null;
+                    win.PrevMouse = null;
                 } else {
                     CaptureMouse = null;
                 }
@@ -405,11 +442,11 @@ fn MouseWindow(x:c_int, y:c_int) df.WINDOW {
     if (app.ApplicationWindow) |awin| {
         var Mwnd = inWindow(awin, x, y);
         // ---- process mouse captures -----
-        if (CaptureMouse != null) {
+        if (CaptureMouse) |capture| {
             if (NoChildCaptureMouse or
                                     Mwnd == null  or
-                                    normal.isAncestor(Mwnd, CaptureMouse) == false)
-                Mwnd = CaptureMouse;
+                                    normal.isAncestor(Mwnd, capture.win) == false)
+                Mwnd = capture.win;
         }
         return Mwnd;
     }
@@ -443,11 +480,11 @@ pub fn dispatch_message() bool {
         var Kwnd:df.WINDOW = Window.inFocusWnd();
 
         // ---- process keyboard captures -----
-        if (CaptureKeyboard != null) {
+        if (CaptureKeyboard) |capture| {
             if (Kwnd == null or
                     NoChildCaptureKeyboard or
-                    normal.isAncestor(Kwnd, CaptureKeyboard) == false) {
-                Kwnd = CaptureKeyboard;
+                    normal.isAncestor(Kwnd, capture.win) == false) {
+                Kwnd = capture.win;
             }
         }
 
@@ -464,7 +501,7 @@ pub fn dispatch_message() bool {
                     const Mwnd = MouseWindow(ev.mx, ev.my);
                     if (CaptureMouse == null or
                                 (NoChildCaptureMouse == false and
-                                  normal.isAncestor(Mwnd, CaptureMouse) == true)) {
+                                  normal.isAncestor(Mwnd, CaptureMouse.?.win) == true)) {
                         if (Mwnd != Window.inFocusWnd())
                             _ = SendMessage(Mwnd, df.SETFOCUS, df.TRUE, 0);
                     }

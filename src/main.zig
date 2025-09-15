@@ -278,8 +278,6 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
                     wnd.*.extension = @ptrCast(buf.ptr);
                 } else |_| {
                 }
-//                df.AddTitle(wnd, df.NameComponent(&filename));
-//                df.AddTitle(wnd, ptr);
                 win.AddTitle(@ptrCast(fname));
                 _ = df.SendMessage(wnd, df.BORDER, 0, 0);
             } else |_| {

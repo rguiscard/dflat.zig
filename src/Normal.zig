@@ -243,7 +243,8 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         while (thatpar != null) {
             thispar = wnd;
             while (thispar != null) {
-                if ((this == df.CaptureMouse) or (this == df.CaptureKeyboard)) {
+                if ((this == if (q.CaptureMouse) |cp| cp.win else null) or
+                    (this == if (q.CaptureKeyboard) |cp| cp.win else null)) {
                     // ---- don't repaint if this window has capture ----
                     that = null;
                     thatpar = null;
@@ -524,12 +525,15 @@ fn CloseWindowMsg(win:*Window) void {
     }
 
     // ----- release captured resources ------
-    if (wnd.*.PrevClock != null)
+    if (win.PrevClock) |_| {
         _ = win.sendMessage(df.RELEASE_CLOCK, 0, 0);
-    if (wnd.*.PrevMouse != null)
+    }
+    if (win.PrevMouse) |_| {
         _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
-    if (wnd.*.PrevKeyboard != null)
+    }
+    if (win.PrevKeyboard) |_| {
         _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
+    }
     // --- change focus if this window had it --
     if (win == Window.inFocus)
         lists.SetPrevFocus();

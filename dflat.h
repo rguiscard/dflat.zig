@@ -103,9 +103,9 @@ typedef struct window {
     int restored_attrib;        /* attributes when restored */
     void *extension;      /* menus, dialogs, documents, etc */
 //	void *wrapper;             /* used by C++ wrapper class. not in use. */
-    struct window *PrevMouse;   /* previous mouse capture   */
-    struct window *PrevKeyboard;/* previous keyboard capture*/
-	struct window *PrevClock;   /* previous clock capture   */
+//    struct window *PrevMouse;   /* previous mouse capture   */
+//    struct window *PrevKeyboard;/* previous keyboard capture*/
+//	struct window *PrevClock;   /* previous clock capture   */
 //	struct window *MenuBarWnd;/* menu bar                   */
 //	struct window *StatusBar; /* status bar                 */
 	int isHelping;	    /* > 0 when help is being displayed */

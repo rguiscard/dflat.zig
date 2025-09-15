@@ -76,7 +76,11 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
             const pp:usize = @intCast(p1);
             df.PutWindowLine(wnd, @ptrFromInt(pp), @intCast(win.WindowWidth()-8), 0);
             win.TimePosted = true;
-            _ = q.SendMessage(wnd.*.PrevClock, msg, p1, p2);
+            if (win.PrevClock) |clock| {
+                _ = clock.sendMessage(msg, p1, p2);
+            } else { // can it be null ?
+                _ = q.SendMessage(null, msg, p1, p2);
+            }
             return true;
         },
         df.CLOSE_WINDOW => {

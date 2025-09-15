@@ -22,7 +22,11 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             df.CLOCKTICK => {
                 tick = tick + 1;
                 tick = tick & 3; // the same as tick % 4 for positive number
-                _ = df.SendMessage(wnd.*.PrevClock, msg, p1, p2);
+                if (win.PrevClock) |clock| {
+                    _ = clock.sendMessage(msg, p1, p2);
+                } else { // could clock be null ?
+                    _ = df.SendMessage(null, msg, p1, p2);
+                }
                 // (fall through and paint)
                 _ = df.SetStandardColor(wnd);
                 df.writeline(wnd, @constCast(hands[tick].ptr), 1, 1, df.FALSE);

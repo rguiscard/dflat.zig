@@ -26,6 +26,9 @@ nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
 childfocus:?*TopLevelFields = null,   // child that ha(s/d) focus
 
+PrevMouse:?*TopLevelFields = null,    // previous mouse capture
+PrevKeyboard:?*TopLevelFields = null, // previous keyboard capture
+PrevClock:?*TopLevelFields = null,    // previous clock capture
 MenuBar:?*TopLevelFields = null,      // menu bar
 StatusBar:?*TopLevelFields = null,    // status bar
 
@@ -236,7 +239,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
         df.BUTTON_RELEASED => {
             // --- don't send these messages unless the
             //  window is visible or has captured the mouse --
-            if ((df.isVisible(wnd)>0) or (wnd == df.CaptureMouse)) {
+            if ((df.isVisible(wnd)>0) or (self == q.CaptureMouse)) {
                 if (self.wndproc) |wndproc| {
                     rtn = wndproc(self, msg, p1, p2);
                 }
@@ -246,7 +249,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
         df.SHIFT_CHANGED => {
             // ------- don't send these messages unless the
             //  window is visible or has captured the keyboard --
-            if ((df.isVisible(wnd)>0) or (wnd == df.CaptureKeyboard)) {
+            if ((df.isVisible(wnd)>0) or (self == q.CaptureKeyboard)) {
                 if (self.wndproc) |wndproc| {
                     rtn = wndproc(self, msg, p1, p2);
                 }
