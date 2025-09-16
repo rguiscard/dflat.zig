@@ -66,6 +66,7 @@ pub fn ClearDialogBoxes() void {
                             // FIXME: itext_allocated should save guard already.
                             // Why only apply to these classes?
                             // Memory leak if no safe guard here.
+//                              _ = itext;
                             root.global_allocator.free(itext);
 //                        }
                         ct.*.itext = null;
@@ -623,24 +624,29 @@ pub fn GetDlgTextString(db:*Dialogs.DBOX, cmd:c, Class:df.CLASS) ?[:0]const u8 {
 }
 
 // ------- set the text of a control specification ------
-pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: [*c]u8, Class:df.CLASS) void {
+pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:df.CLASS) void {
     const control = FindCommand(db, cmd, Class);
     if (control) |ct| {
-        if (text != null) {
+        if (text) |txt| {
             // always keep a copy
-            const len = df.strlen(text);
-            if (itextAllocateSentinel(ct, len)) {
-                @memcpy(ct.*.itext.?, text[0..len:0]);
+            if (std.mem.indexOfScalar(txt)) |len| {
+//                const len = df.strlen(text);
+                if (itextAllocateSentinel(ct, len)) {
+                    @memcpy(ct.*.itext.?, text[0..len:0]);
+                }
             }
         } else {
             if (ct.*.itext_allocated) {
                 root.global_allocator.free(ct.*.itext);
+                ct.*.itext = null;
                 ct.*.itext_allocated = false;
             }
 
             // FIXME: not sure the logic is right
             if (ct.*.Class == df.TEXT) {
-                ct.*.itext = @constCast(&[_]u8{0});
+//                ct.*.itext = @constCast(&[_]u8{0});
+                ct.*.itext = "";
+                ct.*.itext_allocated = false;
 //            } else if (ct.*.itext_allocated) {
 //                const ilen = df.strlen(ct.*.itext);
 //                root.global_allocator.free(ct.*.itext[0..ilen]);
@@ -654,8 +660,8 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: [*c]u8, Class:df.CLASS) v
             }
         }
         if (ct.win) |w| {
-            if (text != null) {
-                _ = w.sendMessage(df.SETTEXT, @intCast(@intFromPtr(text)), 0);
+            if (text) |txt| {
+                _ = w.sendTextMessage(df.SETTEXT, @constCast(txt), 0);
             } else {
                 _ = w.sendMessage(df.CLEARTEXT, 0, 0);
             }
@@ -1019,43 +1025,41 @@ pub fn GetControl(win:*Window) ?*Dialogs.CTLWINDOW {
     return win.ct;
 }
 
-pub fn GetDlgText(db:*Dialogs.DBOX, cmd: c) ?[]const u8 {
+pub fn GetDlgText(db:*Dialogs.DBOX, cmd: c) ?[:0]const u8 {
     return GetDlgTextString(db, cmd, df.TEXT);
 }
 
-pub fn GetDlgTextBox(db:*Dialogs.DBOX, cmd: c) ?[]const u8 {
+pub fn GetDlgTextBox(db:*Dialogs.DBOX, cmd: c) ?[:0]const u8 {
     return GetDlgTextString(db, cmd, df.TEXTBOX);
 }
 
-pub fn GetEditBoxText(db:*Dialogs.DBOX, cmd: c) ?[]const u8 {
+pub fn GetEditBoxText(db:*Dialogs.DBOX, cmd: c) ?[:0]const u8 {
     return GetDlgTextString(db, cmd, df.EDITBOX);
 }
 
-pub fn GetComboBoxText(db:*Dialogs.DBOX, cmd: c) ?[]const u8 {
+pub fn GetComboBoxText(db:*Dialogs.DBOX, cmd: c) ?[:0]const u8 {
     return GetDlgTextString(db, cmd, df.COMBOBOX);
 }
 
-pub fn SetDlgText(db:*Dialogs.DBOX, cmd: c, s:[*c]u8) void {
+pub fn SetDlgText(db:*Dialogs.DBOX, cmd: c, s:?[:0]const u8) void {
     SetDlgTextString(db, cmd, s, df.TEXT);
 }
 
-pub fn SetDlgTextBox(db:*Dialogs.DBOX, cmd: c, s:[*c]u8) void {
+pub fn SetDlgTextBox(db:*Dialogs.DBOX, cmd: c, s:?[:0]const u8) void {
     SetDlgTextString(db, cmd, s, df.TEXTBOX);
 }
 
-pub fn SetEditBoxText(db:*Dialogs.DBOX, cmd: c, s:[*c]u8) void {
+pub fn SetEditBoxText(db:*Dialogs.DBOX, cmd: c, s:?[:0]const u8) void {
     SetDlgTextString(db, cmd, s, df.EDITBOX);
 }
 
-pub fn SetComboBoxText(db:*Dialogs.DBOX, cmd: c, s:[*c]u8) void {
+pub fn SetComboBoxText(db:*Dialogs.DBOX, cmd: c, s:?[:0]const u8) void {
     SetDlgTextString(db, cmd, s, df.COMBOBOX);
 }
 
-pub fn SetDlgTitle(db:*Dialogs.DBOX, ttl:[*c]u8) void {
+pub fn SetDlgTitle(db:*Dialogs.DBOX, ttl:?[:0]const u8) void {
     // currently not in use
-    if (ttl) |t| {
-      db.*.dwnd.title = std.mem.span(t);
-    }
+    db.*.dwnd.title = ttl;
 }
 
 pub fn SetCheckBox(db:*Dialogs.DBOX, cmd: c) void {
