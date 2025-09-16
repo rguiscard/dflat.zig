@@ -2,7 +2,17 @@
 
 This is a version of D-Flat for Unix ported in Zig language. Please see original README below.
 
-## Know bugs:
+## How do I compile/run it?
+
+If the help file (memopad.hlp) does not exist, run `make` to generate one.
+
+To run the default memopad, use
+
+```
+$ zig build run
+```
+
+## Known bugs:
 
 - Text field in search box does not work properly when modifying search text after first one. This is a bug from original dflat.
 - Pasting into empty document will crash. (seems fixed).

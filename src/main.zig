@@ -11,8 +11,6 @@ pub fn main() !void {
     const argv = std.os.argv.ptr; // already C-compatible
 
     // Force zig to load, otherwise, it is lazy.
-    _ = mp.list;
-    _ = mp.menu;
     _ = mp.video;
 
     if (mp.q.init_messages() == false) {

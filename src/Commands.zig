@@ -9,7 +9,7 @@ const df = @import("ImportC.zig").df;
 // Add application-specific commands to this enum
 //
 
-pub const Command = enum (c_int) {
+pub const Command = enum (u8) { // it uese u7 if not specified, imcompatible to c
     ID_NULL,
     // --------------- File menu ----------------
     ID_OPEN,
