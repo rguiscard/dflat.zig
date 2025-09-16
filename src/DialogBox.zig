@@ -114,7 +114,7 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
         _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
         while (q.dispatch_message()) {
         }
-        rtn = (win.ReturnCode == df.ID_OK);
+        rtn = (win.ReturnCode == c.ID_OK);
         _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
         _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
         _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
@@ -159,7 +159,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 if (win.GetControl()) |ct| {
                     if (ct.*.help) |help| {
                         if (helpbox.DisplayHelp(win, help) == false) {
-                            _ = win.getParent().sendCommandMessage(df.COMMAND,c.ID_HELP,0);
+                            _ = win.getParent().sendCommandMessage(c.ID_HELP,0);
                         }
                     }
                 }
@@ -206,7 +206,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             if (((normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) and
                 (normal.isDerivedFrom(win, df.BUTTON) == false) and
                 (normal.isDerivedFrom(win, df.LISTBOX) == false)) {
-                _ = win.getParent().sendCommandMessage(df.COMMAND, c.ID_OK, 0);
+                _ = win.getParent().sendCommandMessage(c.ID_OK, 0);
                 return true;
             }
         },
@@ -261,7 +261,7 @@ fn CtlCloseWindowMsg(win:*Window) void {
     const wnd = win.win;
     if (win.GetControl()) |ct| {
         ct.win = null;
-        if (win.getParent().ReturnCode == df.ID_OK) {
+        if (win.getParent().ReturnCode == c.ID_OK) {
             if (ct.*.Class == df.EDITBOX or ct.*.Class == df.COMBOBOX)  {
                 // should use strlen() instead ?
                 const len = wnd.*.textlen;
@@ -343,7 +343,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     oldWin.SetVisible();
                     if (pwin) |pw| {
                         pw.dfocus = win;
-                        _ = pw.sendCommandMessage(df.COMMAND, inFocusCommand(db), df.ENTERFOCUS);
+                        _ = pw.sendCommandMessage(inFocusCommand(db), df.ENTERFOCUS);
                     }
                     return true;
                 }
@@ -489,7 +489,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.CTRL_F4,
         df.ESC => {
-            _ = win.sendCommandMessage(df.COMMAND, c.ID_CANCEL, 0);
+            _ = win.sendCommandMessage(c.ID_CANCEL, 0);
         },
         df.F1 => {
             if (Window.inFocus) |focus| {
@@ -519,7 +519,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
         .ID_OK, .ID_CANCEL => {
             if (p2 != 0)
                 return true;
-            win.ReturnCode = @intCast(p1);
+            win.ReturnCode = cmd;
             if (win.modal) {
                 _ = q.PostMessage(wnd, df.ENDDIALOG, 0, 0);
             } else {
@@ -569,7 +569,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                 return true;
             if (wnd.*.extension) |extension| {
                 const db:*Dialogs.DBOX = @alignCast(@ptrCast(extension));
-                _ = win.sendCommandMessage(df.COMMAND, inFocusCommand(db), msg);
+                _ = win.sendCommandMessage(inFocusCommand(db), msg);
             }
         },
         df.SETFOCUS => {
@@ -597,7 +597,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         },
         df.CLOSE_WINDOW => {
             if (p1 == 0) {
-                _ = win.sendCommandMessage(df.COMMAND, c.ID_CANCEL, 0);
+                _ = win.sendCommandMessage(c.ID_CANCEL, 0);
                 return true;
             }
         },

@@ -37,22 +37,23 @@ pub export fn ReadHelp(wnd:df.WINDOW) callconv(.c) void {
 // ------------- COMMAND message ------------
 fn CommandMsg(win: *Window, p1:df.PARAM) bool {
     const wnd = win.win;
-    switch (p1) {
-        df.ID_PREV => {
+    const cmd:c = @enumFromInt(p1);
+    switch (cmd) {
+        c.ID_PREV => {
             if (df.ThisHelp != null) {
                 const prevhlp:usize = @intCast(df.ThisHelp.*.prevhlp);
                 SelectHelp(wnd, df.FirstHelp+prevhlp, df.TRUE);
             }
             return true;
         },
-        df.ID_NEXT => {
+        c.ID_NEXT => {
             if (df.ThisHelp != null) {
                 const nexthlp:usize = @intCast(df.ThisHelp.*.nexthlp);
                 SelectHelp(wnd, df.FirstHelp+nexthlp, df.TRUE);
             }
             return true;
         },
-        df.ID_BACK => {
+        c.ID_BACK => {
             if (df.stacked > 0) {
                 df.stacked -= 1;
                 const stacked:usize = @intCast(df.stacked);

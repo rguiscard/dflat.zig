@@ -87,7 +87,7 @@ pub var MainMenu:mp.menus.MBAR = mp.menus.buildMenuBar(.{
     },
 
         // ----- cascaded pulldown from Tabs... above -----
-        .{null, null, null, df.ID_TABS, .{
+        .{null, null, null, @intFromEnum(c.ID_TABS), .{
                 .{"~2 tab stops",  c.ID_TAB2,  0,  Default  },
                 .{"~4 tab stops",  c.ID_TAB4,  0,  Default  },
                 .{"~6 tab stops",  c.ID_TAB6,  0,  Default  },

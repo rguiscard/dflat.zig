@@ -43,7 +43,7 @@ DeletedText:?[]u8 = null,    // for undo
 DeletedLength:usize = 0,     // Length of deleted field
 
 // ---------------- dialog box fields ----------------- 
-ReturnCode:u32 = 0,             // return code from a dialog box
+ReturnCode:c = c.ID_NULL,       // return code from a dialog box
 modal: bool = false,            // True if a modeless dialog box
 ct:?*Dialogs.CTLWINDOW = null,  // control structure
 dfocus:?*TopLevelFields = null, // control window that has focus
@@ -220,9 +220,8 @@ pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.P
     return false;
 }
 
-pub fn sendCommandMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: c, p2: df.PARAM) bool {
-    // default to .COMMAND msg ?
-    return self.sendMessage(msg, @intFromEnum(p1), p2);
+pub fn sendCommandMessage(self: *TopLevelFields, p1: c, p2: df.PARAM) bool {
+    return self.sendMessage(df.COMMAND, @intFromEnum(p1), p2);
 }
 
 // --------- send a message to a window -----------

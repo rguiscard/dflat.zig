@@ -1,4 +1,4 @@
-#include "commands.h"
+// #include "commands.h"
 
 // direct.c
 void cBuildList(WINDOW, char *, BOOL);

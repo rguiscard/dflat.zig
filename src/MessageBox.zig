@@ -130,9 +130,9 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             if (p1 < 128) {
                 const cc = std.ascii.toLower(@intCast(p1));
                 if (cc == 'y') {
-                    _ = win.sendCommandMessage(df.COMMAND, c.ID_OK, 0);
+                    _ = win.sendCommandMessage(c.ID_OK, 0);
                 } else if (cc == 'n') {
-                    _ = win.sendCommandMessage(df.COMMAND, c.ID_CANCEL, 0);
+                    _ = win.sendCommandMessage(c.ID_CANCEL, 0);
                 }
             }
         },

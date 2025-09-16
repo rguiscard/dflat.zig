@@ -375,11 +375,11 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                     return true;
                 },
                 .ID_WRAP => {
-                    _ = win.getParent().sendMessage(df.COMMAND, df.ID_WRAP, 0);
+                    _ = win.getParent().sendCommandMessage(c.ID_WRAP, 0);
                     wnd.*.WordWrapMode = df.cfg.WordWrap;
                 },
                 .ID_INSERT => {
-                    _ = win.getParent().sendMessage(df.COMMAND, df.ID_INSERT, 0);
+                    _ = win.getParent().sendCommandMessage(c.ID_INSERT, 0);
                     wnd.*.InsertMode = df.cfg.InsertMode;
                     _ = df.SendMessage(null, df.SHOW_CURSOR, wnd.*.InsertMode, 0);
                 },
@@ -396,7 +396,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 if (std.fmt.allocPrintSentinel(mp.global_allocator, "{s}\nText changed. Save it ?", .{title}, 0)) |m| {
                     defer mp.global_allocator.free(m);
                     if (mp.MessageBox.YesNoBox(m)) {
-                        _ = win.getParent().sendMessage(df.COMMAND, df.ID_SAVE, 0);
+                        _ = win.getParent().sendCommandMessage(c.ID_SAVE, 0);
                     }
                 } else |_| {
                     // error

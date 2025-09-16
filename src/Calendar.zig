@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const c = @import("Commands.zig").Command;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
@@ -161,7 +162,8 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             return true;
         },
         df.COMMAND => {
-            if (p1 == df.ID_HELP) {
+            const cmd:c = @enumFromInt(p1);
+            if (cmd == c.ID_HELP) {
                 _ = helpbox.DisplayHelp(win, "Calendar");
                 return true;
             }
@@ -190,8 +192,8 @@ pub fn Calendar(pwin: *Window) void {
             df.HASBORDER
         );
     }
-    if (Cwnd) |c| {
-        var win = c;
+    if (Cwnd) |cc| {
+        var win = cc;
         _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
     }
 }

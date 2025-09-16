@@ -586,7 +586,7 @@ fn CommandMsg(win:*Window,p1:df.PARAM) bool {
         },
         .ID_CUT => {
             clipboard.CopyToClipboard(win);
-            _ = win.sendMessage(df.COMMAND, df.ID_DELETETEXT, 0);
+            _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },

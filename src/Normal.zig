@@ -143,7 +143,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     }
     switch (p1) {
         df.F1 => {
-            _ = win.sendMessage(df.COMMAND, df.ID_HELP, 0);
+            _ = win.sendCommandMessage(c.ID_HELP, 0);
             return true;
         },
         ' ' => {

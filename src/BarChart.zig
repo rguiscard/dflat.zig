@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const c = @import("Commands.zig").Command;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
@@ -27,7 +28,8 @@ const Months = "           Jan Feb Mar Apr May Jun";
 fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch (message) {
         df.COMMAND => {
-            if (p1 == df.ID_HELP) {
+            const cmd:c = @enumFromInt(p1);
+            if (cmd == c.ID_HELP) {
                 _ = helpbox.DisplayHelp(win, "BarChart");
                 return true;
             }

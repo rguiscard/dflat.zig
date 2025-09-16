@@ -127,7 +127,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                             // chose a file name
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
                             DialogBox.GetDlgListText(wnd, &fName, c.ID_FILES);
-                            _ = win.sendCommandMessage(df.COMMAND, c.ID_OK, 0);
+                            _ = win.sendCommandMessage(c.ID_OK, 0);
                             set_fileName(&fName);
                         },
                         else => {
@@ -147,7 +147,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                             DialogBox.GetDlgListText(wnd, &dd, c.ID_DIRECTORY);
                             _ = df.chdir(&dd);
                             InitDlgBox(win);
-                            _ = win.sendCommandMessage(df.COMMAND, c.ID_OK, 0);
+                            _ = win.sendCommandMessage(c.ID_OK, 0);
                         },
                         else => {
                         }

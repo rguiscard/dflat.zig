@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const c = @import("Commands.zig").Command;
 const rect = @import("Rect.zig");
 const app = @import("Application.zig");
 const menu = @import("Menu.zig");
@@ -107,10 +108,10 @@ fn PaintMsg(win:*Window) void {
 fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
     if ((mwin == null) and (p1 < 256)) {
         // ----- search for menu bar shortcut keys ----
-        const c = std.ascii.toLower(@intCast(p1));
+        const cc = std.ascii.toLower(@intCast(p1));
         const a = df.AltConvert(@intCast(p1));
         for (menupos, 0..) |m, idx| {
-            if (((Window.inFocus == win) and (m.sc == c)) or
+            if (((Window.inFocus == win) and (m.sc == cc)) or
                 ((a > 0) and (m.sc == a))) {
                 _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
                 _ = win.sendMessage(df.MB_SELECTION, @intCast(idx), 0);
@@ -326,7 +327,8 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
 // --------- COMMAND Message ----------
 fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    if (p1 == df.ID_HELP) {
+    const cmd:c = @enumFromInt(p1);
+    if (cmd == c.ID_HELP) {
         _ = root.zBaseWndProc(df.MENUBAR, win, df.COMMAND, p1, p2);
         return;
     }

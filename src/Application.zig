@@ -487,7 +487,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
                 },
                 c.ID_WINDOWLIST => {
                     if (p2 == df.LB_CHOOSE)
-                        _ = win.sendCommandMessage(df.COMMAND, c.ID_OK, 0);
+                        _ = win.sendCommandMessage(c.ID_OK, 0);
                 },
                 else => {
                 }
