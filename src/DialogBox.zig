@@ -63,10 +63,10 @@ pub fn ClearDialogBoxes() void {
 //                      if ((ct.*.Class == df.EDITBOX or
 //                                 ct.*.Class == df.TEXTBOX or
 //                                 ct.*.Class == df.COMBOBOX)) {
-                           // FIXME: itext_allocated should save guard already.
-                           // Why only apply to these classes?
-                           // Memory leak if no safe guard here.
-                           root.global_allocator.free(itext);
+                            // FIXME: itext_allocated should save guard already.
+                            // Why only apply to these classes?
+                            // Memory leak if no safe guard here.
+                            root.global_allocator.free(itext);
 //                        }
                         ct.*.itext = null;
                         ct.*.itext_allocated = false;
@@ -609,11 +609,14 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
 }
 
 // ---- return pointer to the text of a control window ----
-pub fn GetDlgTextString(db:*Dialogs.DBOX, cmd:c, Class:df.CLASS) [*c]u8 {
+pub fn GetDlgTextString(db:*Dialogs.DBOX, cmd:c, Class:df.CLASS) ?[:0]const u8 {
     const ct = FindCommand(db, cmd, Class);
     if (ct) |ctl| {
         if (ctl.*.itext) |itext| {
-            return itext.ptr;
+            // buffer may be bigger than text. return the correct len.
+            if (std.mem.indexOfScalar(u8, itext, 0)) |pos| {
+                return itext[0..pos:0];
+            }
         }
     }
     return null;
@@ -1016,19 +1019,19 @@ pub fn GetControl(win:*Window) ?*Dialogs.CTLWINDOW {
     return win.ct;
 }
 
-pub fn GetDlgText(db:*Dialogs.DBOX, cmd: c) [*c]u8 {
+pub fn GetDlgText(db:*Dialogs.DBOX, cmd: c) ?[]const u8 {
     return GetDlgTextString(db, cmd, df.TEXT);
 }
 
-pub fn GetDlgTextBox(db:*Dialogs.DBOX, cmd: c) [*c]u8 {
+pub fn GetDlgTextBox(db:*Dialogs.DBOX, cmd: c) ?[]const u8 {
     return GetDlgTextString(db, cmd, df.TEXTBOX);
 }
 
-pub fn GetEditBoxText(db:*Dialogs.DBOX, cmd: c) [*c]u8 {
+pub fn GetEditBoxText(db:*Dialogs.DBOX, cmd: c) ?[]const u8 {
     return GetDlgTextString(db, cmd, df.EDITBOX);
 }
 
-pub fn GetComboBoxText(db:*Dialogs.DBOX, cmd: c) [*c]u8 {
+pub fn GetComboBoxText(db:*Dialogs.DBOX, cmd: c) ?[]const u8 {
     return GetDlgTextString(db, cmd, df.COMBOBOX);
 }
 

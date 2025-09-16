@@ -20,7 +20,7 @@ pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
 var oldFocus:df.WINDOW = null;
-var Menus = [_][]u8{
+var Menus = [_][:0]u8{
     @constCast("~1.                      "),
     @constCast("~2.                      "),
     @constCast("~3.                      "),

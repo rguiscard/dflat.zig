@@ -22,7 +22,7 @@ pub const CTLWINDOW = struct {
     itext:?[:0]u8 = null,         // initialized text
     itext_allocated:bool = false, // itext is allocated in heap (true) or in stack (false)
     command:c = c.ID_NULL,        // command code
-    help:?[]const u8 = null,      // help mnemonic
+    help:?[:0]const u8 = null,      // help mnemonic
     isetting:df.BOOL = df.OFF,    // initially ON or OFF
     setting:df.BOOL = df.OFF,     // ON or OFF
     win:?*Window = null,          // window handle
@@ -30,7 +30,7 @@ pub const CTLWINDOW = struct {
 
 // --------- one of these for each dialog box -------
 pub const DBOX = struct {
-    HelpName:[]const u8,
+    HelpName:[:0]const u8,
     dwnd:DIALOGWINDOW,
     ctl:[MAXCONTROLS+1]CTLWINDOW,
 };
@@ -209,10 +209,10 @@ pub var HelpBox:DBOX = buildDialog(
     },
 );
 
-fn buildDialog(comptime help:[]const u8, comptime window:anytype, comptime controls:anytype) DBOX {
+fn buildDialog(comptime help:[:0]const u8, comptime window:anytype, comptime controls:anytype) DBOX {
     var result:DBOX = undefined;
 
-    var ttl: ?[]const u8 = undefined;
+    var ttl: ?[:0]const u8 = undefined;
     var x: c_int = undefined;
     var y: c_int = undefined;
     var h: c_int = undefined;

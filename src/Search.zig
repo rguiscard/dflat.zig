@@ -74,84 +74,86 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 //    char *s1 = NULL, *s2, *cp1;
     var cp1:[*c]u8 = null;
     const dbox = if (Replacing) &Dialogs.ReplaceTextDB else  &Dialogs.SearchTextDB;
-    const cp = DialogBox.GetEditBoxText(dbox, c.ID_SEARCHFOR);
+    const searchtext = DialogBox.GetEditBoxText(dbox, c.ID_SEARCHFOR);
     var FoundOne = false;
     var rpl = true;
-    while ((rpl == true) and (cp != null) and (df.strlen(cp) > 0)) {
-        if (Replacing) {
-            rpl = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, c.ID_REPLACEALL);
-        }
-
-        if (df.TextBlockMarked(wnd)) {
-            textbox.ClearTextBlock(win);
-            _ = win.sendMessage(df.PAINT, 0, 0);
-        }
-        // search for a match starting at cursor position
-        cp1 = df.zCurrChar(wnd);
-        if (incr) {
-            cp1 = cp1 + lastsize; // start past the last hit
-        }
-        // --- compare at each character position ---
-        const zp = std.mem.span(cp);
-        const zp1 = std.mem.span(cp1);
-        var index:?usize = null;
-        // FIXME: original code is whitespace normalized ('\n' -> ' ')
-        if (CheckCase) {
-            index = std.mem.indexOf(u8, zp1, zp);
-        } else {
-            index = std.ascii.indexOfIgnoreCase(zp1, zp);
-        }
-        if (index) |i| {
-            // ----- match at *cp1 -------
-            FoundOne = true;
-
-            // mark a block at beginning of matching text
-            cp1 = cp1+i;
-            const s2 = cp1+zp.len;
-            wnd.*.BlkEndLine = df.TextLineNumber(wnd, s2);
-            wnd.*.BlkBegLine = df.TextLineNumber(wnd, cp1);
-            if (wnd.*.BlkEndLine < wnd.*.BlkBegLine) {
-                wnd.*.BlkEndLine = wnd.*.BlkBegLine;
-            }
-            wnd.*.BlkEndCol = BlkEndColFromLine(wnd, s2);
-            wnd.*.BlkBegCol = BlkBegColFromLine(wnd, cp1);
-
-            // position the cursor at the matching text
-            wnd.*.CurrCol = wnd.*.BlkBegCol;
-            wnd.*.CurrLine = wnd.*.BlkBegLine;
-            wnd.*.WndRow = wnd.*.CurrLine - wnd.*.wtop;
-
-            // -- remember the size of the matching text --
-            lastsize = df.strlen(cp);
-
-            // align the window scroll to matching text
-            if (editbox.WndCol(win) > (win.ClientWidth()-1)) {
-                wnd.*.wleft = wnd.*.CurrCol;
-            }
-            if (wnd.*.WndRow > (win.ClientHeight()-1)) {
-                wnd.*.wtop = wnd.*.CurrLine;
-                wnd.*.WndRow = 0;
+    if (searchtext) |cp| {
+        while ((rpl == true) and (cp.len > 0)) {
+            if (Replacing) {
+                rpl = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, c.ID_REPLACEALL);
             }
 
-            _ = win.sendMessage(df.PAINT, 0, 0);
-            _ = win.sendMessage(df.KEYBOARD_CURSOR, editbox.WndCol(win), wnd.*.WndRow);
+            if (df.TextBlockMarked(wnd)) {
+                textbox.ClearTextBlock(win);
+                _ = win.sendMessage(df.PAINT, 0, 0);
+            }
+            // search for a match starting at cursor position
+            cp1 = df.zCurrChar(wnd);
+            if (incr) {
+                cp1 = cp1 + lastsize; // start past the last hit
+            }
+            // --- compare at each character position ---
+            const zp = cp;
+            const zp1 = std.mem.span(cp1);
+            var index:?usize = null;
+            // FIXME: original code is whitespace normalized ('\n' -> ' ')
+            if (CheckCase) {
+                index = std.mem.indexOf(u8, zp1, zp);
+            } else {
+                index = std.ascii.indexOfIgnoreCase(zp1, zp);
+            }
+            if (index) |i| {
+                // ----- match at *cp1 -------
+                FoundOne = true;
 
-//            if (Replacing)    {
-//                if (rpl || YesNoBox("Replace the text?"))  {
-//                    replacetext(wnd, cp1, db);
-//                    wnd->TextChanged = TRUE;
-//                    BuildTextPointers(wnd);
-//                        if (rpl)    {
-//                        incr = TRUE;
-//                        continue;
-//                        }
+                // mark a block at beginning of matching text
+                cp1 = cp1+i;
+                const s2 = cp1+zp.len;
+                wnd.*.BlkEndLine = df.TextLineNumber(wnd, s2);
+                wnd.*.BlkBegLine = df.TextLineNumber(wnd, cp1);
+                if (wnd.*.BlkEndLine < wnd.*.BlkBegLine) {
+                    wnd.*.BlkEndLine = wnd.*.BlkBegLine;
+                }
+                wnd.*.BlkEndCol = BlkEndColFromLine(wnd, s2);
+                wnd.*.BlkBegCol = BlkBegColFromLine(wnd, cp1);
+
+                // position the cursor at the matching text
+                wnd.*.CurrCol = wnd.*.BlkBegCol;
+                wnd.*.CurrLine = wnd.*.BlkBegLine;
+                wnd.*.WndRow = wnd.*.CurrLine - wnd.*.wtop;
+
+                // -- remember the size of the matching text --
+                lastsize = cp.len;
+
+                // align the window scroll to matching text
+                if (editbox.WndCol(win) > (win.ClientWidth()-1)) {
+                    wnd.*.wleft = wnd.*.CurrCol;
+                }
+                if (wnd.*.WndRow > (win.ClientHeight()-1)) {
+                    wnd.*.wtop = wnd.*.CurrLine;
+                    wnd.*.WndRow = 0;
+                }
+
+                _ = win.sendMessage(df.PAINT, 0, 0);
+                _ = win.sendMessage(df.KEYBOARD_CURSOR, editbox.WndCol(win), wnd.*.WndRow);
+
+//                if (Replacing)    {
+//                    if (rpl || YesNoBox("Replace the text?"))  {
+//                        replacetext(wnd, cp1, db);
+//                        wnd->TextChanged = TRUE;
+//                        BuildTextPointers(wnd);
+//                            if (rpl)    {
+//                            incr = TRUE;
+//                            continue;
+//                            }
+//                    }
+//                    win.ClearTextBlock();
+//                    _ = win.sendMessage(msg.PAINT, 0, 0);
 //                }
-//                win.ClearTextBlock();
-//                _ = win.sendMessage(msg.PAINT, 0, 0);
-//            }
-            return;
+                return;
+            }
+            break;
         }
-        break;
     }
     if (FoundOne == false) {
         const t = "Search/Replace Text";

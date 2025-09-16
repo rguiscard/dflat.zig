@@ -26,7 +26,7 @@ export const ID_HELPTEXT:c_int = @intFromEnum(c.ID_HELPTEXT);
 // ----------- popdown menu selection structure
 //       one for each selection on a popdown menu ---------
 pub const PopDown = struct {
-    SelectionTitle:?[]const u8 = null, // title of the selection
+    SelectionTitle:?[:0]const u8 = null, // title of the selection
     ActionId:c = c.ID_NULL,            // the command executed
     Accelerator:c_int = 0,             // the accelerator key
     Attrib:PopDownAttrib = .{},        // INACTIVE | CHECKED | TOGGLE | CASCADED
@@ -36,9 +36,9 @@ pub const PopDown = struct {
 // ----------- popdown menu structure
 //       one for each popdown menu on the menu bar --------
 pub const MENU = struct {
-    Title:?[]const u8 = null,      // title on the menu bar
+    Title:?[:0]const u8 = null,      // title on the menu bar
     PrepMenu:?*const fn (w: ?*anyopaque, mnu: *MENU) void = null, // function
-    StatusText:?[]const u8 = null, // text for the status bar
+    StatusText:?[:0]const u8 = null, // text for the status bar
     CascadeId:c_int = 0,           // command id of cascading selection
     Selection:c_int = 0,           // most recent selection
     Selections:[MAXSELECTIONS+1]PopDown,
@@ -92,9 +92,9 @@ fn buildMenu(comptime pulldowns:anytype) [MAXPULLDOWNS+1]MENU {
     }**(MAXPULLDOWNS+1);
 
     inline for(pulldowns, 0..) |pulldown, idx| {
-        var title:?[]const u8 = undefined;
+        var title:?[:0]const u8 = undefined;
         var PrepMenu:?*const fn (w: ?*anyopaque, mnu: *MENU) void = undefined;
-        var StatusText:?[]const u8 = undefined;
+        var StatusText:?[:0]const u8 = undefined;
         var CascadeId:c_int = -1;
         title, PrepMenu, StatusText, CascadeId, _ = pulldown;
 
@@ -123,7 +123,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
 
 
     inline for(popdowns, 0..) |popdown, idx| {
-        var SelectTitle: ?[]const u8 = undefined;
+        var SelectTitle: ?[:0]const u8 = undefined;
         var ActionId: c = undefined;
         var Accelerator: c_int = undefined;
         var Attrib:PopDownAttrib = undefined;
