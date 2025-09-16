@@ -1,6 +1,7 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 const Window = @import("Window.zig");
+const c = @import("Commands.zig").Command;
 
 pub const MAXCONTROLS = 30;
 pub const MAXRADIOS = 20;
@@ -20,7 +21,7 @@ pub const CTLWINDOW = struct {
     Class:df.CLASS = 0,           // LISTBOX, BUTTON, etc
     itext:?[:0]u8 = null,         // initialized text
     itext_allocated:bool = false, // itext is allocated in heap (true) or in stack (false)
-    command:c_uint = 0,           // command code
+    command:c = c.ID_NULL,        // command code
     help:?[]const u8 = null,      // help mnemonic
     isetting:df.BOOL = df.OFF,    // initially ON or OFF
     setting:df.BOOL = df.OFF,     // ON or OFF
@@ -41,16 +42,16 @@ pub var FileOpen:DBOX = buildDialog(
     "FileOpen",
     .{"Open File", -1, -1, 19, 57},
     .{
-        .{df.TEXT,     "~Filename:",    3, 1, 1, 9, df.ID_FILENAME,  "ID_FILENAME" },
-        .{df.EDITBOX,  null,           13, 1, 1,40, df.ID_FILENAME,  "ID_FILENAME" },
-        .{df.TEXT,     null        ,    3, 3, 1,50, df.ID_PATH,      "ID_PATH"     },
-        .{df.TEXT,     "~Directories:", 3, 5, 1,12, df.ID_DIRECTORY, "ID_DIRECTORY"},
-        .{df.LISTBOX,  null,            3, 6,10,14, df.ID_DIRECTORY, "ID_DIRECTORY"},
-        .{df.TEXT,     "F~iles:",      19, 5, 1, 6, df.ID_FILES,     "ID_FILES"    },
-        .{df.LISTBOX,  null,           19, 6,10,24, df.ID_FILES,     "ID_FILES"    },
-        .{df.BUTTON,   "   ~OK   ",    46, 7, 1, 8, df.ID_OK,        "ID_OK"       },
-        .{df.BUTTON,   " ~Cancel ",    46,10, 1, 8, df.ID_CANCEL,    "ID_CANCEL"   },
-        .{df.BUTTON,   "  ~Help  ",    46,13, 1, 8, df.ID_HELP,      "ID_HELP"     },
+        .{df.TEXT,     "~Filename:",    3, 1, 1, 9, c.ID_FILENAME,  },
+        .{df.EDITBOX,  null,           13, 1, 1,40, c.ID_FILENAME,  },
+        .{df.TEXT,     null        ,    3, 3, 1,50, c.ID_PATH,      },
+        .{df.TEXT,     "~Directories:", 3, 5, 1,12, c.ID_DIRECTORY, },
+        .{df.LISTBOX,  null,            3, 6,10,14, c.ID_DIRECTORY, },
+        .{df.TEXT,     "F~iles:",      19, 5, 1, 6, c.ID_FILES,     },
+        .{df.LISTBOX,  null,           19, 6,10,24, c.ID_FILES,     },
+        .{df.BUTTON,   "   ~OK   ",    46, 7, 1, 8, c.ID_OK,        },
+        .{df.BUTTON,   " ~Cancel ",    46,10, 1, 8, c.ID_CANCEL,    },
+        .{df.BUTTON,   "  ~Help  ",    46,13, 1, 8, c.ID_HELP,      },
     },
 );
 
@@ -59,16 +60,16 @@ pub var SaveAs:DBOX = buildDialog(
     "SaveAs",
     .{"Save As", -1, -1, 19, 57},
     .{
-        .{df.TEXT,     "~Filename:",    3, 1, 1, 9, df.ID_FILENAME,  "ID_FILENAME" },
-        .{df.EDITBOX,  null,           13, 1, 1,40, df.ID_FILENAME,  "ID_FILENAME" },
-        .{df.TEXT,     null        ,    3, 3, 1,50, df.ID_PATH,      "ID_PATH"     },
-        .{df.TEXT,     "~Directories:", 3, 5, 1,12, df.ID_DIRECTORY, "ID_DIRECTORY"},
-        .{df.LISTBOX,  null,            3, 6,10,14, df.ID_DIRECTORY, "ID_DIRECTORY"},
-        .{df.TEXT,     "F~iles:",      19, 5, 1, 6, df.ID_FILES,     "ID_FILES"    },
-        .{df.LISTBOX,  null,           19, 6,10,24, df.ID_FILES,     "ID_FILES"    },
-        .{df.BUTTON,   "   ~OK   ",    46, 7, 1, 8, df.ID_OK,        "ID_OK"       },
-        .{df.BUTTON,   " ~Cancel ",    46,10, 1, 8, df.ID_CANCEL,    "ID_CANCEL"   },
-        .{df.BUTTON,   "  ~Help  ",    46,13, 1, 8, df.ID_HELP,      "ID_HELP"     },
+        .{df.TEXT,     "~Filename:",    3, 1, 1, 9, c.ID_FILENAME,  },
+        .{df.EDITBOX,  null,           13, 1, 1,40, c.ID_FILENAME,  },
+        .{df.TEXT,     null        ,    3, 3, 1,50, c.ID_PATH,      },
+        .{df.TEXT,     "~Directories:", 3, 5, 1,12, c.ID_DIRECTORY, },
+        .{df.LISTBOX,  null,            3, 6,10,14, c.ID_DIRECTORY, },
+        .{df.TEXT,     "F~iles:",      19, 5, 1, 6, c.ID_FILES,     },
+        .{df.LISTBOX,  null,           19, 6,10,24, c.ID_FILES,     },
+        .{df.BUTTON,   "   ~OK   ",    46, 7, 1, 8, c.ID_OK,        },
+        .{df.BUTTON,   " ~Cancel ",    46,10, 1, 8, c.ID_CANCEL,    },
+        .{df.BUTTON,   "  ~Help  ",    46,13, 1, 8, c.ID_HELP,      },
     },
 );
 
@@ -77,13 +78,13 @@ pub var SearchTextDB:DBOX = buildDialog(
     "SearchTextDB",
     .{"Search Text", -1, -1, 9, 48},
     .{
-        .{df.TEXT,     "~Search for:",             2, 1, 1, 11, df.ID_SEARCHFOR, "ID_SEARCHFOR"},
-        .{df.EDITBOX,  null,                      14, 1, 1, 29, df.ID_SEARCHFOR, "ID_SEARCHFOR"},
-        .{df.TEXT,     "~Match upper/lower case:", 2, 3, 1, 23, df.ID_MATCHCASE, "ID_MATCHCASE"},
-        .{df.CHECKBOX, null,                      26, 3, 1,  3, df.ID_MATCHCASE, "ID_MATCHCASE"},
-        .{df.BUTTON,   "   ~OK   ",                7, 5, 1,  8, df.ID_OK,        "ID_OK"       },
-        .{df.BUTTON,   " ~Cancel ",               19, 5, 1,  8, df.ID_CANCEL,    "ID_CANCEL"   },
-        .{df.BUTTON,   "  ~Help  ",               31, 5, 1,  8, df.ID_HELP,      "ID_HELP"     },
+        .{df.TEXT,     "~Search for:",             2, 1, 1, 11, c.ID_SEARCHFOR, },
+        .{df.EDITBOX,  null,                      14, 1, 1, 29, c.ID_SEARCHFOR, },
+        .{df.TEXT,     "~Match upper/lower case:", 2, 3, 1, 23, c.ID_MATCHCASE, },
+        .{df.CHECKBOX, null,                      26, 3, 1,  3, c.ID_MATCHCASE, },
+        .{df.BUTTON,   "   ~OK   ",                7, 5, 1,  8, c.ID_OK,        },
+        .{df.BUTTON,   " ~Cancel ",               19, 5, 1,  8, c.ID_CANCEL,    },
+        .{df.BUTTON,   "  ~Help  ",               31, 5, 1,  8, c.ID_HELP,      },
     },
 );
 
@@ -92,17 +93,17 @@ pub var ReplaceTextDB:DBOX = buildDialog(
     "ReplaceTextDB",
     .{"Replace Text", -1, -1, 12, 50},
     .{
-        .{df.TEXT,     "~Search for:",              2, 1, 1, 11, df.ID_SEARCHFOR,   "ID_SEARCHFOR"  },
-        .{df.EDITBOX,  null,                       16, 1, 1, 29, df.ID_SEARCHFOR,   "ID_SEARCHFOR"  },
-        .{df.TEXT,     "~Replace for:",             2, 3, 1, 13, df.ID_REPLACEWITH, "ID_REPLACEWITH"},
-        .{df.EDITBOX,  null,                       16, 3, 1, 29, df.ID_REPLACEWITH, "ID_REPLACEWITH"},
-        .{df.TEXT,     "~Match upper/lower case:",  2, 5, 1, 23, df.ID_MATCHCASE,   "ID_MATCHCASE"  },
-        .{df.CHECKBOX, null,                       26, 5, 1,  3, df.ID_MATCHCASE,   "ID_MATCHCASE"  },
-        .{df.TEXT,     "Replace ~Every Match:",     2, 6, 1, 23, df.ID_REPLACEALL,  "ID_REPLACEALL" },
-        .{df.CHECKBOX, null,                       26, 6, 1,  3, df.ID_REPLACEALL,  "ID_REPLACEALL" },
-        .{df.BUTTON,   "   ~OK   ",                 7, 8, 1,  8, df.ID_OK,          "ID_OK"         },
-        .{df.BUTTON,   " ~Cancel ",                20, 8, 1,  8, df.ID_CANCEL,      "ID_CANCEL"     },
-        .{df.BUTTON,   "  ~Help  ",                33, 8, 1,  8, df.ID_HELP,        "ID_HELP"       },
+        .{df.TEXT,     "~Search for:",              2, 1, 1, 11, c.ID_SEARCHFOR,    },
+        .{df.EDITBOX,  null,                       16, 1, 1, 29, c.ID_SEARCHFOR,    },
+        .{df.TEXT,     "~Replace for:",             2, 3, 1, 13, c.ID_REPLACEWITH,  },
+        .{df.EDITBOX,  null,                       16, 3, 1, 29, c.ID_REPLACEWITH,  },
+        .{df.TEXT,     "~Match upper/lower case:",  2, 5, 1, 23, c.ID_MATCHCASE,    },
+        .{df.CHECKBOX, null,                       26, 5, 1,  3, c.ID_MATCHCASE,    },
+        .{df.TEXT,     "Replace ~Every Match:",     2, 6, 1, 23, c.ID_REPLACEALL,   },
+        .{df.CHECKBOX, null,                       26, 6, 1,  3, c.ID_REPLACEALL,   },
+        .{df.BUTTON,   "   ~OK   ",                 7, 8, 1,  8, c.ID_OK,           },
+        .{df.BUTTON,   " ~Cancel ",                20, 8, 1,  8, c.ID_CANCEL,       },
+        .{df.BUTTON,   "  ~Help  ",                33, 8, 1,  8, c.ID_HELP,         },
     },
 );
 
@@ -111,9 +112,9 @@ pub var MsgBox:DBOX = buildDialog(
     "MsgBox",
     .{null, -1, -1, 0, 0},
     .{
-        .{df.TEXT,   null, 1, 1, 0, 0, 0,            null       },
-        .{df.BUTTON, null, 0, 0, 1, 8, df.ID_OK,     "ID_OK"    },
-        .{0,         null, 0, 0, 1, 8, df.ID_CANCEL, "ID_CANCEL"},
+        .{df.TEXT,   null, 1, 1, 0, 0, c.ID_NULL,   },
+        .{df.BUTTON, null, 0, 0, 1, 8, c.ID_OK,     },
+        .{0,         null, 0, 0, 1, 8, c.ID_CANCEL, },
     },
 );
 
@@ -122,10 +123,10 @@ pub var InputBoxDB:DBOX = buildDialog(
     "InputBoxDB",
     .{null, -1, -1, 9, 0},
     .{
-        .{df.TEXT,    null,       1, 1, 1, 0, 0,               null           },
-        .{df.EDITBOX, null,       1, 3, 1, 0, df.ID_INPUTTEXT, "ID_INPUTTEXT" },
-        .{df.BUTTON,  "   ~OK   ",0, 5, 1, 8, df.ID_OK,        "ID_OK"        },
-        .{df.BUTTON,  " ~Cancel ",0, 5, 1, 8, df.ID_CANCEL,    "ID_CANCEL"    },
+        .{df.TEXT,    null,       1, 1, 1, 0, c.ID_NULL,       },
+        .{df.EDITBOX, null,       1, 3, 1, 0, c.ID_INPUTTEXT,  },
+        .{df.BUTTON,  "   ~OK   ",0, 5, 1, 8, c.ID_OK,         },
+        .{df.BUTTON,  " ~Cancel ",0, 5, 1, 8, c.ID_CANCEL,     },
     },
 );
 
@@ -134,9 +135,9 @@ pub var SliderBoxDB:DBOX = buildDialog(
     "SliderBoxDB",
     .{null, -1, -1, 9, 0},
     .{
-        .{df.TEXT,    null,       0, 1, 1, 0, 0,            null        },
-        .{df.TEXT,    null,       0, 3, 1, 0, 0,            null        },
-        .{df.BUTTON,  " Cancel ", 0, 5, 1, 8, df.ID_CANCEL, "ID_CANCEL" },
+        .{df.TEXT,    null,       0, 1, 1, 0, c.ID_NULL,    },
+        .{df.TEXT,    null,       0, 3, 1, 0, c.ID_NULL,    },
+        .{df.BUTTON,  " Cancel ", 0, 5, 1, 8, c.ID_CANCEL,  },
     },
 );
 
@@ -145,25 +146,25 @@ pub var Display:DBOX = buildDialog(
     "Display",
     .{"Display", -1, -1, 19, 35},
     .{
-        .{df.BOX,      "Window",  7, 1, 6,20, 0,            null          },
-        .{df.CHECKBOX, null,      9, 2, 1, 3, df.ID_TITLE,  "ID_TITLE"    },
-        .{df.TEXT,     "~Title", 15, 2, 1, 5, df.ID_TITLE,  "ID_TITLE"    },
-        .{df.CHECKBOX, null,      9, 3, 1, 3, df.ID_BORDER, "ID_BORDER"   },
-        .{df.TEXT,     "~Border",15, 3, 1, 6, df.ID_BORDER, "ID_BORDER"   },
-        .{df.CHECKBOX, null,      9, 4, 1, 3, df.ID_STATUSBAR, "ID_STATUSBAR"   },
-        .{df.TEXT,     "Status bar",15, 4, 1,10, df.ID_STATUSBAR, "ID_STATUSBAR"   },
-        .{df.CHECKBOX, null,       9, 5, 1, 3, df.ID_TEXTURE, "ID_TEXTURE"   },
-        .{df.TEXT,     "Te~xture",15, 5, 1, 7, df.ID_TEXTURE, "ID_TEXTURE"   },
-        .{df.BOX,         "Colors",   7, 8, 5,20, 0,            null          },
-        .{df.RADIOBUTTON, null,       9, 9, 1, 3, df.ID_COLOR, "ID_COLOR"   },
-        .{df.TEXT,        "Co~lor",  13, 9, 1, 5, df.ID_COLOR, "ID_COLOR"   },
-        .{df.RADIOBUTTON, null,       9,10, 1, 3, df.ID_MONO,  "ID_MONO"   },
-        .{df.TEXT ,       "~Mono",   13,10, 1, 4, df.ID_MONO,  "ID_MONO"   },
-        .{df.RADIOBUTTON, null,       9,11, 1, 3, df.ID_REVERSE,  "ID_REVERSE"   },
-        .{df.TEXT,        "~Reverse",13,11, 1, 7, df.ID_REVERSE,  "ID_REVERSE"   },
-        .{df.BUTTON,   "   ~OK   ",   2,15, 1,  8, df.ID_OK,          "ID_OK"         },
-        .{df.BUTTON,   " ~Cancel ",  12,15, 1,  8, df.ID_CANCEL,      "ID_CANCEL"     },
-        .{df.BUTTON,   "  ~Help  ",  22,15, 1,  8, df.ID_HELP,        "ID_HELP"       },
+        .{df.BOX,         "Window",     7, 1, 6,20, c.ID_NULL,     },
+        .{df.CHECKBOX,    null,         9, 2, 1, 3, c.ID_TITLE,    },
+        .{df.TEXT,        "~Title",    15, 2, 1, 5, c.ID_TITLE,    },
+        .{df.CHECKBOX,    null,         9, 3, 1, 3, c.ID_BORDER,   },
+        .{df.TEXT,        "~Border",   15, 3, 1, 6, c.ID_BORDER ,  },
+        .{df.CHECKBOX,    null,         9, 4, 1, 3, c.ID_STATUSBAR,},
+        .{df.TEXT,        "Status bar",15, 4, 1,10, c.ID_STATUSBAR,},
+        .{df.CHECKBOX,    null,         9, 5, 1, 3, c.ID_TEXTURE,  },
+        .{df.TEXT,        "Te~xture",  15, 5, 1, 7, c.ID_TEXTURE,  },
+        .{df.BOX,         "Colors",     7, 8, 5,20, c.ID_NULL,     },
+        .{df.RADIOBUTTON, null,         9, 9, 1, 3, c.ID_COLOR,    },
+        .{df.TEXT,        "Co~lor",    13, 9, 1, 5, c.ID_COLOR,    },
+        .{df.RADIOBUTTON, null,         9,10, 1, 3, c.ID_MONO,     },
+        .{df.TEXT ,       "~Mono",     13,10, 1, 4, c.ID_MONO,     },
+        .{df.RADIOBUTTON, null,         9,11, 1, 3, c.ID_REVERSE,  },
+        .{df.TEXT,        "~Reverse",  13,11, 1, 7, c.ID_REVERSE,  },
+        .{df.BUTTON,   "   ~OK   ",     2,15, 1, 8, c.ID_OK,       },
+        .{df.BUTTON,   " ~Cancel ",    12,15, 1, 8, c.ID_CANCEL,   },
+        .{df.BUTTON,   "  ~Help  ",    22,15, 1, 8, c.ID_HELP,     },
     },
 );
 
@@ -172,10 +173,10 @@ pub var Windows:DBOX = buildDialog(
     "Windows",
     .{"Windows", -1, -1, 19, 24},
     .{
-        .{df.LISTBOX, null,        1, 1,11,20, df.ID_WINDOWLIST, "ID_WINDOWLIST" },
-        .{df.BUTTON,  "   ~OK   ", 2,13, 1, 8, df.ID_OK,         "ID_OK"         },
-        .{df.BUTTON,  " ~Cancel ",12,13, 1, 8, df.ID_CANCEL,     "ID_CANCEL"     },
-        .{df.BUTTON,  "  ~Help  ", 7,15, 1, 8, df.ID_HELP,       "ID_HELP"       },
+        .{df.LISTBOX, null,        1, 1,11,20, c.ID_WINDOWLIST,  },
+        .{df.BUTTON,  "   ~OK   ", 2,13, 1, 8, c.ID_OK,          },
+        .{df.BUTTON,  " ~Cancel ",12,13, 1, 8, c.ID_CANCEL,      },
+        .{df.BUTTON,  "  ~Help  ", 7,15, 1, 8, c.ID_HELP,        },
     },
 );
 
@@ -184,13 +185,13 @@ pub var Log:DBOX = buildDialog(
     "Log",
     .{"D-Flat Message Log", -1, -1,18,41},
     .{
-        .{df.TEXT,    "~Messages",10, 1, 1, 8, df.ID_LOGLIST, "ID_LOGLIST"},
-        .{df.LISTBOX, null,        1, 2,14,26, df.ID_LOGLIST, "ID_LOGLIST"},
-        .{df.TEXT,    "~Logging:",29, 4, 1,10, df.ID_LOGGING, "ID_LOGGING"},
-        .{df.CHECKBOX,null,       31, 5, 1, 3, df.ID_LOGGING, "ID_LOGGING"},
-        .{df.BUTTON,  "   ~OK   ",29, 7, 1, 8, df.ID_OK,      "ID_OK"     },
-        .{df.BUTTON,  " ~Cancel ",29,10, 1, 8, df.ID_CANCEL,  "ID_CANCEL" },
-        .{df.BUTTON,  "  ~Help  ",29,13, 1, 8, df.ID_HELP,    "ID_HELP"   },
+        .{df.TEXT,    "~Messages",10, 1, 1, 8, c.ID_LOGLIST, },
+        .{df.LISTBOX, null,        1, 2,14,26, c.ID_LOGLIST, },
+        .{df.TEXT,    "~Logging:",29, 4, 1,10, c.ID_LOGGING, },
+        .{df.CHECKBOX,null,       31, 5, 1, 3, c.ID_LOGGING, },
+        .{df.BUTTON,  "   ~OK   ",29, 7, 1, 8, c.ID_OK,      },
+        .{df.BUTTON,  " ~Cancel ",29,10, 1, 8, c.ID_CANCEL,  },
+        .{df.BUTTON,  "  ~Help  ",29,13, 1, 8, c.ID_HELP,    },
     },
 );
 
@@ -200,11 +201,11 @@ pub var HelpBox:DBOX = buildDialog(
     "HelpBox",
     .{null, -1, -1,0,45},
     .{
-        .{df.TEXTBOX, null,        1, 1, 0,40, df.ID_HELPTEXT, "ID_HELPTEXT"},
-        .{df.BUTTON,  "  ~Close ", 0, 0, 1, 8, df.ID_CANCEL,   "ID_CANCEL"  },
-        .{df.BUTTON,  "  ~Back  ",10, 0, 1, 8, df.ID_BACK,     "ID_BACK"    },
-        .{df.BUTTON,  "<< ~Prev ",20, 0, 1, 8, df.ID_PREV,     "ID_PREV"    },
-        .{df.BUTTON,  " ~Next >>",30, 0, 1, 8, df.ID_NEXT,     "ID_NEXT"    },
+        .{df.TEXTBOX, null,        1, 1, 0,40, c.ID_HELPTEXT, },
+        .{df.BUTTON,  "  ~Close ", 0, 0, 1, 8, c.ID_CANCEL,   },
+        .{df.BUTTON,  "  ~Back  ",10, 0, 1, 8, c.ID_BACK,     },
+        .{df.BUTTON,  "<< ~Prev ",20, 0, 1, 8, c.ID_PREV,     },
+        .{df.BUTTON,  " ~Next >>",30, 0, 1, 8, c.ID_NEXT,     },
     },
 );
 
@@ -237,24 +238,22 @@ fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
     var result = [_]CTLWINDOW{.{.Class = 0}}**(MAXCONTROLS+1);
     inline for(controls, 0..) |control, idx| {
         var ty: c_int = undefined ;
-        var tx: ?[]const u8 = undefined;
+        var tx: ?[:0]const u8 = undefined;
         var x: c_int = undefined;
         var y: c_int = undefined;
         var h: c_int = undefined;
         var w: c_int = undefined;
-        var c: c_int = undefined;
-        var help: ?[]const u8 = undefined;
-        ty, tx, x, y, h, w, c, help = control;
+        var cc: c = undefined;
+        ty, tx, x, y, h, w, cc = control;
 
-//        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t.ptr) else null;
-        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t[0..t.len:0]) else null;
+        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t) else null;
         result[idx] = .{
             .dwnd = .{.title = null, .x = x, .y = y, .h = h, .w = w},
             .Class = ty,
             .itext = itext,
             .itext_allocated = false, // everything is in stack at this poing.
-            .command = c,
-            .help = help,
+            .command = cc,
+            .help = if (cc == c.ID_NULL) null else @tagName(cc),
             .isetting = if (ty == df.BUTTON) df.ON else df.OFF,
             .setting = df.OFF,
             .win = null,

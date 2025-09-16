@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const c = @import("Commands.zig").Command;
 const lists = @import("Lists.zig");
 const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
@@ -39,23 +40,23 @@ fn CreateWindowMsg(win: *Window) bool {
 
     // INCLUDE_WINDOWOPTIONS
     if (df.cfg.Border > 0) {
-        DialogBox.SetCheckBox(&Dialogs.Display, df.ID_BORDER);
+        DialogBox.SetCheckBox(&Dialogs.Display, c.ID_BORDER);
     }
     if (df.cfg.Title > 0) {
-        DialogBox.SetCheckBox(&Dialogs.Display, df.ID_TITLE);
+        DialogBox.SetCheckBox(&Dialogs.Display, c.ID_TITLE);
     }
     if (df.cfg.StatusBar > 0) {
-        DialogBox.SetCheckBox(&Dialogs.Display, df.ID_STATUSBAR);
+        DialogBox.SetCheckBox(&Dialogs.Display, c.ID_STATUSBAR);
     }
     if (df.cfg.Texture > 0) {
-        DialogBox.SetCheckBox(&Dialogs.Display, df.ID_TEXTURE);
+        DialogBox.SetCheckBox(&Dialogs.Display, c.ID_TEXTURE);
     }
     if (df.cfg.mono == 1) {
-        radio.PushRadioButton(&Dialogs.Display, df.ID_MONO);
+        radio.PushRadioButton(&Dialogs.Display, c.ID_MONO);
     } else if (df.cfg.mono == 2) {
-        radio.PushRadioButton(&Dialogs.Display, df.ID_REVERSE);
+        radio.PushRadioButton(&Dialogs.Display, c.ID_REVERSE);
     } else {
-        radio.PushRadioButton(&Dialogs.Display, df.ID_COLOR);
+        radio.PushRadioButton(&Dialogs.Display, c.ID_COLOR);
     }
     if (df.SCREENHEIGHT != df.cfg.ScreenLines) {
         SetScreenHeight(df.cfg.ScreenLines);
@@ -168,36 +169,37 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
 // -------- COMMAND Message -------
 fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
-    switch (p1) {
-        df.ID_EXIT, df.ID_SYSCLOSE => {
+    const cmd:c = @enumFromInt(p1);
+    switch (cmd) {
+        .ID_EXIT, .ID_SYSCLOSE => {
             q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
         },
-        df.ID_HELP => {
+        .ID_HELP => {
             _ = helpbox.DisplayHelp(win, std.mem.span(df.DFlatApplication));
         },
-        df.ID_HELPHELP => {
+        .ID_HELPHELP => {
             const help = "HelpHelp";
             _ = helpbox.DisplayHelp(win, help);
         },
-        df.ID_EXTHELP => {
+        .ID_EXTHELP => {
             const help = "ExtHelp";
             _ = helpbox.DisplayHelp(win, help);
         },
-        df.ID_KEYSHELP => {
+        .ID_KEYSHELP => {
             const help = "KeysHelp";
             _ = helpbox.DisplayHelp(win, help);
         },
-        df.ID_HELPINDEX => {
+        .ID_HELPINDEX => {
             const help = "HelpIndex";
             _ = helpbox.DisplayHelp(win, help);
         },
-        df.ID_LOG => {
+        .ID_LOG => {
             log.MessageLog(win);
         },
-        df.ID_DOS => {
+        .ID_DOS => {
             ShellDOS(win);
         },
-        df.ID_DISPLAY => {
+        .ID_DISPLAY => {
             if (DialogBox.create(win, &Dialogs.Display, df.TRUE, null)) {
                 if ((Window.inFocus == win.MenuBar) or (Window.inFocus == win.StatusBar)) {
                     oldFocus = ApplicationWindow.?.win;
@@ -221,23 +223,23 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 }
             }
         },
-        df.ID_WINDOW => {
+        .ID_WINDOW => {
             ChooseWindow(win, popdown.CurrentMenuSelection-2);
         },
-        df.ID_CLOSEALL => {
+        .ID_CLOSEALL => {
             CloseAll(win, false);
         },
-        df.ID_MOREWINDOWS => {
+        .ID_MOREWINDOWS => {
             MoreWindows(win);
         },
-        df.ID_SAVEOPTIONS => {
+        .ID_SAVEOPTIONS => {
             df.SaveConfig();
         },
-        df.ID_SYSRESTORE,
-        df.ID_SYSMINIMIZE,
-        df.ID_SYSMAXIMIZE,
-        df.ID_SYSMOVE,
-        df.ID_SYSSIZE => {
+        .ID_SYSRESTORE,
+        .ID_SYSMINIMIZE,
+        .ID_SYSMAXIMIZE,
+        .ID_SYSMOVE,
+        .ID_SYSSIZE => {
             _ = root.zBaseWndProc(df.APPLICATION, win, df.COMMAND, p1, p2);
         },
         else => {
@@ -437,7 +439,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.INITIATE_DIALOG => {
-            if (DialogBox.ControlWindow(&Dialogs.Windows,df.ID_WINDOWLIST)) |cwin| {
+            if (DialogBox.ControlWindow(&Dialogs.Windows,c.ID_WINDOWLIST)) |cwin| {
                 var sel:c_int = 0;
                 if (ApplicationWindow) |awin| {
                     var win1 = awin.firstWindow();
@@ -469,11 +471,12 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
             }
         },
         df.COMMAND => {
-            switch (p1) {
-                df.ID_OK => {
+            const cmd:c = @enumFromInt(p1);
+            switch (cmd) {
+                c.ID_OK => {
                     if (p2 == 0) {
                         const val:c_int = -1;
-                        const control = DialogBox.ControlWindow(&Dialogs.Windows, df.ID_WINDOWLIST);
+                        const control = DialogBox.ControlWindow(&Dialogs.Windows, c.ID_WINDOWLIST);
                         if (control) |cwin| {
                             _ = cwin.sendMessage(df.LB_CURRENTSELECTION, 
                                                 @intCast(@intFromPtr(&val)), 0);
@@ -482,9 +485,9 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
 
                     }
                 },
-                df.ID_WINDOWLIST => {
+                c.ID_WINDOWLIST => {
                     if (p2 == df.LB_CHOOSE)
-                        _ = win.sendMessage(df.COMMAND, df.ID_OK, 0);
+                        _ = win.sendCommandMessage(df.COMMAND, c.ID_OK, 0);
                 },
                 else => {
                 }
@@ -542,9 +545,9 @@ fn DoWindowColors(win:*Window) void {
 
 // ----- set up colors for the application window ------
 fn SelectColors(win: *Window) void {
-    if (radio.RadioButtonSetting(&Dialogs.Display, df.ID_MONO)) {
+    if (radio.RadioButtonSetting(&Dialogs.Display, c.ID_MONO)) {
         df.cfg.mono = 1;   // mono
-    } else if (radio.RadioButtonSetting(&Dialogs.Display, df.ID_REVERSE)) {
+    } else if (radio.RadioButtonSetting(&Dialogs.Display, c.ID_REVERSE)) {
         df.cfg.mono = 2;   // mono reverse
     } else {
         df.cfg.mono = 0;   // color
@@ -603,12 +606,12 @@ fn SetScreenHeight(height: c_int) void {
 
 // ----- select the screen texture -----
 fn SelectTexture() void {
-    df.cfg.Texture = checkbox.CheckBoxSetting(&Dialogs.Display, df.ID_TEXTURE);
+    df.cfg.Texture = if (checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_TEXTURE)) df.TRUE else df.FALSE;
 }
 
 // -- select whether the application screen has a border --
 fn SelectBorder(win: *Window) void {
-    df.cfg.Border = checkbox.CheckBoxSetting(&Dialogs.Display, df.ID_BORDER);
+    df.cfg.Border = if (checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_BORDER)) df.TRUE else df.FALSE;
     if (df.cfg.Border > 0) {
         win.AddAttribute(df.HASBORDER);
     } else {
@@ -618,7 +621,7 @@ fn SelectBorder(win: *Window) void {
 
 // select whether the application screen has a status bar
 fn SelectStatusBar(win: *Window) void {
-    df.cfg.StatusBar = checkbox.CheckBoxSetting(&Dialogs.Display, df.ID_STATUSBAR);
+    df.cfg.StatusBar = if (checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_STATUSBAR)) df.TRUE else df.FALSE;
     if (df.cfg.StatusBar > 0) {
         win.AddAttribute(df.HASSTATUSBAR);
     } else {
@@ -628,7 +631,7 @@ fn SelectStatusBar(win: *Window) void {
 
 // select whether the application screen has a title bar
 fn SelectTitle(win: *Window) void {
-    df.cfg.Title = checkbox.CheckBoxSetting(&Dialogs.Display, df.ID_TITLE);
+    df.cfg.Title = if (checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_TITLE)) df.TRUE else df.FALSE;
     if (df.cfg.Title > 0) {
         win.AddAttribute(df.HASTITLEBAR);
     } else {

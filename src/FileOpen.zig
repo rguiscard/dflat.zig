@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const c = @import("Commands.zig").Command;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
@@ -75,7 +76,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             var db:*Dialogs.DBOX = undefined;
             if (wnd.*.extension) |extension| {
                 db = @ptrCast(@alignCast(extension));
-                if (DialogBox.ControlWindow(db, df.ID_FILENAME)) |cwin| {
+                if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
                     _ = cwin.sendMessage(df.SETTEXTLENGTH, 64, 0);
                 }
             }
@@ -85,13 +86,13 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             InitDlgBox(win);
         },
         df.COMMAND => {
-            const cmd:isize = @intCast(p1);
+            const cmd:c = @enumFromInt(p1);
             const subcmd:isize = @intCast(p2);
             switch(cmd) {
-                df.ID_OK => {
+                c.ID_OK => {
                     if (subcmd == 0) {
                         var fName = std.mem.zeroes([df.MAXPATH]u8);
-                        df.GetItemText(wnd, df.ID_FILENAME, &fName, df.MAXPATH);
+                        DialogBox.GetItemText(wnd, c.ID_FILENAME, &fName, df.MAXPATH);
                         set_fileName(&fName);
                         if (df.CheckAndChangeDir(&fName) > 0) {
                             std.mem.copyForwards(u8, &fName, "*");
@@ -106,27 +107,27 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                             set_fileSpec(&fName);
                             set_srchSpec(&fName);
                             InitDlgBox(win);
-                            if (DialogBox.ControlWindow(db, df.ID_FILENAME)) |cwin| {
+                            if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
                                 _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
                             }
                             return true;
                         }
                     }
                 },
-                df.ID_FILES => {
+                c.ID_FILES => {
                     switch (subcmd) {
                         df.ENTERFOCUS, df.LB_SELECTION => {
                             // selected a different filename
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(wnd, &fName, df.ID_FILES);
-                            DialogBox.PutItemText(wnd, df.ID_FILENAME, &fName);
+                            DialogBox.GetDlgListText(wnd, &fName, c.ID_FILES);
+                            DialogBox.PutItemText(wnd, c.ID_FILENAME, &fName);
                             set_fileName(&fName);
                         },
                         df.LB_CHOOSE => {
                             // chose a file name
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(wnd, &fName, df.ID_FILES);
-                            _ = df.SendMessage(wnd, df.COMMAND, df.ID_OK, 0);
+                            DialogBox.GetDlgListText(wnd, &fName, c.ID_FILES);
+                            _ = win.sendCommandMessage(df.COMMAND, c.ID_OK, 0);
                             set_fileName(&fName);
                         },
                         else => {
@@ -134,19 +135,19 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                     }
                     return true;
                 },
-                df.ID_DIRECTORY => {
+                c.ID_DIRECTORY => {
                     switch (subcmd) {
                         df.ENTERFOCUS => {
                             if (_fileSpec) |f| {
-                                DialogBox.PutItemText(wnd, df.ID_FILENAME, @constCast(f.ptr));
+                                DialogBox.PutItemText(wnd, c.ID_FILENAME, @constCast(f.ptr));
                             }
                         },
                         df.LB_CHOOSE => {
                             var dd = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(wnd, &dd, df.ID_DIRECTORY);
+                            DialogBox.GetDlgListText(wnd, &dd, c.ID_DIRECTORY);
                             _ = df.chdir(&dd);
                             InitDlgBox(win);
-                            _ = df.SendMessage(wnd, df.COMMAND, df.ID_OK, 0);
+                            _ = win.sendCommandMessage(df.COMMAND, c.ID_OK, 0);
                         },
                         else => {
                         }
@@ -170,7 +171,7 @@ fn InitDlgBox(win:*Window) void {
     var sspec:[*c]u8 = null;
     var rtn = df.FALSE;
     if (_fileSpec) |f| {
-        df.PutItemText(wnd, df.ID_FILENAME, @constCast(f.ptr));
+        DialogBox.PutItemText(wnd, c.ID_FILENAME, @constCast(f.ptr));
     }
     if (_srchSpec) |s| {
         sspec = @constCast(s.ptr);

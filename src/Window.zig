@@ -5,6 +5,7 @@ const Klass = @import("Classes.zig");
 const WndProc = @import("WndProc.zig");
 const normal = @import("Normal.zig");
 const q = @import("Message.zig");
+const c = @import("Commands.zig").Command;
 const Dialogs = @import("Dialogs.zig");
 const app = @import("Application.zig");
 const menus = @import("Menus.zig");
@@ -217,6 +218,11 @@ pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.P
         // error
     }
     return false;
+}
+
+pub fn sendCommandMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: c, p2: df.PARAM) bool {
+    // default to .COMMAND msg ?
+    return self.sendMessage(msg, @intFromEnum(p1), p2);
 }
 
 // --------- send a message to a window -----------

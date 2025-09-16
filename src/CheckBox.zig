@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const c = @import("Commands.zig").Command;
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
@@ -53,15 +54,15 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
 }
 
 
-pub fn CheckBoxSetting(db:*Dialogs.DBOX, cmd:c_uint) c_uint {
-    const ct:?*Dialogs.CTLWINDOW = DialogBox.FindCommand(db, @intCast(cmd), df.CHECKBOX);
+pub fn CheckBoxSetting(db:*Dialogs.DBOX, cmd:c) bool {
+    const ct:?*Dialogs.CTLWINDOW = DialogBox.FindCommand(db, cmd, df.CHECKBOX);
     if (ct) |ctl| {
         if (ctl.win) |_| {
-            return if (ctl.*.setting == df.ON) df.TRUE else df.FALSE;
+            return (ctl.*.setting == df.ON);
         } else {
-            return if (ctl.*.isetting == df.ON) df.TRUE else df.FALSE;
+            return (ctl.*.isetting == df.ON);
         }
     }
-    return df.FALSE;
+    return false;
 //    return ct ? (ct->wnd ? (ct->setting==ON) : (ct->isetting==ON)) : FALSE;
 }

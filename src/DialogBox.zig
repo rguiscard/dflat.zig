@@ -4,11 +4,12 @@ const df = @import("ImportC.zig").df;
 const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
 const WndProc = @import("WndProc.zig");
-const q = @import("Message.zig");
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
 const normal = @import("Normal.zig");
 const radio = @import("RadioButton.zig");
+const q = @import("Message.zig");
+const c = @import("Commands.zig").Command;
 
 var SysMenuOpen = false;
 var dialogboxes:?std.ArrayList(*Dialogs.DBOX) = null;
@@ -158,7 +159,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 if (win.GetControl()) |ct| {
                     if (ct.*.help) |help| {
                         if (helpbox.DisplayHelp(win, help) == false) {
-                            _ = win.getParent().sendMessage(df.COMMAND,df.ID_HELP,0);
+                            _ = win.getParent().sendCommandMessage(df.COMMAND,c.ID_HELP,0);
                         }
                     }
                 }
@@ -205,7 +206,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             if (((normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) and
                 (normal.isDerivedFrom(win, df.BUTTON) == false) and
                 (normal.isDerivedFrom(win, df.LISTBOX) == false)) {
-                _ = win.getParent().sendMessage(df.COMMAND, df.ID_OK, 0);
+                _ = win.getParent().sendCommandMessage(df.COMMAND, c.ID_OK, 0);
                 return true;
             }
         },
@@ -342,13 +343,12 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     oldWin.SetVisible();
                     if (pwin) |pw| {
                         pw.dfocus = win;
-                        _ = pw.sendMessage(df.COMMAND, inFocusCommand(db), df.ENTERFOCUS);
+                        _ = pw.sendCommandMessage(df.COMMAND, inFocusCommand(db), df.ENTERFOCUS);
                     }
                     return true;
                 }
             } else {
-                _ = q.SendMessage(pwnd, df.COMMAND,
-                            inFocusCommand(db), df.LEAVEFOCUS);
+                _ = q.SendMessage(pwnd, df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
             }
         },
         df.CLOSE_WINDOW => {
@@ -489,7 +489,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.CTRL_F4,
         df.ESC => {
-            _ = win.sendMessage(df.COMMAND, df.ID_CANCEL, 0);
+            _ = win.sendCommandMessage(df.COMMAND, c.ID_CANCEL, 0);
         },
         df.F1 => {
             if (Window.inFocus) |focus| {
@@ -514,8 +514,9 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 // -------- COMMAND Message ---------
 fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.*.win;
-    switch (p1) {
-        df.ID_OK, df.ID_CANCEL => {
+    const cmd:c = @enumFromInt(p1);
+    switch (cmd) {
+        .ID_OK, .ID_CANCEL => {
             if (p2 != 0)
                 return true;
             win.ReturnCode = @intCast(p1);
@@ -526,7 +527,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
             }
             return true;
         },
-        df.ID_HELP => {
+        .ID_HELP => {
             if (p2 != 0)
                 return true;
 
@@ -568,7 +569,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                 return true;
             if (wnd.*.extension) |extension| {
                 const db:*Dialogs.DBOX = @alignCast(@ptrCast(extension));
-                _ = win.sendMessage(df.COMMAND, inFocusCommand(db), msg);
+                _ = win.sendCommandMessage(df.COMMAND, inFocusCommand(db), msg);
             }
         },
         df.SETFOCUS => {
@@ -596,7 +597,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         },
         df.CLOSE_WINDOW => {
             if (p1 == 0) {
-                _ = win.sendMessage(df.COMMAND, df.ID_CANCEL, 0);
+                _ = win.sendCommandMessage(df.COMMAND, c.ID_CANCEL, 0);
                 return true;
             }
         },
@@ -608,10 +609,10 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
 }
 
 // ---- return pointer to the text of a control window ----
-pub fn GetDlgTextString(db:*Dialogs.DBOX, cmd:c_uint, Class:df.CLASS) [*c]u8 {
+pub fn GetDlgTextString(db:*Dialogs.DBOX, cmd:c, Class:df.CLASS) [*c]u8 {
     const ct = FindCommand(db, cmd, Class);
-    if (ct) |c| {
-        if (c.*.itext) |itext| {
+    if (ct) |ctl| {
+        if (ctl.*.itext) |itext| {
             return itext.ptr;
         }
     }
@@ -619,7 +620,7 @@ pub fn GetDlgTextString(db:*Dialogs.DBOX, cmd:c_uint, Class:df.CLASS) [*c]u8 {
 }
 
 // ------- set the text of a control specification ------
-pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLASS) void {
+pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: [*c]u8, Class:df.CLASS) void {
     const control = FindCommand(db, cmd, Class);
     if (control) |ct| {
         if (text != null) {
@@ -661,7 +662,7 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c_uint, text: [*c]u8, Class:df.CLA
 }
 
 // ------- set the text of a control window ------
-pub export fn PutItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8) callconv(.c) void {
+pub export fn PutItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8) callconv(.c) void {
     const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
     var control = FindCommand(db, cmd, df.EDITBOX);
 
@@ -677,7 +678,6 @@ pub export fn PutItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8) callconv(.c) v
         control = FindCommand(db, cmd, df.TEXT);
     if (control) |ct| {
         // assume cwnd cannot be null ?
-//        const cwnd:df.WINDOW = @ptrCast(@alignCast(ct.*.wnd));
         if (ct.win) |cwin| {
             const cwnd = cwin.win;
             switch (ct.*.Class) {
@@ -707,7 +707,7 @@ pub export fn PutItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8) callconv(.c) v
 }
 
 // ------- get the text of a control window ------
-pub export fn GetItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8, len:c_int) callconv(.c) void {
+pub fn GetItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8, len:c_int) void {
     const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
     var control = FindCommand(db, cmd, df.EDITBOX);
 
@@ -761,7 +761,7 @@ pub export fn GetItemText(wnd:df.WINDOW, cmd:c_uint, text:[*c]u8, len:c_int) cal
 }
 
 // ------- set the text of a listbox control window ------
-pub export fn GetDlgListText(wnd:df.WINDOW, text:[*c]u8, cmd:c_uint) callconv(.c) void {
+pub fn GetDlgListText(wnd:df.WINDOW, text:[*c]u8, cmd:c) void {
     const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
     const control = FindCommand(db, cmd, df.LISTBOX);
     if (control) |ct| {
@@ -774,23 +774,22 @@ pub export fn GetDlgListText(wnd:df.WINDOW, text:[*c]u8, cmd:c_uint) callconv(.c
 }
 
 // ----- return command code of in-focus control window ----
-fn inFocusCommand(db:?*Dialogs.DBOX) c_int {
+fn inFocusCommand(db:?*Dialogs.DBOX) c {
     if (db) |box| {
         for(&box.*.ctl) |*ctl| {
             if (ctl.*.Class == 0)
                 break;
-//            const w:df.WINDOW = @alignCast(@ptrCast(ctl.*.wnd));
             const w = ctl.win;
             if (w == Window.inFocus) {
-                return @intCast(ctl.*.command);
+                return ctl.*.command;
             }
         }
     }
-    return -1;
+    return c.ID_NULL;
 }
 
 // -------- find a specified control structure -------
-pub fn FindCommand(db:*Dialogs.DBOX, cmd:c_uint, Class:df.CLASS) ?*Dialogs.CTLWINDOW {
+pub fn FindCommand(db:*Dialogs.DBOX, cmd:c, Class:df.CLASS) ?*Dialogs.CTLWINDOW {
     for(&db.*.ctl) |*ct| {
         if (ct.*.Class == 0)
             break;
@@ -804,7 +803,7 @@ pub fn FindCommand(db:*Dialogs.DBOX, cmd:c_uint, Class:df.CLASS) ?*Dialogs.CTLWI
 }
 
 // ---- return the window handle of a specified command ----
-pub fn ControlWindow(db:*Dialogs.DBOX, cmd:c_uint) ?*Window {
+pub fn ControlWindow(db:*Dialogs.DBOX, cmd:c) ?*Window {
     for(&db.*.ctl) |*ct| {
         if (ct.*.Class == 0)
             break;
@@ -833,7 +832,7 @@ pub export fn WindowControl(db:*Dialogs.DBOX, wnd:df.WINDOW) ?*Dialogs.CTLWINDOW
 }
 
 // ---- set a control ON or OFF -----
-pub export fn ControlSetting(db:*Dialogs.DBOX, cmd: c_uint, Class: c_int, setting: c_int) void {
+pub export fn ControlSetting(db:*Dialogs.DBOX, cmd: c, Class: c_int, setting: c_int) void {
     const control = FindCommand(db, cmd, Class);
     if (control) |ct| {
         ct.*.isetting = @intCast(setting);
@@ -845,13 +844,14 @@ pub export fn ControlSetting(db:*Dialogs.DBOX, cmd: c_uint, Class: c_int, settin
 }
 
 // ----- test if a control is on or off -----
-pub export fn isControlOn(db:*Dialogs.DBOX, cmd: c_uint, Class: c_int) df.BOOL {
+pub fn isControlOn(db:*Dialogs.DBOX, cmd: c, Class: c_int) bool {
     const control = FindCommand(db, cmd, Class);
-    return if (control) |ct| (if (ct.win) |_| ct.*.setting else ct.*.isetting) else df.FALSE;
+    const rtn = if (control) |ct| (if (ct.win) |_| ct.*.setting else ct.*.isetting) else df.FALSE;
+    return (rtn == df.TRUE);
 }
 
 // -- find control structure associated with text control --
-fn AssociatedControl(db:*Dialogs.DBOX, Tcmd: c_uint) *Dialogs.CTLWINDOW {
+fn AssociatedControl(db:*Dialogs.DBOX, Tcmd: c) *Dialogs.CTLWINDOW {
     for(&db.*.ctl) |*ct| {
         if (ct.*.Class == 0)
             break;
@@ -879,7 +879,7 @@ pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: c_int) bool {
                     if ((pos < text.len-1) and (std.ascii.toLower(text[pos+1]) == ch)) {
                         if (ct.win) |cwin| {
                             if (ct.*.Class == df.TEXT) {
-                                ct = AssociatedControl(db, @intCast(ct.*.command));
+                                ct = AssociatedControl(db, ct.*.command);
                             }
                             if (ct.*.Class == df.RADIOBUTTON) {
                                 radio.SetRadioButton(db, ct);
@@ -1016,35 +1016,35 @@ pub fn GetControl(win:*Window) ?*Dialogs.CTLWINDOW {
     return win.ct;
 }
 
-pub fn GetDlgText(db:*Dialogs.DBOX, cmd: c_uint) [*c]u8 {
+pub fn GetDlgText(db:*Dialogs.DBOX, cmd: c) [*c]u8 {
     return GetDlgTextString(db, cmd, df.TEXT);
 }
 
-pub fn GetDlgTextBox(db:*Dialogs.DBOX, cmd: c_uint) [*c]u8 {
+pub fn GetDlgTextBox(db:*Dialogs.DBOX, cmd: c) [*c]u8 {
     return GetDlgTextString(db, cmd, df.TEXTBOX);
 }
 
-pub fn GetEditBoxText(db:*Dialogs.DBOX, cmd: c_uint) [*c]u8 {
+pub fn GetEditBoxText(db:*Dialogs.DBOX, cmd: c) [*c]u8 {
     return GetDlgTextString(db, cmd, df.EDITBOX);
 }
 
-pub fn GetComboBoxText(db:*Dialogs.DBOX, cmd: c_uint) [*c]u8 {
+pub fn GetComboBoxText(db:*Dialogs.DBOX, cmd: c) [*c]u8 {
     return GetDlgTextString(db, cmd, df.COMBOBOX);
 }
 
-pub fn SetDlgText(db:*Dialogs.DBOX, cmd: c_uint, s:[*c]u8) void {
+pub fn SetDlgText(db:*Dialogs.DBOX, cmd: c, s:[*c]u8) void {
     SetDlgTextString(db, cmd, s, df.TEXT);
 }
 
-pub fn SetDlgTextBox(db:*Dialogs.DBOX, cmd: c_uint, s:[*c]u8) void {
+pub fn SetDlgTextBox(db:*Dialogs.DBOX, cmd: c, s:[*c]u8) void {
     SetDlgTextString(db, cmd, s, df.TEXTBOX);
 }
 
-pub fn SetEditBoxText(db:*Dialogs.DBOX, cmd: c_uint, s:[*c]u8) void {
+pub fn SetEditBoxText(db:*Dialogs.DBOX, cmd: c, s:[*c]u8) void {
     SetDlgTextString(db, cmd, s, df.EDITBOX);
 }
 
-pub fn SetComboBoxText(db:*Dialogs.DBOX, cmd: c_uint, s:[*c]u8) void {
+pub fn SetComboBoxText(db:*Dialogs.DBOX, cmd: c, s:[*c]u8) void {
     SetDlgTextString(db, cmd, s, df.COMBOBOX);
 }
 
@@ -1055,26 +1055,26 @@ pub fn SetDlgTitle(db:*Dialogs.DBOX, ttl:[*c]u8) void {
     }
 }
 
-pub fn SetCheckBox(db:*Dialogs.DBOX, cmd: c_uint) void {
+pub fn SetCheckBox(db:*Dialogs.DBOX, cmd: c) void {
     ControlSetting(db, cmd, df.CHECKBOX, df.ON);
 }
 
-pub fn ClearCheckBox(db:*Dialogs.DBOX, cmd: c_uint) void {
+pub fn ClearCheckBox(db:*Dialogs.DBOX, cmd: c) void {
     ControlSetting(db, cmd, df.CHECKBOX, df.OFF);
 }
 
-pub fn EnableButton(db:*Dialogs.DBOX, cmd: c_uint) void {
+pub fn EnableButton(db:*Dialogs.DBOX, cmd: c) void {
     ControlSetting(db, cmd, df.BUTTON, df.ON);
 }
 
-pub fn DisableButton(db:*Dialogs.DBOX, cmd: c_uint) void {
+pub fn DisableButton(db:*Dialogs.DBOX, cmd: c) void {
     ControlSetting(db, cmd, df.BUTTON, df.OFF);
 }
 
-pub fn ButtonEnabled(db:*Dialogs.DBOX, cmd: c_uint) df.BOOL {
+pub fn ButtonEnabled(db:*Dialogs.DBOX, cmd: c) bool {
     return isControlOn(db, cmd, df.BUTTON);
 }
 
-pub fn CheckBoxEnabled(db:*Dialogs.DBOX, cmd: c_uint) df.BOOL {
+pub fn CheckBoxEnabled(db:*Dialogs.DBOX, cmd: c) bool {
     return isControlOn(db, cmd, df.CHECKBOX);
 }

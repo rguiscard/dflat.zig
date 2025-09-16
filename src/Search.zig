@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const c = @import("Commands.zig").Command;
 const root = @import("root.zig");
 const MessageBox = @import("MessageBox.zig");
 const Window = @import("Window.zig");
@@ -73,12 +74,12 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 //    char *s1 = NULL, *s2, *cp1;
     var cp1:[*c]u8 = null;
     const dbox = if (Replacing) &Dialogs.ReplaceTextDB else  &Dialogs.SearchTextDB;
-    const cp = DialogBox.GetEditBoxText(dbox, df.ID_SEARCHFOR);
+    const cp = DialogBox.GetEditBoxText(dbox, c.ID_SEARCHFOR);
     var FoundOne = false;
     var rpl = true;
     while ((rpl == true) and (cp != null) and (df.strlen(cp) > 0)) {
         if (Replacing) {
-            rpl = if (checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, df.ID_REPLACEALL)>0) true else false;
+            rpl = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, c.ID_REPLACEALL);
         }
 
         if (df.TextBlockMarked(wnd)) {
@@ -165,10 +166,10 @@ pub fn ReplaceText(win:*Window) void {
     Replacing = true;
     lastsize = 0;
     if (CheckCase) {
-        DialogBox.SetCheckBox(&Dialogs.ReplaceTextDB, df.ID_MATCHCASE);
+        DialogBox.SetCheckBox(&Dialogs.ReplaceTextDB, c.ID_MATCHCASE);
     }
     if (DialogBox.create(null, &Dialogs.ReplaceTextDB, df.TRUE, null)) {
-        CheckCase = if (checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, df.ID_MATCHCASE) == df.TRUE) true else false;
+        CheckCase = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, c.ID_MATCHCASE);
         SearchTextBox(win, false);
     }
 }
@@ -178,10 +179,10 @@ pub fn SearchText(win:*Window) void {
     Replacing = false;
     lastsize = 0;
     if (CheckCase) {
-        DialogBox.SetCheckBox(&Dialogs.SearchTextDB, df.ID_MATCHCASE);
+        DialogBox.SetCheckBox(&Dialogs.SearchTextDB, c.ID_MATCHCASE);
     }
     if (DialogBox.create(null, &Dialogs.SearchTextDB, df.TRUE, null)) {
-        CheckCase = if (checkbox.CheckBoxSetting(&Dialogs.SearchTextDB, df.ID_MATCHCASE) == df.TRUE) true else false;
+        CheckCase = checkbox.CheckBoxSetting(&Dialogs.SearchTextDB, c.ID_MATCHCASE);
         SearchTextBox(win, false);
     }
 }

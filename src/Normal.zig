@@ -6,6 +6,7 @@ const lists = @import("Lists.zig");
 const rect = @import("Rect.zig");
 const Klass = @import("Classes.zig");
 const q = @import("Message.zig");
+const c = @import("Commands.zig").Command;
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
 const Classes = @import("Classes.zig");
@@ -174,35 +175,36 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
     const wnd = win.win;
     const dwnd = getDummy();
     const dwnd_p2:df.PARAM = @intCast(@intFromPtr(dwnd));
-    switch (p1) {
-        df.ID_SYSMOVE => {
+    const cmd:c = @enumFromInt(p1);
+    switch (cmd) {
+        .ID_SYSMOVE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.MOUSE_CURSOR, df.GetLeft(wnd), df.GetTop(wnd));
             WindowMoving = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
-        df.ID_SYSSIZE => {
+        .ID_SYSSIZE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.MOUSE_CURSOR, df.GetRight(wnd), df.GetBottom(wnd));
             WindowSizing = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
-        df.ID_SYSCLOSE => {
+        .ID_SYSCLOSE => {
             _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
             lists.SkipApplicationControls();
         },
-        df.ID_SYSRESTORE => {
+        .ID_SYSRESTORE => {
             _ = win.sendMessage(df.RESTORE, 0, 0);
         },
-        df.ID_SYSMINIMIZE => {
+        .ID_SYSMINIMIZE => {
             _ = win.sendMessage(df.MINIMIZE, 0, 0);
         },
-        df.ID_SYSMAXIMIZE => {
+        .ID_SYSMAXIMIZE => {
             _ = win.sendMessage(df.MAXIMIZE, 0, 0);
         },
-        df.ID_HELP => {
+        .ID_HELP => {
             const name = Klass.defs[@intCast(win.getClass())][0];
             _ = helpbox.DisplayHelp(win, name);
         },

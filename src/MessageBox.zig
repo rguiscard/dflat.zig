@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const c = @import("Commands.zig").Command;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
@@ -15,24 +16,24 @@ const sCONFIRM = "Confirm";
 const sWait = "Wait...";
 
 pub fn ErrorMessage(msg: [:0]const u8) bool {
-    return GenericMessage(null, sERROR, msg, 1, ErrorBoxProc, sOK, null, df.ID_OK, 0, true);
+    return GenericMessage(null, sERROR, msg, 1, ErrorBoxProc, sOK, null, c.ID_OK, c.ID_NULL, true);
 }
 
 pub fn MessageBox(title: [:0]const u8, msg: [:0]const u8) bool {
-    return GenericMessage(null, title, msg, 1, MessageBoxProc, sOK, null, df.ID_OK, 0, true);
+    return GenericMessage(null, title, msg, 1, MessageBoxProc, sOK, null, c.ID_OK, c.ID_NULL, true);
 }
 
 pub fn YesNoBox(msg: [:0]const u8) bool {
-    return GenericMessage(null, sCONFIRM, msg, 2, YesNoBoxProc, sYES, sNO, df.ID_OK, df.ID_CANCEL, true);
+    return GenericMessage(null, sCONFIRM, msg, 2, YesNoBoxProc, sYES, sNO, c.ID_OK, c.ID_CANCEL, true);
 }
 
 pub fn CancelBox(win:?*Window, msg: [:0]const u8) bool {
-    return GenericMessage(win, sWait, msg, 1, CancelProc, sCancel, null, df.ID_CANCEL, 0, false);
+    return GenericMessage(win, sWait, msg, 1, CancelProc, sCancel, null, c.ID_CANCEL, c.ID_NULL, false);
 }
 
 fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct: c_int,
                   wndproc: *const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
-                  button1: ?[:0]const u8, button2: ?[:0]const u8, c1: c_int, c2: c_int, isModal: bool) bool {
+                  button1: ?[:0]const u8, button2: ?[:0]const u8, c1: c, c2: c, isModal: bool) bool {
     var mBox = Dialogs.MsgBox;
 
 //    const ptr:[*c]u8 = @constCast(msg.ptr);
@@ -65,8 +66,8 @@ fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct
     mBox.ctl[0].itext = @constCast(m);
     mBox.ctl[1].itext = if (button1) |b| @constCast(b) else null;
     mBox.ctl[2].itext = if (button2) |b| @constCast(b) else null;
-    mBox.ctl[1].command = @intCast(c1);
-    mBox.ctl[2].command = @intCast(c2);
+    mBox.ctl[1].command = c1;
+    mBox.ctl[2].command = c2;
     mBox.ctl[1].isetting = df.ON;
     mBox.ctl[2].isetting = df.ON;
 
@@ -127,11 +128,11 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.KEYBOARD => {
             if (p1 < 128) {
-                const c = std.ascii.toLower(@intCast(p1));
-                if (c == 'y') {
-                    _ = win.sendMessage(df.COMMAND, df.ID_OK, 0);
-                } else if (c == 'n') {
-                    _ = win.sendMessage(df.COMMAND, df.ID_CANCEL, 0);
+                const cc = std.ascii.toLower(@intCast(p1));
+                if (cc == 'y') {
+                    _ = win.sendCommandMessage(df.COMMAND, c.ID_OK, 0);
+                } else if (cc == 'n') {
+                    _ = win.sendCommandMessage(df.COMMAND, c.ID_CANCEL, 0);
                 }
             }
         },

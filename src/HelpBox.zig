@@ -6,6 +6,7 @@ const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
+const c = @import("Commands.zig").Command;
 const lists = @import("Lists.zig");
 const normal = @import("Normal.zig");
 
@@ -26,7 +27,7 @@ fn CreateWindowMsg(win:*Window) void {
 // -------- read the help text into the editbox -------
 pub export fn ReadHelp(wnd:df.WINDOW) callconv(.c) void {
     const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(wnd.*.extension));
-    if (DialogBox.ControlWindow(dbox, df.ID_HELPTEXT)) |cwin| {
+    if (DialogBox.ControlWindow(dbox, c.ID_HELPTEXT)) |cwin| {
         cwin.wndproc = HelpTextProc;
         _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
         df.cReadHelp(wnd, cwin.win);
@@ -70,7 +71,7 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
     const wnd = win.win;
     if (wnd.*.extension) |ext| {
         const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
-        if (DialogBox.ControlWindow(dbox, df.ID_HELPTEXT)) |cwin| {
+        if (DialogBox.ControlWindow(dbox, c.ID_HELPTEXT)) |cwin| {
             if (Window.inFocus == cwin) {
                 return if (df.cHelpBoxKeyboardMsg(wnd, cwin.win, p1) == df.TRUE) true else false;
             }
@@ -137,9 +138,9 @@ fn StripTildes(input: []const u8, buffer: *[30]u8) []const u8 {
     const tilde = '~';
     var i: usize = 0;
 
-    for (input) |c| {
-        if (c != tilde) {
-            buffer[i] = c;
+    for (input) |cc| {
+        if (cc != tilde) {
+            buffer[i] = cc;
             i += 1;
         }
     }
@@ -165,7 +166,7 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
         df.helpfp = df.OpenHelpFile(&df.HelpFileName, "rb");
         if (df.helpfp) |_| {
             BuildHelpBox(win);
-            DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_BACK);
+            DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_BACK);
 
             // ------- display the help window -----
             _ = DialogBox.create(null, &Dialogs.HelpBox, df.TRUE, HelpBoxProc);
@@ -232,14 +233,14 @@ fn BuildHelpBox(win:?*Window) void {
 
     // ---- disable ineffective buttons ----
     if (df.ThisHelp.*.nexthlp == -1) {
-        DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_NEXT);
+        DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_NEXT);
     } else {
-        DialogBox.EnableButton(&Dialogs.HelpBox, df.ID_NEXT);
+        DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_NEXT);
     }
     if (df.ThisHelp.*.prevhlp == -1) {
-        DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_PREV);
+        DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_PREV);
     } else {
-        DialogBox.EnableButton(&Dialogs.HelpBox, df.ID_PREV);
+        DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_PREV);
     }
 }
 
@@ -255,9 +256,9 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
             df.ThisHelp = newhelp;
             _ = win.getParent().sendMessage(df.DISPLAY_HELP, @intCast(@intFromPtr(df.ThisHelp.*.hname)), 0);
             if (df.stacked>0) {
-                DialogBox.EnableButton(&Dialogs.HelpBox, df.ID_BACK);
+                DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_BACK);
             } else {
-                DialogBox.DisableButton(&Dialogs.HelpBox, df.ID_BACK);
+                DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_BACK);
             }
             BuildHelpBox(null);
             if (Dialogs.HelpBox.dwnd.title) |ttl| {

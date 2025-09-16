@@ -8,6 +8,7 @@ const textbox = @import("TextBox.zig");
 const search = @import("Search.zig");
 const clipboard = @import("Clipboard.zig");
 const normal = @import("Normal.zig");
+const c = @import("Commands.zig").Command;
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -569,52 +570,53 @@ fn ParagraphCmd(win:*Window) void {
 
 // ----------- COMMAND Message ----------
 fn CommandMsg(win:*Window,p1:df.PARAM) bool {
-    switch (p1) {
-        df.ID_SEARCH => {
+    const cmd:c = @enumFromInt(p1);
+    switch (cmd) {
+        .ID_SEARCH => {
             search.SearchText(win);
             return true;
         },
-        df.ID_REPLACE => {
+        .ID_REPLACE => {
             search.ReplaceText(win);
             return true;
         },
-        df.ID_SEARCHNEXT => {
+        .ID_SEARCHNEXT => {
             search.SearchNext(win);
             return true;
         },
-        df.ID_CUT => {
+        .ID_CUT => {
             clipboard.CopyToClipboard(win);
             _ = win.sendMessage(df.COMMAND, df.ID_DELETETEXT, 0);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },
-        df.ID_COPY => {
+        .ID_COPY => {
             clipboard.CopyToClipboard(win);
             textbox.ClearTextBlock(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },
-        df.ID_PASTE => {
+        .ID_PASTE => {
             _ = clipboard.PasteFromClipboard(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },
-        df.ID_DELETETEXT => {
+        .ID_DELETETEXT => {
             DeleteTextCmd(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },
-        df.ID_CLEAR => {
+        .ID_CLEAR => {
             ClearCmd(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },
-        df.ID_UNDO => {
+        .ID_UNDO => {
             UndoCmd(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
         },
-        df.ID_PARAGRAPH => {
+        .ID_PARAGRAPH => {
             ParagraphCmd(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return true;
