@@ -693,7 +693,7 @@ pub export fn PutItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8) callconv(.c) void {
                 df.COMBOBOX,
                 df.EDITBOX => {
                     _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
-                    _ = cwin.sendMessage(df.ADDTEXT, @intCast(@intFromPtr(text)), 0);
+                    _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                     if (df.isMultiLine(cwnd) == df.FALSE) {
                         _ = cwin.sendMessage(df.PAINT, 0, 0);
                     }
@@ -701,11 +701,11 @@ pub export fn PutItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8) callconv(.c) void {
                 df.LISTBOX,
                 df.TEXTBOX,
                 df.SPINBUTTON => {
-                    _ = cwin.sendMessage(df.ADDTEXT, @intCast(@intFromPtr(text)), 0);
+                    _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                 },
                 df.TEXT => {
                     _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
-                    _ = cwin.sendMessage(df.ADDTEXT, @intCast(@intFromPtr(text)), 0);
+                    _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                     _ = cwin.sendMessage(df.PAINT, 0, 0);
                 },
                 else => {

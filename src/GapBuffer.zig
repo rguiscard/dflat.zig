@@ -8,19 +8,31 @@ gap_start: usize,
 gap_end: usize,
 realloc: bool = false,
 
-pub fn init(allocator: std.mem.Allocator, initial_capacity: usize) !TopLevelFields {
+pub fn init(allocator: std.mem.Allocator, initial_capacity: usize) !*TopLevelFields {
+    var self:*TopLevelFields = undefined;
+    if (allocator.create(TopLevelFields)) |s| {
+       self = s;
+    } else |err| {
+        return err;
+    }
+
     const buf = try allocator.alloc(u8, initial_capacity + 1);
     @memset(buf, 0);
-    return TopLevelFields{
+
+    self.* = .{
         .allocator = allocator,
         .items = buf,
         .gap_start = 0,
         .gap_end = initial_capacity,
     };
+
+    return self;
 }
 
 pub fn deinit(self: *TopLevelFields) void {
-    self.allocator.free(self.items);
+    const allocator = self.allocator;
+    allocator.free(self.items);
+    allocator.destroy(self);
 }
 
 // use realloc or alloc
@@ -48,10 +60,10 @@ fn ensureGap(self: *TopLevelFields, need: usize) !void {
     const new_gap_end = new_len - right_len;
     if (self.realloc) {
         if (self.allocator.realloc(self.items, new_len + 1)) |new_buf| {
-            @memcpy(
-                new_buf[new_gap_end..new_gap_end+right_len],
-                self.items[self.gap_end..self.gap_end+right_len],
-            );
+//            @memcpy(
+//                new_buf[new_gap_end..new_gap_end+right_len],
+//                self.items[new_gap_end..new_gap_end+right_len],
+//            );
             self.items = new_buf;
         } else |err| {
             return err;
@@ -65,7 +77,7 @@ fn ensureGap(self: *TopLevelFields, need: usize) !void {
                 self.items[self.gap_end..self.gap_end+right_len],
             );
             self.allocator.free(self.items);
-                self.items = new_buf;
+            self.items = new_buf;
         } else |err| {
             return err;
         }
@@ -83,6 +95,7 @@ pub fn insert(self: *TopLevelFields, c: u8) !void {
 
 pub fn insertSlice(self: *TopLevelFields, slice: []const u8) !void {
     try self.ensureGap(slice.len);
+    // use @memmove in case copy and paste from itself ?
     @memcpy(self.items[self.gap_start .. self.gap_start+slice.len], slice);
     self.gap_start += slice.len;
     self.items[self.items.len - 1] = 0;
@@ -189,6 +202,20 @@ test "gap buffer clear" {
         try std.testing.expectEqualStrings("", buf.toString());
         try buf.insertSlice("World");
         try std.testing.expectEqualStrings("World", buf.toString());
+    }
+}
+
+test "zero length" {
+    const gpa = std.testing.allocator;
+
+    for (0..1) |idx| {
+        var buf = try TopLevelFields.init(gpa, 0);
+        defer buf.deinit();
+        if (idx > 0) {
+           buf.setRealloc(true);
+        }
+        try buf.insertSlice("Hello");
+        try std.testing.expectEqualStrings("Hello", buf.toString());
     }
 }
 
