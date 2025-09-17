@@ -90,7 +90,7 @@ pub fn insert(self: *TopLevelFields, c: u8) !void {
     try self.ensureGap(1);
     self.items[self.gap_start] = c;
     self.gap_start += 1;
-    self.items[self.items.len - 1] = 0;
+//    self.items[self.items.len - 1] = 0;
 }
 
 pub fn insertSlice(self: *TopLevelFields, slice: []const u8) !void {
@@ -98,7 +98,7 @@ pub fn insertSlice(self: *TopLevelFields, slice: []const u8) !void {
     // use @memmove in case copy and paste from itself ?
     @memcpy(self.items[self.gap_start .. self.gap_start+slice.len], slice);
     self.gap_start += slice.len;
-    self.items[self.items.len - 1] = 0;
+//    self.items[self.items.len - 1] = 0;
 }
 
 pub fn moveCursor(self: *TopLevelFields, pos: usize) void {
@@ -133,7 +133,7 @@ pub fn backspace(self: *TopLevelFields) void {
     }
 }
 
-pub fn toString(self: *TopLevelFields) []const u8 {
+pub fn compact(self: *TopLevelFields) void {
     const right_len = (self.items.len - 1) - self.gap_end;
     const total = self.gap_start + right_len;
     var out = self.items[0..total];
@@ -141,7 +141,45 @@ pub fn toString(self: *TopLevelFields) []const u8 {
     self.items[total] = 0; // sentinel
     self.gap_start = total;
     self.gap_end = self.items.len-1;
-    return out;
+}
+
+pub fn trancate(self: *TopLevelFields, pos: usize) void {
+    self.gap_start = pos;
+    self.gap_end = self.items.len - 1;
+}
+
+pub fn toString(self: *TopLevelFields) []const u8 {
+    self.compact();
+    return self.items[0..self.gap_start];
+}
+
+test "gap buffer trancate" {
+    const gpa = std.testing.allocator;
+    for (0..2) |idx| {
+        var buf = try TopLevelFields.init(gpa, 40);
+        defer buf.deinit();
+        if (idx > 0) {
+           buf.setRealloc(true);
+        }
+        try buf.insertSlice("Hello\n");
+        try std.testing.expectEqualStrings("Hello\n", buf.toString());
+        buf.trancate(2);
+        try std.testing.expectEqualStrings("He", buf.toString());
+        if (std.mem.indexOfScalar(u8, buf.items, 0)) |pos| {
+            try std.testing.expectEqual(2, pos);
+        } else {
+            try std.testing.expect(false);
+        }
+        try std.testing.expect(buf.items.len >= 3);
+
+        buf.moveCursor(2);
+        try buf.insertSlice("llo");
+        try std.testing.expectEqualStrings("Hello", buf.toString());
+        if (std.mem.indexOfScalar(u8, buf.items, 'o')) |pos| {
+            buf.trancate(pos);
+            try std.testing.expectEqualStrings("Hell", buf.toString());
+        }
+    }
 }
 
 test "gap buffer toString" {

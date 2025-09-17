@@ -9,6 +9,7 @@ const c = @import("Commands.zig").Command;
 const Dialogs = @import("Dialogs.zig");
 const app = @import("Application.zig");
 const menus = @import("Menus.zig");
+const GapBuf = @import("GapBuffer.zig");
 
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
@@ -37,6 +38,7 @@ isHelping:u32 = 0,                    // > 0 when help is being displayed
 // ----------------- text box fields ------------------
 text:?[]u8 = null,   // window text
 textlen:usize = 0,   // text length
+gapbuf:?*GapBuf = null, // gap buffer
 
 // ----------------- edit box fields ------------------
 DeletedText:?[]u8 = null,    // for undo

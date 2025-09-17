@@ -10,6 +10,7 @@ const normal = @import("Normal.zig");
 const radio = @import("RadioButton.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const GapBuffer = @import("GapBuffer.zig");
 
 var SysMenuOpen = false;
 var dialogboxes:?std.ArrayList(*Dialogs.DBOX) = null;
@@ -34,6 +35,17 @@ fn itextAllocateSentinel(ct:*Dialogs.CTLWINDOW, size:usize) bool {
     } else |_| {
     }
     return false; // error on allocation
+}
+
+fn getGapBuffer(ct:*Dialogs.CTLWINDOW, size:usize) ?*GapBuffer {
+    if (ct.igapbuf == null) {
+        if (GapBuffer.init(root.global_allocator, size)) |buf| {
+            ct.igapbuf = @constCast(buf);
+        } else |_| {
+            return null;
+        }
+    }
+    return ct.igapbuf orelse null;
 }
 
 fn getDialogBoxes() *std.ArrayList(*Dialogs.DBOX) {
@@ -73,6 +85,14 @@ pub fn ClearDialogBoxes() void {
                         ct.*.itext_allocated = false;
                     }
                     // null for others ?
+                }
+                if (ct.*.igapbuf) |buf| {
+//                      if ((ct.*.Class == df.EDITBOX or
+//                                 ct.*.Class == df.TEXTBOX or
+//                                 ct.*.Class == df.COMBOBOX)) {
+                    buf.deinit();
+                    ct.*.igapbuf = null;
+//                        }
                 }
             }
         }
@@ -270,10 +290,21 @@ fn CtlCloseWindowMsg(win:*Window) void {
                     @memcpy(ct.*.itext.?, wnd.*.text[0..len:0]);
                 }
                 if (df.isMultiLine(wnd) == df.FALSE) {
-                    // remove last \n
+                    // remove first \n
                     if (ct.*.itext) |itext| {
                         if (std.mem.indexOfScalar(u8, itext, '\n')) |pos| {
                             itext.ptr[pos] = 0;
+                        }
+                    }
+                }
+                if (getGapBuffer(ct, len)) |buf| {
+                    buf.clear();
+                    if (buf.insertSlice(wnd.*.text[0..len])) {} else |_| {}
+                    if (df.isMultiLine(wnd) == df.FALSE) {
+                        // remove first \n
+                        buf.compact();
+                        if (std.mem.indexOfScalar(u8, buf.items, '\n')) |pos| {
+                            buf.trancate(pos);
                         }
                     }
                 }

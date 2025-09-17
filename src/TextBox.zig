@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
+const GapBuffer = @import("GapBuffer.zig");
 
 pub var VSliding = false; // also used in ListBox
 var HSliding = false;
@@ -75,6 +76,23 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         df.BuildTextPointers(wnd);
         return true;
     }
+
+    // GapBuffer
+    if (win.gapbuf == null) {
+        if (GapBuffer.init(win.allocator, 0)) |buf| {
+            win.gapbuf = @constCast(buf);
+        } else |_| {
+        }
+    }
+
+    if (win.gapbuf) |buf| {
+        if (buf.insertSlice(txt)) |_| {
+        } else |_| {
+             // error
+        }
+        // need extra \n ?
+    }
+
     return false;
 }
 
@@ -118,6 +136,23 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
         wnd.*.text[len] = 0;
     }
     df.BuildTextPointers(wnd);
+
+    // GapBuffer
+    if (win.gapbuf == null) {
+        if (GapBuffer.init(win.allocator, 0)) |buf| {
+            win.gapbuf = @constCast(buf);
+        } else |_| {
+        }
+    }
+
+    if (win.gapbuf) |buf| {
+        if (buf.insertSlice(txt)) |_| {
+        } else |_| {
+             // error
+        }
+        // need extra \n ?
+    }
+
 }
 
 fn ClearTextMsg(win:*Window) void {
@@ -134,8 +169,14 @@ fn ClearTextMsg(win:*Window) void {
     wnd.*.textwidth = 0;
     wnd.*.wtop = 0;
     wnd.*.wleft = 0;
+
+    if (win.gapbuf) |buf| {
+        buf.deinit();
+        win.gapbuf = null;
+    }
     ClearTextBlock(win);
     df.ClearTextPointers(wnd);
+
 }  
 
 // ------------ KEYBOARD Message --------------
