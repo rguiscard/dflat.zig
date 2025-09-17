@@ -63,9 +63,9 @@ fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct
 
     mBox.ctl[1].dwnd.y = mBox.dwnd.h - 4;
     mBox.ctl[2].dwnd.y = mBox.dwnd.h - 4;
-    mBox.ctl[0].itext = @constCast(m);
-    mBox.ctl[1].itext = if (button1) |b| @constCast(b) else null;
-    mBox.ctl[2].itext = if (button2) |b| @constCast(b) else null;
+    mBox.ctl[0].dtext = @constCast(m);
+    mBox.ctl[1].dtext = if (button1) |b| @constCast(b) else null;
+    mBox.ctl[2].dtext = if (button2) |b| @constCast(b) else null;
     mBox.ctl[1].command = c1;
     mBox.ctl[2].command = c2;
     mBox.ctl[1].isetting = df.ON;

@@ -18,7 +18,8 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
             }
             df.wputch(wnd, 220, @intCast(win.WindowWidth()), 0);
         }
-        if (ct.itext) |itext| {
+//        if (ct.itext) |itext| {
+        if (DialogBox.getCtlWindowText(ct)) |itext| {
             if(root.global_allocator.allocSentinel(u8, itext.len+10, 0)) |txt| {
                 defer root.global_allocator.free(txt);
                 @memset(txt, 0);
@@ -29,9 +30,9 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
                   txt[2] = wnd.*.WindowColors[df.STD_COLOR][df.BG] | 0x80;
                   start = 3;
                 }
-                _ = df.CopyCommand(&txt[start],itext,if (ct.*.setting == df.OFF) 1 else 0, df.WndBackground(wnd));
+                _ = df.CopyCommand(&txt[start],@constCast(itext.ptr),if (ct.*.setting == df.OFF) 1 else 0, df.WndBackground(wnd));
                 _ = win.sendMessage(df.CLEARTEXT, 0, 0);
-                _ = win.sendMessage(df.ADDTEXT, @intCast(@intFromPtr(txt.ptr)), 0);
+                _ = win.sendTextMessage(df.ADDTEXT, @constCast(txt), 0);
             } else |_| {
             }
         }

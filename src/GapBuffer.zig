@@ -148,9 +148,9 @@ pub fn trancate(self: *TopLevelFields, pos: usize) void {
     self.gap_end = self.items.len - 1;
 }
 
-pub fn toString(self: *TopLevelFields) []const u8 {
+pub fn toString(self: *TopLevelFields) [:0]const u8 {
     self.compact();
-    return self.items[0..self.gap_start];
+    return self.items[0..self.gap_start:0];
 }
 
 test "gap buffer trancate" {

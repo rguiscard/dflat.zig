@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const DialogBox = @import("DialogBox.zig");
 
 fn drawText(win:*Window) void {
     const wnd = win.win;
@@ -10,7 +11,11 @@ fn drawText(win:*Window) void {
     if (win.GetControl()) |ct| {
 //        if (ct == null)
 //            return;
-        if ((ct.*.itext == null) or (wnd.*.text != null))
+//        if ((ct.*.itext == null) or (wnd.*.text != null))
+//            return;
+
+        const ctl_text = DialogBox.getCtlWindowText(ct);
+        if ((ctl_text == null) or (wnd.*.text != null))
             return;
 
         const height:usize = @intCast(ct.*.dwnd.h);
@@ -18,8 +23,9 @@ fn drawText(win:*Window) void {
 
 //        const ptr = @as([*:0]u8, ct.*.itext);
 //        const content = std.mem.span(ptr);
-        if (ct.*.itext) |content| {
-            var iter = std.mem.splitScalar(u8, content, '\n'); // split do not include '\n'
+//        if (ct.*.itext) |content| {
+        if (ctl_text) |text| {
+            var iter = std.mem.splitScalar(u8, text, '\n'); // split do not include '\n'
             while (iter.next()) |line| {
                 const count = std.mem.count(u8, line, &[_]u8{df.SHORTCUTCHAR});
                 if (count > 0) {

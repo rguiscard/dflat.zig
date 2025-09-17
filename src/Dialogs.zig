@@ -20,8 +20,9 @@ pub const DIALOGWINDOW = struct  {
 pub const CTLWINDOW = struct {
     dwnd:DIALOGWINDOW = .{.title = null, .x = 0, .y = 0, .h = 0, .w = 0},
     Class:df.CLASS = 0,           // LISTBOX, BUTTON, etc
-    itext:?[:0]u8 = null,         // initialized text
-    itext_allocated:bool = false, // itext is allocated in heap (true) or in stack (false)
+//    itext:?[:0]u8 = null,         // initialized text
+//    itext_allocated:bool = false, // itext is allocated in heap (true) or in stack (false)
+    dtext:?[:0]u8 = null,         // default text, to be copied to gapbuffer later
     igapbuf:?*GapBuffer = null,   // initialized text in gapbuffer
     command:c = c.ID_NULL,        // command code
     help:?[:0]const u8 = null,    // help mnemonic
@@ -247,13 +248,17 @@ fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
         var w: c_int = undefined;
         var cc: c = undefined;
         ty, tx, x, y, h, w, cc = control;
+//        const gapbuf:?*GapBuffer = null;
 
-        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t) else null;
+//        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t) else null;
+        const dtext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t) else null;
         result[idx] = .{
             .dwnd = .{.title = null, .x = x, .y = y, .h = h, .w = w},
             .Class = ty,
-            .itext = itext,
-            .itext_allocated = false, // everything is in stack at this poing.
+            .dtext = dtext,
+//            .itext = itext,
+//            .itext_allocated = false, // everything is in stack at this poing.
+//            .igapbuf = gapbuf,
             .command = cc,
             .help = if (cc == c.ID_NULL) null else @tagName(cc),
             .isetting = if (ty == df.BUTTON) df.ON else df.OFF,
