@@ -6,16 +6,16 @@
 #define Ch(c) ((c)&0x7f)
 #define isWhite(c) (Ch(c)==' '||Ch(c)=='\n'||Ch(c)=='\f'||Ch(c)=='\t')
 /* ---------- local prototypes ----------- */
-static void Forward(WINDOW);
-static void Backward(WINDOW);
-static void End(WINDOW);
-static void Home(WINDOW);
-static void Downward(WINDOW);
-static void Upward(WINDOW);
+void Forward(WINDOW);
+void Backward(WINDOW);
+void End(WINDOW);
+void Home(WINDOW);
+void Downward(WINDOW);
+void Upward(WINDOW);
 void StickEnd(WINDOW);
-static void NextWord(WINDOW);
-static void PrevWord(WINDOW);
-static void ModTextPointers(WINDOW, int, int);
+void NextWord(WINDOW);
+void PrevWord(WINDOW);
+void ModTextPointers(WINDOW, int, int);
 void SetAnchor(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
 
@@ -62,6 +62,7 @@ void ExtendBlock(WINDOW wnd, int x, int y)
 }
 
 /* ---------- page/scroll keys ----------- */
+#if 0
 int ScrollingKey(WINDOW wnd, int c, PARAM p2)
 {
     switch (c)    {
@@ -126,8 +127,9 @@ int ScrollingKey(WINDOW wnd, int c, PARAM p2)
 
     return TRUE;
 }
+#endif
 /* -------------- Del key ---------------- */
-static void DelKey(WINDOW wnd)
+void DelKey(WINDOW wnd) // private
 {
     char *currchar = CurrChar;
     int repaint = *currchar == '\n';
@@ -150,7 +152,7 @@ static void DelKey(WINDOW wnd)
     wnd->TextChanged = TRUE;
 }
 /* ------------ Tab key ------------ */
-static void TabKey(WINDOW wnd, PARAM p2)
+void TabKey(WINDOW wnd, PARAM p2) // private
 {
     if (isMultiLine(wnd))    {
         int insmd = wnd->InsertMode;
@@ -167,7 +169,7 @@ static void TabKey(WINDOW wnd, PARAM p2)
 	    PostMessage(GetParent(wnd), KEYBOARD, '\t', p2);
 }
 /* ------------ Shift+Tab key ------------ */
-static void ShiftTabKey(WINDOW wnd, PARAM p2)
+void ShiftTabKey(WINDOW wnd, PARAM p2) // private
 {
     if (isMultiLine(wnd))    {
         do  {
@@ -180,7 +182,7 @@ static void ShiftTabKey(WINDOW wnd, PARAM p2)
 	    PostMessage(GetParent(wnd), KEYBOARD, SHIFT_HT, p2);
 }
 /* --------- All displayable typed keys ------------- */
-static void KeyTyped(WINDOW wnd, int c)
+void KeyTyped(WINDOW wnd, int c) // private
 {
     char *currchar = CurrChar;
     if ((c != '\n' && c < ' ') || (c & 0x1000))
@@ -283,7 +285,8 @@ static void KeyTyped(WINDOW wnd, int c)
 }
 
 /* ------------ screen changing key strokes ------------- */
-void DoKeyStroke(WINDOW wnd, int c, PARAM p2)
+#if 0
+void DoKeyStroke(WINDOW wnd, int c, PARAM p2) // private
 {
     switch (c)    {
         case RUBOUT:
@@ -316,6 +319,7 @@ void DoKeyStroke(WINDOW wnd, int c, PARAM p2)
             break;
     }
 }
+#endif
 
 // ------ change all text lines in block to \n -----
 void TextBlockToN(char *bbl, char *bel) {
@@ -403,7 +407,7 @@ void ParagraphCmd(WINDOW wnd)
 }
 
 /* ---- cursor right key: right one character position ---- */
-static void Forward(WINDOW wnd)
+void Forward(WINDOW wnd) // private
 {
     char *cc = CurrChar+1;
     if (*cc == '\0')
@@ -419,7 +423,7 @@ static void Forward(WINDOW wnd)
     }
 }
 /* ----- stick the moving cursor to the end of the line ---- */
-void StickEnd(WINDOW wnd)
+void StickEnd(WINDOW wnd) // private
 {
     char *cp = TextLine(wnd, wnd->CurrLine);
     char *cp1 = strchr(cp, '\n');
@@ -435,7 +439,7 @@ void StickEnd(WINDOW wnd)
     }
 }
 /* --------- cursor down key: down one line --------- */
-static void Downward(WINDOW wnd)
+void Downward(WINDOW wnd) // private
 {
     if (isMultiLine(wnd) &&
             wnd->WndRow+wnd->wtop+1 < wnd->wlines)  {
@@ -447,7 +451,7 @@ static void Downward(WINDOW wnd)
     }
 }
 /* -------- cursor up key: up one line ------------ */
-static void Upward(WINDOW wnd)
+void Upward(WINDOW wnd) // private
 {
     if (isMultiLine(wnd) && wnd->CurrLine != 0)    {
         --wnd->CurrLine;
@@ -458,7 +462,7 @@ static void Upward(WINDOW wnd)
     }
 }
 /* ---- cursor left key: left one character position ---- */
-static void Backward(WINDOW wnd)
+void Backward(WINDOW wnd) // private
 {
     if (wnd->CurrCol)    {
         --wnd->CurrCol;
@@ -471,7 +475,7 @@ static void Backward(WINDOW wnd)
     }
 }
 /* -------- End key: to end of line ------- */
-static void End(WINDOW wnd)
+ void End(WINDOW wnd) // private
 {
     while (*CurrChar && *CurrChar != '\n')
         ++wnd->CurrCol;
@@ -481,7 +485,7 @@ static void End(WINDOW wnd)
     }
 }
 /* -------- Home key: to beginning of line ------- */
-static void Home(WINDOW wnd)
+void Home(WINDOW wnd) // private
 {
     wnd->CurrCol = 0;
     if (wnd->wleft != 0)    {
@@ -490,7 +494,7 @@ static void Home(WINDOW wnd)
     }
 }
 /* -- Ctrl+cursor right key: to beginning of next word -- */
-static void NextWord(WINDOW wnd)
+void NextWord(WINDOW wnd) // private
 {
     int savetop = wnd->wtop;
     int saveleft = wnd->wleft;
@@ -513,7 +517,7 @@ static void NextWord(WINDOW wnd)
         SendMessage(wnd, PAINT, 0, 0);
 }
 /* -- Ctrl+cursor left key: to beginning of previous word -- */
-static void PrevWord(WINDOW wnd)
+void PrevWord(WINDOW wnd) // private
 {
     int savetop = wnd->wtop;
     int saveleft = wnd->wleft;
@@ -539,13 +543,13 @@ static void PrevWord(WINDOW wnd)
 }
 /* ----- modify text pointers from a specified position
                 by a specified plus or minus amount ----- */
-static void ModTextPointers(WINDOW wnd, int lineno, int var)
+void ModTextPointers(WINDOW wnd, int lineno, int var) // private
 {
     while (lineno < wnd->wlines)
         *((wnd->TextPointers) + lineno++) += var;
 }
 /* ----- set anchor point for marking text block ----- */
-void SetAnchor(WINDOW wnd, int mx, int my)
+void SetAnchor(WINDOW wnd, int mx, int my) // private
 {
     ClearTextBlock(wnd);
     /* ------ set the anchor ------ */

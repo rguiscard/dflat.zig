@@ -39,9 +39,25 @@ void ChangeSelection(WINDOW, int, int);
 void ListCopyText(char *, char *);
 
 // editbox.c
+void Forward(WINDOW);
+void Backward(WINDOW);
+void End(WINDOW);
+void Home(WINDOW);
+void Downward(WINDOW);
+void Upward(WINDOW);
 void StickEnd(WINDOW);
-void ExtendBlock(WINDOW, int, int);
+void NextWord(WINDOW);
+void PrevWord(WINDOW);
+void ModTextPointers(WINDOW, int, int);
 void SetAnchor(WINDOW, int, int);
+void ExtendBlock(WINDOW, int, int);
+void DoKeyStroke(WINDOW, int, PARAM);
+void DelKey(WINDOW);
+void ShiftTabKey(WINDOW, PARAM);
+void TabKey(WINDOW, PARAM);
+void KeyTyped(WINDOW, int);
+
+void StickEnd(WINDOW);
 int CommandMsg(WINDOW, PARAM);
 void TextBlockToN(char *, char *);
 void ParagraphCmd(WINDOW);

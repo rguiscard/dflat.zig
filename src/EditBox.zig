@@ -386,6 +386,49 @@ fn ButtonReleasedMsg(win:*Window) bool {
     return false;
 }
 
+
+// ------------ screen changing key strokes -------------
+fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
+    const wnd = win.win;
+    switch (cc) {
+        df.RUBOUT => {
+            if (wnd.*.CurrCol > 0 or wnd.*.CurrLine > 0) {
+                _ = win.sendMessage(df.KEYBOARD, df.BS, 0);
+                _ = win.sendMessage(df.KEYBOARD, df.DEL, 0);
+            }
+        },
+        df.DEL => {
+            df.DelKey(wnd);
+        },
+        df.SHIFT_HT => {
+            df.ShiftTabKey(wnd, p2);
+        },
+        '\t' => {
+            df.TabKey(wnd, p2);
+        },
+        '\r' => {
+            if (df.isMultiLine(wnd) == df.FALSE)    {
+                _ = q.PostMessage(win.getParent().win, df.KEYBOARD, cc, p2);
+            } else {
+                const chr = '\n';
+                // fall through
+                if (df.TextBlockMarked(wnd)) {
+                    _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
+                    _ = win.sendMessage(df.PAINT, 0, 0);
+                }
+                df.KeyTyped(wnd, chr);
+            }
+        },
+        else => {
+            if (df.TextBlockMarked(wnd)) {
+                _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
+                _ = win.sendMessage(df.PAINT, 0, 0);
+            }
+            df.KeyTyped(wnd, cc);
+        }
+    }
+}
+
 // ----------- KEYBOARD Message ----------
 fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
@@ -429,7 +472,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         if (KeyBoardMarking)
             df.ExtendBlock(wnd, WndCol(win), wnd.*.WndRow);
     } else if (win.TestAttribute(df.READONLY) == false) {
-        df.DoKeyStroke(wnd, @intCast(p1), p2);
+        DoKeyStroke(win, @intCast(p1), p2);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
     } else if (p1 == '\t') {
         q.PostMessage(win.getParent().win, df.KEYBOARD, @intCast('\t'), p2);
@@ -767,10 +810,78 @@ fn DoMultiLines(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 }
 
 // ---------- page/scroll keys -----------
+fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
+    const wnd = win.win;
+    switch (cc) {
+        df.PGUP,
+        df.PGDN => {
+            if (df.isMultiLine(wnd)>0)
+                _ = root.zBaseWndProc(df.EDITBOX, win, df.KEYBOARD, cc, p2);
+        },
+        df.CTRL_PGUP,
+        df.CTRL_PGDN => {
+            _ = root.zBaseWndProc(df.EDITBOX, win, df.KEYBOARD, cc, p2);
+        },
+        df.HOME => {
+            df.Home(wnd);
+        },
+        df.END => {
+            df.End(wnd);
+        },
+        df.CTRL_FWD => {
+            df.NextWord(wnd);
+        },
+        df.CTRL_BS => {
+            df.PrevWord(wnd);
+        },
+        df.CTRL_HOME => {
+            if (df.isMultiLine(wnd)>0) {
+                _ = win.sendMessage(df.SCROLLDOC, df.TRUE, 0);
+                wnd.*.CurrLine = 0;
+                wnd.*.WndRow = 0;
+            }
+            df.Home(wnd);
+        },
+        df.CTRL_END => {
+            if (df.isMultiLine(wnd)>0 and
+                wnd.*.WndRow+wnd.*.wtop+1 < wnd.*.wlines and
+                wnd.*.wlines > 0) {
+                _ = win.sendMessage(df.SCROLLDOC, df.FALSE, 0);
+                wnd.*.CurrLine = wnd.*.wlines-1;
+//                _ = df.SetLinePointer(wnd, wnd.*.wlines-1);
+                wnd.*.WndRow =
+                    @intCast(@min(win.ClientHeight()-1, wnd.*.wlines-1));
+                df.Home(wnd);
+            }
+            df.End(wnd);
+        },
+        df.UP => {
+            if (df.isMultiLine(wnd)>0)
+                df.Upward(wnd);
+        },
+        df.DN => {
+            if (df.isMultiLine(wnd)>0)
+                df.Downward(wnd);
+        },
+        df.FWD => {
+            df.Forward(wnd);
+        },
+        df.BS => {
+            df.Backward(wnd);
+        },
+        else => {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// ---------- page/scroll keys -----------
 fn DoScrolling(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    const rtn = df.ScrollingKey(wnd, @intCast(p1), p2);
-    if (rtn == df.FALSE) {
+    const rtn = ScrollingKey(win, @intCast(p1), p2);
+    if (rtn == false) {
         return false;
     }
 
