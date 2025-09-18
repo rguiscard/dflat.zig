@@ -13,6 +13,7 @@ BOOL VSliding;
 //BOOL HSliding;
 
 /* ------------ DELETETEXT Message -------------- */
+#if 0
 void DeleteTextMsg(WINDOW wnd, int lno)
 {
 	char *cp1 = TextLine(wnd, lno);
@@ -25,7 +26,9 @@ void DeleteTextMsg(WINDOW wnd, int lno)
 	}
     BuildTextPointers(wnd);
 }
+#endif
 
+#if 0
 void InsertTextAt(WINDOW wnd, char *txt, int lno) {
     int len = strlen(txt)+1;
     char *cp2 = TextLine(wnd, lno);
@@ -34,6 +37,7 @@ void InsertTextAt(WINDOW wnd, char *txt, int lno) {
     strcpy(cp2, txt);
     *(cp2+len-1) = '\n';
 }
+#endif
 
 /* ------------ CLOSE_WINDOW Message -------------- */
 void CloseWindowMsg(WINDOW wnd)

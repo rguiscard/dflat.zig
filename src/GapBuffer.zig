@@ -169,6 +169,60 @@ pub fn toString(self: *TopLevelFields) [:0]const u8 {
     return self.items[0..self.gap_start:0];
 }
 
+// Accessories
+pub fn indexOfLine(self: *TopLevelFields, lno:usize, move: bool) usize {
+    var pos:usize = 0;
+    if (lno == 0) {
+        if (move)
+            self.moveCursor(0);
+    } else {
+        pos = 0;
+        var lc:usize = 0;
+        while(std.mem.indexOfScalarPos(u8, self.items, pos, '\n')) |idx| {
+            pos = idx+1;
+            lc += 1;
+            if (lc == lno) {
+                break;
+            }
+        }
+        if (pos > self.gap_end) {
+            pos -= self.gap_end-self.gap_start;
+        }
+        if (move)
+            self.moveCursor(pos);
+    }
+    return pos; 
+}
+
+test "gap buffer line position" {
+    const gpa = std.testing.allocator;
+    for (0..2) |idx| {
+        var buf = try TopLevelFields.init(gpa, 40);
+        defer buf.deinit();
+        if (idx > 0) {
+           buf.setRealloc(true);
+        }
+        try buf.insertSlice("1xxxx\n2xxxxyyyyy\n3xxxxx\n4");
+        var pos = buf.indexOfLine(0, false);
+        try std.testing.expectEqual(0, pos);
+        pos = buf.indexOfLine(1, false);
+        try std.testing.expectEqual(6, pos);
+        pos = buf.indexOfLine(2, false);
+        try std.testing.expectEqual(17, pos);
+        pos = buf.indexOfLine(3, true);
+        try std.testing.expectEqual(24, pos);
+        try std.testing.expectEqual(24, buf.gap_start);
+
+
+        for (0..7) |_| {
+            buf.backspace();
+        }
+        pos = buf.indexOfLine(2, false);
+        try std.testing.expectEqual(17, pos);
+        try std.testing.expectEqualStrings("1xxxx\n2xxxxyyyyy\n4", buf.toString());
+    }
+}
+
 test "gap buffer out of bound 1" {
     const gpa = std.testing.allocator;
     for (0..2) |idx| {

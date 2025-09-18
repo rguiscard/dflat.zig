@@ -17,32 +17,44 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
     const adln:usize = txt.len;
     if (adln > 0xfff0)
         return false;
-    if (win.text) |t| {
-        // ---- appending to existing text ----
-        const txln:usize = @intCast(df.strlen(wnd.*.text)); // more accurate than win.text because \0 ?
-        if (txln+adln > 0xfff0) { // consider overflow ?
-            return false;
-        }
-        if (txln+adln > wnd.*.textlen) {
-            if (root.global_allocator.realloc(t, txln+adln+3)) |buf| {
-                win.text = buf;
-                wnd.*.text = buf.ptr;
-                win.textlen = txln+adln+1;
-                wnd.*.textlen = @intCast(txln+adln+1);
-            } else |_| {
-            }
-        }
-    } else {
-        // ------ 1st text appended ------
-        if (root.global_allocator.allocSentinel(u8, adln+3, 0)) |buf| {
-            @memset(buf, 0);
-            win.text = buf;
-            wnd.*.text = buf.ptr;
-            win.textlen = adln+1;
-            wnd.*.textlen = @intCast(adln+1);
-        } else |_| {
-        }
+//    if (win.text) |t| {
+//        // ---- appending to existing text ----
+//        const txln:usize = @intCast(df.strlen(wnd.*.text)); // more accurate than win.text because \0 ?
+//        if (txln+adln > 0xfff0) { // consider overflow ?
+//            return false;
+//        }
+//        if (txln+adln > wnd.*.textlen) {
+//            if (root.global_allocator.realloc(t, txln+adln+3)) |buf| {
+//                win.text = buf;
+//                wnd.*.text = buf.ptr;
+//                win.textlen = txln+adln+1;
+//                wnd.*.textlen = @intCast(txln+adln+1);
+//            } else |_| {
+//            }
+//        }
+//    } else {
+//        // ------ 1st text appended ------
+//        if (root.global_allocator.allocSentinel(u8, adln+3, 0)) |buf| {
+//            @memset(buf, 0);
+//            win.text = buf;
+//            wnd.*.text = buf.ptr;
+//            win.textlen = adln+1;
+//            wnd.*.textlen = @intCast(adln+1);
+//        } else |_| {
+//        }
+//    }
+
+    if (win.getGapBuffer(txt.len)) |buf| {
+        // ---- append the text ----
+        if (buf.insertSlice(txt)) { } else |_| { }
+        if (buf.insert('\n')) { } else |_| { }
+        wnd.*.text = @constCast(buf.toString().ptr);
+        wnd.*.textlen = @intCast(buf.len());
+
+        df.BuildTextPointers(wnd);
+        return true;
     }
+
 
 //    if (wnd->text != NULL)    {
 //        /* ---- appending to existing text ---- */
@@ -61,49 +73,78 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
 //    }
 
     wnd.*.TextChanged = df.TRUE;
-    if (win.text) |buf| {
+//    if (win.text) |buf| {
         // ---- append the text ----
-        if (std.mem.indexOfScalar(u8, buf, 0)) |idx| {
-            @memcpy(buf.ptr[idx..idx+txt.len], txt);
+//        if (std.mem.indexOfScalar(u8, buf, 0)) |idx| {
+//            @memcpy(buf.ptr[idx..idx+txt.len], txt);
 //            @memcpy(buf.ptr[idx+txt.len..idx+txt.len+1], "\n");
 //            @memcpy(buf.ptr[idx+txt.len+1..idx+txt.len+2], "\x00");
-            buf.ptr[idx+txt.len] = '\n';
-            buf.ptr[idx+txt.len+1] = 0;
-        }
+//            buf.ptr[idx+txt.len] = '\n';
+//            buf.ptr[idx+txt.len+1] = 0;
+//        }
 //        strcat(wnd->text, txt);
 //        strcat(wnd->text, "\n");
 
-        df.BuildTextPointers(wnd);
-        return true;
-    }
-
-    // GapBuffer
-    if (win.gapbuf == null) {
-        if (GapBuffer.init(win.allocator, 0)) |buf| {
-            win.gapbuf = @constCast(buf);
-        } else |_| {
-        }
-    }
-
-    if (win.gapbuf) |buf| {
-        if (buf.insertSlice(txt)) |_| {
-        } else |_| {
-             // error
-        }
-        // need extra \n ?
-    }
-
+//        df.BuildTextPointers(wnd);
+//        return true;
+//    }
     return false;
 }
 
-// ------------ INSERTTEXT Message --------------
-fn InsertTextMsg(win:*Window, txt:[]const u8, lno:c_int) void {
+// ------------ DELETETEXT Message --------------
+fn DeleteTextMsg(win:*Window, lno:usize) void {
     const wnd = win.win;
-    if (AddTextMsg(win, txt)) {
-        df.InsertTextAt(wnd, @constCast(txt.ptr), lno);
+    wnd.*.wlines -= 1;
+
+    if (win.gapbuf) |buf| {
+        const pos2 = buf.indexOfLine(lno+1, false);
+        const pos1 = buf.indexOfLine(lno, true);
+        for(pos1..pos2) |_| {
+            buf.delete();
+        }
+        wnd.*.text = @constCast(buf.toString().ptr);
+        wnd.*.textlen = @intCast(buf.len());
+
+        df.BuildTextPointers(wnd);
+    }
+
+//    const pos1 = 
+//        char *cp1 = TextLine(wnd, lno);
+//        --wnd->wlines;
+//        if (lno == wnd->wlines)
+//                *cp1 = '\0';
+//        else    {
+//                char *cp2 = TextLine(wnd, lno+1);
+//                memmove(cp1, cp2, strlen(cp2)+1);
+//        }
+//    df.BuildTextPointers(wnd);
+}
+
+// ------------ INSERTTEXT Message --------------
+fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
+    const wnd = win.win;
+
+    if (win.getGapBuffer(txt.len)) |buf| {
+        buf.compact();
+        // find line
+        _ = buf.indexOfLine(lno, true);
+
+        // ---- append the text ----
+        if (buf.insertSlice(txt)) { } else |_| { }
+        if (buf.insert('\n')) { } else |_| { }
+        wnd.*.text = @constCast(buf.toString().ptr);
+        wnd.*.textlen = @intCast(buf.len());
+
         df.BuildTextPointers(wnd);
         wnd.*.TextChanged = df.TRUE;
     }
+//    df.BuildTextPointers(wnd);
+//    wnd.*.TextChanged = df.TRUE;
+//    if (AddTextMsg(win, txt)) {
+//        df.InsertTextAt(wnd, @constCast(txt.ptr), lno);
+//        df.BuildTextPointers(wnd);
+//        wnd.*.TextChanged = df.TRUE;
+//    }
 }
 
 
@@ -111,69 +152,65 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:c_int) void {
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
     const wnd = win.win;
     // -- assign new text value to textbox buffer --
-    const len = txt.len+1;
+//    const len = txt.len+1;
     _ = win.sendMessage(df.CLEARTEXT, 0, 0);
     
-    if (win.text) |t| {
-        if (root.global_allocator.realloc(t, @intCast(len+1))) |buf| {
-            win.text = buf;
-        } else |_| {
-        }
-    } else {
-        if (root.global_allocator.allocSentinel(u8, @intCast(len+1), 0)) |buf| {
-            @memset(buf, 0);
-            win.text = buf;
-        } else |_| {
-        }
-    }
+//    if (win.text) |t| {
+//        if (root.global_allocator.realloc(t, @intCast(len+1))) |buf| {
+//            win.text = buf;
+//        } else |_| {
+//        }
+//    } else {
+//        if (root.global_allocator.allocSentinel(u8, @intCast(len+1), 0)) |buf| {
+//            @memset(buf, 0);
+//            win.text = buf;
+//        } else |_| {
+//        }
+//    }
+//
+//    if (win.text) |buf| {
+//        @memset(buf, 0);
+//        @memcpy(buf[0..len-1], txt);
+//        wnd.*.textlen = @intCast(len);
+//        win.textlen = @intCast(len);
+//        wnd.*.text = buf.ptr;
+//        wnd.*.text[len] = 0;
+//    }
 
-    if (win.text) |buf| {
-        @memset(buf, 0);
-        @memcpy(buf[0..len-1], txt);
-        wnd.*.textlen = @intCast(len);
-        win.textlen = @intCast(len);
-        wnd.*.text = buf.ptr;
-        wnd.*.text[len] = 0;
+    if (win.getGapBuffer(txt.len)) |buf| {
+        buf.clear();
+        if (buf.insertSlice(txt)) { } else |_| { }
+        wnd.*.text = @constCast(buf.toString().ptr);
+        wnd.*.textlen = @intCast(buf.len());
+        df.BuildTextPointers(wnd);
     }
-    df.BuildTextPointers(wnd);
-
-    // GapBuffer
-    if (win.gapbuf == null) {
-        if (GapBuffer.init(win.allocator, 0)) |buf| {
-            win.gapbuf = @constCast(buf);
-        } else |_| {
-        }
-    }
-
-    if (win.gapbuf) |buf| {
-        if (buf.insertSlice(txt)) |_| {
-        } else |_| {
-             // error
-        }
-        // need extra \n ?
-    }
-
 }
 
 fn ClearTextMsg(win:*Window) void {
     const wnd = win.win;
     // ----- clear text from textbox -----
-    if (win.text) |text| {
-        root.global_allocator.free(text);
-        win.text = null;
-    }
-    wnd.*.text = null;
-    wnd.*.textlen = 0;
-    win.textlen = 0;
-    wnd.*.wlines = 0;
-    wnd.*.textwidth = 0;
-    wnd.*.wtop = 0;
-    wnd.*.wleft = 0;
+//    if (win.text) |text| {
+//        root.global_allocator.free(text);
+//        win.text = null;
+//    }
+//    wnd.*.text = null;
+//    wnd.*.textlen = 0;
+//    win.textlen = 0;
+//    wnd.*.wlines = 0;
+//    wnd.*.textwidth = 0;
+//    wnd.*.wtop = 0;
+//    wnd.*.wleft = 0;
 
     if (win.gapbuf) |buf| {
-        buf.deinit();
-        win.gapbuf = null;
+        buf.clear();
+        wnd.*.text = null;
+        wnd.*.textlen = 0;
+        wnd.*.wlines = 0;
+        wnd.*.textwidth = 0;
+        wnd.*.wtop = 0;
+        wnd.*.wleft = 0;
     }
+
     ClearTextBlock(win);
     df.ClearTextPointers(wnd);
 
@@ -559,7 +596,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
             return AddTextMsg(win, txt[0..len]);
         },
         df.DELETETEXT => {
-            df.DeleteTextMsg(wnd, @intCast(p1));
+            DeleteTextMsg(win, @intCast(p1));
             return true;
         },
         df.INSERTTEXT => {

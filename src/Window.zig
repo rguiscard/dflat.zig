@@ -515,3 +515,14 @@ pub export fn hasStatusBar(wnd:df.WINDOW) df.BOOL {
 pub fn GetControl(self:*TopLevelFields) ?*Dialogs.CTLWINDOW {
     return self.ct;
 }
+
+pub fn getGapBuffer(self:*TopLevelFields, size:usize) ?*GapBuf {
+    if (self.gapbuf == null) {
+        if (GapBuf.init(self.allocator, size)) |buf| {
+            self.gapbuf = @constCast(buf);
+        } else |_| {
+            return null;
+        }
+    }
+    return self.gapbuf orelse null;
+}
