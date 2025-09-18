@@ -404,6 +404,131 @@ fn ButtonReleasedMsg(win:*Window) bool {
     return false;
 }
 
+// --------- All displayable typed keys -------------
+fn KeyTyped(win:*Window, cc:c_int) void {
+    const wnd = win.win;
+    if (win.getGapBuffer(1)) |buf| {
+        var currchar = df.zCurrChar(wnd);
+        if ((cc != '\n' and cc < ' ') or (cc & 0x1000)>0) {
+            // ---- not recognized by editor ---
+            return;
+        }
+        if (df.isMultiLine(wnd)==0 and df.TextBlockMarked(wnd)) {
+            _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+            currchar = df.zCurrChar(wnd);
+        }
+        // ---- test typing at end of text ----
+        const currpos = df.CurrPos(wnd);
+//        if (currchar == (char *)wnd->text+wnd->MaxTextLength)    {
+        if (currpos == wnd.*.MaxTextLength) {
+            // ---- typing at the end of maximum buffer ----
+            df.beep();
+            return;
+        }
+        const len = buf.len();
+//        if (currchar == 0) {
+        if (currpos == len) {
+            // --- insert a newline at end of text ---
+            if (buf.insert('\n')) {} else |_| {}
+            if (buf.insert(0)) {} else |_| {}
+            wnd.*.text = @constCast(buf.toString().ptr);
+            wnd.*.textlen = @intCast(buf.len());
+//            *currchar = '\n';
+//            *(currchar+1) = '\0';
+            df.BuildTextPointers(wnd);
+        }
+        // --- displayable char or newline ---
+//        if (c == '\n' or wnd.*.InsertMode or currchar == '\n') {
+//            // ------ inserting the keyed character ------ */
+//            if (wnd->textlen == 0 || wnd->text[wnd->textlen-1] != '\0')    {
+//                /* --- the current text buffer is full --- */
+//                if (wnd->textlen == wnd->MaxTextLength)    {
+//                    /* --- text buffer is at maximum size --- */
+//                    beep();
+//                    return;
+//                }
+//                /* ---- increase the text buffer size ---- */
+//                wnd->textlen += GROWLENGTH;
+//                /* --- but not above maximum size --- */
+//                if (wnd->textlen > wnd->MaxTextLength)
+//                    wnd->textlen = wnd->MaxTextLength;
+//                wnd->text = DFrealloc(wnd->text, wnd->textlen+2);
+//                wnd->text[wnd->textlen-1] = '\0';
+//                currchar = CurrChar;
+//            }
+//
+//            memmove(currchar+1, currchar, strlen(currchar)+1);
+//            df.ModTextPointers(wnd, wnd.*.CurrLine+1, 1);
+//            if (df.isMultiLine(wnd) and wnd.*.wlines > 1) {
+//                wnd.*.textwidth = @max(wnd.*.textwidth,
+//                    buf.indexOfLine(wnd.*.CurrLine+1) - buf.indexOfLine(wnd.*.CurrLine));
+//                    (int) (TextLine(wnd, wnd->CurrLine+1)-
+//                    TextLine(wnd, wnd->CurrLine)));
+//            } else {
+//                wnd.*.textwidth = @max(wnd.*.textwidth, buf.len()+1);
+//                    strlen(wnd->text));
+//            }
+//            df.WriteTextLine(wnd, null,
+//                wnd.*.wtop+wnd.*.WndRow, df.FALSE);
+//        }
+        // ----- put the char in the buffer -----
+        buf.moveCursor(currpos);
+        if (buf.insert(@intCast(cc))) {} else |_| {}
+        wnd.*.text = @constCast(buf.toString().ptr);
+        wnd.*.textlen = @intCast(buf.len());
+        df.BuildTextPointers(wnd);
+        _ = win.sendMessage(df.PAINT, 0, 0);
+        wnd.*.TextChanged = df.TRUE;
+
+        if (cc == '\n')    {
+            wnd.*.wleft = 0;
+            df.BuildTextPointers(wnd);
+            df.End(wnd);
+            df.Forward(wnd);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+            return;
+        }
+
+        // ---------- test end of window --------- 
+        if (WndCol(win) == win.ClientWidth()-1) {
+            if (df.isMultiLine(wnd) == 0)  {
+//                if (!(currchar == (char *)wnd->text+wnd->MaxTextLength-2))
+//                    SendMessage(wnd, HORIZSCROLL, TRUE, 0);
+                if (!(currpos == wnd.*.MaxTextLength))
+                    _ = win.sendMessage(df.HORIZSCROLL, df.TRUE, 0);
+            } else {
+//                char *cp = currchar;
+//                while (*cp != ' ' && cp != (char *)TextLine(wnd, wnd->CurrLine))
+//                    --cp;
+//                if (cp == (char *)TextLine(wnd, wnd->CurrLine) ||
+//                            !wnd->WordWrapMode) {
+//                    SendMessage(wnd, HORIZSCROLL, TRUE, 0);
+//                } else {
+//                    int dif = 0;
+//                    if (c != ' ')    {
+//                        dif = (int) (currchar - cp);
+//                        wnd->CurrCol -= dif;
+//                        SendMessage(wnd, KEYBOARD, DEL, 0);
+//                        --dif;
+//                    }
+//                    SendMessage(wnd, KEYBOARD, '\n', 0);
+//                    currchar = CurrChar;
+//                    wnd->CurrCol = dif;
+//                    if (c == ' ')
+//                        return;
+//                }
+            }
+        }
+        // ------ display the character ------
+//        df.SetStandardColor(wnd);
+//        if (wnd.*.protect)
+//            c = '*';
+//        PutWindowChar(wnd, c, WndCol, wnd->WndRow);
+        // ----- advance the pointers ------
+        wnd.*.CurrCol += 1;
+    }
+}
+
 
 // ------------ screen changing key strokes -------------
 fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
@@ -434,7 +559,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
                     _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
                     _ = win.sendMessage(df.PAINT, 0, 0);
                 }
-                df.KeyTyped(wnd, chr);
+                KeyTyped(win, chr);
             }
         },
         else => {
@@ -442,7 +567,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
                 _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
                 _ = win.sendMessage(df.PAINT, 0, 0);
             }
-            df.KeyTyped(wnd, cc);
+            KeyTyped(win, cc);
         }
     }
 }

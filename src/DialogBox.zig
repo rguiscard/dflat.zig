@@ -307,12 +307,14 @@ fn CtlCloseWindowMsg(win:*Window) void {
 //                }
                 if (getGapBuffer(ct, len)) |buf| {
                     buf.clear();
-                    if (buf.insertSlice(wnd.*.text[0..len])) {} else |_| {}
-                    if (df.isMultiLine(wnd) == df.FALSE) {
-                        // remove first \n
-                        buf.compact();
-                        if (std.mem.indexOfScalar(u8, buf.items, '\n')) |pos| {
-                            buf.trancate(pos);
+                    if (wnd.*.text) |text| {
+                        if (buf.insertSlice(text[0..len])) {} else |_| {}
+                        if (df.isMultiLine(wnd) == df.FALSE) {
+                            // remove first \n
+                            buf.compact();
+                            if (std.mem.indexOfScalar(u8, buf.items, '\n')) |pos| {
+                                buf.trancate(pos);
+                            }
                         }
                     }
                 }
