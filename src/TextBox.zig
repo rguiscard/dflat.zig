@@ -156,31 +156,8 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
     const wnd = win.win;
     // -- assign new text value to textbox buffer --
-//    const len = txt.len+1;
     _ = win.sendMessage(df.CLEARTEXT, 0, 0);
     
-//    if (win.text) |t| {
-//        if (root.global_allocator.realloc(t, @intCast(len+1))) |buf| {
-//            win.text = buf;
-//        } else |_| {
-//        }
-//    } else {
-//        if (root.global_allocator.allocSentinel(u8, @intCast(len+1), 0)) |buf| {
-//            @memset(buf, 0);
-//            win.text = buf;
-//        } else |_| {
-//        }
-//    }
-//
-//    if (win.text) |buf| {
-//        @memset(buf, 0);
-//        @memcpy(buf[0..len-1], txt);
-//        wnd.*.textlen = @intCast(len);
-//        win.textlen = @intCast(len);
-//        wnd.*.text = buf.ptr;
-//        wnd.*.text[len] = 0;
-//    }
-
     if (win.getGapBuffer(txt.len)) |buf| {
         buf.clear();
         if (buf.insertSlice(txt)) { } else |_| { }
@@ -193,18 +170,6 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
 fn ClearTextMsg(win:*Window) void {
     const wnd = win.win;
     // ----- clear text from textbox -----
-//    if (win.text) |text| {
-//        root.global_allocator.free(text);
-//        win.text = null;
-//    }
-//    wnd.*.text = null;
-//    wnd.*.textlen = 0;
-//    win.textlen = 0;
-//    wnd.*.wlines = 0;
-//    wnd.*.textwidth = 0;
-//    wnd.*.wtop = 0;
-//    wnd.*.wleft = 0;
-
     if (win.gapbuf) |buf| {
         buf.clear();
         wnd.*.text = null;

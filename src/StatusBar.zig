@@ -22,8 +22,10 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                     const sub = "F1=Help";
                     @memcpy(sb[1..8], sub);
 
-                    if (win.text) |text| {
-                        if (std.mem.indexOfScalar(u8, text, 0)) |wlen| {
+                    if (win.gapbuf) |buf| {
+                        const text = buf.toString();
+                        if (text.len>0) {
+                            const wlen = text.len;
                             var len:isize = @min(wlen, win.WindowWidth()-17);
                             if (len > 0) {
                                 const off:isize = @intCast(@divFloor(win.WindowWidth()-len, 2));
