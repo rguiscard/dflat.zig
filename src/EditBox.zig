@@ -48,7 +48,14 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     var rtn = false;
     const pp1:usize = @intCast(p1);
     const ptext:[*c]u8 = @ptrFromInt(pp1);
-    if (df.strlen(ptext)+wnd.*.textlen <= wnd.*.MaxTextLength) {
+//    if (df.strlen(ptext) > 10) {
+//        _ = df.printf("AddText %s %d %d %d\n", ptext, df.strlen(ptext), wnd.*.textlen,  wnd.*.MaxTextLength);
+//        while(true) {}
+//    }
+
+//    if (df.strlen(ptext)+wnd.*.textlen <= wnd.*.MaxTextLength) {
+    const len = if (win.gapbuf) |buf| buf.len() else 0;
+    if (df.strlen(ptext)+len <= wnd.*.MaxTextLength) {
         rtn = root.zBaseWndProc(df.EDITBOX, win, df.ADDTEXT, p1, p2);
         if (rtn) {
             if (df.isMultiLine(wnd) == 0)    {
@@ -84,24 +91,24 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
 fn ClearTextMsg(win:*Window) bool {
     const wnd = win.win;
     const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CLEARTEXT, 0, 0);
-    const blen = EditBufLen(win)+2;
+//    const blen = EditBufLen(win)+2;
 
-    if (win.text) |txt| {
-        if (root.global_allocator.realloc(txt, blen)) |buf| {
-            win.text = buf;
-        } else |_| {
-        }
-    } else {
-        if (root.global_allocator.allocSentinel(u8, blen, 0)) |buf| {
-            win.text = buf;
-        } else |_| {
-        }
-    }
-
-    if (win.text) |buf| {
-        @memset(buf, 0);
-        wnd.*.text = buf.ptr;
-    }
+//    if (win.text) |txt| {
+//        if (root.global_allocator.realloc(txt, blen)) |buf| {
+//            win.text = buf;
+//        } else |_| {
+//        }
+//    } else {
+//        if (root.global_allocator.allocSentinel(u8, blen, 0)) |buf| {
+//            win.text = buf;
+//        } else |_| {
+//        }
+//    }
+//
+//    if (win.text) |buf| {
+//        @memset(buf, 0);
+//        wnd.*.text = buf.ptr;
+//    }
 //    wnd.*.text = @ptrCast(df.DFrealloc(wnd.*.text, blen));
 //    _ = df.memset(wnd.*.text, 0, blen);
     wnd.*.wlines = 0;
@@ -122,33 +129,44 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
     len += 1;
     if (len < df.MAXTEXTLEN) {
         wnd.*.MaxTextLength = @intCast(len);
-        if (len < win.textlen) {
-            if (win.text) |txt| {
-                if (root.global_allocator.realloc(txt, @intCast(len+2))) |buf| {
-                    win.text = buf;
-                } else |_| {
-                }
-            } else {
-                if (root.global_allocator.allocSentinel(u8, @intCast(len+2), 0)) |buf| {
-                    @memset(buf, 0);
-                    win.text = buf;
-                } else |_| {
-                }
-            }
-            if (win.text) |txt| {
-                wnd.*.text = txt.ptr;
-                wnd.*.textlen = @intCast(len); // len is less than actually allocated memory
-                win.textlen = @intCast(len);
-                wnd.*.text[@intCast(len)] = 0;
-                wnd.*.text[@intCast(len+1)] = 0;
+//        if (len < win.textlen) {
+//            if (win.text) |txt| {
+//                if (root.global_allocator.realloc(txt, @intCast(len+2))) |buf| {
+//                    win.text = buf;
+//                } else |_| {
+//                }
+//            } else {
+//                if (root.global_allocator.allocSentinel(u8, @intCast(len+2), 0)) |buf| {
+//                    @memset(buf, 0);
+//                    win.text = buf;
+//                } else |_| {
+//                }
+//            }
+//            if (win.text) |txt| {
+//                wnd.*.text = txt.ptr;
+//                wnd.*.textlen = @intCast(len); // len is less than actually allocated memory
+//                win.textlen = @intCast(len);
+//                wnd.*.text[@intCast(len)] = 0;
+//                wnd.*.text[@intCast(len+1)] = 0;
+//                df.BuildTextPointers(wnd);
+//            }
+        if (win.gapbuf) |buf| {
+            if (len < buf.len()) {
+                // this is for trancate
+                buf.trancate(@intCast(len));
+                if (buf.insert('\n')) { } else |_| { } // 0 or \n ?
+                if (buf.insert(0)) { } else |_| { }
+                wnd.*.text = @constCast(buf.toString().ptr);
+                wnd.*.textlen = @intCast(buf.len());
                 df.BuildTextPointers(wnd);
             }
+        }
 //            wnd->text=DFrealloc(wnd->text, len+2);
 //            wnd->textlen = len;
 //            *((wnd->text)+len) = '\0';
 //            *((wnd->text)+len+1) = '\0';
 //            BuildTextPointers(wnd);
-        }
+//        }
         return true;
     }
     return false;
@@ -683,9 +701,15 @@ fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     }
 
     const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CLOSE_WINDOW, p1, p2);
-    if (win.text) |text| {
-        root.global_allocator.free(text);
-        win.text = null;
+//    if (win.text) |text| {
+//        root.global_allocator.free(text);
+//        win.text = null;
+//        wnd.*.text = null;
+//    }
+    // This is free at editbox instead of textbox ?
+    if (win.gapbuf) |buf| {
+        buf.deinit();
+        win.gapbuf = null;
         wnd.*.text = null;
     }
     return rtn;

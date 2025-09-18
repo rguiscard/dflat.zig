@@ -65,6 +65,9 @@ void DoKeyStroke(WINDOW, int, PARAM);
 int ScrollingKey(WINDOW, int, PARAM);
 int GetTextMsg(WINDOW, PARAM, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
+#define TextLine(wnd, sel) \
+      (wnd->text + *((wnd->TextPointers) + sel))
+#define CurrPos(wnd) (*((wnd->TextPointers) + (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 
 // editor.c
 int cSetTextMsg(WINDOW, char *);

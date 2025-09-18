@@ -45,7 +45,8 @@ pub fn clear(self: *TopLevelFields) void {
     const capacity = self.items.len - 1; // exclude sentinel
     self.gap_start = 0;
     self.gap_end = capacity;
-    self.items[capacity] = 0; // sentinel
+    @memset(self.items, 0);
+//    self.items[capacity] = 0; // sentinel
 }
 
 fn ensureGap(self: *TopLevelFields, need: usize) !void {

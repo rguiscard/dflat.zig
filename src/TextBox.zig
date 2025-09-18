@@ -44,6 +44,10 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
 //        }
 //    }
 
+//    if (txt.len > 10) {
+//        _ = df.printf("AddText %s\n", txt.ptr);
+//        while(true) {}
+//    }
     if (win.getGapBuffer(txt.len)) |buf| {
         // ---- append the text ----
         if (buf.insertSlice(txt)) { } else |_| { }

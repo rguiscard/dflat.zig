@@ -76,29 +76,39 @@ pub fn PasteFromClipboard(win: *Window) bool {
 
 pub fn PasteText(win:*Window, SaveTo:[]u8, len:c_uint) bool {
     const wnd = win.win;
-    const src:[*c]u8 = SaveTo.ptr;
+//    const src:[*c]u8 = SaveTo.ptr;
     
 //    if (SaveTo != null and len > 0)    {
     if (len > 0) {
-        if (win.text) |text| {
-            const plen = text.len + len;
-            if (plen <= wnd.*.MaxTextLength) {
-                if (plen+1 > win.textlen) {
-                    if (root.global_allocator.realloc(text, @intCast(plen+3))) |buf| {
-                        win.text = buf;
-                        wnd.*.text = buf.ptr;
-                        win.textlen = @intCast(plen+1);
-                        wnd.*.textlen = @intCast(plen+1);
-                    } else |_| {
-                    }
-                    // assume win.text exists.
-                }
+//        if (win.text) |text| {
+//            const plen = text.len + len;
+//            if (plen <= wnd.*.MaxTextLength) {
+//                if (plen+1 > win.textlen) {
+//                    if (root.global_allocator.realloc(text, @intCast(plen+3))) |buf| {
+//                        win.text = buf;
+//                        wnd.*.text = buf.ptr;
+//                        win.textlen = @intCast(plen+1);
+//                        wnd.*.textlen = @intCast(plen+1);
+//                    } else |_| {
+//                    }
+//                    // assume win.text exists.
+//                }
 //                wnd.*.text = @ptrCast(df.DFrealloc(wnd.*.text, plen+3));
 //                wnd.*.textlen = @intCast(plen+1);
+//            }
+        if (win.gapbuf) |buf| {
+            const plen = buf.len() + len;
+            if (plen <= wnd.*.MaxTextLength) {
+                const pos = df.CurrPos(wnd);
+                buf.moveCursor(pos);
+                if (buf.insertSlice(SaveTo)) { } else |_| { }
+                wnd.*.text = @constCast(buf.toString().ptr);
+                wnd.*.textlen = @intCast(buf.len());
             }
-            const cp:[*c]u8 = df.zCurrChar(wnd);
-            _ = df.memmove(cp+len, cp, df.strlen(cp)+1);
-            _ = df.memmove(cp, src, len);
+
+//            const cp:[*c]u8 = df.zCurrChar(wnd);
+//            _ = df.memmove(cp+len, cp, df.strlen(cp)+1);
+//            _ = df.memmove(cp, src, len);
             df.BuildTextPointers(wnd);
             wnd.*.TextChanged = df.TRUE;
             return true;
