@@ -78,14 +78,14 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
-fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
+fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
     const wnd = win.win;
-    const buf = sel[0..df.MAXPOPWIDTH];
+    const buf = sel;
     if (win.mnu) |mnu| {
 //        const ActivePopDown = &mnu.*.Selections[0];
         const selections:[]menus.PopDown = &mnu.*.Selections;
         const sel_wd:c_int = SelectionWidth(@constCast(&selections));
-        const m_wd:c_int = MenuWidth(@constCast(&selections));
+        const m_wd:usize = @intCast(MenuWidth(@constCast(&selections)));
         var idx:usize = 0;
 
         @memset(buf, 0);
@@ -106,13 +106,10 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
                 buf[idx-1] = checkmark;
         }
 
-//        var len=df.CopyCommand(&buf[idx], @constCast(pd1.*.SelectionTitle.?.ptr),
-//                 if (pd1.*.Attrib.INACTIVE) df.TRUE else df.FALSE,
-//                 wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
-        var len=CopyCommand(&buf[idx], pd1.*.SelectionTitle.?,
+        var len=CopyCommand(buf[idx..], pd1.*.SelectionTitle.?,
                  pd1.*.Attrib.INACTIVE,
                  wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
-        idx += @intCast(len);
+        idx += len;
 
         if (pd1.*.Accelerator>0) {
             // ---- paint accelerator key ----
@@ -125,7 +122,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
                     buf[idx] = ' ';
                     idx += 1;
                 }
-                len = df.sprintf(&buf[idx], "[Ctrl+%c]", key-1+'A');
+                len = @intCast(df.sprintf(&buf[idx], "[Ctrl+%c]", key-1+'A'));
                 idx += @intCast(len);
             } else {
                 var i:usize = 0;
@@ -138,7 +135,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
                             buf[idx] = ' ';
                             idx += 1;
                         }
-                        len = df.sprintf(&buf[idx], "[%s]", k.keylabel);
+                        len = @intCast(df.sprintf(&buf[idx], "[%s]", k.keylabel));
                         idx += @intCast(len);
                         break;
                     }
@@ -149,7 +146,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
         if (pd1.*.Attrib.CASCADED) {
             // ---- paint cascaded menu token ----
             if (pd1.*.Accelerator == 0) {
-                const wd:usize = @intCast(m_wd-len+1);
+                const wd:usize = m_wd-len+1;
                 for(0..wd) |_| {
                     buf[idx] = ' ';
                     idx += 1;
@@ -170,11 +167,15 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
 fn PaintMsg(win:*Window) void {
     if (win.mnu) |mnu| {
         const wnd = win.win;
-        var sep = [_]u8{0}**df.MAXPOPWIDTH;
-        var sel = [_]u8{0}**df.MAXPOPWIDTH;
+//        var sep = [_]u8{df.LINE}**df.MAXPOPWIDTH; // cannot be slice
+        // need to use df.LINE to differentiate from sel. 
+        // otherwise, zig make them the same.
+        var sep:[]u8 = @constCast(&[_]u8{df.LINE}**df.MAXPOPWIDTH);
+        const sel:[]u8 = @constCast(&[_]u8{0}**df.MAXPOPWIDTH);
         const selections:[]menus.PopDown = &mnu.*.Selections;
+
+        @memset(sep, df.LINE);
         const wd:usize = @intCast(MenuWidth(@constCast(&selections))-2);
-        @memset(&sep, df.LINE);
         sep[wd] = 0; // minimal of width and maxwidth ?
 
         _ = win.sendMessage(df.CLEARTEXT, 0, 0);
@@ -182,10 +183,10 @@ fn PaintMsg(win:*Window) void {
         for (mnu.*.Selections) |m| {
             if (m.SelectionTitle) |title| {
                 if (title[0] == df.LINE) {
-                    _ = win.sendTextMessage(df.ADDTEXT, sep[0..wd], 0);
+                    _ = win.sendTextMessage(df.ADDTEXT, sep, 0);
                 } else {
-                    PaintPopDownSelection(win, @constCast(&m), &sel);
-                    _ = win.sendTextMessage(df.ADDTEXT, &sel, 0);
+                    PaintPopDownSelection(win, @constCast(&m), sel);
+                    _ = win.sendTextMessage(df.ADDTEXT, sel, 0);
                 }
             }
         }
@@ -437,7 +438,7 @@ pub fn SelectionWidth(pd:*[]menus.PopDown) c_int {
 }
 
 // ----- copy a menu command to a display buffer ----
-pub fn CopyCommand(dest:[*c]u8, src:[]const u8, skipcolor:bool, bg:c_int) c_int {
+pub fn CopyCommand(dest:[]u8, src:[]const u8, skipcolor:bool, bg:c_int) usize {
     var idx:usize = 0;
     var change = false;
     for (src) |chr| {

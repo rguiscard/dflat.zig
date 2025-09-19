@@ -31,8 +31,7 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
                   txt[2] = wnd.*.WindowColors[df.STD_COLOR][df.BG] | 0x80;
                   start = 3;
                 }
-//                _ = df.CopyCommand(&txt[start],@constCast(itext.ptr),if (ct.*.setting == df.OFF) 1 else 0, df.WndBackground(wnd));
-                _ = popdown.CopyCommand(&txt[start],itext, (ct.*.setting == df.OFF), df.WndBackground(wnd));
+                _ = popdown.CopyCommand(txt[start..],itext, (ct.*.setting == df.OFF), df.WndBackground(wnd));
                 _ = win.sendMessage(df.CLEARTEXT, 0, 0);
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(txt), 0);
             } else |_| {

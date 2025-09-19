@@ -25,8 +25,7 @@ fn drawText(win:*Window) void {
                     if (root.global_allocator.allocSentinel(u8, mlen, 0)) |buf| {
                         @memset(buf, 0);
                         defer root.global_allocator.free(buf);
-//                        _ = df.CopyCommand(buf.ptr, @constCast(line.ptr), df.FALSE, df.WndBackground(wnd));
-                        _ = popdown.CopyCommand(buf.ptr, line, false, df.WndBackground(wnd));
+                        _ = popdown.CopyCommand(buf, line, false, df.WndBackground(wnd));
                         _ = win.sendTextMessage(df.ADDTEXT, @constCast(buf), 0);
                     } else |_| {
                     }
