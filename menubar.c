@@ -3,6 +3,7 @@
 #include "dflat.h"
 
 // return FALSE to break;
+#if 0
 BOOL cBuildMenu(WINDOW wnd, char *title, int offset, char **buf) {
     if (strlen(*buf+offset) < strlen(title)+3)
         return FALSE;
@@ -12,6 +13,7 @@ BOOL cBuildMenu(WINDOW wnd, char *title, int offset, char **buf) {
 
     return TRUE;
 }
+#endif
 
 void cPaintMenu(WINDOW wnd, int offset, int offset1, int selection) {
     char *cp;

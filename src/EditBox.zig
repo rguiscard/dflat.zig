@@ -48,10 +48,6 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     var rtn = false;
     const pp1:usize = @intCast(p1);
     const ptext:[*c]u8 = @ptrFromInt(pp1);
-//    if (df.strlen(ptext) > 10) {
-//        _ = df.printf("AddText %s %d %d %d\n", ptext, df.strlen(ptext), wnd.*.textlen,  wnd.*.MaxTextLength);
-//        while(true) {}
-//    }
 
 //    if (df.strlen(ptext)+wnd.*.textlen <= wnd.*.MaxTextLength) {
     const len = if (win.gapbuf) |buf| buf.len() else 0;
@@ -93,18 +89,6 @@ fn ClearTextMsg(win:*Window) bool {
     const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CLEARTEXT, 0, 0);
 //    const blen = EditBufLen(win)+2;
 
-//    if (win.text) |txt| {
-//        if (root.global_allocator.realloc(txt, blen)) |buf| {
-//            win.text = buf;
-//        } else |_| {
-//        }
-//    } else {
-//        if (root.global_allocator.allocSentinel(u8, blen, 0)) |buf| {
-//            win.text = buf;
-//        } else |_| {
-//        }
-//    }
-//
 //    if (win.text) |buf| {
 //        @memset(buf, 0);
 //        wnd.*.text = buf.ptr;

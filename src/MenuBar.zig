@@ -35,23 +35,27 @@ fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
 fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
     const wnd = win.win;
     reset_menubar(win);
-    if (win.text) |buf| {
-        const b:[*c]u8 = buf.ptr;
-        var offset:isize = 3;
+    if (win.gapbuf) |buf| {
+        const b = [_]u8{0}**80;
+        var offset:usize = 3;
         var idx:usize = 0;
         const pp1:usize = @intCast(p1);
         ActiveMenuBar = @ptrFromInt(pp1);
         if (ActiveMenuBar) |mbar| {
             for(mbar.*.PullDown) |m| {
                 if (m.Title) |title| {
-                    // FIX: this method realloc buf, may cause memory leak.
-                    const rtn = df.cBuildMenu(wnd, @constCast(title.ptr), @intCast(offset), @constCast(&b));
-                    if (rtn == df.FALSE) {
-                        break;
+                    if (title.len+3 > buf.items.len+offset)
+                        break; // longer than buffer size. should compare to screenwidth ?
+                    const len = df.CopyCommand(@constCast(&b), @constCast(title.ptr), df.FALSE, wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
+                    while(offset > buf.len()) {
+                        if (buf.insert(' ')) {} else |_| {}
                     }
-                    menupos[idx].x1 = offset;
+                    buf.moveCursor(offset);
+                    if (buf.insertSlice(b[0..@intCast(len)])) {} else |_| {}
+
+                    menupos[idx].x1 = @intCast(offset);
                     offset += @intCast(title.len + (3+df.MSPACE));
-                    menupos[idx].x2 = offset-df.MSPACE;
+                    menupos[idx].x2 = @intCast(offset-df.MSPACE);
 
                     if (std.mem.indexOfScalar(u8, title, df.SHORTCUTCHAR)) |pos| {
                         menupos[idx].sc = std.ascii.toLower(title[pos+1]);
@@ -60,10 +64,15 @@ fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
                     mctr += 1;
                 }
             }
+            // FIXME: width is not accurate
+            while(buf.len() < df.SCREENWIDTH*2) {
+                 if (buf.insert(' ')) {} else |_| {}
+            }
 
             ActiveMenu = &mbar.*.PullDown;
         }
-        wnd.*.text = b;
+        wnd.*.text = @constCast(buf.toString().ptr);
+        wnd.*.textlen = @intCast(buf.len());
     } else {
         // error 
     }
@@ -135,8 +144,6 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
                                 if (pd.Attrib.TOGGLE) {
                                     pd.Attrib.CHECKED = !pd.Attrib.CHECKED;
                                 }
-//                                if (pd.Attrib & df.TOGGLE > 0)
-//                                    pd.Attrib ^= df.CHECKED;
                                 _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
                                 q.PostMessage(win.getParent().win, df.COMMAND, @intFromEnum(pd.ActionId), 0);
                             }
@@ -379,8 +386,9 @@ fn ClosePopdownMsg(win:*Window) void {
 // ---------------- CLOSE_WINDOW Message ---------------
 fn CloseWindowMsg(win:*Window) void {
     const wnd = win.win;
-    if (win.text) |text| {
-        root.global_allocator.free(text);
+    if (win.gapbuf) |buf| {
+        buf.clear();
+        // buf.deinit(); // free ?
         win.text = null;
         wnd.*.text = null;
     }
@@ -452,26 +460,10 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
 // ------------- reset the MENUBAR --------------
 fn reset_menubar(win:*Window) void {
     const wnd = win.win;
-    if (win.text) |text|{
-        if (root.global_allocator.realloc(text, @intCast(df.SCREENWIDTH+5))) |b| {
-            win.text= b;
-        } else |_| {
-            // error
-        }
-    } else {
-        if (root.global_allocator.allocSentinel(u8, @intCast(df.SCREENWIDTH+5), 0)) |b| {
-            @memset(b, 0);
-            win.text= b;
-        } else |_| {
-            // error
-        }
+    if (win.getGapBuffer(@intCast(df.SCREENWIDTH+5))) |_| {
+        wnd.*.text = null;
+        wnd.*.textlen = 0;
     }
-    if (win.text) |text| {
-        @memset(text, ' ');
-        wnd.*.text = text.ptr;
-        wnd.*.text[text.len-1] = 0;
-    }
-    wnd.*.text[@intCast(win.WindowWidth())] = 0;
 }
 
 fn GetDocFocus() df.WINDOW {

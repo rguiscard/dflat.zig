@@ -17,37 +17,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
     const adln:usize = txt.len;
     if (adln > 0xfff0)
         return false;
-//    if (win.text) |t| {
-//        // ---- appending to existing text ----
-//        const txln:usize = @intCast(df.strlen(wnd.*.text)); // more accurate than win.text because \0 ?
-//        if (txln+adln > 0xfff0) { // consider overflow ?
-//            return false;
-//        }
-//        if (txln+adln > wnd.*.textlen) {
-//            if (root.global_allocator.realloc(t, txln+adln+3)) |buf| {
-//                win.text = buf;
-//                wnd.*.text = buf.ptr;
-//                win.textlen = txln+adln+1;
-//                wnd.*.textlen = @intCast(txln+adln+1);
-//            } else |_| {
-//            }
-//        }
-//    } else {
-//        // ------ 1st text appended ------
-//        if (root.global_allocator.allocSentinel(u8, adln+3, 0)) |buf| {
-//            @memset(buf, 0);
-//            win.text = buf;
-//            wnd.*.text = buf.ptr;
-//            win.textlen = adln+1;
-//            wnd.*.textlen = @intCast(adln+1);
-//        } else |_| {
-//        }
-//    }
 
-//    if (txt.len > 10) {
-//        _ = df.printf("AddText %s\n", txt.ptr);
-//        while(true) {}
-//    }
     if (win.getGapBuffer(txt.len)) |buf| {
         // ---- append the text ----
         if (buf.insertSlice(txt)) { } else |_| { }
@@ -59,39 +29,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         return true;
     }
 
-
-//    if (wnd->text != NULL)    {
-//        /* ---- appending to existing text ---- */
-//        unsigned txln = strlen(wnd->text);
-//        if ((long)txln+adln > (unsigned) 0xfff0)
-//            return FALSE;
-//        if (txln+adln > wnd->textlen)    {
-//            wnd->text = DFrealloc(wnd->text, txln+adln+3);
-//            wnd->textlen = txln+adln+1;
-//        }
-//    }
-//    else    {
-//        /* ------ 1st text appended ------ */
-//        wnd->text = DFcalloc(1, adln+3);
-//        wnd->textlen = adln+1;
-//    }
-
     wnd.*.TextChanged = df.TRUE;
-//    if (win.text) |buf| {
-        // ---- append the text ----
-//        if (std.mem.indexOfScalar(u8, buf, 0)) |idx| {
-//            @memcpy(buf.ptr[idx..idx+txt.len], txt);
-//            @memcpy(buf.ptr[idx+txt.len..idx+txt.len+1], "\n");
-//            @memcpy(buf.ptr[idx+txt.len+1..idx+txt.len+2], "\x00");
-//            buf.ptr[idx+txt.len] = '\n';
-//            buf.ptr[idx+txt.len+1] = 0;
-//        }
-//        strcat(wnd->text, txt);
-//        strcat(wnd->text, "\n");
-
-//        df.BuildTextPointers(wnd);
-//        return true;
-//    }
     return false;
 }
 
