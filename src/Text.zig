@@ -4,26 +4,18 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const DialogBox = @import("DialogBox.zig");
+const popdown = @import("PopDown.zig");
 
 fn drawText(win:*Window) void {
     const wnd = win.win;
-//    const ct = df.GetControl(wnd);
     if (win.GetControl()) |ct| {
-//        if (ct == null)
-//            return;
-//        if ((ct.*.itext == null) or (wnd.*.text != null))
-//            return;
-
         const ctl_text = DialogBox.getCtlWindowText(ct);
-        if ((ctl_text == null) or (wnd.*.text != null))
+        if (ctl_text == null)
             return;
 
         const height:usize = @intCast(ct.*.dwnd.h);
         var idx:usize = 0;
 
-//        const ptr = @as([*:0]u8, ct.*.itext);
-//        const content = std.mem.span(ptr);
-//        if (ct.*.itext) |content| {
         if (ctl_text) |text| {
             var iter = std.mem.splitScalar(u8, text, '\n'); // split do not include '\n'
             while (iter.next()) |line| {
@@ -33,7 +25,8 @@ fn drawText(win:*Window) void {
                     if (root.global_allocator.allocSentinel(u8, mlen, 0)) |buf| {
                         @memset(buf, 0);
                         defer root.global_allocator.free(buf);
-                        _ = df.CopyCommand(buf.ptr, @constCast(line.ptr), df.FALSE, df.WndBackground(wnd));
+//                        _ = df.CopyCommand(buf.ptr, @constCast(line.ptr), df.FALSE, df.WndBackground(wnd));
+                        _ = popdown.CopyCommand(buf.ptr, line, false, df.WndBackground(wnd));
                         _ = win.sendTextMessage(df.ADDTEXT, @constCast(buf), 0);
                     } else |_| {
                     }

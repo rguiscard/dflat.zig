@@ -17,6 +17,8 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
         df.PAINT => {
             if (df.isVisible(wnd) > 0) {
                 if(root.global_allocator.alloc(u8, @intCast(win.WindowWidth()+1))) |sb| {
+                    defer root.global_allocator.free(sb);
+
                     @memset(sb, ' ');
                     sb[@intCast(win.WindowWidth())] = 0;
                     const sub = "F1=Help";
@@ -44,7 +46,6 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
 
                     df.SetStandardColor(wnd);
                     df.PutWindowLine(wnd, @constCast(@ptrCast(sb.ptr)), 0, 0);
-                    defer root.global_allocator.free(sb);
                     return true;
                 } else |_| {
                     // error

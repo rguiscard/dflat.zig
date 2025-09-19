@@ -46,7 +46,8 @@ fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
                 if (m.Title) |title| {
                     if (title.len+3 > buf.items.len+offset)
                         break; // longer than buffer size. should compare to screenwidth ?
-                    const len = df.CopyCommand(@constCast(&b), @constCast(title.ptr), df.FALSE, wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
+//                    const len = df.CopyCommand(@constCast(&b), @constCast(title.ptr), df.FALSE, wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
+                    const len = popdown.CopyCommand(@constCast(&b), title, false, wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
                     while(offset > buf.len()) {
                         if (buf.insert(' ')) {} else |_| {}
                     }

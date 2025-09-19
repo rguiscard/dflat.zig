@@ -61,73 +61,6 @@ void ExtendBlock(WINDOW wnd, int x, int y)
     }
 }
 
-/* ---------- page/scroll keys ----------- */
-#if 0
-int ScrollingKey(WINDOW wnd, int c, PARAM p2)
-{
-    switch (c)    {
-        case PGUP:
-        case PGDN:
-            if (isMultiLine(wnd))
-                BaseWndProc(EDITBOX, wnd, KEYBOARD, c, p2);
-            break;
-        case CTRL_PGUP:
-        case CTRL_PGDN:
-            BaseWndProc(EDITBOX, wnd, KEYBOARD, c, p2);
-            break;
-        case HOME:
-            Home(wnd);
-            break;
-        case END:
-            End(wnd);
-            break;
-        case CTRL_FWD:
-            NextWord(wnd);
-            break;
-        case CTRL_BS:
-            PrevWord(wnd);
-            break;
-        case CTRL_HOME:
-            if (isMultiLine(wnd))    {
-                SendMessage(wnd, SCROLLDOC, TRUE, 0);
-                wnd->CurrLine = 0;
-                wnd->WndRow = 0;
-            }
-            Home(wnd);
-            break;
-        case CTRL_END:
-			if (isMultiLine(wnd) &&
-					wnd->WndRow+wnd->wtop+1 < wnd->wlines
-						&& wnd->wlines > 0) {
-                SendMessage(wnd, SCROLLDOC, FALSE, 0);
-                SetLinePointer(wnd, wnd->wlines-1);
-                wnd->WndRow =
-                    min(ClientHeight(wnd)-1, wnd->wlines-1);
-                Home(wnd);
-            }
-            End(wnd);
-            break;
-        case UP:
-            if (isMultiLine(wnd))
-                Upward(wnd);
-            break;
-        case DN:
-            if (isMultiLine(wnd))
-                Downward(wnd);
-            break;
-        case FWD:
-            Forward(wnd);
-            break;
-        case BS:
-            Backward(wnd);
-            break;
-        default:
-            return FALSE;
-    }
-
-    return TRUE;
-}
-#endif
 /* -------------- Del key ---------------- */
 void DelKey(WINDOW wnd) // private
 {
@@ -283,43 +216,6 @@ void KeyTyped(WINDOW wnd, int c) // private
     /* ----- advance the pointers ------ */
     wnd->CurrCol++;
 }
-
-/* ------------ screen changing key strokes ------------- */
-#if 0
-void DoKeyStroke(WINDOW wnd, int c, PARAM p2) // private
-{
-    switch (c)    {
-        case RUBOUT:
-			if (wnd->CurrCol == 0 && wnd->CurrLine == 0)
-				break;
-			SendMessage(wnd, KEYBOARD, BS, 0);
-			SendMessage(wnd, KEYBOARD, DEL, 0);
-			break;
-        case DEL:
-            DelKey(wnd);
-            break;
-        case SHIFT_HT:
-            ShiftTabKey(wnd, p2);
-            break;
-        case '\t':
-            TabKey(wnd, p2);
-            break;
-        case '\r':
-            if (!isMultiLine(wnd))    {
-                PostMessage(GetParent(wnd), KEYBOARD, c, p2);
-                break;
-            }
-            c = '\n';
-        default:
-            if (TextBlockMarked(wnd))    {
-                SendMessage(wnd, COMMAND, ID_DELETETEXT, 0);
-                SendMessage(wnd, PAINT, 0, 0);
-            }
-            KeyTyped(wnd, c);
-            break;
-    }
-}
-#endif
 
 // ------ change all text lines in block to \n -----
 void TextBlockToN(char *bbl, char *bel) {

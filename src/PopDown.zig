@@ -106,8 +106,11 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[*c]u8) void {
                 buf[idx-1] = checkmark;
         }
 
-        var len=df.CopyCommand(&buf[idx], @constCast(pd1.*.SelectionTitle.?.ptr),
-                 if (pd1.*.Attrib.INACTIVE) df.TRUE else df.FALSE,
+//        var len=df.CopyCommand(&buf[idx], @constCast(pd1.*.SelectionTitle.?.ptr),
+//                 if (pd1.*.Attrib.INACTIVE) df.TRUE else df.FALSE,
+//                 wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
+        var len=CopyCommand(&buf[idx], pd1.*.SelectionTitle.?,
+                 pd1.*.Attrib.INACTIVE,
                  wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
         idx += @intCast(len);
 
@@ -431,4 +434,31 @@ pub fn SelectionWidth(pd:*[]menus.PopDown) c_int {
         }
     }
     return wd;
+}
+
+// ----- copy a menu command to a display buffer ----
+pub fn CopyCommand(dest:[*c]u8, src:[]const u8, skipcolor:bool, bg:c_int) c_int {
+    var idx:usize = 0;
+    var change = false;
+    for (src) |chr| {
+        if (chr == '\n') // original code end with '\n' and dest do no have '\n'
+            break;
+        if (chr == df.SHORTCUTCHAR) {
+            change = true;
+            continue; // skip shortcut symbol
+        }
+        if (change and !skipcolor) {
+            dest[idx]   = df.CHANGECOLOR;
+            dest[idx+1] = df.cfg.clr[df.POPDOWNMENU] [df.HILITE_COLOR] [df.BG] | 0x80;
+            dest[idx+2] = @intCast(bg | 0x80);
+            dest[idx+3] = chr;
+            dest[idx+4] = df.RESETCOLOR;
+            idx += 5;
+        } else {
+            dest[idx] = chr;
+            idx += 1;
+        }
+        change = false;
+    }
+    return @intCast(idx);
 }

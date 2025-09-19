@@ -618,10 +618,6 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:df.C
         if (text) |txt| {
             // always keep a copy
             if (std.mem.indexOfScalar(txt)) |len| {
-//                const len = df.strlen(text);
-//                if (itextAllocateSentinel(ct, len)) {
-//                    @memcpy(ct.*.itext.?, text[0..len:0]);
-//                }
                 if (getGapBuffer(ct, len)) |buf| {
                     buf.clear();
                     buf.insertSlice(text[0..len]);
@@ -718,12 +714,9 @@ pub fn GetItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8, len:c_int) void {
         control = FindCommand(db, cmd, df.TEXT);
     if (control) |ct| {
         if (ct.win) |cwin| {
-//            const cwnd = cwin.win;
-//            const cwin_text = cwin.text;
             switch (ct.*.Class) {
                 df.TEXT => {
                     if (cwin.gapbuf) |buf| {
-//                    if (cwin_text) |t| {
                         const t = buf.toString();
                         if (std.mem.indexOfScalar(u8, t, '\n')) |pos| {
                             @memcpy(text[0..pos], t[0..pos]);
@@ -739,7 +732,6 @@ pub fn GetItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8, len:c_int) void {
                     }
                 },
                 df.TEXTBOX => {
-//                    if (cwin_text) |t| {
                     if (cwin.gapbuf) |buf| {
                         const t = buf.toString();
                         var l:usize = @intCast(len);
@@ -839,7 +831,6 @@ pub export fn ControlSetting(db:*Dialogs.DBOX, cmd: c, Class: c_int, setting: c_
     const control = FindCommand(db, cmd, Class);
     if (control) |ct| {
         ct.*.isetting = @intCast(setting);
-//        if (ct.*.wnd != null)
         if (ct.win) |_| {
             ct.*.setting = @intCast(setting);
         }
@@ -876,10 +867,6 @@ pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: c_int) bool {
             var ct = ctl;
             if (ct.*.Class == 0)
                 break;
-//            if (ct.*.itext) |itext| {
-//                const text = itext;
-//              if (ct.igapbuf) |buf| {
-//                const text = buf.toString();
             if (getCtlWindowText(ct)) |text| {
                 if (std.mem.indexOfScalar(u8, text, df.SHORTCUTCHAR)) |pos| {
                     if ((pos < text.len-1) and (std.ascii.toLower(text[pos+1]) == ch)) {
