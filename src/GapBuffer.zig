@@ -161,6 +161,31 @@ pub fn trancate(self: *TopLevelFields, pos: usize) void {
 
 }
 
+pub fn setChar(self: *TopLevelFields, pos: usize, c: u8) void {
+    const l = self.len();
+    if (pos >= l)
+        return;
+
+    if (pos < self.gap_start) {
+        self.items[pos] = c;
+    } else {
+        const after_index = self.gap_end + (pos - self.gap_start);
+        self.items[after_index] = c;
+    }
+}
+
+pub fn getChar(self: *TopLevelFields, pos: usize) ?u8 {
+    const l = self.len();
+    if (pos >= l)
+        return null;
+
+    var idx = pos;
+    if (pos >= self.gap_start) {
+        idx = pos + (self.gap_end - self.gap_start);
+    }
+    return self.items[idx];
+}
+
 pub fn len(self: *TopLevelFields) usize {
     return (self.items.len - 1) - (self.gap_end - self.gap_start);
 }
@@ -193,6 +218,33 @@ pub fn indexOfLine(self: *TopLevelFields, lno:usize, move: bool) usize {
             self.moveCursor(pos);
     }
     return pos; 
+}
+
+test "gap buffer get and set char" {
+    const gpa = std.testing.allocator;
+    for (0..2) |idx| {
+        var buf = try TopLevelFields.init(gpa, 40);
+        defer buf.deinit();
+        if (idx > 0) {
+           buf.setRealloc(true);
+        }
+        try buf.insertSlice("012345678901234567890");
+        if (buf.getChar(1)) |chr| {
+            try std.testing.expectEqual('1', chr);
+        } else {
+            try std.testing.expect(false);
+        }
+        buf.moveCursor(10);
+        for(0..5) |_| {
+            buf.backspace();
+        }
+        if (buf.getChar(7)) |chr| {
+            try std.testing.expectEqual('2', chr);
+        } else {
+            try std.testing.expect(false);
+        }
+        try std.testing.expectEqualStrings("0123401234567890", buf.toString());
+    }
 }
 
 test "gap buffer line position" {

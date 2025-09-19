@@ -15,6 +15,7 @@ BOOL cBuildMenu(WINDOW wnd, char *title, int offset, char **buf) {
 }
 #endif
 
+#if 0
 void cPaintMenu(WINDOW wnd, int offset, int offset1, int selection) {
     char *cp;
     char sel[MAXCOLS];
@@ -27,3 +28,4 @@ void cPaintMenu(WINDOW wnd, int offset, int offset1, int selection) {
     wputs(wnd, sel, offset-selection*4, 0);
     GetText(wnd)[offset1] = ' ';
 }
+#endif

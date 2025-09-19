@@ -481,13 +481,13 @@ fn KeyTyped(win:*Window, cc:c_int) void {
                 if (!(currpos == wnd.*.MaxTextLength))
                     _ = win.sendMessage(df.HORIZSCROLL, df.TRUE, 0);
             } else {
-//                char *cp = currchar;
-//                while (*cp != ' ' && cp != (char *)TextLine(wnd, wnd->CurrLine))
-//                    --cp;
-//                if (cp == (char *)TextLine(wnd, wnd->CurrLine) ||
-//                            !wnd->WordWrapMode) {
-//                    SendMessage(wnd, HORIZSCROLL, TRUE, 0);
-//                } else {
+                var cp = currchar;
+                const lchr:u8 = @intCast(df.TextLine(wnd, wnd.*.CurrLine)[0]);
+                while (cp != ' ' and cp != lchr)
+                    cp -= 1;
+                if (cp == lchr or (wnd.*.WordWrapMode == df.FALSE)) {
+                    _ = win.sendMessage(df.HORIZSCROLL, df.TRUE, 0);
+                } else {
 //                    int dif = 0;
 //                    if (c != ' ')    {
 //                        dif = (int) (currchar - cp);
@@ -500,11 +500,11 @@ fn KeyTyped(win:*Window, cc:c_int) void {
 //                    wnd->CurrCol = dif;
 //                    if (c == ' ')
 //                        return;
-//                }
+                }
             }
         }
         // ------ display the character ------
-//        df.SetStandardColor(wnd);
+        df.SetStandardColor(wnd);
 //        if (wnd.*.protect)
 //            c = '*';
 //        PutWindowChar(wnd, c, WndCol, wnd->WndRow);

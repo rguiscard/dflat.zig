@@ -87,28 +87,47 @@ fn PaintMsg(win:*Window) void {
         _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
     }
     df.SetStandardColor(wnd);
-    df.wputs(wnd, wnd.*.text, 0, 0);
 
-    if (ActiveMenuBar) |mbar| {
-        if ((mbar.*.ActiveSelection != -1) and
-                ((win == Window.inFocus) or (mwin != null))) {
+    if (win.gapbuf) |buf| {
+        buf.compact();
+        if (root.global_allocator.dupeZ(u8, buf.items)) |text| {
+            defer root.global_allocator.free(text);
 
-            const idx:usize = @intCast(mbar.*.ActiveSelection);
-            const offset=menupos[idx].x1;
-            const offset1=menupos[idx].x2;
+//            df.wputs(wnd, wnd.*.text, 0, 0);
+            df.wputs(wnd, text.ptr, 0, 0);
 
-            wnd.*.text[@intCast(offset1)] = 0;
-            df.SetReverseColor(wnd);
-            df.cPaintMenu(wnd, @intCast(offset), @intCast(offset1), mbar.*.ActiveSelection);
+            if (ActiveMenuBar) |mbar| {
+                if ((mbar.*.ActiveSelection != -1) and
+                        ((win == Window.inFocus) or (mwin != null))) {
 
-            if ((mwin == null) and (win == Window.inFocus)) {
-                if (ActiveMenu) |amenu| {
-                    const st = amenu[idx].StatusText;
-                    if (st) |txt| {
-                        _ = win.getParent().sendTextMessage(df.ADDSTATUS, @constCast(txt), 0);
+                    const idx:usize = @intCast(mbar.*.ActiveSelection);
+                    const offset=menupos[idx].x1;
+                    const offset1=menupos[idx].x2;
+
+//                    wnd.*.text[@intCast(offset1)] = 0;
+                    text[@intCast(offset1)] = 0;
+
+                    df.SetReverseColor(wnd);
+//                    df.cPaintMenu(wnd, @intCast(offset), @intCast(offset1), mbar.*.ActiveSelection);
+
+                    if (std.mem.indexOfScalarPos(u8, text, @intCast(offset), df.CHANGECOLOR)) |idxx| {
+                        text[idxx+2] = @intCast(df.background | 0x80);
+                    }
+                    // ActiveSelection suggest how many shortcut symbol ahead
+                    df.wputs(wnd, &text[@intCast(offset)], @intCast(offset-mbar.*.ActiveSelection*4), 0);
+                    buf.setChar(@intCast(offset1), ' ');
+
+                    if ((mwin == null) and (win == Window.inFocus)) {
+                        if (ActiveMenu) |amenu| {
+                            const st = amenu[idx].StatusText;
+                            if (st) |txt| {
+                                _ = win.getParent().sendTextMessage(df.ADDSTATUS, @constCast(txt), 0);
+                            }
+                        }
                     }
                 }
             }
+        } else |_| {
         }
     }
 }

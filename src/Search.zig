@@ -71,7 +71,6 @@ fn BlkBegColFromLine(wnd: df.WINDOW, cp:[*c]u8) c_int {
 fn SearchTextBox(win:*Window, incr:bool) void {
     const wnd = win.win;
 
-//    char *s1 = NULL, *s2, *cp1;
     var cp1:[*c]u8 = null;
     const dbox = if (Replacing) &Dialogs.ReplaceTextDB else  &Dialogs.SearchTextDB;
     const searchtext = DialogBox.GetEditBoxText(dbox, c.ID_SEARCHFOR);

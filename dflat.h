@@ -351,7 +351,7 @@ BOOL isAncestor(WINDOW, WINDOW);
 		HighlightForeground(wnd) = fg, HighlightBackground(wnd) = bg
 /* -------- text box prototypes ---------- */
 #define TextLine(wnd, sel) \
-      (wnd->text + *((wnd->TextPointers) + sel))
+      (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
 void WriteTextLine(WINDOW, RECT *, int, BOOL);
 #define TextBlockMarked(wnd) (  wnd->BlkBegLine ||    \
                                 wnd->BlkEndLine ||    \
