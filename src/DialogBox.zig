@@ -15,28 +15,6 @@ const GapBuffer = @import("GapBuffer.zig");
 var SysMenuOpen = false;
 var dialogboxes:?std.ArrayList(*Dialogs.DBOX) = null;
 
-//fn itextAllocateSentinel(ct:*Dialogs.CTLWINDOW, size:usize) bool {
-//    if (ct.*.itext) |itext| {
-//        if (ct.*.itext_allocated) { // can realloc
-//            if(root.global_allocator.realloc(itext, size+1)) |buf| {
-//                ct.*.itext = buf[0..size:0];
-//            } else |_| {
-//            }
-//            return true;
-//        }
-//    }
-//
-//    // Either itext is null or no in heap. Assign to new memory buf.
-//    if(root.global_allocator.allocSentinel(u8, size, 0)) |buf| {
-//        @memset(buf, 0);
-//        ct.*.itext = buf;
-//        ct.*.itext_allocated = true; // can be freed.
-//        return true;
-//    } else |_| {
-//    }
-//    return false; // error on allocation
-//}
-
 fn getGapBuffer(ct:*Dialogs.CTLWINDOW, size:usize) ?*GapBuffer {
     if (ct.igapbuf == null) {
         if (GapBuffer.init(root.global_allocator, size)) |buf| {
@@ -77,30 +55,14 @@ pub fn ClearDialogBoxes() void {
             for (&db.*.ctl) |*ct| {
                 if (ct.*.Class == 0)
                     break;
-//                if (ct.*.itext) |itext| {
-//                    if (ct.*.itext_allocated) {
-//-                     if ((ct.*.Class == df.EDITBOX or
-//-                                ct.*.Class == df.TEXTBOX or
-//-                                ct.*.Class == df.COMBOBOX)) {
-//                            // FIXME: itext_allocated should save guard already.
-//                            // Why only apply to these classes?
-//                            // Memory leak if no safe guard here.
-//-                             _ = itext;
-//                            root.global_allocator.free(itext);
-//-                        }
-//                        ct.*.itext = null;
-//                        ct.*.itext_allocated = false;
-//                    }
-//                    // null for others ?
-//                }
                 if (ct.igapbuf) |buf| {
-                      // FIXME: check existence of igapbuf should be sufficient
-                      if ((ct.*.Class == df.EDITBOX or
+                    // FIXME: check existence of igapbuf should be sufficient
+                    if ((ct.*.Class == df.EDITBOX or
                                  ct.*.Class == df.TEXTBOX or
                                  ct.*.Class == df.COMBOBOX)) {
-                    ct.igapbuf = null;
-                    buf.deinit();
-                        }
+                        ct.igapbuf = null;
+                        buf.deinit();
+                    }
                 }
             }
         }
@@ -294,17 +256,6 @@ fn CtlCloseWindowMsg(win:*Window) void {
             if (ct.*.Class == df.EDITBOX or ct.*.Class == df.COMBOBOX)  {
                 // should use strlen() instead ?
                 const len = wnd.*.textlen;
-//                if (itextAllocateSentinel(ct, len)) {
-//                    @memcpy(ct.*.itext.?, wnd.*.text[0..len:0]);
-//                }
-//                if (df.isMultiLine(wnd) == df.FALSE) {
-//                    // remove first \n
-//                    if (ct.*.itext) |itext| {
-//                        if (std.mem.indexOfScalar(u8, itext, '\n')) |pos| {
-//                            itext.ptr[pos] = 0;
-//                        }
-//                    }
-//                }
                 if (getGapBuffer(ct, len)) |buf| {
                     buf.clear();
                     if (wnd.*.text) |text| {
@@ -441,11 +392,6 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
         } else if ((ctl.*.Class == df.LISTBOX or ctl.*.Class == df.TEXTBOX) and ctl.*.dwnd.h > 2) {
             attrib = attrib | df.HASBORDER;
         }
-        // create gapbuffer
-//        if (getGapBuffer(ctl, ctl.dtext.len)) |buf| {
-//            buf.clear();
-//            buf.insertSlice(ctl.dtext);
-//        }
 
         var cwnd = Window.create(ctl.*.Class,
                         ctl.*.dwnd.title,
@@ -459,9 +405,6 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
                         attrib);
         if ((ctl.*.Class == df.EDITBOX or ctl.*.Class == df.TEXTBOX or
                 ctl.*.Class == df.COMBOBOX)) {
-//            if (ctl.*.itext) |itext| {
-//                _ = cwnd.sendTextMessage(df.SETTEXT, @constCast(itext), 0);
-//            }
             if (getCtlWindowText(ctl)) |text| {
                 _ = cwnd.sendTextMessage(df.SETTEXT, @constCast(text), 0);
             }
@@ -663,21 +606,6 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
 pub fn GetDlgTextString(db:*Dialogs.DBOX, cmd:c, Class:df.CLASS) ?[:0]const u8 {
     const ct = FindCommand(db, cmd, Class);
     if (ct) |ctl| {
-//        if (ctl.*.itext) |itext| {
-//            // buffer may be bigger than text. return the correct len.
-//            if (std.mem.indexOfScalar(u8, itext, 0)) |pos| {
-//                return itext[0..pos:0];
-//            }
-//        }
-//        if (ctl.igapbuf) |buf| {
-//            // buffer may be bigger than text. return the correct len.
-//            buf.compact();
-//            if (std.mem.indexOfScalar(u8, buf.items, 0)) |pos| {
-//                buf.trancate(pos);
-//                return buf.toString();
-//            }
-//         
-//        }
         return getCtlWindowText(ctl);
     }
     return null;
@@ -700,11 +628,6 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:df.C
                 }
             }
         } else {
-//            if (ct.*.itext_allocated) {
-//                root.global_allocator.free(ct.*.itext);
-//                ct.*.itext = null;
-//                ct.*.itext_allocated = false;
-//            }
             if (ct.gapbuf) |buf| {
                 buf.clear();
             }
@@ -796,10 +719,12 @@ pub fn GetItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8, len:c_int) void {
     if (control) |ct| {
         if (ct.win) |cwin| {
 //            const cwnd = cwin.win;
-            const cwin_text = cwin.text;
+//            const cwin_text = cwin.text;
             switch (ct.*.Class) {
                 df.TEXT => {
-                    if (cwin_text) |t| {
+                    if (cwin.gapbuf) |buf| {
+//                    if (cwin_text) |t| {
+                        const t = buf.toString();
                         if (std.mem.indexOfScalar(u8, t, '\n')) |pos| {
                             @memcpy(text[0..pos], t[0..pos]);
                         } else {
@@ -814,7 +739,9 @@ pub fn GetItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8, len:c_int) void {
                     }
                 },
                 df.TEXTBOX => {
-                    if (cwin_text) |t| {
+//                    if (cwin_text) |t| {
+                    if (cwin.gapbuf) |buf| {
+                        const t = buf.toString();
                         var l:usize = @intCast(len);
                         if (std.mem.indexOfScalar(u8, t, 0)) |pos| {
                             if (pos < len)

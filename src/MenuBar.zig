@@ -389,7 +389,7 @@ fn CloseWindowMsg(win:*Window) void {
     if (win.gapbuf) |buf| {
         buf.clear();
         // buf.deinit(); // free ?
-        win.text = null;
+//        win.text = null;
         wnd.*.text = null;
     }
     mctr = 0;

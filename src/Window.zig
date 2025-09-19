@@ -36,8 +36,6 @@ StatusBar:?*TopLevelFields = null,    // status bar
 isHelping:u32 = 0,                    // > 0 when help is being displayed
 
 // ----------------- text box fields ------------------
-text:?[]u8 = null,   // window text
-textlen:usize = 0,   // text length
 gapbuf:?*GapBuf = null, // gap buffer
 
 // ----------------- edit box fields ------------------

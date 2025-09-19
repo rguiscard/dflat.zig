@@ -34,7 +34,7 @@ fn CreateWindowMsg(win:*Window) bool {
     const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CREATE_WINDOW, 0, 0);
     wnd.*.MaxTextLength = df.MAXTEXTLEN+1;
     wnd.*.textlen = EditBufLen(win);
-    win.textlen = EditBufLen(win);
+//    win.textlen = EditBufLen(win);
     wnd.*.InsertMode = df.TRUE;
     if (df.isMultiLine(wnd)>0)
         wnd.*.WordWrapMode = df.TRUE;
