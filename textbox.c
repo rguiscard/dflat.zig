@@ -368,6 +368,7 @@ void MarkTextBlock(WINDOW wnd, int BegLine, int BegCol,
 }
 
 /* ----- clear and initialize text line pointer array ----- */
+#if 0
 void ClearTextPointers(WINDOW wnd)
 {
     wnd->TextPointers = DFrealloc(wnd->TextPointers, sizeof(int));
@@ -402,6 +403,7 @@ void BuildTextPointers(WINDOW wnd)
             cp++;
     }
 }
+#endif
 
 void MoveScrollBox(WINDOW wnd, int vscrollbox)
 {

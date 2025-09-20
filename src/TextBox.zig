@@ -586,3 +586,97 @@ pub fn ClearTextBlock(win:*Window) void {
     wnd.*.BlkBegCol = 0;
     wnd.*.BlkEndCol = 0;
 }
+
+// ----- clear and initialize text line pointer array -----
+pub export fn ClearTextPointers(wnd:df.WINDOW) void {
+    const allocator = root.global_allocator;
+    var arraylist:std.ArrayList(c_uint) = undefined;
+    if (wnd.*.TextPointers) |pointers| {
+        const slice = pointers[0..@intCast(wnd.*.wlines)];    
+        arraylist = std.ArrayList(c_uint).fromOwnedSlice(slice);
+        arraylist.clearRetainingCapacity();
+    } else {
+        if (std.ArrayList(c_uint).initCapacity(allocator, 1)) |list| {
+            arraylist = list;
+        } else |_| {
+            return;
+        }
+    }
+    if (arraylist.append(allocator, 0)) {} else |_| {} // first line
+    if (arraylist.toOwnedSlice(allocator)) |pointers| {
+        wnd.*.TextPointers = pointers.ptr;
+    } else |_| {}
+    // set wnd.*.wlines to zero ?
+    wnd.*.wlines = 0;
+
+//    wnd->TextPointers = DFrealloc(wnd->TextPointers, sizeof(int));
+//    *(wnd->TextPointers) = 0;
+}
+
+// ---- build array of pointers to text lines ----
+pub export fn BuildTextPointers(wnd:df.WINDOW) void {
+    const allocator = root.global_allocator;
+    var arraylist:std.ArrayList(c_uint) = undefined;
+    if (wnd.*.TextPointers) |pointers| {
+        arraylist = std.ArrayList(c_uint).fromOwnedSlice(pointers[0..@intCast(wnd.*.wlines)]);
+        arraylist.clearRetainingCapacity();
+    } else {
+        if (std.ArrayList(c_uint).initCapacity(allocator, 100)) |list| {
+            arraylist = list;
+        } else |_| {
+            return;
+        }
+    }
+
+    if (wnd.*.text) |text| {
+        wnd.*.wlines = 0;
+        wnd.*.textwidth = 0;
+        var next_pos:usize= 0;
+
+        if (arraylist.append(allocator, 0)) {} else |_| {} // first line
+        wnd.*.wlines += 1;
+
+        // this only cound to last '\n'
+        while (std.mem.indexOfScalarPos(u8, text[0..wnd.*.textlen], next_pos, '\n')) |pos| {
+            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
+            next_pos = pos+1;
+            if (next_pos < wnd.*.textlen) {
+                // add next line if there are still content
+                // otherwise, it is the end of line and end of text
+                if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
+                wnd.*.wlines += 1;
+            }
+        }
+        if (next_pos < wnd.*.textlen) {
+            // there is no '\n', but may still has text.
+            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+        }
+       
+    }
+    if (arraylist.toOwnedSlice(allocator)) |pointers| {
+        wnd.*.TextPointers = pointers.ptr;
+    } else |_| {}
+
+//    char *cp = wnd->text, *cp1;
+//    int incrs = INITLINES;
+//    unsigned int off;
+//    wnd->textwidth = wnd->wlines = 0;
+//    while (*cp)    {
+//        if (incrs == INITLINES)    {
+//            incrs = 0;
+//            wnd->TextPointers = DFrealloc(wnd->TextPointers,
+//                    (wnd->wlines + INITLINES) * sizeof(int));
+//        }
+//        off = (unsigned int) (cp - (char *)wnd->text);
+//        *((wnd->TextPointers) + wnd->wlines) = off;
+//        wnd->wlines++;
+//        incrs++;
+//        cp1 = cp;
+//        while (*cp && *cp != '\n')
+//            cp++;
+//        wnd->textwidth = max(wnd->textwidth,
+//                        (unsigned int) (cp - cp1));
+//        if (*cp)
+//            cp++;
+//    }
+}
