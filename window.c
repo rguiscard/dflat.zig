@@ -10,24 +10,6 @@ static void TopLine(WINDOW, int, RECT);
 WINDOW inFocusWnd();
 BOOL hasStatusBar(WINDOW);
 
-/* -------- add a title to a window --------- */
-/*
-void AddTitle(WINDOW wnd, const char *ttl)
-{
-    InsertTitle(wnd, ttl);
-    SendMessage(wnd, BORDER, 0, 0);
-}
-*/
-
-/* ----- insert a title into a window ---------- */
-/*
-void InsertTitle(WINDOW wnd, const char *ttl)
-{
-    wnd->title=DFrealloc(wnd->title,strlen(ttl)+1);
-    strcpy(wnd->title, ttl);
-}
-*/
-
 static unsigned char line[MAXCOLS];
 
 /* ------ write a line to video window client area ------ */

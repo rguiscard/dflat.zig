@@ -9,47 +9,8 @@ int ComputeHScrollBox(WINDOW);
 void MoveScrollBox(WINDOW, int);
 static char *GetTextLine(WINDOW, int);
 
-BOOL VSliding;
+//BOOL VSliding;
 //BOOL HSliding;
-
-/* ------------ DELETETEXT Message -------------- */
-#if 0
-void DeleteTextMsg(WINDOW wnd, int lno)
-{
-	char *cp1 = TextLine(wnd, lno);
-	--wnd->wlines;
-	if (lno == wnd->wlines)
-		*cp1 = '\0';
-	else 	{
-		char *cp2 = TextLine(wnd, lno+1);
-		memmove(cp1, cp2, strlen(cp2)+1);
-	}
-    BuildTextPointers(wnd);
-}
-#endif
-
-#if 0
-void InsertTextAt(WINDOW wnd, char *txt, int lno) {
-    int len = strlen(txt)+1;
-    char *cp2 = TextLine(wnd, lno);
-    char *cp1 = cp2+len;
-    memmove(cp1, cp2, strlen(cp2)-len);
-    strcpy(cp2, txt);
-    *(cp2+len-1) = '\n';
-}
-#endif
-
-/* ------------ CLOSE_WINDOW Message -------------- */
-#if 0
-void CloseWindowMsg(WINDOW wnd)
-{
-    SendMessage(wnd, CLEARTEXT, 0, 0);
-    if (wnd->TextPointers != NULL)    {
-        free(wnd->TextPointers);
-        wnd->TextPointers = NULL;
-    }
-}
-#endif
 
 /* ------ compute the vertical scroll box position from
                    the text pointers --------- */
@@ -359,68 +320,6 @@ void WriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
                     y-wnd->wtop+TopBorderAdj(wnd), FALSE);
     free(svlp);
 }
-
-#if 0
-void MarkTextBlock(WINDOW wnd, int BegLine, int BegCol,
-                               int EndLine, int EndCol)
-{
-    wnd->BlkBegLine = BegLine;
-    wnd->BlkEndLine = EndLine;
-    wnd->BlkBegCol = BegCol;
-    wnd->BlkEndCol = EndCol;
-}
-#endif
-
-/* ----- clear and initialize text line pointer array ----- */
-#if 0
-void ClearTextPointers(WINDOW wnd)
-{
-    wnd->TextPointers = DFrealloc(wnd->TextPointers, sizeof(int));
-    *(wnd->TextPointers) = 0;
-}
-
-#define INITLINES 100
-
-/* ---- build array of pointers to text lines ---- */
-void BuildTextPointers(WINDOW wnd)
-{
-    char *cp = wnd->text, *cp1;
-    int incrs = INITLINES;
-    unsigned int off;
-    wnd->textwidth = wnd->wlines = 0;
-    while (*cp)    {
-        if (incrs == INITLINES)    {
-            incrs = 0;
-            wnd->TextPointers = DFrealloc(wnd->TextPointers,
-                    (wnd->wlines + INITLINES) * sizeof(int));
-        }
-        off = (unsigned int) (cp - (char *)wnd->text);
-        *((wnd->TextPointers) + wnd->wlines) = off;
-        wnd->wlines++;
-        incrs++;
-        cp1 = cp;
-        while (*cp && *cp != '\n')
-            cp++;
-        wnd->textwidth = max(wnd->textwidth,
-                        (unsigned int) (cp - cp1));
-        if (*cp)
-            cp++;
-    }
-}
-#endif
-
-#if 0
-void MoveScrollBox(WINDOW wnd, int vscrollbox)
-{
-    foreground = FrameForeground(wnd);
-    background = FrameBackground(wnd);
-    wputch(wnd, SCROLLBARCHAR, WindowWidth(wnd)-1,
-            wnd->VScrollBox+1);
-    wputch(wnd, SCROLLBOXCHAR, WindowWidth(wnd)-1,
-            vscrollbox+1);
-    wnd->VScrollBox = vscrollbox;
-}
-#endif
 
 int TextLineNumber(WINDOW wnd, char *lp)
 {

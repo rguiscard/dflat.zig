@@ -639,69 +639,70 @@ pub export fn BuildTextPointers(wnd:df.WINDOW) void {
         }
     }
 
-    if (Window.get_zin(wnd)) |win| {
-        if (win.gapbuf) |buf| {
-            wnd.*.wlines = 0;
-            wnd.*.textwidth = 0;
-            var next_pos:usize= 0;
-            const diff = buf.gap_end - buf.gap_start;
-
-            if (arraylist.append(allocator, 0)) {} else |_| {} // first line
-            wnd.*.wlines += 1;
-
-            // this only cound to last '\n'
-            while (std.mem.indexOfScalarPos(u8, buf.items, next_pos, '\n')) |pos| {
-                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
-                // adjust for gap
-                if ((next_pos <= buf.gap_start) and (buf.gap_end <= pos)) {
-                    wnd.*.textwidth -= @intCast(diff);
-                }
-
-                next_pos = pos+1;
-                // adjust for gap
-                if (buf.gap_end < pos) {
-                    next_pos -= diff;
-                }
-                if (next_pos < buf.len()) {
-                    // add next line if there are still content
-                    // otherwise, it is the end of line and end of text
-                    if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
-                    wnd.*.wlines += 1;
-                }
-            }
-            if (next_pos < buf.len()) {
-                // there is no '\n', but may still has text.
-                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
-            }
-        }
-       
-    }
-
-//    if (wnd.*.text) |text| {
-//        wnd.*.wlines = 0;
-//        wnd.*.textwidth = 0;
-//        var next_pos:usize= 0;
+    // Need to consider gap. Not yet work.
+//    if (Window.get_zin(wnd)) |win| {
+//        if (win.gapbuf) |buf| {
+//            wnd.*.wlines = 0;
+//            wnd.*.textwidth = 0;
+//            var next_pos:usize= 0;
+//            const diff = buf.gap_end - buf.gap_start;
 //
-//        if (arraylist.append(allocator, 0)) {} else |_| {} // first line
-//        wnd.*.wlines += 1;
+//            if (arraylist.append(allocator, 0)) {} else |_| {} // first line
+//            wnd.*.wlines += 1;
 //
-//        // this only cound to last '\n'
-//        while (std.mem.indexOfScalarPos(u8, text[0..wnd.*.textlen], next_pos, '\n')) |pos| {
-//            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
-//            next_pos = pos+1;
-//            if (next_pos < wnd.*.textlen) {
-//                // add next line if there are still content
-//                // otherwise, it is the end of line and end of text
-//                if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
-//                wnd.*.wlines += 1;
+//            // this only cound to last '\n'
+//            while (std.mem.indexOfScalarPos(u8, buf.items, next_pos, '\n')) |pos| {
+//                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
+//                // adjust for gap
+//                if ((next_pos <= buf.gap_start) and (buf.gap_end <= pos)) {
+//                    wnd.*.textwidth -= @intCast(diff);
+//                }
+//
+//                next_pos = pos+1;
+//                // adjust for gap
+//                if (buf.gap_end < pos) {
+//                    next_pos -= diff;
+//                }
+//                if (next_pos < buf.len()) {
+//                    // add next line if there are still content
+//                    // otherwise, it is the end of line and end of text
+//                    if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
+//                    wnd.*.wlines += 1;
+//                }
 //            }
-//        }
-//        if (next_pos < wnd.*.textlen) {
-//            // there is no '\n', but may still has text.
-//            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+//            if (next_pos < buf.len()) {
+//                // there is no '\n', but may still has text.
+//                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+//            }
 //        }
 //       
 //    }
+
+    if (wnd.*.text) |text| {
+        wnd.*.wlines = 0;
+        wnd.*.textwidth = 0;
+        var next_pos:usize= 0;
+
+        if (arraylist.append(allocator, 0)) {} else |_| {} // first line
+        wnd.*.wlines += 1;
+
+        // this only cound to last '\n'
+        while (std.mem.indexOfScalarPos(u8, text[0..wnd.*.textlen], next_pos, '\n')) |pos| {
+            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
+            next_pos = pos+1;
+            if (next_pos < wnd.*.textlen) {
+                // add next line if there are still content
+                // otherwise, it is the end of line and end of text
+                if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
+                wnd.*.wlines += 1;
+            }
+        }
+        if (next_pos < wnd.*.textlen) {
+            // there is no '\n', but may still has text.
+            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+        }
+       
+    }
 
     if (arraylist.toOwnedSlice(allocator)) |pointers| {
         wnd.*.TextPointers = pointers.ptr;

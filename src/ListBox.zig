@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
+const textbox = @import("TextBox.zig");
 
 var py:c_int = -1;    // the previous y mouse coordinate
 
@@ -279,7 +280,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
         },
         df.BUTTON_RELEASED => {
-            if (normal.WindowMoving or normal.WindowSizing or df.VSliding>0) {
+            if (normal.WindowMoving or normal.WindowSizing or textbox.VSliding) {
             } else {
                 py = -1;
                 return true;
