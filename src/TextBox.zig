@@ -324,7 +324,7 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
         if (win.TestAttribute(df.VSCROLLBAR)) {
             const vscrollbox = df.ComputeVScrollBox(wnd);
             if (vscrollbox != wnd.*.VScrollBox) {
-                df.MoveScrollBox(wnd, vscrollbox);
+                MoveScrollBox(win, vscrollbox);
             }
         }
     }
@@ -487,6 +487,17 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
     }
 }
 
+// ------------ CLOSE_WINDOW Message --------------
+fn CloseWindowMsg(win:*Window) void {
+    const wnd = win.win;
+    _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+    if (wnd.*.TextPointers != null) {
+        root.global_allocator.free(wnd.*.TextPointers[0..@intCast(wnd.*.wlines)]);
+//        free(wnd->TextPointers);
+        wnd.*.TextPointers = null;
+    }
+}
+
 // ----------- TEXTBOX Message-processing Module -----------
 pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -571,7 +582,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
             }
         },
         df.CLOSE_WINDOW => {
-            df.CloseWindowMsg(wnd);
+            CloseWindowMsg(win);
         },
         else => {
         }
@@ -628,31 +639,70 @@ pub export fn BuildTextPointers(wnd:df.WINDOW) void {
         }
     }
 
-    if (wnd.*.text) |text| {
-        wnd.*.wlines = 0;
-        wnd.*.textwidth = 0;
-        var next_pos:usize= 0;
+    if (Window.get_zin(wnd)) |win| {
+        if (win.gapbuf) |buf| {
+            wnd.*.wlines = 0;
+            wnd.*.textwidth = 0;
+            var next_pos:usize= 0;
+            const diff = buf.gap_end - buf.gap_start;
 
-        if (arraylist.append(allocator, 0)) {} else |_| {} // first line
-        wnd.*.wlines += 1;
+            if (arraylist.append(allocator, 0)) {} else |_| {} // first line
+            wnd.*.wlines += 1;
 
-        // this only cound to last '\n'
-        while (std.mem.indexOfScalarPos(u8, text[0..wnd.*.textlen], next_pos, '\n')) |pos| {
-            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
-            next_pos = pos+1;
-            if (next_pos < wnd.*.textlen) {
-                // add next line if there are still content
-                // otherwise, it is the end of line and end of text
-                if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
-                wnd.*.wlines += 1;
+            // this only cound to last '\n'
+            while (std.mem.indexOfScalarPos(u8, buf.items, next_pos, '\n')) |pos| {
+                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
+                // adjust for gap
+                if ((next_pos <= buf.gap_start) and (buf.gap_end <= pos)) {
+                    wnd.*.textwidth -= @intCast(diff);
+                }
+
+                next_pos = pos+1;
+                // adjust for gap
+                if (buf.gap_end < pos) {
+                    next_pos -= diff;
+                }
+                if (next_pos < buf.len()) {
+                    // add next line if there are still content
+                    // otherwise, it is the end of line and end of text
+                    if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
+                    wnd.*.wlines += 1;
+                }
             }
-        }
-        if (next_pos < wnd.*.textlen) {
-            // there is no '\n', but may still has text.
-            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+            if (next_pos < buf.len()) {
+                // there is no '\n', but may still has text.
+                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+            }
         }
        
     }
+
+//    if (wnd.*.text) |text| {
+//        wnd.*.wlines = 0;
+//        wnd.*.textwidth = 0;
+//        var next_pos:usize= 0;
+//
+//        if (arraylist.append(allocator, 0)) {} else |_| {} // first line
+//        wnd.*.wlines += 1;
+//
+//        // this only cound to last '\n'
+//        while (std.mem.indexOfScalarPos(u8, text[0..wnd.*.textlen], next_pos, '\n')) |pos| {
+//            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
+//            next_pos = pos+1;
+//            if (next_pos < wnd.*.textlen) {
+//                // add next line if there are still content
+//                // otherwise, it is the end of line and end of text
+//                if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
+//                wnd.*.wlines += 1;
+//            }
+//        }
+//        if (next_pos < wnd.*.textlen) {
+//            // there is no '\n', but may still has text.
+//            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+//        }
+//       
+//    }
+
     if (arraylist.toOwnedSlice(allocator)) |pointers| {
         wnd.*.TextPointers = pointers.ptr;
     } else |_| {}
@@ -679,4 +729,15 @@ pub export fn BuildTextPointers(wnd:df.WINDOW) void {
 //        if (*cp)
 //            cp++;
 //    }
+}
+
+fn MoveScrollBox(win:*Window, vscrollbox:c_int) void {
+    const wnd = win.win;
+    df.foreground = df.FrameForeground(wnd);
+    df.background = df.FrameBackground(wnd);
+    df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1),
+            wnd.*.VScrollBox+1);
+    df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(win.WindowWidth()-1),
+            vscrollbox+1);
+    wnd.*.VScrollBox = vscrollbox;
 }

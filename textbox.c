@@ -40,6 +40,7 @@ void InsertTextAt(WINDOW wnd, char *txt, int lno) {
 #endif
 
 /* ------------ CLOSE_WINDOW Message -------------- */
+#if 0
 void CloseWindowMsg(WINDOW wnd)
 {
     SendMessage(wnd, CLEARTEXT, 0, 0);
@@ -48,6 +49,7 @@ void CloseWindowMsg(WINDOW wnd)
         wnd->TextPointers = NULL;
     }
 }
+#endif
 
 /* ------ compute the vertical scroll box position from
                    the text pointers --------- */
@@ -358,6 +360,7 @@ void WriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
     free(svlp);
 }
 
+#if 0
 void MarkTextBlock(WINDOW wnd, int BegLine, int BegCol,
                                int EndLine, int EndCol)
 {
@@ -366,6 +369,7 @@ void MarkTextBlock(WINDOW wnd, int BegLine, int BegCol,
     wnd->BlkBegCol = BegCol;
     wnd->BlkEndCol = EndCol;
 }
+#endif
 
 /* ----- clear and initialize text line pointer array ----- */
 #if 0
@@ -405,6 +409,7 @@ void BuildTextPointers(WINDOW wnd)
 }
 #endif
 
+#if 0
 void MoveScrollBox(WINDOW wnd, int vscrollbox)
 {
     foreground = FrameForeground(wnd);
@@ -415,6 +420,7 @@ void MoveScrollBox(WINDOW wnd, int vscrollbox)
             vscrollbox+1);
     wnd->VScrollBox = vscrollbox;
 }
+#endif
 
 int TextLineNumber(WINDOW wnd, char *lp)
 {
