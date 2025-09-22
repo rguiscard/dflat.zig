@@ -62,7 +62,6 @@ pub fn build(b: *std.Build) void {
             "textbox.c",
             "listbox.c",
             "editbox.c",
-            //"editor.c",
 
             // currently not in use. port later.
             // "spinbutt.c",

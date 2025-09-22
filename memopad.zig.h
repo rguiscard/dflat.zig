@@ -43,7 +43,7 @@ void TabKey(WINDOW, PARAM);
 
 int CommandMsg(WINDOW, PARAM);
 void TextBlockToN(char *, char *);
-void ParagraphCmd(WINDOW);
+void cParagraphCmd(WINDOW);
 int GetTextMsg(WINDOW, PARAM, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 //#define TextLine(wnd, sel) \

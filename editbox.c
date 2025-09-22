@@ -185,17 +185,21 @@ void TextBlockToN(char *bbl, char *bel) {
 
 /* ----------- ID_PARAGRAPH Command ---------- */
 // Rewrite to be called from  zig size
-void ParagraphCmd(WINDOW wnd)
+void cParagraphCmd(WINDOW wnd)
 {
+#if 0
     int bc, fl;
-    char *bl, *bbl, *bel, *bb;
-
-    /* ---- forming paragraph from cursor position --- */
     fl = wnd->wtop + wnd->WndRow;
-    bbl = bel = bl = TextLine(wnd, wnd->CurrLine);
     if ((bc = wnd->CurrCol) >= ClientWidth(wnd))
         bc = 0;
+    char *bl = TextLine(wnd, wnd->CurrLine);
     Home(wnd);
+#endif
+
+    char *bbl, *bel, *bb;
+
+    /* ---- forming paragraph from cursor position --- */
+    bbl = bel = TextLine(wnd, wnd->CurrLine);
     /* ---- locate the end of the paragraph ---- */
     while (*bel)    {
         int blank = TRUE;
@@ -247,13 +251,16 @@ void ParagraphCmd(WINDOW wnd)
             bb = bbl+1;
         }
     }
+#if 0
     BuildTextPointers(wnd);
     /* --- put cursor back at beginning --- */
     wnd->CurrLine = TextLineNumber(wnd, bl);
     wnd->CurrCol = bc;
+
     if (fl < wnd->wtop)
         wnd->wtop = fl;
     wnd->WndRow = fl - wnd->wtop;
+#endif
 }
 
 /* -------- Home key: to beginning of line ------- */

@@ -2,6 +2,7 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
+const textbox = @import("TextBox.zig");
 
 pub var Clipboard:?[]u8 = null;
 pub var ClipboardLength:usize = 0;
@@ -109,7 +110,7 @@ pub fn PasteText(win:*Window, SaveTo:[]u8, len:c_uint) bool {
 //            const cp:[*c]u8 = df.zCurrChar(wnd);
 //            _ = df.memmove(cp+len, cp, df.strlen(cp)+1);
 //            _ = df.memmove(cp, src, len);
-            df.BuildTextPointers(wnd);
+            textbox.BuildTextPointers(win);
             wnd.*.TextChanged = df.TRUE;
             return true;
         }

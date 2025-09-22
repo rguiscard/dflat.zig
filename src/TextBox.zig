@@ -25,7 +25,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
 
-        BuildTextPointers(wnd);
+        BuildTextPointers(win);
         return true;
     }
 
@@ -47,7 +47,7 @@ fn DeleteTextMsg(win:*Window, lno:usize) void {
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
 
-        BuildTextPointers(wnd);
+        BuildTextPointers(win);
     }
 
 //    const pos1 = 
@@ -77,7 +77,7 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
 
-        BuildTextPointers(wnd);
+        BuildTextPointers(win);
         wnd.*.TextChanged = df.TRUE;
     }
 //    BuildTextPointers(wnd);
@@ -101,7 +101,7 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
         if (buf.insertSlice(txt)) { } else |_| { }
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
-        BuildTextPointers(wnd);
+        BuildTextPointers(win);
     }
 }
 
@@ -625,7 +625,8 @@ pub export fn ClearTextPointers(wnd:df.WINDOW) void {
 }
 
 // ---- build array of pointers to text lines ----
-pub export fn BuildTextPointers(wnd:df.WINDOW) void {
+pub fn BuildTextPointers(win:*Window) void {
+    const wnd = win.win;
     const allocator = root.global_allocator;
     var arraylist:std.ArrayList(c_uint) = undefined;
     if (wnd.*.TextPointers) |pointers| {

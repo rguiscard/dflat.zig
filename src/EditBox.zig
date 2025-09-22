@@ -147,7 +147,7 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
                 if (buf.insert(0)) { } else |_| { }
                 wnd.*.text = @constCast(buf.toString().ptr);
                 wnd.*.textlen = @intCast(buf.len());
-                textbox.BuildTextPointers(wnd);
+                textbox.BuildTextPointers(win);
             }
         }
 //            wnd->text=DFrealloc(wnd->text, len+2);
@@ -424,7 +424,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
             wnd.*.textlen = @intCast(buf.len());
 //            *currchar = '\n';
 //            *(currchar+1) = '\0';
-            textbox.BuildTextPointers(wnd);
+            textbox.BuildTextPointers(win);
         }
         // --- displayable char or newline ---
 //        if (c == '\n' or wnd.*.InsertMode or currchar == '\n') {
@@ -465,13 +465,13 @@ fn KeyTyped(win:*Window, cc:c_int) void {
         if (buf.insert(@intCast(cc))) {} else |_| {}
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
-        textbox.BuildTextPointers(wnd);
+        textbox.BuildTextPointers(win);
         _ = win.sendMessage(df.PAINT, 0, 0);
         wnd.*.TextChanged = df.TRUE;
 
         if (cc == '\n')    {
             wnd.*.wleft = 0;
-            textbox.BuildTextPointers(wnd);
+            textbox.BuildTextPointers(win);
             End(win);
             Forward(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
@@ -538,7 +538,7 @@ fn DelKey(win:*Window) void {
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
         // always repaint for now
-        textbox.BuildTextPointers(wnd);
+        textbox.BuildTextPointers(win);
         _ = win.sendMessage(df.PAINT, 0, 0);
     }
 
@@ -683,7 +683,7 @@ fn DeleteTextCmd(win:*Window) void {
         }
         _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
         textbox.ClearTextBlock(win);
-        textbox.BuildTextPointers(wnd);
+        textbox.BuildTextPointers(win);
     }
 }
 
@@ -732,7 +732,7 @@ fn ClearCmd(win:*Window) void {
 //        }
 
         textbox.ClearTextBlock(win);
-        textbox.BuildTextPointers(wnd);
+        textbox.BuildTextPointers(win);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
         wnd.*.TextChanged = df.TRUE;
 
@@ -770,12 +770,29 @@ fn ParagraphCmd(win:*Window) void {
     const wnd = win.win;
     textbox.ClearTextBlock(win);
 
-    df.ParagraphCmd(wnd);
+    // ---- forming paragraph from cursor position ---
+    const fl = wnd.*.wtop + wnd.*.WndRow;
+    const bl = df.TextLine(wnd, wnd.*.CurrLine);
+    var bc = wnd.*.CurrCol;
+    if (bc >= win.ClientWidth()) {
+        bc = 0;
+    }
+    Home(win);
+
+    df.cParagraphCmd(wnd);
+
+    textbox.BuildTextPointers(win);
+    // --- put cursor back at beginning ---
+    wnd.*.CurrLine = df.TextLineNumber(wnd, bl);
+    wnd.*.CurrCol = bc;
+    if (fl < wnd.*.wtop)
+        wnd.*.wtop = fl;
+    wnd.*.WndRow = fl - wnd.*.wtop;
 
     _ = win.sendMessage(df.PAINT, 0, 0);
     _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
     wnd.*.TextChanged = df.TRUE;
-    textbox.BuildTextPointers(wnd);
+    textbox.BuildTextPointers(win);
 }
 
 // ----------- COMMAND Message ----------
