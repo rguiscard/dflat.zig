@@ -82,8 +82,8 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
     const ptext:[*c]u8 = @ptrFromInt(pp1);
     if (df.strlen(ptext) <= wnd.*.MaxTextLength) {
         rtn = root.zBaseWndProc(df.EDITBOX, win, df.SETTEXT, p1, 0);
-            wnd.*.TextChanged = df.FALSE;
-        }
+        win.TextChanged = false;
+    }
     return rtn;
 }
 
@@ -106,7 +106,7 @@ fn ClearTextMsg(win:*Window) bool {
     wnd.*.wleft = 0;
     wnd.*.wtop = 0;
     wnd.*.textwidth = 0;
-    wnd.*.TextChanged = df.FALSE;
+    win.TextChanged = false;
     return rtn;
 }
 
@@ -467,7 +467,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
         wnd.*.textlen = @intCast(buf.len());
         textbox.BuildTextPointers(win);
         _ = win.sendMessage(df.PAINT, 0, 0);
-        wnd.*.TextChanged = df.TRUE;
+        win.TextChanged = true;
 
         if (cc == '\n')    {
             wnd.*.wleft = 0;
@@ -550,7 +550,7 @@ fn DelKey(win:*Window) void {
 //        ModTextPointers(win, wnd->CurrLine+1, -1);
 //        WriteTextLine(wnd, NULL, wnd->WndRow+wnd->wtop, FALSE);
 //    }
-    wnd.*.TextChanged = df.TRUE;
+    win.TextChanged = true;
 }
 
 
@@ -671,7 +671,7 @@ fn DeleteTextCmd(win:*Window) void {
         const bel=df.TextLine(wnd,end_sel)+end_col;
         const len:c_int = @intCast(bel - bbl);
         SaveDeletedText(win, bbl, @intCast(len));
-        wnd.*.TextChanged = df.TRUE;
+        win.TextChanged = true;
         _ = df.memmove(bbl, bel, df.strlen(bel));
         const bcol:usize = @intCast(wnd.*.BlkBegCol); // could we reuse beg_col?
         wnd.*.CurrLine = df.TextLineNumber(wnd, bbl-bcol);
@@ -734,7 +734,7 @@ fn ClearCmd(win:*Window) void {
         textbox.ClearTextBlock(win);
         textbox.BuildTextPointers(win);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
-        wnd.*.TextChanged = df.TRUE;
+        win.TextChanged = true;
 
 //        ClearTextBlock(wnd);
 //        BuildTextPointers(wnd);
@@ -791,7 +791,7 @@ fn ParagraphCmd(win:*Window) void {
 
     _ = win.sendMessage(df.PAINT, 0, 0);
     _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
-    wnd.*.TextChanged = df.TRUE;
+    win.TextChanged = true;
     textbox.BuildTextPointers(win);
 }
 

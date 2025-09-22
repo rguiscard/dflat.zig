@@ -29,7 +29,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         return true;
     }
 
-    wnd.*.TextChanged = df.TRUE;
+    win.TextChanged = true;
     return false;
 }
 
@@ -78,7 +78,7 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
         wnd.*.textlen = @intCast(buf.len());
 
         BuildTextPointers(win);
-        wnd.*.TextChanged = df.TRUE;
+        win.TextChanged = true;
     }
 //    BuildTextPointers(wnd);
 //    wnd.*.TextChanged = df.TRUE;

@@ -294,7 +294,7 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
         const text = @as([*:0]u8, @ptrCast(wnd.*.text));
         const data:[]const u8 = std.mem.span(text); // save data up to \0
         if (std.fs.cwd().writeFile(.{.sub_path = path, .data = data})) {
-            wnd.*.TextChanged = df.FALSE;
+            win.TextChanged = false;
         } else |_| {
         }
 
@@ -386,7 +386,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             }
         },
         df.CLOSE_WINDOW => {
-            if (wnd.*.TextChanged > 0)    {
+            if (win.TextChanged)    {
                 _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
 //                const tl:[*c]u8 = @ptrCast(wnd.*.title);
 //                const title = std.mem.span(tl);

@@ -132,7 +132,7 @@ typedef struct window {
     int CurrCol;      /* Current column                     */
     int CurrLine;     /* Current line                       */
     int WndRow;       /* Current window row                 */
-    BOOL TextChanged; /* TRUE if text has changed           */
+//    BOOL TextChanged; /* TRUE if text has changed           */
 	BOOL protect;	  /* TRUE to display '*'                */
     unsigned char *DeletedText; /* for undo                 */
     unsigned DeletedLength; /* Length of deleted field      */

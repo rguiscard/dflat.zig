@@ -111,7 +111,7 @@ pub fn PasteText(win:*Window, SaveTo:[]u8, len:c_uint) bool {
 //            _ = df.memmove(cp+len, cp, df.strlen(cp)+1);
 //            _ = df.memmove(cp, src, len);
             textbox.BuildTextPointers(win);
-            wnd.*.TextChanged = df.TRUE;
+            win.TextChanged = true;
             return true;
         }
     }

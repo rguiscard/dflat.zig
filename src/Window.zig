@@ -39,6 +39,7 @@ isHelping:u32 = 0,                    // > 0 when help is being displayed
 gapbuf:?*GapBuf = null, // gap buffer
 
 // ----------------- edit box fields ------------------
+TextChanged:bool = false,    // TRUE if text has changed
 DeletedText:?[]u8 = null,    // for undo
 DeletedLength:usize = 0,     // Length of deleted field
 
