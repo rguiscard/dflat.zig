@@ -115,6 +115,7 @@ void ShiftTabKey(WINDOW wnd, PARAM p2) // private
 	    PostMessage(GetParent(wnd), KEYBOARD, SHIFT_HT, p2);
 }
 /* --------- All displayable typed keys ------------- */
+#if 0
 void KeyTyped(WINDOW wnd, int c) // private
 {
     char *currchar = CurrChar;
@@ -216,6 +217,7 @@ void KeyTyped(WINDOW wnd, int c) // private
     /* ----- advance the pointers ------ */
     wnd->CurrCol++;
 }
+#endif
 
 // ------ change all text lines in block to \n -----
 void TextBlockToN(char *bbl, char *bel) {
@@ -303,6 +305,7 @@ void ParagraphCmd(WINDOW wnd)
 }
 
 /* ---- cursor right key: right one character position ---- */
+#if 0
 void Forward(WINDOW wnd) // private
 {
     char *cc = CurrChar+1;
@@ -318,7 +321,10 @@ void Forward(WINDOW wnd) // private
             SendMessage(wnd, HORIZSCROLL, TRUE, 0);
     }
 }
+#endif
+
 /* ----- stick the moving cursor to the end of the line ---- */
+#if 0
 void StickEnd(WINDOW wnd) // private
 {
     char *cp = TextLine(wnd, wnd->CurrLine);
@@ -334,7 +340,9 @@ void StickEnd(WINDOW wnd) // private
         SendMessage(wnd, PAINT, 0, 0);
     }
 }
+#endif
 /* --------- cursor down key: down one line --------- */
+#if 0
 void Downward(WINDOW wnd) // private
 {
     if (isMultiLine(wnd) &&
@@ -346,7 +354,9 @@ void Downward(WINDOW wnd) // private
         StickEnd(wnd);
     }
 }
+#endif
 /* -------- cursor up key: up one line ------------ */
+#if 0
 void Upward(WINDOW wnd) // private
 {
     if (isMultiLine(wnd) && wnd->CurrLine != 0)    {
@@ -357,7 +367,9 @@ void Upward(WINDOW wnd) // private
         StickEnd(wnd);
     }
 }
+#endif
 /* ---- cursor left key: left one character position ---- */
+#if 0
 void Backward(WINDOW wnd) // private
 {
     if (wnd->CurrCol)    {
@@ -370,7 +382,9 @@ void Backward(WINDOW wnd) // private
         End(wnd);
     }
 }
+#endif
 /* -------- End key: to end of line ------- */
+#if 0
  void End(WINDOW wnd) // private
 {
     while (*CurrChar && *CurrChar != '\n')
@@ -380,6 +394,7 @@ void Backward(WINDOW wnd) // private
         SendMessage(wnd, PAINT, 0, 0);
     }
 }
+#endif
 /* -------- Home key: to beginning of line ------- */
 void Home(WINDOW wnd) // private
 {
@@ -390,6 +405,7 @@ void Home(WINDOW wnd) // private
     }
 }
 /* -- Ctrl+cursor right key: to beginning of next word -- */
+#if 0
 void NextWord(WINDOW wnd) // private
 {
     int savetop = wnd->wtop;
@@ -412,7 +428,9 @@ void NextWord(WINDOW wnd) // private
     if (wnd->wtop != savetop || wnd->wleft != saveleft)
         SendMessage(wnd, PAINT, 0, 0);
 }
+#endif
 /* -- Ctrl+cursor left key: to beginning of previous word -- */
+#if 0
 void PrevWord(WINDOW wnd) // private
 {
     int savetop = wnd->wtop;
@@ -437,6 +455,7 @@ void PrevWord(WINDOW wnd) // private
     if (wnd->wtop != savetop || wnd->wleft != saveleft)
         SendMessage(wnd, PAINT, 0, 0);
 }
+#endif
 /* ----- modify text pointers from a specified position
                 by a specified plus or minus amount ----- */
 void ModTextPointers(WINDOW wnd, int lineno, int var) // private
@@ -445,6 +464,7 @@ void ModTextPointers(WINDOW wnd, int lineno, int var) // private
         *((wnd->TextPointers) + lineno++) += var;
 }
 /* ----- set anchor point for marking text block ----- */
+#if 0
 void SetAnchor(WINDOW wnd, int mx, int my) // private
 {
     ClearTextBlock(wnd);
@@ -453,3 +473,4 @@ void SetAnchor(WINDOW wnd, int mx, int my) // private
     wnd->BlkBegCol = wnd->BlkEndCol = mx;
     SendMessage(wnd, PAINT, 0, 0);
 }
+#endif

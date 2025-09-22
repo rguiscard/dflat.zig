@@ -25,7 +25,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
 
-        df.BuildTextPointers(wnd);
+        BuildTextPointers(wnd);
         return true;
     }
 
@@ -47,7 +47,7 @@ fn DeleteTextMsg(win:*Window, lno:usize) void {
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
 
-        df.BuildTextPointers(wnd);
+        BuildTextPointers(wnd);
     }
 
 //    const pos1 = 
@@ -59,7 +59,7 @@ fn DeleteTextMsg(win:*Window, lno:usize) void {
 //                char *cp2 = TextLine(wnd, lno+1);
 //                memmove(cp1, cp2, strlen(cp2)+1);
 //        }
-//    df.BuildTextPointers(wnd);
+//    BuildTextPointers(wnd);
 }
 
 // ------------ INSERTTEXT Message --------------
@@ -77,14 +77,14 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
 
-        df.BuildTextPointers(wnd);
+        BuildTextPointers(wnd);
         wnd.*.TextChanged = df.TRUE;
     }
-//    df.BuildTextPointers(wnd);
+//    BuildTextPointers(wnd);
 //    wnd.*.TextChanged = df.TRUE;
 //    if (AddTextMsg(win, txt)) {
 //        df.InsertTextAt(wnd, @constCast(txt.ptr), lno);
-//        df.BuildTextPointers(wnd);
+//        BuildTextPointers(wnd);
 //        wnd.*.TextChanged = df.TRUE;
 //    }
 }
@@ -101,7 +101,7 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
         if (buf.insertSlice(txt)) { } else |_| { }
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
-        df.BuildTextPointers(wnd);
+        BuildTextPointers(wnd);
     }
 }
 
@@ -644,35 +644,42 @@ pub export fn BuildTextPointers(wnd:df.WINDOW) void {
 //        if (win.gapbuf) |buf| {
 //            wnd.*.wlines = 0;
 //            wnd.*.textwidth = 0;
-//            var next_pos:usize= 0;
+//            var prev_pos:usize= 0; // pos including gap
 //            const diff = buf.gap_end - buf.gap_start;
 //
 //            if (arraylist.append(allocator, 0)) {} else |_| {} // first line
 //            wnd.*.wlines += 1;
 //
 //            // this only cound to last '\n'
-//            while (std.mem.indexOfScalarPos(u8, buf.items, next_pos, '\n')) |pos| {
-//                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
-//                // adjust for gap
-//                if ((next_pos <= buf.gap_start) and (buf.gap_end <= pos)) {
+//            while (std.mem.indexOfScalarPos(u8, buf.items, pos, '\n')) |pos| {
+//                if ((buf.gap_start <= pos) and (pos < buf.gap_end)) {
+//                    pos = buf.gap_end;
+//                    continue;
+//                }
+//       
+//                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-prev_pos));
+//                // adjust for pos in gap
+//                if ((prev_pos <= buf.gap_start) and (buf.gap_end < pos)) {
 //                    wnd.*.textwidth -= @intCast(diff);
 //                }
 //
-//                next_pos = pos+1;
-//                // adjust for gap
-//                if (buf.gap_end < pos) {
-//                    next_pos -= diff;
-//                }
-//                if (next_pos < buf.len()) {
+//                if (pos+1 < buf.len()) {
 //                    // add next line if there are still content
 //                    // otherwise, it is the end of line and end of text
+//                    // adjust for gap
+//                    var next_pos = pos+1; // pos excluding gap
+//                    if (buf.gap_end < pos) {
+//                        next_pos -= diff;
+//                    }
 //                    if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
 //                    wnd.*.wlines += 1;
 //                }
+//                prev_pos = pos;
+//                pos += 1;
 //            }
-//            if (next_pos < buf.len()) {
+//            if (pos+1 < buf.len()) {
 //                // there is no '\n', but may still has text.
-//                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+//                wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-prev_pos));
 //            }
 //        }
 //       

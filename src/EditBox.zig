@@ -18,6 +18,11 @@ var ButtonX:c_int = 0;
 var ButtonY:c_int = 0;
 var PrevY:c_int = -1;
 
+fn isWhite(chr:u8) bool {
+    //#define isWhite(c) (Ch(c)==' '||Ch(c)=='\n'||Ch(c)=='\f'||Ch(c)=='\t')
+    return (chr == ' ') or (chr == '\n') or (chr == 12) or (chr == '\t');
+}
+
 fn EditBufLen(win:*Window) c_uint {
     const wnd = win.win;
     return if (df.isMultiLine(wnd)>0) df.EDITLEN else df.ENTRYLEN;
@@ -132,7 +137,7 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
 //                win.textlen = @intCast(len);
 //                wnd.*.text[@intCast(len)] = 0;
 //                wnd.*.text[@intCast(len+1)] = 0;
-//                df.BuildTextPointers(wnd);
+//                textbox.BuildTextPointers(wnd);
 //            }
         if (win.gapbuf) |buf| {
             if (len < buf.len()) {
@@ -142,7 +147,7 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
                 if (buf.insert(0)) { } else |_| { }
                 wnd.*.text = @constCast(buf.toString().ptr);
                 wnd.*.textlen = @intCast(buf.len());
-                df.BuildTextPointers(wnd);
+                textbox.BuildTextPointers(wnd);
             }
         }
 //            wnd->text=DFrealloc(wnd->text, len+2);
@@ -198,7 +203,7 @@ fn ScrollMsg(win:*Window, p1:df.PARAM) bool {
                 // -------- scrolling up ---------
                 if (wnd.*.WndRow == 0)    {
                     wnd.*.CurrLine += 1;
-                    df.StickEnd(wnd);
+                    StickEnd(win);
                 } else {
                     wnd.*.WndRow -= 1;
                 }
@@ -208,7 +213,7 @@ fn ScrollMsg(win:*Window, p1:df.PARAM) bool {
                     if (wnd.*.CurrLine > 0) {
                         wnd.*.CurrLine -= 1;
                     }
-                    df.StickEnd(wnd);
+                    StickEnd(win);
                 } else {
                     wnd.*.WndRow += 1;
                 }
@@ -248,7 +253,7 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
         rtn = root.zBaseWndProc(df.EDITBOX, win, df.SCROLLPAGE, p1, 0);
 //        SetLinePointer(wnd, wnd->wtop+wnd->WndRow);
         wnd.*.CurrLine = wnd.*.wtop+wnd.*.WndRow;
-        df.StickEnd(wnd);
+        StickEnd(win);
         _ = win.sendMessage(df.KEYBOARD_CURSOR,@intCast(WndCol(win)), @intCast(wnd.*.WndRow));
     }
     return rtn;
@@ -362,7 +367,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     if (MouseY > wnd.*.wlines-1)
         return false;
     if (ButtonDown) {
-        df.SetAnchor(wnd, @intCast(ButtonX+wnd.*.wleft), @intCast(ButtonY+wnd.*.wtop));
+        SetAnchor(win, @intCast(ButtonX+wnd.*.wleft), @intCast(ButtonY+wnd.*.wtop));
         TextMarking = true;
         rc = win.WindowRect();
         _ = q.SendMessage(null,df.MOUSE_TRAVEL,@intCast(@intFromPtr(&rc)), 0);
@@ -419,7 +424,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
             wnd.*.textlen = @intCast(buf.len());
 //            *currchar = '\n';
 //            *(currchar+1) = '\0';
-            df.BuildTextPointers(wnd);
+            textbox.BuildTextPointers(wnd);
         }
         // --- displayable char or newline ---
 //        if (c == '\n' or wnd.*.InsertMode or currchar == '\n') {
@@ -460,15 +465,15 @@ fn KeyTyped(win:*Window, cc:c_int) void {
         if (buf.insert(@intCast(cc))) {} else |_| {}
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
-        df.BuildTextPointers(wnd);
+        textbox.BuildTextPointers(wnd);
         _ = win.sendMessage(df.PAINT, 0, 0);
         wnd.*.TextChanged = df.TRUE;
 
         if (cc == '\n')    {
             wnd.*.wleft = 0;
-            df.BuildTextPointers(wnd);
-            df.End(wnd);
-            df.Forward(wnd);
+            textbox.BuildTextPointers(wnd);
+            End(win);
+            Forward(win);
             _ = win.sendMessage(df.PAINT, 0, 0);
             return;
         }
@@ -643,7 +648,7 @@ fn DeleteTextCmd(win:*Window) void {
         }
         _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
         textbox.ClearTextBlock(win);
-        df.BuildTextPointers(wnd);
+        textbox.BuildTextPointers(wnd);
     }
 }
 
@@ -692,7 +697,7 @@ fn ClearCmd(win:*Window) void {
 //        }
 
         textbox.ClearTextBlock(win);
-        df.BuildTextPointers(wnd);
+        textbox.BuildTextPointers(wnd);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
         wnd.*.TextChanged = df.TRUE;
 
@@ -735,7 +740,7 @@ fn ParagraphCmd(win:*Window) void {
     _ = win.sendMessage(df.PAINT, 0, 0);
     _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
     wnd.*.TextChanged = df.TRUE;
-    df.BuildTextPointers(wnd);
+    textbox.BuildTextPointers(wnd);
 }
 
 // ----------- COMMAND Message ----------
@@ -933,7 +938,7 @@ fn DoMultiLines(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 df.CTRL_FWD => {
                     KeyBoardMarking = true;
                     TextMarking = true;
-                    df.SetAnchor(wnd, wnd.*.CurrCol, wnd.*.CurrLine);
+                    SetAnchor(win, wnd.*.CurrCol, wnd.*.CurrLine);
                 },
                 else => {
                 }
@@ -956,16 +961,16 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
             _ = root.zBaseWndProc(df.EDITBOX, win, df.KEYBOARD, cc, p2);
         },
         df.HOME => {
-            df.Home(wnd);
+            Home(win);
         },
         df.END => {
-            df.End(wnd);
+            End(win);
         },
         df.CTRL_FWD => {
-            df.NextWord(wnd);
+            NextWord(win);
         },
         df.CTRL_BS => {
-            df.PrevWord(wnd);
+            PrevWord(win);
         },
         df.CTRL_HOME => {
             if (df.isMultiLine(wnd)>0) {
@@ -973,7 +978,7 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
                 wnd.*.CurrLine = 0;
                 wnd.*.WndRow = 0;
             }
-            df.Home(wnd);
+            Home(win);
         },
         df.CTRL_END => {
             if (df.isMultiLine(wnd)>0 and
@@ -984,23 +989,23 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
 //                _ = df.SetLinePointer(wnd, wnd.*.wlines-1);
                 wnd.*.WndRow =
                     @intCast(@min(win.ClientHeight()-1, wnd.*.wlines-1));
-                df.Home(wnd);
+                Home(win);
             }
-            df.End(wnd);
+            End(win);
         },
         df.UP => {
             if (df.isMultiLine(wnd)>0)
-                df.Upward(wnd);
+                Upward(win);
         },
         df.DN => {
             if (df.isMultiLine(wnd)>0)
-                df.Downward(wnd);
+                Downward(win);
         },
         df.FWD => {
-            df.Forward(wnd);
+            Forward(win);
         },
         df.BS => {
-            df.Backward(wnd);
+            Backward(win);
         },
         else => {
             return false;
@@ -1071,3 +1076,237 @@ fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
 //    wnd->DeletedText=DFrealloc(wnd->DeletedText,len);
 //    memmove(wnd->DeletedText, bbl, len);
 }
+
+// ---- cursor right key: right one character position ----
+fn Forward(win:*Window) void {
+    const wnd = win.win;
+    const pos = df.CurrPos(wnd);
+    const cc = wnd.*.text[pos+1];
+    if (cc == 0)
+        return;
+    if (cc == '\n') {
+        Home(win);
+        Downward(win);
+    } else {
+        wnd.*.CurrCol += 1;
+        if (WndCol(win) == win.ClientWidth())
+            _ = win.sendMessage(df.HORIZSCROLL, df.TRUE, 0);
+    }
+//    char *cc = CurrChar+1;
+//    if (*cc == '\0')
+//        return;
+//    if (*CurrChar == '\n')    {
+//        Home(wnd);
+//        Downward(wnd);
+//    }
+//    else    {
+//        wnd->CurrCol++;
+//        if (WndCol == ClientWidth(wnd))
+//            SendMessage(wnd, HORIZSCROLL, TRUE, 0);
+//    }
+}
+
+// ----- stick the moving cursor to the end of the line ----
+fn StickEnd(win:*Window) void {
+    const wnd = win.win;
+    const curr_pos = wnd.*.TextPointers[@intCast(wnd.*.CurrLine)];
+    var len:usize = 0;
+    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], curr_pos, '\n')) |end_pos| {
+        len = end_pos-curr_pos;
+    } else {
+        len = wnd.*.textlen-curr_pos-1; // consider end null -1 ?
+    }
+    wnd.*.CurrCol = @min(len, wnd.*.CurrCol);
+    if (wnd.*.wleft > wnd.*.CurrCol) {
+        wnd.*.wleft = @max(0, wnd.*.CurrCol - 4);
+    } else if (wnd.*.CurrCol-wnd.*.wleft >= win.ClientWidth()) {
+        wnd.*.wleft = @intCast(wnd.*.CurrCol - (win.ClientWidth()-1));
+    }
+    _ = win.sendMessage(df.PAINT, 0, 0);
+    
+//    char *cp = TextLine(wnd, wnd->CurrLine);
+//    char *cp1 = strchr(cp, '\n');
+//    int len = cp1 ? (int) (cp1 - cp) : 0;
+//    wnd->CurrCol = min(len, wnd->CurrCol);
+//    if (wnd->wleft > wnd->CurrCol)    {
+//        wnd->wleft = max(0, wnd->CurrCol - 4);
+//        SendMessage(wnd, PAINT, 0, 0);
+//    }
+//    else if (wnd->CurrCol-wnd->wleft >= ClientWidth(wnd))    {
+//        wnd->wleft = wnd->CurrCol - (ClientWidth(wnd)-1);
+//        SendMessage(wnd, PAINT, 0, 0);
+//    }
+
+}
+
+// --------- cursor down key: down one line ---------
+fn Downward(win:*Window) void {
+    const wnd = win.win;
+    if (df.isMultiLine(wnd)>0 and
+            wnd.*.WndRow+wnd.*.wtop+1 < wnd.*.wlines)  {
+        wnd.*.CurrLine += 1;
+        if (wnd.*.WndRow == win.ClientHeight()-1)
+            _ = win.sendMessage(df.SCROLL, df.TRUE, 0);
+        wnd.*.WndRow += 1;
+        StickEnd(win);
+    }
+}
+
+// -------- cursor up key: up one line ------------
+fn Upward(win:*Window) void {
+    const wnd = win.win;
+    if (df.isMultiLine(wnd)>0 and wnd.*.CurrLine != 0) {
+        wnd.*.CurrLine -= 1;
+        if (wnd.*.WndRow == 0)
+            _ = win.sendMessage(df.SCROLL, df.FALSE, 0);
+        wnd.*.WndRow -= 1;
+        StickEnd(win);
+    }
+}
+
+// ---- cursor left key: left one character position ----
+fn Backward(win:*Window) void {
+    const wnd = win.win;
+    if (wnd.*.CurrCol>0) {
+        wnd.*.CurrCol -= 1;
+        if (wnd.*.CurrCol < wnd.*.wleft)
+            _ = win.sendMessage(df.HORIZSCROLL, df.FALSE, 0);
+    } else if (df.isMultiLine(wnd)>0 and wnd.*.CurrLine != 0) {
+        Upward(win);
+        End(win);
+    }
+}
+
+// -------- End key: to end of line -------
+fn End(win:*Window) void {
+    const wnd = win.win;
+    const curr_pos = wnd.*.TextPointers[@intCast(wnd.*.CurrLine)];
+    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..@intCast(wnd.*.textlen)], curr_pos, '\n')) |pos| {
+        wnd.*.CurrCol = @intCast(pos-curr_pos);
+    } else {
+        wnd.*.CurrCol = @intCast(wnd.*.textlen-curr_pos-1);
+    }
+    if (WndCol(win) >= win.ClientWidth()) {
+        wnd.*.wleft = @intCast(wnd.*.CurrCol - (win.ClientWidth()-1));
+        _ = win.sendMessage(df.PAINT, 0, 0);
+    }
+//    while (*CurrChar && *CurrChar != '\n')
+//        ++wnd->CurrCol;
+//    if (WndCol >= ClientWidth(wnd))    {
+//        wnd->wleft = wnd->CurrCol - (ClientWidth(wnd)-1);
+//        SendMessage(wnd, PAINT, 0, 0);
+//    }
+}
+
+// -------- Home key: to beginning of line -------
+fn Home(win:*Window) void {
+    const wnd = win.win;
+    wnd.*.CurrCol = 0;
+    if (wnd.*.wleft != 0) {
+        wnd.*.wleft = 0;
+        _ = win.sendMessage(df.PAINT, 0, 0);
+    }
+}
+
+// -- Ctrl+cursor right key: to beginning of next word -- 
+// not really tested. Key binding doesn't work
+// modern escape does not have \f
+fn NextWord(win:*Window) void {
+    const wnd = win.win;
+    const savetop = wnd.*.wtop;
+    const saveleft = wnd.*.wleft;
+    win.ClearVisible();
+
+    var curr_pos:usize = @intCast(df.CurrPos(wnd));
+    var cc:u8 = @intCast(wnd.*.text[curr_pos]&0x7f);
+    while(!isWhite(cc)) {
+        if (wnd.*.text[curr_pos+1] == 0)
+            break;
+        Forward(win);
+        curr_pos = @intCast(df.CurrPos(wnd));
+        cc = @intCast(wnd.*.text[curr_pos]&0x7f);
+    }
+    while(isWhite(cc)) {
+        if (wnd.*.text[curr_pos+1] == 0)
+            break;
+        Forward(win);
+        curr_pos = @intCast(df.CurrPos(wnd));
+        cc = @intCast(wnd.*.text[curr_pos]&0x7f);
+    }
+//    while (!isWhite(*CurrChar)) {
+//        char *cc = CurrChar+1;
+//        if (*cc == '\0')
+//            break;
+//        Forward(wnd);
+//    }
+//    while (isWhite(*CurrChar))    {
+//        char *cc = CurrChar+1;
+//        if (*cc == '\0')
+//            break;
+//        Forward(wnd);
+//    }
+    win.SetVisible();
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
+    if (wnd.*.wtop != savetop or wnd.*.wleft != saveleft)
+        _ = win.sendMessage(df.PAINT, 0, 0);
+}
+
+// -- Ctrl+cursor left key: to beginning of previous word --
+// not tested as NextWord()
+fn PrevWord(win:*Window) void {
+    const wnd = win.win;
+    const savetop = wnd.*.wtop;
+    const saveleft = wnd.*.wleft;
+    win.ClearVisible();
+    Backward(win);
+
+    var curr_pos:usize = @intCast(df.CurrPos(wnd));
+    var cc:u8 = @intCast(wnd.*.text[curr_pos]&0x7f);
+    while(isWhite(cc)) {
+        if ((wnd.*.CurrLine == 0) and (wnd.*.CurrCol == 0))
+            break;
+        Backward(win);
+        curr_pos = @intCast(df.CurrPos(wnd));
+        cc = @intCast(wnd.*.text[curr_pos]&0x7f);
+    }
+    while(wnd.*.CurrCol != 0 and !isWhite(cc)) {
+        Backward(win);
+        curr_pos = @intCast(df.CurrPos(wnd));
+        cc = @intCast(wnd.*.text[curr_pos]&0x7f);
+    }
+    if (isWhite(cc)) {
+        Forward(win);
+    }
+//    while (isWhite(*CurrChar))    {
+//        if (wnd->CurrLine == 0 && wnd->CurrCol == 0)
+//            break;
+//        Backward(wnd);
+//    }
+//    while (wnd->CurrCol != 0 && !isWhite(*CurrChar))
+//        Backward(wnd);
+//    if (isWhite(*CurrChar))
+//        Forward(wnd);
+    win.SetVisible();
+    if (wnd.*.wleft != saveleft) {
+        if (wnd.*.CurrCol >= saveleft) {
+            if (wnd.*.CurrCol - saveleft < win.ClientWidth())
+                wnd.*.wleft = saveleft;
+        }
+    }
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
+    if (wnd.*.wtop != savetop or wnd.*.wleft != saveleft)
+        _ = win.sendMessage(df.PAINT, 0, 0);
+}
+
+// ----- set anchor point for marking text block -----
+fn SetAnchor(win:*Window, mx:c_int, my:c_int) void {
+    const wnd = win.win;
+    textbox.ClearTextBlock(win);
+    // ------ set the anchor ------
+    wnd.*.BlkBegLine = my;
+    wnd.*.BlkEndLine = my;
+    wnd.*.BlkBegCol = mx;
+    wnd.*.BlkEndCol = mx;
+    _ = win.sendMessage(df.PAINT, 0, 0);
+}
+  
