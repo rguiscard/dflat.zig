@@ -28,41 +28,22 @@ typedef struct {
     RECT rc;
 } VECT;
 
-// menubar.c
-BOOL cBuildMenu(WINDOW, char *, int, char **);
-void cPaintMenu(WINDOW, int, int, int);
-WINDOW GetDocFocus(void);
-
 //listbox.c
 void WriteSelection(WINDOW, int, int, RECT *);
 void ChangeSelection(WINDOW, int, int);
 void ListCopyText(char *, char *);
 
 // editbox.c
-void Forward(WINDOW);
-void Backward(WINDOW);
-void End(WINDOW);
 void Home(WINDOW);
-void Downward(WINDOW);
-void Upward(WINDOW);
-void StickEnd(WINDOW);
-void NextWord(WINDOW);
-void PrevWord(WINDOW);
 void ModTextPointers(WINDOW, int, int);
-void SetAnchor(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
-void DoKeyStroke(WINDOW, int, PARAM);
 void DelKey(WINDOW);
 void ShiftTabKey(WINDOW, PARAM);
 void TabKey(WINDOW, PARAM);
-void KeyTyped(WINDOW, int);
 
-void StickEnd(WINDOW);
 int CommandMsg(WINDOW, PARAM);
 void TextBlockToN(char *, char *);
 void ParagraphCmd(WINDOW);
-void DoKeyStroke(WINDOW, int, PARAM);
-int ScrollingKey(WINDOW, int, PARAM);
 int GetTextMsg(WINDOW, PARAM, PARAM);
 #define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 //#define TextLine(wnd, sel) \

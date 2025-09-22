@@ -19,8 +19,7 @@ var ButtonY:c_int = 0;
 var PrevY:c_int = -1;
 
 fn isWhite(chr:u8) bool {
-    //#define isWhite(c) (Ch(c)==' '||Ch(c)=='\n'||Ch(c)=='\f'||Ch(c)=='\t')
-    return (chr == ' ') or (chr == '\n') or (chr == 12) or (chr == '\t');
+    return (chr == ' ') or (chr == '\n') or (chr == 12) or (chr == '\t'); // '\f' is 12 in ASCII
 }
 
 fn EditBufLen(win:*Window) c_uint {
@@ -111,6 +110,28 @@ fn ClearTextMsg(win:*Window) bool {
     return rtn;
 }
 
+// ----------- GETTEXT Message ---------- 
+fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    const pp:usize = @intCast(p1);
+    const dst:[*c]u8 = @ptrFromInt(pp);
+    var len:usize = @intCast(p2);
+    if (wnd.*.text) |text| {
+        if (std.mem.indexOfScalar(u8, text[0..wnd.*.textlen], '\n')) |pos| {
+            len = @min(len, pos-1);
+        } else {
+            len = @min(len, wnd.*.textlen-1); // null at the end
+        }
+        @memmove(dst, text[0..len]);
+        dst[len] = 0;
+//        while (p2-- && *cp2 && *cp2 != '\n')
+//            *cp1++ = *cp2++;
+//        *cp1 = '\0';
+        return true;
+    }
+    return false;
+}
+
 // ----------- SETTEXTLENGTH Message ----------
 fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
     const wnd = win.win;
@@ -118,27 +139,6 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
     len += 1;
     if (len < df.MAXTEXTLEN) {
         wnd.*.MaxTextLength = @intCast(len);
-//        if (len < win.textlen) {
-//            if (win.text) |txt| {
-//                if (root.global_allocator.realloc(txt, @intCast(len+2))) |buf| {
-//                    win.text = buf;
-//                } else |_| {
-//                }
-//            } else {
-//                if (root.global_allocator.allocSentinel(u8, @intCast(len+2), 0)) |buf| {
-//                    @memset(buf, 0);
-//                    win.text = buf;
-//                } else |_| {
-//                }
-//            }
-//            if (win.text) |txt| {
-//                wnd.*.text = txt.ptr;
-//                wnd.*.textlen = @intCast(len); // len is less than actually allocated memory
-//                win.textlen = @intCast(len);
-//                wnd.*.text[@intCast(len)] = 0;
-//                wnd.*.text[@intCast(len+1)] = 0;
-//                textbox.BuildTextPointers(wnd);
-//            }
         if (win.gapbuf) |buf| {
             if (len < buf.len()) {
                 // this is for trancate
@@ -518,6 +518,41 @@ fn KeyTyped(win:*Window, cc:c_int) void {
     }
 }
 
+// -------------- Del key ----------------
+fn DelKey(win:*Window) void {
+    const wnd = win.win;
+    const curr_pos = df.CurrPos(wnd);
+    const curr_char = wnd.*.text[curr_pos];
+//    const repaint = (curr_char == '\n');
+
+    if (df.TextBlockMarked(wnd))    {
+        _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
+        _ = win.sendMessage(df.PAINT, 0, 0);
+        return;
+    }
+    if (df.isMultiLine(wnd)>0 and curr_char == '\n' and  wnd.*.text[curr_pos+1] == 0)
+        return;
+    if (win.gapbuf) |buf| {
+        buf.moveCursor(curr_pos);
+        buf.delete();
+        wnd.*.text = @constCast(buf.toString().ptr);
+        wnd.*.textlen = @intCast(buf.len());
+        // always repaint for now
+        textbox.BuildTextPointers(wnd);
+        _ = win.sendMessage(df.PAINT, 0, 0);
+    }
+
+//    memmove(currchar, currchar+1, strlen(currchar+1));
+//    if (repaint) {
+//        BuildTextPointers(win);
+//        _ = win.sendMessage(df.PAINT, 0, 0);
+//    } else {
+//        ModTextPointers(wnd, wnd->CurrLine+1, -1);
+//        WriteTextLine(wnd, NULL, wnd->WndRow+wnd->wtop, FALSE);
+//    }
+    wnd.*.TextChanged = df.TRUE;
+}
+
 
 // ------------ screen changing key strokes -------------
 fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
@@ -530,7 +565,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
             }
         },
         df.DEL => {
-            df.DelKey(wnd);
+            DelKey(win);
         },
         df.SHIFT_HT => {
             df.ShiftTabKey(wnd, p2);
@@ -845,7 +880,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return ClearTextMsg(win);
         },
         df.GETTEXT => {
-            return if (df.GetTextMsg(wnd, p1, p2) == df.TRUE) true else false;
+            return GetTextMsg(win, p1, p2);
         },
         df.SETTEXTLENGTH => {
             return SetTextLengthMsg(win, p1);

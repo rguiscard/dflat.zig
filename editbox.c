@@ -6,22 +6,14 @@
 #define Ch(c) ((c)&0x7f)
 #define isWhite(c) (Ch(c)==' '||Ch(c)=='\n'||Ch(c)=='\f'||Ch(c)=='\t')
 /* ---------- local prototypes ----------- */
-void Forward(WINDOW);
-void Backward(WINDOW);
-void End(WINDOW);
 void Home(WINDOW);
-void Downward(WINDOW);
-void Upward(WINDOW);
-void StickEnd(WINDOW);
-void NextWord(WINDOW);
-void PrevWord(WINDOW);
 void ModTextPointers(WINDOW, int, int);
-void SetAnchor(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
 
-extern int ID_DELETETEXT; // from zig side
+//extern int ID_DELETETEXT; // from zig side
 
 /* ----------- GETTEXT Message ---------- */
+#if 0
 int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     char *cp1 = (char *)p1;
@@ -34,6 +26,7 @@ int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return FALSE;
 }
+#endif
 
 /* ----- Extend the marked block to the new x,y position ---- */
 void ExtendBlock(WINDOW wnd, int x, int y)
@@ -62,6 +55,7 @@ void ExtendBlock(WINDOW wnd, int x, int y)
 }
 
 /* -------------- Del key ---------------- */
+#if 0
 void DelKey(WINDOW wnd) // private
 {
     char *currchar = CurrChar;
@@ -84,6 +78,7 @@ void DelKey(WINDOW wnd) // private
     }
     wnd->TextChanged = TRUE;
 }
+#endif
 /* ------------ Tab key ------------ */
 void TabKey(WINDOW wnd, PARAM p2) // private
 {
@@ -304,97 +299,6 @@ void ParagraphCmd(WINDOW wnd)
     wnd->WndRow = fl - wnd->wtop;
 }
 
-/* ---- cursor right key: right one character position ---- */
-#if 0
-void Forward(WINDOW wnd) // private
-{
-    char *cc = CurrChar+1;
-    if (*cc == '\0')
-        return;
-    if (*CurrChar == '\n')    {
-        Home(wnd);
-        Downward(wnd);
-    }
-    else    {
-        wnd->CurrCol++;
-        if (WndCol == ClientWidth(wnd))
-            SendMessage(wnd, HORIZSCROLL, TRUE, 0);
-    }
-}
-#endif
-
-/* ----- stick the moving cursor to the end of the line ---- */
-#if 0
-void StickEnd(WINDOW wnd) // private
-{
-    char *cp = TextLine(wnd, wnd->CurrLine);
-    char *cp1 = strchr(cp, '\n');
-    int len = cp1 ? (int) (cp1 - cp) : 0;
-    wnd->CurrCol = min(len, wnd->CurrCol);
-    if (wnd->wleft > wnd->CurrCol)    {
-        wnd->wleft = max(0, wnd->CurrCol - 4);
-        SendMessage(wnd, PAINT, 0, 0);
-    }
-    else if (wnd->CurrCol-wnd->wleft >= ClientWidth(wnd))    {
-        wnd->wleft = wnd->CurrCol - (ClientWidth(wnd)-1);
-        SendMessage(wnd, PAINT, 0, 0);
-    }
-}
-#endif
-/* --------- cursor down key: down one line --------- */
-#if 0
-void Downward(WINDOW wnd) // private
-{
-    if (isMultiLine(wnd) &&
-            wnd->WndRow+wnd->wtop+1 < wnd->wlines)  {
-        wnd->CurrLine++;
-        if (wnd->WndRow == ClientHeight(wnd)-1)
-			SendMessage(wnd, SCROLL, TRUE, 0);
-        wnd->WndRow++;
-        StickEnd(wnd);
-    }
-}
-#endif
-/* -------- cursor up key: up one line ------------ */
-#if 0
-void Upward(WINDOW wnd) // private
-{
-    if (isMultiLine(wnd) && wnd->CurrLine != 0)    {
-        --wnd->CurrLine;
-        if (wnd->WndRow == 0)
-			SendMessage(wnd, SCROLL, FALSE, 0);
-        --wnd->WndRow;
-        StickEnd(wnd);
-    }
-}
-#endif
-/* ---- cursor left key: left one character position ---- */
-#if 0
-void Backward(WINDOW wnd) // private
-{
-    if (wnd->CurrCol)    {
-        --wnd->CurrCol;
-        if (wnd->CurrCol < wnd->wleft)
-            SendMessage(wnd, HORIZSCROLL, FALSE, 0);
-    }
-    else if (isMultiLine(wnd) && wnd->CurrLine != 0)    {
-        Upward(wnd);
-        End(wnd);
-    }
-}
-#endif
-/* -------- End key: to end of line ------- */
-#if 0
- void End(WINDOW wnd) // private
-{
-    while (*CurrChar && *CurrChar != '\n')
-        ++wnd->CurrCol;
-    if (WndCol >= ClientWidth(wnd))    {
-        wnd->wleft = wnd->CurrCol - (ClientWidth(wnd)-1);
-        SendMessage(wnd, PAINT, 0, 0);
-    }
-}
-#endif
 /* -------- Home key: to beginning of line ------- */
 void Home(WINDOW wnd) // private
 {
@@ -404,58 +308,7 @@ void Home(WINDOW wnd) // private
         SendMessage(wnd, PAINT, 0, 0);
     }
 }
-/* -- Ctrl+cursor right key: to beginning of next word -- */
-#if 0
-void NextWord(WINDOW wnd) // private
-{
-    int savetop = wnd->wtop;
-    int saveleft = wnd->wleft;
-    ClearVisible(wnd);
-    while (!isWhite(*CurrChar))    {
-        char *cc = CurrChar+1;
-        if (*cc == '\0')
-            break;
-        Forward(wnd);
-    }
-    while (isWhite(*CurrChar))    {
-        char *cc = CurrChar+1;
-        if (*cc == '\0')
-            break;
-        Forward(wnd);
-    }
-    SetVisible(wnd);
-    SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-    if (wnd->wtop != savetop || wnd->wleft != saveleft)
-        SendMessage(wnd, PAINT, 0, 0);
-}
-#endif
-/* -- Ctrl+cursor left key: to beginning of previous word -- */
-#if 0
-void PrevWord(WINDOW wnd) // private
-{
-    int savetop = wnd->wtop;
-    int saveleft = wnd->wleft;
-    ClearVisible(wnd);
-    Backward(wnd);
-    while (isWhite(*CurrChar))    {
-        if (wnd->CurrLine == 0 && wnd->CurrCol == 0)
-            break;
-        Backward(wnd);
-    }
-    while (wnd->CurrCol != 0 && !isWhite(*CurrChar))
-        Backward(wnd);
-    if (isWhite(*CurrChar))
-        Forward(wnd);
-    SetVisible(wnd);
-    if (wnd->wleft != saveleft)
-        if (wnd->CurrCol >= saveleft)
-            if (wnd->CurrCol - saveleft < ClientWidth(wnd))
-                wnd->wleft = saveleft;
-    SendMessage(wnd, KEYBOARD_CURSOR, WndCol, wnd->WndRow);
-    if (wnd->wtop != savetop || wnd->wleft != saveleft)
-        SendMessage(wnd, PAINT, 0, 0);
-}
-#endif
+
 /* ----- modify text pointers from a specified position
                 by a specified plus or minus amount ----- */
 void ModTextPointers(WINDOW wnd, int lineno, int var) // private
@@ -463,14 +316,3 @@ void ModTextPointers(WINDOW wnd, int lineno, int var) // private
     while (lineno < wnd->wlines)
         *((wnd->TextPointers) + lineno++) += var;
 }
-/* ----- set anchor point for marking text block ----- */
-#if 0
-void SetAnchor(WINDOW wnd, int mx, int my) // private
-{
-    ClearTextBlock(wnd);
-    /* ------ set the anchor ------ */
-    wnd->BlkBegLine = wnd->BlkEndLine = my;
-    wnd->BlkBegCol = wnd->BlkEndCol = mx;
-    SendMessage(wnd, PAINT, 0, 0);
-}
-#endif
