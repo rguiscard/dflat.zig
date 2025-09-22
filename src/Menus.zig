@@ -20,7 +20,6 @@ pub const Toggle:PopDownAttrib = .{.TOGGLE = true};
 pub const Cascaded:PopDownAttrib = .{.CASCADED = true};
 
 // for editbox.c
-//export const ID_DELETETEXT:c_int = @intFromEnum(c.ID_DELETETEXT);
 export const ID_HELPTEXT:c_int = @intFromEnum(c.ID_HELPTEXT);
 
 // ----------- popdown menu selection structure

@@ -5,6 +5,7 @@
 #define sTab ('\f' + 0x80)
 
 /* ---------- SETTEXT Message ------------ */
+#if 0
 int cSetTextMsg(WINDOW wnd, char *Buf)
 {
    	unsigned char *tp, *ep, *ttp;
@@ -58,6 +59,9 @@ int cSetTextMsg(WINDOW wnd, char *Buf)
     free(ep);
 	return rtn;
 }
+#endif
+
+#if 0
 void CollapseTabs(WINDOW wnd)
 {
 	unsigned char *cp = wnd->text, *cp2;
@@ -89,8 +93,10 @@ void ExpandTabs(WINDOW wnd)
 	SendMessage(wnd, PAINT, 0, 0);
 	SendMessage(wnd, KEYBOARD_CURSOR, 0, wnd->WndRow);
 }
+#endif
 
 /* --- When inserting or deleting, adjust next following tab, same line --- */
+#if 0
 void AdjustTab(WINDOW wnd)
 {
     /* ---- test if there is a tab beyond this character ---- */
@@ -107,5 +113,7 @@ void AdjustTab(WINDOW wnd)
 		}
         wnd->CurrCol++;
     }
+
 	wnd->CurrCol = col;
 }
+#endif

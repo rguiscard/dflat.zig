@@ -5,15 +5,67 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const editbox = @import("EditBox.zig");
 const normal = @import("Normal.zig");
+const GapBuffer = @import("GapBuffer.zig");
 
-const pTab = '\t' + 0x80;
-const sTab = 0x0C + 0x80; // '\f'
+const pTab:u8 = '\t' + 0x80;
+const sTab:u8 = 0x0C + 0x80; // '\f'
 
 // ---------- SETTEXT Message ------------
 fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
-    const wnd = win.win;
     const pp:usize = @intCast(p1);
-    return if (df.cSetTextMsg(wnd, @ptrFromInt(pp)) == df.TRUE) true else false;
+    const src:[*c]u8 = @ptrFromInt(pp);
+    var idx:usize = 0; // source
+    var x:usize = 0;   // per line
+    const tabs:usize = @intCast(df.cfg.Tabs);
+
+    var buf:*GapBuffer = undefined;
+    if (GapBuffer.init(win.allocator, 10)) |b| {
+        buf = b;
+    } else |_| {
+        // error
+        return false;
+    }
+    defer buf.deinit();
+
+    buf.moveCursor(0);
+    while(true) {
+        if (src[idx] == 0)
+            break;
+        // --- put the character (\t, too) into the buffer ---
+        x += 1;
+        // --- expand tab into subst tab (\f + 0x80)
+        //     and expansions (\t + 0x80) --- 
+        if (src[idx] == '\t') {
+            if (buf.insert(sTab)) {} else |_| {} // --- substitute tab character ---
+            while (@mod(x, tabs) != 0) {
+                if (buf.insert(pTab)) {} else |_| {}
+                x += 1;
+            }
+        } else {
+            if (buf.insert(src[idx])) {} else |_| {}
+            if (src[idx] == '\n') {
+                x = 0;
+            }
+        }
+//        if (if (*tp == '\t') {
+//            *ttp++ = sTab;  /* --- substitute tab character --- */
+//            while ((x % cfg.Tabs) != 0) {
+//                *ttp++ = pTab, x++;
+//            }
+//        } else {
+//            *ttp++ = *tp;
+//            if (*tp == '\n')
+//                x = 0;
+//        }
+//        tp++;
+   
+        idx += 1;
+    }
+    // if (buf.insert(0)) {} else |_| {} // gapbuf insert 0 actually
+    //  *ttp = '\0';
+
+    return root.zBaseWndProc(df.EDITOR, win, df.SETTEXT, @intCast(@intFromPtr(buf.toString().ptr)), 0);
+//    return if (df.cSetTextMsg(wnd, @ptrFromInt(pp)) == df.TRUE) true else false;
 }
 
 // --------- KEYBOARD Message ----------
@@ -60,7 +112,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             while (df.zCurrChar(wnd)[0] == pTab) {
                 _ = root.zBaseWndProc(df.EDITOR, win, df.KEYBOARD, p1, p2);
             }
-            df.AdjustTab(wnd);
+            AdjustTab(win);
             TurnOnDisplay(win);
             RepaintLine(win);
             if (delnl) {
@@ -85,7 +137,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                                 (std.ascii.isPrint(@intCast(p1)) or p1 == '\r')) {
                 TurnOffDisplay(win);
                 _ = root.zBaseWndProc(df.EDITOR, win, df.KEYBOARD, p1, p2);
-                df.AdjustTab(wnd);
+                AdjustTab(win);
                 TurnOnDisplay(win);
                 RepaintLine(win);
                 if (p1 == '\r') {
@@ -96,6 +148,84 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         }
     }
     return false;
+}
+
+// not in use
+//void CollapseTabs(WINDOW wnd)
+//{
+//        unsigned char *cp = wnd->text, *cp2;
+//        while (*cp)     {
+//                if (*cp == sTab)        {
+//                        *cp = '\t';
+//                        cp2 = cp;
+//                        while (*++cp2 == pTab)
+//                                ;
+//                        memmove(cp+1, cp2, strlen(cp2)+1);
+//                }
+//                cp++;
+//        }
+//}
+
+// not in use
+//void ExpandTabs(WINDOW wnd)
+//{
+//        int Holdwtop = wnd->wtop;
+//        int Holdwleft = wnd->wleft;
+//        int HoldRow = wnd->CurrLine;
+//        int HoldCol = wnd->CurrCol;
+//        int HoldwRow = wnd->WndRow;
+//        SendMessage(wnd, SETTEXT, (PARAM) wnd->text, 0);
+//        wnd->wtop = Holdwtop;
+//        wnd->wleft = Holdwleft;
+//        wnd->CurrLine = HoldRow;
+//        wnd->CurrCol = HoldCol;
+//        wnd->WndRow = HoldwRow;
+//        SendMessage(wnd, PAINT, 0, 0);
+//        SendMessage(wnd, KEYBOARD_CURSOR, 0, wnd->WndRow);
+//}
+
+// --- When inserting or deleting, adjust next following tab, same line ---
+//  not sure it work properly
+fn AdjustTab(win:*Window) void {
+    // turn visibility off when use this function
+    const wnd = win.win;
+    // ---- test if there is a tab beyond this character ---- 
+    var col = wnd.*.CurrCol;
+    var curr_pos = df.CurrPos(wnd);
+    var cc = wnd.*.text[curr_pos];
+    while ((curr_pos < wnd.*.textlen) and (cc != '\n')) {
+        if (cc == sTab) {
+            var exp = (df.cfg.Tabs-1) - @mod(col, df.cfg.Tabs);
+            col += 1;
+            curr_pos += 1;
+            cc = wnd.*.text[curr_pos];
+            while (cc == pTab) {
+                _ = root.zBaseWndProc(df.EDITOR, win, df.KEYBOARD, df.DEL, 0);
+            }
+            while (exp > 0) {
+                exp -= 1;
+                _ = root.zBaseWndProc(df.EDITOR, win, df.KEYBOARD, pTab, 0);
+            }
+            break;
+        }
+        col += 1;
+        curr_pos += 1;
+        cc = wnd.*.text[curr_pos];
+    }
+//    while (*CurrChar && *CurrChar != '\n')    {
+//                if (*CurrChar == sTab)  {
+//                        int exp = (cfg.Tabs - 1) - (wnd->CurrCol % cfg.Tabs);
+//                wnd->CurrCol++;
+//                        while (*CurrChar == pTab)
+//                                BaseWndProc(EDITOR, wnd, KEYBOARD, DEL, 0);
+//                        while (exp--)
+//                                BaseWndProc(EDITOR, wnd, KEYBOARD, pTab, 0);
+//                        break;
+//                }
+//        wnd->CurrCol++;
+//    }
+
+//    wnd.*.CurrCol = col; // we do not change CurrCol 
 }
 
 // ------- Window processing module for EDITBOX class ------ 

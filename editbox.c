@@ -10,24 +10,6 @@ void Home(WINDOW);
 void ModTextPointers(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
 
-//extern int ID_DELETETEXT; // from zig side
-
-/* ----------- GETTEXT Message ---------- */
-#if 0
-int GetTextMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    char *cp1 = (char *)p1;
-    char *cp2 = wnd->text;
-    if (cp2 != NULL)    {
-        while (p2-- && *cp2 && *cp2 != '\n')
-            *cp1++ = *cp2++;
-        *cp1 = '\0';
-        return TRUE;
-    }
-    return FALSE;
-}
-#endif
-
 /* ----- Extend the marked block to the new x,y position ---- */
 void ExtendBlock(WINDOW wnd, int x, int y)
 {
@@ -54,31 +36,6 @@ void ExtendBlock(WINDOW wnd, int x, int y)
     }
 }
 
-/* -------------- Del key ---------------- */
-#if 0
-void DelKey(WINDOW wnd) // private
-{
-    char *currchar = CurrChar;
-    int repaint = *currchar == '\n';
-    if (TextBlockMarked(wnd))    {
-        SendMessage(wnd, COMMAND, ID_DELETETEXT, 0);
-        SendMessage(wnd, PAINT, 0, 0);
-        return;
-    }
-    if (isMultiLine(wnd) && *currchar == '\n' && *(currchar+1) == '\0')
-        return;
-    memmove(currchar, currchar+1, strlen(currchar+1));
-    if (repaint)    {
-        BuildTextPointers(wnd);
-        SendMessage(wnd, PAINT, 0, 0);
-    }
-    else    {
-        ModTextPointers(wnd, wnd->CurrLine+1, -1);
-        WriteTextLine(wnd, NULL, wnd->WndRow+wnd->wtop, FALSE);
-    }
-    wnd->TextChanged = TRUE;
-}
-#endif
 /* ------------ Tab key ------------ */
 void TabKey(WINDOW wnd, PARAM p2) // private
 {
@@ -311,8 +268,10 @@ void Home(WINDOW wnd) // private
 
 /* ----- modify text pointers from a specified position
                 by a specified plus or minus amount ----- */
+#if 0
 void ModTextPointers(WINDOW wnd, int lineno, int var) // private
 {
     while (lineno < wnd->wlines)
         *((wnd->TextPointers) + lineno++) += var;
 }
+#endif

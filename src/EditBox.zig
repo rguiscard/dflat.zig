@@ -447,7 +447,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
 //            }
 //
 //            memmove(currchar+1, currchar, strlen(currchar)+1);
-//            df.ModTextPointers(wnd, wnd.*.CurrLine+1, 1);
+//            ModTextPointers(win, wnd.*.CurrLine+1, 1);
 //            if (df.isMultiLine(wnd) and wnd.*.wlines > 1) {
 //                wnd.*.textwidth = @max(wnd.*.textwidth,
 //                    buf.indexOfLine(wnd.*.CurrLine+1) - buf.indexOfLine(wnd.*.CurrLine));
@@ -547,7 +547,7 @@ fn DelKey(win:*Window) void {
 //        BuildTextPointers(win);
 //        _ = win.sendMessage(df.PAINT, 0, 0);
 //    } else {
-//        ModTextPointers(wnd, wnd->CurrLine+1, -1);
+//        ModTextPointers(win, wnd->CurrLine+1, -1);
 //        WriteTextLine(wnd, NULL, wnd->WndRow+wnd->wtop, FALSE);
 //    }
     wnd.*.TextChanged = df.TRUE;
@@ -1345,3 +1345,14 @@ fn SetAnchor(win:*Window, mx:c_int, my:c_int) void {
     _ = win.sendMessage(df.PAINT, 0, 0);
 }
   
+// ----- modify text pointers from a specified position
+//                by a specified plus or minus amount -----
+// Not in use, but could be useful
+fn ModTextPointers(win:*Window, lineno:usize, incr:c_int) void {
+    const wnd = win.win;
+    for (lineno..wnd.*.wlines) |idx| {
+        wnd.*.TextPointers[idx] += incr;
+    }
+//    while (lineno < wnd->wlines)
+//        *((wnd->TextPointers) + lineno++) += var;
+}
