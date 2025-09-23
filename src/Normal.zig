@@ -280,8 +280,9 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
                 if (app.ApplicationWindow) |awin| {
                     var ffwin = awin.firstWindow();
                     while (ffwin) |ff| {
-                        const ffwnd = ff.win;
-                        if (isAncestor(wnd, ffwnd) == false) {
+//                        const ffwnd = ff.win;
+//                        if (isAncestor(wnd, ffwnd) == false) {
+                        if (isAncestor(win, ff) == false) {
                             rc = df.subRectangle(win.WindowRect(),ff.WindowRect());
                             if (df.ValidRect(rc)) {
                                 break;
@@ -1159,12 +1160,21 @@ fn PutVideoBuffer(win:*Window) void {
 }
 
 // ------- return TRUE if awnd is an ancestor of wnd -------
-pub fn isAncestor(w: df.WINDOW, awnd: df.WINDOW) bool {
-    var wnd = w;
-    while (wnd != null) {
-        if (wnd == awnd)
+pub fn isAncestor(w: *Window, awnd: *Window) bool {
+    var win:?*Window = w;
+    while (win) |ww| {
+        if (ww == awnd)
             return true;
-        wnd = df.GetParent(wnd);
+        win = ww.parent;
     }
     return false;
 }
+//pub fn isAncestor(w: df.WINDOW, awnd: df.WINDOW) bool {
+//    var wnd = w;
+//    while (wnd != null) {
+//        if (wnd == awnd)
+//            return true;
+//        wnd = df.GetParent(wnd);
+//    }
+//    return false;
+//}

@@ -416,18 +416,18 @@ fn VisibleRect(win:*Window) df.RECT {
 
 
 // ----- find window that mouse coordinates are in ---
-fn inWindow(w:?*Window, x:c_int, y:c_int) df.WINDOW {
+fn inWindow(w:?*Window, x:c_int, y:c_int) ?*Window {
     var ww = w;
-    var Hit:df.WINDOW = null;
+    var Hit:?*Window = null;
     while (ww) |win| {
         const wnd = win.win;
         if (df.isVisible(wnd)>0) {
             const rc = VisibleRect(win);
             if (rect.InsideRect(x, y, rc))
-                Hit = wnd;
-            const wnd1 = inWindow(win.lastWindow(), x, y);
-            if (wnd1 != null)
-                Hit = wnd1;
+                Hit = win;
+            const win1 = inWindow(win.lastWindow(), x, y);
+            if (win1 != null)
+                Hit = win1;
             if (Hit != null)
                 break;
         }
@@ -436,7 +436,7 @@ fn inWindow(w:?*Window, x:c_int, y:c_int) df.WINDOW {
     return Hit;
 }
 
-fn MouseWindow(x:c_int, y:c_int) df.WINDOW {
+fn MouseWindow(x:c_int, y:c_int) ?*Window {
     // ------ get the window in which a
     //              mouse event occurred ------
     if (app.ApplicationWindow) |awin| {
@@ -445,8 +445,8 @@ fn MouseWindow(x:c_int, y:c_int) df.WINDOW {
         if (CaptureMouse) |capture| {
             if (NoChildCaptureMouse or
                                     Mwnd == null  or
-                                    normal.isAncestor(Mwnd, capture.win) == false)
-                Mwnd = capture.win;
+                                    normal.isAncestor(Mwnd.?, capture) == false)
+                Mwnd = capture;
         }
         return Mwnd;
     }
@@ -477,14 +477,14 @@ pub fn dispatch_message() bool {
 
         // ------ get the window in which a
         //              keyboard event occurred ------
-        var Kwnd:df.WINDOW = Window.inFocusWnd();
+        var Kwnd = Window.inFocus;
 
         // ---- process keyboard captures -----
         if (CaptureKeyboard) |capture| {
             if (Kwnd == null or
                     NoChildCaptureKeyboard or
-                    normal.isAncestor(Kwnd, capture.win) == false) {
-                Kwnd = capture.win;
+                    normal.isAncestor(Kwnd.?, capture) == false) {
+                Kwnd = capture;
             }
         }
 
@@ -493,19 +493,37 @@ pub fn dispatch_message() bool {
         switch (ev.event) {
             df.SHIFT_CHANGED,
             df.KEYBOARD => {
-                if (!handshaking)
-                    _ = SendMessage(Kwnd, ev.event, ev.mx, ev.my);
+                if (!handshaking) {
+                    if (Kwnd) |kw| {
+                        _ = kw.sendMessage(ev.event, ev.mx, ev.my);
+                    } else {
+                        // could this happen ?
+                        _ = SendMessage(null, ev.event, ev.mx, ev.my);
+                    }
+                }
             },
             df.LEFT_BUTTON => {
                 if (!handshaking) {
+                    // cannot be sure Mwnd is not null
                     const Mwnd = MouseWindow(ev.mx, ev.my);
                     if (CaptureMouse == null or
                                 (NoChildCaptureMouse == false and
-                                  normal.isAncestor(Mwnd, CaptureMouse.?.win) == true)) {
-                        if (Mwnd != Window.inFocusWnd())
-                            _ = SendMessage(Mwnd, df.SETFOCUS, df.TRUE, 0);
+                                  normal.isAncestor(Mwnd.?, CaptureMouse.?) == true)) {
+                        if (Mwnd != Window.inFocus) {
+                            if (Mwnd) |mw| {
+                                _ = mw.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                            } else {
+                                // could this happen ?
+                                _ = SendMessage(null, df.SETFOCUS, df.TRUE, 0);
+                            }
+                        }
                     }
-                    _ = df.SendMessage(Mwnd, df.LEFT_BUTTON, ev.mx, ev.my);
+                    if (Mwnd) |mw| {
+                        _ = mw.sendMessage(df.LEFT_BUTTON, ev.mx, ev.my);
+                    } else {
+                        // could this happen ?
+                        _ = SendMessage(null, df.LEFT_BUTTON, ev.mx, ev.my);
+                    }
                 }
             },
             df.BUTTON_RELEASED,
@@ -514,12 +532,22 @@ pub fn dispatch_message() bool {
                 if (!handshaking) {
                     // Fall through
                     const Mwnd = MouseWindow(ev.mx, ev.my);
-                    _ = SendMessage(Mwnd, ev.event, ev.mx, ev.my);
+                    if (Mwnd) |mw| {
+                        _ = mw.sendMessage(ev.event, ev.mx, ev.my);
+                    } else {
+                        // could this happen ?
+                        _ = SendMessage(null, ev.event, ev.mx, ev.my);
+                    }
                 }
             },
             df.MOUSE_MOVED => {
                 const Mwnd = MouseWindow(ev.mx, ev.my);
-                _ = SendMessage(Mwnd, ev.event, ev.mx, ev.my);
+                if (Mwnd) |mw| {
+                    _ = mw.sendMessage(ev.event, ev.mx, ev.my);
+                } else {
+                    // could this happen ?
+                    _ = SendMessage(null, ev.event, ev.mx, ev.my);
+                }
             },
 //#if MSDOS       // FIXME add MK_FP
 //            case CLOCKTICK:

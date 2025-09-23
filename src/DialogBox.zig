@@ -306,31 +306,46 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             }
         },
         df.SETFOCUS => {
-            var pwin = win.parent;
+            const pwin = win.parent;
             var pwnd:df.WINDOW = null;
+            var db:?*Dialogs.DBOX = null;
             if (pwin) |pw| {
                 pwnd = pw.win; // only dummy and application window is null
-            }
-            var db:?*Dialogs.DBOX = null;
-            if (pwnd != null) {
                 db = @alignCast(@ptrCast(pwnd.*.extension));
             }
+
             if (p1 > 0) {
                 const oldFocus = Window.inFocus;
                 // we assume df.inFocus is not null
                 if (oldFocus) |oldWin| {
-                    if ((pwnd != null) and (oldWin.getClass() != df.APPLICATION) and
-                                       (normal.isAncestor(oldWin.win, pwnd) == false)) {
-                        Window.inFocus = null;
-                        _ = oldWin.sendMessage(df.BORDER, 0, 0);
-                        _ = q.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);
-                        Window.inFocus = oldFocus;
-                        oldWin.ClearVisible();
-                    }
-                    if (oldWin.getClass() == df.APPLICATION) {
-                        if (pwin != null and pwin.?.nextWindow() != null) {
-                            pwnd.*.wasCleared = df.FALSE;
+                    if (pwin) |pw| {
+                        if ((oldWin.getClass() != df.APPLICATION) and
+//                                       (normal.isAncestor(oldWin.win, pwnd) == false)) {
+                                       (normal.isAncestor(oldWin, pw) == false)) {
+                            Window.inFocus = null;
+                            _ = oldWin.sendMessage(df.BORDER, 0, 0);
+                            _ = pw.sendMessage(df.SHOW_WINDOW, 0, 0);
+                            Window.inFocus = oldFocus;
+                            oldWin.ClearVisible();
                         }
+                    }
+//                    if ((pwnd != null) and (oldWin.getClass() != df.APPLICATION) and
+//                                       (normal.isAncestor(oldWin.win, pwnd) == false)) {
+//                        Window.inFocus = null;
+//                        _ = oldWin.sendMessage(df.BORDER, 0, 0);
+//                        _ = q.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);
+//                        Window.inFocus = oldFocus;
+//                        oldWin.ClearVisible();
+//                    }
+                    if (oldWin.getClass() == df.APPLICATION) {
+                        if (pwin) |pw| {
+                            if (pw.nextWindow() != null) {
+                                pwnd.*.wasCleared = df.FALSE;
+                            }
+                        }
+//                        if (pwin != null and pwin.?.nextWindow() != null) {
+//                            pwnd.*.wasCleared = df.FALSE;
+//                        }
                     }
                     _ = root.zDefaultWndProc(win, msg, p1, p2);
                     oldWin.SetVisible();
@@ -341,7 +356,11 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     return true;
                 }
             } else {
-                _ = q.SendMessage(pwnd, df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
+                // assume pwin (parent) exists. seems work.
+                if (pwin) |pw| {
+                    _ = pw.sendMessage(df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
+                }
+//                _ = q.SendMessage(pwnd, df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
             }
         },
         df.CLOSE_WINDOW => {

@@ -152,7 +152,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
         for (&mbar.*.PullDown) |*mnu| {
             if (mnu.Title != null) {
                 if (mnu.PrepMenu) |proc| {
-                    proc(GetDocFocus(), @constCast(mnu));
+                    proc(GetDocFocus().win, @constCast(mnu));
                 }
                 for (&mnu.Selections) |*pd| {
                     if (pd.SelectionTitle) |_| {
@@ -163,7 +163,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
                                 if (pd.Attrib.TOGGLE) {
                                     pd.Attrib.CHECKED = !pd.Attrib.CHECKED;
                                 }
-                                _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+                                _ = GetDocFocus().sendMessage(df.SETFOCUS, df.TRUE, 0);
                                 q.PostMessage(win.getParent().win, df.COMMAND, @intFromEnum(pd.ActionId), 0);
                             }
                         }
@@ -300,7 +300,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         const mnu = &amenu[@intCast(p1)];
 //        const mnu = &ActiveMenu[@intCast(p1)];
         if (mnu.*.PrepMenu) |proc| {
-            proc(GetDocFocus(), @constCast(mnu));
+            proc(GetDocFocus().win, @constCast(mnu));
         }
         const selections:[]menus.PopDown = &mnu.*.Selections;
         const wd = popdown.MenuWidth(@constCast(&selections));
@@ -379,7 +379,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             if (mwin) |m| {
                 _ = m.sendMessage(df.CLOSE_WINDOW, 0, 0);
             }
-            _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+            _ = GetDocFocus().sendMessage(df.SETFOCUS, df.TRUE, 0);
             q.PostMessage(win.getParent().win, df.COMMAND, p1, p2);
         }
     }
@@ -396,7 +396,7 @@ fn ClosePopdownMsg(win:*Window) void {
             mbar.*.ActiveSelection = -1;
         }
         if (Selecting == false) {
-            _ = q.SendMessage(GetDocFocus(), df.SETFOCUS, df.TRUE, 0);
+            _ = GetDocFocus().sendMessage(df.SETFOCUS, df.TRUE, 0);
             _ = win.sendMessage(df.PAINT, 0, 0);
         }
     }
@@ -485,7 +485,7 @@ fn reset_menubar(win:*Window) void {
     }
 }
 
-fn GetDocFocus() df.WINDOW {
+fn GetDocFocus() *Window {
     if (app.ApplicationWindow) |awin| {
         var win:?*Window = awin;
         if (win) |w| {
@@ -502,9 +502,10 @@ fn GetDocFocus() df.WINDOW {
                 }
             }
         }
-        return if (win != null) win.?.win else awin.win;
+        return win orelse awin;
+//        return if (win != null) win.?.win else awin.win;
     } else {
-        // unreachable
-        return null;
+        unreachable;
+//        return null;
     }
 }
