@@ -20,9 +20,9 @@ var diff:c_int = 0;
 pub var WindowMoving = false;
 pub var WindowSizing = false;
 
-var Bsave:[*c]u16 = null;
-var Bht:c_int = 0;
-var Bwd:c_int = 0;
+var Bsave:?[]u16 = null;
+var Bht:usize = 0;
+var Bwd:usize = 0;
 
 var HiddenWindow:*Window = undefined; // seems initialized before use ?
 
@@ -1025,35 +1025,37 @@ fn PaintUnderLappers(win:*Window) void {
 
 // --- save video area to be used by dummy window border ---
 fn SaveBorder(rc:df.RECT) void {
-    Bht = rc.bt - rc.tp + 1;
-    Bwd = rc.rt - rc.lf + 1;
-    if (df.DFrealloc(Bsave, @intCast((Bht + Bwd) * 4))) |buf| {
-        Bsave = @ptrCast(@alignCast(buf));
+    Bht = @intCast(rc.bt - rc.tp + 1);
+    Bwd = @intCast(rc.rt - rc.lf + 1);
+
+    const size:usize = (Bht+Bwd)*4;
+    if (Bsave) |buf| {
+        if (root.global_allocator.realloc(buf, size)) |b| {
+            Bsave = b;
+        } else |_| {
+        }
     } else {
-        return;
+        if (root.global_allocator.alloc(u16, size)) |b| {
+            Bsave = b;
+        } else |_| {
+        }
     }
-
-    var lrc = rc;
-    lrc.bt = lrc.tp;
-    df.getvideo(lrc, @ptrCast(Bsave));
-    lrc.tp = rc.bt;
-    lrc.bt = rc.bt;
-    const uBwd:usize = @intCast(Bwd);
-    df.getvideo(lrc, @ptrCast(Bsave + uBwd));
-//    var cp = Bsave + Bwd * 2;
-    var pos:usize = @intCast(Bwd*2);
-    for (1..@intCast(Bht-1)) |idx| {
-        const i:c_int = @intCast(idx);
-        Bsave[pos] = @intCast(df.GetVideoChar(rc.lf, rc.tp+i));
-        pos += 1;
-        Bsave[pos] = @intCast(df.GetVideoChar(rc.rt, rc.tp+i));
-        pos += 1;
-
+    if (Bsave) |buf| {
+        var lrc = rc;
+        lrc.bt = lrc.tp;
+        df.getvideo(lrc, @ptrCast(buf.ptr));
+        lrc.tp = rc.bt;
+        lrc.bt = rc.bt;
+        df.getvideo(lrc, @ptrCast(&buf[Bwd]));
+        var pos:usize = Bwd*2;
+        for (1..Bht-1) |idx| {
+            const i:c_int = @intCast(idx);
+            buf[pos] = @intCast(df.GetVideoChar(rc.lf, rc.tp+i));
+            pos += 1;
+            buf[pos] = @intCast(df.GetVideoChar(rc.rt, rc.tp+i));
+            pos += 1;
+        }
     }
-//    for (i = 1; i < Bht-1; i++)    {
-//        *cp++ = GetVideoChar(RectLeft(rc),RectTop(rc)+i);
-//        *cp++ = GetVideoChar(RectRight(rc),RectTop(rc)+i);
-//    }
 }
 
 // ---- restore video area used by dummy window border ---- 
@@ -1061,14 +1063,12 @@ fn RestoreBorder(rc:df.RECT) void {
     if (Bsave) |buf| {
         var lrc = rc;
         lrc.bt = lrc.tp;
-        df.storevideo(lrc, buf);
+        df.storevideo(lrc, @constCast(&buf[0]));
         lrc.tp = rc.bt;
         lrc.bt = rc.bt;
-        const uBwd:usize = @intCast(Bwd);
-        df.storevideo(lrc, buf + uBwd);
-//        cp = Bsave + Bwd * 2;
+        df.storevideo(lrc, @constCast(&buf[Bwd]));
         var pos:usize = @intCast(Bwd*2);
-        for (1..@intCast(Bht-1)) |idx| {
+        for (1..Bht-1) |idx| {
             const i:c_int = @intCast(idx);
             df.PutVideoChar(rc.lf, rc.tp+i, buf[pos]);
             pos += 1;
@@ -1076,11 +1076,7 @@ fn RestoreBorder(rc:df.RECT) void {
             pos += 1;
 
         }
-//        for (i = 1; i < Bht-1; i++)    {
-//            PutVideoChar(RectLeft(rc),RectTop(rc)+i, *cp++);
-//            PutVideoChar(RectRight(rc),RectTop(rc)+i, *cp++);
-//        }
-        df.free(Bsave);
+        root.global_allocator.free(buf);
         Bsave = null;
     }
 }
