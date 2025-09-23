@@ -2,6 +2,7 @@
 
 #include "dflat.h"
 
+#if 0
 void SaveBorder(RECT);
 void RestoreBorder(RECT);
 
@@ -52,6 +53,7 @@ void RestoreBorder(RECT rc) // should be private
         Bsave = NULL;
     }
 }
+#endif
 
 BOOL isVisible(WINDOW wnd)
 {
