@@ -13,14 +13,17 @@ const normal = @import("Normal.zig");
 const MAXHELPKEYWORDS = 50; // --- maximum keywords in a window ---
 const MAXHELPSTACK = 100;
 
+var ThisHelp:?*df.helps = null;
+
 // ------------- CREATE_WINDOW message ------------
 fn CreateWindowMsg(win:*Window) void {
     const wnd = win.win;
     df.Helping = df.TRUE;
     win.Class = df.HELPBOX;
     df.InitWindowColors(wnd);
-    if (df.ThisHelp != null)
-        df.ThisHelp.*.hwnd = wnd;
+    if (ThisHelp) |help| {
+        help.*.hwnd = wnd;
+    }
 }
 
 // -------- read the help text into the editbox -------
@@ -39,15 +42,15 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
     const cmd:c = @enumFromInt(p1);
     switch (cmd) {
         c.ID_PREV => {
-            if (df.ThisHelp != null) {
-                const prevhlp:usize = @intCast(df.ThisHelp.*.prevhlp);
+            if (ThisHelp) |help| {
+                const prevhlp:usize = @intCast(help.*.prevhlp);
                 SelectHelp(wnd, df.FirstHelp+prevhlp, df.TRUE);
             }
             return true;
         },
         c.ID_NEXT => {
-            if (df.ThisHelp != null) {
-                const nexthlp:usize = @intCast(df.ThisHelp.*.nexthlp);
+            if (ThisHelp) |help| {
+                const nexthlp:usize = @intCast(help.*.nexthlp);
                 SelectHelp(wnd, df.FirstHelp+nexthlp, df.TRUE);
             }
             return true;
@@ -102,8 +105,9 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             }
         },
         df.CLOSE_WINDOW => {
-            if (df.ThisHelp != null)
-                df.ThisHelp.*.hwnd = null;
+            if (ThisHelp) |help| {
+                help.*.hwnd = null;
+            }
             df.Helping = df.FALSE;
         },
         else => {
@@ -154,9 +158,10 @@ fn HelpComment(Help:[]const u8) [*c]u8 {
     @memset(&buffer, 0);
 
     const FixedHelp = StripTildes(Help, &buffer);
-    df.ThisHelp = df.FindHelp(@constCast(FixedHelp.ptr));
-    if (df.ThisHelp != null)
-        return df.ThisHelp.*.comment;
+    ThisHelp = df.FindHelp(@constCast(FixedHelp.ptr));
+    if (ThisHelp) |help| {
+        return help.*.comment;
+    }
     return null;
 }
 
@@ -173,8 +178,8 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
     const FixedHelp = StripTildes(Help, &buffer);
 
     win.isHelping += 1;
-    df.ThisHelp = df.FindHelp(@constCast(FixedHelp.ptr));
-    if (df.ThisHelp) |thisHelp| {
+    ThisHelp = df.FindHelp(@constCast(FixedHelp.ptr));
+    if (ThisHelp) |thisHelp| {
         _ = thisHelp;
         df.helpfp = df.OpenHelpFile(&df.HelpFileName, "rb");
         if (df.helpfp) |_| {
@@ -199,9 +204,10 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
 }
 
 // ------- display a definition window --------- 
+// This one does not work properly from origin
 pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be private
     const MAXHEIGHT = df.SCREENHEIGHT-10;
-    const HoldThisHelp = df.ThisHelp;
+    const HoldThisHelp = ThisHelp;
     var hwnd = wnd;
 
     if (df.GetClass(wnd) == df.POPDOWNMENU)
@@ -209,25 +215,25 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
 
     const y:c_int = if (df.GetClass(hwnd) == df.MENUBAR) 2 else 1;
 
-    df.ThisHelp = df.FindHelp(def);
+    ThisHelp = df.FindHelp(def);
     if (Window.get_zin(hwnd)) |hwin| {
-        if (df.ThisHelp) |_| {
+        if (ThisHelp) |help| {
             const dwnd = df.CreateWindow(
                         df.TEXTBOX,
                         null,
                         @intCast(hwin.GetClientLeft()),
                         @intCast(hwin.GetClientTop()+y),
-                        @min(df.ThisHelp.*.hheight, MAXHEIGHT)+3,
-                        @intCast(df.ThisHelp.*.hwidth+2),
+                        @min(help.*.hheight, MAXHEIGHT)+3,
+                        @intCast(help.*.hwidth+2),
                         null,
                         wnd,
                         df.HASBORDER | df.NOCLIP | df.SAVESELF);
             if (dwnd != null) {
-//                df.clearBIOSbuffer();
+//                df.clearBIOSbuffer(); // no function
                 // ----- read the help text -------
-                df.SeekHelpLine(df.ThisHelp.*.hptr, df.ThisHelp.*.bit);
+                df.SeekHelpLine(help.*.hptr, help.*.bit);
                 while (true) {
-//                    df.clearBIOSbuffer();
+//                    df.clearBIOSbuffer(); // no function
                     if (df.GetHelpLine(&df.hline) == null)
                         break;
                     if (df.hline[0] == '<')
@@ -243,65 +249,67 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
             }
         }
     }
-    df.ThisHelp = HoldThisHelp;
+    ThisHelp = HoldThisHelp;
 }
 
 fn BuildHelpBox(win:?*Window) void {
     const MAXHEIGHT = df.SCREENHEIGHT-10;
 
-    // -- seek to the first line of the help text --
-    df.SeekHelpLine(df.ThisHelp.*.hptr, df.ThisHelp.*.bit);
+    if (ThisHelp) |help| {
+        // -- seek to the first line of the help text --
+        df.SeekHelpLine(help.*.hptr, help.*.bit);
 
-    // ----- read the title -----
-    _ = df.GetHelpLine(&df.hline);
-    const len:usize = df.strlen(&df.hline);
-    df.hline[len-1] = 0;
+        // ----- read the title -----
+        _ = df.GetHelpLine(&df.hline);
+        const len:usize = df.strlen(&df.hline);
+        df.hline[len-1] = 0;
 
-    // FIXME: should replace with zig allocator
-    if (Dialogs.HelpBox.dwnd.title) |ttl| {
-        root.global_allocator.free(ttl);
-        Dialogs.HelpBox.dwnd.title = null;
-    }
+        // FIXME: should replace with zig allocator
+        if (Dialogs.HelpBox.dwnd.title) |ttl| {
+            root.global_allocator.free(ttl);
+            Dialogs.HelpBox.dwnd.title = null;
+        }
 
-    if (root.global_allocator.dupeZ(u8, df.hline[0..len])) |buf| {
-        Dialogs.HelpBox.dwnd.title = buf;
-    } else |_| {
-    }
+        if (root.global_allocator.dupeZ(u8, df.hline[0..len])) |buf| {
+            Dialogs.HelpBox.dwnd.title = buf;
+        } else |_| {
+        }
 
 //    df.free(Dialogs.HelpBox.dwnd.title);
 //    Dialogs.HelpBox.dwnd.title = @ptrCast(@alignCast(df.DFmalloc(len+1)));
 //    _ = df.strcpy(Dialogs.HelpBox.dwnd.title, &df.hline);
 
-    // ----- set the height and width -----
-    Dialogs.HelpBox.dwnd.h = @min(df.ThisHelp.*.hheight, MAXHEIGHT)+7;
-    Dialogs.HelpBox.dwnd.w = @max(45, df.ThisHelp.*.hwidth+6);
+        // ----- set the height and width -----
+        Dialogs.HelpBox.dwnd.h = @min(help.*.hheight, MAXHEIGHT)+7;
+        Dialogs.HelpBox.dwnd.w = @max(45, help.*.hwidth+6);
 
-    // ------ position the help window -----
-    if (win) |w| {
-        BestFit(w, &Dialogs.HelpBox.dwnd);
-    }
-    // ------- position the command buttons ------ 
-    Dialogs.HelpBox.ctl[0].dwnd.w = @max(40, df.ThisHelp.*.hwidth+2);
-    Dialogs.HelpBox.ctl[0].dwnd.h =
-                @min(df.ThisHelp.*.hheight, MAXHEIGHT)+2;
-    const offset = @divFloor(Dialogs.HelpBox.dwnd.w-40, 2);
-    for (1..5) |i| {
-        const ii:c_int = @intCast(i);
-        Dialogs.HelpBox.ctl[i].dwnd.y =
-                        @min(df.ThisHelp.*.hheight, MAXHEIGHT)+3;
-        Dialogs.HelpBox.ctl[i].dwnd.x = (ii-1) * 10 + offset;
-    }
+        // ------ position the help window -----
+        if (win) |w| {
+            BestFit(w, &Dialogs.HelpBox.dwnd);
+        }
+        // ------- position the command buttons ------ 
+        Dialogs.HelpBox.ctl[0].dwnd.w = @max(40, help.*.hwidth+2);
+        Dialogs.HelpBox.ctl[0].dwnd.h =
+                    @min(help.*.hheight, MAXHEIGHT)+2;
+        const offset = @divFloor(Dialogs.HelpBox.dwnd.w-40, 2);
+        for (1..5) |i| {
+            const ii:c_int = @intCast(i);
+            Dialogs.HelpBox.ctl[i].dwnd.y =
+                            @min(help.*.hheight, MAXHEIGHT)+3;
+            Dialogs.HelpBox.ctl[i].dwnd.x = (ii-1) * 10 + offset;
+        }
 
-    // ---- disable ineffective buttons ----
-    if (df.ThisHelp.*.nexthlp == -1) {
-        DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_NEXT);
-    } else {
-        DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_NEXT);
-    }
-    if (df.ThisHelp.*.prevhlp == -1) {
-        DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_PREV);
-    } else {
-        DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_PREV);
+        // ---- disable ineffective buttons ----
+        if (help.*.nexthlp == -1) {
+            DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_NEXT);
+        } else {
+            DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_NEXT);
+        }
+        if (help.*.prevhlp == -1) {
+            DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_PREV);
+        } else {
+            DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_PREV);
+        }
     }
 }
 
@@ -310,12 +318,16 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
     if (newhelp != null) {
         if (Window.get_zin(wnd)) |win| {
             _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
-            if (recall>0 and df.stacked < df.MAXHELPSTACK) {
-                df.HelpStack[@intCast(df.stacked)] = @intCast(df.ThisHelp-df.FirstHelp);
-                df.stacked += 1;
+
+            if (ThisHelp) |help| {
+                if (recall>0 and df.stacked < df.MAXHELPSTACK) {
+                    df.HelpStack[@intCast(df.stacked)] = @intCast(help-df.FirstHelp);
+                    df.stacked += 1;
+                }
+                ThisHelp = newhelp;
+                _ = win.getParent().sendMessage(df.DISPLAY_HELP, @intCast(@intFromPtr(help.*.hname)), 0);
             }
-            df.ThisHelp = newhelp;
-            _ = win.getParent().sendMessage(df.DISPLAY_HELP, @intCast(@intFromPtr(df.ThisHelp.*.hname)), 0);
+
             if (df.stacked>0) {
                 DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_BACK);
             } else {

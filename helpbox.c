@@ -8,7 +8,7 @@
 #define MAXHELPSTACK 100
 
 struct helps *FirstHelp;
-struct helps *ThisHelp;
+//struct helps *ThisHelp;
 int HelpCount;
 char HelpFileName[9];
 
@@ -307,6 +307,7 @@ char *HelpComment(char *Help)
 #endif
 
 /* ------- display a definition window --------- */
+#if 0
 void cDisplayDefinition(WINDOW wnd, char *def) // should be private
 {
     WINDOW dwnd;
@@ -350,6 +351,7 @@ void cDisplayDefinition(WINDOW wnd, char *def) // should be private
     }
 	ThisHelp = HoldThisHelp;
 }
+#endif
 
 /* ------ compare help names with wild cards ----- */
 static BOOL wildcmp(char *s1, char *s2)
