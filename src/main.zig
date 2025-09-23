@@ -425,13 +425,15 @@ fn ShowPosition(win:*mp.Window) void {
     }
 }
 
-pub fn PrepFileMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
+pub fn PrepFileMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     _ = mnu;
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVE);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVEAS);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_DELETEFILE);
     if (w) |ww| {
-        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
+        const win = ww;
+        const wnd = win.win;
+//        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
         if (df.GetClass(wnd) == df.EDITBOX) {
             if (df.isMultiLine(wnd)>0) {
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVE);
@@ -442,7 +444,7 @@ pub fn PrepFileMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     }
 }
 
-pub fn PrepEditMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
+pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     _ = mnu;
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_CUT);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_COPY);
@@ -452,7 +454,9 @@ pub fn PrepEditMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_PASTE);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_UNDO);
     if (w) |ww| {
-        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
+        const win = ww;
+        const wnd = win.win;
+//        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
         if (df.GetClass(wnd) == df.EDITBOX) {
            if (df.isMultiLine(wnd)>0) {
                if (df.TextBlockMarked(wnd)) {
@@ -474,13 +478,15 @@ pub fn PrepEditMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
     }
 }
 
-pub fn PrepSearchMenu(w:?*anyopaque, mnu:*mp.menus.MENU) void {
+pub fn PrepSearchMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     _ = mnu;
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCH);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_REPLACE);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCHNEXT);
     if (w) |ww| {
-        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
+        const win = ww;
+        const wnd = win.win;
+//        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
         if (df.GetClass(wnd) == df.EDITBOX) {
             if (df.isMultiLine(wnd)>0) {
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SEARCH);

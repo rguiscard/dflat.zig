@@ -152,7 +152,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
         for (&mbar.*.PullDown) |*mnu| {
             if (mnu.Title != null) {
                 if (mnu.PrepMenu) |proc| {
-                    proc(GetDocFocus().win, @constCast(mnu));
+                    proc(GetDocFocus(), @constCast(mnu));
                 }
                 for (&mnu.Selections) |*pd| {
                     if (pd.SelectionTitle) |_| {
@@ -300,7 +300,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         const mnu = &amenu[@intCast(p1)];
 //        const mnu = &ActiveMenu[@intCast(p1)];
         if (mnu.*.PrepMenu) |proc| {
-            proc(GetDocFocus().win, @constCast(mnu));
+            proc(GetDocFocus(), @constCast(mnu));
         }
         const selections:[]menus.PopDown = &mnu.*.Selections;
         const wd = popdown.MenuWidth(@constCast(&selections));

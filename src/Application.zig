@@ -378,9 +378,11 @@ fn WindowName(wnd:df.WINDOW) ?[]const u8 {
 
 // ----------- Prepare the Window menu ------------
 // FIXME: All "more windows" functsion are not tested. it does not work as expected now.
-pub fn PrepWindowMenu(w:?*anyopaque, mnu:*menus.MENU) void {
+pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
     if (w) |ww| {
-        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
+        const win = ww;
+        const wnd = win.win;
+//        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
         const p0 = &mnu.*.Selections[0];
         var pd = &mnu.*.Selections[2];
 //        const ca = &mnu.*.Selections[13];

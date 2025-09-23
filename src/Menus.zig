@@ -1,6 +1,7 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 const c = @import("Commands.zig").Command;
+const Window = @import("Window.zig");
 
 pub const MAXPULLDOWNS  = 15;
 pub const MAXSELECTIONS  = 20;
@@ -36,7 +37,7 @@ pub const PopDown = struct {
 //       one for each popdown menu on the menu bar --------
 pub const MENU = struct {
     Title:?[:0]const u8 = null,      // title on the menu bar
-    PrepMenu:?*const fn (w: ?*anyopaque, mnu: *MENU) void = null, // function
+    PrepMenu:?*const fn (w: ?*Window, mnu: *MENU) void = null, // function
     StatusText:?[:0]const u8 = null, // text for the status bar
     CascadeId:c_int = 0,           // command id of cascading selection
     Selection:c_int = 0,           // most recent selection
@@ -92,7 +93,7 @@ fn buildMenu(comptime pulldowns:anytype) [MAXPULLDOWNS+1]MENU {
 
     inline for(pulldowns, 0..) |pulldown, idx| {
         var title:?[:0]const u8 = undefined;
-        var PrepMenu:?*const fn (w: ?*anyopaque, mnu: *MENU) void = undefined;
+        var PrepMenu:?*const fn (w: ?*Window, mnu: *MENU) void = undefined;
         var StatusText:?[:0]const u8 = undefined;
         var CascadeId:c_int = -1;
         title, PrepMenu, StatusText, CascadeId, _ = pulldown;
