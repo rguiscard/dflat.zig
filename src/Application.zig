@@ -19,7 +19,7 @@ const popdown = @import("PopDown.zig");
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
-var oldFocus:df.WINDOW = null;
+var oldFocus:?*Window = null;
 var Menus = [_][:0]u8{
     @constCast("~1.                      "),
     @constCast("~2.                      "),
@@ -202,9 +202,9 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         .ID_DISPLAY => {
             if (DialogBox.create(win, &Dialogs.Display, df.TRUE, null)) {
                 if ((Window.inFocus == win.MenuBar) or (Window.inFocus == win.StatusBar)) {
-                    oldFocus = ApplicationWindow.?.win;
+                    oldFocus = ApplicationWindow;
                 } else {
-                    oldFocus = Window.inFocusWnd();
+                    oldFocus = Window.inFocus;
                 }
                 _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
                 SelectColors(win);
@@ -217,7 +217,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 CreateStatusBar(win);
                 _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
                 if (oldFocus) |focus| { // cannot sure old focus can be null
-                    _ = q.SendMessage(focus, df.SETFOCUS, df.TRUE, 0);
+                    _ = focus.sendMessage(df.SETFOCUS, df.TRUE, 0);
                 } else {
                     _ = q.SendMessage(null, df.SETFOCUS, df.TRUE, 0);
                 }
@@ -390,7 +390,7 @@ pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
         mnu.*.Selection = 0;
         oldFocus = null;
         if (df.GetClass(wnd) != df.APPLICATION)    {
-            oldFocus = wnd;
+            oldFocus = win;
             // ----- point to the APPLICATION window -----
             if (ApplicationWindow) |awin| {
                 var cwin = awin.firstWindow();
@@ -404,7 +404,7 @@ pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
                             // --- add the document window to the menu ---
                             // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
                             pd.*.SelectionTitle = Menus[MenuNo];
-                            if (cwnd == oldFocus) {
+                            if (cw == oldFocus) {
                                 // -- mark the current document --
                                 pd.*.Attrib.CHECKED = true;
                                 mnu.*.Selection = @intCast(MenuNo+2);
@@ -450,7 +450,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
                         if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
                                         (w1.getClass() != df.MENUBAR) and
                                         w1.getClass() != df.STATUSBAR) {
-                            if (wnd1 == oldFocus)
+                            if (w1 == oldFocus)
                                 WindowSel = sel;
     
                             const name = WindowName(wnd1);
@@ -698,7 +698,7 @@ fn SwitchCursor() void {
 
 // ------- Shell out to DOS ----------
 fn ShellDOS(win:*Window) void {
-    oldFocus = Window.inFocusWnd();
+    oldFocus = Window.inFocus;
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     SwitchCursor();
     if (ScreenHeight != df.SCREENHEIGHT)
@@ -713,6 +713,8 @@ fn ShellDOS(win:*Window) void {
         SetScreenHeight(df.cfg.ScreenLines);
     SwitchCursor();
     _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
-    _ = q.SendMessage(oldFocus, df.SETFOCUS, df.TRUE, 0);
+    if (oldFocus) |focus| {
+        _ = focus.sendMessage(df.SETFOCUS, df.TRUE, 0);
+    }
     _ = q.SendMessage(null, df.SHOW_MOUSE, 0, 0);
 }
