@@ -20,6 +20,7 @@ $ zig build run
 - Keep open 'Display' dialog and close it by "ok" several time will result in black in menubar.
 - Position of help box from dialogbox seems off.
 - 'Window' at menubar crash if there is no open document.
+- Help tends to crash after closing.
 
 --------
 

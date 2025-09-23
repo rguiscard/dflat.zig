@@ -39,13 +39,12 @@ fn getDummy() df.WINDOW {
 
 // --------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) void {
-    const wnd = win.win;
     lists.AppendWindow(win);
     const rtn = q.SendMessage(null, df.MOUSE_INSTALLED, 0, 0);
     if (rtn == 0) {
         win.ClearAttribute(df.VSCROLLBAR | df.HSCROLLBAR);
     }
-    if (win.TestAttribute(df.SAVESELF) and df.isVisible(wnd)>0) {
+    if (win.TestAttribute(df.SAVESELF) and isVisible(win)) {
         GetVideoBuffer(win);
     }
 }
@@ -90,8 +89,7 @@ fn HideWindowMsg(win:*Window) void {
 
 // ----- test if screen coordinates are in a window ----
 fn InsideWindow(win:*Window, x:c_int, y:c_int) bool {
-    const wnd = win.win;
-    var rc = df.WindowRect(wnd);
+    var rc = win.WindowRect();
     if (win.TestAttribute(df.NOCLIP))    {
         var pwnd = win.parent;
         while (pwnd) |pw| {
@@ -107,7 +105,6 @@ fn InsideWindow(win:*Window, x:c_int, y:c_int) bool {
 
 // --------- KEYBOARD Message ----------
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     const dwnd = getDummy();
     if (WindowMoving or WindowSizing) {
         // -- move or size a window with keyboard --
@@ -141,8 +138,8 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
             }
         }
-        _ = q.SendMessage(wnd, df.MOUSE_CURSOR, x, y);
-        _ = q.SendMessage(wnd, df.MOUSE_MOVED, x, y);
+        _ = win.sendMessage(df.MOUSE_CURSOR, x, y);
+        _ = win.sendMessage(df.MOUSE_MOVED, x, y);
         return true;
     }
     switch (p1) {
@@ -176,7 +173,6 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 // --------- COMMAND Message ----------
 fn CommandMsg(win:*Window, p1:df.PARAM) void {
-    const wnd = win.win;
     const dwnd = getDummy();
     const dwnd_p2:df.PARAM = @intCast(@intFromPtr(dwnd));
     const cmd:c = @enumFromInt(p1);
@@ -184,14 +180,14 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
         .ID_SYSMOVE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
-            _ = win.sendMessage(df.MOUSE_CURSOR, df.GetLeft(wnd), df.GetTop(wnd));
+            _ = win.sendMessage(df.MOUSE_CURSOR, @intCast(win.GetLeft()), @intCast(win.GetTop()));
             WindowMoving = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         .ID_SYSSIZE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwnd_p2);
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwnd_p2);
-            _ = win.sendMessage(df.MOUSE_CURSOR, df.GetRight(wnd), df.GetBottom(wnd));
+            _ = win.sendMessage(df.MOUSE_CURSOR, @intCast(win.GetRight()), @intCast(win.GetBottom()));
             WindowSizing = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
@@ -223,10 +219,10 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
     var rc:df.RECT = .{.lf=0, .tp=0, .rt=0, .bt=0};
     if ((p1>0) and (Window.inFocus != win)) {
         // set focus
-        var this:df.WINDOW = null;
-        var thispar:df.WINDOW = null;
-        var that:df.WINDOW = null;
-        var thatpar:df.WINDOW = null;
+        var this:?*Window = null;
+        var thispar:?*Window = null;
+        var that:?*Window = null;
+        var thatpar:?*Window = null;
 
         var cwin:?*Window = win;
         var fwin = win.parent;
@@ -244,43 +240,42 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
             fwin = cwin;
         }
 
-        this = wnd;
-        that = Window.inFocusWnd();
-        thatpar = Window.inFocusWnd();
+        this = win;
+        that = Window.inFocus;
+        thatpar = Window.inFocus;
         // ---- find common ancestor of prev focus and this window ---
-        while (thatpar != null) {
-            thispar = wnd;
-            while (thispar != null) {
-                if ((this == if (q.CaptureMouse) |cp| cp.win else null) or
-                    (this == if (q.CaptureKeyboard) |cp| cp.win else null)) {
+        while (thatpar) |thatp| {
+            thispar = win;
+            while (thispar) |thisp| {
+                if (this == q.CaptureMouse or this == q.CaptureKeyboard) {
                     // ---- don't repaint if this window has capture ----
                     that = null;
                     thatpar = null;
                     break;
                 }
-                if (thispar == thatpar) {
+                if (thisp == thatp) {
                     // ---- don't repaint if SAVESELF window had focus ----
-                    if ((this != that) and (df.TestAttribute(that, df.SAVESELF)>0)) {
+                    if ((this != that) and that.?.TestAttribute(df.SAVESELF)) {
                         that = null;
                         thatpar = null;
                     }
                     break;
                 }
-                this = thispar;
-                thispar = Window.GetParent(thispar);
+                this = thisp;
+                thispar = thisp.parent;
             }
             if (thispar != null) {
                 break;
             }
-            that = thatpar;
-            thatpar = Window.GetParent(thatpar);
+            that = thatp;
+            thatpar = thatp.parent;
         }
         if (Window.inFocus) |focus| {
             _ = focus.sendMessage(df.SETFOCUS, df.FALSE, 0);
         }
         Window.inFocus = win;
-        if ((that != null) and (isVisible(win))) {
-            rc = df.subRectangle(df.WindowRect(that), df.WindowRect(this));
+        if ((that != null) and isVisible(win)) {
+            rc = df.subRectangle(that.?.WindowRect(), this.?.WindowRect());
             if (df.ValidRect(rc) == false) {
                 if (app.ApplicationWindow) |awin| {
                     var ffwin = awin.firstWindow();
@@ -297,17 +292,17 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
                 }
             }
         }
-        if ((that != null) and (df.ValidRect(rc)==false) and (df.isVisible(wnd)>0)) {
+        if ((that != null) and (df.ValidRect(rc)==false) and isVisible(win)) {
             this = null;
         }
         lists.ReFocus(win);
-        if ((this != null) and ((df.isVisible(this) == 0) or (df.TestAttribute(this, df.SAVESELF) == 0))) {
+        if ((this != null) and ((isVisible(this.?) == false) or (this.?.TestAttribute(df.SAVESELF) == false))) {
             wnd.*.wasCleared = df.FALSE;
-            _ = q.SendMessage(this, df.SHOW_WINDOW, 0, 0);
-        } else if (df.isVisible(wnd) == 0) {
-            _ = q.SendMessage(wnd, df.SHOW_WINDOW, 0, 0);
+            _ = this.?.sendMessage(df.SHOW_WINDOW, 0, 0);
+        } else if (isVisible(win) == false) {
+            _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
         } else {
-            _ = q.SendMessage(wnd, df.BORDER, 0, 0);
+            _ = win.sendMessage(df.BORDER, 0, 0);
         }
     }
     else if ((p1 == 0) and (Window.inFocus == win)) {
@@ -653,7 +648,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                 q.PostMessage(win.getParent().win, msg, p1, p2);
         },
         df.PAINT => {
-            if (df.isVisible(wnd)>0) {
+            if (isVisible(win)) {
                 if (wnd.*.wasCleared > 0) {
                     PaintUnderLappers(win);
                 } else {
@@ -670,7 +665,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             }
         },
         df.BORDER => {
-            if (df.isVisible(wnd)>0) {
+            if (isVisible(win)) {
                 var pp1:?*df.RECT = null;
                 if (p1>0) {
                     const p1_addr:usize = @intCast(p1);
@@ -819,17 +814,16 @@ fn TerminateMoveSize() void {
 
 // ---- build a dummy window border for moving or sizing ---
 fn dragborder(win:*Window, x:c_int, y:c_int) void {
-    const wnd = win.win;
     const dwnd = getDummy();
 
     RestoreBorder(dwnd.*.rc);
     // ------- build the dummy window --------
     dwnd.*.rc.lf = x;
     dwnd.*.rc.tp = y;
-    dwnd.*.rc.rt = dwnd.*.rc.lf+df.WindowWidth(wnd)-1;
-    dwnd.*.rc.bt = dwnd.*.rc.tp+df.WindowHeight(wnd)-1;
-    dwnd.*.ht = df.WindowHeight(wnd);
-    dwnd.*.wd = df.WindowWidth(wnd);
+    dwnd.*.rc.rt = @intCast(dwnd.*.rc.lf+win.WindowWidth()-1);
+    dwnd.*.rc.bt = @intCast(dwnd.*.rc.tp+win.WindowHeight()-1);
+    dwnd.*.ht = @intCast(win.WindowHeight());
+    dwnd.*.wd = @intCast(win.WindowWidth());
     if (Window.get_zin(dwnd)) |dwin| {
         dwin.parent = win.parent;
     }
