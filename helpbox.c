@@ -37,7 +37,8 @@ BOOL Helping;
 void SelectHelp(WINDOW, struct helps *, BOOL);
 void ReadHelp(WINDOW);
 struct helps *FindHelp(char *);
-static void DisplayDefinition(WINDOW, char *);
+void DisplayDefinition(WINDOW, char *);
+void cDisplayDefinition(WINDOW, char *);
 
 int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 
@@ -294,6 +295,7 @@ static void StripTildes(char *fh, char *hp)
 	*fh = '\0';
 }
 /* --- return the comment associated with a help window --- */
+#if 0
 char *HelpComment(char *Help)
 {
 	char FixedHelp[30];
@@ -302,9 +304,10 @@ char *HelpComment(char *Help)
 		return ThisHelp->comment;
 	return NULL;
 }
+#endif
 
 /* ------- display a definition window --------- */
-static void DisplayDefinition(WINDOW wnd, char *def)
+void cDisplayDefinition(WINDOW wnd, char *def) // should be private
 {
     WINDOW dwnd;
     WINDOW hwnd = wnd;

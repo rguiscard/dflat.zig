@@ -1,13 +1,13 @@
 /* ------------- editbox.c ------------ */
 #include "dflat.h"
 
-#define EditBufLen(wnd) (isMultiLine(wnd) ? EDITLEN : ENTRYLEN)
-#define SetLinePointer(wnd, ln) (wnd->CurrLine = ln)
-#define Ch(c) ((c)&0x7f)
-#define isWhite(c) (Ch(c)==' '||Ch(c)=='\n'||Ch(c)=='\f'||Ch(c)=='\t')
+//#define EditBufLen(wnd) (isMultiLine(wnd) ? EDITLEN : ENTRYLEN)
+//#define SetLinePointer(wnd, ln) (wnd->CurrLine = ln)
+//#define Ch(c) ((c)&0x7f)
+//#define isWhite(c) (Ch(c)==' '||Ch(c)=='\n'||Ch(c)=='\f'||Ch(c)=='\t')
 /* ---------- local prototypes ----------- */
-void Home(WINDOW);
-void ModTextPointers(WINDOW, int, int);
+//void Home(WINDOW);
+//void ModTextPointers(WINDOW, int, int);
 void ExtendBlock(WINDOW, int, int);
 
 /* ----- Extend the marked block to the new x,y position ---- */
@@ -264,6 +264,7 @@ void cParagraphCmd(WINDOW wnd)
 }
 
 /* -------- Home key: to beginning of line ------- */
+#if 0
 void Home(WINDOW wnd) // private
 {
     wnd->CurrCol = 0;
@@ -272,6 +273,7 @@ void Home(WINDOW wnd) // private
         SendMessage(wnd, PAINT, 0, 0);
     }
 }
+#endif
 
 /* ----- modify text pointers from a specified position
                 by a specified plus or minus amount ----- */
