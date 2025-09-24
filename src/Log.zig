@@ -9,6 +9,7 @@ const checkbox = @import("CheckBox.zig");
 const Class = @import("Classes.zig");
 const Menu = @import("Menu.zig");
 const menubar = @import("MenuBar.zig");
+const listbox = @import("ListBox.zig");
 const c = @import("Commands.zig").Command;
 
 var log:?*df.FILE = null;
@@ -52,7 +53,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                     const cwnd = cwin.win;
                     const tl = df.GetTextLines(cwnd);
                     for(0..@intCast(tl)) |item| {
-                        if (df.ItemSelected(cwnd, @intCast(item))>0) {
+                        if (listbox.ItemSelected(cwin, @intCast(item))) {
                             messages[item][0] = df.LISTSELECTOR;
                         }
                     }

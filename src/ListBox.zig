@@ -9,18 +9,20 @@ const textbox = @import("TextBox.zig");
 
 var py:c_int = -1;    // the previous y mouse coordinate
 
-// ----- Test for extended selections in the listbox -----
-fn TestExtended(win:*Window, p2:df.PARAM) void {
-    // EXTENDEDSELECTIONS
-    _ = win;
-    _ = p2;
-//    if (isMultiLine(wnd) && !wnd->AddMode &&
-//            !((int) p2 & (LEFTSHIFT | RIGHTSHIFT)))    {
-//        if (wnd->SelectCount > 1)    {
-//            ClearAllSelections(wnd);
-//            SendMessage(wnd, PAINT, 0, 0);
-//        }
-//    }
+// --------- SHIFT_F8 Key ------------
+fn AddModeKey(win:*Window) void {
+    const wnd = win.win;
+    if (df.isMultiLine(wnd)>0)    {
+        wnd.*.AddMode ^= df.TRUE;
+        // parent could be null ?
+        const mode = "Add Mode";
+        const p1:c_int = if (wnd.*.AddMode == df.TRUE) @intCast(@intFromPtr(mode.ptr)) else 0;
+        if (win.parent) |pw| {
+            _ = pw.sendMessage(df.ADDSTATUS, p1, 0);
+        } else {
+            _ = df.SendMessage(null, df.ADDSTATUS, p1, 0);
+        }
+    }
 }
 
 // --------- UP (Up Arrow) Key ------------
@@ -94,6 +96,29 @@ fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (df.isMultiLine(wnd)>0) p2 else df.FALSE);  // EXTENDEDSELECTIONS
 }
 
+// --------- Space Bar Key ------------ 
+fn SpacebarKey(win:*Window, p2:df.PARAM) void {
+    const wnd = win.win;
+    if (df.isMultiLine(wnd)>0) {
+        var sel:isize = -1;
+        _ = win.sendMessage(df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&sel)), 0);
+        if (sel != -1) {
+            if (wnd.*.AddMode == df.TRUE) {
+                FlipSelection(win, sel);
+            }
+            if (ItemSelected(win, sel)) {
+                const p2n = p2 & (df.LEFTSHIFT | df.RIGHTSHIFT);
+                if (p2n == 0)
+                    wnd.*.AnchorPoint = @intCast(sel);
+                _ = ExtendSelections(win, sel, @intCast(p2));
+            } else {
+                wnd.*.AnchorPoint = -1;
+            }
+            _ = win.sendMessage(df.PAINT, 0, 0);
+        }
+    }
+}
+
 // --------- Enter ('\r') Key ------------
 fn EnterKey(win:*Window) void {
     const wnd = win.win;
@@ -106,22 +131,20 @@ fn EnterKey(win:*Window) void {
 // --------- All Other Key Presses ------------
 fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
-    var sel:usize = @intCast(wnd.*.selection+1);
+    var sel:isize = @intCast(wnd.*.selection+1);
     while (sel < wnd.*.wlines) {
-        const cp = df.TextLine(wnd, sel);
+        var cp = df.TextLine(wnd, sel);
         if (cp == null)
             break;
-//#ifdef INCLUDE_EXTENDEDSELECTIONS
-//        if (isMultiLine(wnd))
-//            cp++;
-//#endif
+        if (df.isMultiLine(wnd)>0)
+            cp += 1;
 
         const first = cp[0];
         if ((first < 256) and (std.ascii.toLower(first) == p1)) {
             _ = win.sendMessage(df.LB_SELECTION, @intCast(sel),
                 if (df.isMultiLine(wnd)>0) p2 else df.FALSE);
             if (SelectionInWindow(win, sel) == false) {
-                const x:usize = @intCast(win.ClientHeight());
+                const x:isize = win.ClientHeight();
                 wnd.*.wtop = @intCast(sel-x+1);
                 _ = win.sendMessage(df.PAINT, 0, 0);
             }
@@ -144,11 +167,10 @@ fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 //    const wnd = win.win;
     switch (p1) {
-//#ifdef INCLUDE_EXTENDEDSELECTIONS
-//        case SHIFT_F8:
-//            AddModeKey(wnd);
-//            return TRUE;
-//#endif
+        df.SHIFT_F8 => {
+            AddModeKey(win);
+            return true;
+        },
         df.UP => {
             TestExtended(win, p2);
             UpKey(win, p2);
@@ -171,11 +193,9 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             EndPgDnKey(win, p1, p2);
             return true;
         },
-//#ifdef INCLUDE_EXTENDEDSELECTIONS
-//        case ' ':
-//            SpacebarKey(wnd, p2);
-//            break;
-//#endif
+        ' ' => {
+            SpacebarKey(win, p2);
+        },
         '\r' => {
             EnterKey(win);
             return true;
@@ -303,16 +323,16 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             if (p1 > 0) {
                 const pp1:usize = @intCast(p1);
                 const rc:*df.RECT = @ptrFromInt(pp1);
-                df.WriteSelection(wnd, wnd.*.selection, df.TRUE, rc);
+                WriteSelection(win, @intCast(wnd.*.selection), df.TRUE, rc);
             } else {
-                df.WriteSelection(wnd, wnd.*.selection, df.TRUE, null);
+                WriteSelection(win, @intCast(wnd.*.selection), df.TRUE, null);
             }
             return true;
         },
         df.SETFOCUS => {
             _ = root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
             if (p1>0)
-                df.WriteSelection(wnd, wnd.*.selection, df.TRUE, null);
+                WriteSelection(win, @intCast(wnd.*.selection), df.TRUE, null);
             return true;
         },
         df.SCROLL,
@@ -321,7 +341,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         df.HORIZPAGE,
         df.SCROLLDOC => {
             _ = root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
-            df.WriteSelection(wnd,wnd.*.selection,df.TRUE,null);
+            WriteSelection(win, @intCast(wnd.*.selection),df.TRUE,null);
             return true;
         },
         df.LB_CHOOSE => {
@@ -329,7 +349,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.LB_SELECTION => {
-            df.ChangeSelection(wnd, @intCast(p1), @intCast(p2));
+            ChangeSelection(win, @intCast(p1), @intCast(p2));
             _ = win.getParent().sendMessage(df.LB_SELECTION, wnd.*.selection, 0);
             return true;
         },
@@ -343,7 +363,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return false;
         },
         df.LB_SETSELECTION => {
-            df.ChangeSelection(wnd, @intCast(p1), 0);
+            ChangeSelection(win, @intCast(p1), 0);
             return true;
         },
         df.CLOSE_WINDOW => {
@@ -358,8 +378,133 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
     return root.zBaseWndProc(df.LISTBOX, win, msg, p1, p2);
 }
 
-fn SelectionInWindow(win:*Window, sel:usize) bool {
+fn SelectionInWindow(win:*Window, sel:isize) bool {
     const wnd = win.win;
     return ((wnd.*.wlines>0) and (sel >= wnd.*.wtop) and
             (sel < wnd.*.wtop+win.ClientHeight()));
+}
+
+fn WriteSelection(win:*Window, sel:isize, reverse:c_int, rc:?*df.RECT) void {
+    const wnd = win.win;
+    if (win.isVisible()) {
+        if (SelectionInWindow(win, sel)) {
+            df.WriteTextLine(wnd, rc, @intCast(sel), @intCast(reverse));
+        }
+    }
+}
+
+// ----- Test for extended selections in the listbox -----
+fn TestExtended(win:*Window, p2:df.PARAM) void {
+    const wnd = win.win;
+    const p2n = p2 & (df.LEFTSHIFT | df.RIGHTSHIFT);
+    if (df.isMultiLine(wnd)>0 and (wnd.*.AddMode == df.FALSE) and p2n == 0) {
+        if (wnd.*.SelectCount > 1) {
+            ClearAllSelections(win);
+            _ = win.sendMessage(df.PAINT, 0, 0);
+        }
+    }
+}
+
+// ----- Clear selections in the listbox -----
+fn ClearAllSelections(win:*Window) void {
+    const wnd = win.win;
+    if (df.isMultiLine(wnd)>0 and wnd.*.SelectCount > 0)    {
+        for (0..@intCast(wnd.*.wlines)) |idx| {
+            ClearSelection(win, @intCast(idx));
+        }
+//        int sel;
+//        for (sel = 0; sel < wnd->wlines; sel++)
+//            ClearSelection(wnd, sel);
+    }
+}
+
+// ----- Invert a selection in the listbox -----
+fn FlipSelection(win:*Window, sel:isize) void {
+    const wnd = win.win;
+    if (df.isMultiLine(wnd)>0) {
+        if (ItemSelected(win, sel)) {
+            ClearSelection(win, sel);
+        } else {
+            SetSelection(win, sel);
+        }
+    }
+}
+
+fn ExtendSelections(win:*Window, sel:isize, shift:usize) usize {
+    const wnd = win.win;
+    if (((shift & (df.LEFTSHIFT | df.RIGHTSHIFT))>0) and
+                        wnd.*.AnchorPoint != -1) {
+        const anchor:usize = @intCast(wnd.*.AnchorPoint);
+        const i:usize = @intCast(@max(sel, anchor));
+        const j:usize = @intCast(@min(sel, anchor));
+        const rtn = i-j;
+
+        for (j..i+1) |idx| {
+            SetSelection(win, @intCast(idx));
+        }
+//        int i = sel;
+//        int j = wnd->AnchorPoint;
+//        int rtn;
+//        if (j > i)
+//            swap(i,j);
+//        rtn = i - j;
+//        while (j <= i)
+//            SetSelection(wnd, j++);
+        return rtn;
+    }
+    return 0;
+}
+
+fn SetSelection(win:*Window,sel:isize) void {
+    const wnd = win.win;
+    if (df.isMultiLine(wnd)>0 and (ItemSelected(win, sel) == false)) {
+        const lp = df.TextLine(wnd, sel);
+        lp[0] = df.LISTSELECTOR;
+//        *lp = LISTSELECTOR;
+        wnd.*.SelectCount += 1;
+    }
+}
+
+fn ClearSelection(win:*Window,sel:isize) void {
+    const wnd = win.win;
+    if (df.isMultiLine(wnd)>0 and ItemSelected(win, sel)) {
+        const lp = df.TextLine(wnd, sel);
+        lp[0] =  ' ';
+//        *lp = ' ';
+        wnd.*.SelectCount -= 1;
+    }
+}
+
+pub fn ItemSelected(win:*Window,sel:isize) bool {
+    const wnd = win.win;
+    if (sel != -1 and df.isMultiLine(wnd)>0 and sel < wnd.*.wlines) {
+        const cp = df.TextLine(wnd, sel);
+        return (cp[0] & 255) == df.LISTSELECTOR;
+//        return (int)((*cp) & 255) == LISTSELECTOR;
+    }
+    return false;
+}
+
+fn ChangeSelection(win:*Window,sel:isize,shift:usize) void {
+    const wnd = win.win;
+    if (sel != wnd.*.selection) {
+        if (sel != -1 and df.isMultiLine(wnd)>0) {
+            if (wnd.*.AddMode == df.FALSE) {
+                ClearAllSelections(win);
+            }
+            const sels = ExtendSelections(win, sel, shift);
+            if (sels > 1) {
+                _ = win.sendMessage(df.PAINT, 0, 0);
+            }
+            if (sels == 0 and wnd.*.AddMode == df.FALSE) {
+                ClearSelection(win, @intCast(wnd.*.selection));
+                SetSelection(win, sel);
+                wnd.*.AnchorPoint = @intCast(sel);
+            }
+        }
+        WriteSelection(win, @intCast(wnd.*.selection), df.FALSE, null);
+        wnd.*.selection = @intCast(sel);
+        if (sel != -1)
+            WriteSelection(win, sel, df.TRUE, null);
+     }
 }

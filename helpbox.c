@@ -12,10 +12,6 @@ struct helps *FirstHelp;
 int HelpCount;
 char HelpFileName[9];
 
-int HelpStack[MAXHELPSTACK];
-int stacked;
-
-int HelpTextProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2);
 int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
 int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
 void cReadHelp(WINDOW wnd, WINDOW cwnd);
@@ -40,7 +36,7 @@ struct helps *FindHelp(char *);
 void DisplayDefinition(WINDOW, char *);
 void cDisplayDefinition(WINDOW, char *);
 
-int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
+//int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
 
 extern int ID_HELPTEXT; // from zig side
 

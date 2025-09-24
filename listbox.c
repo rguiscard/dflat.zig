@@ -20,6 +20,7 @@ static int py = -1;    /* the previous y mouse coordinate */
 
 #ifdef INCLUDE_EXTENDEDSELECTIONS
 /* --------- SHIFT_F8 Key ------------ */
+#if 0
 static void AddModeKey(WINDOW wnd)
 {
     if (isMultiLine(wnd))    {
@@ -29,9 +30,11 @@ static void AddModeKey(WINDOW wnd)
     }
 }
 #endif
+#endif
 
 #ifdef INCLUDE_EXTENDEDSELECTIONS
 /* --------- Space Bar Key ------------ */
+#if 0
 static void SpacebarKey(WINDOW wnd, PARAM p2)
 {
     if (isMultiLine(wnd))    {
@@ -52,6 +55,7 @@ static void SpacebarKey(WINDOW wnd, PARAM p2)
     }
 }
 #endif
+#endif
 
 void ListCopyText(char *dst, char *src) {
     while (src && *src && *src != '\n')
@@ -59,6 +63,7 @@ void ListCopyText(char *dst, char *src) {
     *dst = '\0';
 }
 
+#if 0
 static BOOL SelectionInWindow(WINDOW wnd, int sel)
 {
     return (wnd->wlines && sel >= wnd->wtop &&
@@ -72,9 +77,11 @@ void WriteSelection(WINDOW wnd, int sel,
         if (SelectionInWindow(wnd, sel))
             WriteTextLine(wnd, rc, sel, reverse);
 }
+#endif
 
 #ifdef INCLUDE_EXTENDEDSELECTIONS
 /* ----- Test for extended selections in the listbox ----- */
+#if 0
 static void TestExtended(WINDOW wnd, PARAM p2)
 {
     if (isMultiLine(wnd) && !wnd->AddMode &&
@@ -85,8 +92,10 @@ static void TestExtended(WINDOW wnd, PARAM p2)
         }
     }
 }
+#endif
 
 /* ----- Clear selections in the listbox ----- */
+#if 0
 static void ClearAllSelections(WINDOW wnd)
 {
     if (isMultiLine(wnd) && wnd->SelectCount > 0)    {
@@ -95,8 +104,10 @@ static void ClearAllSelections(WINDOW wnd)
             ClearSelection(wnd, sel);
     }
 }
+#endif
 
 /* ----- Invert a selection in the listbox ----- */
+#if 0
 static void FlipSelection(WINDOW wnd, int sel)
 {
     if (isMultiLine(wnd))    {
@@ -106,7 +117,9 @@ static void FlipSelection(WINDOW wnd, int sel)
             SetSelection(wnd, sel);
     }
 }
+#endif
 
+#if 0
 static int ExtendSelections(WINDOW wnd, int sel, int shift)
 {    
     if (shift & (LEFTSHIFT | RIGHTSHIFT) &&
@@ -123,7 +136,9 @@ static int ExtendSelections(WINDOW wnd, int sel, int shift)
     }
     return 0;
 }
+#endif
 
+#if 0
 static void SetSelection(WINDOW wnd, int sel)
 {
     if (isMultiLine(wnd) && !ItemSelected(wnd, sel))    {
@@ -151,7 +166,9 @@ BOOL ItemSelected(WINDOW wnd, int sel)
     return FALSE;
 }
 #endif
+#endif
 
+#if 0
 void ChangeSelection(WINDOW wnd,int sel,int shift)
 {
     if (sel != wnd->selection)    {
@@ -176,3 +193,4 @@ void ChangeSelection(WINDOW wnd,int sel,int shift)
 	        WriteSelection(wnd, sel, TRUE, NULL);
      }
 }
+#endif

@@ -13,6 +13,9 @@ const normal = @import("Normal.zig");
 const MAXHELPKEYWORDS = 50; // --- maximum keywords in a window ---
 const MAXHELPSTACK = 100;
 
+var HelpStack = [_]usize{0}**MAXHELPSTACK;
+var stacked:usize = 0;
+
 var ThisHelp:?*df.helps = null;
 
 // ------------- CREATE_WINDOW message ------------
@@ -56,10 +59,10 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
             return true;
         },
         c.ID_BACK => {
-            if (df.stacked > 0) {
-                df.stacked -= 1;
-                const stacked:usize = @intCast(df.stacked);
-                const helpstack:usize = @intCast(df.HelpStack[stacked]);
+            if (stacked > 0) {
+                stacked -= 1;
+                const stked:usize = stacked;
+                const helpstack:usize = HelpStack[stked];
                 SelectHelp(wnd, df.FirstHelp+helpstack, df.FALSE);
             }
             return true;
@@ -320,15 +323,15 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
             _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
 
             if (ThisHelp) |help| {
-                if (recall>0 and df.stacked < df.MAXHELPSTACK) {
-                    df.HelpStack[@intCast(df.stacked)] = @intCast(help-df.FirstHelp);
-                    df.stacked += 1;
+                if (recall>0 and stacked < df.MAXHELPSTACK) {
+                    HelpStack[stacked] = help-df.FirstHelp;
+                    stacked += 1;
                 }
                 ThisHelp = newhelp;
                 _ = win.getParent().sendMessage(df.DISPLAY_HELP, @intCast(@intFromPtr(help.*.hname)), 0);
             }
 
-            if (df.stacked>0) {
+            if (stacked>0) {
                 DialogBox.EnableButton(&Dialogs.HelpBox, c.ID_BACK);
             } else {
                 DialogBox.DisableButton(&Dialogs.HelpBox, c.ID_BACK);
