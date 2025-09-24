@@ -436,7 +436,7 @@ fn FlipSelection(win:*Window, sel:isize) void {
 
 fn ExtendSelections(win:*Window, sel:isize, shift:usize) usize {
     if (((shift & (df.LEFTSHIFT | df.RIGHTSHIFT))>0) and
-                        win.AnchorPoint != -1) {
+                        win.AnchorPoint >= 0) {
         const anchor:usize = @intCast(win.AnchorPoint);
         const i:usize = @intCast(@max(sel, anchor));
         const j:usize = @intCast(@min(sel, anchor));
