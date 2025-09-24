@@ -376,17 +376,13 @@ fn WindowName(wnd:df.WINDOW) ?[]const u8 {
 // ----------- Prepare the Window menu ------------
 // FIXME: All "more windows" functsion are not tested. it does not work as expected now.
 pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
-    if (w) |ww| {
-        const win = ww;
-        const wnd = win.win;
-//        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
+    if (w) |win| {
         const p0 = &mnu.*.Selections[0];
         var pd = &mnu.*.Selections[2];
-//        const ca = &mnu.*.Selections[13];
         var MenuNo:usize = 0;
         mnu.*.Selection = 0;
         oldFocus = null;
-        if (df.GetClass(wnd) != df.APPLICATION)    {
+        if (win.getClass() != df.APPLICATION)    {
             oldFocus = win;
             // ----- point to the APPLICATION window -----
             if (ApplicationWindow) |awin| {

@@ -444,6 +444,11 @@ pub fn isVisible(self: *TopLevelFields) bool {
     return normal.isVisible(self);
 }
 
+//#define isMultiLine(wnd) TestAttribute(wnd, MULTILINE)
+pub fn isMultiLine(self: *TopLevelFields) bool {
+    return self.TestAttribute(df.MULTILINE);
+}
+
 // parent cannot be null theoretically
 // dummy for drag do have parent (see dragborder()).
 // application window do not have parent.

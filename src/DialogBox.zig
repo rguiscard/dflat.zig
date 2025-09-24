@@ -130,7 +130,6 @@ fn CtlCreateWindowMsg(win:*Window) void {
 
 // ------- KEYBOARD Message (Control) -----
 fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     switch (p1) {
         ' ' => {
             if ((p2 & df.ALTKEY) > 0) {
@@ -161,7 +160,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         }
     }
     if (win.getClass() == df.EDITBOX) {
-        if (df.isMultiLine(wnd)>0) {
+        if (win.isMultiLine()) {
             return false;
         }
     }
@@ -194,7 +193,7 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 //                p1 = '\t';
 //            break;
         '\r' => {
-            if (((normal.isDerivedFrom(win, df.EDITBOX) and (df.isMultiLine(wnd) > 0)) == false) and
+            if (((normal.isDerivedFrom(win, df.EDITBOX) and win.isMultiLine()) == false) and
                 (normal.isDerivedFrom(win, df.BUTTON) == false) and
                 (normal.isDerivedFrom(win, df.LISTBOX) == false)) {
                 _ = win.getParent().sendCommandMessage(c.ID_OK, 0);
@@ -260,7 +259,7 @@ fn CtlCloseWindowMsg(win:*Window) void {
                     buf.clear();
                     if (wnd.*.text) |text| {
                         if (buf.insertSlice(text[0..len])) {} else |_| {}
-                        if (df.isMultiLine(wnd) == df.FALSE) {
+                        if (win.isMultiLine() == false) {
                             // remove first \n
                             buf.compact();
                             if (std.mem.indexOfScalar(u8, buf.items, '\n')) |pos| {
@@ -693,13 +692,12 @@ pub export fn PutItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8) callconv(.c) void {
     if (control) |ct| {
         // assume cwnd cannot be null ?
         if (ct.win) |cwin| {
-            const cwnd = cwin.win;
             switch (ct.*.Class) {
                 df.COMBOBOX,
                 df.EDITBOX => {
                     _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
                     _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
-                    if (df.isMultiLine(cwnd) == df.FALSE) {
+                    if (cwin.isMultiLine() == false) {
                         _ = cwin.sendMessage(df.PAINT, 0, 0);
                     }
                 },

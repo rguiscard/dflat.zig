@@ -430,12 +430,9 @@ pub fn PrepFileMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVE);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVEAS);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_DELETEFILE);
-    if (w) |ww| {
-        const win = ww;
-        const wnd = win.win;
-//        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
-        if (df.GetClass(wnd) == df.EDITBOX) {
-            if (df.isMultiLine(wnd)>0) {
+    if (w) |win| {
+        if (win.getClass() == df.EDITBOX) {
+            if (win.isMultiLine()) {
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVE);
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVEAS);
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_DELETEFILE);
@@ -453,12 +450,10 @@ pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_PARAGRAPH);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_PASTE);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_UNDO);
-    if (w) |ww| {
-        const win = ww;
+    if (w) |win| {
         const wnd = win.win;
-//        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
-        if (df.GetClass(wnd) == df.EDITBOX) {
-           if (df.isMultiLine(wnd)>0) {
+        if (win.getClass() == df.EDITBOX) {
+           if (win.isMultiLine()) {
                if (df.TextBlockMarked(wnd)) {
                    mp.menu.ActivateCommand(&menu.MainMenu, c.ID_CUT);
                    mp.menu.ActivateCommand(&menu.MainMenu, c.ID_COPY);
@@ -483,12 +478,9 @@ pub fn PrepSearchMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCH);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_REPLACE);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCHNEXT);
-    if (w) |ww| {
-        const win = ww;
-        const wnd = win.win;
-//        const wnd:df.WINDOW = @ptrCast(@alignCast(ww));
-        if (df.GetClass(wnd) == df.EDITBOX) {
-            if (df.isMultiLine(wnd)>0) {
+    if (w) |win| {
+        if (win.getClass() == df.EDITBOX) {
+            if (win.isMultiLine()) {
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SEARCH);
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_REPLACE);
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SEARCHNEXT);

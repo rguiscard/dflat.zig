@@ -25,7 +25,6 @@ pub const clipboard = @import("Clipboard.zig");
 pub const video = @import("Video.zig");
 pub const app = @import("Application.zig");
 pub const Command = @import("Commands.zig").Command;
-
 pub const q = @import("Message.zig");
 
 pub const global_allocator = std.heap.c_allocator;

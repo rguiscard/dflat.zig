@@ -23,8 +23,7 @@ fn isWhite(chr:u8) bool {
 }
 
 fn EditBufLen(win:*Window) c_uint {
-    const wnd = win.win;
-    return if (df.isMultiLine(wnd)>0) df.EDITLEN else df.ENTRYLEN;
+    return if (win.isMultiLine()) df.EDITLEN else df.ENTRYLEN;
 }
 
 pub fn WndCol(win:*Window) c_int {
@@ -40,7 +39,7 @@ fn CreateWindowMsg(win:*Window) bool {
     wnd.*.textlen = EditBufLen(win);
 //    win.textlen = EditBufLen(win);
     wnd.*.InsertMode = df.TRUE;
-    if (df.isMultiLine(wnd)>0)
+    if (win.isMultiLine())
         wnd.*.WordWrapMode = df.TRUE;
     _ = win.sendMessage(df.CLEARTEXT, 0, 0);
     return rtn;
@@ -58,7 +57,7 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     if (df.strlen(ptext)+len <= wnd.*.MaxTextLength) {
         rtn = root.zBaseWndProc(df.EDITBOX, win, df.ADDTEXT, p1, p2);
         if (rtn) {
-            if (df.isMultiLine(wnd) == 0)    {
+            if (win.isMultiLine() == false)    {
                 wnd.*.CurrLine = 0;
                 wnd.*.CurrCol = @intCast(df.strlen(p1));
                 if (wnd.*.CurrCol >= win.ClientWidth()) {
@@ -197,7 +196,7 @@ fn SizeMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 fn ScrollMsg(win:*Window, p1:df.PARAM) bool {
     const wnd = win.win;
     var rtn = false;
-    if (df.isMultiLine(wnd)>0) {
+    if (win.isMultiLine()) {
         rtn = root.zBaseWndProc(df.EDITBOX,win,df.SCROLL,p1,0);
         if (rtn) {
             if (p1>0) {
@@ -250,7 +249,7 @@ fn HorizScrollMsg(win:*Window, p1:df.PARAM) bool {
 fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
     const wnd = win.win;
     var rtn = false;
-    if (df.isMultiLine(wnd)>0)    {
+    if (win.isMultiLine())    {
         rtn = root.zBaseWndProc(df.EDITBOX, win, df.SCROLLPAGE, p1, 0);
 //        SetLinePointer(wnd, wnd->wtop+wnd->WndRow);
         wnd.*.CurrLine = wnd.*.wtop+wnd.*.WndRow;
@@ -348,7 +347,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     wnd.*.WndRow = MouseY;
     wnd.*.CurrLine = MouseY+wnd.*.wtop;
 
-    if (df.isMultiLine(wnd)>0 or
+    if (win.isMultiLine() or
         ((df.TextBlockMarked(wnd) == false) and
             (MouseX+wnd.*.wleft < df.strlen(wnd.*.text)))) {
         wnd.*.CurrCol = @intCast(MouseX+wnd.*.wleft);
@@ -403,7 +402,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
             // ---- not recognized by editor ---
             return;
         }
-        if (df.isMultiLine(wnd)==0 and df.TextBlockMarked(wnd)) {
+        if (win.isMultiLine()==false and df.TextBlockMarked(wnd)) {
             _ = win.sendMessage(df.CLEARTEXT, 0, 0);
             currchar = df.zCurrChar(wnd);
         }
@@ -481,7 +480,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
 
         // ---------- test end of window --------- 
         if (WndCol(win) == win.ClientWidth()-1) {
-            if (df.isMultiLine(wnd) == 0)  {
+            if (win.isMultiLine() == false)  {
 //                if (!(currchar == (char *)wnd->text+wnd->MaxTextLength-2))
 //                    SendMessage(wnd, HORIZSCROLL, TRUE, 0);
                 if (!(currpos == wnd.*.MaxTextLength))
@@ -531,7 +530,7 @@ fn DelKey(win:*Window) void {
         _ = win.sendMessage(df.PAINT, 0, 0);
         return;
     }
-    if (df.isMultiLine(wnd)>0 and curr_char == '\n' and  wnd.*.text[curr_pos+1] == 0)
+    if (win.isMultiLine() and curr_char == '\n' and  wnd.*.text[curr_pos+1] == 0)
         return;
     if (win.gapbuf) |buf| {
         buf.moveCursor(curr_pos);
@@ -575,7 +574,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
             df.TabKey(wnd, p2);
         },
         '\r' => {
-            if (df.isMultiLine(wnd) == df.FALSE)    {
+            if (win.isMultiLine() == false)    {
                 _ = q.PostMessage(win.getParent().win, df.KEYBOARD, cc, p2);
             } else {
                 const chr = '\n';
@@ -1006,7 +1005,7 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
     switch (cc) {
         df.PGUP,
         df.PGDN => {
-            if (df.isMultiLine(wnd)>0)
+            if (win.isMultiLine())
                 _ = root.zBaseWndProc(df.EDITBOX, win, df.KEYBOARD, cc, p2);
         },
         df.CTRL_PGUP,
@@ -1026,7 +1025,7 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
             PrevWord(win);
         },
         df.CTRL_HOME => {
-            if (df.isMultiLine(wnd)>0) {
+            if (win.isMultiLine()) {
                 _ = win.sendMessage(df.SCROLLDOC, df.TRUE, 0);
                 wnd.*.CurrLine = 0;
                 wnd.*.WndRow = 0;
@@ -1034,7 +1033,7 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
             Home(win);
         },
         df.CTRL_END => {
-            if (df.isMultiLine(wnd)>0 and
+            if (win.isMultiLine() and
                 wnd.*.WndRow+wnd.*.wtop+1 < wnd.*.wlines and
                 wnd.*.wlines > 0) {
                 _ = win.sendMessage(df.SCROLLDOC, df.FALSE, 0);
@@ -1047,11 +1046,11 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
             End(win);
         },
         df.UP => {
-            if (df.isMultiLine(wnd)>0)
+            if (win.isMultiLine())
                 Upward(win);
         },
         df.DN => {
-            if (df.isMultiLine(wnd)>0)
+            if (win.isMultiLine())
                 Downward(win);
         },
         df.FWD => {
@@ -1195,7 +1194,7 @@ fn StickEnd(win:*Window) void {
 // --------- cursor down key: down one line ---------
 fn Downward(win:*Window) void {
     const wnd = win.win;
-    if (df.isMultiLine(wnd)>0 and
+    if (win.isMultiLine() and
             wnd.*.WndRow+wnd.*.wtop+1 < wnd.*.wlines)  {
         wnd.*.CurrLine += 1;
         if (wnd.*.WndRow == win.ClientHeight()-1)
@@ -1208,7 +1207,7 @@ fn Downward(win:*Window) void {
 // -------- cursor up key: up one line ------------
 fn Upward(win:*Window) void {
     const wnd = win.win;
-    if (df.isMultiLine(wnd)>0 and wnd.*.CurrLine != 0) {
+    if (win.isMultiLine() and wnd.*.CurrLine != 0) {
         wnd.*.CurrLine -= 1;
         if (wnd.*.WndRow == 0)
             _ = win.sendMessage(df.SCROLL, df.FALSE, 0);
@@ -1224,7 +1223,7 @@ fn Backward(win:*Window) void {
         wnd.*.CurrCol -= 1;
         if (wnd.*.CurrCol < wnd.*.wleft)
             _ = win.sendMessage(df.HORIZSCROLL, df.FALSE, 0);
-    } else if (df.isMultiLine(wnd)>0 and wnd.*.CurrLine != 0) {
+    } else if (win.isMultiLine() and wnd.*.CurrLine != 0) {
         Upward(win);
         End(win);
     }
