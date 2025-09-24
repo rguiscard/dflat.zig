@@ -26,7 +26,7 @@ pub fn SetNextFocus() void {
                 }
                 // isVisible is true when win is null in original code.
                 // not sure it is correct behavior
-                if (df.isVisible(w.win)>0) {
+                if (w.isVisible()) {
                     break;
                 }
             }
@@ -67,7 +67,7 @@ pub fn SetPrevFocus() void {
                 }
                 // isVisible is true when win is null in original code.
                 // not sure it is correct behavior
-                if (df.isVisible(w.win)>0) {
+                if (w.isVisible()) {
                     break;
                 }
             }

@@ -432,7 +432,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             BuildMenuMsg(win, p1);
         },
         df.PAINT => {
-            if ((df.isVisible(wnd)>0) and (wnd.*.text != null)) {
+            if (win.isVisible() and (wnd.*.text != null)) {
                 PaintMsg(win);
                 return false;
             }

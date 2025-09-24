@@ -1100,7 +1100,7 @@ fn GetAncestor(win:*Window) ?*Window {
     return ww;
 }
 
-// this should be go Window ?
+// there is also another Window.isVisible() which utilized this one
 pub fn isVisible(win:*Window) bool {
     var ww:?*Window = win;
     while (ww) |w| {

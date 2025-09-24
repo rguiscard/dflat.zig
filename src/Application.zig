@@ -107,8 +107,7 @@ fn AddStatusMsg(win: *Window, p1: df.PARAM) void {
 
 // ------- SIZE Message --------
 fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const wnd = win.win;
-    const WasVisible = (df.isVisible(wnd) > 0);
+    const WasVisible = win.isVisible();
     if (WasVisible)
         _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     var p1_new = p1;
@@ -302,7 +301,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
             return true;
         },
         df.PAINT => {
-            if (normal.isVisible(win))    {
+            if (win.isVisible())    {
                 const cl:u8 = if (df.cfg.Texture > 0) df.APPLCHAR else ' ';
                 const pptr:usize = @intCast(p1);
                 df.ClearWindow(wnd, @ptrFromInt(pptr), cl);
@@ -327,8 +326,7 @@ fn CloseAll(win:*Window, closing:bool) void {
     _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
     var win1 = win.lastWindow();
     while (win1) |w1| {
-        const wnd1 = w1.win;
-        if ((df.isVisible(wnd1)>0) and
+        if (w1.isVisible() and
                        (w1.getClass() != df.MENUBAR) and
                        (w1.getClass() != df.STATUSBAR)) {
             w1.ClearVisible();
@@ -343,7 +341,6 @@ fn CloseAll(win:*Window, closing:bool) void {
 
 // -------- SETFOCUS Message --------
 fn SetFocusMsg(win:*Window, p1:bool) void {
-    const wnd = win.win;
     if (p1) {
         if (Window.inFocus) |focus| {
             _ = focus.sendMessage(df.SETFOCUS, df.FALSE, 0);
@@ -352,7 +349,7 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
     Window.inFocus = if (p1) win else null;
     _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
 
-    if (df.isVisible(wnd)>0) {
+    if (win.isVisible()) {
         _ = win.sendMessage(df.BORDER, 0, 0);
     } else {
         _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
@@ -398,8 +395,7 @@ pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
                 for (0..9) |idx| {
                     MenuNo = idx;
                     if (cwin) |cw| {
-                        const cwnd = cw.win;
-                        if (df.isVisible(cwnd)>0 and cw.getClass() != df.MENUBAR and
+                        if (cw.isVisible() and cw.getClass() != df.MENUBAR and
                                 cw.getClass() != df.STATUSBAR) {
                             // --- add the document window to the menu ---
                             // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
@@ -447,7 +443,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
                     var win1 = awin.firstWindow();
                     while (win1) |w1| {
                         const wnd1 = w1.win;
-                        if (df.isVisible(wnd1)>0 and (wnd1 != wnd) and
+                        if (w1.isVisible() and (wnd1 != wnd) and
                                         (w1.getClass() != df.MENUBAR) and
                                         w1.getClass() != df.STATUSBAR) {
                             if (w1 == oldFocus)
@@ -514,8 +510,7 @@ fn ChooseWindow(win:*Window, WindowNo:c_int) void {
     var counter = WindowNo;
     var cwin = win.firstWindow();
     while (cwin) |cw| {
-        const cwnd = cw.win;
-        if (df.isVisible(cwnd)>0 and
+        if (cw.isVisible() and
                         cw.getClass() != df.MENUBAR and
                         cw.getClass() != df.STATUSBAR) {
             if (counter == 0)

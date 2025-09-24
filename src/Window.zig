@@ -200,9 +200,9 @@ pub fn create(
         wnd.*.condition = df.ISRESTORED;
         wnd.*.RestoredRC = wnd.*.rc;
         df.InitWindowColors(wnd);
-        _ = df.SendMessage(wnd, df.CREATE_WINDOW, 0, 0);
-        if (df.isVisible(wnd)>0) {
-            _ = df.SendMessage(wnd, df.SHOW_WINDOW, 0, 0);
+        _ = self.sendMessage(df.CREATE_WINDOW, 0, 0);
+        if (self.isVisible()) {
+            _ = self.sendMessage(df.SHOW_WINDOW, 0, 0);
         }
     }
 
@@ -235,7 +235,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
         df.BORDER => {
             // ------- don't send these messages unless the
             //    window is visible --------
-            if (df.isVisible(wnd)>0) {
+            if (self.isVisible()) {
                 if (self.wndproc) |wndproc| {
                     rtn = wndproc(self, msg, p1, p2);
                 }
@@ -247,7 +247,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
         df.BUTTON_RELEASED => {
             // --- don't send these messages unless the
             //  window is visible or has captured the mouse --
-            if ((df.isVisible(wnd)>0) or (self == q.CaptureMouse)) {
+            if ((self.isVisible()) or (self == q.CaptureMouse)) {
                 if (self.wndproc) |wndproc| {
                     rtn = wndproc(self, msg, p1, p2);
                 }
@@ -257,7 +257,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
         df.SHIFT_CHANGED => {
             // ------- don't send these messages unless the
             //  window is visible or has captured the keyboard --
-            if ((df.isVisible(wnd)>0) or (self == q.CaptureKeyboard)) {
+            if ((self.isVisible()) or (self == q.CaptureKeyboard)) {
                 if (self.wndproc) |wndproc| {
                     rtn = wndproc(self, msg, p1, p2);
                 }
@@ -432,6 +432,10 @@ pub fn SetVisible(self: *TopLevelFields) void {
 pub fn ClearVisible(self: *TopLevelFields) void {
     const wnd = self.win;
     wnd.*.attrib &= ~df.VISIBLE;
+}
+
+pub fn isVisible(self: *TopLevelFields) bool {
+    return normal.isVisible(self);
 }
 
 // parent cannot be null theoretically

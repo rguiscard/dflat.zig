@@ -302,7 +302,7 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
         }
         wnd.*.wtop -= 1;
     }
-    if (normal.isVisible(win)) {
+    if (win.isVisible()) {
         const rc = df.ClipRectangle(wnd, rect.ClientRect(win));
         if (df.ValidRect(rc))    {
             // ---- scroll the window ----- 
@@ -576,7 +576,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
             return true;
         },
         df.PAINT => {
-            if (df.isVisible(wnd)>0) {
+            if (win.isVisible()) {
                 PaintMsg(win, p1, p2);
                 return false;
             }

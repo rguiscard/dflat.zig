@@ -15,7 +15,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                 return true;
         },
         df.PAINT => {
-            if (df.isVisible(wnd) > 0) {
+            if (win.isVisible()) {
                 if(root.global_allocator.alloc(u8, @intCast(win.WindowWidth()+1))) |sb| {
                     defer root.global_allocator.free(sb);
 

@@ -9,7 +9,7 @@ const popdown = @import("PopDown.zig");
 
 fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
     const wnd = win.win;
-    if (df.isVisible(wnd) > 0) {
+    if (win.isVisible()) {
         if (win.TestAttribute(df.SHADOW) and (df.cfg.mono == 0)) {
             // -------- draw the button's shadow -------
             df.background = df.WndBackground(win.getParent().win);

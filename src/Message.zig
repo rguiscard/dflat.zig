@@ -420,8 +420,7 @@ fn inWindow(w:?*Window, x:c_int, y:c_int) ?*Window {
     var ww = w;
     var Hit:?*Window = null;
     while (ww) |win| {
-        const wnd = win.win;
-        if (df.isVisible(wnd)>0) {
+        if (win.isVisible()) {
             const rc = VisibleRect(win);
             if (rect.InsideRect(x, y, rc))
                 Hit = win;

@@ -586,7 +586,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             }
         },
         df.SETFOCUS => {
-            if ((p1 != 0) and (df.isVisible(wnd) > 0)) {
+            if ((p1 != 0) and win.isVisible()) {
                 if (win.dfocus) |dfocus| {
                     return dfocus.sendMessage(df.SETFOCUS, df.TRUE, 0);
                 }
@@ -601,7 +601,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         },
         df.MOVE, df.SIZE => {
             const rtn = root.zBaseWndProc(df.DIALOG, win, msg, p1, p2);
-            if (df.isVisible(wnd) > 0) {
+            if (win.isVisible()) {
                 if (win.dfocus) |dfocus| {
                     _ = dfocus.sendMessage(df.SETFOCUS, df.TRUE, 0);
                 }
