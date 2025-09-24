@@ -124,10 +124,10 @@ typedef struct window {
     int VScrollBox; /* position of vertical scroll box      */
 	unsigned int *TextPointers; /* -> list of line offsets	*/
     /* ----------------- list box fields ------------------ */
-    int selection;  /* current selection                    */
-    BOOL AddMode;   /* adding extended selections mode      */
-    int AnchorPoint;/* anchor point for extended selections */
-    int SelectCount;/* count of selected items              */
+//    int selection;  /* current selection                    */
+//    BOOL AddMode;   /* adding extended selections mode      */
+//    int AnchorPoint;/* anchor point for extended selections */
+//    int SelectCount;/* count of selected items              */
     /* ----------------- edit box fields ------------------ */
     int CurrCol;      /* Current column                     */
     int CurrLine;     /* Current line                       */

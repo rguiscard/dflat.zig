@@ -118,7 +118,8 @@ fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     var len:usize = @intCast(p2);
     if (wnd.*.text) |text| {
         if (std.mem.indexOfScalar(u8, text[0..wnd.*.textlen], '\n')) |pos| {
-            len = @min(len, pos-1);
+            // pos is usize, overflow if minus 1.
+            len = if (pos > 0) @min(len, pos-1) else 0; 
         } else {
             len = @min(len, wnd.*.textlen-1); // null at the end
         }

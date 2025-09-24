@@ -65,7 +65,7 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         const sel:c_uint = @intCast(p2 - win.GetClientTop());
         const tl = df.TextLine(wnd, sel);
         if (tl[0] != df.LINE)
-            _ = win.sendMessage(df.LB_CHOOSE, @intCast(wnd.*.selection), 0);
+            _ = win.sendMessage(df.LB_CHOOSE, win.selection, 0);
     } else {
         const pwin = win.getParent();
         if ((pwin.getClass() == df.MENUBAR) and (p2==pwin.GetTop()))
@@ -166,7 +166,6 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
 // --------- PAINT Message --------
 fn PaintMsg(win:*Window) void {
     if (win.mnu) |mnu| {
-        const wnd = win.win;
 //        var sep = [_]u8{df.LINE}**df.MAXPOPWIDTH; // cannot be slice
         // need to use df.LINE to differentiate from sel. 
         // otherwise, zig make them the same.
@@ -179,7 +178,7 @@ fn PaintMsg(win:*Window) void {
         sep[wd] = 0; // minimal of width and maxwidth ?
 
         _ = win.sendMessage(df.CLEARTEXT, 0, 0);
-        wnd.*.selection = mnu.*.Selection;
+        win.selection = mnu.*.Selection;
         for (mnu.*.Selections) |m| {
             if (m.SelectionTitle) |title| {
                 if (title[0] == df.LINE) {
@@ -261,7 +260,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             // if (ActivePopDown == NULL)
             if (win.mnu) |mnu| {
                 if (mnu.*.Selections[0].SelectionTitle != null) {
-                    if (mnu.*.Selections[@intCast(wnd.*.selection)].help) |helpName| {
+                    if (mnu.*.Selections[@intCast(win.selection)].help) |helpName| {
                         _ = helpbox.DisplayHelp(win, helpName);
                         return true;
                     }
@@ -289,7 +288,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.UP => {
-            if (wnd.*.selection == 0) {
+            if (win.selection == 0) {
                 if (wnd.*.wlines == win.ClientHeight()) {
                     q.PostMessage(wnd, df.LB_SELECTION,
                                     @intCast(wnd.*.wlines-1), df.FALSE);
@@ -298,7 +297,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             }
         },
         df.DN => {
-            if (wnd.*.selection == wnd.*.wlines-1) {
+            if (win.selection == wnd.*.wlines-1) {
                 if (wnd.*.wlines == win.ClientHeight()) {
                     q.PostMessage(wnd, df.LB_SELECTION, 0, df.FALSE);
                     return true;
@@ -360,7 +359,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             const pp:usize = @intCast(p1);
             win.mnu = @ptrFromInt(pp);
             if (win.mnu) |mnu| {
-                wnd.*.selection = mnu.*.Selection;
+                win.selection = mnu.*.Selection;
             }
         },
         df.PAINT => {

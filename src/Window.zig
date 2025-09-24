@@ -38,6 +38,12 @@ isHelping:u32 = 0,                    // > 0 when help is being displayed
 // ----------------- text box fields ------------------
 gapbuf:?*GapBuf = null, // gap buffer
 
+// ----------------- list box fields ------------------
+selection:isize = -1,      // current selection, -1 for none
+AddMode:bool = false,      // adding extended selections mode
+AnchorPoint:isize = 0,     // anchor point for extended selections
+SelectCount:usize = 0,     // count of selected items
+
 // ----------------- edit box fields ------------------
 TextChanged:bool = false,    // TRUE if text has changed
 DeletedText:?[]u8 = null,    // for undo

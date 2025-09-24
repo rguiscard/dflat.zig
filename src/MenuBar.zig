@@ -311,7 +311,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 if (mx + wd > brd) {
                     mx = @intCast(brd - wd);
                 }
-                my = @intCast(zin.GetTop() + zin.win.*.selection);
+                my = @intCast(zin.GetTop() + zin.selection);
             }
         } else {
             var offset = menupos[@intCast(p1)].x1 - 4 * p1;
