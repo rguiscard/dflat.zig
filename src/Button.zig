@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
+const r = @import("Colors.zig");
 const Window = @import("Window.zig");
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
@@ -14,7 +15,7 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
         if (win.TestAttribute(df.SHADOW) and (df.cfg.mono == 0)) {
             // -------- draw the button's shadow -------
             df.background = df.WndBackground(win.getParent().win);
-            df.foreground = df.BLACK;
+            df.foreground = r.BLACK;
             for(1..@intCast(win.WindowWidth()+1)) |x| {
                 df.wputch(wnd, 223, @intCast(x), 1);
             }

@@ -2,8 +2,6 @@
 
 #include "dflat.h"
 
-// WINDOW inFocus = NULL;
-
 int foreground, background;   /* current video colors */
 
 static void TopLine(WINDOW, int, RECT);
@@ -13,6 +11,8 @@ BOOL hasStatusBar(WINDOW);
 static unsigned char line[MAXCOLS];
 
 extern int TITLEBAR;
+extern unsigned char BLACK;
+extern unsigned char DARKGRAY;
 
 /* ------ write a line to video window client area ------ */
 void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
@@ -82,38 +82,24 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
             	background = cfg.clr[TITLEBAR] [STD_COLOR] [BG];
         	}
         	memset(line,' ',WindowWidth(wnd));
-#ifdef INCLUDE_MINIMIZE
         	if (wnd->condition != ISMINIMIZED)
-#endif
-            	strncpy(line + ((WindowWidth(wnd)-2 - tlen) / 2),
-                	GetTitle(wnd), tlen);
+            	    strncpy(line + ((WindowWidth(wnd)-2 - tlen) / 2),
+                 	    GetTitle(wnd), tlen);
         	if (TestAttribute(wnd, CONTROLBOX))
             	line[2-BorderAdj(wnd)] = CONTROLBOXCHAR;
         	if (TestAttribute(wnd, MINMAXBOX))    {
             	switch (wnd->condition)    {
                 	case ISRESTORED:
-#ifdef INCLUDE_MAXIMIZE
-                    	line[tend+1] = MAXPOINTER;
-#endif
-#ifdef INCLUDE_MINIMIZE
-                    	line[tend]   = MINPOINTER;
-#endif
-                    	break;
-#ifdef INCLUDE_MINIMIZE
+                    	    line[tend+1] = MAXPOINTER;
+                    	    line[tend]   = MINPOINTER;
+                    	    break;
                 	case ISMINIMIZED:
-                    	line[tend+1] = MAXPOINTER;
-                    	break;
-#endif
-#ifdef INCLUDE_MAXIMIZE
+                    	    line[tend+1] = MAXPOINTER;
+                    	    break;
                 	case ISMAXIMIZED:
-#ifdef INCLUDE_MINIMIZE
-                    	line[tend]   = MINPOINTER;
-#endif
-#ifdef INCLUDE_RESTORE
-                    	line[tend+1] = RESTOREPOINTER;
-#endif
-                    	break;
-#endif
+                    	    line[tend]   = MINPOINTER;
+                    	    line[tend+1] = RESTOREPOINTER;
+                    	    break;
                 	default:
                     	break;
             	}
@@ -130,17 +116,8 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
 	}
 }
 
-#ifdef INCLUDE_MINIMIZE
 #define MinTest() (wnd->condition == ISMINIMIZED) ||
-#else
-#define MinTest() /**/
-#endif
-
-#ifdef INCLUDE_MAXIMIZE
 #define MaxTest() (wnd->condition == ISMAXIMIZED) ||
-#else
-#define MaxTest() /**/
-#endif
 
 #define NoShadow(wnd)                    \
      (TestAttribute(wnd, SHADOW) == 0 || \

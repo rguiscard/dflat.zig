@@ -2,6 +2,7 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
+const r = @import("Colors.zig");
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
@@ -91,10 +92,10 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
 
     _ = win.sendTextMessage(df.SETTEXT, @constCast(msg), 0);
     if (df.cfg.mono == 0) {
-        wnd.*.WindowColors[df.STD_COLOR][df.FG] = df.WHITE;
-        wnd.*.WindowColors[df.STD_COLOR][df.BG] = df.GREEN;
-        wnd.*.WindowColors[df.FRAME_COLOR][df.FG] = df.WHITE;
-        wnd.*.WindowColors[df.FRAME_COLOR][df.BG] = df.GREEN;
+        wnd.*.WindowColors[df.STD_COLOR][df.FG] = r.WHITE;
+        wnd.*.WindowColors[df.STD_COLOR][df.BG] = r.GREEN;
+        wnd.*.WindowColors[df.FRAME_COLOR][df.FG] = r.WHITE;
+        wnd.*.WindowColors[df.FRAME_COLOR][df.BG] = r.GREEN;
     }
     _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
     return win;
