@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const k = @import("Classes.zig").CLASS;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const log = @import("Log.zig");
@@ -144,7 +145,7 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             }
 
             // Should rtn be TRUE or FALSE or call sendMessage() ?
-            if (Window.GetClass(wnd) != df.DUMMY) {
+            if (Window.GetClass(wnd) != @intFromEnum(k.DUMMY)) {
                 // Try to catch any window which is not dummy nor created by Window.create()
                 _ = df.printf("Not dummy !! \n");
                 while(true) {}

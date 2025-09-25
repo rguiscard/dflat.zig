@@ -12,6 +12,8 @@ BOOL hasStatusBar(WINDOW);
 
 static unsigned char line[MAXCOLS];
 
+extern int TITLEBAR;
+
 /* ------ write a line to video window client area ------ */
 void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
 {

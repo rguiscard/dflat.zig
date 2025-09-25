@@ -360,7 +360,7 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
 // -------- return the name of a document window -------
 fn WindowName(wnd:df.WINDOW) ?[]const u8 {
     if (df.GetTitle(wnd) == null) {
-        if (df.GetClass(wnd) == df.DIALOG) {
+        if (df.GetClass(wnd) == @intFromEnum(k.DIALOG)) {
             if (wnd.*.extension) |ext| {
                 const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
                 return dbox.*.HelpName;

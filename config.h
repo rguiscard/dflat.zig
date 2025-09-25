@@ -12,6 +12,9 @@ enum colortypes {
 
 enum grounds { FG, BG };
 
+// FIXME. This should derive from CLASS directly
+#define CLASSCOUNT 23
+
 /* ----------- configuration parameters ----------- */
 typedef struct config {
     char version[sizeof VERSION];

@@ -65,6 +65,7 @@ typedef enum {FALSE, TRUE} BOOL;
 #define MAXPOPWIDTH 80    /* max popup width */
 #define MAXPATH     80
 
+#include "classes.h"
 #include "system.h"
 #include "config.h"
 #include "rect.h"
@@ -183,7 +184,7 @@ typedef struct window {
 //#define GetTitle(w)          ((w)->title)
 char *GetTitle(WINDOW);
 WINDOW GetParent(WINDOW);
-CLASS GetClass(WINDOW);
+int GetClass(WINDOW); // use int for CLASS
 // #define GetClass(w)          ((w)->Class)
 #define GetAttribute(w)      ((w)->attrib)
 #define AddAttribute(w,a)    (GetAttribute(w) |= a)
@@ -196,7 +197,7 @@ CLASS GetClass(WINDOW);
 BOOL isVisible(WINDOW);
 //WINDOW CreateWindow(CLASS,const char *,int,int,int,int,void*,WINDOW,
 //       int (*)(struct window *,enum messages,PARAM,PARAM),int);
-WINDOW CreateWindow(CLASS,const char *,int,int,int,int,void*,WINDOW, int);
+WINDOW CreateWindow(int,const char *,int,int,int,int,void*,WINDOW, int); // use int for CLASS
 void AddTitle(WINDOW, const char *);
 void InsertTitle(WINDOW, const char *);
 void DisplayTitle(WINDOW, RECT *);
@@ -222,12 +223,12 @@ int CheckAndChangeDir(char *);
 #define SwapVideoBuffer(wnd, ish, fh) swapvideo(wnd, wnd->videosave, ish, fh)
 int LineLength(char *);
 RECT AdjustRectangle(WINDOW, RECT);
-BOOL isDerivedFrom(WINDOW, CLASS);
+BOOL isDerivedFrom(WINDOW, int); // use int for CLASS
 WINDOW GetAncestor(WINDOW);
 void PutWindowChar(WINDOW,int,int,int);
 void PutWindowLine(WINDOW, void *,int,int);
 
-int BaseWndProc(CLASS, WINDOW, MESSAGE, PARAM, PARAM);
+//int BaseWndProc(CLASS, WINDOW, MESSAGE, PARAM, PARAM);
 int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM); 
 
 //extern WINDOW ApplicationWindow;

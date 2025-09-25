@@ -73,7 +73,7 @@ win: df.WINDOW,
 
 // --------- create a window ------------
 pub export fn CreateWindow(
-    klass:df.CLASS,              // class of this window
+    klass:c_int,                 // class of this window
     ttl:[*c]u8,                  // title or NULL
     left:c_int, top:c_int,       // upper left coordinates
     height:c_int, width:c_int,   // dimensions
@@ -496,7 +496,7 @@ pub export fn GetTitle(wnd:df.WINDOW) [*c]u8 {
     return null;
 }
 
-pub export fn GetClass(wnd:df.WINDOW) df.CLASS {
+pub export fn GetClass(wnd:df.WINDOW) c_int {
     if (get_zin(wnd)) |win| {
         return @intFromEnum(win.Class);
     }

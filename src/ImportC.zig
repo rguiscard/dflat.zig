@@ -1,3 +1,4 @@
+const CLASS = @import("Classes.zig").CLASS;
 pub const df = @cImport({
     @cDefine("BUILD_FULL_DFLAT", {});
     @cInclude("dflat.h");

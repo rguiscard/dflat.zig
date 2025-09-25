@@ -31,17 +31,21 @@ pub const q = @import("Message.zig");
 pub const global_allocator = std.heap.c_allocator;
 
 // for editbox.c
-export const ID_HELPTEXT:c_int = @intFromEnum(Command.ID_HELPTEXT);
+pub export const ID_HELPTEXT:c_int = @intFromEnum(Command.ID_HELPTEXT);
+pub export const POPDOWNMENU:c_int = @intFromEnum(CLASS.POPDOWNMENU);
+pub export const MENUBAR:c_int = @intFromEnum(CLASS.MENUBAR);
+pub export const TITLEBAR:c_int = @intFromEnum(CLASS.TITLEBAR);
+pub export const CLASSCOUNT:c_int = @intFromEnum(CLASS.CLASSCOUNT);
 
-pub export fn BaseWndProc(klass: df.CLASS, wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
-    if (Window.get_zin(wnd)) |zin| {
-        const cls:CLASS = @enumFromInt(klass);
-        const rtn = zBaseWndProc(cls, zin, msg, p1, p2);
-        return if (rtn) df.TRUE else df.FALSE;
-    }
-    return df.FALSE;
-    // Is it possible that wnd is null ?
-}
+//pub export fn BaseWndProc(klass: c_int, wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
+//    if (Window.get_zin(wnd)) |zin| {
+//        const cls:CLASS = @enumFromInt(klass);
+//        const rtn = zBaseWndProc(cls, zin, msg, p1, p2);
+//        return if (rtn) df.TRUE else df.FALSE;
+//    }
+//    return df.FALSE;
+//    // Is it possible that wnd is null ?
+//}
 
 pub export fn DefaultWndProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     if (Window.get_zin(wnd)) |zin| {

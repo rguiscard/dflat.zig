@@ -1,0 +1,569 @@
+install
++- install memopad
+   +- compile exe memopad Debug native 64 errors
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/config.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/config.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/config.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/config.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/config.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/config.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/config.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/config.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/colors.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/colors.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/colors.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/colors.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/colors.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/colors.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/colors.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/colors.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/colors.c:6:15: error: variable length array declaration not allowed at file scope
+unsigned char color[CLASSCOUNT] [4] [2] = {
+              ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/colors.c:153:15: error: variable length array declaration not allowed at file scope
+unsigned char bw[CLASSCOUNT] [4] [2] = {
+              ^~~~
+/home/rguiscard/Projects/dflat.zig/colors.c:299:15: error: variable length array declaration not allowed at file scope
+unsigned char reverse[CLASSCOUNT] [4] [2] = {
+              ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/console-unix.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/console-unix.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/console-unix.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/console-unix.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/console-unix.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/console-unix.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/console-unix.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/console-unix.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/events-unix.c:6:10: note: in file included from /home/rguiscard/Projects/dflat.zig/events-unix.c:6:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/events-unix.c:6:10: note: in file included from /home/rguiscard/Projects/dflat.zig/events-unix.c:6:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/events-unix.c:6:10: note: in file included from /home/rguiscard/Projects/dflat.zig/events-unix.c:6:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/events-unix.c:6:10: note: in file included from /home/rguiscard/Projects/dflat.zig/events-unix.c:6:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/video.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/video.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/video.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/video.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/video.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/video.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/video.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/video.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/mouse-ansi.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/mouse-ansi.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/mouse-ansi.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/mouse-ansi.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/mouse-ansi.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/mouse-ansi.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/mouse-ansi.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/mouse-ansi.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/direct.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/direct.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/direct.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/direct.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/direct.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/direct.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/direct.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/direct.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/editbox.c:2:10: note: in file included from /home/rguiscard/Projects/dflat.zig/editbox.c:2:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/editbox.c:2:10: note: in file included from /home/rguiscard/Projects/dflat.zig/editbox.c:2:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/editbox.c:2:10: note: in file included from /home/rguiscard/Projects/dflat.zig/editbox.c:2:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/editbox.c:2:10: note: in file included from /home/rguiscard/Projects/dflat.zig/editbox.c:2:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/rect.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/rect.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/rect.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/rect.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/rect.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/rect.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/rect.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/rect.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/textbox.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/textbox.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/textbox.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/textbox.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/textbox.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/textbox.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/textbox.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/textbox.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/decomp.c:10:10: note: in file included from /home/rguiscard/Projects/dflat.zig/decomp.c:10:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/decomp.c:10:10: note: in file included from /home/rguiscard/Projects/dflat.zig/decomp.c:10:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/decomp.c:10:10: note: in file included from /home/rguiscard/Projects/dflat.zig/decomp.c:10:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/decomp.c:10:10: note: in file included from /home/rguiscard/Projects/dflat.zig/decomp.c:10:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/dfalloc.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dfalloc.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/dfalloc.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dfalloc.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/dfalloc.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dfalloc.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/dfalloc.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dfalloc.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/helpbox.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/helpbox.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/helpbox.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/helpbox.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/helpbox.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/helpbox.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/helpbox.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/helpbox.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/normal.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/normal.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/normal.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/normal.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/normal.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/normal.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/normal.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/normal.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:29:19: error: fields must have a constant size: 'variable length array in structure' extension will never be supported
+    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
+                  ^
+/home/rguiscard/Projects/dflat.zig/window.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/window.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:33:22: error: variable length array declaration not allowed at file scope
+extern unsigned char color[CLASSCOUNT] [4] [2];
+                     ^~~~~~~
+/home/rguiscard/Projects/dflat.zig/window.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/window.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:34:22: error: variable length array declaration not allowed at file scope
+extern unsigned char bw[CLASSCOUNT] [4] [2];
+                     ^~~~
+/home/rguiscard/Projects/dflat.zig/window.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/window.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/config.h:35:22: error: variable length array declaration not allowed at file scope
+extern unsigned char reverse[CLASSCOUNT] [4] [2];
+                     ^~~~~~~~~
+/home/rguiscard/Projects/dflat.zig/window.c:3:10: note: in file included from /home/rguiscard/Projects/dflat.zig/window.c:3:
+#include "dflat.h"
+         ^
+/home/rguiscard/Projects/dflat.zig/dflat.h:70:10: note: in file included from /home/rguiscard/Projects/dflat.zig/dflat.h:70:
+#include "config.h"
+         ^
+src/ImportC.zig:4:28: error: expected type '[]const u8', found 'comptime_int'
+    @cDefine("CLASSCOUNT", 10);
+                           ^~
+referenced by:
+    df: src/root.zig:7:38
+    DefaultWndProc: src/root.zig:50:35
+    6 reference(s) hidden; use '-freference-trace=8' to see all references
+error: the following command failed with 64 compilation errors:
+/home/rguiscard/Projects/zig-x86_64-linux-0.15.1/zig build-exe -ODebug -I /home/rguiscard/Projects/dflat.zig/. --dep dflat --dep memopad -Mroot=/home/rguiscard/Projects/dflat.zig/src/main.zig -cflags -DMACOS=1 -DBUILD_FULL_DFLAT -g -Wno-pointer-sign -Wno-compare-distinct-pointer-types -Wno-invalid-source-encoding -- /home/rguiscard/Projects/dflat.zig/keys.c /home/rguiscard/Projects/dflat.zig/colors.c /home/rguiscard/Projects/dflat.zig/config.c /home/rguiscard/Projects/dflat.zig/dfalloc.c /home/rguiscard/Projects/dflat.zig/window.c /home/rguiscard/Projects/dflat.zig/rect.c /home/rguiscard/Projects/dflat.zig/normal.c /home/rguiscard/Projects/dflat.zig/textbox.c /home/rguiscard/Projects/dflat.zig/editbox.c /home/rguiscard/Projects/dflat.zig/direct.c /home/rguiscard/Projects/dflat.zig/helpbox.c /home/rguiscard/Projects/dflat.zig/decomp.c /home/rguiscard/Projects/dflat.zig/video.c /home/rguiscard/Projects/dflat.zig/events-unix.c /home/rguiscard/Projects/dflat.zig/mouse-ansi.c /home/rguiscard/Projects/dflat.zig/console-unix.c /home/rguiscard/Projects/dflat.zig/kcp437.c /home/rguiscard/Projects/dflat.zig/runes.c /home/rguiscard/Projects/dflat.zig/unikey.c /home/rguiscard/Projects/dflat.zig/tty.c /home/rguiscard/Projects/dflat.zig/tty-cp437.c /home/rguiscard/Projects/dflat.zig/runshell.c -ODebug -I /home/rguiscard/Projects/dflat.zig/./ -Mdflat -ODebug -I /home/rguiscard/Projects/dflat.zig/. -Mmemopad=/home/rguiscard/Projects/dflat.zig/src/root.zig -lc --cache-dir .zig-cache --global-cache-dir /home/rguiscard/.cache/zig --name memopad --zig-lib-dir /home/rguiscard/Projects/zig-x86_64-linux-0.15.1/lib/ --listen=-
+
+Build Summary: 0/3 steps succeeded; 1 failed
+install transitive failure
++- install memopad transitive failure
+   +- compile exe memopad Debug native 64 errors
+
+error: the following build command failed with exit code 1:
+.zig-cache/o/32e28263e5ffba55064bb26df0598995/build /home/rguiscard/Projects/zig-x86_64-linux-0.15.1/zig /home/rguiscard/Projects/zig-x86_64-linux-0.15.1/lib /home/rguiscard/Projects/dflat.zig .zig-cache /home/rguiscard/.cache/zig --seed 0xca0fbce9 -Ze1875fb3cd5b1e1d

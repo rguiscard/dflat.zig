@@ -57,6 +57,9 @@ pub const CLASS = enum (c_int) {
     // ---------- pseudo classes to create enums, etc.
     TITLEBAR,
     DUMMY,
+
+    // ---------- total count of classes (excl FORCEINTTYPE)
+    CLASSCOUNT,
 };
 
 // The order need to match enum Klass

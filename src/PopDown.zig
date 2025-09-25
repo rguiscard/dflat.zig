@@ -441,6 +441,8 @@ pub fn SelectionWidth(pd:*[]menus.PopDown) c_int {
 pub fn CopyCommand(dest:[]u8, src:[]const u8, skipcolor:bool, bg:c_int) usize {
     var idx:usize = 0;
     var change = false;
+
+    const pmi:usize = @intCast(@intFromEnum(k.POPDOWNMENU));
     for (src) |chr| {
         if (chr == '\n') // original code end with '\n' and dest do no have '\n'
             break;
@@ -450,7 +452,7 @@ pub fn CopyCommand(dest:[]u8, src:[]const u8, skipcolor:bool, bg:c_int) usize {
         }
         if (change and !skipcolor) {
             dest[idx]   = df.CHANGECOLOR;
-            dest[idx+1] = df.cfg.clr[df.POPDOWNMENU] [df.HILITE_COLOR] [df.BG] | 0x80;
+            dest[idx+1] = df.cfg.clr[pmi] [df.HILITE_COLOR] [df.BG] | 0x80;
             dest[idx+2] = @intCast(bg | 0x80);
             dest[idx+3] = chr;
             dest[idx+4] = df.RESETCOLOR;

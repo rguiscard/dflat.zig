@@ -28,6 +28,7 @@
  *        Class Name  Base Class   Processor       Attribute    
  *       ------------  --------- ---------------  -----------
  */
+#if 0
 ClassDef(  NORMAL,      -1,      0 )
 ClassDef(  APPLICATION, NORMAL,  VISIBLE   |
                                  SAVESELF  |
@@ -75,3 +76,4 @@ ClassDef(  EDITOR,      EDITBOX, 0          )
 /* ---------- pseudo classes to create enums, etc. ---------- */
 ClassDef(  TITLEBAR,    -1,      0          )
 ClassDef(  DUMMY,       -1,      HASBORDER  )
+#endif

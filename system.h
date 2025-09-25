@@ -85,11 +85,13 @@ typedef enum messages {
  * Another solution would be using -fno-short-enums, which uses more space,
  * as 2 bytes (and type int) would always be allocated for a CLASS enum.
  */
+#if 0
 typedef enum window_class    {
 	FORCEINTTYPE = -1,      /* required or enum type is unsigned char */
 	#define ClassDef(c,b,a) c,
 	#include "classes.h"
 	CLASSCOUNT
 } CLASS;
+#endif
 
 #endif
