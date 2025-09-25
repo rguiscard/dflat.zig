@@ -14,6 +14,9 @@ extern int TITLEBAR;
 extern unsigned char BLACK;
 extern unsigned char DARKGRAY;
 
+void cDisplayTitle(WINDOW, RECT *);
+void cRepaintBorder(WINDOW, RECT *);
+
 /* ------ write a line to video window client area ------ */
 void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
 {
@@ -59,7 +62,7 @@ RECT AdjustRectangle(WINDOW wnd, RECT rc)
 }
 
 /* -------- display a window's title --------- */
-void DisplayTitle(WINDOW wnd, RECT *rcc)
+void cDisplayTitle(WINDOW wnd, RECT *rcc)
 {
 	if (GetTitle(wnd) != NULL)	{
     	int tlen = min(strlen(GetTitle(wnd)), WindowWidth(wnd)-2);
@@ -183,6 +186,7 @@ static RECT ParamRect(WINDOW wnd, RECT *rcc)
 	return rc;
 }
 
+#if 0 // not used
 void PaintShadow(WINDOW wnd)
 {
 	int y;
@@ -191,6 +195,7 @@ void PaintShadow(WINDOW wnd)
 		shadow_char(wnd, y);
     shadowline(wnd, rc);
 }
+#endif
 
 static unsigned int SeCorner(WINDOW wnd, unsigned int stdse)
 {
@@ -200,7 +205,7 @@ static unsigned int SeCorner(WINDOW wnd, unsigned int stdse)
 }
 
 /* ------- display a window's border ----- */
-void RepaintBorder(WINDOW wnd, RECT *rcc)
+void cRepaintBorder(WINDOW wnd, RECT *rcc)
 {
     int y;
     unsigned int lin, side, ne, nw, se, sw;
@@ -232,7 +237,7 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
     if (TestAttribute(wnd, HASTITLEBAR))
         if (RectTop(rc) == 0)
             if (RectLeft(rc) < WindowWidth(wnd)-BorderAdj(wnd))
-                DisplayTitle(wnd, &rc);
+                cDisplayTitle(wnd, &rc);
     foreground = FrameForeground(wnd);
     background = FrameBackground(wnd);
     /* -------- top frame corners --------- */

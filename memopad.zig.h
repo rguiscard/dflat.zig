@@ -6,11 +6,15 @@ extern BOOL AllocTesting;
 extern jmp_buf AllocError;
 
 // normal.c
-void SaveBorder(RECT);
-void RestoreBorder(RECT);
+//void SaveBorder(RECT);
+//void RestoreBorder(RECT);
 
 // applicat.c
 extern BOOL AltDown;
+
+// window.c
+void cDisplayTitle(WINDOW, RECT *);
+void cRepaintBorder(WINDOW, RECT *);
 
 // textbox.c
 void DeleteTextMsg(WINDOW, int);

@@ -679,10 +679,11 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                     pp1 = @ptrFromInt(p1_addr);
                 }
 
+                // pp1 (p1) could be null
                 if (win.TestAttribute(df.HASBORDER)) {
-                    df.RepaintBorder(wnd, pp1);
+                    win.RepaintBorder(pp1);
                 } else if (win.TestAttribute(df.HASTITLEBAR)) {
-                    df.DisplayTitle(wnd, pp1);
+                    win.DisplayTitle(pp1);
                 }
             }
         },
@@ -835,11 +836,13 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
         dwin.parent = win.parent;
         dwnd.*.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
         dwin.InitWindowColors();
+        SaveBorder(dwnd.*.rc);
+        dwin.RepaintBorder(null);
     }
 //    dwnd.*.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
 //    df.InitWindowColors(dwnd);
-    SaveBorder(dwnd.*.rc);
-    df.RepaintBorder(dwnd, null);
+//    SaveBorder(dwnd.*.rc);
+//    df.RepaintBorder(dwnd, null);
 }
 
 // ---- write the dummy window border for sizing ----
@@ -872,7 +875,9 @@ fn sizeborder(win:*Window, rt:c_int, bt:c_int) void {
         px = new_rt;
         py = new_bt;
         SaveBorder(dwnd.*.rc);
-        df.RepaintBorder(dwnd, null);
+        if (Window.get_zin(dwnd)) |dwin| {
+            dwin.RepaintBorder(null);
+        }
     }
 }
 
@@ -933,7 +938,7 @@ fn PaintOverLap(win:*Window, rc:df.RECT) void {
         if (isBorder) {
             _ = win.sendMessage(df.BORDER, @intCast(@intFromPtr(&rc)), 0);
         } else if (isTitle) {
-            df.DisplayTitle(wnd, @constCast(&rc));
+            win.DisplayTitle(@constCast(&rc));
         }
     }
 }

@@ -17,14 +17,14 @@ int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
 void cReadHelp(WINDOW wnd, WINDOW cwnd);
 
 /* --- keywords in the current help text -------- */
-static struct keywords {
+struct keywords { // private
 	struct helps *hkey;
     int lineno;
     int off1, off2, off3;
     char isDefinition;
 } KeyWords[MAXHELPKEYWORDS];
-static struct keywords *thisword;
-static int keywordcount;
+struct keywords *thisword; // private
+int keywordcount; // private
 
 FILE *helpfp;
 char hline [160];

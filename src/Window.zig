@@ -306,6 +306,18 @@ pub fn InsertTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
 //    strcpy(wnd->title, ttl);
 }
 
+// -------- display a window's title ---------
+pub fn DisplayTitle(win:*TopLevelFields, rcc:?*df.RECT) void {
+    const wnd = win.win;
+    df.cDisplayTitle(wnd, rcc);
+}
+
+// ------- display a window's border -----
+pub fn RepaintBorder(win:*TopLevelFields, rcc:?*df.RECT) void {
+    const wnd = win.win;
+    df.cRepaintBorder(wnd, rcc);
+}
+
 pub fn InitWindowColors(win:*TopLevelFields) void {
     var cls = win.Class;
     var icls:usize = @intCast(@intFromEnum(cls));
