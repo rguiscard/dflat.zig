@@ -14,6 +14,9 @@ const sysmenu = @import("SystemMenu.zig");
 const Classes = @import("Classes.zig");
 const app = @import("Application.zig");
 
+const ICONHEIGHT = 3;
+const ICONWIDTH = 10;
+
 var dummyWin:?Window = null;
 var dummy:df.window = undefined;
 var px:c_int = -1;
@@ -751,8 +754,8 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
 // ---- compute lower right icon space in a rectangle ----
 fn LowerRight(prc:df.RECT) df.RECT {
     const rc = df.RECT{
-        .lf = prc.rt - df.ICONWIDTH,
-        .tp = prc.bt - df.ICONHEIGHT,
+        .lf = prc.rt - ICONWIDTH,
+        .tp = prc.bt - ICONHEIGHT,
         .rt = prc.rt - 1,
         .bt = prc.bt - 1,
     };
@@ -769,8 +772,8 @@ fn LowerRight(prc:df.RECT) df.RECT {
 // ----- compute a position for a minimized window icon ----
 fn PositionIcon(win:*Window) df.RECT {
     var rc = df.RECT{
-        .lf = df.SCREENWIDTH-df.ICONWIDTH,
-        .tp = df.SCREENHEIGHT-df.ICONHEIGHT,
+        .lf = df.SCREENWIDTH-ICONWIDTH,
+        .tp = df.SCREENHEIGHT-ICONHEIGHT,
         .rt = df.SCREENWIDTH-1,
         .bt = df.SCREENHEIGHT-1
     };
@@ -784,13 +787,13 @@ fn PositionIcon(win:*Window) df.RECT {
             if (cw.win.*.condition == df.ISMINIMIZED) {
                 const rc1 = cw.WindowRect();
                 if (rc1.lf == rc.lf and rc1.tp == rc.tp) {
-                    rc.lf -= df.ICONWIDTH;
-                    rc.rt -= df.ICONWIDTH;
+                    rc.lf -= ICONWIDTH;
+                    rc.rt -= ICONWIDTH;
                     if (rc.lf < prc.lf+1) {
-                        rc.lf = prc.rt-df.ICONWIDTH;
-                        rc.rt = rc.lf+df.ICONWIDTH-1;
-                        rc.tp -= df.ICONHEIGHT;
-                        rc.bt -= df.ICONHEIGHT;
+                        rc.lf = prc.rt-ICONWIDTH;
+                        rc.rt = rc.lf+ICONWIDTH-1;
+                        rc.tp -= ICONHEIGHT;
+                        rc.bt -= ICONHEIGHT;
                         if (rc.tp < prc.tp+1)
                             return LowerRight(prc);
                     }

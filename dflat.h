@@ -159,8 +159,8 @@ typedef struct window {
 //void LogMessages (WINDOW, MESSAGE, PARAM, PARAM);
 //void MessageLog(WINDOW);
 /* ------- window methods ----------- */
-#define ICONHEIGHT 3
-#define ICONWIDTH  10
+//#define ICONHEIGHT 3
+//#define ICONWIDTH  10
 #define WindowHeight(w)      ((w)->ht)
 #define WindowWidth(w)       ((w)->wd)
 #define BorderAdj(w)         (TestAttribute(w,HASBORDER)?1:0)
@@ -238,8 +238,8 @@ int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM);
 extern int foreground, background;
 //extern BOOL WindowMoving;
 //extern BOOL WindowSizing;
-extern BOOL VSliding;
-extern BOOL HSliding;
+//extern BOOL VSliding;
+//extern BOOL HSliding;
 extern char DFlatApplication[];
 //extern char *Clipboard;
 //extern unsigned ClipboardLength;

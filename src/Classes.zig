@@ -28,7 +28,7 @@ const helpbox = @import("HelpBox.zig");
 //         You must add entries to the color tables in
 //         CONFIG.C for new classes.
 
-pub const CLASS = enum (c_int) {
+pub const CLASS = enum (i8) {
     FORCEINTTYPE = -1,      // required or enum type is unsigned char
     NORMAL = 0,
     APPLICATION,

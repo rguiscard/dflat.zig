@@ -16,6 +16,7 @@ const checkbox = @import("CheckBox.zig");
 const normal = @import("Normal.zig");
 const menus = @import("Menus.zig");
 const popdown = @import("PopDown.zig");
+const Colors = @import("Colors.zig");
 
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
@@ -548,11 +549,14 @@ fn SelectColors(win: *Window) void {
     }
 
     if (df.cfg.mono == 1) {
-        @memcpy(&df.cfg.clr, &df.bw);
+//        @memcpy(&df.cfg.clr, &df.bw);
+        @memcpy(&df.cfg.clr, &Colors.bw);
     } else if (df.cfg.mono == 2) {
-        @memcpy(&df.cfg.clr, &df.reverse);
+//        @memcpy(&df.cfg.clr, &df.reverse);
+        @memcpy(&df.cfg.clr, &Colors.reverse);
     } else {
-        @memcpy(&df.cfg.clr, &df.color);
+//        @memcpy(&df.cfg.clr, &df.color);
+        @memcpy(&df.cfg.clr, &Colors.color);
     }
     DoWindowColors(win);
 }
