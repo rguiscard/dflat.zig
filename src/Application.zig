@@ -525,8 +525,7 @@ fn ChooseWindow(win:*Window, WindowNo:c_int) void {
 }
 
 fn DoWindowColors(win:*Window) void {
-    const wnd = win.win;
-    df.InitWindowColors(wnd);
+    win.InitWindowColors();
     var cwin = win.firstWindow();
     while (cwin) |cw| {
         const cwnd = cw.win;

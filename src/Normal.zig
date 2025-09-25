@@ -833,9 +833,11 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
     dwnd.*.wd = @intCast(win.WindowWidth());
     if (Window.get_zin(dwnd)) |dwin| {
         dwin.parent = win.parent;
+        dwnd.*.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
+        dwin.InitWindowColors();
     }
-    dwnd.*.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
-    df.InitWindowColors(dwnd);
+//    dwnd.*.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
+//    df.InitWindowColors(dwnd);
     SaveBorder(dwnd.*.rc);
     df.RepaintBorder(dwnd, null);
 }

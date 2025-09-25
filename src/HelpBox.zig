@@ -24,7 +24,7 @@ fn CreateWindowMsg(win:*Window) void {
     const wnd = win.win;
     df.Helping = df.TRUE;
     win.Class = k.HELPBOX;
-    df.InitWindowColors(wnd);
+    win.InitWindowColors();
     if (ThisHelp) |help| {
         help.*.hwnd = wnd;
     }

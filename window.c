@@ -407,6 +407,7 @@ int LineLength(char *ln)
     return len;
 }
 
+#if 0
 void InitWindowColors(WINDOW wnd)
 {
 	int fbg,col;
@@ -419,6 +420,7 @@ void InitWindowColors(WINDOW wnd)
 		for (col = 0; col < 4; col++)
 			wnd->WindowColors[col][fbg] = cfg.clr[cls][col][fbg];
 }
+#endif
 
 void PutWindowChar(WINDOW wnd, int c, int x, int y)
 {

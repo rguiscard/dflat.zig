@@ -326,6 +326,19 @@ BOOL isAncestor(WINDOW, WINDOW);
 #define HitControlBox(wnd, p1, p2)     \
      (TestAttribute(wnd, CONTROLBOX) && \
      p1 == 2 && p2 == 0)
+unsigned char WndForeground(WINDOW);
+unsigned char WndBackground(WINDOW);
+unsigned char FrameForeground(WINDOW);
+unsigned char FrameBackground(WINDOW);
+unsigned char SelectForeground(WINDOW);
+unsigned char SelectBackground(WINDOW);
+unsigned char HighlightForeground(WINDOW);
+unsigned char HighlightBackground(WINDOW);
+unsigned char WindowClientColor(WINDOW, unsigned char, unsigned char);
+unsigned char WindowReverseColor(WINDOW, unsigned char, unsigned char);
+unsigned char WindowFrameColor(WINDOW, unsigned char, unsigned char);
+unsigned char WindowHighlightColor(WINDOW, unsigned char, unsigned char);
+#if 0
 #define WndForeground(wnd) 		\
 	(wnd->WindowColors [STD_COLOR] [FG])
 #define WndBackground(wnd) 		\
@@ -350,6 +363,7 @@ BOOL isAncestor(WINDOW, WINDOW);
 		FrameForeground(wnd) = fg, FrameBackground(wnd) = bg
 #define WindowHighlightColor(wnd, fg, bg) \
 		HighlightForeground(wnd) = fg, HighlightBackground(wnd) = bg
+#endif
 /* -------- text box prototypes ---------- */
 #define TextLine(wnd, sel) \
       (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))

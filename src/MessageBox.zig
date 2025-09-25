@@ -101,11 +101,10 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
 }
 
 fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             win.Class = k.MESSAGEBOX;
-            df.InitWindowColors(wnd);
+            win.InitWindowColors();
             win.ClearAttribute(df.CONTROLBOX);
         },
         df.KEYBOARD => {
@@ -120,11 +119,10 @@ fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             win.Class = k.MESSAGEBOX;
-            df.InitWindowColors(wnd);
+            win.InitWindowColors();
             win.ClearAttribute(df.CONTROLBOX);
         },
         df.KEYBOARD => {

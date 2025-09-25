@@ -77,6 +77,7 @@ void SaveConfig(void)
 }
 
 /* --------- set window colors --------- */
+#if 0
 void SetStandardColor(WINDOW wnd)
 {
     foreground = WndForeground(wnd);
@@ -88,3 +89,4 @@ void SetReverseColor(WINDOW wnd)
     foreground = SelectForeground(wnd);
     background = SelectBackground(wnd);
 }
+#endif

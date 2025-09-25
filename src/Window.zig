@@ -208,7 +208,7 @@ pub fn create(
         wnd.*.oldcondition = df.ISRESTORED;
         wnd.*.condition = df.ISRESTORED;
         wnd.*.RestoredRC = wnd.*.rc;
-        df.InitWindowColors(wnd);
+        InitWindowColors(self);
         _ = self.sendMessage(df.CREATE_WINDOW, 0, 0);
         if (self.isVisible()) {
             _ = self.sendMessage(df.SHOW_WINDOW, 0, 0);
@@ -304,6 +304,24 @@ pub fn InsertTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
     }
 //    wnd->title=DFrealloc(wnd->title,strlen(ttl)+1);
 //    strcpy(wnd->title, ttl);
+}
+
+pub fn InitWindowColors(win:*TopLevelFields) void {
+    var cls = win.Class;
+    var icls:usize = @intCast(@intFromEnum(cls));
+    // window classes without assigned colors inherit parent's colors
+    if (df.cfg.clr[icls][0][0] == 0xff) {
+        if (win.parent) |pw| {
+            cls = pw.Class;
+        }
+    }
+    icls = @intCast(@intFromEnum(cls));
+    // ---------- set the colors ----------
+    for (0..2) |fbg| {
+        for (0..4) |col| {
+            win.win.*.WindowColors[col][fbg] = df.cfg.clr[icls][col][fbg];
+        }
+    }
 }
 
 // ------- window methods -----------

@@ -1,5 +1,18 @@
+const std = @import("std");
+const df = @import("ImportC.zig").df;
+const root = @import("root.zig");
 const Classes = @import("Classes.zig");
 const CLASSCOUNT:usize = @intFromEnum(Classes.CLASS.CLASSCOUNT);
+
+// ============= Color Type =============
+pub const STD_COLOR    = 0;
+pub const SELECT_COLOR = 1;
+pub const FRAME_COLOR  = 2;
+pub const HILITE_COLOR = 3;
+
+// ============= Color Grounds =============
+pub const FG    = 0;
+pub const BG    = 1;
 
 // ============= Color Macros ============
 pub const BLACK        =  0;
@@ -445,3 +458,67 @@ pub const reverse = [CLASSCOUNT][4][2]u8{
      .{LIGHTGRAY, BLACK}, // FRAME_COLOR
      .{LIGHTGRAY, BLACK}}, // HILITE_COLOR
 };
+
+// Accessories
+pub export fn WndForeground(wnd:df.WINDOW) u8 {
+    return wnd.*.WindowColors [STD_COLOR] [FG];
+}
+
+pub export fn WndBackground(wnd:df.WINDOW) u8 {
+    return wnd.*.WindowColors [STD_COLOR] [BG];
+}
+
+pub export fn FrameForeground(wnd:df.WINDOW) u8 {
+    return wnd.*.WindowColors [FRAME_COLOR] [FG];
+}
+
+pub export fn FrameBackground(wnd:df.WINDOW) u8 {
+    return wnd.*.WindowColors [FRAME_COLOR] [BG];
+}
+
+pub export fn SelectForeground(wnd:df.WINDOW) u8 {
+    return wnd.*.WindowColors [SELECT_COLOR] [FG];
+}
+
+pub export fn SelectBackground(wnd:df.WINDOW) u8 {
+    return wnd.*.WindowColors [SELECT_COLOR] [BG];
+}
+
+pub export fn HighlightForeground(wnd:df.WINDOW) u8 {
+    return wnd.*.WindowColors [HILITE_COLOR] [FG];
+}
+
+pub export fn HighlightBackground(wnd:df.WINDOW) u8 {
+    return wnd.*.WindowColors [HILITE_COLOR] [BG];
+}
+
+pub export fn WindowClientColor(wnd:df.WINDOW, fg:u8, bg:u8) void {
+    wnd.*.WindowColors [STD_COLOR] [FG] = fg;
+    wnd.*.WindowColors [STD_COLOR] [BG] = bg;
+}
+
+pub export fn WindowReverseColor(wnd:df.WINDOW, fg:u8, bg:u8) void {
+    wnd.*.WindowColors [SELECT_COLOR] [FG] = fg;
+    wnd.*.WindowColors [SELECT_COLOR] [BG] = bg;
+}
+
+pub export fn WindowFrameColor(wnd:df.WINDOW, fg:u8, bg:u8) void {
+    wnd.*.WindowColors [FRAME_COLOR] [FG] = fg;
+    wnd.*.WindowColors [FRAME_COLOR] [BG] = bg;
+}
+
+pub export fn WindowHighlightColor(wnd:df.WINDOW, fg:u8, bg:u8) void {
+    wnd.*.WindowColors [HILITE_COLOR] [FG] = fg;
+    wnd.*.WindowColors [HILITE_COLOR] [BG] = bg;
+}
+
+// --------- set window colors ---------
+pub export fn SetStandardColor(wnd:df.WINDOW) void {
+    df.foreground = WndForeground(wnd);
+    df.background = WndBackground(wnd);
+}
+
+pub export fn SetReverseColor(wnd:df.WINDOW) void {
+    df.foreground = SelectForeground(wnd);
+    df.background = SelectBackground(wnd);
+}
