@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
@@ -16,12 +17,12 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 if (p1 == 0)
                     _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
                 // fall off ?
-                const rtn = root.zBaseWndProc(df.CHECKBOX, win, msg, p1, p2);
+                const rtn = root.zBaseWndProc(k.CHECKBOX, win, msg, p1, p2);
                 df.SetFocusCursor(wnd);
                 return rtn;
             },
             df.MOVE => {
-                const rtn = root.zBaseWndProc(df.CHECKBOX, win, msg, p1, p2);
+                const rtn = root.zBaseWndProc(k.CHECKBOX, win, msg, p1, p2);
                 df.SetFocusCursor(wnd);
                 return rtn;
             },
@@ -50,12 +51,12 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             }
         }
     }
-    return root.zBaseWndProc(df.CHECKBOX, win, msg, p1, p2);
+    return root.zBaseWndProc(k.CHECKBOX, win, msg, p1, p2);
 }
 
 
 pub fn CheckBoxSetting(db:*Dialogs.DBOX, cmd:c) bool {
-    const ct:?*Dialogs.CTLWINDOW = DialogBox.FindCommand(db, cmd, df.CHECKBOX);
+    const ct:?*Dialogs.CTLWINDOW = DialogBox.FindCommand(db, cmd, k.CHECKBOX);
     if (ct) |ctl| {
         if (ctl.win) |_| {
             return (ctl.*.setting == df.ON);

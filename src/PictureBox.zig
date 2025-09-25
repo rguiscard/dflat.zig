@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const k = @import("Classes.zig").CLASS;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 
@@ -243,7 +244,7 @@ fn DrawBoxMsg(win:*Window, p1:df.PARAM) void {
 pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch (message) {
         df.PAINT => {
-            _ = root.zBaseWndProc(df.PICTUREBOX, win, message, p1, p2);
+            _ = root.zBaseWndProc(k.PICTUREBOX, win, message, p1, p2);
             PaintMsg(win);
             return true;
         },
@@ -267,7 +268,7 @@ pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         else => {
         }
     }
-    return root.zBaseWndProc(df.PICTUREBOX, win, message, p1, p2);
+    return root.zBaseWndProc(k.PICTUREBOX, win, message, p1, p2);
 }
 
 fn PictureRect(x:c_int, y:c_int, len:c_int, hv:c_int) df.RECT {

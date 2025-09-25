@@ -7,6 +7,7 @@ const DialogBox = @import("DialogBox.zig");
 const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 const lists = @import("Lists.zig");
 const normal = @import("Normal.zig");
 
@@ -22,7 +23,7 @@ var ThisHelp:?*df.helps = null;
 fn CreateWindowMsg(win:*Window) void {
     const wnd = win.win;
     df.Helping = df.TRUE;
-    win.Class = df.HELPBOX;
+    win.Class = k.HELPBOX;
     df.InitWindowColors(wnd);
     if (ThisHelp) |help| {
         help.*.hwnd = wnd;
@@ -116,7 +117,7 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.zBaseWndProc(df.HELPBOX, win, msg, p1, p2);
+    return root.zBaseWndProc(k.HELPBOX, win, msg, p1, p2);
 }
 
 // --- window processing module for HELPBOX's text EDITBOX --
@@ -383,8 +384,8 @@ fn OverLap(a: c_int, b: c_int) c_int {
 
 // ----- compute the best location for a help dialogbox -----
 fn BestFit(win:*Window, dwnd:*Dialogs.DIALOGWINDOW) void {
-    if (win.getClass() == df.MENUBAR or
-        win.getClass() == df.APPLICATION) {
+    if (win.getClass() == k.MENUBAR or
+        win.getClass() == k.APPLICATION) {
         dwnd.*.x = -1;
         dwnd.*.y = -1;
         return;

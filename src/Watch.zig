@@ -1,6 +1,7 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
+const k = @import("Classes.zig").CLASS;
 const Window = @import("Window.zig");
 
 var tick:usize = 0;
@@ -66,7 +67,7 @@ pub export fn WatchIcon() *Window {
     var my:c_int = 10;
     _ = df.SendMessage(null, df.CURRENT_MOUSE_CURSOR, @intCast(@intFromPtr(&mx)), @intCast(@intFromPtr(&my)));
     const win = Window.create (
-                    df.BOX,
+                    k.BOX,
                     null,
                     mx, my, 3, 5,
                     null, null,

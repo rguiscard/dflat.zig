@@ -1,6 +1,7 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
@@ -181,7 +182,7 @@ pub fn Calendar(pwin: *Window) void {
     if (Cwnd == null)    {
         const tim = ctime.time(null);
         ttm = ctime.localtime(&tim).*;
-        Cwnd = Window.create(df.PICTUREBOX,
+        Cwnd = Window.create(k.PICTUREBOX,
             "Calendar",
             -1, -1, CALHEIGHT, CALWIDTH,
             null, pwin, CalendarProc,

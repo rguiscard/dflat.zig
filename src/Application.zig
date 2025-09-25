@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 const lists = @import("Lists.zig");
 const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
@@ -72,7 +73,7 @@ fn CreateWindowMsg(win: *Window) bool {
     SelectTitle(win);
     SelectStatusBar(win);
 
-    const rtn = root.zBaseWndProc(df.APPLICATION, win, df.CREATE_WINDOW, 0, 0);
+    const rtn = root.zBaseWndProc(k.APPLICATION, win, df.CREATE_WINDOW, 0, 0);
     if (wnd.*.extension != null) {
         CreateMenu(win);
     }
@@ -113,7 +114,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     var p1_new = p1;
     if (p1-win.GetLeft() < 30)
         p1_new = win.GetLeft() + 30;
-    _ = root.zBaseWndProc(df.APPLICATION, win, df.SIZE, p1_new, p2);
+    _ = root.zBaseWndProc(k.APPLICATION, win, df.SIZE, p1_new, p2);
     CreateMenu(win);
     CreateStatusBar(win);
     if (WasVisible)
@@ -123,7 +124,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     if (normal.WindowMoving or normal.WindowSizing or (p1 == df.F1))
-        return root.zBaseWndProc(df.APPLICATION, win, df.KEYBOARD, p1, p2);
+        return root.zBaseWndProc(k.APPLICATION, win, df.KEYBOARD, p1, p2);
     switch (p1)  {
         df.ALT_F4 => {
             if (win.TestAttribute(df.CONTROLBOX)) {
@@ -239,7 +240,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         .ID_SYSMAXIMIZE,
         .ID_SYSMOVE,
         .ID_SYSSIZE => {
-            _ = root.zBaseWndProc(df.APPLICATION, win, df.COMMAND, p1, p2);
+            _ = root.zBaseWndProc(k.APPLICATION, win, df.COMMAND, p1, p2);
         },
         else => {
             if ((Window.inFocus != win.MenuBar) and (Window.inFocus != win)) {
@@ -255,7 +256,7 @@ fn CloseWindowMsg(win:*Window) bool {
     WindowSel = 0;
     q.PostMessage(null, df.STOP, 0, 0);
 
-    const rtn = root.zBaseWndProc(df.APPLICATION, win, df.CLOSE_WINDOW, 0, 0);
+    const rtn = root.zBaseWndProc(k.APPLICATION, win, df.CLOSE_WINDOW, 0, 0);
     if (ScreenHeight != df.SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
 
@@ -318,7 +319,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         else => {
         }
     }
-    return root.zBaseWndProc(df.APPLICATION, win, msg, p1, p2);
+    return root.zBaseWndProc(k.APPLICATION, win, msg, p1, p2);
 }
 
 // ----- Close all document windows -----
@@ -327,8 +328,8 @@ fn CloseAll(win:*Window, closing:bool) void {
     var win1 = win.lastWindow();
     while (win1) |w1| {
         if (w1.isVisible() and
-                       (w1.getClass() != df.MENUBAR) and
-                       (w1.getClass() != df.STATUSBAR)) {
+                       (w1.getClass() != k.MENUBAR) and
+                       (w1.getClass() != k.STATUSBAR)) {
             w1.ClearVisible();
             _ = w1.sendMessage(df.CLOSE_WINDOW, 0, 0);
         }
@@ -382,7 +383,7 @@ pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
         var MenuNo:usize = 0;
         mnu.*.Selection = 0;
         oldFocus = null;
-        if (win.getClass() != df.APPLICATION)    {
+        if (win.getClass() != k.APPLICATION)    {
             oldFocus = win;
             // ----- point to the APPLICATION window -----
             if (ApplicationWindow) |awin| {
@@ -391,8 +392,8 @@ pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
                 for (0..9) |idx| {
                     MenuNo = idx;
                     if (cwin) |cw| {
-                        if (cw.isVisible() and cw.getClass() != df.MENUBAR and
-                                cw.getClass() != df.STATUSBAR) {
+                        if (cw.isVisible() and cw.getClass() != k.MENUBAR and
+                                cw.getClass() != k.STATUSBAR) {
                             // --- add the document window to the menu ---
                             // strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20); //for MSDOS ?
                             pd.*.SelectionTitle = Menus[MenuNo];
@@ -440,8 +441,8 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
                     while (win1) |w1| {
                         const wnd1 = w1.win;
                         if (w1.isVisible() and (wnd1 != wnd) and
-                                        (w1.getClass() != df.MENUBAR) and
-                                        w1.getClass() != df.STATUSBAR) {
+                                        (w1.getClass() != k.MENUBAR) and
+                                        w1.getClass() != k.STATUSBAR) {
                             if (w1 == oldFocus)
                                 WindowSel = sel;
     
@@ -507,8 +508,8 @@ fn ChooseWindow(win:*Window, WindowNo:c_int) void {
     var cwin = win.firstWindow();
     while (cwin) |cw| {
         if (cw.isVisible() and
-                        cw.getClass() != df.MENUBAR and
-                        cw.getClass() != df.STATUSBAR) {
+                        cw.getClass() != k.MENUBAR and
+                        cw.getClass() != k.STATUSBAR) {
             if (counter == 0)
                 break;
             counter -= 1;
@@ -529,7 +530,7 @@ fn DoWindowColors(win:*Window) void {
     while (cwin) |cw| {
         const cwnd = cw.win;
         DoWindowColors(cw);
-        if ((cw.getClass() == df.TEXT) and df.GetText(cwnd) != null) {
+        if ((cw.getClass() == k.TEXT) and df.GetText(cwnd) != null) {
             _ = cw.sendMessage(df.CLEARTEXT, 0, 0);
         }
         cwin = cw.nextWindow();
@@ -639,7 +640,7 @@ fn CreateMenu(win: *Window) void {
     if (win.MenuBar) |mb| {
         _ = mb.sendMessage(df.CLOSE_WINDOW, 0, 0);
     }
-    var mwnd = Window.create(df.MENUBAR,
+    var mwnd = Window.create(k.MENUBAR,
                         null,
                         @intCast(win.GetClientLeft()),
                         @intCast(win.GetClientTop()-1),
@@ -665,7 +666,7 @@ fn CreateStatusBar(win: *Window) void {
         win.StatusBar = null;
     }
     if (win.TestAttribute(df.HASSTATUSBAR)) {
-        var sbar = Window.create(df.STATUSBAR,
+        var sbar = Window.create(k.STATUSBAR,
                             null,
                             @intCast(win.GetClientLeft()),
                             @intCast(win.GetBottom()),

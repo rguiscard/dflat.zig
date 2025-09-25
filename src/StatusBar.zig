@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const k = @import("Classes.zig").CLASS;
 
 pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -92,5 +93,5 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
         else => {
         }
     }
-    return root.zBaseWndProc(df.STATUSBAR, win, msg, p1, p2);
+    return root.zBaseWndProc(k.STATUSBAR, win, msg, p1, p2);
 }

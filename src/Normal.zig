@@ -7,6 +7,8 @@ const rect = @import("Rect.zig");
 const Klass = @import("Classes.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const CLASS = @import("Classes.zig").CLASS;
+const k = CLASS; // abbreviation
 const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
 const Classes = @import("Classes.zig");
@@ -30,7 +32,7 @@ fn getDummy() df.WINDOW {
     if(dummyWin == null) {
         dummy = std.mem.zeroInit(df.window, .{.rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
         dummyWin = Window.init(&dummy, root.global_allocator);
-        dummyWin.?.Class = df.DUMMY;
+        dummyWin.?.Class = k.DUMMY;
         dummyWin.?.wndproc = NormalProc; // doesn't seem necessary
         dummy.zin = @ptrCast(@alignCast(&dummyWin.?));
     }
@@ -205,7 +207,8 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
             _ = win.sendMessage(df.MAXIMIZE, 0, 0);
         },
         .ID_HELP => {
-            const name = Klass.defs[@intCast(win.getClass())][0];
+            const idx:usize = @intCast(@intFromEnum(win.getClass()));
+            const name = Klass.defs[idx][0];
             _ = helpbox.DisplayHelp(win, name);
         },
         else => {
@@ -1076,14 +1079,15 @@ fn RestoreBorder(rc:df.RECT) void {
     }
 }
 
-pub fn isDerivedFrom(win:*Window, klass:df.CLASS) bool {
+pub fn isDerivedFrom(win:*Window, klass:CLASS) bool {
     var tclass = win.getClass();
-    while (tclass != -1) {
+    while (tclass != k.FORCEINTTYPE) {
         if (tclass == klass) {
             return true;
         }
-        const cls = Classes.defs[@intCast(tclass)];
-        tclass = @intFromEnum(cls[1]);
+        const idx:usize = @intCast(@intFromEnum(tclass));
+        const cls = Classes.defs[idx];
+        tclass = cls[1];
     }
     return false;
 }
@@ -1093,7 +1097,7 @@ fn GetAncestor(win:*Window) ?*Window {
     var ww = win;
     // don't need to check null for win ?
     while (ww.parent) |pw| {
-        if (pw.getClass() == df.APPLICATION)
+        if (pw.getClass() == k.APPLICATION)
             break;
         ww = pw;
     }

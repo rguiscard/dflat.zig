@@ -20,9 +20,6 @@ pub const Inactive:PopDownAttrib = .{.INACTIVE = true};
 pub const Toggle:PopDownAttrib = .{.TOGGLE = true};
 pub const Cascaded:PopDownAttrib = .{.CASCADED = true};
 
-// for editbox.c
-export const ID_HELPTEXT:c_int = @intFromEnum(c.ID_HELPTEXT);
-
 // ----------- popdown menu selection structure
 //       one for each selection on a popdown menu ---------
 pub const PopDown = struct {

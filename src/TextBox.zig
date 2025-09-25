@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const k = @import("Classes.zig").CLASS;
 const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const GapBuffer = @import("GapBuffer.zig");
@@ -587,7 +588,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
         else => {
         }
     }
-    return root.zBaseWndProc(df.TEXTBOX, win, msg, p1, p2);
+    return root.zBaseWndProc(k.TEXTBOX, win, msg, p1, p2);
 }
 
 pub fn ClearTextBlock(win:*Window) void {

@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 const rect = @import("Rect.zig");
 const app = @import("Application.zig");
 const menu = @import("Menu.zig");
@@ -22,7 +23,7 @@ var ActiveMenu:?*[menus.MAXPULLDOWNS+1]menus.MENU = null; // this should be priv
 
 // ----------- SETFOCUS Message -----------
 fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
-    const rtn = root.zBaseWndProc(df.MENUBAR, win, df.SETFOCUS, p1, 0);
+    const rtn = root.zBaseWndProc(k.MENUBAR, win, df.SETFOCUS, p1, 0);
     if (p1>0) {
         _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
     } else {
@@ -327,7 +328,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             mx = @intCast(win.GetLeft()+offset);
             my = @intCast(win.GetTop()+1);
         }
-        mwin = Window.create(df.POPDOWNMENU, null,
+        mwin = Window.create(k.POPDOWNMENU, null,
                     mx, my,
                     popdown.MenuHeight(@constCast(&selections)),
                     wd,
@@ -355,7 +356,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const cmd:c = @enumFromInt(p1);
     if (cmd == c.ID_HELP) {
-        _ = root.zBaseWndProc(df.MENUBAR, win, df.COMMAND, p1, p2);
+        _ = root.zBaseWndProc(k.MENUBAR, win, df.COMMAND, p1, p2);
         return;
     }
     if (ActiveMenuBar) |mbar| {
@@ -466,14 +467,14 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             return true;
         },
         df.CLOSE_WINDOW => {
-            const rtn = root.zBaseWndProc(df.MENUBAR, win, msg, p1, p2);
+            const rtn = root.zBaseWndProc(k.MENUBAR, win, msg, p1, p2);
             CloseWindowMsg(win);
             return rtn;
         },
         else => {
         }
     }
-    return root.zBaseWndProc(df.MENUBAR, win, msg, p1, p2);
+    return root.zBaseWndProc(k.MENUBAR, win, msg, p1, p2);
 }
 
 // ------------- reset the MENUBAR --------------
@@ -490,8 +491,8 @@ fn GetDocFocus() *Window {
         var win:?*Window = awin;
         if (win) |w| {
             win = w.lastWindow();
-            while (win != null and (win.?.getClass() == df.MENUBAR or
-                                    win.?.getClass() == df.STATUSBAR)) {
+            while (win != null and (win.?.getClass() == k.MENUBAR or
+                                    win.?.getClass() == k.STATUSBAR)) {
                 win = win.?.prevWindow();
             }
             if (win) |ww| {

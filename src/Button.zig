@@ -2,6 +2,7 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const q = @import("Message.zig");
+const k = @import("Classes.zig").CLASS;
 const Window = @import("Window.zig");
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
@@ -71,7 +72,7 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
-                _ = root.zBaseWndProc(df.BUTTON, win, msg, p1, p2);
+                _ = root.zBaseWndProc(k.BUTTON, win, msg, p1, p2);
                 // ---- fall through ----
                 PaintMsg(win, ct, null);
                 return true;
@@ -99,6 +100,6 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             }
         }
     }
-    return root.zBaseWndProc(df.BUTTON, win, msg, p1, p2);
+    return root.zBaseWndProc(k.BUTTON, win, msg, p1, p2);
 }
  

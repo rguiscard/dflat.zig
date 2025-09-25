@@ -6,6 +6,8 @@ const WndProc = @import("WndProc.zig");
 const normal = @import("Normal.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const CLASS = @import("Classes.zig").CLASS;
+const k = CLASS; // abbreviation
 const Dialogs = @import("Dialogs.zig");
 const app = @import("Application.zig");
 const menus = @import("Menus.zig");
@@ -16,7 +18,7 @@ const GapBuf = @import("GapBuffer.zig");
 const TopLevelFields = @This();
 pub var inFocus:?*TopLevelFields = null;
 
-Class:df.CLASS,            // window class
+Class:CLASS,                 // window class
 title:?[:0]const u8 = null,  // window title
 wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
 
@@ -91,13 +93,13 @@ pub export fn CreateWindow(
         pwin = pw;
     }
 
-    const win = self.create(klass, title, left, top, height, width, extension, pwin, null, attrib);
+    const win = self.create(@enumFromInt(klass), title, left, top, height, width, extension, pwin, null, attrib);
     return win.*.win;
 }
 
 pub fn init(wnd: df.WINDOW, allocator: std.mem.Allocator) TopLevelFields {
     return .{
-        .Class = df.FORCEINTTYPE,
+        .Class = CLASS.FORCEINTTYPE,
         .win = wnd,
         .wndproc = null,
         .allocator = allocator,
@@ -105,8 +107,8 @@ pub fn init(wnd: df.WINDOW, allocator: std.mem.Allocator) TopLevelFields {
 }
 
 pub fn create(
-    klass: df.CLASS,            // class of this window
-    ttl: ?[:0]const u8,           // title or NULL
+    klass: CLASS,               // class of this window
+    ttl: ?[:0]const u8,         // title or NULL
     left:c_int, top:c_int,      // upper left coordinates
     height:c_int, width:c_int,  // dimensions
     extension:?*anyopaque,      // pointer to additional data
@@ -158,7 +160,8 @@ pub fn create(
         }
         if (wndproc == null) {
 //            wnd.*.wndproc = Klass.defs[@intCast(klass)][2]; // wndproc
-            self.wndproc = Klass.defs[@intCast(klass)][2]; // wndproc
+            const idx:usize = @intCast(@intFromEnum(klass));
+            self.wndproc = Klass.defs[idx][2]; // wndproc
         } else {
 //            wnd.*.wndproc = wndproc;
             self.wndproc = wndproc;
@@ -166,12 +169,12 @@ pub fn create(
 
         // ---- derive attributes of base classes ----
         var base = klass;
-        while (base != -1) {
-            const cls = Klass.defs[@intCast(base)];
+        while (base != CLASS.FORCEINTTYPE) {
+            const cls = Klass.defs[@intCast(@intFromEnum(base))];
             const attr:c_int = @intCast(cls[3]); // attributes
             // df.AddAttribute(wnd, attr);
             wnd.*.attrib = wnd.*.attrib | attr;
-            base = @intFromEnum(cls[1]); // base
+            base = cls[1]; // base
         }
 
         // ---- adjust position with parent ----
@@ -400,7 +403,7 @@ pub fn GetClientRight(self: *TopLevelFields) isize {
     return self.GetRight() - self.TopBorderAdj();
 }
 
-pub fn getClass(self: *TopLevelFields) df.CLASS {
+pub fn getClass(self: *TopLevelFields) CLASS {
     return self.Class;
 }
 
@@ -495,9 +498,9 @@ pub export fn GetTitle(wnd:df.WINDOW) [*c]u8 {
 
 pub export fn GetClass(wnd:df.WINDOW) df.CLASS {
     if (get_zin(wnd)) |win| {
-        return win.Class;
+        return @intFromEnum(win.Class);
     }
-    return df.FORCEINTTYPE; // unreachable
+    return @intFromEnum(k.FORCEINTTYPE); // unreachable
 }
 
 pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {

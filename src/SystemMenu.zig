@@ -7,6 +7,7 @@ const menu = @import("Menu.zig");
 const menubar = @import("MenuBar.zig");
 const popdown = @import("PopDown.zig");
 const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 
 pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -54,7 +55,7 @@ pub fn BuildSystemMenu(win: *Window) void {
     const ht:c_int = popdown.MenuHeight(@constCast(&selections));
     const wd:c_int = popdown.MenuWidth(@constCast(&selections));
 
-    if (win.getClass() == df.APPLICATION) {
+    if (win.getClass() == k.APPLICATION) {
         menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.ALT_F4;
     } else {
         menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.CTRL_F4;
@@ -65,7 +66,7 @@ pub fn BuildSystemMenu(win: *Window) void {
     if (tp+ht > df.SCREENHEIGHT-2)
         tp = (df.SCREENHEIGHT-2) - ht;
 
-    const SystemMenuWin = Window.create(df.POPDOWNMENU, null,
+    const SystemMenuWin = Window.create(k.POPDOWNMENU, null,
                 lf,tp,ht,wd,null,win,SystemMenuProc, 0);
 
     if (wnd.*.condition == df.ISRESTORED) {

@@ -1,6 +1,7 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
 const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
@@ -47,7 +48,7 @@ pub export fn BarChart(pwin: *Window) void {
     const pct = ProjChart.len;
 
     if (Bwnd == null) {
-        Bwnd = Window.create(df.PICTUREBOX,
+        Bwnd = Window.create(k.PICTUREBOX,
                     "BarChart",
                     -1, -1, BCHEIGHT, BCWIDTH,
                     null, pwin, BarChartProc,

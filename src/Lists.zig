@@ -1,5 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
+const k = @import("Classes.zig").CLASS;
 const Window = @import("Window.zig");
 
 // ----- set focus to the next sibling -----
@@ -21,7 +22,7 @@ pub fn SetNextFocus() void {
                 break;
             }
             if (win1) |w| {
-                if (w.getClass() == df.STATUSBAR or w.getClass() == df.MENUBAR) {
+                if (w.getClass() == k.STATUSBAR or w.getClass() == k.MENUBAR) {
                     continue;
                 }
                 // isVisible is true when win is null in original code.
@@ -62,7 +63,7 @@ pub fn SetPrevFocus() void {
                 break;
             }
             if (win1) |w| {
-                if (w.getClass() == df.STATUSBAR or w.getClass() == df.MENUBAR) {
+                if (w.getClass() == k.STATUSBAR or w.getClass() == k.MENUBAR) {
                     continue;
                 }
                 // isVisible is true when win is null in original code.
@@ -137,9 +138,9 @@ pub fn SkipApplicationControls() void {
     var ct:isize = 0;
     while (!EmptyAppl and (Window.inFocus != null))	{
         const cl = Window.inFocus.?.getClass();
-        if (cl == df.MENUBAR or cl == df.STATUSBAR) {
+        if (cl == k.MENUBAR or cl == k.STATUSBAR) {
 	    SetPrevFocus();
-            EmptyAppl = ((cl == df.MENUBAR) and (ct > 0));
+            EmptyAppl = ((cl == k.MENUBAR) and (ct > 0));
 	    ct += 1;
         } else {
             break;

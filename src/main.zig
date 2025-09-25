@@ -23,7 +23,7 @@ pub fn main() !void {
         df.cfg.ScreenLines = df.SCREENHEIGHT;
     }
 
-    var win = mp.Window.create(df.APPLICATION,
+    var win = mp.Window.create(mp.CLASS.APPLICATION,
                         "D-Flat MemoPad",
                         0, 0, -1, -1,
                         @constCast(@ptrCast(&menu.MainMenu)),
@@ -215,7 +215,7 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
     wndpos += 2;
     if (wndpos == 20)
         wndpos = 2;
-    var win1 = mp.Window.create(df.EDITBOX, // Win
+    var win1 = mp.Window.create(mp.CLASS.EDITBOX, // Win
                 @ptrCast(fname),
                 (wndpos-1)*2, wndpos, 10, 40,
                 null, win, OurEditorProc,
@@ -328,7 +328,7 @@ fn FixTabMenu() void {
     if (cp) |cmd| {
         if (std.mem.indexOfScalar(u8, cmd, '(')) |_| {
             if (mp.Window.inFocus) |focus| {
-                if (focus.getClass() == df.POPDOWNMENU) {
+                if (focus.getClass() == mp.CLASS.POPDOWNMENU) {
                     _ = focus.sendMessage(df.PAINT, 0, 0);
                 }
             }
@@ -431,7 +431,7 @@ pub fn PrepFileMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVEAS);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_DELETEFILE);
     if (w) |win| {
-        if (win.getClass() == df.EDITBOX) {
+        if (win.getClass() == mp.CLASS.EDITBOX) {
             if (win.isMultiLine()) {
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVE);
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVEAS);
@@ -452,7 +452,7 @@ pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_UNDO);
     if (w) |win| {
         const wnd = win.win;
-        if (win.getClass() == df.EDITBOX) {
+        if (win.getClass() == mp.CLASS.EDITBOX) {
            if (win.isMultiLine()) {
                if (df.TextBlockMarked(wnd)) {
                    mp.menu.ActivateCommand(&menu.MainMenu, c.ID_CUT);
@@ -479,7 +479,7 @@ pub fn PrepSearchMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_REPLACE);
     mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCHNEXT);
     if (w) |win| {
-        if (win.getClass() == df.EDITBOX) {
+        if (win.getClass() == mp.CLASS.EDITBOX) {
             if (win.isMultiLine()) {
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SEARCH);
                 mp.menu.ActivateCommand(&menu.MainMenu, c.ID_REPLACE);

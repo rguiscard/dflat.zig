@@ -28,7 +28,7 @@ const helpbox = @import("HelpBox.zig");
 //         You must add entries to the color tables in
 //         CONFIG.C for new classes.
 
-pub const Klass = enum (c_int) {
+pub const CLASS = enum (c_int) {
     FORCEINTTYPE = -1,      // required or enum type is unsigned char
     NORMAL = 0,
     APPLICATION,
@@ -64,49 +64,49 @@ pub const Klass = enum (c_int) {
 // ----------  ----------  ---------  ---------
 pub const defs = [_]struct{
     []const u8,
-    Klass,
+    CLASS,
     ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
     isize} {
 
-    .{"NORMAL",      Klass.FORCEINTTYPE, normal.NormalProc,        0              },
-    .{"APPLICATION", Klass.NORMAL,          app.ApplicationProc,   df.VISIBLE    |
+    .{"NORMAL",      CLASS.FORCEINTTYPE, normal.NormalProc,        0              },
+    .{"APPLICATION", CLASS.NORMAL,          app.ApplicationProc,   df.VISIBLE    |
                                                                    df.SAVESELF   |
                                                                    df.CONTROLBOX  },
-    .{"TEXTBOX",     Klass.NORMAL,      textbox.TextBoxProc,       0              },
-    .{"LISTBOX",     Klass.TEXTBOX,     listbox.ListBoxProc,       0              },
-    .{"EDITBOX",     Klass.TEXTBOX,     editbox.EditBoxProc,       0              },
-    .{"MENUBAR",     Klass.NORMAL,      menubar.MenuBarProc,       df.NOCLIP      },
-    .{"POPDOWNMENU", Klass.LISTBOX,     popdown.PopDownProc,       df.SAVESELF   |
+    .{"TEXTBOX",     CLASS.NORMAL,      textbox.TextBoxProc,       0              },
+    .{"LISTBOX",     CLASS.TEXTBOX,     listbox.ListBoxProc,       0              },
+    .{"EDITBOX",     CLASS.TEXTBOX,     editbox.EditBoxProc,       0              },
+    .{"MENUBAR",     CLASS.NORMAL,      menubar.MenuBarProc,       df.NOCLIP      },
+    .{"POPDOWNMENU", CLASS.LISTBOX,     popdown.PopDownProc,       df.SAVESELF   |
                                                                    df.NOCLIP     |
                                                                    df.HASBORDER   },
-    .{"PICTUREBOX",  Klass.TEXTBOX,     picture.PictureProc,       0              },
-    .{"DIALOG",      Klass.NORMAL,      dialbox.DialogProc,        df.SHADOW     |
+    .{"PICTUREBOX",  CLASS.TEXTBOX,     picture.PictureProc,       0              },
+    .{"DIALOG",      CLASS.NORMAL,      dialbox.DialogProc,        df.SHADOW     |
                                                                    df.MOVEABLE   |
                                                                    df.CONTROLBOX |
                                                                    df.HASBORDER  |
                                                                    df.NOCLIP      },
-    .{"BOX",         Klass.NORMAL,          box.BoxProc,           df.HASBORDER   },
-    .{"BUTTON",      Klass.TEXTBOX,      button.ButtonProc,        df.SHADOW      },
-    .{"COMBOBOX",    Klass.EDITBOX,          wp.ComboProc,         0              },
-    .{"TEXT",        Klass.TEXTBOX,        text.TextProc,          0              },
-    .{"RADIOBUTTON", Klass.TEXTBOX,       radio.RadioButtonProc,   0              },
-    .{"CHECKBOX",    Klass.TEXTBOX,    checkbox.CheckBoxProc,      0              },
-    .{"SPINBUTTON",  Klass.LISTBOX,          wp.SpinButtonProc,    0              },
-    .{"ERRORBOX",    Klass.DIALOG,       null,                     df.SHADOW     |
+    .{"BOX",         CLASS.NORMAL,          box.BoxProc,           df.HASBORDER   },
+    .{"BUTTON",      CLASS.TEXTBOX,      button.ButtonProc,        df.SHADOW      },
+    .{"COMBOBOX",    CLASS.EDITBOX,          wp.ComboProc,         0              },
+    .{"TEXT",        CLASS.TEXTBOX,        text.TextProc,          0              },
+    .{"RADIOBUTTON", CLASS.TEXTBOX,       radio.RadioButtonProc,   0              },
+    .{"CHECKBOX",    CLASS.TEXTBOX,    checkbox.CheckBoxProc,      0              },
+    .{"SPINBUTTON",  CLASS.LISTBOX,          wp.SpinButtonProc,    0              },
+    .{"ERRORBOX",    CLASS.DIALOG,       null,                     df.SHADOW     |
                                                                    df.HASBORDER   },
-    .{"MESSAGEBOX",  Klass.DIALOG,       null,                     df.SHADOW     |
+    .{"MESSAGEBOX",  CLASS.DIALOG,       null,                     df.SHADOW     |
                                                                    df.HASBORDER   },
-    .{"HELPBOX",     Klass.DIALOG,      helpbox.HelpBoxProc,       df.MOVEABLE   |
+    .{"HELPBOX",     CLASS.DIALOG,      helpbox.HelpBoxProc,       df.MOVEABLE   |
                                                                    df.SAVESELF   |
                                                                    df.HASBORDER  |
                                                                    df.NOCLIP     |
                                                                    df.CONTROLBOX},
-    .{"STATUSBAR",   Klass.TEXTBOX,   statusbar.StatusBarProc,     df.NOCLIP      },
-    .{"EDITOR",      Klass.EDITBOX,      editor.EditorProc,        0              },
+    .{"STATUSBAR",   CLASS.TEXTBOX,   statusbar.StatusBarProc,     df.NOCLIP      },
+    .{"EDITOR",      CLASS.EDITBOX,      editor.EditorProc,        0              },
 
     // ========> Add new classes here <========
 
     // ---------- pseudo classes to create enums, etc. ----------
-    .{"TITLEBAR",    Klass.FORCEINTTYPE, null,                     0              },
-    .{"DUMMY",       Klass.FORCEINTTYPE, null,                     df.HASBORDER   },
+    .{"TITLEBAR",    CLASS.FORCEINTTYPE, null,                     0              },
+    .{"DUMMY",       CLASS.FORCEINTTYPE, null,                     df.HASBORDER   },
 };

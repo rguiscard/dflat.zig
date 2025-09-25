@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const k = @import("Classes.zig").CLASS;
 const DialogBox = @import("DialogBox.zig");
 const popdown = @import("PopDown.zig");
 
@@ -54,5 +55,5 @@ pub fn TextProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
         else => {
         }
     }
-    return root.zBaseWndProc(df.TEXT, win, msg, p1, p2);
+    return root.zBaseWndProc(k.TEXT, win, msg, p1, p2);
 }

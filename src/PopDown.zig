@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const k = @import("Classes.zig").CLASS;
 const rect = @import("Rect.zig");
 const helpbox = @import("HelpBox.zig");
 const menus = @import("Menus.zig");
@@ -29,7 +30,7 @@ fn CreateWindowMsg(win:*Window) bool {
         wnd.*.rc.lf += adj;
         wnd.*.rc.rt += adj;
     }
-    const rtn = root.zBaseWndProc(df.POPDOWNMENU, win, df.CREATE_WINDOW, 0, 0);
+    const rtn = root.zBaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, 0, 0);
     _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
     _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
     _ = q.SendMessage(null, df.SAVE_CURSOR, 0, 0);
@@ -51,7 +52,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
         }
     } else if (p2 == win.getParent().GetTop()) {
         const parent = win.getParent();
-        if (parent.getClass() == df.MENUBAR) {
+        if (parent.getClass() == k.MENUBAR) {
             q.PostMessage(parent.win, df.LEFT_BUTTON, p1, p2);
         }
     }
@@ -68,7 +69,7 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             _ = win.sendMessage(df.LB_CHOOSE, win.selection, 0);
     } else {
         const pwin = win.getParent();
-        if ((pwin.getClass() == df.MENUBAR) and (p2==pwin.GetTop()))
+        if ((pwin.getClass() == k.MENUBAR) and (p2==pwin.GetTop()))
             return false;
         if (p1 == pwin.GetLeft()+2)
             return false;
@@ -127,15 +128,15 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
             } else {
                 var i:usize = 0;
                 while(true) {
-                    const k = df.keys[i];
-                    if (k.keylabel == null)
+                    const ky = df.keys[i];
+                    if (ky.keylabel == null)
                         break;
-                    if (k.keycode == key) {
+                    if (ky.keycode == key) {
                         for(0..wd1) |_| {
                             buf[idx] = ' ';
                             idx += 1;
                         }
-                        len = @intCast(df.sprintf(&buf[idx], "[%s]", k.keylabel));
+                        len = @intCast(df.sprintf(&buf[idx], "[%s]", ky.keylabel));
                         idx += @intCast(len);
                         break;
                     }
@@ -198,7 +199,7 @@ fn BorderMsg(win:*Window) bool {
     if (win.mnu) |_| {
         const currFocus = Window.inFocus;
         Window.inFocus = null;
-        rtn = root.zBaseWndProc(df.POPDOWNMENU, win, df.BORDER, 0, 0);
+        rtn = root.zBaseWndProc(k.POPDOWNMENU, win, df.BORDER, 0, 0);
         Window.inFocus = currFocus;
         for (0..@intCast(win.ClientHeight())) |i| {
             if (df.TextLine(wnd, i)[0] == df.LINE) {
@@ -282,7 +283,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.FWD,
         df.BS => {
-            if (win.getParent().getClass() == df.MENUBAR) {
+            if (win.getParent().getClass() == k.MENUBAR) {
                 q.PostMessage(win.getParent().win, df.KEYBOARD, p1, p2);
             }
             return true;
@@ -322,7 +323,7 @@ fn CloseWindowMsg(win:*Window) bool {
     _ = q.SendMessage(null, df.RESTORE_CURSOR, 0, 0);
     Window.inFocus = win.oldFocus;
 
-    const rtn = root.zBaseWndProc(df.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
+    const rtn = root.zBaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
     _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, 0, 0);
     return rtn;
 }
@@ -384,7 +385,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.zBaseWndProc(df.POPDOWNMENU, win, msg, p1, p2);
+    return root.zBaseWndProc(k.POPDOWNMENU, win, msg, p1, p2);
 }
 
 // --------- compute menu height --------

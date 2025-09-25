@@ -6,13 +6,14 @@ const Dialogs = @import("Dialogs.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 
 fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
     const wnd = win.win;
     if (wnd.*.extension) |ext| {
         const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
         const control = DialogBox.FindCommand(dbox,
-                        if (dirs) c.ID_DIRECTORY else c.ID_FILES, df.LISTBOX);
+                        if (dirs) c.ID_DIRECTORY else c.ID_FILES, k.LISTBOX);
         if (control) |ct| {
             if (ct.win) |cwin| {
                 _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
@@ -37,7 +38,7 @@ pub fn BuildPathDisplay(win:*Window) void {
     const wnd = win.win;
     if (wnd.*.extension) |ext| {
         const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
-        const control = DialogBox.FindCommand(dbox, c.ID_PATH, df.TEXT);
+        const control = DialogBox.FindCommand(dbox, c.ID_PATH, k.TEXT);
         if (control) |ct| {
             const path = std.mem.zeroes([df.MAXPATH]u8);
             _ = df.getcwd(@constCast(&path), path.len);

@@ -3,12 +3,13 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const c = @import("Commands.zig").Command;
+const k = @import("Classes.zig").CLASS;
 const rect = @import("Rect.zig");
 const textbox = @import("TextBox.zig");
 const search = @import("Search.zig");
 const clipboard = @import("Clipboard.zig");
 const normal = @import("Normal.zig");
-const c = @import("Commands.zig").Command;
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -34,7 +35,7 @@ pub fn WndCol(win:*Window) c_int {
 // ----------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) bool {
     const wnd = win.win;
-    const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CREATE_WINDOW, 0, 0);
+    const rtn = root.zBaseWndProc(k.EDITBOX, win, df.CREATE_WINDOW, 0, 0);
     wnd.*.MaxTextLength = df.MAXTEXTLEN+1;
     wnd.*.textlen = EditBufLen(win);
 //    win.textlen = EditBufLen(win);
@@ -55,7 +56,7 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 //    if (df.strlen(ptext)+wnd.*.textlen <= wnd.*.MaxTextLength) {
     const len = if (win.gapbuf) |buf| buf.len() else 0;
     if (df.strlen(ptext)+len <= wnd.*.MaxTextLength) {
-        rtn = root.zBaseWndProc(df.EDITBOX, win, df.ADDTEXT, p1, p2);
+        rtn = root.zBaseWndProc(k.EDITBOX, win, df.ADDTEXT, p1, p2);
         if (rtn) {
             if (win.isMultiLine() == false)    {
                 wnd.*.CurrLine = 0;
@@ -80,7 +81,7 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
     const pp1:usize = @intCast(p1);
     const ptext:[*c]u8 = @ptrFromInt(pp1);
     if (df.strlen(ptext) <= wnd.*.MaxTextLength) {
-        rtn = root.zBaseWndProc(df.EDITBOX, win, df.SETTEXT, p1, 0);
+        rtn = root.zBaseWndProc(k.EDITBOX, win, df.SETTEXT, p1, 0);
         win.TextChanged = false;
     }
     return rtn;
@@ -89,7 +90,7 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
 // ----------- CLEARTEXT Message ------------
 fn ClearTextMsg(win:*Window) bool {
     const wnd = win.win;
-    const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CLEARTEXT, 0, 0);
+    const rtn = root.zBaseWndProc(k.EDITBOX, win, df.CLEARTEXT, 0, 0);
 //    const blen = EditBufLen(win)+2;
 
 //    if (win.text) |buf| {
@@ -180,7 +181,7 @@ fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 // ----------- SIZE Message ----------
 fn SizeMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    const rtn = root.zBaseWndProc(df.EDITBOX, win, df.SIZE, p1, p2);
+    const rtn = root.zBaseWndProc(k.EDITBOX, win, df.SIZE, p1, p2);
     if (WndCol(win) > win.ClientWidth()-1) {
         wnd.*.CurrCol = @intCast(win.ClientWidth()-1 + wnd.*.wleft);
     }
@@ -197,7 +198,7 @@ fn ScrollMsg(win:*Window, p1:df.PARAM) bool {
     const wnd = win.win;
     var rtn = false;
     if (win.isMultiLine()) {
-        rtn = root.zBaseWndProc(df.EDITBOX,win,df.SCROLL,p1,0);
+        rtn = root.zBaseWndProc(k.EDITBOX,win,df.SCROLL,p1,0);
         if (rtn) {
             if (p1>0) {
                 // -------- scrolling up ---------
@@ -232,7 +233,7 @@ fn HorizScrollMsg(win:*Window, p1:df.PARAM) bool {
     const curr_char = df.zCurrChar(wnd);
     if (((p1>0) and (wnd.*.CurrCol == wnd.*.wleft) and
                (curr_char[0] == '\n')) == false)  {
-        rtn = root.zBaseWndProc(df.EDITBOX, win, df.HORIZSCROLL, p1, 0);
+        rtn = root.zBaseWndProc(k.EDITBOX, win, df.HORIZSCROLL, p1, 0);
         if (rtn) {
             if (wnd.*.CurrCol < wnd.*.wleft) {
                 wnd.*.CurrCol += 1;
@@ -250,7 +251,7 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
     const wnd = win.win;
     var rtn = false;
     if (win.isMultiLine())    {
-        rtn = root.zBaseWndProc(df.EDITBOX, win, df.SCROLLPAGE, p1, 0);
+        rtn = root.zBaseWndProc(k.EDITBOX, win, df.SCROLLPAGE, p1, 0);
 //        SetLinePointer(wnd, wnd->wtop+wnd->WndRow);
         wnd.*.CurrLine = wnd.*.wtop+wnd.*.WndRow;
         StickEnd(win);
@@ -261,7 +262,7 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
 // ----------- HORIZSCROLLPAGE Message ----------
 fn HorizPageMsg(win:*Window, p1:df.PARAM) bool {
     const wnd = win.win;
-    const rtn = root.zBaseWndProc(df.EDITBOX, win, df.HORIZPAGE, p1, 0);
+    const rtn = root.zBaseWndProc(k.EDITBOX, win, df.HORIZPAGE, p1, 0);
     if (p1 == df.FALSE) {
         if (wnd.*.CurrCol > wnd.*.wleft+win.ClientWidth()-1)
             wnd.*.CurrCol = @intCast(wnd.*.wleft+win.ClientWidth()-1);
@@ -866,7 +867,7 @@ fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         win.DeletedText = null;
     }
 
-    const rtn = root.zBaseWndProc(df.EDITBOX, win, df.CLOSE_WINDOW, p1, p2);
+    const rtn = root.zBaseWndProc(k.EDITBOX, win, df.CLOSE_WINDOW, p1, p2);
 //    if (win.text) |text| {
 //        root.global_allocator.free(text);
 //        win.text = null;
@@ -911,13 +912,13 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
             }
             // fall through?
-            const rtn = root.zBaseWndProc(df.EDITBOX, win, msg, p1, p2);
+            const rtn = root.zBaseWndProc(k.EDITBOX, win, msg, p1, p2);
             _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(wnd.*.CurrCol-wnd.*.wleft), wnd.*.WndRow);
             return rtn;
         },
         df.PAINT,
         df.MOVE => {
-            const rtn = root.zBaseWndProc(df.EDITBOX, win, msg, p1, p2);
+            const rtn = root.zBaseWndProc(k.EDITBOX, win, msg, p1, p2);
             _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(wnd.*.CurrCol-wnd.*.wleft), wnd.*.WndRow);
             return rtn;
         },
@@ -965,7 +966,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.zBaseWndProc(df.EDITBOX, win, msg, p1, p2);
+    return root.zBaseWndProc(k.EDITBOX, win, msg, p1, p2);
 }
 
 // ---- Process text block keys for multiline text box ----
@@ -1006,11 +1007,11 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
         df.PGUP,
         df.PGDN => {
             if (win.isMultiLine())
-                _ = root.zBaseWndProc(df.EDITBOX, win, df.KEYBOARD, cc, p2);
+                _ = root.zBaseWndProc(k.EDITBOX, win, df.KEYBOARD, cc, p2);
         },
         df.CTRL_PGUP,
         df.CTRL_PGDN => {
-            _ = root.zBaseWndProc(df.EDITBOX, win, df.KEYBOARD, cc, p2);
+            _ = root.zBaseWndProc(k.EDITBOX, win, df.KEYBOARD, cc, p2);
         },
         df.HOME => {
             Home(win);

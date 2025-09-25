@@ -10,6 +10,7 @@ pub const menus = @import("Menus.zig");
 pub const Window = @import("Window.zig");
 pub const Message = @import("Message.zig");
 pub const Klass = @import("Classes.zig");
+pub const CLASS = @import("Classes.zig").CLASS;
 pub const BarChart = @import("BarChart.zig");
 pub const Calendar = @import("Calendar.zig");
 pub const list = @import("Lists.zig");
@@ -29,9 +30,13 @@ pub const q = @import("Message.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 
+// for editbox.c
+export const ID_HELPTEXT:c_int = @intFromEnum(Command.ID_HELPTEXT);
+
 pub export fn BaseWndProc(klass: df.CLASS, wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     if (Window.get_zin(wnd)) |zin| {
-        const rtn = zBaseWndProc(klass, zin, msg, p1, p2);
+        const cls:CLASS = @enumFromInt(klass);
+        const rtn = zBaseWndProc(cls, zin, msg, p1, p2);
         return if (rtn) df.TRUE else df.FALSE;
     }
     return df.FALSE;
@@ -47,10 +52,12 @@ pub export fn DefaultWndProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: 
     // Is it possible that wnd is null ?
 }
 
-pub fn zBaseWndProc(klass: df.CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const base_class = Klass.defs[@intCast(klass)][1]; // base
-    const index:c_int = @intFromEnum(base_class);
-    if (Klass.defs[@intCast(index)][2]) |proc| { // wndproc
+pub fn zBaseWndProc(klass: CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+    const base_idx:usize = @intCast(@intFromEnum(klass));
+    const base_class = Klass.defs[base_idx][1]; // base
+
+    const idx:usize = @intCast(@intFromEnum(base_class));
+    if (Klass.defs[idx][2]) |proc| { // wndproc
         return proc(win, msg, p1, p2);
     }
     return false;
@@ -58,7 +65,8 @@ pub fn zBaseWndProc(klass: df.CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM,
 
 pub fn zDefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const klass = win.Class;
-    if (Klass.defs[@intCast(klass)][2]) |proc| { // wndproc
+    const idx:usize = @intCast(@intFromEnum(klass));
+    if (Klass.defs[idx][2]) |proc| { // wndproc
         return proc(win, msg, p1, p2);
     }
     return zBaseWndProc(klass, win, msg, p1, p2);
