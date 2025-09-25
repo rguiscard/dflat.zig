@@ -407,21 +407,6 @@ int LineLength(char *ln)
     return len;
 }
 
-#if 0
-void InitWindowColors(WINDOW wnd)
-{
-	int fbg,col;
-	int cls = GetClass(wnd);
-	/* window classes without assigned colors inherit parent's colors */
-	if (cfg.clr[cls][0][0] == 0xff && GetParent(wnd) != NULL)
-		cls = GetClass(GetParent(wnd));
-	/* ---------- set the colors ---------- */
-	for (fbg = 0; fbg < 2; fbg++)
-		for (col = 0; col < 4; col++)
-			wnd->WindowColors[col][fbg] = cfg.clr[cls][col][fbg];
-}
-#endif
-
 void PutWindowChar(WINDOW wnd, int c, int x, int y)
 {
 	if (x < ClientWidth(wnd) && y < ClientHeight(wnd))

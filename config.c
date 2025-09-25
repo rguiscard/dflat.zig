@@ -75,18 +75,3 @@ void SaveConfig(void)
         fclose(fp);
     }
 }
-
-/* --------- set window colors --------- */
-#if 0
-void SetStandardColor(WINDOW wnd)
-{
-    foreground = WndForeground(wnd);
-    background = WndBackground(wnd);
-}
-
-void SetReverseColor(WINDOW wnd)
-{
-    foreground = SelectForeground(wnd);
-    background = SelectBackground(wnd);
-}
-#endif
