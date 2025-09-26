@@ -75,14 +75,17 @@ void cDisplayTitle(WINDOW wnd, RECT rc)
 }
 #endif
 
+#if 0
 static unsigned int SeCorner(WINDOW wnd, unsigned int stdse)
 {
 	if (TestAttribute(wnd, SIZEABLE) && wnd->condition == ISRESTORED)
 		return SIZETOKEN;
 	return stdse;
 }
+#endif
 
 /* ------- display a window's border ----- */
+#if 0
 void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
 {
     int y;
@@ -106,7 +109,6 @@ void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
     }
     line[WindowWidth(wnd)] = '\0';
     /* -------- top frame corners --------- */
-#if 0
     if (RectTop(rc) == 0)    {
         if (RectLeft(rc) == 0)
             wputch(wnd, nw, 0, 0);
@@ -116,7 +118,6 @@ void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
             TopLine(wnd, lin, clrc);
         }
     }
-#endif
 
     /* ----------- window body ------------ */
     for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
@@ -141,7 +142,6 @@ void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
         if (RectRight(rc) == WindowWidth(wnd))
             shadow_char(wnd, y);
     }
-
     if (RectTop(rc) <= WindowHeight(wnd)-1 &&
             RectBottom(rc) >= WindowHeight(wnd)-1)    {
         /* -------- bottom frame corners ---------- */
@@ -183,6 +183,7 @@ void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
         /* ---------- bottom shadow ------------- */
         shadowline(wnd, rc);
 }
+#endif
 
 #if 0
 static void TopLine(WINDOW wnd, int lin, RECT rc)

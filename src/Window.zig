@@ -395,8 +395,7 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
 }
 
 // --- display right border shadow character of a window ---
-// Private
-pub export fn shadow_char(wnd:df.WINDOW, y:c_int) void {
+fn shadow_char(wnd:df.WINDOW, y:c_int) void {
     if (TopLevelFields.get_zin(wnd)) |win| {
         const fg = df.foreground;
         const bg = df.background;
@@ -419,8 +418,7 @@ pub export fn shadow_char(wnd:df.WINDOW, y:c_int) void {
 }
 
 // --- display the bottom border shadow line for a window --
-// Private
-pub export fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
+fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
     if (TopLevelFields.get_zin(wnd)) |win| {
         var rc = rcc;
         const fg = df.foreground;
@@ -609,7 +607,84 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
         }
     }
 
-    df.cRepaintBorder(wnd, rc, clrc);
+    // ----------- window body ------------
+    for (@intCast(rc.tp)..@intCast(rc.bt+1)) |ydx| {
+        var ch:u8 = 0;
+        if (ydx == 0 or ydx >= self.WindowHeight()-1)
+            continue;
+        if (rc.lf == 0)
+            df.wputch(wnd, side, 0, @intCast(ydx));
+        if (rc.lf < self.WindowWidth() and
+            rc.rt >= self.WindowWidth()-1) {
+            if (self.TestAttribute(df.VSCROLLBAR)) {
+                if (ydx == 1) {
+                    ch = df.UPSCROLLBOX;
+                } else if (ydx == self.WindowHeight()-2) {
+                    ch = df.DOWNSCROLLBOX;
+                } else if (ydx-1 == wnd.*.VScrollBox) {
+                    ch = df.SCROLLBOXCHAR;
+                } else {
+                    ch = df.SCROLLBARCHAR;
+                }
+//                ch = (    y == 1 ? UPSCROLLBOX      :
+//                          y == WindowHeight(wnd)-2  ?
+//                                DOWNSCROLLBOX       :
+//                          y-1 == wnd->VScrollBox    ?
+//                                SCROLLBOXCHAR       :
+//                          SCROLLBARCHAR );
+            } else {
+                ch = side;
+            }
+            df.wputch(wnd, ch, @intCast(self.WindowWidth()-1), @intCast(ydx));
+        }
+        if (rc.rt == self.WindowWidth())
+            shadow_char(wnd, @intCast(ydx));
+    }
+
+    if (rc.tp <= self.WindowHeight()-1 and
+            rc.bt >= self.WindowHeight()-1) {
+        // -------- bottom frame corners ----------
+        if (rc.lf == 0)
+            df.wputch(wnd, sw, 0, @intCast(self.WindowHeight()-1));
+        if (rc.lf < self.WindowWidth() and
+                rc.rt >= self.WindowWidth()-1) {
+            df.wputch(wnd, se, @intCast(self.WindowWidth()-1), @intCast(self.WindowHeight()-1));
+        }
+
+        if (self.StatusBar == null) {
+            // ----------- bottom line -------------
+            @memset(line[0..@intCast(self.WindowWidth()-1)], lin);
+            if (self.TestAttribute(df.HSCROLLBAR)) {
+                line[0] = df.LEFTSCROLLBOX;
+                line[@intCast(self.WindowWidth()-3)] = df.RIGHTSCROLLBOX;
+                @memset(line[1..@intCast(self.WindowWidth()-4+1)], df.SCROLLBARCHAR);
+                line[@intCast(wnd.*.HScrollBox)] = df.SCROLLBOXCHAR;
+            }
+            line[@intCast(rc.rt)] = 0;
+            line[@intCast(self.WindowWidth()-2)] = 0;
+            if (rc.lf != rc.rt or
+                (rc.lf>0 and rc.lf < self.WindowWidth()-1)) {
+                if (self != inFocus) {
+                    df.ClipString += 1;
+                }
+                df.writeline(wnd,
+                             &line[@intCast(clrc.lf)],
+                             clrc.lf+1,
+                             @intCast(self.WindowHeight()-1),
+                             df.FALSE);
+                df.ClipString = 0;
+            }
+        }
+        if (rc.rt == self.WindowWidth())
+            shadow_char(wnd, @intCast(self.WindowHeight()-1));
+    }
+
+    if (rc.bt == self.WindowHeight()) {
+        // ---------- bottom shadow -------------
+        shadowline(wnd, rc);
+    }
+
+//    df.cRepaintBorder(wnd, rc, clrc);
 }
 
 // ------ clear the data space of a window -------- 
@@ -895,14 +970,14 @@ pub export fn inFocusWnd() df.WINDOW {
     return null;
 }
 
-pub export fn hasStatusBar(wnd:df.WINDOW) df.BOOL {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        if (win.StatusBar != null) {
-            return df.TRUE;
-        }
-    }
-    return df.FALSE;
-}
+//pub export fn hasStatusBar(wnd:df.WINDOW) df.BOOL {
+//    if (TopLevelFields.get_zin(wnd)) |win| {
+//        if (win.StatusBar != null) {
+//            return df.TRUE;
+//        }
+//    }
+//    return df.FALSE;
+//}
 
 // Accessories
 pub fn GetControl(self:*TopLevelFields) ?*Dialogs.CTLWINDOW {
