@@ -18,7 +18,9 @@ const GapBuf = @import("GapBuffer.zig");
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
+
 pub var inFocus:?*TopLevelFields = null;
+var line = [_]u8{0}**df.MAXCOLS;
 
 Class:CLASS,                 // window class
 title:?[:0]const u8 = null,  // window title
@@ -348,7 +350,46 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
                 df.foreground = title_color [r.STD_COLOR] [r.FG];
                 df.background = title_color [r.STD_COLOR] [r.BG];
             }
-            df.cDisplayTitle(wnd, rc);
+            const ttlen = if (self.title) |tt| tt.len else 0;
+            const tlen:usize = @intCast(@min(ttlen, self.WindowWidth()-2));
+            const tend:usize = @intCast(self.WindowWidth()-3-self.BorderAdj());
+            @memset(line[0..@intCast(self.WindowWidth())],  ' ');
+            if (wnd.*.condition != df.ISMINIMIZED) {
+                const ilen:isize = @intCast(tlen);
+                const pos:usize = @intCast(@divFloor(self.WindowWidth()-2-ilen, 2));
+                @memcpy(line[pos..pos+tlen], self.title orelse "");
+//                strncpy(line + ((WindowWidth(wnd)-2 - tlen) / 2),
+//                            GetTitle(wnd), tlen);
+            }
+            if (self.TestAttribute(df.CONTROLBOX))
+                line[@intCast(2-self.BorderAdj())] = df.CONTROLBOXCHAR;
+            if (self.TestAttribute(df.MINMAXBOX)) {
+                switch (wnd.*.condition) {
+                    df.ISRESTORED => {
+                        line[tend+1] = df.MAXPOINTER;
+                        line[tend]   = df.MINPOINTER;
+                    },
+                    df.ISMINIMIZED => {
+                        line[tend+1] = df.MAXPOINTER;
+                    },
+                    df.ISMAXIMIZED => {
+                        line[tend]   = df.MINPOINTER;
+                        line[tend+1] = df.RESTOREPOINTER;
+                    },
+                    else => {
+                    }
+                }
+            }
+            line[tend+3] = 0;
+            line[@intCast(rc.rt+1)] = 0;
+            if (self != inFocus)
+                df.ClipString += 1;
+            df.writeline(wnd, &line[@intCast(rc.lf)],
+                        @intCast(rc.lf+self.BorderAdj()),
+                        0,
+                        df.FALSE);
+            df.ClipString = 0;
+//            df.cDisplayTitle(wnd, rc);
         }
     }
 }

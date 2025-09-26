@@ -36,6 +36,7 @@ void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
 }
 
 /* -------- display a window's title --------- */
+#if 0
 void cDisplayTitle(WINDOW wnd, RECT rc)
 {
                 int tlen = min(strlen(GetTitle(wnd)), WindowWidth(wnd)-2);
@@ -72,6 +73,7 @@ void cDisplayTitle(WINDOW wnd, RECT rc)
                        	FALSE);
 			ClipString = 0;
 }
+#endif
 
 static unsigned int SeCorner(WINDOW wnd, unsigned int stdse)
 {
