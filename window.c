@@ -106,6 +106,7 @@ void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
     }
     line[WindowWidth(wnd)] = '\0';
     /* -------- top frame corners --------- */
+#if 0
     if (RectTop(rc) == 0)    {
         if (RectLeft(rc) == 0)
             wputch(wnd, nw, 0, 0);
@@ -115,6 +116,7 @@ void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
             TopLine(wnd, lin, clrc);
         }
     }
+#endif
 
     /* ----------- window body ------------ */
     for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
@@ -182,6 +184,7 @@ void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
         shadowline(wnd, rc);
 }
 
+#if 0
 static void TopLine(WINDOW wnd, int lin, RECT rc)
 {
     if (TestAttribute(wnd, HASMENUBAR))
@@ -207,6 +210,7 @@ static void TopLine(WINDOW wnd, int lin, RECT rc)
             RectLeft(rc), 0, FALSE);
     }
 }
+#endif
 
 /* ------ compute the logical line length of a window ------ */
 int LineLength(char *ln)

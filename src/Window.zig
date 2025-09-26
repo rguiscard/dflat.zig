@@ -513,6 +513,45 @@ fn ParamRect(self:*TopLevelFields, rcc:?*df.RECT) df.RECT {
 //    shadowline(wnd, rc);
 //}
 
+fn SeCorner(self:*TopLevelFields, stdse:u8) u8 {
+    const wnd = self.win;
+    if (self.TestAttribute(df.SIZEABLE) and wnd.*.condition == df.ISRESTORED)
+        return df.SIZETOKEN;
+    return stdse;
+}
+
+// probably not well tested because most windows have titles
+fn TopLine(self:*TopLevelFields, lin:u8, rcc:df.RECT) void {
+    const wnd = self.win;
+    var rc = rcc;
+    if (self.TestAttribute(df.HASMENUBAR))
+        return;
+    if (self.TestAttribute(df.HASTITLEBAR) and self.title != null)
+        return;
+
+    if (rc.lf == 0) {
+        rc.lf += @intCast(self.BorderAdj());
+        rc.rt += @intCast(self.BorderAdj());
+    }
+
+    if (rc.rt < self.WindowWidth()-1)
+        rc.rt += 1;
+
+    if (rc.lf < rc.rt) {
+        // ----------- top line -------------
+        @memset(line[0..@intCast(self.WindowWidth()-1)], lin);
+//        @memset(line,lin,WindowWidth(wnd)-1);
+        if (self.TestAttribute(df.CONTROLBOX)) {
+            @memcpy(line[1..4], "   ");
+            line[2] = df.CONTROLBOXCHAR;
+//                        strncpy(line+1, "   ", 3);
+//                        *(line+2) = CONTROLBOXCHAR;
+        }
+        line[@intCast(rc.rt)] = 0;
+        df.writeline(wnd, &line[@intCast(rc.lf)], rc.lf, 0, df.FALSE);
+    }
+}
+
 // ------- display a window's border -----
 pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
     const wnd = self.win;
@@ -533,6 +572,42 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
     df.foreground = colors.FrameForeground(wnd);
     df.background = colors.FrameBackground(wnd);
     const clrc = self.AdjustRectangle(rc);
+
+    var lin:u8 = 0;
+    var side:u8 = 0;
+    var ne:u8 = 0;
+    var nw:u8 = 0;
+    var se:u8 = 0;
+    var sw:u8 = 0;
+
+    if (self == inFocus) {
+        lin  = df.FOCUS_LINE;
+        side = df.FOCUS_SIDE;
+        ne   = df.FOCUS_NE;
+        nw   = df.FOCUS_NW;
+        se   = SeCorner(self, df.FOCUS_SE);
+        sw   = df.FOCUS_SW;
+    } else {
+        lin  = df.LINE;
+        side = df.SIDE;
+        ne   = df.NE;
+        nw   = df.NW;
+        se   = SeCorner(self, df.SE);
+        sw   = df.SW;
+    }
+
+    line[@intCast(self.WindowWidth())] = 0; // maybe @memset ? Title was draw already
+    // -------- top frame corners ---------
+    if (rc.tp == 0) {
+        if (rc.lf == 0)
+            df.wputch(wnd, nw, 0, 0);
+        if (rc.lf < self.WindowWidth()) {
+            if (rc.rt >= self.WindowWidth()-1) {
+                df.wputch(wnd, ne, @intCast(self.WindowWidth()-1), 0);
+            }
+            self.TopLine(lin, clrc);
+        }
+    }
 
     df.cRepaintBorder(wnd, rc, clrc);
 }
