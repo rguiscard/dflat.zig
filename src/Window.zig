@@ -389,7 +389,6 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
                         0,
                         df.FALSE);
             df.ClipString = 0;
-//            df.cDisplayTitle(wnd, rc);
         }
     }
 }
@@ -683,8 +682,6 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
         // ---------- bottom shadow -------------
         shadowline(wnd, rc);
     }
-
-//    df.cRepaintBorder(wnd, rc, clrc);
 }
 
 // ------ clear the data space of a window -------- 

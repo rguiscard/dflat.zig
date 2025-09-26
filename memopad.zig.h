@@ -5,21 +5,10 @@ void cBuildList(WINDOW, char *, BOOL);
 extern BOOL AllocTesting;
 extern jmp_buf AllocError;
 
-// normal.c
-//void SaveBorder(RECT);
-//void RestoreBorder(RECT);
-
 // applicat.c
 extern BOOL AltDown;
 
-// window.c
-void cDisplayTitle(WINDOW, RECT);
-void cRepaintBorder(WINDOW, RECT, RECT);
-
 // textbox.c
-void DeleteTextMsg(WINDOW, int);
-void InsertTextAt(WINDOW, char *, int);
-void CloseWindowMsg(WINDOW);
 void ComputeWindowTop(WINDOW);
 void ComputeWindowLeft(WINDOW);
 int ComputeVScrollBox(WINDOW);
@@ -33,16 +22,7 @@ typedef struct {
     RECT rc;
 } VECT;
 
-//listbox.c
-void WriteSelection(WINDOW, int, int, RECT *);
-void ChangeSelection(WINDOW, int, int);
-void ListCopyText(char *, char *);
-
 // editbox.c
-void Home(WINDOW);
-void ModTextPointers(WINDOW, int, int);
-void ExtendBlock(WINDOW, int, int);
-void DelKey(WINDOW);
 void ShiftTabKey(WINDOW, PARAM);
 void TabKey(WINDOW, PARAM);
 
