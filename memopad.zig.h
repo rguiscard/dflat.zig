@@ -14,7 +14,7 @@ extern BOOL AltDown;
 
 // window.c
 void cDisplayTitle(WINDOW, RECT);
-void cRepaintBorder(WINDOW, RECT);
+void cRepaintBorder(WINDOW, RECT, RECT);
 
 // textbox.c
 void DeleteTextMsg(WINDOW, int);

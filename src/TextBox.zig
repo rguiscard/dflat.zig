@@ -432,7 +432,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
         }
         rc.rt = @intCast(win.WindowWidth()-2);
     }
-    const rcc = df.AdjustRectangle(wnd, rc);
+    const rcc = win.AdjustRectangle(rc);
 
     if ((p2 == 0) and (win != Window.inFocus)) {
         df.ClipString += 1;

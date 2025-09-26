@@ -195,14 +195,14 @@ fn DrawVectorMsg(win:*Window, p1:df.PARAM, vt:df.VectTypes) void {
         if (win.VectorList) |list| {
             vectors = std.ArrayList(df.VECT).fromOwnedSlice(list);
         } else {
-            if (std.ArrayList(df.VECT).initCapacity(win.allocator, 0)) |list| {
+            if (std.ArrayList(df.VECT).initCapacity(root.global_allocator, 0)) |list| {
                 vectors = list;
             } else |_| {
                 // error
             }
        
         }
-        if (vectors.addOne(win.allocator)) |vc| {
+        if (vectors.addOne(root.global_allocator)) |vc| {
             vc.*.vt = vt;
             const p1_addr:usize = @intCast(p1);
             const p1_ptr:*df.RECT = @ptrFromInt(p1_addr);
@@ -211,9 +211,9 @@ fn DrawVectorMsg(win:*Window, p1:df.PARAM, vt:df.VectTypes) void {
             // error
         }
 
-        if (vectors.toOwnedSlice(win.allocator)) |list| {
+        if (vectors.toOwnedSlice(root.global_allocator)) |list| {
             win.VectorList = list;
-            vectors.deinit(win.allocator);
+            vectors.deinit(root.global_allocator);
         } else |_| {
             // error
         }
@@ -260,7 +260,7 @@ pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         },
         df.CLOSE_WINDOW => {
             if (win.VectorList) |list| {
-                win.allocator.free(list);
+                root.global_allocator.free(list);
             }
         },
         else => {

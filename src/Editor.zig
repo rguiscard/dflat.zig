@@ -20,7 +20,7 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
     const tabs:usize = @intCast(df.cfg.Tabs);
 
     var buf:*GapBuffer = undefined;
-    if (GapBuffer.init(win.allocator, 10)) |b| {
+    if (GapBuffer.init(root.global_allocator, 10)) |b| {
         buf = b;
     } else |_| {
         // error

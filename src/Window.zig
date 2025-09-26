@@ -70,7 +70,6 @@ TimePosted:bool = false,        // True if time has been posted
 // ------------- picture box fields -------------------
 VectorList:?[]df.VECT = null,   // list of picture box vectors
 
-allocator: std.mem.Allocator,
 win: df.WINDOW,
 
 // --------- create a window ------------
@@ -99,12 +98,11 @@ pub export fn CreateWindow(
     return win.*.win;
 }
 
-pub fn init(wnd: df.WINDOW, allocator: std.mem.Allocator) TopLevelFields {
+pub fn init(wnd: df.WINDOW) TopLevelFields {
     return .{
         .Class = CLASS.FORCEINTTYPE,
         .win = wnd,
         .wndproc = null,
-        .allocator = allocator,
     };
 }
 
@@ -127,7 +125,7 @@ pub fn create(
     } else |_| {
         // error
     }
-    self.* = init(wnd, root.global_allocator);
+    self.* = init(wnd);
 
     df.get_videomode();
 
@@ -223,8 +221,8 @@ pub fn create(
 // --------- message prototypes -----------
 pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.PARAM) bool {
     // Be sure to send null-terminated string to c.
-    if (self.allocator.dupeZ(u8, p1)) |txt| {
-        defer self.allocator.free(txt);
+    if (root.global_allocator.dupeZ(u8, p1)) |txt| {
+        defer root.global_allocator.free(txt);
         return self.sendMessage(msg, @intCast(@intFromPtr(txt.ptr)), p2);
     } else |_| {
         // error
@@ -295,11 +293,11 @@ pub fn AddTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
 // ----- insert a title into a window ----------
 pub fn InsertTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
     if (self.title) |t| {
-        self.allocator.free(t);
+        root.global_allocator.free(t);
         self.title = null;
     }
     if (ttl) |title| {
-        if (self.allocator.dupeZ(u8, title)) |t| {
+        if (root.global_allocator.dupeZ(u8, title)) |t| {
             self.title = t;
         } else |_| {
         }
@@ -308,7 +306,7 @@ pub fn InsertTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
 //    strcpy(wnd->title, ttl);
 }
 
-fn AdjustRectangle(self:*TopLevelFields, rcc:df.RECT) df.RECT {
+pub fn AdjustRectangle(self:*TopLevelFields, rcc:df.RECT) df.RECT {
     var rc = rcc;
     // -------- adjust the rectangle -------
     if (self.TestAttribute(df.HASBORDER)) {
@@ -397,6 +395,7 @@ pub export fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
 
         const len:usize = @intCast(win.WindowWidth());
         if (root.global_allocator.allocSentinel(u8, len+1, 0)) |buf| {
+            defer root.global_allocator.free(buf);
             const y = win.GetBottom()+1;
             const left:usize = @intCast(win.GetLeft());
             for (0..len+1) |idx| {
@@ -492,9 +491,9 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
 
     df.foreground = colors.FrameForeground(wnd);
     df.background = colors.FrameBackground(wnd);
-    //const clrc = self.AdjustRectangle(rc);
+    const clrc = self.AdjustRectangle(rc);
 
-    df.cRepaintBorder(wnd, rc);
+    df.cRepaintBorder(wnd, rc, clrc);
 }
 
 pub fn InitWindowColors(win:*TopLevelFields) void {
@@ -751,7 +750,7 @@ pub fn GetControl(self:*TopLevelFields) ?*Dialogs.CTLWINDOW {
 
 pub fn getGapBuffer(self:*TopLevelFields, size:usize) ?*GapBuf {
     if (self.gapbuf == null) {
-        if (GapBuf.init(self.allocator, size)) |buf| {
+        if (GapBuf.init(root.global_allocator, size)) |buf| {
             self.gapbuf = @constCast(buf);
         } else |_| {
             return null;

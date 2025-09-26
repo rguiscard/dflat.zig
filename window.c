@@ -10,12 +10,8 @@ BOOL hasStatusBar(WINDOW);
 
 static unsigned char line[MAXCOLS];
 
-extern int TITLEBAR;
-extern unsigned char BLACK;
-extern unsigned char DARKGRAY;
-
 void cDisplayTitle(WINDOW, RECT);
-void cRepaintBorder(WINDOW, RECT);
+void cRepaintBorder(WINDOW, RECT, RECT);
 void shadow_char(WINDOW, int);
 void shadowline(WINDOW, RECT);
 
@@ -109,14 +105,14 @@ static unsigned int SeCorner(WINDOW wnd, unsigned int stdse)
 }
 
 /* ------- display a window's border ----- */
-void cRepaintBorder(WINDOW wnd, RECT rc)
+void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
 {
     int y;
     unsigned int lin, side, ne, nw, se, sw;
-    RECT clrc;
+//    RECT clrc;
 
 
-    clrc = AdjustRectangle(wnd, rc);
+//    clrc = AdjustRectangle(wnd, rc);
 
     if (wnd == inFocusWnd())    {
         lin  = FOCUS_LINE;

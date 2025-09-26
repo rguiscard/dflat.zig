@@ -34,7 +34,7 @@ var HiddenWindow:*Window = undefined; // seems initialized before use ?
 fn getDummy() df.WINDOW {
     if(dummyWin == null) {
         dummy = std.mem.zeroInit(df.window, .{.rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
-        dummyWin = Window.init(&dummy, root.global_allocator);
+        dummyWin = Window.init(&dummy);
         dummyWin.?.Class = k.DUMMY;
         dummyWin.?.wndproc = NormalProc; // doesn't seem necessary
         dummy.zin = @ptrCast(@alignCast(&dummyWin.?));
@@ -549,7 +549,7 @@ fn CloseWindowMsg(win:*Window) void {
         lists.SetPrevFocus();
     // -- free memory allocated to this window --
     if (win.title) |t| {
-        win.allocator.free(t);
+        root.global_allocator.free(t);
     }
     if (wnd.*.videosave != null)
         df.free(wnd.*.videosave);

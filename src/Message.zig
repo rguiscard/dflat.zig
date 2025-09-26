@@ -135,7 +135,7 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             // This shouldn't happen, except dummy window at normal.c for now.
             // Or we can create a Window instance for it here.
             if (root.global_allocator.create(Window)) |win| {
-                win.* = Window.init(wnd, root.global_allocator);
+                win.* = Window.init(wnd);
                 wnd.*.zin = @constCast(win);
                 // Should call sendMessage() for it ?
                 // Segment fault if call sendMessage(), seems ok to call ProcessMessage().
