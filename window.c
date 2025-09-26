@@ -35,32 +35,6 @@ void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
     wputs(wnd, wline, x, y);
 }
 
-#if 0
-RECT AdjustRectangle(WINDOW wnd, RECT rc)
-{
-    /* -------- adjust the rectangle ------- */
-    if (TestAttribute(wnd, HASBORDER))    {
-        if (RectLeft(rc) == 0)
-            --rc.rt;
-        else if (RectLeft(rc) < RectRight(rc) &&
-                RectLeft(rc) < WindowWidth(wnd)+1)
-            --rc.lf;
-    }
-    if (TestAttribute(wnd, HASBORDER | HASTITLEBAR))    {
-        if (RectTop(rc) == 0)
-            --rc.bt;
-        else if (RectTop(rc) < RectBottom(rc) &&
-                RectTop(rc) < WindowHeight(wnd)+1)
-            --rc.tp;
-    }
-    RectRight(rc) = max(RectLeft(rc),
-                        min(RectRight(rc),WindowWidth(wnd)));
-    RectBottom(rc) = max(RectTop(rc),
-                        min(RectBottom(rc),WindowHeight(wnd)));
-    return rc;
-}
-#endif
-
 /* -------- display a window's title --------- */
 void cDisplayTitle(WINDOW wnd, RECT rc)
 {
@@ -111,10 +85,6 @@ void cRepaintBorder(WINDOW wnd, RECT rc, RECT clrc)
 {
     int y;
     unsigned int lin, side, ne, nw, se, sw;
-//    RECT clrc;
-
-
-//    clrc = AdjustRectangle(wnd, rc);
 
     if (wnd == inFocusWnd())    {
         lin  = FOCUS_LINE;
@@ -237,6 +207,7 @@ static void TopLine(WINDOW wnd, int lin, RECT rc)
 }
 
 /* ------ clear the data space of a window -------- */
+#if 0
 void ClearWindow(WINDOW wnd, RECT *rcc, int clrchar)
 {
     if (isVisible(wnd))    {
@@ -264,6 +235,7 @@ void ClearWindow(WINDOW wnd, RECT *rcc, int clrchar)
         }
     }
 }
+#endif
 
 /* ------ compute the logical line length of a window ------ */
 int LineLength(char *ln)

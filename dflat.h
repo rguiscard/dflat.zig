@@ -194,7 +194,7 @@ int GetClass(WINDOW); // use int for CLASS
 #define SetVisible(w)        (GetAttribute(w) |= VISIBLE)
 #define ClearVisible(w)      (GetAttribute(w) &= ~VISIBLE)
 #define gotoxy(w,x,y) cursor(w->rc.lf+(x)+1,w->rc.tp+(y)+1)
-BOOL isVisible(WINDOW);
+//BOOL isVisible(WINDOW);
 //WINDOW CreateWindow(CLASS,const char *,int,int,int,int,void*,WINDOW,
 //       int (*)(struct window *,enum messages,PARAM,PARAM),int);
 WINDOW CreateWindow(int,const char *,int,int,int,int,void*,WINDOW, int); // use int for CLASS

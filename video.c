@@ -125,6 +125,18 @@ void wputch(WINDOW wnd, int c, int x, int y)
 	}
 }
 
+// this is part of Window.zig already.
+// use zig version in the future.
+static BOOL isVisible(WINDOW wnd)
+{
+    while (wnd != NULL)    {
+        if (isHidden(wnd))
+            return FALSE;
+        wnd = GetParent(wnd);
+    }
+    return TRUE;
+}
+
 /* ------- write a string to a window ---------- */
 void wputs(WINDOW wnd, void *s, int x, int y)
 {

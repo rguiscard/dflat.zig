@@ -450,7 +450,7 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 // --------- MOVE Message ----------
 fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
-    const wasVisible = (df.isVisible(wnd) > 0);
+    const wasVisible = win.isVisible();
     const xdif = p1 - win.GetLeft();
     const ydif = p2 - win.GetTop();
 
@@ -484,7 +484,7 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 // --------- SIZE Message ----------
 fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
-    const wasVisible = (df.isVisible(wnd) > 0);
+    const wasVisible = win.isVisible();
     const xdif = p1 - win.GetRight();
     const ydif = p2 - win.GetBottom();
 
@@ -667,7 +667,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                         pp1 = @ptrFromInt(p1_addr);
                     }
 
-                    df.ClearWindow(wnd, pp1, ' '); // pp1 can be null
+                    win.ClearWindow(pp1, ' '); // pp1 can be null
                 }
             }
         },

@@ -496,6 +496,51 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
     df.cRepaintBorder(wnd, rc, clrc);
 }
 
+// ------ clear the data space of a window -------- 
+pub fn ClearWindow(win:*TopLevelFields, rcc:?*df.RECT, clrchar:u8) void {
+    const wnd = win.win;
+    if (win.isVisible()) {
+        var rc:df.RECT = undefined;
+        if (rcc) |cc| {
+            rc = cc.*;
+        } else {
+            rc = df.RelativeWindowRect(wnd, win.WindowRect());
+        }
+        const top = win.TopBorderAdj();
+        const bot = win.WindowHeight()-1-win.BottomBorderAdj();
+
+        if (rc.lf == 0)
+            rc.lf = @intCast(win.BorderAdj());
+        if (rc.rt > win.WindowWidth()-1)
+            rc.rt = @intCast(win.WindowWidth()-1);
+        colors.SetStandardColor(wnd);
+
+        if (root.global_allocator.allocSentinel(u8, @intCast(rc.rt), 0)) |buf| {
+            defer root.global_allocator.free(buf);
+            @memset(buf, clrchar);
+            buf[buf.len] = 0;
+            for (@intCast(rc.tp)..@intCast(rc.bt+1)) |ydx| {
+                if (ydx < top or ydx > bot)
+                    continue;
+                df.writeline(wnd, &buf[@intCast(rc.lf)], rc.lf, @intCast(ydx), df.FALSE);
+            }
+        } else |_| {
+        }
+
+//        memset(line, clrchar, sizeof line);
+//        line[RectRight(rc)+1] = '\0';
+//        for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
+//           if (y < top || y > bot)
+//               continue;
+//           writeline(wnd,
+//               line+(RectLeft(rc)),
+//               RectLeft(rc),
+//               y,
+//               FALSE);
+//       }
+    }
+}
+
 pub fn InitWindowColors(win:*TopLevelFields) void {
     var cls = win.Class;
     var icls:usize = @intCast(@intFromEnum(cls));

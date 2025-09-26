@@ -59,7 +59,7 @@ pub fn build(b: *std.Build) void {
             "dfalloc.c",
             "window.c",
             "rect.c",
-            "normal.c",
+//            "normal.c",
             "textbox.c",
             "editbox.c",
 

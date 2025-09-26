@@ -9,9 +9,6 @@ int ComputeHScrollBox(WINDOW);
 void MoveScrollBox(WINDOW, int);
 static char *GetTextLine(WINDOW, int);
 
-//BOOL VSliding;
-//BOOL HSliding;
-
 /* ------ compute the vertical scroll box position from
                    the text pointers --------- */
 int ComputeVScrollBox(WINDOW wnd)
@@ -131,35 +128,11 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
 {
     int len = 0;
     int dif = 0;
-//    RECT rc;
     unsigned char *lp, *svlp;
     int lnlen;
     int i;
     BOOL trunc = FALSE;
     unsigned char line[MAXCOLS];
-
-    /* ------ make sure y is inside the window ----- */
-//    if (y < wnd->wtop || y >= wnd->wtop+ClientHeight(wnd))
-//        return;
-
-    /* ---- build the retangle within which can write ---- */
-//    if (rcc == NULL)    {
-//        rc = RelativeWindowRect(wnd, WindowRect(wnd));
-//        if (TestAttribute(wnd, HASBORDER) &&
-//                RectRight(rc) >= WindowWidth(wnd)-1)
-//            RectRight(rc) = WindowWidth(wnd)-2;
-//    }
-//    else
-//        rc = *rcc;
-
-    /* ----- make sure rectangle is within window ------ */
-//    if (RectLeft(rc) >= WindowWidth(wnd)-1)
-//        return;
-//    if (RectRight(rc) == 0)
-//        return;
-//    rc = AdjustRectangle(wnd, rc);
-//    if (y-wnd->wtop<RectTop(rc) || y-wnd->wtop>RectBottom(rc))
-//        return;
 
     /* --- get the text and length of the text line --- */
     lp = svlp = GetTextLine(wnd, y);

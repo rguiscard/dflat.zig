@@ -267,8 +267,6 @@ fn CloseWindowMsg(win:*Window) bool {
 }
 
 pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
-
     switch (msg) {
         df.CREATE_WINDOW => {
             return CreateWindowMsg(win);
@@ -306,7 +304,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
             if (win.isVisible())    {
                 const cl:u8 = if (df.cfg.Texture > 0) df.APPLCHAR else ' ';
                 const pptr:usize = @intCast(p1);
-                df.ClearWindow(wnd, @ptrFromInt(pptr), cl);
+                win.ClearWindow(@ptrFromInt(pptr), cl);
             }
             return true;
         },

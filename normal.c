@@ -2,6 +2,7 @@
 
 #include "dflat.h"
 
+#if 0
 BOOL isVisible(WINDOW wnd)
 {
     while (wnd != NULL)    {
@@ -11,3 +12,4 @@ BOOL isVisible(WINDOW wnd)
     }
     return TRUE;
 }
+#endif
