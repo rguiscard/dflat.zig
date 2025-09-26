@@ -54,12 +54,10 @@ pub fn build(b: *std.Build) void {
 
     lib_mod.addCSourceFiles(.{ .files = &.{
             "keys.c",
-//            "colors.c",
             "config.c",
             "dfalloc.c",
             "window.c",
             "rect.c",
-//            "normal.c",
             "textbox.c",
             "editbox.c",
 

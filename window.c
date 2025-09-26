@@ -206,37 +206,6 @@ static void TopLine(WINDOW wnd, int lin, RECT rc)
     }
 }
 
-/* ------ clear the data space of a window -------- */
-#if 0
-void ClearWindow(WINDOW wnd, RECT *rcc, int clrchar)
-{
-    if (isVisible(wnd))    {
-        int y;
-        RECT rc = rcc ? *rcc : RelativeWindowRect(wnd, WindowRect(wnd));
-
-		int top = TopBorderAdj(wnd);
-		int bot = WindowHeight(wnd)-1-BottomBorderAdj(wnd);
-
-        if (RectLeft(rc) == 0)
-            RectLeft(rc) = BorderAdj(wnd);
-        if (RectRight(rc) > WindowWidth(wnd)-1)
-            RectRight(rc) = WindowWidth(wnd)-1;
-        SetStandardColor(wnd);
-        memset(line, clrchar, sizeof line);
-        line[RectRight(rc)+1] = '\0';
-        for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
-            if (y < top || y > bot)
-                continue;
-            writeline(wnd,
-                line+(RectLeft(rc)),
-                RectLeft(rc),
-                y,
-                FALSE);
-        }
-    }
-}
-#endif
-
 /* ------ compute the logical line length of a window ------ */
 int LineLength(char *ln)
 {
@@ -253,14 +222,6 @@ int LineLength(char *ln)
     }
     return len;
 }
-
-#if 0
-void PutWindowChar(WINDOW wnd, int c, int x, int y)
-{
-	if (x < ClientWidth(wnd) && y < ClientHeight(wnd))
-		wputch(wnd, c, x+BorderAdj(wnd), y+TopBorderAdj(wnd));
-}
-#endif
 
 void PutWindowLine(WINDOW wnd, void *s, int x, int y)
 {
