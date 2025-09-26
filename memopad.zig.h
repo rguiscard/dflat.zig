@@ -13,8 +13,8 @@ extern jmp_buf AllocError;
 extern BOOL AltDown;
 
 // window.c
-void cDisplayTitle(WINDOW, RECT *);
-void cRepaintBorder(WINDOW, RECT *);
+void cDisplayTitle(WINDOW, RECT);
+void cRepaintBorder(WINDOW, RECT);
 
 // textbox.c
 void DeleteTextMsg(WINDOW, int);

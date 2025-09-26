@@ -8,6 +8,8 @@ const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
 const CLASS = @import("Classes.zig").CLASS;
 const k = CLASS; // abbreviation
+const colors = @import("Colors.zig");
+const r = colors;
 const Dialogs = @import("Dialogs.zig");
 const app = @import("Application.zig");
 const menus = @import("Menus.zig");
@@ -306,16 +308,90 @@ pub fn InsertTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
 //    strcpy(wnd->title, ttl);
 }
 
+fn AdjustRectangle(self:*TopLevelFields, rcc:df.RECT) df.RECT {
+    var rc = rcc;
+    // -------- adjust the rectangle -------
+    if (self.TestAttribute(df.HASBORDER)) {
+        if (rc.lf == 0) {
+            rc.rt -= 1;
+        } else if (rc.lf < rc.rt and rc.lf < self.WindowWidth()+1) {
+            rc.lf -= 1;
+        }
+    }
+    if (self.TestAttribute(df.HASBORDER | df.HASTITLEBAR)) {
+        if (rc.tp == 0) {
+            rc.bt -= 1;
+        } else if (rc.tp < rc.bt and rc.tp < self.WindowHeight()+1) {
+            rc.tp -= 1;
+        }
+    }
+    rc.rt = @intCast(@max(rc.lf, @min(rc.rt, self.WindowWidth())));
+    rc.bt = @intCast(@max(rc.tp, @min(rc.bt, self.WindowHeight())));
+    return rc;
+}
+
 // -------- display a window's title ---------
-pub fn DisplayTitle(win:*TopLevelFields, rcc:?*df.RECT) void {
-    const wnd = win.win;
-    df.cDisplayTitle(wnd, rcc);
+pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
+    const wnd = self.win;
+    if (self.title) |_| {
+        var rc:df.RECT = undefined;
+        if (rcc) |cc| {
+            rc = cc.*;
+        } else {
+            rc = df.RelativeWindowRect(wnd, self.WindowRect());
+        }
+        rc = self.AdjustRectangle(rc);
+        if (self.sendMessage(df.TITLE, @intCast(@intFromPtr(rcc)), 0)) {
+            const title_color = df.cfg.clr[@intCast(@intFromEnum(k.TITLEBAR))];
+            if (self == inFocus) {
+                df.foreground = title_color [r.HILITE_COLOR] [r.FG];
+                df.background = title_color [r.HILITE_COLOR] [r.BG];
+            } else {
+                df.foreground = title_color [r.STD_COLOR] [r.FG];
+                df.background = title_color [r.STD_COLOR] [r.BG];
+            }
+            df.cDisplayTitle(wnd, rc);
+        }
+    }
+}
+
+fn ParamRect(self:*TopLevelFields, rcc:?*df.RECT) df.RECT {
+    const wnd = self.win;
+    var rc:df.RECT = undefined;
+    if (rcc) |cc| {
+        rc = cc.*;
+    } else {
+        rc = df.RelativeWindowRect(wnd, self.WindowRect());
+        if (self.TestAttribute(df.SHADOW)) {
+            rc.rt += 1;
+            rc.bt += 1;
+        }
+    }
+    return rc;
 }
 
 // ------- display a window's border -----
-pub fn RepaintBorder(win:*TopLevelFields, rcc:?*df.RECT) void {
-    const wnd = win.win;
-    df.cRepaintBorder(wnd, rcc);
+pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
+    const wnd = self.win;
+
+    if (self.TestAttribute(df.HASBORDER) == false)
+        return;
+    const rc = self.ParamRect(rcc);
+
+    // ---------- window title ------------
+    if (self.TestAttribute(df.HASTITLEBAR)) {
+        if (rc.tp == 0) {
+            if (rc.lf < self.WindowWidth()-self.BorderAdj()) {
+                self.DisplayTitle(@constCast(&rc));
+            }
+        }
+    }
+
+    df.foreground = colors.FrameForeground(wnd);
+    df.background = colors.FrameBackground(wnd);
+    //const clrc = self.AdjustRectangle(rc);
+
+    df.cRepaintBorder(wnd, rc);
 }
 
 pub fn InitWindowColors(win:*TopLevelFields) void {

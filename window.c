@@ -14,8 +14,8 @@ extern int TITLEBAR;
 extern unsigned char BLACK;
 extern unsigned char DARKGRAY;
 
-void cDisplayTitle(WINDOW, RECT *);
-void cRepaintBorder(WINDOW, RECT *);
+void cDisplayTitle(WINDOW, RECT);
+void cRepaintBorder(WINDOW, RECT);
 
 /* ------ write a line to video window client area ------ */
 void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
@@ -62,28 +62,28 @@ RECT AdjustRectangle(WINDOW wnd, RECT rc)
 }
 
 /* -------- display a window's title --------- */
-void cDisplayTitle(WINDOW wnd, RECT *rcc)
+void cDisplayTitle(WINDOW wnd, RECT rc)
 {
-	if (GetTitle(wnd) != NULL)	{
-    	int tlen = min(strlen(GetTitle(wnd)), WindowWidth(wnd)-2);
-    	int tend = WindowWidth(wnd)-3-BorderAdj(wnd);
-    	RECT rc;
+//	if (GetTitle(wnd) != NULL)	{
+//    	RECT rc;
 
-    	if (rcc == NULL)
-        	rc = RelativeWindowRect(wnd, WindowRect(wnd));
-    	else
-        	rc = *rcc;
-    	rc = AdjustRectangle(wnd, rc);
+//    	if (rcc == NULL)
+//        	rc = RelativeWindowRect(wnd, WindowRect(wnd));
+//    	else
+//        	rc = *rcc;
+//    	rc = AdjustRectangle(wnd, rc);
 
-    	if (SendMessage(wnd, TITLE, (PARAM) rcc, 0))    {
-        	if (wnd == inFocusWnd())    {
-            	foreground = cfg.clr[TITLEBAR] [HILITE_COLOR] [FG];
-            	background = cfg.clr[TITLEBAR] [HILITE_COLOR] [BG];
-        	}
-        	else    {
-            	foreground = cfg.clr[TITLEBAR] [STD_COLOR] [FG];
-            	background = cfg.clr[TITLEBAR] [STD_COLOR] [BG];
-        	}
+//    	if (SendMessage(wnd, TITLE, (PARAM) rcc, 0))    {
+                int tlen = min(strlen(GetTitle(wnd)), WindowWidth(wnd)-2);
+                int tend = WindowWidth(wnd)-3-BorderAdj(wnd);
+//        	if (wnd == inFocusWnd())    {
+//            	foreground = cfg.clr[TITLEBAR] [HILITE_COLOR] [FG];
+//            	background = cfg.clr[TITLEBAR] [HILITE_COLOR] [BG];
+//        	}
+//        	else    {
+//            	foreground = cfg.clr[TITLEBAR] [STD_COLOR] [FG];
+//            	background = cfg.clr[TITLEBAR] [STD_COLOR] [BG];
+//        	}
         	memset(line,' ',WindowWidth(wnd));
         	if (wnd->condition != ISMINIMIZED)
             	    strncpy(line + ((WindowWidth(wnd)-2 - tlen) / 2),
@@ -115,8 +115,8 @@ void cDisplayTitle(WINDOW wnd, RECT *rcc)
                        	0,
                        	FALSE);
 			ClipString = 0;
-    	}
-	}
+//    	}
+//  }
 }
 
 #define MinTest() (wnd->condition == ISMINIMIZED) ||
@@ -171,6 +171,7 @@ static void near shadowline(WINDOW wnd, RECT rc)
     background = bg;
 }
 
+#if 0
 static RECT ParamRect(WINDOW wnd, RECT *rcc)
 {
 	RECT rc;
@@ -185,6 +186,7 @@ static RECT ParamRect(WINDOW wnd, RECT *rcc)
         rc = *rcc;
 	return rc;
 }
+#endif
 
 #if 0 // not used
 void PaintShadow(WINDOW wnd)
@@ -205,16 +207,23 @@ static unsigned int SeCorner(WINDOW wnd, unsigned int stdse)
 }
 
 /* ------- display a window's border ----- */
-void cRepaintBorder(WINDOW wnd, RECT *rcc)
+void cRepaintBorder(WINDOW wnd, RECT rc)
 {
     int y;
     unsigned int lin, side, ne, nw, se, sw;
-    RECT rc, clrc;
+    RECT clrc;
 
-    if (!TestAttribute(wnd, HASBORDER))
-        return;
-	rc = ParamRect(wnd, rcc);
+//    if (!TestAttribute(wnd, HASBORDER))
+//        return;
+//	rc = ParamRect(wnd, rcc);
+
     clrc = AdjustRectangle(wnd, rc);
+    /* ---------- window title ------------ */
+//    if (TestAttribute(wnd, HASTITLEBAR))
+//        if (RectTop(rc) == 0)
+//            if (RectLeft(rc) < WindowWidth(wnd)-BorderAdj(wnd))
+//                cDisplayTitle(wnd, &rc);
+
 
     if (wnd == inFocusWnd())    {
         lin  = FOCUS_LINE;
@@ -233,13 +242,8 @@ void cRepaintBorder(WINDOW wnd, RECT *rcc)
         sw   = SW;
     }
     line[WindowWidth(wnd)] = '\0';
-    /* ---------- window title ------------ */
-    if (TestAttribute(wnd, HASTITLEBAR))
-        if (RectTop(rc) == 0)
-            if (RectLeft(rc) < WindowWidth(wnd)-BorderAdj(wnd))
-                cDisplayTitle(wnd, &rc);
-    foreground = FrameForeground(wnd);
-    background = FrameBackground(wnd);
+//    foreground = FrameForeground(wnd);
+//    background = FrameBackground(wnd);
     /* -------- top frame corners --------- */
     if (RectTop(rc) == 0)    {
         if (RectLeft(rc) == 0)
