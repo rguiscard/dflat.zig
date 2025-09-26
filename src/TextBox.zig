@@ -593,7 +593,33 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
 // ------- write a line of text to a textbox window -------
 pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
     const wnd = win.win;
-    df.cWriteTextLine(wnd, rcc, y, if (reverse) df.TRUE else df.FALSE);
+
+    // ------ make sure y is inside the window -----
+    if (y < wnd.*.wtop or y >= wnd.*.wtop+win.ClientHeight())
+        return;
+
+    // ---- build the retangle within which can write ----
+    var rc:df.RECT = undefined;
+    if (rcc) |cc| {
+        rc = cc.*;
+    } else {
+        rc = df.RelativeWindowRect(wnd, win.WindowRect());
+        if (win.TestAttribute(df.HASBORDER) and
+                rc.rt >= win.WindowWidth()-1) {
+            rc.rt = @intCast(win.WindowWidth()-2);
+        }
+    }
+
+    // ----- make sure rectangle is within window ------
+    if (rc.lf >= win.WindowWidth()-1)
+        return;
+    if (rc.rt == 0)
+        return;
+    rc = win.AdjustRectangle(rc);
+    if (y-wnd.*.wtop < rc.tp or y-wnd.*.wtop > rc.bt)
+        return;
+
+    df.cWriteTextLine(wnd, rc, y, if (reverse) df.TRUE else df.FALSE);
 }
 
 // not in use

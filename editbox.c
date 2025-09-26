@@ -1,43 +1,6 @@
 /* ------------- editbox.c ------------ */
 #include "dflat.h"
 
-//#define EditBufLen(wnd) (isMultiLine(wnd) ? EDITLEN : ENTRYLEN)
-//#define SetLinePointer(wnd, ln) (wnd->CurrLine = ln)
-//#define Ch(c) ((c)&0x7f)
-//#define isWhite(c) (Ch(c)==' '||Ch(c)=='\n'||Ch(c)=='\f'||Ch(c)=='\t')
-/* ---------- local prototypes ----------- */
-//void Home(WINDOW);
-//void ModTextPointers(WINDOW, int, int);
-//void ExtendBlock(WINDOW, int, int);
-
-/* ----- Extend the marked block to the new x,y position ---- */
-#if 0
-void ExtendBlock(WINDOW wnd, int x, int y)
-{
-    int bbl, bel;
-    int ptop = min(wnd->BlkBegLine, wnd->BlkEndLine);
-    int pbot = max(wnd->BlkBegLine, wnd->BlkEndLine);
-    char *lp = TextLine(wnd, wnd->wtop+y);
-    int len = (int) (strchr(lp, '\n') - lp);
-    x = max(0, min(x, len));
-	y = max(0, y);
-    wnd->BlkEndCol = min(len, x+wnd->wleft);
-    wnd->BlkEndLine = y+wnd->wtop;
-    bbl = min(wnd->BlkBegLine, wnd->BlkEndLine);
-    bel = max(wnd->BlkBegLine, wnd->BlkEndLine);
-    while (ptop < bbl)    {
-        WriteTextLine(wnd, NULL, ptop, FALSE);
-        ptop++;
-    }
-    for (y = bbl; y <= bel; y++)
-        WriteTextLine(wnd, NULL, y, FALSE);
-    while (pbot > bel)    {
-        WriteTextLine(wnd, NULL, pbot, FALSE);
-        --pbot;
-    }
-}
-#endif
-
 /* ------------ Tab key ------------ */
 void TabKey(WINDOW wnd, PARAM p2) // private
 {
@@ -264,25 +227,3 @@ void cParagraphCmd(WINDOW wnd)
     wnd->WndRow = fl - wnd->wtop;
 #endif
 }
-
-/* -------- Home key: to beginning of line ------- */
-#if 0
-void Home(WINDOW wnd) // private
-{
-    wnd->CurrCol = 0;
-    if (wnd->wleft != 0)    {
-        wnd->wleft = 0;
-        SendMessage(wnd, PAINT, 0, 0);
-    }
-}
-#endif
-
-/* ----- modify text pointers from a specified position
-                by a specified plus or minus amount ----- */
-#if 0
-void ModTextPointers(WINDOW wnd, int lineno, int var) // private
-{
-    while (lineno < wnd->wlines)
-        *((wnd->TextPointers) + lineno++) += var;
-}
-#endif

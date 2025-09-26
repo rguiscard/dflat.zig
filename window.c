@@ -35,6 +35,7 @@ void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
     wputs(wnd, wline, x, y);
 }
 
+#if 0
 RECT AdjustRectangle(WINDOW wnd, RECT rc)
 {
     /* -------- adjust the rectangle ------- */
@@ -58,6 +59,7 @@ RECT AdjustRectangle(WINDOW wnd, RECT rc)
                         min(RectBottom(rc),WindowHeight(wnd)));
     return rc;
 }
+#endif
 
 /* -------- display a window's title --------- */
 void cDisplayTitle(WINDOW wnd, RECT rc)

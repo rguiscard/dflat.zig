@@ -127,11 +127,11 @@ static char *GetTextLine(WINDOW wnd, int selection)
 }
 
 /* ------- write a line of text to a textbox window ------- */
-void cWriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
+void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
 {
     int len = 0;
     int dif = 0;
-    RECT rc;
+//    RECT rc;
     unsigned char *lp, *svlp;
     int lnlen;
     int i;
@@ -139,27 +139,27 @@ void cWriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
     unsigned char line[MAXCOLS];
 
     /* ------ make sure y is inside the window ----- */
-    if (y < wnd->wtop || y >= wnd->wtop+ClientHeight(wnd))
-        return;
+//    if (y < wnd->wtop || y >= wnd->wtop+ClientHeight(wnd))
+//        return;
 
     /* ---- build the retangle within which can write ---- */
-    if (rcc == NULL)    {
-        rc = RelativeWindowRect(wnd, WindowRect(wnd));
-        if (TestAttribute(wnd, HASBORDER) &&
-                RectRight(rc) >= WindowWidth(wnd)-1)
-            RectRight(rc) = WindowWidth(wnd)-2;
-    }
-    else
-        rc = *rcc;
+//    if (rcc == NULL)    {
+//        rc = RelativeWindowRect(wnd, WindowRect(wnd));
+//        if (TestAttribute(wnd, HASBORDER) &&
+//                RectRight(rc) >= WindowWidth(wnd)-1)
+//            RectRight(rc) = WindowWidth(wnd)-2;
+//    }
+//    else
+//        rc = *rcc;
 
     /* ----- make sure rectangle is within window ------ */
-    if (RectLeft(rc) >= WindowWidth(wnd)-1)
-        return;
-    if (RectRight(rc) == 0)
-        return;
-    rc = AdjustRectangle(wnd, rc);
-    if (y-wnd->wtop<RectTop(rc) || y-wnd->wtop>RectBottom(rc))
-        return;
+//    if (RectLeft(rc) >= WindowWidth(wnd)-1)
+//        return;
+//    if (RectRight(rc) == 0)
+//        return;
+//    rc = AdjustRectangle(wnd, rc);
+//    if (y-wnd->wtop<RectTop(rc) || y-wnd->wtop>RectBottom(rc))
+//        return;
 
     /* --- get the text and length of the text line --- */
     lp = svlp = GetTextLine(wnd, y);
