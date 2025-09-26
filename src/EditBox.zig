@@ -513,7 +513,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
         df.SetStandardColor(wnd);
 //        if (wnd.*.protect)
 //            c = '*';
-//        PutWindowChar(wnd, c, WndCol, wnd->WndRow);
+//        win.PutWindowChar(c, df.WndCol(), wnd.*.WndRow);
         // ----- advance the pointers ------
         wnd.*.CurrCol += 1;
     }

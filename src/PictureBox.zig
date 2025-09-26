@@ -95,7 +95,6 @@ fn FindVector(win:*Window, rc:df.RECT, x:c_int, y:c_int) c_int {
 }
 
 fn PaintVector(win:*Window, rc:df.RECT) void {
-    const wnd = win.win;
     var len: c_int = 0;
     var nc: c_uint = 0;
     var vertvect: c_int = 0;
@@ -146,12 +145,11 @@ fn PaintVector(win:*Window, rc:df.RECT) void {
                 }
             }
         }
-        df.PutWindowChar(wnd, @intCast(newch), rc.lf+xi, rc.tp+yi);
+        win.PutWindowChar(@intCast(newch), rc.lf+xi, rc.tp+yi);
     }
 }
 
 fn PaintBar(win:*Window, rc:df.RECT, vt:df.VectTypes) void {
-    const wnd = win.win;
     var len:c_int = 0;
     var vertbar:c_int = 0;
     const tys = [_]c_int{219, 178, 177, 176};
@@ -175,7 +173,7 @@ fn PaintBar(win:*Window, rc:df.RECT, vt:df.VectTypes) void {
         } else {
             xi = @intCast(i);
         }
-        df.PutWindowChar(wnd, nc, rc.lf+xi, rc.tp+yi);
+        win.PutWindowChar(nc, rc.lf+xi, rc.tp+yi);
     }
 }
 

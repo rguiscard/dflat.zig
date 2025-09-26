@@ -355,6 +355,99 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
     }
 }
 
+// --- display right border shadow character of a window ---
+// Private
+pub export fn shadow_char(wnd:df.WINDOW, y:c_int) void {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        const fg = df.foreground;
+        const bg = df.background;
+        const x:c_int = @intCast(win.WindowWidth());
+        const chr = df.GetVideoChar(@intCast(win.GetLeft()+x), @intCast(win.GetTop()+y)) & 255;
+
+        if (win.TestAttribute(df.SHADOW) == false or
+            wnd.*.condition == df.ISMINIMIZED or
+            wnd.*.condition == df.ISMAXIMIZED or
+            df.cfg.mono > 0) {
+            // No shadow
+            return;
+        }
+        df.foreground = r.DARKGRAY;
+        df.background = r.BLACK;
+        df.wputch(wnd, @intCast(chr), @intCast(x), @intCast(y));
+        df.foreground = fg;
+        df.background = bg;
+    }
+}
+
+// --- display the bottom border shadow line for a window --
+// Private
+pub export fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        var rc = rcc;
+        const fg = df.foreground;
+        const bg = df.background;
+
+        if (win.TestAttribute(df.SHADOW) == false or
+            wnd.*.condition == df.ISMINIMIZED or
+            wnd.*.condition == df.ISMAXIMIZED or
+            df.cfg.mono > 0) {
+            // No shadow
+            return;
+        }
+
+        const len:usize = @intCast(win.WindowWidth());
+        if (root.global_allocator.allocSentinel(u8, len+1, 0)) |buf| {
+            const y = win.GetBottom()+1;
+            const left:usize = @intCast(win.GetLeft());
+            for (0..len+1) |idx| {
+                buf[idx] = @intCast(df.GetVideoChar(@intCast(left+idx), @intCast(y)) & 255);
+            }
+            buf[len+1] = 0;
+
+            df.foreground = r.DARKGRAY;
+            df.background = r.BLACK;
+ 
+            buf[@intCast(rc.rt+1)] = 0;
+            if (rc.lf == 0)
+                rc.lf += 1;
+
+            df.ClipString += 1;
+
+            df.wputs(wnd, &buf[@intCast(rc.lf)], rc.lf, @intCast(win.WindowHeight()));
+
+            df.ClipString -= 1;
+
+            df.foreground = fg;
+            df.background = bg;
+        } else |_| {
+        }
+
+//    int i;
+//    int y = GetBottom(wnd)+1;
+//
+//    for (i = 0; i < WindowWidth(wnd)+1; i++)
+//        line[i] = videochar(GetLeft(wnd)+i, y);
+//    line[i] = '\0';
+
+//        df.foreground = r.DARKGRAY;
+//        df.background = r.BLACK;
+
+//    line[RectRight(rc)+1] = '\0';
+//    if (RectLeft(rc) == 0)
+//        rc.lf++;
+//
+//        df.ClipString += 1;
+//
+//    wputs(wnd, line+RectLeft(rc), RectLeft(rc),
+//        WindowHeight(wnd));
+//
+//        df.ClipString -= 1;
+//
+//        df.foreground = fg;
+//        df.background = bg;
+    }
+}
+
 fn ParamRect(self:*TopLevelFields, rcc:?*df.RECT) df.RECT {
     const wnd = self.win;
     var rc:df.RECT = undefined;
@@ -369,6 +462,16 @@ fn ParamRect(self:*TopLevelFields, rcc:?*df.RECT) df.RECT {
     }
     return rc;
 }
+
+// Not in use
+//void PaintShadow(WINDOW wnd)
+//{
+//        int y;
+//        RECT rc = ParamRect(wnd, NULL);
+//        for (y = 1; y < WindowHeight(wnd); y++)
+//                shadow_char(wnd, y);
+//    shadowline(wnd, rc);
+//}
 
 // ------- display a window's border -----
 pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
@@ -409,6 +512,13 @@ pub fn InitWindowColors(win:*TopLevelFields) void {
         for (0..4) |col| {
             win.win.*.WindowColors[col][fbg] = df.cfg.clr[icls][col][fbg];
         }
+    }
+}
+
+pub fn PutWindowChar(self: *TopLevelFields, chr:c_int, x:c_int, y:c_int) void {
+    const wnd = self.win;
+    if (x < self.ClientWidth() and y < self.ClientHeight()) {
+        df.wputch(wnd, chr, @intCast(x+self.BorderAdj()), @intCast(y+self.TopBorderAdj()));
     }
 }
 

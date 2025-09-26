@@ -35,8 +35,8 @@ pub const global_allocator = std.heap.c_allocator;
 pub export const ID_HELPTEXT:c_int = @intFromEnum(Command.ID_HELPTEXT);
 pub export const POPDOWNMENU:c_int = @intFromEnum(CLASS.POPDOWNMENU);
 pub export const MENUBAR:c_int = @intFromEnum(CLASS.MENUBAR);
-pub export const BLACK:u8 = Colors.BLACK;
-pub export const DARKGRAY:u8 = Colors.DARKGRAY;
+//pub export const BLACK:u8 = Colors.BLACK;
+//pub export const DARKGRAY:u8 = Colors.DARKGRAY;
 
 //pub export fn BaseWndProc(klass: c_int, wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
 //    if (Window.get_zin(wnd)) |zin| {
