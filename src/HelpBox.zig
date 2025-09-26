@@ -117,7 +117,7 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.zBaseWndProc(k.HELPBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.HELPBOX, win, msg, p1, p2);
 }
 
 // --- window processing module for HELPBOX's text EDITBOX --

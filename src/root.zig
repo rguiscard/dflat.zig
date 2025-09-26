@@ -35,18 +35,6 @@ pub const global_allocator = std.heap.c_allocator;
 pub export const ID_HELPTEXT:c_int = @intFromEnum(Command.ID_HELPTEXT);
 pub export const POPDOWNMENU:c_int = @intFromEnum(CLASS.POPDOWNMENU);
 pub export const MENUBAR:c_int = @intFromEnum(CLASS.MENUBAR);
-//pub export const BLACK:u8 = Colors.BLACK;
-//pub export const DARKGRAY:u8 = Colors.DARKGRAY;
-
-//pub export fn BaseWndProc(klass: c_int, wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
-//    if (Window.get_zin(wnd)) |zin| {
-//        const cls:CLASS = @enumFromInt(klass);
-//        const rtn = zBaseWndProc(cls, zin, msg, p1, p2);
-//        return if (rtn) df.TRUE else df.FALSE;
-//    }
-//    return df.FALSE;
-//    // Is it possible that wnd is null ?
-//}
 
 pub export fn DefaultWndProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     if (Window.get_zin(wnd)) |zin| {
@@ -57,7 +45,7 @@ pub export fn DefaultWndProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: 
     // Is it possible that wnd is null ?
 }
 
-pub fn zBaseWndProc(klass: CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn BaseWndProc(klass: CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const base_idx:usize = @intCast(@intFromEnum(klass));
     const base_class = Klass.defs[base_idx][1]; // base
 
@@ -74,7 +62,7 @@ pub fn zDefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
     if (Klass.defs[idx][2]) |proc| { // wndproc
         return proc(win, msg, p1, p2);
     }
-    return zBaseWndProc(klass, win, msg, p1, p2);
+    return BaseWndProc(klass, win, msg, p1, p2);
 }
 
 pub export fn add(a: i32, b: i32) i32 {

@@ -97,7 +97,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
                     _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
             },
             df.MOVE => {
-                const rtn = root.zBaseWndProc(k.RADIOBUTTON,win,msg,p1,p2);
+                const rtn = root.BaseWndProc(k.RADIOBUTTON,win,msg,p1,p2);
                 df.SetFocusCursor(wnd);
                 return rtn;
             },
@@ -128,7 +128,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
             }
         }
     }
-    return root.zBaseWndProc(k.RADIOBUTTON, win, msg, p1, p2);
+    return root.BaseWndProc(k.RADIOBUTTON, win, msg, p1, p2);
 }
 
 pub fn RadioButtonSetting(db:*Dialogs.DBOX, cmd:c) bool {

@@ -30,7 +30,7 @@ fn CreateWindowMsg(win:*Window) bool {
         wnd.*.rc.lf += adj;
         wnd.*.rc.rt += adj;
     }
-    const rtn = root.zBaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, 0, 0);
+    const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, 0, 0);
     _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
     _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
     _ = q.SendMessage(null, df.SAVE_CURSOR, 0, 0);
@@ -199,7 +199,7 @@ fn BorderMsg(win:*Window) bool {
     if (win.mnu) |_| {
         const currFocus = Window.inFocus;
         Window.inFocus = null;
-        rtn = root.zBaseWndProc(k.POPDOWNMENU, win, df.BORDER, 0, 0);
+        rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.BORDER, 0, 0);
         Window.inFocus = currFocus;
         for (0..@intCast(win.ClientHeight())) |i| {
             if (df.TextLine(wnd, i)[0] == df.LINE) {
@@ -323,7 +323,7 @@ fn CloseWindowMsg(win:*Window) bool {
     _ = q.SendMessage(null, df.RESTORE_CURSOR, 0, 0);
     Window.inFocus = win.oldFocus;
 
-    const rtn = root.zBaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
+    const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
     _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, 0, 0);
     return rtn;
 }
@@ -385,7 +385,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.zBaseWndProc(k.POPDOWNMENU, win, msg, p1, p2);
+    return root.BaseWndProc(k.POPDOWNMENU, win, msg, p1, p2);
 }
 
 // --------- compute menu height --------

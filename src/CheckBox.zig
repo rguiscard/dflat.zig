@@ -17,12 +17,12 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 if (p1 == 0)
                     _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
                 // fall off ?
-                const rtn = root.zBaseWndProc(k.CHECKBOX, win, msg, p1, p2);
+                const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
                 df.SetFocusCursor(wnd);
                 return rtn;
             },
             df.MOVE => {
-                const rtn = root.zBaseWndProc(k.CHECKBOX, win, msg, p1, p2);
+                const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
                 df.SetFocusCursor(wnd);
                 return rtn;
             },
@@ -51,7 +51,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             }
         }
     }
-    return root.zBaseWndProc(k.CHECKBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
 }
 
 

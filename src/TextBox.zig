@@ -588,7 +588,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
         else => {
         }
     }
-    return root.zBaseWndProc(k.TEXTBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.TEXTBOX, win, msg, p1, p2);
 }
 
 pub fn ClearTextBlock(win:*Window) void {

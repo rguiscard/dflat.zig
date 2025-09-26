@@ -74,7 +74,7 @@ fn CreateWindowMsg(win: *Window) bool {
     SelectTitle(win);
     SelectStatusBar(win);
 
-    const rtn = root.zBaseWndProc(k.APPLICATION, win, df.CREATE_WINDOW, 0, 0);
+    const rtn = root.BaseWndProc(k.APPLICATION, win, df.CREATE_WINDOW, 0, 0);
     if (wnd.*.extension != null) {
         CreateMenu(win);
     }
@@ -115,7 +115,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     var p1_new = p1;
     if (p1-win.GetLeft() < 30)
         p1_new = win.GetLeft() + 30;
-    _ = root.zBaseWndProc(k.APPLICATION, win, df.SIZE, p1_new, p2);
+    _ = root.BaseWndProc(k.APPLICATION, win, df.SIZE, p1_new, p2);
     CreateMenu(win);
     CreateStatusBar(win);
     if (WasVisible)
@@ -125,7 +125,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     if (normal.WindowMoving or normal.WindowSizing or (p1 == df.F1))
-        return root.zBaseWndProc(k.APPLICATION, win, df.KEYBOARD, p1, p2);
+        return root.BaseWndProc(k.APPLICATION, win, df.KEYBOARD, p1, p2);
     switch (p1)  {
         df.ALT_F4 => {
             if (win.TestAttribute(df.CONTROLBOX)) {
@@ -241,7 +241,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         .ID_SYSMAXIMIZE,
         .ID_SYSMOVE,
         .ID_SYSSIZE => {
-            _ = root.zBaseWndProc(k.APPLICATION, win, df.COMMAND, p1, p2);
+            _ = root.BaseWndProc(k.APPLICATION, win, df.COMMAND, p1, p2);
         },
         else => {
             if ((Window.inFocus != win.MenuBar) and (Window.inFocus != win)) {
@@ -257,7 +257,7 @@ fn CloseWindowMsg(win:*Window) bool {
     WindowSel = 0;
     q.PostMessage(null, df.STOP, 0, 0);
 
-    const rtn = root.zBaseWndProc(k.APPLICATION, win, df.CLOSE_WINDOW, 0, 0);
+    const rtn = root.BaseWndProc(k.APPLICATION, win, df.CLOSE_WINDOW, 0, 0);
     if (ScreenHeight != df.SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
 
@@ -320,7 +320,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         else => {
         }
     }
-    return root.zBaseWndProc(k.APPLICATION, win, msg, p1, p2);
+    return root.BaseWndProc(k.APPLICATION, win, msg, p1, p2);
 }
 
 // ----- Close all document windows -----

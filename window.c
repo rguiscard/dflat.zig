@@ -101,64 +101,6 @@ void cDisplayTitle(WINDOW wnd, RECT rc)
 			ClipString = 0;
 }
 
-#if 0
-#define MinTest() (wnd->condition == ISMINIMIZED) ||
-#define MaxTest() (wnd->condition == ISMAXIMIZED) ||
-
-#define NoShadow(wnd)                    \
-     (TestAttribute(wnd, SHADOW) == 0 || \
-      MinTest()                          \
-      MaxTest()                          \
-	  cfg.mono)
-#endif
-
-/* --- display right border shadow character of a window --- */
-#if 0
-static void near shadow_char(WINDOW wnd, int y)
-{
-    int fg = foreground;
-    int bg = background;
-    int x = WindowWidth(wnd);
-    int c = videochar(GetLeft(wnd)+x, GetTop(wnd)+y);
-
-	if (NoShadow(wnd))
-        return;
-    foreground = DARKGRAY;
-    background = BLACK;
-    wputch(wnd, c, x, y);
-    foreground = fg;
-    background = bg;
-}
-#endif
-
-/* --- display the bottom border shadow line for a window -- */
-#if 0
-static void near shadowline(WINDOW wnd, RECT rc)
-{
-    int i;
-    int y = GetBottom(wnd)+1;
-    int fg = foreground;
-    int bg = background;
-
-	if (NoShadow(wnd))
-        return;
-    for (i = 0; i < WindowWidth(wnd)+1; i++)
-        line[i] = videochar(GetLeft(wnd)+i, y);
-    line[i] = '\0';
-    foreground = DARKGRAY;
-    background = BLACK;
-    line[RectRight(rc)+1] = '\0';
-    if (RectLeft(rc) == 0)
-        rc.lf++;
-	ClipString++;
-    wputs(wnd, line+RectLeft(rc), RectLeft(rc),
-        WindowHeight(wnd));
-	--ClipString;
-    foreground = fg;
-    background = bg;
-}
-#endif
-
 static unsigned int SeCorner(WINDOW wnd, unsigned int stdse)
 {
 	if (TestAttribute(wnd, SIZEABLE) && wnd->condition == ISRESTORED)

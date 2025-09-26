@@ -65,7 +65,7 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
     // if (buf.insert(0)) {} else |_| {} // gapbuf insert 0 actually
     //  *ttp = '\0';
 
-    return root.zBaseWndProc(k.EDITOR, win, df.SETTEXT, @intCast(@intFromPtr(buf.toString().ptr)), 0);
+    return root.BaseWndProc(k.EDITOR, win, df.SETTEXT, @intCast(@intFromPtr(buf.toString().ptr)), 0);
 //    return if (df.cSetTextMsg(wnd, @ptrFromInt(pp)) == df.TRUE) true else false;
 }
 
@@ -84,22 +84,22 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         df.DN => {
             pn = df.BS;
             // fall through
-            _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
+            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
             TurnOffDisplay(win);
 //            while (*df.CurrChar == pTab) {
             while (df.zCurrChar(wnd)[0] == pTab) {
-                _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, pn, p2);
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, pn, p2);
             }
             TurnOnDisplay(win);
             return true;
         },
         df.FWD,
         df.BS => {
-            _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
+            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
             TurnOffDisplay(win);
 //            while (*df.CurrChar == pTab) {
             while (df.zCurrChar(wnd)[0] == pTab) {
-                _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, pn, p2);
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, pn, p2);
             }
             TurnOnDisplay(win);
             return true;
@@ -108,10 +108,10 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             TurnOffDisplay(win);
 //            const delnl = (*df.CurrChar == '\n' or df.TextBlockMarked(wnd));
             const delnl = (df.zCurrChar(wnd)[0] == '\n' or df.TextBlockMarked(wnd));
-            _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
+            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
 //            while (*df.CurrChar == pTab) {
             while (df.zCurrChar(wnd)[0] == pTab) {
-                _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
             }
             AdjustTab(win);
             TurnOnDisplay(win);
@@ -123,9 +123,9 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         },
         '\t' => {
             TurnOffDisplay(win);
-            _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, @intCast(sTab), p2);
+            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, @intCast(sTab), p2);
             while (@rem(wnd.*.CurrCol, df.cfg.Tabs) != 0) {
-                _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, @intCast(pTab), p2);
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, @intCast(pTab), p2);
             }
             TurnOnDisplay(win);
             RepaintLine(win);
@@ -137,7 +137,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             if ( (p1 < 128) and           // FIXME unicode
                                 (std.ascii.isPrint(@intCast(p1)) or p1 == '\r')) {
                 TurnOffDisplay(win);
-                _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
                 AdjustTab(win);
                 TurnOnDisplay(win);
                 RepaintLine(win);
@@ -201,11 +201,11 @@ fn AdjustTab(win:*Window) void {
             curr_pos += 1;
             cc = wnd.*.text[curr_pos];
             while (cc == pTab) {
-                _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, df.DEL, 0);
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, df.DEL, 0);
             }
             while (exp > 0) {
                 exp -= 1;
-                _ = root.zBaseWndProc(k.EDITOR, win, df.KEYBOARD, pTab, 0);
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, pTab, 0);
             }
             break;
         }
@@ -242,7 +242,7 @@ pub fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.zBaseWndProc(k.EDITOR, win, msg, p1, p2);
+    return root.BaseWndProc(k.EDITOR, win, msg, p1, p2);
 }
 
 fn TurnOffDisplay(win:*Window) void {

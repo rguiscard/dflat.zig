@@ -73,7 +73,7 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
-                _ = root.zBaseWndProc(k.BUTTON, win, msg, p1, p2);
+                _ = root.BaseWndProc(k.BUTTON, win, msg, p1, p2);
                 // ---- fall through ----
                 PaintMsg(win, ct, null);
                 return true;
@@ -101,6 +101,6 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             }
         }
     }
-    return root.zBaseWndProc(k.BUTTON, win, msg, p1, p2);
+    return root.BaseWndProc(k.BUTTON, win, msg, p1, p2);
 }
  

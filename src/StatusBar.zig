@@ -93,5 +93,5 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
         else => {
         }
     }
-    return root.zBaseWndProc(k.STATUSBAR, win, msg, p1, p2);
+    return root.BaseWndProc(k.STATUSBAR, win, msg, p1, p2);
 }

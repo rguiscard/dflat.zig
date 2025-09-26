@@ -394,7 +394,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
         } else |_| { // error
         }
     }
-    rtn = root.zBaseWndProc(k.DIALOG, win, df.CREATE_WINDOW, p1, p2);
+    rtn = root.BaseWndProc(k.DIALOG, win, df.CREATE_WINDOW, p1, p2);
 
     for(0..Dialogs.MAXCONTROLS) |i| {
         const ctl:*Dialogs.CTLWINDOW = @ptrCast(&db.*.ctl[i]);
@@ -601,7 +601,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             p2_new = df.TRUE;
         },
         df.MOVE, df.SIZE => {
-            const rtn = root.zBaseWndProc(k.DIALOG, win, msg, p1, p2);
+            const rtn = root.BaseWndProc(k.DIALOG, win, msg, p1, p2);
             if (win.isVisible()) {
                 if (win.dfocus) |dfocus| {
                     _ = dfocus.sendMessage(df.SETFOCUS, df.TRUE, 0);
@@ -619,7 +619,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         }
     }
     // Note, p2 will be changed.
-    return root.zBaseWndProc(k.DIALOG, win, msg, p1, p2_new);
+    return root.BaseWndProc(k.DIALOG, win, msg, p1, p2_new);
 }
 
 // ---- return pointer to the text of a control window ----

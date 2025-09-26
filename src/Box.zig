@@ -17,7 +17,7 @@ pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                 return win.getParent().sendMessage(msg, p1, p2);
             },
             df.BORDER => {
-                const rtn = root.zBaseWndProc(k.BOX, win, msg, p1, p2);
+                const rtn = root.BaseWndProc(k.BOX, win, msg, p1, p2);
 //                if (ct.*.itext) |txt| {
 //                    df.writeline(wnd, txt, 1, 0, df.FALSE);
 //                }
@@ -30,5 +30,5 @@ pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             }
         }
     }
-    return root.zBaseWndProc(k.BOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.BOX, win, msg, p1, p2);
 }

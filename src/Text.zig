@@ -55,5 +55,5 @@ pub fn TextProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
         else => {
         }
     }
-    return root.zBaseWndProc(k.TEXT, win, msg, p1, p2);
+    return root.BaseWndProc(k.TEXT, win, msg, p1, p2);
 }

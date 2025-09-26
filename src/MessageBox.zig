@@ -116,7 +116,7 @@ fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.zBaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
 }
 
 fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
@@ -139,7 +139,7 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.zBaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
 }
 
 fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
@@ -157,7 +157,7 @@ fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.zBaseWndProc(df.ERRORBOX, win, msg, p1, p2);
+    return root.BaseWndProc(df.ERRORBOX, win, msg, p1, p2);
 }
 
 fn CancelProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
@@ -181,7 +181,7 @@ fn CancelProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.zBaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
 }
 
 pub fn MsgHeight(msg:[:0]const u8) c_int {
