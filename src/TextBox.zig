@@ -120,7 +120,7 @@ fn ClearTextMsg(win:*Window) void {
     }
 
     ClearTextBlock(win);
-    df.ClearTextPointers(wnd);
+    ClearTextPointers(win);
 
 }  
 
@@ -313,11 +313,11 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
                 df.scroll_window(wnd, rc, @intCast(p1));
                 if (p1 == 0) {
                     // -- write top line (down) --
-                    df.WriteTextLine(wnd,null,wnd.*.wtop,df.FALSE);
+                    WriteTextLine(win,null,wnd.*.wtop,false);
                 } else {
                     // -- write bottom line (up) --
                     const y=df.RectBottom(rc)-win.GetClientTop();
-                    df.WriteTextLine(wnd,null,@intCast(wnd.*.wtop+y), df.FALSE);
+                    WriteTextLine(win,null,@intCast(wnd.*.wtop+y),false);
                 }
             }
         }
@@ -462,8 +462,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
         const yy = yi-win.TopBorderAdj(); // not sure this number will be negative
         if (yy < wnd.*.wlines-wnd.*.wtop) {
             // ---- paint a text line ----
-            df.WriteTextLine(wnd, &rc,
-                        @intCast(yy+wnd.*.wtop), df.FALSE);
+            WriteTextLine(win, &rc, @intCast(yy+wnd.*.wtop), false);
         } else {
             // ---- paint a blank line ----
             df.SetStandardColor(wnd);
@@ -506,7 +505,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
         df.CREATE_WINDOW => {
             wnd.*.HScrollBox = 1;
             wnd.*.VScrollBox = 1;
-            df.ClearTextPointers(wnd);
+            ClearTextPointers(win);
         },
         df.ADDTEXT => {
             const pp1:usize = @intCast(p1);
@@ -591,6 +590,23 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
     return root.BaseWndProc(k.TEXTBOX, win, msg, p1, p2);
 }
 
+// ------- write a line of text to a textbox window -------
+pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
+    const wnd = win.win;
+    df.cWriteTextLine(wnd, rcc, y, if (reverse) df.TRUE else df.FALSE);
+}
+
+// not in use
+//void MarkTextBlock(WINDOW wnd, int BegLine, int BegCol,
+//                               int EndLine, int EndCol)
+//{
+//    wnd->BlkBegLine = BegLine;
+//    wnd->BlkEndLine = EndLine;
+//    wnd->BlkBegCol = BegCol;
+//    wnd->BlkEndCol = EndCol;
+//}
+
+
 pub fn ClearTextBlock(win:*Window) void {
     const wnd = win.win;
     wnd.*.BlkBegLine = 0;
@@ -600,7 +616,8 @@ pub fn ClearTextBlock(win:*Window) void {
 }
 
 // ----- clear and initialize text line pointer array -----
-pub export fn ClearTextPointers(wnd:df.WINDOW) void {
+pub fn ClearTextPointers(win:*Window) void {
+    const wnd = win.win;
     const allocator = root.global_allocator;
     var arraylist:std.ArrayList(c_uint) = undefined;
     if (wnd.*.TextPointers) |pointers| {

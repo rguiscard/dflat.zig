@@ -325,16 +325,16 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             if (p1 > 0) {
                 const pp1:usize = @intCast(p1);
                 const rc:*df.RECT = @ptrFromInt(pp1);
-                WriteSelection(win, @intCast(win.selection), df.TRUE, rc);
+                WriteSelection(win, @intCast(win.selection), true, rc);
             } else {
-                WriteSelection(win, @intCast(win.selection), df.TRUE, null);
+                WriteSelection(win, @intCast(win.selection), true, null);
             }
             return true;
         },
         df.SETFOCUS => {
             _ = root.BaseWndProc(k.LISTBOX, win, msg, p1, p2);
             if (p1>0)
-                WriteSelection(win, @intCast(win.selection), df.TRUE, null);
+                WriteSelection(win, @intCast(win.selection), true, null);
             return true;
         },
         df.SCROLL,
@@ -343,7 +343,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         df.HORIZPAGE,
         df.SCROLLDOC => {
             _ = root.BaseWndProc(k.LISTBOX, win, msg, p1, p2);
-            WriteSelection(win, @intCast(win.selection),df.TRUE,null);
+            WriteSelection(win, @intCast(win.selection),true,null);
             return true;
         },
         df.LB_CHOOSE => {
@@ -386,11 +386,10 @@ fn SelectionInWindow(win:*Window, sel:isize) bool {
             (sel < wnd.*.wtop+win.ClientHeight()));
 }
 
-fn WriteSelection(win:*Window, sel:isize, reverse:c_int, rc:?*df.RECT) void {
-    const wnd = win.win;
+fn WriteSelection(win:*Window, sel:isize, reverse:bool, rc:?*df.RECT) void {
     if (win.isVisible()) {
         if (SelectionInWindow(win, sel)) {
-            df.WriteTextLine(wnd, rc, @intCast(sel), @intCast(reverse));
+            textbox.WriteTextLine(win, rc, @intCast(sel), reverse);
         }
     }
 }
@@ -500,9 +499,9 @@ fn ChangeSelection(win:*Window,sel:isize,shift:usize) void {
                 win.AnchorPoint = sel;
             }
         }
-        WriteSelection(win, @intCast(win.selection), df.FALSE, null);
+        WriteSelection(win, @intCast(win.selection), false, null);
         win.selection = sel;
         if (sel != -1)
-            WriteSelection(win, sel, df.TRUE, null);
+            WriteSelection(win, sel, true, null);
      }
 }

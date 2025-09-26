@@ -127,7 +127,7 @@ static char *GetTextLine(WINDOW wnd, int selection)
 }
 
 /* ------- write a line of text to a textbox window ------- */
-void WriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
+void cWriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
 {
     int len = 0;
     int dif = 0;

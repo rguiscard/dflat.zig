@@ -8,6 +8,7 @@ const Window = @import("Window.zig");
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 const popdown = @import("PopDown.zig");
+const textbox = @import("TextBox.zig");
 
 fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
     const wnd = win.win;
@@ -40,7 +41,7 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
             }
         }
         // --------- write the button's text -------
-        df.WriteTextLine(wnd, rc, 0, if (win == Window.inFocus) 1 else 0 );
+        textbox.WriteTextLine(win, rc, 0, win == Window.inFocus);
     }
 }
 

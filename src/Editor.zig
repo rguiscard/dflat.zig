@@ -5,6 +5,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
 const editbox = @import("EditBox.zig");
+const textbox = @import("TextBox.zig");
 const normal = @import("Normal.zig");
 const GapBuffer = @import("GapBuffer.zig");
 
@@ -258,5 +259,5 @@ fn TurnOnDisplay(win:*Window) void {
 fn RepaintLine(win:*Window) void {
     const wnd = win.win;
     _ = win.sendMessage(df.KEYBOARD_CURSOR, editbox.WndCol(win), @intCast(wnd.*.WndRow));
-    df.WriteTextLine(wnd, null, wnd.*.CurrLine, df.FALSE);
+    textbox.WriteTextLine(win, null, wnd.*.CurrLine, false);
 }

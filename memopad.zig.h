@@ -25,6 +25,7 @@ void ComputeWindowLeft(WINDOW);
 int ComputeVScrollBox(WINDOW);
 int ComputeHScrollBox(WINDOW);
 void MoveScrollBox(WINDOW, int);
+void cWriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse);
 
 // pictbox.c
 typedef struct {

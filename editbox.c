@@ -8,9 +8,10 @@
 /* ---------- local prototypes ----------- */
 //void Home(WINDOW);
 //void ModTextPointers(WINDOW, int, int);
-void ExtendBlock(WINDOW, int, int);
+//void ExtendBlock(WINDOW, int, int);
 
 /* ----- Extend the marked block to the new x,y position ---- */
+#if 0
 void ExtendBlock(WINDOW wnd, int x, int y)
 {
     int bbl, bel;
@@ -35,6 +36,7 @@ void ExtendBlock(WINDOW wnd, int x, int y)
         --pbot;
     }
 }
+#endif
 
 /* ------------ Tab key ------------ */
 void TabKey(WINDOW wnd, PARAM p2) // private

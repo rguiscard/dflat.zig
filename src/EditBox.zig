@@ -273,6 +273,36 @@ fn HorizPageMsg(win:*Window, p1:df.PARAM) bool {
     return rtn;
 }
 
+// ----- Extend the marked block to the new x,y position ----
+fn ExtendBlock(win:*Window, xx:c_int, yy:c_int) void {
+    const wnd = win.win;
+    var x = xx;
+    var y = yy;
+    var ptop = @min(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
+    var pbot = @max(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
+    const lp = df.TextLine(wnd, wnd.*.wtop+y);
+    const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
+    x = @max(0, @min(x, len));
+    y = @max(0, y);
+    wnd.*.BlkEndCol = @min(len, x+wnd.*.wleft);
+    wnd.*.BlkEndLine = y+wnd.*.wtop;
+    const bbl = @min(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
+    const bel = @max(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
+    while (ptop < bbl) {
+        textbox.WriteTextLine(win, null, ptop, false);
+        ptop += 1;
+    }
+    for (@intCast(bbl)..@intCast(bel+1)) |ydx| {
+        textbox.WriteTextLine(win, null, @intCast(ydx), false);
+    }
+//    for (y = bbl; y <= bel; y++)
+//        WriteTextLine(wnd, NULL, y, FALSE);
+    while (pbot > bel) {
+        textbox.WriteTextLine(win, null, pbot, false);
+        pbot -= 1;
+    }
+}
+
 // ----------- LEFT_BUTTON Message ---------- 
 fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
@@ -309,7 +339,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             }
             if (msg != 0)   {
                 if (win.sendMessage(msg, dir, 0)) {
-                    df.ExtendBlock(wnd, x, y);
+                    ExtendBlock(win, x, y);
                 }
                 _ = win.sendMessage(df.PAINT, 0, 0);
             }
@@ -375,7 +405,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         ButtonDown = false;
     }
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
-        df.ExtendBlock(wnd, MouseX, MouseY);
+        ExtendBlock(win, MouseX, MouseY);
         return true;
     }
     return false;
@@ -638,7 +668,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     DoMultiLines(win, p1, p2);
     if (DoScrolling(win, @intCast(p1), p2)) {
         if (KeyBoardMarking)
-            df.ExtendBlock(wnd, WndCol(win), wnd.*.WndRow);
+            ExtendBlock(win, WndCol(win), wnd.*.WndRow);
     } else if (win.TestAttribute(df.READONLY) == false) {
         DoKeyStroke(win, @intCast(p1), p2);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
