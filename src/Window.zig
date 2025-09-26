@@ -556,7 +556,7 @@ pub fn ClearWindow(win:*TopLevelFields, rcc:?*df.RECT, clrchar:u8) void {
             rc.rt = @intCast(win.WindowWidth()-1);
         colors.SetStandardColor(wnd);
 
-        if (root.global_allocator.allocSentinel(u8, @intCast(rc.rt), 0)) |buf| {
+        if (root.global_allocator.allocSentinel(u8, @intCast(rc.rt+1), 0)) |buf| {
             defer root.global_allocator.free(buf);
             @memset(buf, clrchar);
             buf[buf.len] = 0;
