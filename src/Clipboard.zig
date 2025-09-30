@@ -99,7 +99,7 @@ pub fn PasteText(win:*Window, SaveTo:[]u8, len:c_uint) bool {
 //            }
         if (win.gapbuf) |buf| {
             const plen = buf.len() + len;
-            if (plen <= wnd.*.MaxTextLength) {
+            if (plen <= win.MaxTextLength) {
                 const pos = df.CurrPos(wnd);
                 buf.moveCursor(pos);
                 if (buf.insertSlice(SaveTo)) { } else |_| { }

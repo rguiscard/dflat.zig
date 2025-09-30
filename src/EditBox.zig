@@ -37,7 +37,7 @@ pub fn WndCol(win:*Window) c_int {
 fn CreateWindowMsg(win:*Window) bool {
     const wnd = win.win;
     const rtn = root.BaseWndProc(k.EDITBOX, win, df.CREATE_WINDOW, 0, 0);
-    wnd.*.MaxTextLength = df.MAXTEXTLEN+1;
+    win.MaxTextLength = df.MAXTEXTLEN+1;
     wnd.*.textlen = EditBufLen(win);
 //    win.textlen = EditBufLen(win);
 //    wnd.*.InsertMode = df.TRUE;
@@ -57,7 +57,7 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 
 //    if (df.strlen(ptext)+wnd.*.textlen <= wnd.*.MaxTextLength) {
     const len = if (win.gapbuf) |buf| buf.len() else 0;
-    if (df.strlen(ptext)+len <= wnd.*.MaxTextLength) {
+    if (df.strlen(ptext)+len <= win.MaxTextLength) {
         rtn = root.BaseWndProc(k.EDITBOX, win, df.ADDTEXT, p1, p2);
         if (rtn) {
             if (win.isMultiLine() == false)    {
@@ -78,11 +78,10 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 
 // ----------- SETTEXT Message ----------
 fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
-    const wnd = win.win;
     var rtn = false;
     const pp1:usize = @intCast(p1);
     const ptext:[*c]u8 = @ptrFromInt(pp1);
-    if (df.strlen(ptext) <= wnd.*.MaxTextLength) {
+    if (df.strlen(ptext) <= win.MaxTextLength) {
         rtn = root.BaseWndProc(k.EDITBOX, win, df.SETTEXT, p1, 0);
         win.TextChanged = false;
     }
@@ -141,7 +140,7 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
     var len:c_int = @intCast(p1);
     len += 1;
     if (len < df.MAXTEXTLEN) {
-        wnd.*.MaxTextLength = @intCast(len);
+        win.MaxTextLength = @intCast(len);
         if (win.gapbuf) |buf| {
             if (len < buf.len()) {
                 // this is for trancate
@@ -442,7 +441,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
         // ---- test typing at end of text ----
         const currpos = df.CurrPos(wnd);
 //        if (currchar == (char *)wnd->text+wnd->MaxTextLength)    {
-        if (currpos == wnd.*.MaxTextLength) {
+        if (currpos == win.MaxTextLength) {
             // ---- typing at the end of maximum buffer ----
             df.beep();
             return;
@@ -516,7 +515,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
             if (win.isMultiLine() == false)  {
 //                if (!(currchar == (char *)wnd->text+wnd->MaxTextLength-2))
 //                    SendMessage(wnd, HORIZSCROLL, TRUE, 0);
-                if (!(currpos == wnd.*.MaxTextLength))
+                if (!(currpos == win.MaxTextLength))
                     _ = win.sendMessage(df.HORIZSCROLL, df.TRUE, 0);
             } else {
                 var cp = currchar;
@@ -593,23 +592,15 @@ fn TabKey(win:*Window, p2:df.PARAM) void {
     if (win.isMultiLine()) {
         const insmd = win.InsertMode;
         const pos = df.CurrPos(wnd);
-        for (pos+1..wnd.*.MaxTextLength) |idx| {
+        for (pos+1..win.MaxTextLength) |idx| {
             if (insmd == false and wnd.*.text[idx] == 0)
                 break;
-            if (wnd.*.textlen == wnd.*.MaxTextLength)
+            if (wnd.*.textlen == win.MaxTextLength)
                 break;
             _ = win.sendMessage(df.KEYBOARD, if (insmd) ' ' else df.FWD, 0);
             if (@mod(wnd.*.CurrCol, tabs) == 0)
                 break;
         }
-//        do  {
-//            char *cc = CurrChar+1;
-//            if (insmd == false and *cc == '\0')
-//                break;
-//            if (win.textlen == wnd.*.MaxTextLength)
-//                break;
-//            _ = win.sendMessage(df.KEYBOARD, if (insmd) ' ' else df.FWD, 0);
-//        } while (wnd.*.CurrCol % cfg.config.Tabs);
     } else {
         const pwnd = if (win.parent) |pwin| pwin.win else null;
         q.PostMessage(pwnd, df.KEYBOARD, '\t', p2);
@@ -629,11 +620,6 @@ fn ShiftTabKey(win:*Window, p2:df.PARAM) void {
             if (@mod(wnd.*.CurrCol, tabs) == 0)
                 break;
         }
-//        do  {
-//            if (CurrChar == GetText(wnd))
-//                break;
-//            SendMessage(wnd,KEYBOARD,BS,0);
-//        } while (wnd->CurrCol % cfgTabs());
     } else {
         const pwnd = if (win.parent) |pwin| pwin.win else null;
         q.PostMessage(pwnd, df.KEYBOARD, df.SHIFT_HT, p2);
@@ -831,15 +817,11 @@ fn ClearCmd(win:*Window) void {
 
 // ----------- ID_UNDO Command ----------
 fn UndoCmd(win:*Window) void {
-    const wnd = win.win;
     if (win.DeletedText) |text| {
-//        _ = df.PasteText(wnd, wnd.*.DeletedText, wnd.*.DeletedLength);
         _ = clipboard.PasteText(win, text, @intCast(text.len));
         root.global_allocator.free(text);
         win.DeletedText = null;
-        win.*.DeletedText = null;
         win.DeletedLength = 0;
-        wnd.*.DeletedLength = 0;
         _ = win.sendMessage(df.PAINT, 0, 0);
     }
 //    if (wnd->DeletedText != NULL)    {
@@ -948,7 +930,6 @@ fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         root.global_allocator.free(text);
 
         // May not necessary. Not in original code
-        wnd.*.DeletedText = null;
         win.DeletedText = null;
     }
 
@@ -1190,8 +1171,6 @@ fn StopMarking(win:*Window) void {
 
 // ------ save deleted text for the Undo command ------
 fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
-    const wnd = win.win;
-    wnd.*.DeletedLength = @intCast(len);
     win.DeletedLength = len;
 
     if (win.DeletedText) |txt| {
@@ -1207,7 +1186,7 @@ fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
         }
     }
     if (win.DeletedText) |buf| {
-        wnd.*.DeletedText = buf.ptr;
+//        wnd.*.DeletedText = buf.ptr;
         @memmove(buf, bbl[0..len]);
     }
 

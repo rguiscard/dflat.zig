@@ -134,12 +134,12 @@ typedef struct window {
     int CurrLine;     /* Current line                       */
     int WndRow;       /* Current window row                 */
 //    BOOL TextChanged; /* TRUE if text has changed           */
-	BOOL protect;	  /* TRUE to display '*'                */
-    unsigned char *DeletedText; /* for undo                 */
-    unsigned DeletedLength; /* Length of deleted field      */
+//    BOOL protect;	  /* TRUE to display '*'                */
+//    unsigned char *DeletedText; /* for undo                 */
+//    unsigned DeletedLength; /* Length of deleted field      */
 //    BOOL InsertMode;   /* TRUE or FALSE for text insert     */
 //    BOOL WordWrapMode; /* TRUE or FALSE for word wrap       */
-	unsigned int MaxTextLength; /* maximum text length      */
+//	unsigned int MaxTextLength; /* maximum text length      */
     /* ---------------- dialog box fields ----------------- */
 //    int ReturnCode;        /* return code from a dialog box */
 //	BOOL Modal;		       // True if a modeless dialog box

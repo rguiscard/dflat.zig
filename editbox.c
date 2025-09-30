@@ -1,46 +1,6 @@
 /* ------------- editbox.c ------------ */
 #include "dflat.h"
 
-//BOOL wndInsertMode(WINDOW);
-//int cfgTabs();
-
-/* ------------ Tab key ------------ */
-#if 0
-void TabKey(WINDOW wnd, PARAM p2) // private
-{
-    if (isMultiLine(wnd))    {
-//        int insmd = wnd->InsertMode;
-        int insmd = wndInsertMode(wnd);
-        do  {
-            char *cc = CurrChar+1;
-            if (!insmd && *cc == '\0')
-                break;
-            if (wnd->textlen == wnd->MaxTextLength)
-                break;
-            SendMessage(wnd,KEYBOARD,insmd ? ' ' : FWD,0);
-        } while (wnd->CurrCol % cfgTabs());
-//        } while (wnd->CurrCol % cfg.Tabs);
-    }
-	else
-	    PostMessage(GetParent(wnd), KEYBOARD, '\t', p2);
-}
-#endif
-/* ------------ Shift+Tab key ------------ */
-#if 0
-void ShiftTabKey(WINDOW wnd, PARAM p2) // private
-{
-    if (isMultiLine(wnd))    {
-        do  {
-            if (CurrChar == GetText(wnd))
-                break;
-            SendMessage(wnd,KEYBOARD,BS,0);
-        } while (wnd->CurrCol % cfgTabs());
-//        } while (wnd->CurrCol % cfg.Tabs);
-    }
-	else
-	    PostMessage(GetParent(wnd), KEYBOARD, SHIFT_HT, p2);
-}
-#endif
 /* --------- All displayable typed keys ------------- */
 #if 0
 void KeyTyped(WINDOW wnd, int c) // private
@@ -162,15 +122,6 @@ void TextBlockToN(char *bbl, char *bel) {
 // Rewrite to be called from  zig size
 void cParagraphCmd(WINDOW wnd)
 {
-#if 0
-    int bc, fl;
-    fl = wnd->wtop + wnd->WndRow;
-    if ((bc = wnd->CurrCol) >= ClientWidth(wnd))
-        bc = 0;
-    char *bl = TextLine(wnd, wnd->CurrLine);
-    Home(wnd);
-#endif
-
     char *bbl, *bel, *bb;
 
     /* ---- forming paragraph from cursor position --- */
@@ -226,14 +177,4 @@ void cParagraphCmd(WINDOW wnd)
             bb = bbl+1;
         }
     }
-#if 0
-    BuildTextPointers(wnd);
-    /* --- put cursor back at beginning --- */
-    wnd->CurrLine = TextLineNumber(wnd, bl);
-    wnd->CurrCol = bc;
-
-    if (fl < wnd->wtop)
-        wnd->wtop = fl;
-    wnd->WndRow = fl - wnd->wtop;
-#endif
 }

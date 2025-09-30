@@ -140,14 +140,15 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
         return;
     lnlen = LineLength(lp);
 
-	if (wnd->protect)	{
-		char *pp = lp;
-		while (*pp)	{
-			if (isprint(*pp))
-				*pp = '*';
-			pp++;
-		}
-	}
+//    FIXME: protect is not in use now
+//	if (wnd->protect)	{
+//		char *pp = lp;
+//		while (*pp)	{
+//			if (isprint(*pp))
+//				*pp = '*';
+//			pp++;
+//		}
+//	}
 
     /* -------- insert block color change controls ------- */
     if (TextBlockMarked(wnd))    {

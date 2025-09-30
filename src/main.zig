@@ -466,7 +466,7 @@ pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
                        mp.menu.ActivateCommand(&menu.MainMenu, c.ID_PASTE);
                    }
                }
-               if (wnd.*.DeletedText != null)
+               if (win.DeletedText != null)
                    mp.menu.ActivateCommand(&menu.MainMenu, c.ID_UNDO);
            }
         }

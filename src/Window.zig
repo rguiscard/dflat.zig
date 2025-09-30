@@ -53,10 +53,12 @@ SelectCount:usize = 0,     // count of selected items
 
 // ----------------- edit box fields ------------------
 TextChanged:bool = false,    // TRUE if text has changed
+protected:bool = false,      // TRUE to display
 DeletedText:?[]u8 = null,    // for undo
 DeletedLength:usize = 0,     // Length of deleted field
 InsertMode:bool = false,     // TRUE or FALSE for text insert
 WordWrapMode:bool = false,   // TRUE or FALSE for word wrap
+MaxTextLength:usize = 0,     // maximum text length
 
 // ---------------- dialog box fields ----------------- 
 ReturnCode:c = c.ID_NULL,       // return code from a dialog box
