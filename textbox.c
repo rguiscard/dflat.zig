@@ -300,7 +300,8 @@ int TextLineNumber(WINDOW wnd, char *lp)
     int lineno;
     char *cp;
     for (lineno = 0; lineno < wnd->wlines; lineno++)    {
-        cp = wnd->text + *((wnd->TextPointers) + lineno);
+//        cp = wnd->text + *((wnd->TextPointers) + lineno);
+        cp = TextLine(wnd, lineno);
         if (cp == lp)
             return lineno;
         if (cp > lp)

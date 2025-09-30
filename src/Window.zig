@@ -43,7 +43,9 @@ StatusBar:?*TopLevelFields = null,    // status bar
 isHelping:u32 = 0,                    // > 0 when help is being displayed
 
 // ----------------- text box fields ------------------
-gapbuf:?*GapBuf = null, // gap buffer
+gapbuf:?*GapBuf = null,       // gap buffer
+
+TextPointers:[]usize = &.{}, // -> list of line offsets
 
 // ----------------- list box fields ------------------
 selection:isize = -1,      // current selection, -1 for none
@@ -928,6 +930,12 @@ pub fn prevWindow(self: *TopLevelFields) ?*TopLevelFields {
     return self.prevsibling;
 }
 
+pub fn currPos(self: *TopLevelFields) usize {
+    const wnd = self.win;
+    const col:c_uint = @intCast(wnd.*.CurrCol);
+    return @intCast(wnd.*.TextPointers[@intCast(wnd.*.CurrLine)]+col);
+}
+
 // Accessories for c
 pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
     // @fieldParentPtr is not yet reliable at this stage. Therefore, use zin inserted into WINDOW in c.
@@ -971,22 +979,6 @@ pub export fn inFocusWnd() df.WINDOW {
     }
     return null;
 }
-
-//pub export fn wndInsertMode(wnd:df.WINDOW) df.BOOL {
-//    if (TopLevelFields.get_zin(wnd)) |win| {
-//        return if (win.InsertMode) df.TRUE else df.FALSE;
-//    }
-//    return df.FALSE;
-//}
-
-//pub export fn hasStatusBar(wnd:df.WINDOW) df.BOOL {
-//    if (TopLevelFields.get_zin(wnd)) |win| {
-//        if (win.StatusBar != null) {
-//            return df.TRUE;
-//        }
-//    }
-//    return df.FALSE;
-//}
 
 // Accessories
 pub fn GetControl(self:*TopLevelFields) ?*Dialogs.CTLWINDOW {

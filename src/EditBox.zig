@@ -439,7 +439,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
             currchar = df.zCurrChar(wnd);
         }
         // ---- test typing at end of text ----
-        const currpos = df.CurrPos(wnd);
+        const currpos = win.currPos();
 //        if (currchar == (char *)wnd->text+wnd->MaxTextLength)    {
         if (currpos == win.MaxTextLength) {
             // ---- typing at the end of maximum buffer ----
@@ -553,7 +553,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
 // -------------- Del key ----------------
 fn DelKey(win:*Window) void {
     const wnd = win.win;
-    const curr_pos = df.CurrPos(wnd);
+    const curr_pos = win.currPos();
     const curr_char = wnd.*.text[curr_pos];
 //    const repaint = (curr_char == '\n');
 
@@ -591,7 +591,7 @@ fn TabKey(win:*Window, p2:df.PARAM) void {
     const tabs:c_int = @intCast(cfg.config.Tabs);
     if (win.isMultiLine()) {
         const insmd = win.InsertMode;
-        const pos = df.CurrPos(wnd);
+        const pos = win.currPos();
         for (pos+1..win.MaxTextLength) |idx| {
             if (insmd == false and wnd.*.text[idx] == 0)
                 break;
@@ -614,7 +614,7 @@ fn ShiftTabKey(win:*Window, p2:df.PARAM) void {
     const tabs:c_int = @intCast(cfg.config.Tabs);
     if (win.isMultiLine()) {
         while(true) {
-            const pos = df.CurrPos(wnd);
+            const pos = win.currPos();
             if (pos == 0)
                 break;
             if (@mod(wnd.*.CurrCol, tabs) == 0)
@@ -1197,7 +1197,7 @@ fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
 // ---- cursor right key: right one character position ----
 fn Forward(win:*Window) void {
     const wnd = win.win;
-    const pos = df.CurrPos(wnd);
+    const pos = win.currPos();
     const cc = wnd.*.text[pos+1];
     if (cc == 0)
         return;
@@ -1334,20 +1334,20 @@ fn NextWord(win:*Window) void {
     const saveleft = wnd.*.wleft;
     win.ClearVisible();
 
-    var curr_pos:usize = @intCast(df.CurrPos(wnd));
+    var curr_pos:usize = win.currPos();
     var cc:u8 = @intCast(wnd.*.text[curr_pos]&0x7f);
     while(!isWhite(cc)) {
         if (wnd.*.text[curr_pos+1] == 0)
             break;
         Forward(win);
-        curr_pos = @intCast(df.CurrPos(wnd));
+        curr_pos = win.currPos();
         cc = @intCast(wnd.*.text[curr_pos]&0x7f);
     }
     while(isWhite(cc)) {
         if (wnd.*.text[curr_pos+1] == 0)
             break;
         Forward(win);
-        curr_pos = @intCast(df.CurrPos(wnd));
+        curr_pos = win.currPos();
         cc = @intCast(wnd.*.text[curr_pos]&0x7f);
     }
 //    while (!isWhite(*CurrChar)) {
@@ -1377,18 +1377,18 @@ fn PrevWord(win:*Window) void {
     win.ClearVisible();
     Backward(win);
 
-    var curr_pos:usize = @intCast(df.CurrPos(wnd));
+    var curr_pos:usize = win.currPos();
     var cc:u8 = @intCast(wnd.*.text[curr_pos]&0x7f);
     while(isWhite(cc)) {
         if ((wnd.*.CurrLine == 0) and (wnd.*.CurrCol == 0))
             break;
         Backward(win);
-        curr_pos = @intCast(df.CurrPos(wnd));
+        curr_pos = win.currPos();
         cc = @intCast(wnd.*.text[curr_pos]&0x7f);
     }
     while(wnd.*.CurrCol != 0 and !isWhite(cc)) {
         Backward(win);
-        curr_pos = @intCast(df.CurrPos(wnd));
+        curr_pos = win.currPos();
         cc = @intCast(wnd.*.text[curr_pos]&0x7f);
     }
     if (isWhite(cc)) {

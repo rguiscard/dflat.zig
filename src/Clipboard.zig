@@ -100,7 +100,7 @@ pub fn PasteText(win:*Window, SaveTo:[]u8, len:c_uint) bool {
         if (win.gapbuf) |buf| {
             const plen = buf.len() + len;
             if (plen <= win.MaxTextLength) {
-                const pos = df.CurrPos(wnd);
+                const pos = win.currPos();
                 buf.moveCursor(pos);
                 if (buf.insertSlice(SaveTo)) { } else |_| { }
                 wnd.*.text = @constCast(buf.toString().ptr);

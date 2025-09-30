@@ -590,6 +590,12 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
     return root.BaseWndProc(k.TEXTBOX, win, msg, p1, p2);
 }
 
+//#define TextLine(wnd, sel) \
+//      (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
+pub fn TextLine(wnd:df.WINDOW, sel:c_uint) [*c]u8 {
+    return wnd.*.text + wnd.*.TextPointers[sel];
+}
+
 // ------- write a line of text to a textbox window -------
 pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
     const wnd = win.win;

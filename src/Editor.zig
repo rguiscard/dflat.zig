@@ -195,7 +195,7 @@ fn AdjustTab(win:*Window) void {
     const wnd = win.win;
     // ---- test if there is a tab beyond this character ---- 
     var col = wnd.*.CurrCol;
-    var curr_pos = df.CurrPos(wnd);
+    var curr_pos = win.currPos();
     var cc = wnd.*.text[curr_pos];
     while ((curr_pos < wnd.*.textlen) and (cc != '\n')) {
         if (cc == sTab) {
