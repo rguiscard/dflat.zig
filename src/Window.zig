@@ -45,7 +45,7 @@ isHelping:u32 = 0,                    // > 0 when help is being displayed
 // ----------------- text box fields ------------------
 gapbuf:?*GapBuf = null,       // gap buffer
 
-TextPointers:[]usize = &.{}, // -> list of line offsets
+TextPointers:[]c_uint = &.{}, // -> list of line offsets
 
 // ----------------- list box fields ------------------
 selection:isize = -1,      // current selection, -1 for none
@@ -933,7 +933,12 @@ pub fn prevWindow(self: *TopLevelFields) ?*TopLevelFields {
 pub fn currPos(self: *TopLevelFields) usize {
     const wnd = self.win;
     const col:c_uint = @intCast(wnd.*.CurrCol);
-    return @intCast(wnd.*.TextPointers[@intCast(wnd.*.CurrLine)]+col);
+    return self.TextPointers[@intCast(wnd.*.CurrLine)]+col;
+}
+
+// return position of beginning of line specified by sel
+pub fn textLine(self: *TopLevelFields, sel:usize) usize {
+    return self.TextPointers[sel];
 }
 
 // Accessories for c

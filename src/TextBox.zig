@@ -652,9 +652,8 @@ pub fn ClearTextPointers(win:*Window) void {
     const wnd = win.win;
     const allocator = root.global_allocator;
     var arraylist:std.ArrayList(c_uint) = undefined;
-    if (wnd.*.TextPointers) |pointers| {
-        const slice = pointers[0..@intCast(wnd.*.wlines)];    
-        arraylist = std.ArrayList(c_uint).fromOwnedSlice(slice);
+    if (win.TextPointers.len > 0) {
+        arraylist = std.ArrayList(c_uint).fromOwnedSlice(win.TextPointers);
         arraylist.clearRetainingCapacity();
     } else {
         if (std.ArrayList(c_uint).initCapacity(allocator, 1)) |list| {
@@ -663,8 +662,20 @@ pub fn ClearTextPointers(win:*Window) void {
             return;
         }
     }
+//    if (wnd.*.TextPointers) |pointers| {
+//        const slice = pointers[0..@intCast(wnd.*.wlines)];    
+//        arraylist = std.ArrayList(c_uint).fromOwnedSlice(slice);
+//        arraylist.clearRetainingCapacity();
+//    } else {
+//        if (std.ArrayList(c_uint).initCapacity(allocator, 1)) |list| {
+//            arraylist = list;
+//        } else |_| {
+//            return;
+//        }
+//    }
     if (arraylist.append(allocator, 0)) {} else |_| {} // first line
     if (arraylist.toOwnedSlice(allocator)) |pointers| {
+        win.TextPointers = pointers;
         wnd.*.TextPointers = pointers.ptr;
     } else |_| {}
     // set wnd.*.wlines to zero ?
@@ -679,8 +690,8 @@ pub fn BuildTextPointers(win:*Window) void {
     const wnd = win.win;
     const allocator = root.global_allocator;
     var arraylist:std.ArrayList(c_uint) = undefined;
-    if (wnd.*.TextPointers) |pointers| {
-        arraylist = std.ArrayList(c_uint).fromOwnedSlice(pointers[0..@intCast(wnd.*.wlines)]);
+    if (win.TextPointers.len > 0) {
+        arraylist = std.ArrayList(c_uint).fromOwnedSlice(win.TextPointers);
         arraylist.clearRetainingCapacity();
     } else {
         if (std.ArrayList(c_uint).initCapacity(allocator, 100)) |list| {
@@ -689,6 +700,17 @@ pub fn BuildTextPointers(win:*Window) void {
             return;
         }
     }
+
+//    if (wnd.*.TextPointers) |pointers| {
+//        arraylist = std.ArrayList(c_uint).fromOwnedSlice(pointers[0..@intCast(wnd.*.wlines)]);
+//        arraylist.clearRetainingCapacity();
+//    } else {
+//        if (std.ArrayList(c_uint).initCapacity(allocator, 100)) |list| {
+//            arraylist = list;
+//        } else |_| {
+//            return;
+//        }
+//    }
 
     // Need to consider gap. Not yet work.
 //    if (Window.get_zin(wnd)) |win| {
@@ -763,6 +785,7 @@ pub fn BuildTextPointers(win:*Window) void {
     }
 
     if (arraylist.toOwnedSlice(allocator)) |pointers| {
+        win.TextPointers = pointers;
         wnd.*.TextPointers = pointers.ptr;
     } else |_| {}
 
