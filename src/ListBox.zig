@@ -36,12 +36,18 @@ fn UpKey(win:*Window,p2:df.PARAM) void {
         } else {
             var newsel:isize = win.selection-1;
             if (wnd.*.wlines == win.ClientHeight()) {
-                  var last = df.TextLine(wnd, newsel);
-                  while(last[0] == df.LINE) {
+                  var last = win.textLine(@intCast(newsel));
+                  while(wnd.*.text[last] == df.LINE) {
                       // Not sure this is really work.
-                      newsel -= 1;
-                      last = df.TextLine(wnd, newsel);
+                      newsel -= 1; // check boundary ?
+                      last = win.textLine(@intCast(newsel));
                   }
+//                  var last = df.TextLine(wnd, newsel);
+//                  while(last[0] == df.LINE) {
+//                      // Not sure this is really work.
+//                      newsel -= 1;
+//                      last = df.TextLine(wnd, newsel);
+//                  }
 //                while (*TextLine(wnd, newsel) == LINE)
 //                    --newsel;
             }
@@ -62,12 +68,18 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
         } else {
             var newsel:usize = @intCast(win.selection+1);
             if (wnd.*.wlines == win.ClientHeight()) {
-                  var last = df.TextLine(wnd, newsel);
-                  while(last[0] == df.LINE) {
+                  var last = win.textLine(@intCast(newsel));
+                  while(wnd.*.text[last] == df.LINE) {
                       // Not sure this is really work.
-                      newsel += 1;
-                      last = df.TextLine(wnd, newsel);
+                      newsel += 1; // check boundary ?
+                      last = win.textLine(@intCast(newsel));
                   }
+//                  var last = df.TextLine(wnd, newsel);
+//                  while(last[0] == df.LINE) {
+//                      // Not sure this is really work.
+//                      newsel += 1;
+//                      last = df.TextLine(wnd, newsel);
+//                  }
 //                while (*TextLine(wnd, newsel) == LINE)
 //                    newsel++;
             }
@@ -132,13 +144,19 @@ fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
     var sel:isize = win.selection+1;
     while (sel < wnd.*.wlines) {
-        var cp = df.TextLine(wnd, sel);
-        if (cp == null)
+//        var cp = df.TextLine(wnd, sel);
+//        if (cp == null)
+//            break;
+//        if (win.isMultiLine())
+//            cp += 1;
+//
+//        const first = cp[0];
+        var pos = win.textLine(@intCast(sel));
+        if (pos >= wnd.*.textlen)
             break;
         if (win.isMultiLine())
-            cp += 1;
-
-        const first = cp[0];
+            pos += 1;
+        const first = wnd.*.text[pos];
         if ((first < 256) and (std.ascii.toLower(first) == p1)) {
             _ = win.sendMessage(df.LB_SELECTION, @intCast(sel),
                 if (win.isMultiLine()) p2 else df.FALSE);

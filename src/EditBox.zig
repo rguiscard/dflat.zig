@@ -281,8 +281,13 @@ fn ExtendBlock(win:*Window, xx:c_int, yy:c_int) void {
     var y = yy;
     var ptop = @min(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
     var pbot = @max(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
-    const lp = df.TextLine(wnd, wnd.*.wtop+y);
-    const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
+//    const lp = df.TextLine(wnd, wnd.*.wtop+y);
+//    const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
+    const lp = win.textLine(@intCast(wnd.*.wtop+y));
+    var len:c_int = 0;
+    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], lp, '\n')) |pos| {
+        len = @intCast(pos-lp);
+    }
     x = @max(0, @min(x, len));
     y = @max(0, y);
     wnd.*.BlkEndCol = @min(len, x+wnd.*.wleft);
@@ -357,13 +362,17 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         if (MouseY > wnd.*.wlines-1)
             return true;
         const sel:c_uint = @intCast(MouseY+wnd.*.wtop);
-        const lp = df.TextLine(wnd, sel);
-        const pos = df.strchr(lp, '\n');
+//        const lp = df.TextLine(wnd, sel);
+//        const pos = df.strchr(lp, '\n');
+//        var len:c_int = 0;
+//        if (pos != null) {
+//            len = @intCast(df.strchr(lp, '\n') - lp);
+//        }
+        const lp = win.textLine(sel);
         var len:c_int = 0;
-        if (pos != null) {
-            len = @intCast(df.strchr(lp, '\n') - lp);
+        if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], lp, '\n')) |pos| {
+            len = @intCast(pos-lp);
         }
-
         MouseX = @min(MouseX, len);
         if (MouseX < wnd.*.wleft) {
             MouseX = 0;

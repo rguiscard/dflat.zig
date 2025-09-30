@@ -32,8 +32,10 @@ pub fn CopyToClipboard(win:*Window) void {
         const endCol:usize = @intCast(wnd.*.BlkEndCol);
         const begLine:usize = @intCast(wnd.*.BlkBegLine);
         const endLine:usize = @intCast(wnd.*.BlkEndLine);
-        const bbl = df.TextLine(wnd,begLine)+begCol;
-        const bel = df.TextLine(wnd,endLine)+endCol;
+//        const bbl = df.TextLine(wnd,begLine)+begCol;
+//        const bel = df.TextLine(wnd,endLine)+endCol;
+        const bbl = win.textLine(begLine)+begCol;
+        const bel = win.textLine(endLine)+endCol;
         ClipboardLength = bel - bbl;
 
         var list:std.ArrayList(u8) = undefined;
@@ -52,7 +54,8 @@ pub fn CopyToClipboard(win:*Window) void {
         } else |_| {
         }
    
-        @memcpy(list.items, bbl[0..ClipboardLength]);
+//        @memcpy(list.items, bbl[0..ClipboardLength]);
+        @memcpy(list.items, wnd.*.text[bbl..bel]);
 
         if (list.toOwnedSlice(root.global_allocator)) |text| {
             Clipboard = text;
