@@ -1,10 +1,11 @@
 /* ------------- editbox.c ------------ */
 #include "dflat.h"
 
-BOOL wndInsertMode(WINDOW);
-int cfgTabs();
+//BOOL wndInsertMode(WINDOW);
+//int cfgTabs();
 
 /* ------------ Tab key ------------ */
+#if 0
 void TabKey(WINDOW wnd, PARAM p2) // private
 {
     if (isMultiLine(wnd))    {
@@ -23,7 +24,9 @@ void TabKey(WINDOW wnd, PARAM p2) // private
 	else
 	    PostMessage(GetParent(wnd), KEYBOARD, '\t', p2);
 }
+#endif
 /* ------------ Shift+Tab key ------------ */
+#if 0
 void ShiftTabKey(WINDOW wnd, PARAM p2) // private
 {
     if (isMultiLine(wnd))    {
@@ -37,6 +40,7 @@ void ShiftTabKey(WINDOW wnd, PARAM p2) // private
 	else
 	    PostMessage(GetParent(wnd), KEYBOARD, SHIFT_HT, p2);
 }
+#endif
 /* --------- All displayable typed keys ------------- */
 #if 0
 void KeyTyped(WINDOW wnd, int c) // private

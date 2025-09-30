@@ -10,6 +10,7 @@ const textbox = @import("TextBox.zig");
 const search = @import("Search.zig");
 const clipboard = @import("Clipboard.zig");
 const normal = @import("Normal.zig");
+const cfg = @import("Config.zig");
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -585,6 +586,59 @@ fn DelKey(win:*Window) void {
     win.TextChanged = true;
 }
 
+// ------------ Tab key ------------
+fn TabKey(win:*Window, p2:df.PARAM) void {
+    const wnd = win.win;
+    const tabs:c_int = @intCast(cfg.config.Tabs);
+    if (win.isMultiLine()) {
+        const insmd = win.InsertMode;
+        const pos = df.CurrPos(wnd);
+        for (pos+1..wnd.*.MaxTextLength) |idx| {
+            if (insmd == false and wnd.*.text[idx] == 0)
+                break;
+            if (wnd.*.textlen == wnd.*.MaxTextLength)
+                break;
+            _ = win.sendMessage(df.KEYBOARD, if (insmd) ' ' else df.FWD, 0);
+            if (@mod(wnd.*.CurrCol, tabs) == 0)
+                break;
+        }
+//        do  {
+//            char *cc = CurrChar+1;
+//            if (insmd == false and *cc == '\0')
+//                break;
+//            if (win.textlen == wnd.*.MaxTextLength)
+//                break;
+//            _ = win.sendMessage(df.KEYBOARD, if (insmd) ' ' else df.FWD, 0);
+//        } while (wnd.*.CurrCol % cfg.config.Tabs);
+    } else {
+        const pwnd = if (win.parent) |pwin| pwin.win else null;
+        q.PostMessage(pwnd, df.KEYBOARD, '\t', p2);
+    }
+}
+
+// ------------ Shift+Tab key ------------
+// not tested
+fn ShiftTabKey(win:*Window, p2:df.PARAM) void {
+    const wnd = win.win;
+    const tabs:c_int = @intCast(cfg.config.Tabs);
+    if (win.isMultiLine()) {
+        while(true) {
+            const pos = df.CurrPos(wnd);
+            if (pos == 0)
+                break;
+            if (@mod(wnd.*.CurrCol, tabs) == 0)
+                break;
+        }
+//        do  {
+//            if (CurrChar == GetText(wnd))
+//                break;
+//            SendMessage(wnd,KEYBOARD,BS,0);
+//        } while (wnd->CurrCol % cfgTabs());
+    } else {
+        const pwnd = if (win.parent) |pwin| pwin.win else null;
+        q.PostMessage(pwnd, df.KEYBOARD, df.SHIFT_HT, p2);
+    }
+}
 
 // ------------ screen changing key strokes -------------
 fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
@@ -600,10 +654,10 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
             DelKey(win);
         },
         df.SHIFT_HT => {
-            df.ShiftTabKey(wnd, p2);
+            ShiftTabKey(win, p2);
         },
         '\t' => {
-            df.TabKey(wnd, p2);
+            TabKey(win, p2);
         },
         '\r' => {
             if (win.isMultiLine() == false)    {

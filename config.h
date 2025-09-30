@@ -12,37 +12,4 @@ enum colortypes {
 
 enum grounds { FG, BG };
 
-// FIXME. This should derive from CLASS directly
-//#define CLASSCOUNT 23
-
-/* ----------- configuration parameters ----------- */
-#if 0
-typedef struct config {
-    char version[sizeof VERSION];
-    char mono;         /* 0=color, 1=mono, 2=reverse mono    */
-    BOOL InsertMode;   /* Editor insert mode                 */
-    int Tabs;          /* Editor tab stops                   */
-    BOOL WordWrap;     /* True to word wrap editor           */
-    BOOL Border;       /* True for application window border */
-    BOOL Title;        /* True for application window title  */
-	BOOL StatusBar;    /* True for appl'n window status bar  */
-    BOOL Texture;      /* True for textured appl window      */
-    int ScreenLines;   /* Number of screen lines (25/43/50)  */
-    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
-} CONFIG;
-#endif
-
-#if 0
-//extern CONFIG cfg;
-extern unsigned char color[CLASSCOUNT] [4] [2];
-extern unsigned char bw[CLASSCOUNT] [4] [2];
-extern unsigned char reverse[CLASSCOUNT] [4] [2];
-#endif
-
-#if 0
-BOOL LoadConfig(void);
-void SaveConfig(void);
-FILE *OpenConfig(char *);
-#endif
-
 #endif

@@ -78,6 +78,6 @@ pub fn Save() void {
 }
 
 // Accessories, for porting
-pub export fn cfgTabs() c_int {
-    return @intCast(config.Tabs);
-}
+//pub export fn cfgTabs() c_int {
+//    return @intCast(config.Tabs);
+//}

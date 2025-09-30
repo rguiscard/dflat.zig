@@ -970,12 +970,12 @@ pub export fn inFocusWnd() df.WINDOW {
     return null;
 }
 
-pub export fn wndInsertMode(wnd:df.WINDOW) df.BOOL {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return if (win.InsertMode) df.TRUE else df.FALSE;
-    }
-    return df.FALSE;
-}
+//pub export fn wndInsertMode(wnd:df.WINDOW) df.BOOL {
+//    if (TopLevelFields.get_zin(wnd)) |win| {
+//        return if (win.InsertMode) df.TRUE else df.FALSE;
+//    }
+//    return df.FALSE;
+//}
 
 //pub export fn hasStatusBar(wnd:df.WINDOW) df.BOOL {
 //    if (TopLevelFields.get_zin(wnd)) |win| {
