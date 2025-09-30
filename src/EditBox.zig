@@ -39,9 +39,10 @@ fn CreateWindowMsg(win:*Window) bool {
     wnd.*.MaxTextLength = df.MAXTEXTLEN+1;
     wnd.*.textlen = EditBufLen(win);
 //    win.textlen = EditBufLen(win);
-    wnd.*.InsertMode = df.TRUE;
+//    wnd.*.InsertMode = df.TRUE;
+    win.InsertMode = true;
     if (win.isMultiLine())
-        wnd.*.WordWrapMode = df.TRUE;
+        win.WordWrapMode = true;
     _ = win.sendMessage(df.CLEARTEXT, 0, 0);
     return rtn;
 }
@@ -171,7 +172,7 @@ fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if (win == Window.inFocus) {
         if (df.CharInView(wnd, @intCast(p1), @intCast(p2))>0)
             _ = q.SendMessage(null, df.SHOW_CURSOR,
-                      if ((wnd.*.InsertMode>0) and (TextMarking == false)) df.TRUE else df.FALSE,
+                      if (win.InsertMode and (TextMarking == false)) df.TRUE else df.FALSE,
                       0);
     } else {
         _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
@@ -521,7 +522,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
                 const lchr:u8 = @intCast(df.TextLine(wnd, wnd.*.CurrLine)[0]);
                 while (cp != ' ' and cp != lchr)
                     cp -= 1;
-                if (cp == lchr or (wnd.*.WordWrapMode == df.FALSE)) {
+                if (cp == lchr or (win.WordWrapMode == false)) {
                     _ = win.sendMessage(df.HORIZSCROLL, df.TRUE, 0);
                 } else {
 //                    int dif = 0;

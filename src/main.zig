@@ -19,8 +19,8 @@ pub fn main() !void {
 
     df.Argv = @ptrCast(argv);
 
-    if (df.LoadConfig() == df.FALSE) {
-        df.cfg.ScreenLines = df.SCREENHEIGHT;
+    if (mp.cfg.Load() == false) {
+        mp.cfg.config.ScreenLines = @intCast(df.SCREENHEIGHT);
     }
 
     var win = mp.Window.create(mp.CLASS.APPLICATION,
@@ -52,9 +52,9 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
     switch(msg) {
         df.CREATE_WINDOW => {
             const rtn = mp.zDefaultWndProc(win, msg, p1, p2);
-            if (df.cfg.InsertMode == df.TRUE)
+            if (mp.cfg.config.InsertMode == true)
                 mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT);
-            if (df.cfg.WordWrap == df.TRUE)
+            if (mp.cfg.config.WordWrap == true)
                 mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP);
             FixTabMenu();
             return rtn;
@@ -100,30 +100,30 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                         return false;
                 },
                 .ID_WRAP => {
-                    df.cfg.WordWrap = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP));
+                    mp.cfg.config.WordWrap = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP);
                     return true;
                 },
                 .ID_INSERT => {
-                    df.cfg.InsertMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT));
+                    mp.cfg.config.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT);
                     return true;
                 },
                 .ID_TAB2 => {
-                    df.cfg.Tabs = 2;
+                    mp.cfg.config.Tabs = 2;
                     FixTabMenu();
                     return true;
                 },
                 .ID_TAB4 => {
-                    df.cfg.Tabs = 4;
+                    mp.cfg.config.Tabs = 4;
                     FixTabMenu();
                     return true;
                 },
                 .ID_TAB6 => {
-                    df.cfg.Tabs = 6;
+                    mp.cfg.config.Tabs = 6;
                     FixTabMenu();
                     return true;
                 },
                 .ID_TAB8 => {
-                    df.cfg.Tabs = 8;
+                    mp.cfg.config.Tabs = 8;
                     FixTabMenu();
                     return true;
                 },
@@ -348,8 +348,8 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
     switch (msg) {
         df.SETFOCUS => {
             if (p1 > 0) {
-                wnd.*.InsertMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT));
-                wnd.*.WordWrapMode = @intCast(mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP));
+                win.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT);
+                win.WordWrapMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP);
             }
             rtn = mp.zDefaultWndProc(win, msg, p1, p2);
             if (p1 == 0) {
@@ -374,12 +374,12 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 },
                 .ID_WRAP => {
                     _ = win.getParent().sendCommandMessage(c.ID_WRAP, 0);
-                    wnd.*.WordWrapMode = df.cfg.WordWrap;
+                    win.WordWrapMode = mp.cfg.config.WordWrap;
                 },
                 .ID_INSERT => {
                     _ = win.getParent().sendCommandMessage(c.ID_INSERT, 0);
-                    wnd.*.InsertMode = df.cfg.InsertMode;
-                    _ = df.SendMessage(null, df.SHOW_CURSOR, wnd.*.InsertMode, 0);
+                    win.InsertMode = mp.cfg.config.InsertMode;
+                    _ = df.SendMessage(null, df.SHOW_CURSOR, if (win.InsertMode) df.TRUE else df.FALSE, 0);
                 },
                 else => {
                 }

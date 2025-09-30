@@ -8,6 +8,7 @@ const editbox = @import("EditBox.zig");
 const textbox = @import("TextBox.zig");
 const normal = @import("Normal.zig");
 const GapBuffer = @import("GapBuffer.zig");
+const cfg = @import("Config.zig");
 
 const pTab:u8 = '\t' + 0x80;
 const sTab:u8 = 0x0C + 0x80; // '\f'
@@ -18,7 +19,7 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
     const src:[*c]u8 = @ptrFromInt(pp);
     var idx:usize = 0; // source
     var x:usize = 0;   // per line
-    const tabs:usize = @intCast(df.cfg.Tabs);
+    const tabs:usize = cfg.config.Tabs;
 
     var buf:*GapBuffer = undefined;
     if (GapBuffer.init(root.global_allocator, 10)) |b| {
@@ -125,7 +126,8 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         '\t' => {
             TurnOffDisplay(win);
             _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, @intCast(sTab), p2);
-            while (@rem(wnd.*.CurrCol, df.cfg.Tabs) != 0) {
+            const tabs:c_int = @intCast(cfg.config.Tabs);
+            while (@rem(wnd.*.CurrCol, tabs) != 0) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, @intCast(pTab), p2);
             }
             TurnOnDisplay(win);
@@ -197,7 +199,8 @@ fn AdjustTab(win:*Window) void {
     var cc = wnd.*.text[curr_pos];
     while ((curr_pos < wnd.*.textlen) and (cc != '\n')) {
         if (cc == sTab) {
-            var exp = (df.cfg.Tabs-1) - @mod(col, df.cfg.Tabs);
+            const tabs:c_int = @intCast(cfg.config.Tabs);
+            var exp = (tabs-1) - @mod(col, tabs);
             col += 1;
             curr_pos += 1;
             cc = wnd.*.text[curr_pos];

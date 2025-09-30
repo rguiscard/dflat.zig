@@ -17,6 +17,7 @@ const normal = @import("Normal.zig");
 const menus = @import("Menus.zig");
 const popdown = @import("PopDown.zig");
 const Colors = @import("Colors.zig");
+const cfg = @import("Config.zig");
 
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
@@ -41,27 +42,27 @@ fn CreateWindowMsg(win: *Window) bool {
     ScreenHeight = df.SCREENHEIGHT;
 
     // INCLUDE_WINDOWOPTIONS
-    if (df.cfg.Border > 0) {
+    if (cfg.config.Border) {
         DialogBox.SetCheckBox(&Dialogs.Display, c.ID_BORDER);
     }
-    if (df.cfg.Title > 0) {
+    if (cfg.config.Title) {
         DialogBox.SetCheckBox(&Dialogs.Display, c.ID_TITLE);
     }
-    if (df.cfg.StatusBar > 0) {
+    if (cfg.config.StatusBar) {
         DialogBox.SetCheckBox(&Dialogs.Display, c.ID_STATUSBAR);
     }
-    if (df.cfg.Texture > 0) {
+    if (cfg.config.Texture) {
         DialogBox.SetCheckBox(&Dialogs.Display, c.ID_TEXTURE);
     }
-    if (df.cfg.mono == 1) {
+    if (cfg.config.mono == 1) {
         radio.PushRadioButton(&Dialogs.Display, c.ID_MONO);
-    } else if (df.cfg.mono == 2) {
+    } else if (cfg.config.mono == 2) {
         radio.PushRadioButton(&Dialogs.Display, c.ID_REVERSE);
     } else {
         radio.PushRadioButton(&Dialogs.Display, c.ID_COLOR);
     }
-    if (df.SCREENHEIGHT != df.cfg.ScreenLines) {
-        SetScreenHeight(df.cfg.ScreenLines);
+    if (df.SCREENHEIGHT != cfg.config.ScreenLines) {
+        SetScreenHeight(@intCast(cfg.config.ScreenLines));
         if ((win.WindowHeight() == ScreenHeight) or
                 (df.SCREENHEIGHT-1 < win.GetBottom()))    {
             win.SetWindowHeight(df.SCREENHEIGHT);
@@ -234,7 +235,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             MoreWindows(win);
         },
         .ID_SAVEOPTIONS => {
-            df.SaveConfig();
+            cfg.Save();
         },
         .ID_SYSRESTORE,
         .ID_SYSMINIMIZE,
@@ -302,7 +303,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         },
         df.PAINT => {
             if (win.isVisible())    {
-                const cl:u8 = if (df.cfg.Texture > 0) df.APPLCHAR else ' ';
+                const cl:u8 = if (cfg.config.Texture) df.APPLCHAR else ' ';
                 const pptr:usize = @intCast(p1);
                 win.ClearWindow(@ptrFromInt(pptr), cl);
             }
@@ -538,22 +539,22 @@ fn DoWindowColors(win:*Window) void {
 // ----- set up colors for the application window ------
 fn SelectColors(win: *Window) void {
     if (radio.RadioButtonSetting(&Dialogs.Display, c.ID_MONO)) {
-        df.cfg.mono = 1;   // mono
+        cfg.config.mono = 1;   // mono
     } else if (radio.RadioButtonSetting(&Dialogs.Display, c.ID_REVERSE)) {
-        df.cfg.mono = 2;   // mono reverse
+        cfg.config.mono = 2;   // mono reverse
     } else {
-        df.cfg.mono = 0;   // color
+        cfg.config.mono = 0;   // color
     }
 
-    if (df.cfg.mono == 1) {
-//        @memcpy(&df.cfg.clr, &df.bw);
-        @memcpy(&df.cfg.clr, &Colors.bw);
-    } else if (df.cfg.mono == 2) {
-//        @memcpy(&df.cfg.clr, &df.reverse);
-        @memcpy(&df.cfg.clr, &Colors.reverse);
+    if (cfg.config.mono == 1) {
+//        @memcpy(&cfg.config.clr, &Colors.bw);
+        cfg.config.clr = Colors.bw;
+    } else if (cfg.config.mono == 2) {
+//        @memcpy(&cfg.config.clr, &Colors.reverse);
+        cfg.config.clr = Colors.reverse;
     } else {
-//        @memcpy(&df.cfg.clr, &df.color);
-        @memcpy(&df.cfg.clr, &Colors.color);
+//        @memcpy(&cfg.config.clr, &Colors.color);
+        cfg.config.clr = Colors.color;
     }
     DoWindowColors(win);
 }
@@ -561,9 +562,9 @@ fn SelectColors(win: *Window) void {
 // ---- select screen lines ----
 fn SelectLines(win:*Window) void {
     const wnd = win.win;
-    df.cfg.ScreenLines = df.SCREENHEIGHT;
-    if (df.SCREENHEIGHT != df.cfg.ScreenLines) {
-        SetScreenHeight(df.cfg.ScreenLines);
+    cfg.config.ScreenLines = @intCast(df.SCREENHEIGHT);
+    if (df.SCREENHEIGHT != cfg.config.ScreenLines) {
+        SetScreenHeight(@intCast(cfg.config.ScreenLines));
         // ---- re-maximize ----
         if (wnd.*.condition == df.ISMAXIMIZED) {
             _ = win.sendMessage(df.SIZE, @intCast(win.GetRight()), @intCast(df.SCREENHEIGHT-1));
@@ -601,13 +602,13 @@ fn SetScreenHeight(height: c_int) void {
 
 // ----- select the screen texture -----
 fn SelectTexture() void {
-    df.cfg.Texture = if (checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_TEXTURE)) df.TRUE else df.FALSE;
+    cfg.config.Texture = checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_TEXTURE);
 }
 
 // -- select whether the application screen has a border --
 fn SelectBorder(win: *Window) void {
-    df.cfg.Border = if (checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_BORDER)) df.TRUE else df.FALSE;
-    if (df.cfg.Border > 0) {
+    cfg.config.Border = checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_BORDER);
+    if (cfg.config.Border) {
         win.AddAttribute(df.HASBORDER);
     } else {
         win.ClearAttribute(df.HASBORDER);
@@ -616,8 +617,8 @@ fn SelectBorder(win: *Window) void {
 
 // select whether the application screen has a status bar
 fn SelectStatusBar(win: *Window) void {
-    df.cfg.StatusBar = if (checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_STATUSBAR)) df.TRUE else df.FALSE;
-    if (df.cfg.StatusBar > 0) {
+    cfg.config.StatusBar = checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_STATUSBAR);
+    if (cfg.config.StatusBar) {
         win.AddAttribute(df.HASSTATUSBAR);
     } else {
         win.ClearAttribute(df.HASSTATUSBAR);
@@ -626,8 +627,8 @@ fn SelectStatusBar(win: *Window) void {
 
 // select whether the application screen has a title bar
 fn SelectTitle(win: *Window) void {
-    df.cfg.Title = if (checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_TITLE)) df.TRUE else df.FALSE;
-    if (df.cfg.Title > 0) {
+    cfg.config.Title = checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_TITLE);
+    if (cfg.config.Title) {
         win.AddAttribute(df.HASTITLEBAR);
     } else {
         win.ClearAttribute(df.HASTITLEBAR);
@@ -702,8 +703,8 @@ fn ShellDOS(win:*Window) void {
     _ = df.runshell();
     df.tty_enable_unikey();
 
-    if (df.SCREENHEIGHT != df.cfg.ScreenLines)
-        SetScreenHeight(df.cfg.ScreenLines);
+    if (df.SCREENHEIGHT != cfg.config.ScreenLines)
+        SetScreenHeight(@intCast(cfg.config.ScreenLines));
     SwitchCursor();
     _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
     if (oldFocus) |focus| {

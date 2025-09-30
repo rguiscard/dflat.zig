@@ -64,14 +64,14 @@ pub fn isActive(mn:*menus.MBAR, cmd:Command) c_int {
     return df.FALSE;
 }
 
-pub fn GetCommandToggle(mn:*menus.MBAR, cmd:Command) c_int {
+pub fn GetCommandToggle(mn:*menus.MBAR, cmd:Command) bool {
     const pd = FindCmd(mn, cmd);
     if (pd) |pulldown| {
         if (pulldown.*.Attrib.CHECKED) {
-            return df.TRUE;
+            return true;
         }
     }
-    return df.FALSE;
+    return false;
 }
 
 pub fn SetCommandToggle(mn:*menus.MBAR, cmd:Command) void {

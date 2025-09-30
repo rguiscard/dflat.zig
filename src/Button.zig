@@ -9,11 +9,12 @@ const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 const popdown = @import("PopDown.zig");
 const textbox = @import("TextBox.zig");
+const cfg = @import("Config.zig");
 
 fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
     const wnd = win.win;
     if (win.isVisible()) {
-        if (win.TestAttribute(df.SHADOW) and (df.cfg.mono == 0)) {
+        if (win.TestAttribute(df.SHADOW) and (cfg.config.mono == 0)) {
             // -------- draw the button's shadow -------
             df.background = df.WndBackground(win.getParent().win);
             df.foreground = r.BLACK;
@@ -47,7 +48,7 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
 
 fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     const wnd = win.win;
-    if (df.cfg.mono == 0) {
+    if (cfg.config.mono == 0) {
         // --------- draw a pushed button --------
         df.background = df.WndBackground(win.getParent().win);
         df.foreground = df.WndBackground(wnd);

@@ -137,8 +137,8 @@ typedef struct window {
 	BOOL protect;	  /* TRUE to display '*'                */
     unsigned char *DeletedText; /* for undo                 */
     unsigned DeletedLength; /* Length of deleted field      */
-	BOOL InsertMode;   /* TRUE or FALSE for text insert     */
-	BOOL WordWrapMode; /* TRUE or FALSE for word wrap       */
+//    BOOL InsertMode;   /* TRUE or FALSE for text insert     */
+//    BOOL WordWrapMode; /* TRUE or FALSE for word wrap       */
 	unsigned int MaxTextLength; /* maximum text length      */
     /* ---------------- dialog box fields ----------------- */
 //    int ReturnCode;        /* return code from a dialog box */

@@ -1,11 +1,15 @@
 /* ------------- editbox.c ------------ */
 #include "dflat.h"
 
+BOOL wndInsertMode(WINDOW);
+int cfgTabs();
+
 /* ------------ Tab key ------------ */
 void TabKey(WINDOW wnd, PARAM p2) // private
 {
     if (isMultiLine(wnd))    {
-        int insmd = wnd->InsertMode;
+//        int insmd = wnd->InsertMode;
+        int insmd = wndInsertMode(wnd);
         do  {
             char *cc = CurrChar+1;
             if (!insmd && *cc == '\0')
@@ -13,7 +17,8 @@ void TabKey(WINDOW wnd, PARAM p2) // private
             if (wnd->textlen == wnd->MaxTextLength)
                 break;
             SendMessage(wnd,KEYBOARD,insmd ? ' ' : FWD,0);
-        } while (wnd->CurrCol % cfg.Tabs);
+        } while (wnd->CurrCol % cfgTabs());
+//        } while (wnd->CurrCol % cfg.Tabs);
     }
 	else
 	    PostMessage(GetParent(wnd), KEYBOARD, '\t', p2);
@@ -26,7 +31,8 @@ void ShiftTabKey(WINDOW wnd, PARAM p2) // private
             if (CurrChar == GetText(wnd))
                 break;
             SendMessage(wnd,KEYBOARD,BS,0);
-        } while (wnd->CurrCol % cfg.Tabs);
+        } while (wnd->CurrCol % cfgTabs());
+//        } while (wnd->CurrCol % cfg.Tabs);
     }
 	else
 	    PostMessage(GetParent(wnd), KEYBOARD, SHIFT_HT, p2);

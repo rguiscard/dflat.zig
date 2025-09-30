@@ -14,6 +14,7 @@ const Dialogs = @import("Dialogs.zig");
 const app = @import("Application.zig");
 const menus = @import("Menus.zig");
 const GapBuf = @import("GapBuffer.zig");
+const cfg = @import("Config.zig");
 
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
@@ -54,6 +55,8 @@ SelectCount:usize = 0,     // count of selected items
 TextChanged:bool = false,    // TRUE if text has changed
 DeletedText:?[]u8 = null,    // for undo
 DeletedLength:usize = 0,     // Length of deleted field
+InsertMode:bool = false,     // TRUE or FALSE for text insert
+WordWrapMode:bool = false,   // TRUE or FALSE for word wrap
 
 // ---------------- dialog box fields ----------------- 
 ReturnCode:c = c.ID_NULL,       // return code from a dialog box
@@ -342,7 +345,7 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
         }
         rc = self.AdjustRectangle(rc);
         if (self.sendMessage(df.TITLE, @intCast(@intFromPtr(rcc)), 0)) {
-            const title_color = df.cfg.clr[@intCast(@intFromEnum(k.TITLEBAR))];
+            const title_color = cfg.config.clr[@intCast(@intFromEnum(k.TITLEBAR))];
             if (self == inFocus) {
                 df.foreground = title_color [r.HILITE_COLOR] [r.FG];
                 df.background = title_color [r.HILITE_COLOR] [r.BG];
@@ -404,7 +407,7 @@ fn shadow_char(wnd:df.WINDOW, y:c_int) void {
         if (win.TestAttribute(df.SHADOW) == false or
             wnd.*.condition == df.ISMINIMIZED or
             wnd.*.condition == df.ISMAXIMIZED or
-            df.cfg.mono > 0) {
+            cfg.config.mono > 0) {
             // No shadow
             return;
         }
@@ -426,7 +429,7 @@ fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
         if (win.TestAttribute(df.SHADOW) == false or
             wnd.*.condition == df.ISMINIMIZED or
             wnd.*.condition == df.ISMAXIMIZED or
-            df.cfg.mono > 0) {
+            cfg.config.mono > 0) {
             // No shadow
             return;
         }
@@ -733,7 +736,7 @@ pub fn InitWindowColors(win:*TopLevelFields) void {
     var cls = win.Class;
     var icls:usize = @intCast(@intFromEnum(cls));
     // window classes without assigned colors inherit parent's colors
-    if (df.cfg.clr[icls][0][0] == 0xff) {
+    if (cfg.config.clr[icls][0][0] == 0xff) {
         if (win.parent) |pw| {
             cls = pw.Class;
         }
@@ -742,7 +745,7 @@ pub fn InitWindowColors(win:*TopLevelFields) void {
     // ---------- set the colors ----------
     for (0..2) |fbg| {
         for (0..4) |col| {
-            win.win.*.WindowColors[col][fbg] = df.cfg.clr[icls][col][fbg];
+            win.win.*.WindowColors[col][fbg] = cfg.config.clr[icls][col][fbg];
         }
     }
 }
@@ -965,6 +968,13 @@ pub export fn inFocusWnd() df.WINDOW {
         return focus.win;
     }
     return null;
+}
+
+pub export fn wndInsertMode(wnd:df.WINDOW) df.BOOL {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return if (win.InsertMode) df.TRUE else df.FALSE;
+    }
+    return df.FALSE;
 }
 
 //pub export fn hasStatusBar(wnd:df.WINDOW) df.BOOL {

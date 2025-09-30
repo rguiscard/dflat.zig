@@ -6,6 +6,7 @@ char DFlatApplication[] = "memopad";
 char **Argv;
 
 /* ------ default configuration values ------- */
+#if 0
 CONFIG cfg = {
     VERSION,
     0,               /* Color                       */
@@ -18,6 +19,7 @@ CONFIG cfg = {
     TRUE,            /* Textured application window */
     25,              /* Number of screen lines      */
 };
+#endif
 
 void BuildFileName(char *path, const char *fn, const char *ext)
 {
@@ -33,6 +35,7 @@ void BuildFileName(char *path, const char *fn, const char *ext)
 	strcat(cp, ext);
 }
 
+#if 0
 FILE *OpenConfig(char *mode)
 {
 	char path[MAXPATH];
@@ -75,3 +78,4 @@ void SaveConfig(void)
         fclose(fp);
     }
 }
+#endif

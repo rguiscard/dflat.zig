@@ -7,6 +7,7 @@ const k = @import("Classes.zig").CLASS;
 const rect = @import("Rect.zig");
 const helpbox = @import("HelpBox.zig");
 const menus = @import("Menus.zig");
+const cfg = @import("Config.zig");
 
 var py:c_int = -1;
 pub var CurrentMenuSelection:c_int = 0;
@@ -452,7 +453,7 @@ pub fn CopyCommand(dest:[]u8, src:[]const u8, skipcolor:bool, bg:c_int) usize {
         }
         if (change and !skipcolor) {
             dest[idx]   = df.CHANGECOLOR;
-            dest[idx+1] = df.cfg.clr[pmi] [df.HILITE_COLOR] [df.BG] | 0x80;
+            dest[idx+1] = cfg.config.clr[pmi] [df.HILITE_COLOR] [df.BG] | 0x80;
             dest[idx+2] = @intCast(bg | 0x80);
             dest[idx+3] = chr;
             dest[idx+4] = df.RESETCOLOR;

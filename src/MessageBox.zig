@@ -8,6 +8,7 @@ const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const WndProc = @import("WndProc.zig");
+const cfg = @import("Config.zig");
 
 const sOK      = "   Ok   ";
 const sYES     = "   Yes  ";
@@ -91,7 +92,7 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
     const wnd = win.*.win;
 
     _ = win.sendTextMessage(df.SETTEXT, @constCast(msg), 0);
-    if (df.cfg.mono == 0) {
+    if (cfg.config.mono == 0) {
         wnd.*.WindowColors[df.STD_COLOR][df.FG] = r.WHITE;
         wnd.*.WindowColors[df.STD_COLOR][df.BG] = r.GREEN;
         wnd.*.WindowColors[df.FRAME_COLOR][df.FG] = r.WHITE;
