@@ -528,7 +528,9 @@ fn KeyTyped(win:*Window, cc:c_int) void {
                     _ = win.sendMessage(df.HORIZSCROLL, df.TRUE, 0);
             } else {
                 var cp = currchar;
-                const lchr:u8 = @intCast(df.TextLine(wnd, wnd.*.CurrLine)[0]);
+//                const lchr:u8 = @intCast(df.TextLine(wnd, wnd.*.CurrLine)[0]);
+                const pos = win.textLine(@intCast(wnd.*.CurrLine));
+                const lchr = wnd.*.text[pos];
                 while (cp != ' ' and cp != lchr)
                     cp -= 1;
                 if (cp == lchr or (win.WordWrapMode == false)) {
@@ -748,14 +750,19 @@ fn DeleteTextCmd(win:*Window) void {
         const beg_col:c_uint = @intCast(wnd.*.BlkBegCol);
         const end_col:c_uint = @intCast(wnd.*.BlkEndCol);
 
-        const bbl=df.TextLine(wnd,beg_sel)+beg_col;
-        const bel=df.TextLine(wnd,end_sel)+end_col;
-        const len:c_int = @intCast(bel - bbl);
-        SaveDeletedText(win, bbl, @intCast(len));
+//        const bbl=df.TextLine(wnd,beg_sel)+beg_col;
+//        const bel=df.TextLine(wnd,end_sel)+end_col;
+//        const len:c_int = @intCast(bel - bbl);
+//        SaveDeletedText(win, bbl, @intCast(len));
+        // FIMXE: seems off a few characters
+        const bbl=win.textLine(beg_sel)+beg_col;
+        const bel=win.textLine(end_sel)+end_col;
+        SaveDeletedText(win, bbl, bel);
         win.TextChanged = true;
-        _ = df.memmove(bbl, bel, df.strlen(bel));
-        const bcol:usize = @intCast(wnd.*.BlkBegCol); // could we reuse beg_col?
-        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl-bcol);
+        _ = df.memmove(&wnd.*.text[bbl], &wnd.*.text[bel], wnd.*.textlen-bel);
+//        const bcol:usize = @intCast(wnd.*.BlkBegCol); // could we reuse beg_col?
+//        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl-bcol);
+        wnd.*.CurrLine = wnd.*.BlkBegLine;
         wnd.*.CurrCol = wnd.*.BlkBegCol;
         wnd.*.WndRow = wnd.*.BlkBegLine - wnd.*.wtop;
         if (wnd.*.WndRow < 0) {
@@ -777,11 +784,16 @@ fn ClearCmd(win:*Window) void {
         const beg_col:c_uint = @intCast(wnd.*.BlkBegCol);
         const end_col:c_uint = @intCast(wnd.*.BlkEndCol);
 
-        const bbl=df.TextLine(wnd,beg_sel)+beg_col;
-        const bel=df.TextLine(wnd,end_sel)+end_col;
-        const len:c_int = @intCast(bel - bbl);
-        SaveDeletedText(win, bbl, @intCast(len));
-        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl);
+//        const bbl=df.TextLine(wnd,beg_sel)+beg_col;
+//        const bel=df.TextLine(wnd,end_sel)+end_col;
+//        const len:c_int = @intCast(bel - bbl);
+//        SaveDeletedText(win, bbl, @intCast(len));
+        // FIMXE: seems off a few characters
+        const bbl=win.textLine(beg_sel)+beg_col;
+        const bel=win.textLine(end_sel)+end_col;
+        SaveDeletedText(win, bbl, bel);
+//        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl);
+        wnd.*.CurrLine = wnd.*.BlkBegLine;
         wnd.*.CurrCol = wnd.*.BlkBegCol;
         wnd.*.WndRow = wnd.*.BlkBegLine - wnd.*.wtop;
         if (wnd.*.WndRow < 0) {
@@ -802,7 +814,7 @@ fn ClearCmd(win:*Window) void {
 //        }
 
         // ------ change all text lines in block to \n -----
-        df.TextBlockToN(bbl, bel);
+        df.TextBlockToN(&wnd.*.text[bbl], &wnd.*.text[bel]);
 //        while (bbl < bel)    {
 //            char *cp = strchr(bbl, '\n');
 //            if (cp > bel)
@@ -849,7 +861,8 @@ fn ParagraphCmd(win:*Window) void {
 
     // ---- forming paragraph from cursor position ---
     const fl = wnd.*.wtop + wnd.*.WndRow;
-    const bl = df.TextLine(wnd, wnd.*.CurrLine);
+//    const bl = df.TextLine(wnd, wnd.*.CurrLine);
+    const saved_line = wnd.*.CurrLine;
     var bc = wnd.*.CurrCol;
     if (bc >= win.ClientWidth()) {
         bc = 0;
@@ -860,7 +873,8 @@ fn ParagraphCmd(win:*Window) void {
 
     textbox.BuildTextPointers(win);
     // --- put cursor back at beginning ---
-    wnd.*.CurrLine = df.TextLineNumber(wnd, bl);
+//    wnd.*.CurrLine = df.TextLineNumber(wnd, bl);
+    wnd.*.CurrLine = saved_line;
     wnd.*.CurrCol = bc;
     if (fl < wnd.*.wtop)
         wnd.*.wtop = fl;
@@ -1179,7 +1193,10 @@ fn StopMarking(win:*Window) void {
 }
 
 // ------ save deleted text for the Undo command ------
-fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
+//fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
+fn SaveDeletedText(win:*Window, bbl:usize, bel:usize) void {
+    const wnd = win.win;
+    const len = bel-bbl;
     win.DeletedLength = len;
 
     if (win.DeletedText) |txt| {
@@ -1196,7 +1213,7 @@ fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
     }
     if (win.DeletedText) |buf| {
 //        wnd.*.DeletedText = buf.ptr;
-        @memmove(buf, bbl[0..len]);
+        @memmove(buf, wnd.*.text[bbl..bel]);
     }
 
 //    wnd->DeletedText=DFrealloc(wnd->DeletedText,len);

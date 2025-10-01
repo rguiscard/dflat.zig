@@ -140,6 +140,21 @@ pub fn backspace(self: *TopLevelFields) void {
     }
 }
 
+// Remove all text in [begin (included), end (not-included)]
+pub fn removeRange(self: *TopLevelFields, begin: usize, end: usize) void {
+    const l = self.len();
+    if (begin > end or end > l) {
+        return;
+        // @panic("removeRange: invalid range");
+    }
+
+    // Move cursor to begin (gap at begin)
+    self.moveCursor(begin);
+
+    // Skip over `end - begin` characters
+    self.gap_end += (end - begin);
+}
+
 pub fn compact(self: *TopLevelFields) void {
     const right_len = (self.items.len - 1) - self.gap_end;
     const total = self.gap_start + right_len;
@@ -218,6 +233,24 @@ pub fn indexOfLine(self: *TopLevelFields, lno:usize, move: bool) usize {
             self.moveCursor(pos);
     }
     return pos; 
+}
+
+test "gap remove range" {
+    const gpa = std.testing.allocator;
+    for (0..2) |idx| {
+        var buf = try TopLevelFields.init(gpa, 40);
+        defer buf.deinit();
+        if (idx > 0) {
+           buf.setRealloc(true);
+        }
+        try buf.insertSlice("01234567890123456789012345678901234567890");
+        buf.removeRange(5, 10);
+        try std.testing.expectEqualStrings("012340123456789012345678901234567890", buf.toString());
+        buf.removeRange(2, 10);
+        try std.testing.expectEqualStrings("0156789012345678901234567890", buf.toString());
+        buf.removeRange(10, 15);
+        try std.testing.expectEqualStrings("01567890128901234567890", buf.toString());
+    }
 }
 
 test "gap buffer get and set char" {
