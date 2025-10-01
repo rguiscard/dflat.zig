@@ -57,21 +57,22 @@ fn replacetext(wnd:df.WINDOW, cp1:[]const u8, db:*df.DBOX) void {
 //    strncpy(cp1, cr, newlen);
 }
 
-fn BlkEndColFromLine(wnd: df.WINDOW, cp:[*c]u8) c_int {
-    const sel:usize = @intCast(wnd.*.BlkEndLine);
-    return @intCast(cp-df.TextLine(wnd, sel));
-}
-
-fn BlkBegColFromLine(wnd: df.WINDOW, cp:[*c]u8) c_int {
-    const sel:usize = @intCast(wnd.*.BlkBegLine);
-    return @intCast(cp-df.TextLine(wnd, sel));
-}
+//fn BlkEndColFromLine(wnd: df.WINDOW, cp:[*c]u8) c_int {
+//    const sel:usize = @intCast(wnd.*.BlkEndLine);
+//    return @intCast(cp-df.TextLine(wnd, sel));
+//}
+//
+//fn BlkBegColFromLine(wnd: df.WINDOW, cp:[*c]u8) c_int {
+//    const sel:usize = @intCast(wnd.*.BlkBegLine);
+//    return @intCast(cp-df.TextLine(wnd, sel));
+//}
 
 // ------- search for the occurrance of a string ------- 
 fn SearchTextBox(win:*Window, incr:bool) void {
     const wnd = win.win;
 
     var cp1:[*c]u8 = null;
+    var pp1:usize = 0; // based on zp1
     const dbox = if (Replacing) &Dialogs.ReplaceTextDB else  &Dialogs.SearchTextDB;
     const searchtext = DialogBox.GetEditBoxText(dbox, c.ID_SEARCHFOR);
     var FoundOne = false;
@@ -88,8 +89,10 @@ fn SearchTextBox(win:*Window, incr:bool) void {
             }
             // search for a match starting at cursor position
             cp1 = df.zCurrChar(wnd);
+            pp1 = win.currPos();
             if (incr) {
                 cp1 = cp1 + lastsize; // start past the last hit
+                pp1 = pp1 + lastsize;
             }
             // --- compare at each character position ---
             const zp = cp;
@@ -106,6 +109,17 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 FoundOne = true;
 
                 // mark a block at beginning of matching text
+//                cp1 = cp1+i;
+//                const s2 = cp1+zp.len;
+//                wnd.*.BlkEndLine = df.TextLineNumber(wnd, s2);
+//                wnd.*.BlkBegLine = df.TextLineNumber(wnd, cp1);
+//                if (wnd.*.BlkEndLine < wnd.*.BlkBegLine) {
+//                    wnd.*.BlkEndLine = wnd.*.BlkBegLine;
+//                }
+//                wnd.*.BlkEndCol = BlkEndColFromLine(wnd, s2);
+//                wnd.*.BlkBegCol = BlkBegColFromLine(wnd, cp1);
+                pp1 = pp1+i; // based on zp1
+                const pp2 = pp1+zp.len;
                 cp1 = cp1+i;
                 const s2 = cp1+zp.len;
                 wnd.*.BlkEndLine = df.TextLineNumber(wnd, s2);
@@ -113,8 +127,10 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 if (wnd.*.BlkEndLine < wnd.*.BlkBegLine) {
                     wnd.*.BlkEndLine = wnd.*.BlkBegLine;
                 }
-                wnd.*.BlkEndCol = BlkEndColFromLine(wnd, s2);
-                wnd.*.BlkBegCol = BlkBegColFromLine(wnd, cp1);
+//                wnd.*.BlkEndCol = BlkEndColFromLine(wnd, s2);
+                wnd.*.BlkEndCol = @intCast(pp2-win.textLine(@intCast(wnd.*.BlkEndLine)));
+//                wnd.*.BlkBegCol = BlkBegColFromLine(wnd, cp1);
+                wnd.*.BlkBegCol = @intCast(pp1-win.textLine(@intCast(wnd.*.BlkBegLine)));
 
                 // position the cursor at the matching text
                 wnd.*.CurrCol = wnd.*.BlkBegCol;

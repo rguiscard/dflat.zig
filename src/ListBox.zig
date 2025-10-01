@@ -284,14 +284,17 @@ fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         const pp1:usize = @intCast(p1);
         const cp1:[*c]u8 = @ptrFromInt(pp1);
         const pp2:usize = @intCast(p2);
-        const cp2:[*c]u8 = df.TextLine(wnd, pp2);
+        var cp2 = win.textLine(pp2);
+//        const cp2:[*c]u8 = df.TextLine(wnd, pp2);
 //        char *cp1 = (char *)p1;
 //        char *cp2 = TextLine(wnd, (int)p2);
 //        df.ListCopyText(cp1, cp2);
         var idx:usize = 0;
-        while(cp2 != null and cp2[idx] != 0 and cp2[idx] != '\n') {
-            cp1[idx] = cp2[idx];
+//        while(cp2 != null and cp2[idx] != 0 and cp2[idx] != '\n') {
+        while(cp2 != wnd.*.textlen and wnd.*.text[cp2] != 0 and wnd.*.text[cp2] != '\n') {
+            cp1[idx] = wnd.*.text[cp2];
             idx += 1;
+            cp2 += 1;
         }
         cp1[idx] = 0;
     }
