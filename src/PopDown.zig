@@ -64,9 +64,11 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     py = -1;
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win))) {
-        const sel:c_uint = @intCast(p2 - win.GetClientTop());
-        const tl = df.TextLine(wnd, sel);
-        if (tl[0] != df.LINE)
+        const sel:usize = @intCast(p2 - win.GetClientTop());
+//        const tl = df.TextLine(wnd, sel);
+//        if (tl[0] != df.LINE)
+        const tl = win.textLine(sel);
+        if (wnd.*.text[tl] != df.LINE)
             _ = win.sendMessage(df.LB_CHOOSE, win.selection, 0);
     } else {
         const pwin = win.getParent();
@@ -203,7 +205,10 @@ fn BorderMsg(win:*Window) bool {
         rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.BORDER, 0, 0);
         Window.inFocus = currFocus;
         for (0..@intCast(win.ClientHeight())) |i| {
-            if (df.TextLine(wnd, i)[0] == df.LINE) {
+            const pos = win.textLine(i);
+            const chr = wnd.*.text[pos]; 
+//            if (df.TextLine(wnd, i)[0] == df.LINE) {
+            if (chr == df.LINE) {
                 df.wputch(wnd, df.LEDGE, 0, @intCast(i+1));
                 df.wputch(wnd, df.REDGE, @intCast(win.WindowWidth()-1), @intCast(i+1));
             }
@@ -344,9 +349,11 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             return true;
         },
         df.LB_SELECTION => {
-            const sel:c_uint = @intCast(p1);
-            const l = df.TextLine(wnd, sel);
-            if (l[0] == df.LINE) {
+            const sel:usize = @intCast(p1);
+//            const l = df.TextLine(wnd, sel);
+//            if (l[0] == df.LINE) {
+            const l = win.textLine(sel);
+            if (wnd.*.text[l] == df.LINE) {
                 return true;
             }
             if (win.mnu) |mnu| {

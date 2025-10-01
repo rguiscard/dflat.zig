@@ -474,8 +474,10 @@ fn ExtendSelections(win:*Window, sel:isize, shift:usize) usize {
 fn SetSelection(win:*Window,sel:isize) void {
     const wnd = win.win;
     if (win.isMultiLine() and (ItemSelected(win, sel) == false)) {
-        const lp = df.TextLine(wnd, sel);
-        lp[0] = df.LISTSELECTOR;
+//        const lp = df.TextLine(wnd, sel);
+//        lp[0] = df.LISTSELECTOR;
+        const lp = win.textLine(@intCast(sel));
+        wnd.*.text[lp] = df.LISTSELECTOR;
 //        *lp = LISTSELECTOR;
         win.SelectCount += 1;
     }
@@ -484,8 +486,10 @@ fn SetSelection(win:*Window,sel:isize) void {
 fn ClearSelection(win:*Window,sel:isize) void {
     const wnd = win.win;
     if (win.isMultiLine() and ItemSelected(win, sel)) {
-        const lp = df.TextLine(wnd, sel);
-        lp[0] =  ' ';
+//        const lp = df.TextLine(wnd, sel);
+//        lp[0] =  ' ';
+        const lp = win.textLine(@intCast(sel));
+        wnd.*.text[lp] = ' ';
 //        *lp = ' ';
         win.SelectCount -= 1;
     }
@@ -494,8 +498,10 @@ fn ClearSelection(win:*Window,sel:isize) void {
 pub fn ItemSelected(win:*Window,sel:isize) bool {
     const wnd = win.win;
     if (sel != -1 and win.isMultiLine() and sel < wnd.*.wlines) {
-        const cp = df.TextLine(wnd, sel);
-        return (cp[0] & 255) == df.LISTSELECTOR;
+//        const cp = df.TextLine(wnd, sel);
+//        return (cp[0] & 255) == df.LISTSELECTOR;
+        const cp = win.textLine(@intCast(sel));
+        return (wnd.*.text[cp] & 255) == df.LISTSELECTOR;
 //        return (int)((*cp) & 255) == LISTSELECTOR;
     }
     return false;
