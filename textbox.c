@@ -295,6 +295,7 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
     free(svlp);
 }
 
+#if 0
 int TextLineNumber(WINDOW wnd, char *lp)
 {
     int lineno;
@@ -309,3 +310,4 @@ int TextLineNumber(WINDOW wnd, char *lp)
     }
     return lineno-1;
 }
+#endif

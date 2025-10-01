@@ -823,3 +823,29 @@ fn MoveScrollBox(win:*Window, vscrollbox:c_int) void {
             vscrollbox+1);
     wnd.*.VScrollBox = vscrollbox;
 }
+
+pub fn TextLineNumber(win:*Window, pos:usize) usize {
+    const wnd = win.win;
+    const len:usize = @intCast(wnd.*.wlines);
+    var line:usize = 0;
+    for (win.TextPointers, 0..) |lp, idx| {
+        if (pos > lp) {
+            line = idx;
+        } else {
+            return line;
+        }
+    }
+    return len-1;
+
+//    int lineno;
+//    char *cp;
+//    for (lineno = 0; lineno < wnd->wlines; lineno++)    {
+//        cp = wnd->text + *((wnd->TextPointers) + lineno);
+//        cp = TextLine(wnd, lineno);
+//        if (cp == lp)
+//            return lineno;
+//        if (cp > lp)
+//            break;
+//    }
+//    return lineno-1;
+}

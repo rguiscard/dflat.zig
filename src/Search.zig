@@ -121,9 +121,11 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 pp1 = pp1+i; // based on zp1
                 const pp2 = pp1+zp.len;
                 cp1 = cp1+i;
-                const s2 = cp1+zp.len;
-                wnd.*.BlkEndLine = df.TextLineNumber(wnd, s2);
-                wnd.*.BlkBegLine = df.TextLineNumber(wnd, cp1);
+//                const s2 = cp1+zp.len;
+//                wnd.*.BlkEndLine = df.TextLineNumber(wnd, s2);
+//                wnd.*.BlkBegLine = df.TextLineNumber(wnd, cp1);
+                wnd.*.BlkEndLine = @intCast(textbox.TextLineNumber(win, pp2));
+                wnd.*.BlkBegLine = @intCast(textbox.TextLineNumber(win, pp1));
                 if (wnd.*.BlkEndLine < wnd.*.BlkBegLine) {
                     wnd.*.BlkEndLine = wnd.*.BlkBegLine;
                 }
