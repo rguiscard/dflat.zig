@@ -45,6 +45,8 @@ isHelping:u32 = 0,                    // > 0 when help is being displayed
 // ----------------- text box fields ------------------
 gapbuf:?*GapBuf = null,       // gap buffer
 
+HScrollBox:usize = 0,         // position of horizontal scroll box
+VScrollBox:usize = 0,         // position of vertical scroll box
 TextPointers:[]c_uint = &.{}, // -> list of line offsets
 
 // ----------------- list box fields ------------------
@@ -627,7 +629,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
                     ch = df.UPSCROLLBOX;
                 } else if (ydx == self.WindowHeight()-2) {
                     ch = df.DOWNSCROLLBOX;
-                } else if (ydx-1 == wnd.*.VScrollBox) {
+                } else if (ydx-1 == self.VScrollBox) {
                     ch = df.SCROLLBOXCHAR;
                 } else {
                     ch = df.SCROLLBARCHAR;
@@ -664,7 +666,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
                 line[0] = df.LEFTSCROLLBOX;
                 line[@intCast(self.WindowWidth()-3)] = df.RIGHTSCROLLBOX;
                 @memset(line[1..@intCast(self.WindowWidth()-4+1)], df.SCROLLBARCHAR);
-                line[@intCast(wnd.*.HScrollBox)] = df.SCROLLBOXCHAR;
+                line[self.HScrollBox] = df.SCROLLBOXCHAR;
             }
             line[@intCast(rc.rt)] = 0;
             line[@intCast(self.WindowWidth()-2)] = 0;

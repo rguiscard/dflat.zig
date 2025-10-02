@@ -167,7 +167,6 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM) bool {
 
 // ------------ LEFT_BUTTON Message --------------
 fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     const mx = p1 - win.GetLeft();
     const my = p2 - win.GetTop();
     if (win.TestAttribute(df.VSCROLLBAR) and
@@ -186,7 +185,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return win.sendMessage(df.SCROLL, df.TRUE, 0);
         }
         // ---------- in the scroll bar -----------
-        if ((VSliding == false) and (my-1 == wnd.*.VScrollBox)) {
+        if ((VSliding == false) and (my-1 == win.VScrollBox)) {
             VSliding = true;
             const rc:df.RECT = .{
                 .lf = @intCast(win.GetRight()),
@@ -196,10 +195,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             };
             return (df.TRUE == q.SendMessage(null, df.MOUSE_TRAVEL, @intCast(@intFromPtr(&rc)), 0));
         }
-        if (my-1 < wnd.*.VScrollBox) {
+        if (my-1 < win.VScrollBox) {
             return win.sendMessage(df.SCROLLPAGE,df.FALSE,0);
         }
-        if (my-1 > wnd.*.VScrollBox) {
+        if (my-1 > win.VScrollBox) {
             return win.sendMessage(df.SCROLLPAGE,df.TRUE,0);
         }
     }
@@ -216,7 +215,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         if (mx == win.WindowWidth()-2) {
             return win.sendMessage(df.HORIZSCROLL,df.TRUE,0);
         }
-        if ((HSliding == false) and (mx-1 == wnd.*.HScrollBox)) {
+        if ((HSliding == false) and (mx-1 == win.HScrollBox)) {
             // --- hit the scroll box ---
             HSliding = true;
             const rc:df.RECT = .{
@@ -229,10 +228,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             _ = q.SendMessage(null, df.MOUSE_TRAVEL, @intCast(@intFromPtr(&rc)), 0);
             return true;
         }
-        if (mx-1 < wnd.*.HScrollBox) {
+        if (mx-1 < win.HScrollBox) {
             return win.sendMessage(df.HORIZPAGE,df.FALSE,0);
         }
-        if (mx-1 > wnd.*.HScrollBox) {
+        if (mx-1 > win.HScrollBox) {
             return win.sendMessage(df.HORIZPAGE,df.TRUE,0);
         }
     }
@@ -245,22 +244,22 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
     const my = p2 - win.GetTop();
     if (VSliding) {
         // ---- dragging the vertical scroll box ---
-        if (my-1 != wnd.*.VScrollBox) {
+        if (my-1 != win.VScrollBox) {
             df.foreground = df.FrameForeground(wnd);
             df.background = df.FrameBackground(wnd);
-            df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1), wnd.*.VScrollBox+1);
-            wnd.*.VScrollBox = @intCast(my-1);
+            df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1), @intCast(win.VScrollBox+1));
+            win.VScrollBox = @intCast(my-1);
             df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(win.WindowWidth()-1), @intCast(my));
         }
         return true;
     }
     if (HSliding) {
         // --- dragging the horizontal scroll box ---
-        if (mx-1 != wnd.*.HScrollBox) {
+        if (mx-1 != win.HScrollBox) {
             df.foreground = df.FrameForeground(wnd);
             df.background = df.FrameBackground(wnd);
-            df.wputch(wnd, df.SCROLLBARCHAR, wnd.*.HScrollBox+1, @intCast(win.WindowHeight()-1));
-            wnd.*.HScrollBox = @intCast(mx-1);
+            df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.HScrollBox+1), @intCast(win.WindowHeight()-1));
+            win.HScrollBox = @intCast(mx-1);
             df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(mx), @intCast(win.WindowHeight()-1));
         }
         return true;
@@ -323,8 +322,8 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
         // ---- reset the scroll box ----
         if (win.TestAttribute(df.VSCROLLBAR)) {
             const vscrollbox = ComputeVScrollBox(win);
-            if (vscrollbox != wnd.*.VScrollBox) {
-                MoveScrollBox(win, @intCast(vscrollbox));
+            if (vscrollbox != win.VScrollBox) {
+                MoveScrollBox(win, vscrollbox);
             }
         }
     }
@@ -474,10 +473,10 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
     if (win.TestAttribute(df.VSCROLLBAR|df.HSCROLLBAR)) {
         const hscrollbox = ComputeHScrollBox(win);
         const vscrollbox = ComputeVScrollBox(win);
-        if ((hscrollbox != wnd.*.HScrollBox) or
-                (vscrollbox != wnd.*.VScrollBox)) {
-            wnd.*.HScrollBox = @intCast(hscrollbox);
-            wnd.*.VScrollBox = @intCast(vscrollbox);
+        if ((hscrollbox != win.HScrollBox) or
+                (vscrollbox != win.VScrollBox)) {
+            win.HScrollBox = hscrollbox;
+            win.VScrollBox = vscrollbox;
             _ = win.sendMessage(df.BORDER, p1, 0);
         }
     }
@@ -499,11 +498,10 @@ fn CloseWindowMsg(win:*Window) void {
 
 // ----------- TEXTBOX Message-processing Module -----------
 pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
-            wnd.*.HScrollBox = 1;
-            wnd.*.VScrollBox = 1;
+            win.HScrollBox = 1;
+            win.VScrollBox = 1;
             ClearTextPointers(win);
         },
         df.ADDTEXT => {
@@ -626,9 +624,9 @@ fn ComputeVScrollBox(win:*Window) usize {
 fn ComputeWindowTop(win:*Window) void {
     const wnd = win.win;
     const pagelen:usize = @intCast(wnd.*.wlines - win.ClientHeight());
-    if (wnd.*.VScrollBox == 0) {
+    if (win.VScrollBox == 0) {
         wnd.*.wtop = 0;
-    } else if (wnd.*.VScrollBox == win.ClientHeight()-2) {
+    } else if (win.VScrollBox == win.ClientHeight()-2) {
         wnd.*.wtop = @intCast(pagelen);
     } else {
         const barlen:usize = @intCast(win.ClientHeight()-2);
@@ -639,8 +637,7 @@ fn ComputeWindowTop(win:*Window) void {
         } else {
             lines_tick = if (pagelen>0) @divFloor(barlen, pagelen) else 0;
         }
-        const vsbox:usize = @intCast(wnd.*.VScrollBox-1);
-        wnd.*.wtop = @intCast(vsbox * lines_tick);
+        wnd.*.wtop = @intCast((win.VScrollBox-1) * lines_tick);
         if (wnd.*.wtop + win.ClientHeight() > wnd.*.wlines)
             wnd.*.wtop = @intCast(pagelen);
     }
@@ -681,9 +678,9 @@ fn ComputeWindowLeft(win:*Window) void {
     const wnd = win.win;
     const pagewidth:usize = @intCast(wnd.*.textwidth - win.ClientWidth());
 
-    if (wnd.*.HScrollBox == 0) {
+    if (win.HScrollBox == 0) {
         wnd.*.wleft = 0;
-    } else if (wnd.*.HScrollBox == win.ClientWidth()-2) {
+    } else if (win.HScrollBox == win.ClientWidth()-2) {
         wnd.*.wleft = @intCast(pagewidth);
     } else {
         const barlen:usize = @intCast(win.ClientWidth()-2);
@@ -694,8 +691,7 @@ fn ComputeWindowLeft(win:*Window) void {
         } else {
             chars_tick = @divFloor(barlen, pagewidth);
         }
-        const hsbox:usize = @intCast(wnd.*.HScrollBox-1);
-        wnd.*.wleft = @intCast(hsbox * chars_tick);
+        wnd.*.wleft = @intCast((win.HScrollBox-1) * chars_tick);
         if (wnd.*.wleft + win.ClientWidth() > wnd.*.textwidth)
             wnd.*.wleft = @intCast(pagewidth);
     }
@@ -920,15 +916,15 @@ pub fn BuildTextPointers(win:*Window) void {
 //    }
 }
 
-fn MoveScrollBox(win:*Window, vscrollbox:c_int) void {
+fn MoveScrollBox(win:*Window, vscrollbox:usize) void {
     const wnd = win.win;
     df.foreground = df.FrameForeground(wnd);
     df.background = df.FrameBackground(wnd);
     df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1),
-            wnd.*.VScrollBox+1);
+            @intCast(win.VScrollBox+1));
     df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(win.WindowWidth()-1),
-            vscrollbox+1);
-    wnd.*.VScrollBox = vscrollbox;
+            @intCast(vscrollbox+1));
+    win.VScrollBox = vscrollbox;
 }
 
 pub fn TextLineNumber(win:*Window, pos:usize) usize {

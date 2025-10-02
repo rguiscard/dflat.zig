@@ -121,8 +121,8 @@ typedef struct window {
     int BlkBegCol;  /* beginning column of marked block     */
     int BlkEndLine; /* ending line of marked block          */
     int BlkEndCol;  /* ending column of marked block        */
-    int HScrollBox; /* position of horizontal scroll box    */
-    int VScrollBox; /* position of vertical scroll box      */
+//    int HScrollBox; /* position of horizontal scroll box    */
+//    int VScrollBox; /* position of vertical scroll box      */
 	unsigned int *TextPointers; /* -> list of line offsets	*/
     /* ----------------- list box fields ------------------ */
 //    int selection;  /* current selection                    */
