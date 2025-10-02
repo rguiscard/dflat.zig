@@ -731,6 +731,18 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
     df.cWriteTextLine(wnd, rc, y, if (reverse) df.TRUE else df.FALSE);
 }
 
+pub fn TextBlockMarked(win:*Window) bool {
+    return (win.BlkBegLine>0) or (win.BlkBegCol>0) or
+           (win.BlkEndLine>0) or (win.BlkEndCol>0);
+}
+
+pub export fn cTextBlockMarked(wnd:df.WINDOW) df.BOOL {
+    if (Window.get_zin(wnd)) |win| {
+        return if (TextBlockMarked(win)) df.TRUE else df.FALSE;
+    }
+    return df.FALSE;
+}
+
 // not in use
 //void MarkTextBlock(WINDOW wnd, int BegLine, int BegCol,
 //                               int EndLine, int EndCol)
@@ -743,11 +755,10 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
 
 
 pub fn ClearTextBlock(win:*Window) void {
-    const wnd = win.win;
-    wnd.*.BlkBegLine = 0;
-    wnd.*.BlkEndLine = 0;
-    wnd.*.BlkBegCol = 0;
-    wnd.*.BlkEndCol = 0;
+    win.BlkBegLine = 0;
+    win.BlkEndLine = 0;
+    win.BlkBegCol = 0;
+    win.BlkEndCol = 0;
 }
 
 // ----- clear and initialize text line pointer array -----

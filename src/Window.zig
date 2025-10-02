@@ -29,22 +29,26 @@ wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.
 
 // -------------- linked list pointers ----------------
 parent:?*TopLevelFields = null,       // parent window
-firstchild:?*TopLevelFields = null,   // first child this parent
-lastchild:?*TopLevelFields = null,    // last child this parent
+firstchild:?*TopLevelFields  = null,  // first child this parent
+lastchild:?*TopLevelFields   = null,  // last child this parent
 nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
-childfocus:?*TopLevelFields = null,   // child that ha(s/d) focus
+childfocus:?*TopLevelFields  = null,  // child that ha(s/d) focus
 
-PrevMouse:?*TopLevelFields = null,    // previous mouse capture
+PrevMouse:?*TopLevelFields    = null, // previous mouse capture
 PrevKeyboard:?*TopLevelFields = null, // previous keyboard capture
-PrevClock:?*TopLevelFields = null,    // previous clock capture
-MenuBar:?*TopLevelFields = null,      // menu bar
-StatusBar:?*TopLevelFields = null,    // status bar
+PrevClock:?*TopLevelFields    = null, // previous clock capture
+MenuBar:?*TopLevelFields      = null, // menu bar
+StatusBar:?*TopLevelFields    = null, // status bar
 isHelping:u32 = 0,                    // > 0 when help is being displayed
 
 // ----------------- text box fields ------------------
 gapbuf:?*GapBuf = null,       // gap buffer
 
+BlkBegLine:usize = 0,         // beginning line of marked block
+BlkBegCol:usize  = 0,         // beginning column of marked block
+BlkEndLine:usize = 0,         // ending line of marked block
+BlkEndCol:usize  = 0,         // ending column of marked block
 HScrollBox:usize = 0,         // position of horizontal scroll box
 VScrollBox:usize = 0,         // position of vertical scroll box
 TextPointers:[]c_uint = &.{}, // -> list of line offsets
@@ -985,6 +989,34 @@ pub export fn inFocusWnd() df.WINDOW {
         return focus.win;
     }
     return null;
+}
+
+pub export fn getBlkBegLine(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.BlkBegLine);
+    }
+    return 0;
+}
+
+pub export fn getBlkEndLine(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.BlkEndLine);
+    }
+    return 0;
+}
+
+pub export fn getBlkBegCol(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.BlkBegCol);
+    }
+    return 0;
+}
+
+pub export fn getBlkEndCol(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.BlkEndCol);
+    }
+    return 0;
 }
 
 // Accessories

@@ -67,7 +67,7 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                     wnd.*.wleft = @intCast(wnd.*.CurrCol-win.ClientWidth());
                     wnd.*.CurrCol -= wnd.*.wleft;
                 }
-                wnd.*.BlkEndCol = wnd.*.CurrCol;
+                win.BlkEndCol = @intCast(wnd.*.CurrCol);
                 _ = win.sendMessage(df.KEYBOARD_CURSOR,
                                      @intCast(WndCol(win)), wnd.*.WndRow); // WndCol
             }
@@ -279,8 +279,8 @@ fn ExtendBlock(win:*Window, xx:c_int, yy:c_int) void {
     const wnd = win.win;
     var x = xx;
     var y = yy;
-    var ptop = @min(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
-    var pbot = @max(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
+    var ptop = @min(win.BlkBegLine, win.BlkEndLine);
+    var pbot = @max(win.BlkBegLine, win.BlkEndLine);
 //    const lp = df.TextLine(wnd, wnd.*.wtop+y);
 //    const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
     const lp = win.textLine(@intCast(wnd.*.wtop+y));
@@ -290,12 +290,12 @@ fn ExtendBlock(win:*Window, xx:c_int, yy:c_int) void {
     }
     x = @max(0, @min(x, len));
     y = @max(0, y);
-    wnd.*.BlkEndCol = @min(len, x+wnd.*.wleft);
-    wnd.*.BlkEndLine = y+wnd.*.wtop;
-    const bbl = @min(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
-    const bel = @max(wnd.*.BlkBegLine, wnd.*.BlkEndLine);
+    win.BlkEndCol = @intCast(@min(len, x+wnd.*.wleft));
+    win.BlkEndLine = @intCast(y+wnd.*.wtop);
+    const bbl = @min(win.BlkBegLine, win.BlkEndLine);
+    const bel = @max(win.BlkBegLine, win.BlkEndLine);
     while (ptop < bbl) {
-        textbox.WriteTextLine(win, null, ptop, false);
+        textbox.WriteTextLine(win, null, @intCast(ptop), false);
         ptop += 1;
     }
     for (@intCast(bbl)..@intCast(bel+1)) |ydx| {
@@ -304,7 +304,7 @@ fn ExtendBlock(win:*Window, xx:c_int, yy:c_int) void {
 //    for (y = bbl; y <= bel; y++)
 //        WriteTextLine(wnd, NULL, y, FALSE);
     while (pbot > bel) {
-        textbox.WriteTextLine(win, null, pbot, false);
+        textbox.WriteTextLine(win, null, @intCast(pbot), false);
         pbot -= 1;
     }
 }
@@ -354,7 +354,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     }
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false)
         return false;
-    if (df.TextBlockMarked(wnd)) {
+    if (textbox.TextBlockMarked(win)) {
         textbox.ClearTextBlock(win);
         _ = win.sendMessage(df.PAINT, 0, 0);
     }
@@ -389,7 +389,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     wnd.*.CurrLine = MouseY+wnd.*.wtop;
 
     if (win.isMultiLine() or
-        ((df.TextBlockMarked(wnd) == false) and
+        ((textbox.TextBlockMarked(win) == false) and
             (MouseX+wnd.*.wleft < df.strlen(wnd.*.text)))) {
         wnd.*.CurrCol = @intCast(MouseX+wnd.*.wleft);
     }
@@ -443,7 +443,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
             // ---- not recognized by editor ---
             return;
         }
-        if (win.isMultiLine()==false and df.TextBlockMarked(wnd)) {
+        if (win.isMultiLine()==false and textbox.TextBlockMarked(win)) {
             _ = win.sendMessage(df.CLEARTEXT, 0, 0);
             currchar = df.zCurrChar(wnd);
         }
@@ -568,7 +568,7 @@ fn DelKey(win:*Window) void {
     const curr_char = wnd.*.text[curr_pos];
 //    const repaint = (curr_char == '\n');
 
-    if (df.TextBlockMarked(wnd))    {
+    if (textbox.TextBlockMarked(win))    {
         _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
         _ = win.sendMessage(df.PAINT, 0, 0);
         return;
@@ -662,7 +662,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
             } else {
                 const chr = '\n';
                 // fall through
-                if (df.TextBlockMarked(wnd)) {
+                if (textbox.TextBlockMarked(win)) {
                     _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
                     _ = win.sendMessage(df.PAINT, 0, 0);
                 }
@@ -670,7 +670,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
             }
         },
         else => {
-            if (df.TextBlockMarked(wnd)) {
+            if (textbox.TextBlockMarked(win)) {
                 _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
                 _ = win.sendMessage(df.PAINT, 0, 0);
             }
@@ -744,11 +744,11 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
 // ----------- ID_DELETETEXT Command ----------
 fn DeleteTextCmd(win:*Window) void {
     const wnd = win.win;
-    if (df.TextBlockMarked(wnd)) {
-        const beg_sel:c_uint = @intCast(wnd.*.BlkBegLine);
-        const end_sel:c_uint = @intCast(wnd.*.BlkEndLine);
-        const beg_col:c_uint = @intCast(wnd.*.BlkBegCol);
-        const end_col:c_uint = @intCast(wnd.*.BlkEndCol);
+    if (textbox.TextBlockMarked(win)) {
+        const beg_sel = win.BlkBegLine;
+        const end_sel = win.BlkEndLine;
+        const beg_col = win.BlkBegCol;
+        const end_col = win.BlkEndCol;
 
 //        const bbl=df.TextLine(wnd,beg_sel)+beg_col;
 //        const bel=df.TextLine(wnd,end_sel)+end_col;
@@ -762,11 +762,12 @@ fn DeleteTextCmd(win:*Window) void {
         _ = df.memmove(&wnd.*.text[bbl], &wnd.*.text[bel], wnd.*.textlen-bel);
 //        const bcol:usize = @intCast(wnd.*.BlkBegCol); // could we reuse beg_col?
 //        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl-bcol);
-        wnd.*.CurrLine = wnd.*.BlkBegLine;
-        wnd.*.CurrCol = wnd.*.BlkBegCol;
-        wnd.*.WndRow = wnd.*.BlkBegLine - wnd.*.wtop;
+        wnd.*.CurrLine = @intCast(win.BlkBegLine);
+        wnd.*.CurrCol = @intCast(win.BlkBegCol);
+        const begline:c_int = @intCast(win.BlkBegLine);
+        wnd.*.WndRow = begline - wnd.*.wtop;
         if (wnd.*.WndRow < 0) {
-            wnd.*.wtop = wnd.*.BlkBegLine;
+            wnd.*.wtop = @intCast(win.BlkBegLine);
             wnd.*.WndRow = 0;
         }
         _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
@@ -778,11 +779,11 @@ fn DeleteTextCmd(win:*Window) void {
 // ----------- ID_CLEAR Command ----------
 fn ClearCmd(win:*Window) void {
     const wnd = win.win;
-    if (df.TextBlockMarked(wnd))    {
-        const beg_sel:c_uint = @intCast(wnd.*.BlkBegLine);
-        const end_sel:c_uint = @intCast(wnd.*.BlkEndLine);
-        const beg_col:c_uint = @intCast(wnd.*.BlkBegCol);
-        const end_col:c_uint = @intCast(wnd.*.BlkEndCol);
+    if (textbox.TextBlockMarked(win))    {
+        const beg_sel = win.BlkBegLine;
+        const end_sel = win.BlkEndLine;
+        const beg_col = win.BlkBegCol;
+        const end_col = win.BlkEndCol;
 
 //        const bbl=df.TextLine(wnd,beg_sel)+beg_col;
 //        const bel=df.TextLine(wnd,end_sel)+end_col;
@@ -793,12 +794,13 @@ fn ClearCmd(win:*Window) void {
         const bel=win.textLine(end_sel)+end_col;
         SaveDeletedText(win, bbl, bel);
 //        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl);
-        wnd.*.CurrLine = wnd.*.BlkBegLine;
-        wnd.*.CurrCol = wnd.*.BlkBegCol;
-        wnd.*.WndRow = wnd.*.BlkBegLine - wnd.*.wtop;
+        wnd.*.CurrLine = @intCast(win.BlkBegLine);
+        wnd.*.CurrCol = @intCast(win.BlkBegCol);
+        const begline:c_int = @intCast(win.BlkBegLine);
+        wnd.*.WndRow = begline - wnd.*.wtop;
         if (wnd.*.WndRow < 0) {
             wnd.*.WndRow = 0;
-            wnd.*.wtop = wnd.*.BlkBegLine;
+            wnd.*.wtop = @intCast(win.BlkBegLine);
         }
 
 //        char *bbl=TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol;
@@ -1080,7 +1082,7 @@ fn DoMultiLines(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 df.CTRL_FWD => {
                     KeyBoardMarking = true;
                     TextMarking = true;
-                    SetAnchor(win, wnd.*.CurrCol, wnd.*.CurrLine);
+                    SetAnchor(win, @intCast(wnd.*.CurrCol), @intCast(wnd.*.CurrLine));
                 },
                 else => {
                 }
@@ -1165,7 +1167,7 @@ fn DoScrolling(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         return false;
     }
 
-    if (!KeyBoardMarking and df.TextBlockMarked(wnd)) {
+    if (!KeyBoardMarking and textbox.TextBlockMarked(win)) {
         textbox.ClearTextBlock(win);
         _ = win.sendMessage(df.PAINT, 0, 0);
     }
@@ -1173,22 +1175,21 @@ fn DoScrolling(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     return true;
 }
 
-fn swap(a:*c_int, b:*c_int) void {
+fn swap(a:*usize, b:*usize) void {
     const x = a.*;
     a.* = b.*;
     b.* = x;
 }
 
 fn StopMarking(win:*Window) void {
-    const wnd = win.win;
     TextMarking = false;
-    if (wnd.*.BlkBegLine > wnd.*.BlkEndLine) {
-        swap(&wnd.*.BlkBegLine, &wnd.*.BlkEndLine);
-        swap(&wnd.*.BlkBegCol, &wnd.*.BlkEndCol);
+    if (win.BlkBegLine > win.BlkEndLine) {
+        swap(&win.BlkBegLine, &win.BlkEndLine);
+        swap(&win.BlkBegCol, &win.BlkEndCol);
     }
-    if ((wnd.*.BlkBegLine == wnd.*.BlkEndLine) and
-            (wnd.*.BlkBegCol > wnd.*.BlkEndCol)) {
-        swap(&wnd.*.BlkBegCol, &wnd.*.BlkEndCol);
+    if ((win.BlkBegLine == win.BlkEndLine) and
+            (win.BlkBegCol > win.BlkEndCol)) {
+        swap(&win.BlkBegCol, &win.BlkEndCol);
     }
 }
 
@@ -1442,14 +1443,13 @@ fn PrevWord(win:*Window) void {
 }
 
 // ----- set anchor point for marking text block -----
-fn SetAnchor(win:*Window, mx:c_int, my:c_int) void {
-    const wnd = win.win;
+fn SetAnchor(win:*Window, mx:usize, my:usize) void {
     textbox.ClearTextBlock(win);
     // ------ set the anchor ------
-    wnd.*.BlkBegLine = my;
-    wnd.*.BlkEndLine = my;
-    wnd.*.BlkBegCol = mx;
-    wnd.*.BlkEndCol = mx;
+    win.BlkBegLine = my;
+    win.BlkEndLine = my;
+    win.BlkBegCol = mx;
+    win.BlkEndCol = mx;
     _ = win.sendMessage(df.PAINT, 0, 0);
 }
   

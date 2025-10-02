@@ -28,6 +28,7 @@ pub const app = @import("Application.zig");
 pub const Command = @import("Commands.zig").Command;
 pub const q = @import("Message.zig");
 pub const Colors = @import("Colors.zig");
+pub const textbox = @import("TextBox.zig");
 pub const cfg = @import("Config.zig");
 
 pub const global_allocator = std.heap.c_allocator;

@@ -27,11 +27,11 @@ pub var ClipboardLength:usize = 0;
 
 pub fn CopyToClipboard(win:*Window) void {
     const wnd = win.win;
-    if (df.TextBlockMarked(wnd)) {
-        const begCol:usize = @intCast(wnd.*.BlkBegCol);
-        const endCol:usize = @intCast(wnd.*.BlkEndCol);
-        const begLine:usize = @intCast(wnd.*.BlkBegLine);
-        const endLine:usize = @intCast(wnd.*.BlkEndLine);
+    if (textbox.TextBlockMarked(win)) {
+        const begCol = win.BlkBegCol;
+        const endCol = win.BlkEndCol;
+        const begLine = win.BlkBegLine;
+        const endLine = win.BlkEndLine;
 //        const bbl = df.TextLine(wnd,begLine)+begCol;
 //        const bel = df.TextLine(wnd,endLine)+endCol;
         const bbl = win.textLine(begLine)+begCol;

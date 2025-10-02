@@ -109,7 +109,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         df.DEL => {
             TurnOffDisplay(win);
 //            const delnl = (*df.CurrChar == '\n' or df.TextBlockMarked(wnd));
-            const delnl = (df.zCurrChar(wnd)[0] == '\n' or df.TextBlockMarked(wnd));
+            const delnl = (df.zCurrChar(wnd)[0] == '\n' or textbox.TextBlockMarked(win));
             _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, p1, p2);
 //            while (*df.CurrChar == pTab) {
             while (df.zCurrChar(wnd)[0] == pTab) {

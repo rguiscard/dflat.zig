@@ -4,6 +4,12 @@
 
 static char *GetTextLine(WINDOW, int);
 
+int getBlkBegLine(WINDOW);
+int getBlkEndLine(WINDOW);
+int getBlkBegCol(WINDOW);
+int getBlkEndCol(WINDOW);
+BOOL cTextBlockMarked(WINDOW);
+
 /* ----- get the text to a specified line ----- */
 static char *GetTextLine(WINDOW wnd, int selection)
 {
@@ -49,11 +55,11 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
 //	}
 
     /* -------- insert block color change controls ------- */
-    if (TextBlockMarked(wnd))    {
-        int bbl = wnd->BlkBegLine;
-        int bel = wnd->BlkEndLine;
-        int bbc = wnd->BlkBegCol;
-        int bec = wnd->BlkEndCol;
+    if (cTextBlockMarked(wnd))    {
+        int bbl = getBlkBegLine(wnd);
+        int bel = getBlkEndLine(wnd);
+        int bbc = getBlkBegCol(wnd);
+        int bec = getBlkEndCol(wnd);
         int by = y;
 
         /* ----- put lowest marker first ----- */

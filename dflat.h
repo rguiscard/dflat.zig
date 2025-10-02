@@ -117,10 +117,10 @@ typedef struct window {
     unsigned int textlen;  /* text length                   */
     int wleft;      /* left position in window viewport     */
     int textwidth;  /* width of longest line in textbox     */
-    int BlkBegLine; /* beginning line of marked block       */
-    int BlkBegCol;  /* beginning column of marked block     */
-    int BlkEndLine; /* ending line of marked block          */
-    int BlkEndCol;  /* ending column of marked block        */
+//    int BlkBegLine; /* beginning line of marked block       */
+//    int BlkBegCol;  /* beginning column of marked block     */
+//    int BlkEndLine; /* ending line of marked block          */
+//    int BlkEndCol;  /* ending column of marked block        */
 //    int HScrollBox; /* position of horizontal scroll box    */
 //    int VScrollBox; /* position of vertical scroll box      */
 	unsigned int *TextPointers; /* -> list of line offsets	*/
@@ -369,11 +369,12 @@ unsigned char WindowHighlightColor(WINDOW, unsigned char, unsigned char);
       (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
 //char *TextLine(WINDOW, unsigned int);
 void WriteTextLine(WINDOW, RECT *, int, BOOL);
-#define TextBlockMarked(wnd) (  wnd->BlkBegLine ||    \
-                                wnd->BlkEndLine ||    \
-                                wnd->BlkBegCol  ||    \
-                                wnd->BlkEndCol)
-void MarkTextBlock(WINDOW, int, int, int, int);
+BOOL cTextBlockMarked(WINDOW);
+//#define TextBlockMarked(wnd) (  wnd->BlkBegLine ||    \
+//                                wnd->BlkEndLine ||    \
+//                                wnd->BlkBegCol  ||    \
+//                                wnd->BlkEndCol)
+//void MarkTextBlock(WINDOW, int, int, int, int);
 //#define ClearTextBlock(wnd) wnd->BlkBegLine = wnd->BlkEndLine =  \
 //                        wnd->BlkBegCol  = wnd->BlkEndCol = 0;
 #define TextBlockBegin(wnd) (TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol)

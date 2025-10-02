@@ -454,7 +454,7 @@ pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
         const wnd = win.win;
         if (win.getClass() == mp.CLASS.EDITBOX) {
            if (win.isMultiLine()) {
-               if (df.TextBlockMarked(wnd)) {
+               if (mp.textbox.TextBlockMarked(win)) {
                    mp.menu.ActivateCommand(&menu.MainMenu, c.ID_CUT);
                    mp.menu.ActivateCommand(&menu.MainMenu, c.ID_COPY);
                    mp.menu.ActivateCommand(&menu.MainMenu, c.ID_CLEAR);

@@ -57,16 +57,6 @@ fn replacetext(wnd:df.WINDOW, cp1:[]const u8, db:*df.DBOX) void {
 //    strncpy(cp1, cr, newlen);
 }
 
-//fn BlkEndColFromLine(wnd: df.WINDOW, cp:[*c]u8) c_int {
-//    const sel:usize = @intCast(wnd.*.BlkEndLine);
-//    return @intCast(cp-df.TextLine(wnd, sel));
-//}
-//
-//fn BlkBegColFromLine(wnd: df.WINDOW, cp:[*c]u8) c_int {
-//    const sel:usize = @intCast(wnd.*.BlkBegLine);
-//    return @intCast(cp-df.TextLine(wnd, sel));
-//}
-
 // ------- search for the occurrance of a string ------- 
 fn SearchTextBox(win:*Window, incr:bool) void {
     const wnd = win.win;
@@ -83,7 +73,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 rpl = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, c.ID_REPLACEALL);
             }
 
-            if (df.TextBlockMarked(wnd)) {
+            if (textbox.TextBlockMarked(win)) {
                 textbox.ClearTextBlock(win);
                 _ = win.sendMessage(df.PAINT, 0, 0);
             }
@@ -124,19 +114,19 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 //                const s2 = cp1+zp.len;
 //                wnd.*.BlkEndLine = df.TextLineNumber(wnd, s2);
 //                wnd.*.BlkBegLine = df.TextLineNumber(wnd, cp1);
-                wnd.*.BlkEndLine = @intCast(textbox.TextLineNumber(win, pp2));
-                wnd.*.BlkBegLine = @intCast(textbox.TextLineNumber(win, pp1));
-                if (wnd.*.BlkEndLine < wnd.*.BlkBegLine) {
-                    wnd.*.BlkEndLine = wnd.*.BlkBegLine;
+                win.BlkEndLine = textbox.TextLineNumber(win, pp2);
+                win.BlkBegLine = textbox.TextLineNumber(win, pp1);
+                if (win.BlkEndLine < win.BlkBegLine) {
+                    win.BlkEndLine = win.BlkBegLine;
                 }
 //                wnd.*.BlkEndCol = BlkEndColFromLine(wnd, s2);
-                wnd.*.BlkEndCol = @intCast(pp2-win.textLine(@intCast(wnd.*.BlkEndLine)));
+                win.BlkEndCol = pp2-win.textLine(win.BlkEndLine);
 //                wnd.*.BlkBegCol = BlkBegColFromLine(wnd, cp1);
-                wnd.*.BlkBegCol = @intCast(pp1-win.textLine(@intCast(wnd.*.BlkBegLine)));
+                win.BlkBegCol = pp1-win.textLine(win.BlkBegLine);
 
                 // position the cursor at the matching text
-                wnd.*.CurrCol = wnd.*.BlkBegCol;
-                wnd.*.CurrLine = wnd.*.BlkBegLine;
+                wnd.*.CurrCol = @intCast(win.BlkBegCol);
+                wnd.*.CurrLine = @intCast(win.BlkBegLine);
                 wnd.*.WndRow = wnd.*.CurrLine - wnd.*.wtop;
 
                 // -- remember the size of the matching text --
