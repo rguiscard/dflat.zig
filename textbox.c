@@ -11,6 +11,7 @@ static char *GetTextLine(WINDOW, int);
 
 /* ------ compute the vertical scroll box position from
                    the text pointers --------- */
+#if 0
 int ComputeVScrollBox(WINDOW wnd)
 {
     int pagelen = wnd->wlines - ClientHeight(wnd);
@@ -32,8 +33,10 @@ int ComputeVScrollBox(WINDOW wnd)
     }
     return vscrollbox;
 }
+#endif
 
 /* ---- compute top text line from scroll box position ---- */
+#if 0
 void ComputeWindowTop(WINDOW wnd)
 {
     int pagelen = wnd->wlines - ClientHeight(wnd);
@@ -56,9 +59,11 @@ void ComputeWindowTop(WINDOW wnd)
     if (wnd->wtop < 0)
         wnd->wtop = 0;
 }
+#endif
 
 /* ------ compute the horizontal scroll box position from
                    the text pointers --------- */
+#if 0
 int ComputeHScrollBox(WINDOW wnd)
 {
     int pagewidth = wnd->textwidth - ClientWidth(wnd);
@@ -80,8 +85,10 @@ int ComputeHScrollBox(WINDOW wnd)
     }
     return hscrollbox;
 }
+#endif
 
 /* ---- compute left column from scroll box position ---- */
+#if 0
 void ComputeWindowLeft(WINDOW wnd)
 {
     int pagewidth = wnd->textwidth - ClientWidth(wnd);
@@ -105,6 +112,7 @@ void ComputeWindowLeft(WINDOW wnd)
     if (wnd->wleft < 0)
         wnd->wleft = 0;
 }
+#endif
 
 /* ----- get the text to a specified line ----- */
 static char *GetTextLine(WINDOW wnd, int selection)
@@ -294,20 +302,3 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
                     y-wnd->wtop+TopBorderAdj(wnd), FALSE);
     free(svlp);
 }
-
-#if 0
-int TextLineNumber(WINDOW wnd, char *lp)
-{
-    int lineno;
-    char *cp;
-    for (lineno = 0; lineno < wnd->wlines; lineno++)    {
-//        cp = wnd->text + *((wnd->TextPointers) + lineno);
-        cp = TextLine(wnd, lineno);
-        if (cp == lp)
-            return lineno;
-        if (cp > lp)
-            break;
-    }
-    return lineno-1;
-}
-#endif

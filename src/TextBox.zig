@@ -270,14 +270,13 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
 
 // ------------ BUTTON_RELEASED Message --------------
 fn ButtonReleasedMsg(win:*Window) void {
-    const wnd = win.win;
     if (HSliding or VSliding) {
         // release the mouse ouside the scroll bar
         _ = q.SendMessage(null, df.MOUSE_TRAVEL, 0, 0);
         if (VSliding) {
-            df.ComputeWindowTop(wnd);
+            ComputeWindowTop(win);
         } else {
-            df.ComputeWindowLeft(wnd);
+            ComputeWindowLeft(win);
         }
         _ = win.sendMessage(df.PAINT, 0, 0);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, 0, 0);
@@ -323,9 +322,9 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
         }
         // ---- reset the scroll box ----
         if (win.TestAttribute(df.VSCROLLBAR)) {
-            const vscrollbox = df.ComputeVScrollBox(wnd);
+            const vscrollbox = ComputeVScrollBox(win);
             if (vscrollbox != wnd.*.VScrollBox) {
-                MoveScrollBox(win, vscrollbox);
+                MoveScrollBox(win, @intCast(vscrollbox));
             }
         }
     }
@@ -473,12 +472,12 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
 
     // ------- position the scroll box -------
     if (win.TestAttribute(df.VSCROLLBAR|df.HSCROLLBAR)) {
-        const hscrollbox = df.ComputeHScrollBox(wnd);
-        const vscrollbox = df.ComputeVScrollBox(wnd);
+        const hscrollbox = ComputeHScrollBox(win);
+        const vscrollbox = ComputeVScrollBox(win);
         if ((hscrollbox != wnd.*.HScrollBox) or
                 (vscrollbox != wnd.*.VScrollBox)) {
-            wnd.*.HScrollBox = hscrollbox;
-            wnd.*.VScrollBox = vscrollbox;
+            wnd.*.HScrollBox = @intCast(hscrollbox);
+            wnd.*.VScrollBox = @intCast(vscrollbox);
             _ = win.sendMessage(df.BORDER, p1, 0);
         }
     }
@@ -592,8 +591,116 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
 
 //#define TextLine(wnd, sel) \
 //      (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
-pub fn TextLine(wnd:df.WINDOW, sel:c_uint) [*c]u8 {
-    return wnd.*.text + wnd.*.TextPointers[sel];
+//pub fn TextLine(wnd:df.WINDOW, sel:c_uint) [*c]u8 {
+//    return wnd.*.text + wnd.*.TextPointers[sel];
+//}
+
+// ------ compute the vertical scroll box position from
+//                   the text pointers ---------
+fn ComputeVScrollBox(win:*Window) usize {
+    const wnd = win.win;
+    const pagelen = wnd.*.wlines - win.ClientHeight();
+    const barlen = win.ClientHeight()-2;
+    var lines_tick:usize = 0;
+    var vscrollbox:usize = 0;
+
+    if (pagelen < 1 or barlen < 1) {
+        vscrollbox = 1;
+    } else {
+        if (pagelen > barlen) {
+            lines_tick = @intCast(@divFloor(pagelen, barlen));
+        } else {
+            lines_tick = @intCast(@divFloor(barlen, pagelen));
+        }
+        const wtop:usize = @intCast(wnd.*.wtop);
+        vscrollbox = 1 + @divFloor(wtop, lines_tick);
+        if (vscrollbox > win.ClientHeight()-2 or
+                wnd.*.wtop + win.ClientHeight() >= wnd.*.wlines) {
+            vscrollbox = @intCast(win.ClientHeight()-2);
+        }
+    }
+    return vscrollbox;
+}
+
+// ---- compute top text line from scroll box position ----
+fn ComputeWindowTop(win:*Window) void {
+    const wnd = win.win;
+    const pagelen:usize = @intCast(wnd.*.wlines - win.ClientHeight());
+    if (wnd.*.VScrollBox == 0) {
+        wnd.*.wtop = 0;
+    } else if (wnd.*.VScrollBox == win.ClientHeight()-2) {
+        wnd.*.wtop = @intCast(pagelen);
+    } else {
+        const barlen:usize = @intCast(win.ClientHeight()-2);
+        var lines_tick:usize = 0;
+
+        if (pagelen > barlen) {
+            lines_tick = if (barlen>0) @divFloor(pagelen, barlen) else 0;
+        } else {
+            lines_tick = if (pagelen>0) @divFloor(barlen, pagelen) else 0;
+        }
+        const vsbox:usize = @intCast(wnd.*.VScrollBox-1);
+        wnd.*.wtop = @intCast(vsbox * lines_tick);
+        if (wnd.*.wtop + win.ClientHeight() > wnd.*.wlines)
+            wnd.*.wtop = @intCast(pagelen);
+    }
+    if (wnd.*.wtop < 0)
+        wnd.*.wtop = 0;
+}
+
+// ------ compute the horizontal scroll box position from
+//                 the text pointers ---------
+fn ComputeHScrollBox(win:*Window) usize {
+    const wnd = win.win;
+    const pagewidth = wnd.*.textwidth - win.ClientWidth();
+    const barlen = win.ClientWidth()-2;
+    var chars_tick:usize = 0;
+    var hscrollbox:usize = 0;
+
+    if (pagewidth < 1 or barlen < 1) {
+        hscrollbox = 1;
+    } else {
+        if (pagewidth > barlen) {
+            chars_tick = if (barlen>0) @intCast(@divFloor(pagewidth, barlen)) else 0;
+        } else {
+            chars_tick = if (pagewidth>0) @intCast(@divFloor(barlen, pagewidth)) else 0;
+        }
+        const wleft:usize = @intCast(wnd.*.wleft);
+        const diff:usize = if (chars_tick>0) @divFloor(wleft, chars_tick) else 0;
+        hscrollbox = 1 + diff;
+        if (hscrollbox > win.ClientWidth()-2 or
+                wnd.*.wleft + win.ClientWidth() >= wnd.*.textwidth) {
+            hscrollbox = @intCast(win.ClientWidth()-2);
+        }
+    }
+    return hscrollbox;
+}
+
+// ---- compute left column from scroll box position ----
+fn ComputeWindowLeft(win:*Window) void {
+    const wnd = win.win;
+    const pagewidth:usize = @intCast(wnd.*.textwidth - win.ClientWidth());
+
+    if (wnd.*.HScrollBox == 0) {
+        wnd.*.wleft = 0;
+    } else if (wnd.*.HScrollBox == win.ClientWidth()-2) {
+        wnd.*.wleft = @intCast(pagewidth);
+    } else {
+        const barlen:usize = @intCast(win.ClientWidth()-2);
+        var chars_tick:usize = 0;
+
+        if (pagewidth > barlen) {
+            chars_tick = @divFloor(pagewidth, barlen);
+        } else {
+            chars_tick = @divFloor(barlen, pagewidth);
+        }
+        const hsbox:usize = @intCast(wnd.*.HScrollBox-1);
+        wnd.*.wleft = @intCast(hsbox * chars_tick);
+        if (wnd.*.wleft + win.ClientWidth() > wnd.*.textwidth)
+            wnd.*.wleft = @intCast(pagewidth);
+    }
+    if (wnd.*.wleft < 0)
+        wnd.*.wleft = 0;
 }
 
 // ------- write a line of text to a textbox window -------
@@ -836,16 +943,4 @@ pub fn TextLineNumber(win:*Window, pos:usize) usize {
         }
     }
     return len-1;
-
-//    int lineno;
-//    char *cp;
-//    for (lineno = 0; lineno < wnd->wlines; lineno++)    {
-//        cp = wnd->text + *((wnd->TextPointers) + lineno);
-//        cp = TextLine(wnd, lineno);
-//        if (cp == lp)
-//            return lineno;
-//        if (cp > lp)
-//            break;
-//    }
-//    return lineno-1;
 }
