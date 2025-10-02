@@ -76,9 +76,9 @@ typedef enum {FALSE, TRUE} BOOL;
 /* ------ integer type for message parameters ----- */
 typedef intptr_t PARAM;
 
-enum Condition     {
-    ISRESTORED, ISMINIMIZED, ISMAXIMIZED, ISCLOSING
-};
+//enum Condition     {
+//    ISRESTORED, ISMINIMIZED, ISMAXIMIZED, ISCLOSING
+//};
 
 typedef struct window {
     /* ---------------- window dimensions ----------------- */
@@ -93,9 +93,9 @@ typedef struct window {
 //	struct window *childfocus;	// child that ha(s/d) focus
     int attrib;                 /* Window attributes        */
     char *videosave;            /* video save buffer        */
-    enum Condition condition;   /* Restored, Maximized,
-                                   Minimized, Closing       */
-    enum Condition oldcondition;/* previous condition       */
+//    enum Condition condition;   /* Restored, Maximized,
+//                                   Minimized, Closing       */
+//    enum Condition oldcondition;/* previous condition       */
 //  BOOL wasCleared;
     int restored_attrib;        /* attributes when restored */
     void *extension;      /* menus, dialogs, documents, etc */

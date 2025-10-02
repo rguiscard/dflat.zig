@@ -16,6 +16,13 @@ const menus = @import("Menus.zig");
 const GapBuf = @import("GapBuffer.zig");
 const cfg = @import("Config.zig");
 
+pub const Condition = enum {
+    ISRESTORED,
+    ISMINIMIZED,
+    ISMAXIMIZED,
+    ISCLOSING,
+};
+
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
@@ -35,6 +42,8 @@ nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
 childfocus:?*TopLevelFields  = null,  // child that ha(s/d) focus
 
+condition: Condition = .ISRESTORED,    // Restored, Maximized, Minimized, Closing
+oldcondition: Condition = .ISRESTORED, // previous condition
 wasCleared:bool = false,
 
 PrevMouse:?*TopLevelFields    = null, // previous mouse capture
@@ -222,8 +231,10 @@ pub fn create(
             InsertTitle(self, title);
         }
         self.parent = pt;
-        wnd.*.oldcondition = df.ISRESTORED;
-        wnd.*.condition = df.ISRESTORED;
+        self.oldcondition = .ISRESTORED;
+        self.condition = .ISRESTORED;
+//        wnd.*.oldcondition = df.ISRESTORED;
+//        wnd.*.condition = df.ISRESTORED;
         wnd.*.RestoredRC = wnd.*.rc;
         InitWindowColors(self);
         _ = self.sendMessage(df.CREATE_WINDOW, 0, 0);
@@ -369,7 +380,7 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
             const tlen:usize = @intCast(@min(ttlen, self.WindowWidth()-2));
             const tend:usize = @intCast(self.WindowWidth()-3-self.BorderAdj());
             @memset(line[0..@intCast(self.WindowWidth())],  ' ');
-            if (wnd.*.condition != df.ISMINIMIZED) {
+            if (self.condition != .ISMINIMIZED) {
                 const ilen:isize = @intCast(tlen);
                 const pos:usize = @intCast(@divFloor(self.WindowWidth()-2-ilen, 2));
                 @memcpy(line[pos..pos+tlen], self.title orelse "");
@@ -379,15 +390,15 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
             if (self.TestAttribute(df.CONTROLBOX))
                 line[@intCast(2-self.BorderAdj())] = df.CONTROLBOXCHAR;
             if (self.TestAttribute(df.MINMAXBOX)) {
-                switch (wnd.*.condition) {
-                    df.ISRESTORED => {
+                switch (self.condition) {
+                    .ISRESTORED => {
                         line[tend+1] = df.MAXPOINTER;
                         line[tend]   = df.MINPOINTER;
                     },
-                    df.ISMINIMIZED => {
+                    .ISMINIMIZED => {
                         line[tend+1] = df.MAXPOINTER;
                     },
-                    df.ISMAXIMIZED => {
+                    .ISMAXIMIZED => {
                         line[tend]   = df.MINPOINTER;
                         line[tend+1] = df.RESTOREPOINTER;
                     },
@@ -417,8 +428,8 @@ fn shadow_char(wnd:df.WINDOW, y:c_int) void {
         const chr = df.GetVideoChar(@intCast(win.GetLeft()+x), @intCast(win.GetTop()+y)) & 255;
 
         if (win.TestAttribute(df.SHADOW) == false or
-            wnd.*.condition == df.ISMINIMIZED or
-            wnd.*.condition == df.ISMAXIMIZED or
+            win.condition == .ISMINIMIZED or
+            win.condition == .ISMAXIMIZED or
             cfg.config.mono > 0) {
             // No shadow
             return;
@@ -439,8 +450,8 @@ fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
         const bg = df.background;
 
         if (win.TestAttribute(df.SHADOW) == false or
-            wnd.*.condition == df.ISMINIMIZED or
-            wnd.*.condition == df.ISMAXIMIZED or
+            win.condition == .ISMINIMIZED or
+            win.condition == .ISMAXIMIZED or
             cfg.config.mono > 0) {
             // No shadow
             return;
@@ -526,8 +537,7 @@ fn ParamRect(self:*TopLevelFields, rcc:?*df.RECT) df.RECT {
 //}
 
 fn SeCorner(self:*TopLevelFields, stdse:u8) u8 {
-    const wnd = self.win;
-    if (self.TestAttribute(df.SIZEABLE) and wnd.*.condition == df.ISRESTORED)
+    if (self.TestAttribute(df.SIZEABLE) and self.condition == .ISRESTORED)
         return df.SIZETOKEN;
     return stdse;
 }

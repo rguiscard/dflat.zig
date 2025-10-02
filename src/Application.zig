@@ -43,23 +43,23 @@ fn CreateWindowMsg(win: *Window) bool {
 
     // INCLUDE_WINDOWOPTIONS
     if (cfg.config.Border) {
-        DialogBox.SetCheckBox(&Dialogs.Display, c.ID_BORDER);
+        DialogBox.SetCheckBox(&Dialogs.Display, .ID_BORDER);
     }
     if (cfg.config.Title) {
-        DialogBox.SetCheckBox(&Dialogs.Display, c.ID_TITLE);
+        DialogBox.SetCheckBox(&Dialogs.Display, .ID_TITLE);
     }
     if (cfg.config.StatusBar) {
-        DialogBox.SetCheckBox(&Dialogs.Display, c.ID_STATUSBAR);
+        DialogBox.SetCheckBox(&Dialogs.Display, .ID_STATUSBAR);
     }
     if (cfg.config.Texture) {
-        DialogBox.SetCheckBox(&Dialogs.Display, c.ID_TEXTURE);
+        DialogBox.SetCheckBox(&Dialogs.Display, .ID_TEXTURE);
     }
     if (cfg.config.mono == 1) {
-        radio.PushRadioButton(&Dialogs.Display, c.ID_MONO);
+        radio.PushRadioButton(&Dialogs.Display, .ID_MONO);
     } else if (cfg.config.mono == 2) {
-        radio.PushRadioButton(&Dialogs.Display, c.ID_REVERSE);
+        radio.PushRadioButton(&Dialogs.Display, .ID_REVERSE);
     } else {
-        radio.PushRadioButton(&Dialogs.Display, c.ID_COLOR);
+        radio.PushRadioButton(&Dialogs.Display, .ID_COLOR);
     }
     if (df.SCREENHEIGHT != cfg.config.ScreenLines) {
         SetScreenHeight(@intCast(cfg.config.ScreenLines));
@@ -434,7 +434,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
     const wnd = win.win;
     switch (msg) {
         df.INITIATE_DIALOG => {
-            if (DialogBox.ControlWindow(&Dialogs.Windows,c.ID_WINDOWLIST)) |cwin| {
+            if (DialogBox.ControlWindow(&Dialogs.Windows,.ID_WINDOWLIST)) |cwin| {
                 var sel:c_int = 0;
                 if (ApplicationWindow) |awin| {
                     var win1 = awin.firstWindow();
@@ -468,10 +468,10 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
         df.COMMAND => {
             const cmd:c = @enumFromInt(p1);
             switch (cmd) {
-                c.ID_OK => {
+                .ID_OK => {
                     if (p2 == 0) {
                         const val:c_int = -1;
-                        const control = DialogBox.ControlWindow(&Dialogs.Windows, c.ID_WINDOWLIST);
+                        const control = DialogBox.ControlWindow(&Dialogs.Windows, .ID_WINDOWLIST);
                         if (control) |cwin| {
                             _ = cwin.sendMessage(df.LB_CURRENTSELECTION, 
                                                 @intCast(@intFromPtr(&val)), 0);
@@ -480,9 +480,9 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
 
                     }
                 },
-                c.ID_WINDOWLIST => {
+                .ID_WINDOWLIST => {
                     if (p2 == df.LB_CHOOSE)
-                        _ = win.sendCommandMessage(c.ID_OK, 0);
+                        _ = win.sendCommandMessage(.ID_OK, 0);
                 },
                 else => {
                 }
@@ -518,7 +518,7 @@ fn ChooseWindow(win:*Window, WindowNo:c_int) void {
     }
     if (cwin) |cw| {
         _ = cw.sendMessage(df.SETFOCUS, df.TRUE, 0);
-        if (cw.win.*.condition == df.ISMINIMIZED)
+        if (cw.condition == .ISMINIMIZED)
             _ = cw.sendMessage(df.RESTORE, 0, 0);
     }
 }
@@ -538,9 +538,9 @@ fn DoWindowColors(win:*Window) void {
 
 // ----- set up colors for the application window ------
 fn SelectColors(win: *Window) void {
-    if (radio.RadioButtonSetting(&Dialogs.Display, c.ID_MONO)) {
+    if (radio.RadioButtonSetting(&Dialogs.Display, .ID_MONO)) {
         cfg.config.mono = 1;   // mono
-    } else if (radio.RadioButtonSetting(&Dialogs.Display, c.ID_REVERSE)) {
+    } else if (radio.RadioButtonSetting(&Dialogs.Display, .ID_REVERSE)) {
         cfg.config.mono = 2;   // mono reverse
     } else {
         cfg.config.mono = 0;   // color
@@ -561,12 +561,11 @@ fn SelectColors(win: *Window) void {
 
 // ---- select screen lines ----
 fn SelectLines(win:*Window) void {
-    const wnd = win.win;
     cfg.config.ScreenLines = @intCast(df.SCREENHEIGHT);
     if (df.SCREENHEIGHT != cfg.config.ScreenLines) {
         SetScreenHeight(@intCast(cfg.config.ScreenLines));
         // ---- re-maximize ----
-        if (wnd.*.condition == df.ISMAXIMIZED) {
+        if (win.condition == .ISMAXIMIZED) {
             _ = win.sendMessage(df.SIZE, @intCast(win.GetRight()), @intCast(df.SCREENHEIGHT-1));
             return;
         }
@@ -602,12 +601,12 @@ fn SetScreenHeight(height: c_int) void {
 
 // ----- select the screen texture -----
 fn SelectTexture() void {
-    cfg.config.Texture = checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_TEXTURE);
+    cfg.config.Texture = checkbox.CheckBoxSetting(&Dialogs.Display, .ID_TEXTURE);
 }
 
 // -- select whether the application screen has a border --
 fn SelectBorder(win: *Window) void {
-    cfg.config.Border = checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_BORDER);
+    cfg.config.Border = checkbox.CheckBoxSetting(&Dialogs.Display, .ID_BORDER);
     if (cfg.config.Border) {
         win.AddAttribute(df.HASBORDER);
     } else {
@@ -617,7 +616,7 @@ fn SelectBorder(win: *Window) void {
 
 // select whether the application screen has a status bar
 fn SelectStatusBar(win: *Window) void {
-    cfg.config.StatusBar = checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_STATUSBAR);
+    cfg.config.StatusBar = checkbox.CheckBoxSetting(&Dialogs.Display, .ID_STATUSBAR);
     if (cfg.config.StatusBar) {
         win.AddAttribute(df.HASSTATUSBAR);
     } else {
@@ -627,7 +626,7 @@ fn SelectStatusBar(win: *Window) void {
 
 // select whether the application screen has a title bar
 fn SelectTitle(win: *Window) void {
-    cfg.config.Title = checkbox.CheckBoxSetting(&Dialogs.Display, c.ID_TITLE);
+    cfg.config.Title = checkbox.CheckBoxSetting(&Dialogs.Display, .ID_TITLE);
     if (cfg.config.Title) {
         win.AddAttribute(df.HASTITLEBAR);
     } else {

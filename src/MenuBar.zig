@@ -355,7 +355,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 // --------- COMMAND Message ----------
 fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const cmd:c = @enumFromInt(p1);
-    if (cmd == c.ID_HELP) {
+    if (cmd == .ID_HELP) {
         _ = root.BaseWndProc(k.MENUBAR, win, df.COMMAND, p1, p2);
         return;
     }

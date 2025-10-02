@@ -69,7 +69,7 @@ fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         // --- show the children of this window ---
         var cwin = win.firstWindow();
         while (cwin) |cw| {
-            if (cw.win.*.condition != df.ISCLOSING) {
+            if (cw.condition != .ISCLOSING) {
                 _ = cw.sendMessage(df.SHOW_WINDOW, p1, p2);
             }
             cwin = cw.nextWindow();
@@ -347,7 +347,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (win.TestAttribute(df.MINMAXBOX) and
                 win.TestAttribute(df.HASTITLEBAR)) {
             if (mx == win.WindowWidth()-2) {
-                if (wnd.*.condition != df.ISRESTORED) {
+                if (win.condition != .ISRESTORED) {
                     // --- hit the restore box ---
                     _ = win.sendMessage(df.RESTORE, 0, 0);
                 } else {
@@ -358,13 +358,13 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             }
             if (mx == win.WindowWidth()-3) {
                 // --- hit the minimize box ---
-                if (wnd.*.condition != df.ISMINIMIZED) {
+                if (win.condition != .ISMINIMIZED) {
                     _ = win.sendMessage(df.MINIMIZE, 0, 0);
                 }
                 return;
             }
         }
-        if (wnd.*.condition == df.ISMAXIMIZED) {
+        if (win.condition == .ISMAXIMIZED) {
             return;
         }
         if (win.TestAttribute(df.MOVEABLE)) {
@@ -381,11 +381,11 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             (my == win.WindowHeight()-1)) {
         var ww = win; // identity of win may change
         // ------- hit the resize corner -------
-        if (wnd.*.condition == df.ISMINIMIZED)
+        if (win.condition == .ISMINIMIZED)
             return;
         if (win.TestAttribute(df.SIZEABLE) == false)
             return;
-        if (wnd.*.condition == df.ISMAXIMIZED) {
+        if (win.condition == .ISMAXIMIZED) {
             if (win.parent == null) {
                 return;
             }
@@ -464,7 +464,7 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     // be careful, changing the same struct.
     wnd.*.rc.rt = @intCast(win.GetLeft()+win.WindowWidth()-1);
     wnd.*.rc.bt = @intCast(win.GetTop()+win.WindowHeight()-1);
-    if (wnd.*.condition == df.ISRESTORED) {
+    if (win.condition == .ISRESTORED) {
         wnd.*.RestoredRC = wnd.*.rc;
     }
 
@@ -498,14 +498,14 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     wnd.*.ht = @intCast(win.GetBottom()-win.GetTop()+1);
     wnd.*.wd = @intCast(win.GetRight()-win.GetLeft()+1);
 
-    if (wnd.*.condition == df.ISRESTORED)
+    if (win.condition == .ISRESTORED)
         wnd.*.RestoredRC = df.WindowRect(wnd);
 
     const rc = rect.ClientRect(win);
 
     var cwin = win.firstWindow();
     while (cwin) |cw| {
-        if (cw.win.*.condition == df.ISMAXIMIZED) {
+        if (cw.condition == .ISMAXIMIZED) {
             _ = cw.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
         }
         cwin = cw.nextWindow();
@@ -518,7 +518,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 // --------- CLOSE_WINDOW Message ----------
 fn CloseWindowMsg(win:*Window) void {
     const wnd = win.win;
-    wnd.*.condition = df.ISCLOSING;
+    win.condition = .ISCLOSING;
     // ----------- hide this window ------------
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
 
@@ -569,8 +569,8 @@ fn MaximizeMsg(win:*Window) void {
     if (win.parent) |pw| {
         rc = rect.ClientRect(pw);
     }
-    wnd.*.oldcondition = wnd.*.condition;
-    wnd.*.condition = df.ISMAXIMIZED;
+    win.oldcondition = win.condition;
+    win.condition = .ISMAXIMIZED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
@@ -588,8 +588,8 @@ fn MinimizeMsg(win:*Window) void {
     const wnd = win.win;
     const holdrc = wnd.*.RestoredRC;
     const rc = PositionIcon(win);
-    wnd.*.oldcondition = wnd.*.condition;
-    wnd.*.condition = df.ISMINIMIZED;
+    win.oldcondition = win.condition;
+    win.condition = .ISMINIMIZED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
@@ -610,8 +610,8 @@ fn MinimizeMsg(win:*Window) void {
 fn RestoreMsg(win:*Window) void {
     const wnd = win.win;
     const holdrc = wnd.*.RestoredRC;
-    wnd.*.oldcondition = wnd.*.condition;
-    wnd.*.condition = df.ISRESTORED;
+    win.oldcondition = win.condition;
+    win.condition = .ISRESTORED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     wnd.*.attrib = wnd.*.restored_attrib;
@@ -723,16 +723,16 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             CloseWindowMsg(win);
         },
         df.MAXIMIZE => {
-            if (wnd.*.condition != df.ISMAXIMIZED)
+            if (win.condition != .ISMAXIMIZED)
                 MaximizeMsg(win);
         },
         df.MINIMIZE => {
-            if (wnd.*.condition != df.ISMINIMIZED)
+            if (win.condition != .ISMINIMIZED)
                 MinimizeMsg(win);
         },
         df.RESTORE => {
-            if (wnd.*.condition != df.ISRESTORED) {
-                if (wnd.*.oldcondition == df.ISMAXIMIZED) {
+            if (win.condition != .ISRESTORED) {
+                if (win.oldcondition == .ISMAXIMIZED) {
                     _ = win.sendMessage(df.MAXIMIZE, 0, 0);
                 } else {
                     RestoreMsg(win);
@@ -783,7 +783,7 @@ fn PositionIcon(win:*Window) df.RECT {
         rc = LowerRight(prc); // this makes previosu assignment useless ?
         // - search for icon available location -
         while (cwin) |cw| {
-            if (cw.win.*.condition == df.ISMINIMIZED) {
+            if (cw.condition == .ISMINIMIZED) {
                 const rc1 = cw.WindowRect();
                 if (rc1.lf == rc.lf and rc1.tp == rc.tp) {
                     rc.lf -= ICONWIDTH;

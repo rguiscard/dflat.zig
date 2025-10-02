@@ -53,9 +53,9 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         df.CREATE_WINDOW => {
             const rtn = mp.zDefaultWndProc(win, msg, p1, p2);
             if (mp.cfg.config.InsertMode == true)
-                mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT);
+                mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
             if (mp.cfg.config.WordWrap == true)
-                mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP);
+                mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_WRAP);
             FixTabMenu();
             return rtn;
         },
@@ -100,11 +100,11 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                         return false;
                 },
                 .ID_WRAP => {
-                    mp.cfg.config.WordWrap = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP);
+                    mp.cfg.config.WordWrap = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_WRAP);
                     return true;
                 },
                 .ID_INSERT => {
-                    mp.cfg.config.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT);
+                    mp.cfg.config.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
                     return true;
                 },
                 .ID_TAB2 => {
@@ -324,7 +324,7 @@ fn DeleteFile(win:*mp.Window) void {
 }
 
 fn FixTabMenu() void {
-    const cp = mp.menu.GetCommandText(&menu.MainMenu, c.ID_TABS);
+    const cp = mp.menu.GetCommandText(&menu.MainMenu, .ID_TABS);
     if (cp) |cmd| {
         if (std.mem.indexOfScalar(u8, cmd, '(')) |_| {
             if (mp.Window.inFocus) |focus| {
@@ -348,8 +348,8 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
     switch (msg) {
         df.SETFOCUS => {
             if (p1 > 0) {
-                win.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_INSERT);
-                win.WordWrapMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), c.ID_WRAP);
+                win.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
+                win.WordWrapMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_WRAP);
             }
             rtn = mp.zDefaultWndProc(win, msg, p1, p2);
             if (p1 == 0) {
@@ -373,11 +373,11 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                     return true;
                 },
                 .ID_WRAP => {
-                    _ = win.getParent().sendCommandMessage(c.ID_WRAP, 0);
+                    _ = win.getParent().sendCommandMessage(.ID_WRAP, 0);
                     win.WordWrapMode = mp.cfg.config.WordWrap;
                 },
                 .ID_INSERT => {
-                    _ = win.getParent().sendCommandMessage(c.ID_INSERT, 0);
+                    _ = win.getParent().sendCommandMessage(.ID_INSERT, 0);
                     win.InsertMode = mp.cfg.config.InsertMode;
                     _ = df.SendMessage(null, df.SHOW_CURSOR, if (win.InsertMode) df.TRUE else df.FALSE, 0);
                 },
@@ -394,7 +394,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 if (std.fmt.allocPrintSentinel(mp.global_allocator, "{s}\nText changed. Save it ?", .{title}, 0)) |m| {
                     defer mp.global_allocator.free(m);
                     if (mp.MessageBox.YesNoBox(m)) {
-                        _ = win.getParent().sendCommandMessage(c.ID_SAVE, 0);
+                        _ = win.getParent().sendCommandMessage(.ID_SAVE, 0);
                     }
                 } else |_| {
                     // error
@@ -427,15 +427,15 @@ fn ShowPosition(win:*mp.Window) void {
 
 pub fn PrepFileMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     _ = mnu;
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVE);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SAVEAS);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_DELETEFILE);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_SAVE);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_SAVEAS);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_DELETEFILE);
     if (w) |win| {
         if (win.getClass() == mp.CLASS.EDITBOX) {
             if (win.isMultiLine()) {
-                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVE);
-                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SAVEAS);
-                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_DELETEFILE);
+                mp.menu.ActivateCommand(&menu.MainMenu, .ID_SAVE);
+                mp.menu.ActivateCommand(&menu.MainMenu, .ID_SAVEAS);
+                mp.menu.ActivateCommand(&menu.MainMenu, .ID_DELETEFILE);
             }
         }
     }
@@ -443,31 +443,31 @@ pub fn PrepFileMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
 
 pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     _ = mnu;
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_CUT);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_COPY);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_CLEAR);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_DELETETEXT);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_PARAGRAPH);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_PASTE);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_UNDO);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_CUT);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_COPY);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_CLEAR);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_DELETETEXT);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_PARAGRAPH);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_PASTE);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_UNDO);
     if (w) |win| {
         const wnd = win.win;
         if (win.getClass() == mp.CLASS.EDITBOX) {
            if (win.isMultiLine()) {
                if (mp.textbox.TextBlockMarked(win)) {
-                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_CUT);
-                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_COPY);
-                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_CLEAR);
-                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_DELETETEXT);
+                   mp.menu.ActivateCommand(&menu.MainMenu, .ID_CUT);
+                   mp.menu.ActivateCommand(&menu.MainMenu, .ID_COPY);
+                   mp.menu.ActivateCommand(&menu.MainMenu, .ID_CLEAR);
+                   mp.menu.ActivateCommand(&menu.MainMenu, .ID_DELETETEXT);
                }
-               mp.menu.ActivateCommand(&menu.MainMenu, c.ID_PARAGRAPH);
+               mp.menu.ActivateCommand(&menu.MainMenu, .ID_PARAGRAPH);
                if ((df.TestAttribute(wnd, df.READONLY) == 0)) {
                    if (mp.clipboard.Clipboard) |_| {
-                       mp.menu.ActivateCommand(&menu.MainMenu, c.ID_PASTE);
+                       mp.menu.ActivateCommand(&menu.MainMenu, .ID_PASTE);
                    }
                }
                if (win.DeletedText != null)
-                   mp.menu.ActivateCommand(&menu.MainMenu, c.ID_UNDO);
+                   mp.menu.ActivateCommand(&menu.MainMenu, .ID_UNDO);
            }
         }
     }
@@ -475,15 +475,15 @@ pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
 
 pub fn PrepSearchMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     _ = mnu;
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCH);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_REPLACE);
-    mp.menu.DeactivateCommand(&menu.MainMenu, c.ID_SEARCHNEXT);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_SEARCH);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_REPLACE);
+    mp.menu.DeactivateCommand(&menu.MainMenu, .ID_SEARCHNEXT);
     if (w) |win| {
         if (win.getClass() == mp.CLASS.EDITBOX) {
             if (win.isMultiLine()) {
-                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SEARCH);
-                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_REPLACE);
-                mp.menu.ActivateCommand(&menu.MainMenu, c.ID_SEARCHNEXT);
+                mp.menu.ActivateCommand(&menu.MainMenu, .ID_SEARCH);
+                mp.menu.ActivateCommand(&menu.MainMenu, .ID_REPLACE);
+                mp.menu.ActivateCommand(&menu.MainMenu, .ID_SEARCHNEXT);
             }
         }
     }
@@ -494,5 +494,4 @@ const std = @import("std");
 /// This imports the separate module containing `root.zig`. Take a look in `build.zig` for details.
 const mp = @import("memopad");
 const df = mp.df;
-const c = mp.Command;
 const menu = @import("MainMenu.zig");

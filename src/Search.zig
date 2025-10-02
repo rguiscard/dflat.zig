@@ -64,13 +64,13 @@ fn SearchTextBox(win:*Window, incr:bool) void {
     var cp1:[*c]u8 = null;
     var pp1:usize = 0; // based on zp1
     const dbox = if (Replacing) &Dialogs.ReplaceTextDB else  &Dialogs.SearchTextDB;
-    const searchtext = DialogBox.GetEditBoxText(dbox, c.ID_SEARCHFOR);
+    const searchtext = DialogBox.GetEditBoxText(dbox, .ID_SEARCHFOR);
     var FoundOne = false;
     var rpl = true;
     if (searchtext) |cp| {
         while ((rpl == true) and (cp.len > 0)) {
             if (Replacing) {
-                rpl = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, c.ID_REPLACEALL);
+                rpl = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, .ID_REPLACEALL);
             }
 
             if (textbox.TextBlockMarked(win)) {
@@ -175,10 +175,10 @@ pub fn ReplaceText(win:*Window) void {
     Replacing = true;
     lastsize = 0;
     if (CheckCase) {
-        DialogBox.SetCheckBox(&Dialogs.ReplaceTextDB, c.ID_MATCHCASE);
+        DialogBox.SetCheckBox(&Dialogs.ReplaceTextDB, .ID_MATCHCASE);
     }
     if (DialogBox.create(null, &Dialogs.ReplaceTextDB, df.TRUE, null)) {
-        CheckCase = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, c.ID_MATCHCASE);
+        CheckCase = checkbox.CheckBoxSetting(&Dialogs.ReplaceTextDB, .ID_MATCHCASE);
         SearchTextBox(win, false);
     }
 }
@@ -188,10 +188,10 @@ pub fn SearchText(win:*Window) void {
     Replacing = false;
     lastsize = 0;
     if (CheckCase) {
-        DialogBox.SetCheckBox(&Dialogs.SearchTextDB, c.ID_MATCHCASE);
+        DialogBox.SetCheckBox(&Dialogs.SearchTextDB, .ID_MATCHCASE);
     }
     if (DialogBox.create(null, &Dialogs.SearchTextDB, df.TRUE, null)) {
-        CheckCase = checkbox.CheckBoxSetting(&Dialogs.SearchTextDB, c.ID_MATCHCASE);
+        CheckCase = checkbox.CheckBoxSetting(&Dialogs.SearchTextDB, .ID_MATCHCASE);
         SearchTextBox(win, false);
     }
 }

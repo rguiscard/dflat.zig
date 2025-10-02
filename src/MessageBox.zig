@@ -1,6 +1,6 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
-const c = @import("Commands.zig").Command;
+const cmd = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
 const r = @import("Colors.zig");
 const root = @import("root.zig");
@@ -19,24 +19,24 @@ const sCONFIRM = "Confirm";
 const sWait = "Wait...";
 
 pub fn ErrorMessage(msg: [:0]const u8) bool {
-    return GenericMessage(null, sERROR, msg, 1, ErrorBoxProc, sOK, null, c.ID_OK, c.ID_NULL, true);
+    return GenericMessage(null, sERROR, msg, 1, ErrorBoxProc, sOK, null, .ID_OK, .ID_NULL, true);
 }
 
 pub fn MessageBox(title: [:0]const u8, msg: [:0]const u8) bool {
-    return GenericMessage(null, title, msg, 1, MessageBoxProc, sOK, null, c.ID_OK, c.ID_NULL, true);
+    return GenericMessage(null, title, msg, 1, MessageBoxProc, sOK, null, .ID_OK, .ID_NULL, true);
 }
 
 pub fn YesNoBox(msg: [:0]const u8) bool {
-    return GenericMessage(null, sCONFIRM, msg, 2, YesNoBoxProc, sYES, sNO, c.ID_OK, c.ID_CANCEL, true);
+    return GenericMessage(null, sCONFIRM, msg, 2, YesNoBoxProc, sYES, sNO, .ID_OK, .ID_CANCEL, true);
 }
 
 pub fn CancelBox(win:?*Window, msg: [:0]const u8) bool {
-    return GenericMessage(win, sWait, msg, 1, CancelProc, sCancel, null, c.ID_CANCEL, c.ID_NULL, false);
+    return GenericMessage(win, sWait, msg, 1, CancelProc, sCancel, null, .ID_CANCEL, .ID_NULL, false);
 }
 
 fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct: c_int,
                   wndproc: *const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
-                  button1: ?[:0]const u8, button2: ?[:0]const u8, c1: c, c2: c, isModal: bool) bool {
+                  button1: ?[:0]const u8, button2: ?[:0]const u8, c1: cmd, c2: cmd, isModal: bool) bool {
     var mBox = Dialogs.MsgBox;
 
 //    const ptr:[*c]u8 = @constCast(msg.ptr);
@@ -131,9 +131,9 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             if (p1 < 128) {
                 const cc = std.ascii.toLower(@intCast(p1));
                 if (cc == 'y') {
-                    _ = win.sendCommandMessage(c.ID_OK, 0);
+                    _ = win.sendCommandMessage(.ID_OK, 0);
                 } else if (cc == 'n') {
-                    _ = win.sendCommandMessage(c.ID_CANCEL, 0);
+                    _ = win.sendCommandMessage(.ID_CANCEL, 0);
                 }
             }
         },

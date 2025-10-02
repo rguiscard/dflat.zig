@@ -37,7 +37,7 @@ pub fn SetNextFocus() void {
             while (ww1.childfocus) |w1| {
                 ww1 = w1;
             }
-            if (ww1.win.*.condition != df.ISCLOSING) {
+            if (ww1.condition != .ISCLOSING) {
                 _ = ww1.sendMessage(df.SETFOCUS, df.TRUE, 0);
             }
         }
@@ -78,7 +78,7 @@ pub fn SetPrevFocus() void {
             while (ww1.childfocus) |w1| {
                 ww1 = w1;
             }
-            if (ww1.win.*.condition != df.ISCLOSING) {
+            if (ww1.condition != .ISCLOSING) {
                 _ = ww1.sendMessage(df.SETFOCUS, df.TRUE, 0);
             }
         }

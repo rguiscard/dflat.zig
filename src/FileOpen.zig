@@ -76,7 +76,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             var db:*Dialogs.DBOX = undefined;
             if (wnd.*.extension) |extension| {
                 db = @ptrCast(@alignCast(extension));
-                if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
+                if (DialogBox.ControlWindow(db, .ID_FILENAME)) |cwin| {
                     _ = cwin.sendMessage(df.SETTEXTLENGTH, 64, 0);
                 }
             }
@@ -89,7 +89,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             const cmd:c = @enumFromInt(p1);
             const subcmd:isize = @intCast(p2);
             switch(cmd) {
-                c.ID_OK => {
+                .ID_OK => {
                     if (subcmd == 0) {
                         var fName = std.mem.zeroes([df.MAXPATH]u8);
                         DialogBox.GetItemText(wnd, c.ID_FILENAME, &fName, df.MAXPATH);
@@ -114,7 +114,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                         }
                     }
                 },
-                c.ID_FILES => {
+                .ID_FILES => {
                     switch (subcmd) {
                         df.ENTERFOCUS, df.LB_SELECTION => {
                             // selected a different filename
@@ -135,7 +135,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                     }
                     return true;
                 },
-                c.ID_DIRECTORY => {
+                .ID_DIRECTORY => {
                     switch (subcmd) {
                         df.ENTERFOCUS => {
                             if (_fileSpec) |f| {
@@ -171,7 +171,7 @@ fn InitDlgBox(win:*Window) void {
     var sspec:[*c]u8 = null;
     var rtn = df.FALSE;
     if (_fileSpec) |f| {
-        DialogBox.PutItemText(wnd, c.ID_FILENAME, @constCast(f.ptr));
+        DialogBox.PutItemText(wnd, .ID_FILENAME, @constCast(f.ptr));
     }
     if (_srchSpec) |s| {
         sspec = @constCast(s.ptr);

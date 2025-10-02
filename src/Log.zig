@@ -34,7 +34,7 @@ pub export fn LogMessages (wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 }
 
 pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const control = DialogBox.ControlWindow(&Dialogs.Log, c.ID_LOGLIST);
+    const control = DialogBox.ControlWindow(&Dialogs.Log, .ID_LOGLIST);
     switch (msg)    {
         df.INITIATE_DIALOG => {
             if (control) |cwin| {
@@ -48,7 +48,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
         },
         df.COMMAND => {
             const cmd:c = @enumFromInt(p1);
-            if (cmd == c.ID_OK) {
+            if (cmd == .ID_OK) {
                 if (control) |cwin| {
                     const cwnd = cwin.win;
                     const tl = df.GetTextLines(cwnd);
@@ -69,16 +69,16 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
 pub fn MessageLog(win:*Window) void {
     const Log = &Dialogs.Log;
     if (DialogBox.create(win, Log, df.TRUE, LogProc)) {
-        if (checkbox.CheckBoxSetting(Log, c.ID_LOGGING)) {
+        if (checkbox.CheckBoxSetting(Log, .ID_LOGGING)) {
             log = df.fopen("DFLAT.LOG", "wt");
             if (menubar.ActiveMenuBar) |mb| {
-                Menu.SetCommandToggle(mb, c.ID_LOG);
+                Menu.SetCommandToggle(mb, .ID_LOG);
             }
         } else if (log != null)    {
             _ = df.fclose(log);
             log = null;
             if (menubar.ActiveMenuBar) |mb| {
-                Menu.ClearCommandToggle(mb, c.ID_LOG);
+                Menu.ClearCommandToggle(mb, .ID_LOG);
             }
         }
     }

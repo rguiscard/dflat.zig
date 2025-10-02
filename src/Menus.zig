@@ -1,13 +1,13 @@
 const std = @import("std");
 const df = @import("ImportC.zig").df;
-const c = @import("Commands.zig").Command;
+const cmd = @import("Commands.zig").Command;
 const Window = @import("Window.zig");
 
 pub const MAXPULLDOWNS  = 15;
 pub const MAXSELECTIONS  = 20;
 pub const MAXCASCADES = 3;  // nesting level of cascaded menus
 pub const SEPCHAR = "\xc4";
-pub const Separator = .{SEPCHAR,        c.ID_NULL,          0,     Default};
+pub const Separator = .{SEPCHAR,        .ID_NULL,          0,     Default};
 
 pub const PopDownAttrib = packed struct {
     INACTIVE: bool = false,
@@ -24,10 +24,10 @@ pub const Cascaded:PopDownAttrib = .{.CASCADED = true};
 //       one for each selection on a popdown menu ---------
 pub const PopDown = struct {
     SelectionTitle:?[:0]const u8 = null, // title of the selection
-    ActionId:c = c.ID_NULL,            // the command executed
-    Accelerator:c_int = 0,             // the accelerator key
-    Attrib:PopDownAttrib = .{},        // INACTIVE | CHECKED | TOGGLE | CASCADED
-    help:?[:0]const u8 = null,         // Help mnemonic
+    ActionId:cmd = .ID_NULL,             // the command executed
+    Accelerator:c_int = 0,               // the accelerator key
+    Attrib:PopDownAttrib = .{},          // INACTIVE | CHECKED | TOGGLE | CASCADED
+    help:?[:0]const u8 = null,           // Help mnemonic
 };
 
 // ----------- popdown menu structure
@@ -50,13 +50,13 @@ pub const MBAR = struct {
 // ------------- the System Menu ---------------------
 pub var SystemMenu:MBAR = buildMenuBar(.{
     .{"System Menu", null, null, -1, .{
-            .{"~Restore",     c.ID_SYSRESTORE,    0,     Default},
-            .{"~Move",        c.ID_SYSMOVE,       0,     Default},
-            .{"~Size",        c.ID_SYSSIZE,       0,     Default},
-            .{"Mi~nimize",    c.ID_SYSMINIMIZE,   0,     Default},
-            .{"Ma~Ximize",    c.ID_SYSMAXIMIZE,   0,     Default},
+            .{"~Restore",     .ID_SYSRESTORE,    0,     Default},
+            .{"~Move",        .ID_SYSMOVE,       0,     Default},
+            .{"~Size",        .ID_SYSSIZE,       0,     Default},
+            .{"Mi~nimize",    .ID_SYSMINIMIZE,   0,     Default},
+            .{"Ma~Ximize",    .ID_SYSMAXIMIZE,   0,     Default},
             Separator,
-            .{"~Close",       c.ID_SYSCLOSE,      0,     Default},
+            .{"~Close",       .ID_SYSCLOSE,      0,     Default},
         },
     },
     
@@ -79,7 +79,7 @@ fn buildMenu(comptime pulldowns:anytype) [MAXPULLDOWNS+1]MENU {
              .Selections = [_]PopDown{ // this will be replace later. need better solution.
                  .{
                      .SelectionTitle = null,
-                     .ActionId = c.ID_NULL,
+                     .ActionId = .ID_NULL,
                      .Accelerator = 0,
                      .Attrib = .{},
                      .help = null,
@@ -111,7 +111,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
     var result = [_]PopDown{
         .{
             .SelectionTitle = null,
-            .ActionId = c.ID_NULL,
+            .ActionId = .ID_NULL,
             .Accelerator = 0,
             .Attrib = .{},
             .help = null,
@@ -121,7 +121,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
 
     inline for(popdowns, 0..) |popdown, idx| {
         var SelectTitle: ?[:0]const u8 = undefined;
-        var ActionId: c = undefined;
+        var ActionId: cmd = undefined;
         var Accelerator: c_int = undefined;
         var Attrib:PopDownAttrib = undefined;
         SelectTitle, ActionId, Accelerator, Attrib = popdown;
@@ -132,7 +132,7 @@ fn buildPopDown(comptime popdowns:anytype) [MAXSELECTIONS+1]PopDown {
             .ActionId = ActionId,
             .Accelerator = Accelerator,
             .Attrib = Attrib,
-            .help = if (ActionId == c.ID_NULL) null else @tagName(ActionId),
+            .help = if (ActionId == .ID_NULL) null else @tagName(ActionId),
         };
     }
 

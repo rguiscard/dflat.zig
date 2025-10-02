@@ -69,34 +69,34 @@ pub fn BuildSystemMenu(win: *Window) void {
     const SystemMenuWin = Window.create(k.POPDOWNMENU, null,
                 lf,tp,ht,wd,null,win,SystemMenuProc, 0);
 
-    if (wnd.*.condition == df.ISRESTORED) {
+    if (win.condition == .ISRESTORED) {
         menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSRESTORE);
     } else {
         menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSRESTORE);
     }
 
     if (df.TestAttribute(wnd, df.MOVEABLE)>0
-            and (wnd.*.condition != df.ISMAXIMIZED)) {
+            and (win.condition != .ISMAXIMIZED)) {
         menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSMOVE);
     } else {
         menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSMOVE);
     }
 
-    if ((wnd.*.condition != df.ISRESTORED) or
+    if ((win.condition != .ISRESTORED) or
             (df.TestAttribute(wnd, df.SIZEABLE) == df.FALSE)) {
         menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSSIZE);
     } else {
         menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSSIZE);
     }
 
-    if ((wnd.*.condition == df.ISMINIMIZED) or
+    if ((win.condition == .ISMINIMIZED) or
             (df.TestAttribute(wnd, df.MINMAXBOX) == df.FALSE)) {
         menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSMINIMIZE);
     } else {
         menu.ActivateCommand(&menus.SystemMenu, c.ID_SYSMINIMIZE);
     }
 
-    if ((wnd.*.condition != df.ISRESTORED) or
+    if ((win.condition != .ISRESTORED) or
             (df.TestAttribute(wnd, df.MINMAXBOX) == df.FALSE)) {
         menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSMAXIMIZE);
     } else {
