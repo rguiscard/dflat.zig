@@ -79,7 +79,6 @@ fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
 // --------- HIDE_WINDOW Message ----------
 fn HideWindowMsg(win:*Window) void {
-    const wnd = win.win;
     if (isVisible(win)) {
         win.ClearVisible();
         // --- paint what this window covered ---
@@ -88,7 +87,7 @@ fn HideWindowMsg(win:*Window) void {
         } else {
             PaintOverLappers(win);
         }
-        wnd.*.wasCleared = df.FALSE;
+        win.wasCleared = false;
     }
 }
 
@@ -221,7 +220,6 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
 
 // --------- SETFOCUS Message ----------
 fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
-    const wnd = win.win;
     var rc:df.RECT = .{.lf=0, .tp=0, .rt=0, .bt=0};
     if ((p1>0) and (Window.inFocus != win)) {
         // set focus
@@ -304,7 +302,7 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         }
         lists.ReFocus(win);
         if ((this != null) and ((isVisible(this.?) == false) or (this.?.TestAttribute(df.SAVESELF) == false))) {
-            wnd.*.wasCleared = df.FALSE;
+            win.wasCleared = false;
             _ = this.?.sendMessage(df.SHOW_WINDOW, 0, 0);
         } else if (isVisible(win) == false) {
             _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
@@ -457,7 +455,7 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if ((xdif == 0) and (ydif == 0)) {
         return;
     }
-    wnd.*.wasCleared = df.FALSE;
+    win.wasCleared = false;
     if (wasVisible) {
         _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     }
@@ -491,7 +489,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if ((xdif == 0) and (ydif == 0)) {
         return;
     }
-    wnd.*.wasCleared = df.FALSE;
+    win.wasCleared = false;
     if (wasVisible) {
         _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     }
@@ -573,7 +571,7 @@ fn MaximizeMsg(win:*Window) void {
     }
     wnd.*.oldcondition = wnd.*.condition;
     wnd.*.condition = df.ISMAXIMIZED;
-    wnd.*.wasCleared = df.FALSE;
+    win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
     _ = win.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
@@ -592,7 +590,7 @@ fn MinimizeMsg(win:*Window) void {
     const rc = PositionIcon(win);
     wnd.*.oldcondition = wnd.*.condition;
     wnd.*.condition = df.ISMINIMIZED;
-    wnd.*.wasCleared = df.FALSE;
+    win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
     _ = win.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
@@ -614,7 +612,7 @@ fn RestoreMsg(win:*Window) void {
     const holdrc = wnd.*.RestoredRC;
     wnd.*.oldcondition = wnd.*.condition;
     wnd.*.condition = df.ISRESTORED;
-    wnd.*.wasCleared = df.FALSE;
+    win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     wnd.*.attrib = wnd.*.restored_attrib;
     wnd.*.restored_attrib = 0;
@@ -656,10 +654,10 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         },
         df.PAINT => {
             if (isVisible(win)) {
-                if (wnd.*.wasCleared > 0) {
+                if (win.wasCleared) {
                     PaintUnderLappers(win);
                 } else {
-                    wnd.*.wasCleared = df.TRUE;
+                    win.wasCleared = true;
 
                     var pp1:?*df.RECT = null;
                     if (p1>0) {
@@ -896,7 +894,6 @@ fn adjShadow(win:*Window) df.RECT {
 
 // --- repaint a rectangular subsection of a window ---
 fn PaintOverLap(win:*Window, rc:df.RECT) void {
-    const wnd = win.win;
     if (isVisible(win)) {
         var isBorder = false;
         var isTitle = false;
@@ -932,7 +929,7 @@ fn PaintOverLap(win:*Window, rc:df.RECT) void {
             isBorder |= rc.rt == win.WindowWidth() or
                         rc.bt == win.WindowHeight();
         if (isData) {
-            wnd.*.wasCleared = df.FALSE;
+            win.wasCleared = false;
             _ = win.sendMessage(df.PAINT, @intCast(@intFromPtr(&rc)), df.TRUE);
         }
         if (isBorder) {

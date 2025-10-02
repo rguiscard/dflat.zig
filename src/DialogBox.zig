@@ -341,7 +341,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     if (oldWin.getClass() == k.APPLICATION) {
                         if (pwin) |pw| {
                             if (pw.nextWindow() != null) {
-                                pwnd.*.wasCleared = df.FALSE;
+                                pw.wasCleared = false;
                             }
                         }
 //                        if (pwin != null and pwin.?.nextWindow() != null) {

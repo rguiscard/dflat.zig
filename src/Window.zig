@@ -35,6 +35,8 @@ nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
 childfocus:?*TopLevelFields  = null,  // child that ha(s/d) focus
 
+wasCleared:bool = false,
+
 PrevMouse:?*TopLevelFields    = null, // previous mouse capture
 PrevKeyboard:?*TopLevelFields = null, // previous keyboard capture
 PrevClock:?*TopLevelFields    = null, // previous clock capture
