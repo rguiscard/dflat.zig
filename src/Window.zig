@@ -42,8 +42,9 @@ nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
 childfocus:?*TopLevelFields  = null,  // child that ha(s/d) focus
 
-condition: Condition = .ISRESTORED,    // Restored, Maximized, Minimized, Closing
-oldcondition: Condition = .ISRESTORED, // previous condition
+videosave:?[]u8 = null,               // video save buffer
+condition: Condition = .ISRESTORED,   // Restored, Maximized, Minimized, Closing
+oldcondition: Condition = .ISRESTORED,// previous condition
 wasCleared:bool = false,
 
 PrevMouse:?*TopLevelFields    = null, // previous mouse capture

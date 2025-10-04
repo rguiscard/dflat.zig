@@ -56,10 +56,9 @@ fn CreateWindowMsg(win:*Window) void {
 
 // --------- SHOW_WINDOW Message ----------
 fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const wnd = win.win;
     if (win.parent == null or isVisible(win.getParent())) {
         if (win.TestAttribute(df.SAVESELF) and
-                        (wnd.*.videosave == null)) {
+                        (win.videosave == null)) {
             GetVideoBuffer(win);
         }
         win.SetVisible();
@@ -549,10 +548,12 @@ fn CloseWindowMsg(win:*Window) void {
     if (win.title) |t| {
         root.global_allocator.free(t);
     }
-    if (wnd.*.videosave != null)
-        df.free(wnd.*.videosave);
+    if (win.videosave) |videosave| {
+        root.global_allocator.free(videosave);
+        win.videosave = null;
+    }
     // -- remove window from parent's list of children --
-        lists.RemoveWindow(win);
+    lists.RemoveWindow(win);
     if (win == Window.inFocus)
         Window.inFocus = null;
     df.free(wnd);
@@ -1137,36 +1138,35 @@ fn ClipRect(win:*Window) df.RECT {
 
 // -- get the video memory that is to be used by a window --
 fn GetVideoBuffer(win:*Window) void {
-    const wnd = win.win;
     const rc = ClipRect(win);
     const ht = df.RectBottom(rc) - df.RectTop(rc) + 1;
     const wd = df.RectRight(rc) - df.RectLeft(rc) + 1;
-    wnd.*.videosave = @ptrCast(df.DFrealloc(wnd.*.videosave, @intCast(ht * wd * 2)));
-//    if (wnd.*.videosave == null) {
-//        if (root.global_allocator.alloc(u8, @intCast(ht * wd * 2))) |buf| {
-//            wnd.*.videosave = @ptrCast(buf);
-//        } else |_| {
-//        }
-//    } else {
-//        if (root.global_allocator.realloc(wnd.*.videosave, @intCast(ht * wd * 2))) |buf| {
-//            wnd.*.videosave = @ptrCast(buf);
-//        } else |_| {
-//        }
-//    }
-    df.get_videomode();
-    df.getvideo(rc, wnd.*.videosave);
+//    wnd.*.videosave = @ptrCast(df.DFrealloc(wnd.*.videosave, @intCast(ht * wd * 2)));
+    if (win.videosave) |videosave| {
+        if (root.global_allocator.realloc(videosave, @intCast(ht * wd * 2))) |buf| {
+            win.videosave = buf;
+        } else |_| {
+        }
+    } else {
+        if (root.global_allocator.alloc(u8, @intCast(ht * wd * 2))) |buf| {
+            win.videosave = buf;
+        } else |_| {
+        }
+    }
+    if (win.videosave) |videosave| {
+        df.get_videomode();
+        df.getvideo(rc, videosave.ptr);
+    }
 }
 
 // -- put the video memory that is used by a window --
 fn PutVideoBuffer(win:*Window) void {
-    const wnd = win.win;
-    if (wnd.*.videosave != null) {
+    if (win.videosave) |videosave| {
         const rc = ClipRect(win);
         df.get_videomode();
-        df.storevideo(rc, wnd.*.videosave);
-        df.free(wnd.*.videosave);
-//        root.global_allocator.free(wnd.*.videosave);
-        wnd.*.videosave = null;
+        df.storevideo(rc, videosave.ptr);
+        root.global_allocator.free(videosave);
+        win.videosave = null;
     }
 }
 

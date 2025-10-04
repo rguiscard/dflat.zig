@@ -70,15 +70,10 @@ typedef enum {FALSE, TRUE} BOOL;
 #include "config.h"
 #include "rect.h"
 #include "keys.h"
-//#include "commands.h"
 #include "helpbox.h"
 
 /* ------ integer type for message parameters ----- */
 typedef intptr_t PARAM;
-
-//enum Condition     {
-//    ISRESTORED, ISMINIMIZED, ISMAXIMIZED, ISCLOSING
-//};
 
 typedef struct window {
     /* ---------------- window dimensions ----------------- */
@@ -92,7 +87,7 @@ typedef struct window {
 
 //	struct window *childfocus;	// child that ha(s/d) focus
     int attrib;                 /* Window attributes        */
-    char *videosave;            /* video save buffer        */
+//    char *videosave;            /* video save buffer        */
 //    enum Condition condition;   /* Restored, Maximized,
 //                                   Minimized, Closing       */
 //    enum Condition oldcondition;/* previous condition       */
