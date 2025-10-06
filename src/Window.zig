@@ -23,6 +23,10 @@ pub const Condition = enum {
     ISCLOSING,
 };
 
+pub const Payload = union {
+    filename: []const u8,
+};
+
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
@@ -47,6 +51,7 @@ condition: Condition = .ISRESTORED,   // Restored, Maximized, Minimized, Closing
 oldcondition: Condition = .ISRESTORED,// previous condition
 wasCleared:bool = false,
 
+extension:?Payload = null,            // menus, dialogs, documents, etc
 PrevMouse:?*TopLevelFields    = null, // previous mouse capture
 PrevKeyboard:?*TopLevelFields = null, // previous keyboard capture
 PrevClock:?*TopLevelFields    = null, // previous clock capture

@@ -181,12 +181,20 @@ fn SelectFile(win: *mp.Window) !void {
         // --- see if the document is already in a window ---
         var win1 = win.firstWindow();
         while (win1) |w1| {
-            if (w1.win.*.extension) |extension| {
-                const ext:[*c]const u8 = @ptrCast(extension);
-                if (df.strcasecmp(&filename, ext) == 0) {
-                    _ = w1.sendMessage(df.SETFOCUS, df.TRUE, 0);
-                    _ = w1.sendMessage(df.RESTORE, 0, 0);
-                    return;
+            if (w1.extension) |extension| {
+                const ext:[:0]const u8 = @ptrCast(extension.filename);
+                if (std.mem.indexOfScalar(u8, &filename,0)) |pos| {
+//                    const ff:[:0]const u8 = @ptrCast(filename[0..pos]);
+//                const ext:[*c]const u8 = @ptrCast(extension);
+//                if (df.strcasecmp(&filename, ext) == 0) {
+                    if (std.ascii.eqlIgnoreCase(filename[0..pos], ext)) {
+                        _ = w1.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                        _ = w1.sendMessage(df.RESTORE, 0, 0);
+                        return;
+                    } else {
+//                        _ = df.printf("ff %s %d, ext %s %d\n", ff.ptr, ff.len, ext.ptr, ext.len);
+//                        while(true) {}
+                    }
                 }
             }
             win1 = w1.nextWindow();
@@ -232,7 +240,8 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
     if (std.mem.eql(u8, fname, sUntitled) == false) {
         if (mp.global_allocator.allocSentinel(u8, fname.len, 0)) |buf| {
             @memcpy(buf[0..fname.len], fname);
-            win1.win.*.extension = @ptrCast(buf.ptr);
+//            win1.win.*.extension = @ptrCast(buf.ptr);
+            win1.extension = .{.filename = buf[0..fname.len]};
         } else |_| {
         }
         // wnd.extension is used to store filename.
@@ -246,9 +255,11 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
 
 // --- Load the notepad file into the editor text buffer ---
 fn LoadFile(win: *mp.Window) void {
-    if (win.win.*.extension) |ext| {
-        const ptr = @as([*:0]u8, @ptrCast(ext));
-        const filename = std.mem.span(ptr);
+//    if (win.win.*.extension) |ext| {
+    if (win.extension) |ext| {
+//        const ptr = @as([*:0]u8, @ptrCast(ext));
+//        const filename = std.mem.span(ptr);
+        const filename = ext.filename;
         if (std.fs.cwd().readFileAlloc(mp.global_allocator, filename, 1_048_576)) |content| {
             defer mp.global_allocator.free(content);
             _ = win.sendTextMessage(df.SETTEXT, content, 0);
@@ -262,19 +273,24 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
     const wnd = win.win;
     const fspec:[:0]const u8 = "*";
     var filename = std.mem.zeroes([df.MAXPATH]u8);
-    if ((wnd.*.extension == null) or (Saveas == true)) {
+//    if ((wnd.*.extension == null) or (Saveas == true)) {
+    if ((win.extension == null) or (Saveas == true)) {
         if (mp.fileopen.SaveAsDialogBox(fspec, null, &filename)) {
-            if (wnd.*.extension) |ext| {
-                const ptr = @as([*:0]u8, @ptrCast(ext));
-                const fname = std.mem.span(ptr);
-                mp.global_allocator.free(fname);
+//            if (wnd.*.extension) |ext| {
+            if (win.extension) |ext| {
+                _ = ext;
+//  FIXME: free memory
+//                const ptr = @as([*:0]u8, @ptrCast(ext));
+//                const fname = std.mem.span(ptr);
+//                mp.global_allocator.free(fname);
             }
             if (std.fs.cwd().realpathAlloc(mp.global_allocator, ".")) |_| {
                 const ptr = @as([*:0]u8, @ptrCast(&filename));
                 const fname = std.mem.span(ptr);
                 if (mp.global_allocator.allocSentinel(u8, fname.len, 0)) |buf| {
                     @memcpy(buf[0..fname.len], fname);
-                    wnd.*.extension = @ptrCast(buf.ptr);
+//                    wnd.*.extension = @ptrCast(buf.ptr);
+                    win.extension = .{.filename = buf};
                 } else |_| {
                 }
                 win.AddTitle(@ptrCast(fname));
@@ -285,12 +301,14 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
             return;
         }
     }
-    if (wnd.*.extension) |ext| {
+//    if (wnd.*.extension) |ext| {
+    if (win.extension) |ext| {
         const m:[:0]const u8 = "Saving the file";
         var mwin = mp.MessageBox.MomentaryMessage(m);
 
-        const ptr = @as([*:0]u8, @ptrCast(ext));
-        const path = std.mem.span(ptr);
+//        const ptr = @as([*:0]u8, @ptrCast(ext));
+//        const path = std.mem.span(ptr);
+        const path = ext.filename;
         const text = @as([*:0]u8, @ptrCast(wnd.*.text));
         const data:[]const u8 = std.mem.span(text); // save data up to \0
         if (std.fs.cwd().writeFile(.{.sub_path = path, .data = data})) {
@@ -305,9 +323,11 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
 // -------- delete a file ------------
 fn DeleteFile(win:*mp.Window) void {
     const wnd = win.win;
-    if (wnd.*.extension) |ext| {
-        const ptr = @as([*:0]u8, @ptrCast(ext));
-        const path = std.mem.span(ptr);
+//    if (wnd.*.extension) |ext| {
+    if (win.extension) |ext| {
+//        const ptr = @as([*:0]u8, @ptrCast(ext));
+//        const path = std.mem.span(ptr);
+        const path:[:0]const u8 = @ptrCast(ext.filename);
         if (std.mem.eql(u8, path, sUntitled) == false) {
             if (std.fmt.allocPrintSentinel(mp.global_allocator, "Delete {s} ?", .{path}, 0)) |m| {
                 defer mp.global_allocator.free(m);
@@ -343,7 +363,7 @@ fn FixTabMenu() void {
 
 // ----- window processing module for the editboxes -----
 fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
+//    const wnd = win.win;
     var rtn = false;
     switch (msg) {
         df.SETFOCUS => {
@@ -401,9 +421,15 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 }
             }
             wndpos = 0;
-            if (wnd.*.extension != null)    {
-                df.free(wnd.*.extension);
-                wnd.*.extension = null;
+//            if (wnd.*.extension != null)    {
+//                df.free(wnd.*.extension);
+//                wnd.*.extension = null;
+//            }
+            if (win.extension) |extension| {
+//                df.free(wnd.*.extension);
+                _ = extension;
+                //FIXME free extension;
+                win.extension = null;
             }
         },
         else => {

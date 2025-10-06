@@ -21,7 +21,7 @@ $ zig build run
 - Position of help box from dialogbox seems off.
 - 'Window' at menubar crash if there is no open document.
 - Help tends to crash after closing.
-
+- SaveDialog return truncated filename by 1.
 --------
 
 # D-Flat: Text User Interface for UNIX, ELKS and Cosmopolitan
