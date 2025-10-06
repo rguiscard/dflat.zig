@@ -14,21 +14,22 @@ const c = @import("Commands.zig").Command;
 
 var log:?*df.FILE = null;
 
-pub export fn LogMessages (wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) void {
+pub export fn LogMessages (win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) void {
     if (log) |L| {
         const m = messages[@intCast(msg)];
         if (m[0] != ' ') {
             var class:[]const u8 = "";
-            var title:[*c]u8 = 0;
-            if (wnd) |w| {
-                const idx:usize = @intCast(df.GetClass(w));
+            var title:?[:0]const u8 = null;
+            if (win) |w| {
+                const idx:usize = @intCast(@intFromEnum(w.Class));
                 if (idx < 128) {
-//                    class = df.ClassNames[idx];
                     class = Class.defs[idx][0]; // name
-                    title = df.GetTitle(w);
+                    title = w.title;
                 }
             }
-            _ = df.fprintf(L, "%-20.20s %-12.12s %-20.20s, %5.5ld, %5.5ld\n", title, @constCast(class.ptr), m, p1, p2);
+            _ = df.fprintf(L, "%-20.20s %-12.12s %-20.20s, %5.5ld, %5.5ld\n", 
+                               if (title) |ttl| ttl.ptr else null, 
+                               @constCast(class.ptr), m, p1, p2);
         }
     }
 }

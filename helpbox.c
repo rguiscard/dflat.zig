@@ -290,64 +290,6 @@ static void StripTildes(char *fh, char *hp)
 	}
 	*fh = '\0';
 }
-/* --- return the comment associated with a help window --- */
-#if 0
-char *HelpComment(char *Help)
-{
-	char FixedHelp[30];
-	StripTildes(FixedHelp, Help);
-    if ((ThisHelp = FindHelp(FixedHelp)) != NULL)
-		return ThisHelp->comment;
-	return NULL;
-}
-#endif
-
-/* ------- display a definition window --------- */
-#if 0
-void cDisplayDefinition(WINDOW wnd, char *def) // should be private
-{
-    WINDOW dwnd;
-    WINDOW hwnd = wnd;
-    int y;
-	struct helps *HoldThisHelp;
-
-	HoldThisHelp = ThisHelp;
-    if (GetClass(wnd) == POPDOWNMENU)
-        hwnd = GetParent(wnd);
-    y = GetClass(hwnd) == MENUBAR ? 2 : 1;
-    if ((ThisHelp = FindHelp(def)) != NULL)    {
-        dwnd = CreateWindow(
-                    TEXTBOX,
-                    NULL,
-                    GetClientLeft(hwnd),
-                    GetClientTop(hwnd)+y,
-                    min(ThisHelp->hheight, MAXHEIGHT)+3,
-                    ThisHelp->hwidth+2,
-                    NULL,
-                    wnd,
-                    HASBORDER | NOCLIP | SAVESELF);
-        if (dwnd != NULL)    {
-            clearBIOSbuffer();
-            /* ----- read the help text ------- */
-            SeekHelpLine(ThisHelp->hptr, ThisHelp->bit);
-            while (TRUE)    {
-                clearBIOSbuffer();
-                if (GetHelpLine(hline) == NULL)
-                    break;
-                if (*hline == '<')
-                    break;
-                hline[strlen(hline)-1] = '\0';
-                SendMessage(dwnd,ADDTEXT,(PARAM)hline,0);
-            }
-            SendMessage(dwnd, SHOW_WINDOW, 0, 0);
-            SendMessage(NULL, WAITKEYBOARD, 0, 0);
-            SendMessage(NULL, WAITMOUSE, 0, 0);
-            SendMessage(dwnd, CLOSE_WINDOW, 0, 0);
-        }
-    }
-	ThisHelp = HoldThisHelp;
-}
-#endif
 
 /* ------ compare help names with wild cards ----- */
 static BOOL wildcmp(char *s1, char *s2)

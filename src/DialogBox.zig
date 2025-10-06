@@ -721,7 +721,8 @@ pub export fn PutItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8) callconv(.c) void {
 }
 
 // ------- get the text of a control window ------
-pub fn GetItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8, len:c_int) void {
+pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
+    const wnd = win.win;
     const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
     var control = FindCommand(db, cmd, k.EDITBOX);
 
@@ -775,7 +776,8 @@ pub fn GetItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8, len:c_int) void {
 }
 
 // ------- set the text of a listbox control window ------
-pub fn GetDlgListText(wnd:df.WINDOW, text:[*c]u8, cmd:c) void {
+pub fn GetDlgListText(win: *Window, text:[*c]u8, cmd:c) void {
+    const wnd = win.win;
     const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
     const control = FindCommand(db, cmd, k.LISTBOX);
     if (control) |ct| {

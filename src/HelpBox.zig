@@ -214,13 +214,15 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
     const HoldThisHelp = ThisHelp;
     var hwnd = wnd;
 
-    if (df.GetClass(wnd) == root.POPDOWNMENU)
-        hwnd = df.GetParent(wnd);
-
-    const y:c_int = if (df.GetClass(hwnd) == root.MENUBAR) 2 else 1;
+    if (Window.get_zin(wnd)) |win| {
+        if (win.Class == k.POPDOWNMENU) {
+            hwnd = if (win.parent) |pw| pw.win else null;
+        }
+    }
 
     ThisHelp = df.FindHelp(def);
     if (Window.get_zin(hwnd)) |hwin| {
+        const y:c_int = if (hwin.Class == k.MENUBAR) 2 else 1;
         if (ThisHelp) |help| {
             const dwnd = df.CreateWindow(
                         @intFromEnum(k.TEXTBOX),

@@ -92,7 +92,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                 .ID_OK => {
                     if (subcmd == 0) {
                         var fName = std.mem.zeroes([df.MAXPATH]u8);
-                        DialogBox.GetItemText(wnd, c.ID_FILENAME, &fName, df.MAXPATH);
+                        DialogBox.GetItemText(win, c.ID_FILENAME, &fName, df.MAXPATH);
                         set_fileName(&fName);
                         if (df.CheckAndChangeDir(&fName) > 0) {
                             std.mem.copyForwards(u8, &fName, "*");
@@ -119,14 +119,14 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                         df.ENTERFOCUS, df.LB_SELECTION => {
                             // selected a different filename
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(wnd, &fName, c.ID_FILES);
+                            DialogBox.GetDlgListText(win, &fName, c.ID_FILES);
                             DialogBox.PutItemText(wnd, c.ID_FILENAME, &fName);
                             set_fileName(&fName);
                         },
                         df.LB_CHOOSE => {
                             // chose a file name
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(wnd, &fName, c.ID_FILES);
+                            DialogBox.GetDlgListText(win, &fName, c.ID_FILES);
                             _ = win.sendCommandMessage(c.ID_OK, 0);
                             set_fileName(&fName);
                         },
@@ -144,7 +144,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                         },
                         df.LB_CHOOSE => {
                             var dd = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(wnd, &dd, c.ID_DIRECTORY);
+                            DialogBox.GetDlgListText(win, &dd, c.ID_DIRECTORY);
                             _ = df.chdir(&dd);
                             InitDlgBox(win);
                             _ = win.sendCommandMessage(c.ID_OK, 0);

@@ -145,12 +145,12 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
             }
 
             // Should rtn be TRUE or FALSE or call sendMessage() ?
-            if (Window.GetClass(wnd) != @intFromEnum(k.DUMMY)) {
-                // Try to catch any window which is not dummy nor created by Window.create()
-                _ = df.printf("Not dummy !! \n");
-                while(true) {}
-                return df.FALSE;
-            }
+//            if (Window.GetClass(wnd) != @intFromEnum(k.DUMMY)) {
+//                // Try to catch any window which is not dummy nor created by Window.create()
+//                _ = df.printf("Not dummy !! \n");
+//                while(true) {}
+//                return df.FALSE;
+//            }
         }
     }
 
@@ -161,7 +161,11 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 
 pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rtn:bool) bool {
     // wnd could be null
-    log.LogMessages(wnd, msg, p1, p2);
+    if (Window.get_zin(wnd)) |win| {
+        log.LogMessages(win, msg, p1, p2);
+    } else {
+        log.LogMessages(null, msg, p1, p2);
+    }
 
     var rrtn = rtn;
 

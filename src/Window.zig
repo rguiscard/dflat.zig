@@ -977,22 +977,6 @@ pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
     return null;
 }
 
-pub export fn GetTitle(wnd:df.WINDOW) [*c]u8 {
-    if (get_zin(wnd)) |win| {
-        if (win.title) |t| {
-            return @constCast(t.ptr);
-        }
-    }
-    return null;
-}
-
-pub export fn GetClass(wnd:df.WINDOW) c_int {
-    if (get_zin(wnd)) |win| {
-        return @intFromEnum(win.Class);
-    }
-    return @intFromEnum(k.FORCEINTTYPE); // unreachable
-}
-
 pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
     if (get_zin(wnd)) |win| {
         if (win.parent) |pw| {

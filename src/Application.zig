@@ -358,9 +358,12 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
 }
 
 // -------- return the name of a document window -------
-fn WindowName(wnd:df.WINDOW) ?[]const u8 {
-    if (df.GetTitle(wnd) == null) {
-        if (df.GetClass(wnd) == @intFromEnum(k.DIALOG)) {
+fn WindowName(win:*Window) ?[:0]const u8 {
+    const wnd = win.win;
+    if (win.title) |title| {
+        return title;
+    } else {
+        if (win.Class == k.DIALOG) {
             if (wnd.*.extension) |ext| {
                 const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
                 return dbox.*.HelpName;
@@ -368,8 +371,6 @@ fn WindowName(wnd:df.WINDOW) ?[]const u8 {
         } else {
             return "Untitled";
         }
-    } else {
-        return std.mem.span(df.GetTitle(wnd));
     }
     return null;
 }
@@ -446,7 +447,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
                             if (w1 == oldFocus)
                                 WindowSel = sel;
     
-                            const name = WindowName(wnd1);
+                            const name = WindowName(w1);
                             if (name) |n| {
                                 _ = cwin.sendMessage(df.ADDTEXT, @intCast(@intFromPtr(n.ptr)), 0);
                             }
