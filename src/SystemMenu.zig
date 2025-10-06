@@ -8,40 +8,40 @@ const menubar = @import("MenuBar.zig");
 const popdown = @import("PopDown.zig");
 const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
+const q = @import("Message.zig");
 
 pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
-        switch (msg) {
-            df.CREATE_WINDOW => {
-                win.holdmenu = menubar.ActiveMenuBar;
-                menubar.ActiveMenuBar = &menus.SystemMenu;
-                menus.SystemMenu.PullDown[0].Selection = 0;
-            },
-            df.LEFT_BUTTON => {
-                const mx = p1 - win.GetLeft();
-                const my = p2 - win.GetTop();
-                if (df.HitControlBox(win.getParent().win, mx, my))
-                    return true;
-            },
-            df.LB_CHOOSE => {
-                df.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
-            },
-            df.DOUBLE_CLICK => {
-                if (p2 == win.getParent().GetTop()) {
-                    df.PostMessage(win.getParent().win, msg, p1, p2);
-                    _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
-                }
+    switch (msg) {
+        df.CREATE_WINDOW => {
+            win.holdmenu = menubar.ActiveMenuBar;
+            menubar.ActiveMenuBar = &menus.SystemMenu;
+            menus.SystemMenu.PullDown[0].Selection = 0;
+        },
+        df.LEFT_BUTTON => {
+            const mx = p1 - win.GetLeft();
+            const my = p2 - win.GetTop();
+            if (df.HitControlBox(win.getParent().win, mx, my))
                 return true;
-            },
-            df.SHIFT_CHANGED => {
-                return true;
-            },
-            df.CLOSE_WINDOW => {
-                menubar.ActiveMenuBar = win.holdmenu;
-            },
-            else => {
+        },
+        df.LB_CHOOSE => {
+            q.PostMessage(win, df.CLOSE_WINDOW, 0, 0);
+        },
+        df.DOUBLE_CLICK => {
+            if (p2 == win.getParent().GetTop()) {
+                q.PostMessage(win.parent, msg, p1, p2);
+                _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
             }
+            return true;
+        },
+        df.SHIFT_CHANGED => {
+            return true;
+        },
+        df.CLOSE_WINDOW => {
+            menubar.ActiveMenuBar = win.holdmenu;
+        },
+        else => {
         }
+    }
     return root.zDefaultWndProc(win, msg, p1, p2);
 }
 

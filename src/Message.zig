@@ -106,7 +106,7 @@ pub export fn PostEvent(event:df.MESSAGE, p1:c_int, p2:c_int) callconv(.c) void 
 }
 
 // ----- post a message and parameters to msg queue ----
-pub export fn PostMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) void {
+pub fn PostMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void {
     if (MsgQueueCtr != MAXMESSAGES) {
         MsgQueue[MsgQueueOnCtr].win = win;
         MsgQueue[MsgQueueOnCtr].msg = msg;
