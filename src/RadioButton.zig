@@ -88,8 +88,6 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c) void {
 }
 
 pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
-//    const control = df.GetControl(wnd);
     if (win.GetControl()) |ct| {
         switch (msg) {
             df.SETFOCUS => {
@@ -98,7 +96,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
             },
             df.MOVE => {
                 const rtn = root.BaseWndProc(k.RADIOBUTTON,win,msg,p1,p2);
-                df.SetFocusCursor(wnd);
+                DialogBox.SetFocusCursor(win);
                 return rtn;
             },
             df.PAINT => {
@@ -107,7 +105,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
                     rb = "(\x07)";
                 _ = win.sendMessage(df.CLEARTEXT, 0, 0);
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(rb), 0);
-                _ = df.SetFocusCursor(wnd);
+                DialogBox.SetFocusCursor(win);
             },
             df.KEYBOARD => {
                 if (p1 == ' ') {

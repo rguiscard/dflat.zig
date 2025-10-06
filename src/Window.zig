@@ -986,13 +986,6 @@ pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
     return null; // unreachable
 }
 
-pub export fn inFocusWnd() df.WINDOW {
-    if (inFocus) |focus| {
-        return focus.win;
-    }
-    return null;
-}
-
 pub export fn getBlkBegLine(wnd:df.WINDOW) c_int {
     if (TopLevelFields.get_zin(wnd)) |win| {
         return @intCast(win.BlkBegLine);

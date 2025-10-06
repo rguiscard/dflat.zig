@@ -198,10 +198,12 @@ pub fn ProcessMessage(wnd:df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, r
             df.KEYBOARD_CURSOR => {
                 if (wnd == null) {
                     df.cursor(@intCast(p1), @intCast(p2));
-                } else if (wnd == Window.inFocusWnd()) {
-                    if (Window.inFocus) |w| {
-                        df.cursor(@intCast(w.GetClientLeft()+p1),
-                                  @intCast(w.GetClientTop()+p2));
+                } else {
+                    if (Window.get_zin(wnd)) |win| {
+                        if (win == Window.inFocus) {
+                            df.cursor(@intCast(win.GetClientLeft()+p1),
+                                      @intCast(win.GetClientTop()+p2));
+                        }
                     }
                 }
             },

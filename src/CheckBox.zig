@@ -9,8 +9,6 @@ const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
 pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
-//    const ct:?*Dialogs.CTLWINDOW = df.GetControl(wnd);
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
@@ -18,12 +16,12 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                     _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
                 // fall off ?
                 const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
-                df.SetFocusCursor(wnd);
+                DialogBox.SetFocusCursor(win);
                 return rtn;
             },
             df.MOVE => {
                 const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
-                df.SetFocusCursor(wnd);
+                DialogBox.SetFocusCursor(win);
                 return rtn;
             },
             df.PAINT => {
@@ -32,7 +30,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                     cb = "[X]";
                 _ = win.sendMessage(df.CLEARTEXT, 0, 0);
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(cb), 0);
-                _ = df.SetFocusCursor(wnd);
+                DialogBox.SetFocusCursor(win);
             },
             df.KEYBOARD => {
                 if (p1 == ' ') {

@@ -833,14 +833,15 @@ pub fn ControlWindow(db:*Dialogs.DBOX, cmd:c) ?*Window {
 }
 
 // --- return a pointer to the control structure that matches a window ---
-pub export fn WindowControl(db:*Dialogs.DBOX, wnd:df.WINDOW) ?*Dialogs.CTLWINDOW {
-    for(&db.*.ctl) |*ct| {
-        if (ct.*.Class == k.NORMAL)
-            break;
-        if (ct.win) |cwin| {
-            const cwnd = cwin.win;
-            if (cwnd == wnd) {
-                return @constCast(ct);
+pub fn WindowControl(db:*Dialogs.DBOX, win:?*Window) ?*Dialogs.CTLWINDOW {
+    if (win) |w| {
+        for(&db.*.ctl) |*ct| {
+            if (ct.*.Class == k.NORMAL)
+                break;
+            if (ct.win) |cwin| {
+                if (cwin == w) {
+                    return @constCast(ct);
+                }
             }
         }
     }
@@ -938,7 +939,7 @@ pub fn FirstFocus(db:*Dialogs.DBOX) void {
 
 // ---- change the focus to the next control ---
 pub fn NextFocus(db:*Dialogs.DBOX) void {
-    const control = WindowControl(db, Window.inFocusWnd());
+    const control = WindowControl(db, Window.inFocus);
     if (control) |ctl| {
         const len = db.*.ctl.len;
         var start:usize = 0;
@@ -972,7 +973,7 @@ pub fn NextFocus(db:*Dialogs.DBOX) void {
 // ---- change the focus to the previous control ---
 // FIXME: not tested.
 pub fn PrevFocus(db:*Dialogs.DBOX) void {
-    const control = WindowControl(db, Window.inFocusWnd());
+    const control = WindowControl(db, Window.inFocus);
     if (control) |ctl| {
         const len = db.*.ctl.len;
         var start:usize = 0;
@@ -1018,8 +1019,10 @@ pub fn PrevFocus(db:*Dialogs.DBOX) void {
 //                SendMessage(ct->wnd, SETFOCUS, TRUE, 0);
 }
 
-pub export fn SetFocusCursor(wnd:df.WINDOW) void {
-    if (wnd == Window.inFocusWnd()) {
+pub fn SetFocusCursor(win:?*Window) void {
+    // Could win be null ?
+    const wnd = if (win) |w| w.win else null;
+    if (win == Window.inFocus) {
         _ = q.SendMessage(null, df.SHOW_CURSOR, 0, 0);
         _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, 1, 0);
     }
