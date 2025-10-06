@@ -87,7 +87,7 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
                     k.TEXTBOX,
                     null,
                     -1,-1,MsgHeight(msg)+2,MsgWidth(msg)+2,
-                    df.NULL,null,null,
+                    null,null,null,
                     df.HASBORDER | df.SHADOW | df.SAVESELF);
     const wnd = win.*.win;
 

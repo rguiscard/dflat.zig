@@ -23,8 +23,18 @@ pub const Condition = enum {
     ISCLOSING,
 };
 
-pub const Payload = union {
+pub const PayloadType = enum {
+    filename,
+    dbox,
+    control,
+    menubar,
+};
+
+pub const Payload = union(PayloadType) {
     filename: []const u8,
+    dbox: *Dialogs.DBOX,
+    control: *Dialogs.CTLWINDOW,
+    menubar: *menus.MBAR,
 };
 
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
@@ -104,32 +114,6 @@ VectorList:?[]df.VECT = null,   // list of picture box vectors
 
 win: df.WINDOW,
 
-// --------- create a window ------------
-pub export fn CreateWindow(
-    klass:c_int,                 // class of this window
-    ttl:[*c]u8,                  // title or NULL
-    left:c_int, top:c_int,       // upper left coordinates
-    height:c_int, width:c_int,   // dimensions
-    extension:?*anyopaque,       // pointer to additional data
-    parent:df.WINDOW,            // parent of this window
-    attrib:c_int)                // window attribute
-    callconv(.c) df.WINDOW
-{
-    const self = TopLevelFields;
-    var title:?[:0]const u8 = null;
-    if (ttl) |t| {
-        title = std.mem.span(t);
-    }
-
-    var pwin:?*TopLevelFields = null;
-    if (self.get_zin(parent)) |pw| {
-        pwin = pw;
-    }
-
-    const win = self.create(@enumFromInt(klass), title, left, top, height, width, extension, pwin, null, attrib);
-    return win.*.win;
-}
-
 pub fn init(wnd: df.WINDOW) TopLevelFields {
     return .{
         .Class = CLASS.FORCEINTTYPE,
@@ -143,7 +127,8 @@ pub fn create(
     ttl: ?[:0]const u8,         // title or NULL
     left:c_int, top:c_int,      // upper left coordinates
     height:c_int, width:c_int,  // dimensions
-    extension:?*anyopaque,      // pointer to additional data
+//    extension:?*anyopaque,      // pointer to additional data
+    payload:?Payload,         // pointer to additional data
     parent: ?*TopLevelFields,   // parent of this window
     wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
     attrib: c_int) *TopLevelFields {
@@ -191,11 +176,9 @@ pub fn create(
             }
         }
         if (wndproc == null) {
-//            wnd.*.wndproc = Klass.defs[@intCast(klass)][2]; // wndproc
             const idx:usize = @intCast(@intFromEnum(klass));
             self.wndproc = Klass.defs[idx][2]; // wndproc
         } else {
-//            wnd.*.wndproc = wndproc;
             self.wndproc = wndproc;
         }
 
@@ -211,10 +194,8 @@ pub fn create(
 
         // ---- adjust position with parent ----
         var pt = parent;
-//        if (parent != null) {
         if (parent) |pw| {
             if (df.TestAttribute(wnd, df.NOCLIP) == 0) {
-//                const pwin:*TopLevelFields = @constCast(@fieldParentPtr("win", &parent));
                 // -- keep upper left within borders of parent -
                 wnd.*.rc.lf = @intCast(@max(wnd.*.rc.lf, pw.GetClientLeft()));
                 wnd.*.rc.tp = @intCast(@max(wnd.*.rc.tp, pw.GetClientTop()));
@@ -228,7 +209,23 @@ pub fn create(
         }
 
         self.Class = klass;
-        wnd.*.extension = extension;
+        if (payload) |py| {
+            switch(py) {
+                .filename => {
+                    wnd.*.extension = @ptrCast(@constCast(py.filename));
+                },
+                .dbox => {
+                    wnd.*.extension = py.dbox;
+                },
+                .control => {
+                    wnd.*.extension = py.control;
+                },
+                .menubar => {
+                    wnd.*.extension = py.menubar;
+                },
+            }
+        }
+//        wnd.*.extension = extension;
         wnd.*.rc.rt = df.GetLeft(wnd)+wt-1;
         wnd.*.rc.bt = df.GetTop(wnd)+ht-1;
         wnd.*.ht = ht;

@@ -93,7 +93,7 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
                         x, y,
                         box.*.dwnd.h,
                         box.*.dwnd.w,
-                        box,
+                        .{.dbox = box},
                         parent,
                         wndproc,
                         save);
@@ -419,7 +419,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
                         @intCast(ctl.*.dwnd.y+win.GetClientTop()),
                         ctl.*.dwnd.h,
                         ctl.*.dwnd.w,
-                        ctl,
+                        .{.control = ctl},
                         win,
                         ControlProc,
                         attrib);

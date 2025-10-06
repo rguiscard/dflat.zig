@@ -212,46 +212,48 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
 pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be private
     const MAXHEIGHT = df.SCREENHEIGHT-10;
     const HoldThisHelp = ThisHelp;
-    var hwnd = wnd;
 
     if (Window.get_zin(wnd)) |win| {
+        var hwin:?*Window = win;
         if (win.Class == k.POPDOWNMENU) {
-            hwnd = if (win.parent) |pw| pw.win else null;
+            hwin = win.parent;
         }
-    }
-
-    ThisHelp = df.FindHelp(def);
-    if (Window.get_zin(hwnd)) |hwin| {
-        const y:c_int = if (hwin.Class == k.MENUBAR) 2 else 1;
-        if (ThisHelp) |help| {
-            const dwnd = df.CreateWindow(
-                        @intFromEnum(k.TEXTBOX),
-                        null,
-                        @intCast(hwin.GetClientLeft()),
-                        @intCast(hwin.GetClientTop()+y),
-                        @min(help.*.hheight, MAXHEIGHT)+3,
-                        @intCast(help.*.hwidth+2),
-                        null,
-                        wnd,
-                        df.HASBORDER | df.NOCLIP | df.SAVESELF);
-            if (dwnd != null) {
-//                df.clearBIOSbuffer(); // no function
+        var y:c_int = 1;
+        if (hwin) |hw| {
+            if (hw.Class == k.MENUBAR) {
+                y = 2;
+            }
+            ThisHelp = df.FindHelp(def);
+            if (ThisHelp) |help| {
+                const dwin = Window.create(
+                            k.TEXTBOX,
+                            null,
+                            @intCast(hw.GetClientLeft()),
+                            @intCast(hw.GetClientTop()+y),
+                            @min(help.*.hheight, MAXHEIGHT)+3,
+                            @intCast(help.*.hwidth+2),
+                            null,
+                            win,
+                            null,
+                            df.HASBORDER | df.NOCLIP | df.SAVESELF);
+//                    df.clearBIOSbuffer(); // no function
                 // ----- read the help text -------
                 df.SeekHelpLine(help.*.hptr, help.*.bit);
                 while (true) {
-//                    df.clearBIOSbuffer(); // no function
+                    //  df.clearBIOSbuffer(); // no function
                     if (df.GetHelpLine(&df.hline) == null)
                         break;
                     if (df.hline[0] == '<')
                         break;
                     const len:usize = df.strlen(&df.hline);
                     df.hline[len] = 0;
-                    _ = q.SendMessage(dwnd,df.ADDTEXT, @intCast(@intFromPtr(&df.hline)),0);
+//                    _ = q.SendMessage(dwnd,df.ADDTEXT, @intCast(@intFromPtr(&df.hline)),0);
+                    _ = dwin.sendTextMessage(df.ADDTEXT, &df.hline,0);
                 }
-                _ = q.SendMessage(dwnd, df.SHOW_WINDOW, 0, 0);
+                _ = dwin.sendMessage(df.SHOW_WINDOW, 0, 0);
                 _ = q.SendMessage(null, df.WAITKEYBOARD, 0, 0);
                 _ = q.SendMessage(null, df.WAITMOUSE, 0, 0);
-                _ = q.SendMessage(dwnd, df.CLOSE_WINDOW, 0, 0);
+                _ = dwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
             }
         }
     }

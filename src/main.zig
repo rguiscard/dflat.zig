@@ -26,7 +26,7 @@ pub fn main() !void {
     var win = mp.Window.create(mp.CLASS.APPLICATION,
                         "D-Flat MemoPad",
                         0, 0, -1, -1,
-                        @constCast(@ptrCast(&menu.MainMenu)),
+                        .{.menubar = &menu.MainMenu},
                         null,
                         MemoPadProc,
                         df.MOVEABLE  |
