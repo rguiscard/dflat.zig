@@ -133,7 +133,7 @@ pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             return if (df.HelpTextLeftButtonMsg(wnd, p1, p2) == df.TRUE) true else false;
         },
         df.DOUBLE_CLICK => {
-            q.PostMessage(wnd, df.KEYBOARD, '\r', 0);
+            q.PostMessage(win, df.KEYBOARD, '\r', 0);
         },
         else => {
         }

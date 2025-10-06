@@ -124,13 +124,12 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 }
 
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     if (normal.WindowMoving or normal.WindowSizing or (p1 == df.F1))
         return root.BaseWndProc(k.APPLICATION, win, df.KEYBOARD, p1, p2);
     switch (p1)  {
         df.ALT_F4 => {
             if (win.TestAttribute(df.CONTROLBOX)) {
-                q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
+                q.PostMessage(win, df.CLOSE_WINDOW, 0, 0);
             }
             return true;
         },
@@ -148,7 +147,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         }
     }
     if (win.MenuBar) |mb| {
-        q.PostMessage(mb.win, df.KEYBOARD, p1, p2);
+        q.PostMessage(mb, df.KEYBOARD, p1, p2);
     } // also consider null ?
     return true;
 }
@@ -170,11 +169,10 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
 
 // -------- COMMAND Message -------
 fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const wnd = win.win;
     const cmd:c = @enumFromInt(p1);
     switch (cmd) {
         .ID_EXIT, .ID_SYSCLOSE => {
-            q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
+            q.PostMessage(win, df.CLOSE_WINDOW, 0, 0);
         },
         .ID_HELP => {
             _ = helpbox.DisplayHelp(win, std.mem.span(df.DFlatApplication));
@@ -246,7 +244,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         },
         else => {
             if ((Window.inFocus != win.MenuBar) and (Window.inFocus != win)) {
-                q.PostMessage(Window.inFocusWnd(), df.COMMAND, p1, p2);
+                q.PostMessage(Window.inFocus, df.COMMAND, p1, p2);
             }
         }
     }
@@ -461,7 +459,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,p1:df.PARAM,p2:df.PARAM) bool {
                 } 
                 _ = cwin.sendMessage(df.LB_SETSELECTION, WindowSel, 0);
                 cwin.AddAttribute(df.VSCROLLBAR);
-                q.PostMessage(cwin.win, df.SHOW_WINDOW, 0, 0);
+                q.PostMessage(cwin, df.SHOW_WINDOW, 0, 0);
             } else {
                 return false;
             }

@@ -323,7 +323,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const my = p2 - win.GetTop();
     if ((WindowSizing == false) and (WindowMoving == false)) {
         if (df.HitControlBox(wnd, mx, my)) {
-            q.PostMessage(wnd, df.CLOSE_WINDOW, 0, 0);
+            q.PostMessage(win, df.CLOSE_WINDOW, 0, 0);
             lists.SkipApplicationControls();
         }
     }
@@ -628,7 +628,6 @@ fn RestoreMsg(win:*Window) void {
 }
 
 pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             CreateWindowMsg(win);
@@ -646,12 +645,14 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             if (KeyboardMsg(win, p1, p2))
                 return true;
             // ------- fall through -------
-            if (win.parent != null)
-                q.PostMessage(win.getParent().win, msg, p1, p2);
+            if (win.parent) |pw| {
+                q.PostMessage(pw, msg, p1, p2);
+            }
         },
         df.ADDSTATUS, df.SHIFT_CHANGED => {
-            if (win.parent != null)
-                q.PostMessage(win.getParent().win, msg, p1, p2);
+            if (win.parent) |pw| {
+                q.PostMessage(pw, msg, p1, p2);
+            }
         },
         df.PAINT => {
             if (isVisible(win)) {
@@ -707,9 +708,9 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             if (WindowMoving or WindowSizing) {
                 const dwnd = getDummy();
                 if (WindowMoving) {
-                    q.PostMessage(wnd,df.MOVE,dwnd.*.rc.lf,dwnd.*.rc.tp);
+                    q.PostMessage(win,df.MOVE,dwnd.*.rc.lf,dwnd.*.rc.tp);
                 } else {
-                    q.PostMessage(wnd,df.SIZE,dwnd.*.rc.rt,dwnd.*.rc.bt);
+                    q.PostMessage(win,df.SIZE,dwnd.*.rc.rt,dwnd.*.rc.bt);
                 }
                 TerminateMoveSize();
             }

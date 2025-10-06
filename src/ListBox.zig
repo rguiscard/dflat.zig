@@ -31,7 +31,7 @@ fn UpKey(win:*Window,p2:df.PARAM) void {
     if (win.selection > 0)    {
         if (win.selection == wnd.*.wtop) {
             _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, df.UP, p2);
-            q.PostMessage(wnd, df.LB_SELECTION, win.selection-1,
+            q.PostMessage(win, df.LB_SELECTION, win.selection-1,
                 if (win.isMultiLine()) p2 else df.FALSE);
         } else {
             var newsel:isize = win.selection-1;
@@ -51,7 +51,7 @@ fn UpKey(win:*Window,p2:df.PARAM) void {
 //                while (*TextLine(wnd, newsel) == LINE)
 //                    --newsel;
             }
-            q.PostMessage(wnd, df.LB_SELECTION, @intCast(newsel),
+            q.PostMessage(win, df.LB_SELECTION, @intCast(newsel),
                 if (win.isMultiLine()) p2 else df.FALSE); // EXTENDEDSELECTIONS
         }
     }
@@ -63,7 +63,7 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
     if (win.selection < wnd.*.wlines-1) {
         if (win.selection == wnd.*.wtop+win.ClientHeight()-1) {
             _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, df.DN, p2);
-            q.PostMessage(wnd, df.LB_SELECTION, win.selection+1,
+            q.PostMessage(win, df.LB_SELECTION, win.selection+1,
                 if (win.isMultiLine()) p2 else df.FALSE);
         } else {
             var newsel:usize = @intCast(win.selection+1);
@@ -83,7 +83,7 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
 //                while (*TextLine(wnd, newsel) == LINE)
 //                    newsel++;
             }
-            q.PostMessage(wnd, df.LB_SELECTION, @intCast(newsel),
+            q.PostMessage(win, df.LB_SELECTION, @intCast(newsel),
                 if (win.isMultiLine()) p2 else df.FALSE);  // EXTENDEDSELECTIONS
         }
     }
@@ -93,7 +93,7 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
 fn HomePgUpKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
     _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, p1, p2);
-    q.PostMessage(wnd, df.LB_SELECTION, wnd.*.wtop,
+    q.PostMessage(win, df.LB_SELECTION, wnd.*.wtop,
         if (win.isMultiLine()) p2 else df.FALSE);  // EXTENDEDSELECTIONS
 }
 
@@ -104,7 +104,7 @@ fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     var bot:c_int = @intCast(wnd.*.wtop+win.ClientHeight()-1);
     if (bot > wnd.*.wlines-1)
         bot = @intCast(wnd.*.wlines-1);
-    q.PostMessage(wnd, df.LB_SELECTION, bot,
+    q.PostMessage(win, df.LB_SELECTION, bot,
         if (win.isMultiLine()) p2 else df.FALSE);  // EXTENDEDSELECTIONS
 }
 

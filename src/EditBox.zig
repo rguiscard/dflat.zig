@@ -613,8 +613,7 @@ fn TabKey(win:*Window, p2:df.PARAM) void {
                 break;
         }
     } else {
-        const pwnd = if (win.parent) |pwin| pwin.win else null;
-        q.PostMessage(pwnd, df.KEYBOARD, '\t', p2);
+        q.PostMessage(win.parent, df.KEYBOARD, '\t', p2);
     }
 }
 
@@ -632,8 +631,7 @@ fn ShiftTabKey(win:*Window, p2:df.PARAM) void {
                 break;
         }
     } else {
-        const pwnd = if (win.parent) |pwin| pwin.win else null;
-        q.PostMessage(pwnd, df.KEYBOARD, df.SHIFT_HT, p2);
+        q.PostMessage(win.parent, df.KEYBOARD, df.SHIFT_HT, p2);
     }
 }
 
@@ -658,7 +656,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
         },
         '\r' => {
             if (win.isMultiLine() == false)    {
-                _ = q.PostMessage(win.getParent().win, df.KEYBOARD, cc, p2);
+                _ = q.PostMessage(win.parent, df.KEYBOARD, cc, p2);
             } else {
                 const chr = '\n';
                 // fall through
@@ -725,7 +723,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         DoKeyStroke(win, @intCast(p1), p2);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
     } else if (p1 == '\t') {
-        q.PostMessage(win.getParent().win, df.KEYBOARD, @intCast('\t'), p2);
+        q.PostMessage(win.parent, df.KEYBOARD, @intCast('\t'), p2);
     } else {
         df.beep();
     }

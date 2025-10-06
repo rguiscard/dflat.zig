@@ -101,7 +101,7 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
     _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
     win.*.modal = (Modal == df.TRUE);
     FirstFocus(db);
-    q.PostMessage(win.win, df.INITIATE_DIALOG, 0, 0);
+    q.PostMessage(win, df.INITIATE_DIALOG, 0, 0);
     if (Modal == df.TRUE) {
         _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
         _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
@@ -136,14 +136,14 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         ' ' => {
             if ((p2 & df.ALTKEY) > 0) {
                 // it didn't break. Fall through
-                q.PostMessage(win.getParent().win, df.KEYBOARD, p1, p2);
+                q.PostMessage(win.parent, df.KEYBOARD, p1, p2);
                 return true;
             }
         },
         df.ALT_F6,
         df.CTRL_F4,
         df.ALT_F4 => {
-            q.PostMessage(win.getParent().win, df.KEYBOARD, p1, p2);
+            q.PostMessage(win.parent, df.KEYBOARD, p1, p2);
             return true;
         },
         df.F1 => {
@@ -441,7 +441,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         return true;
 
     if (df.HitControlBox(wnd, p1-win.GetLeft(), p2-win.GetTop())) {
-        q.PostMessage(wnd, df.KEYBOARD, ' ', df.ALTKEY);
+        q.PostMessage(win, df.KEYBOARD, ' ', df.ALTKEY);
         return true;
     }
 //    Not in use
@@ -535,7 +535,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
             win.ReturnCode = cmd;
             if (win.modal) {
-                _ = q.PostMessage(wnd, df.ENDDIALOG, 0, 0);
+                _ = q.PostMessage(win, df.ENDDIALOG, 0, 0);
             } else {
                 _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
             }
