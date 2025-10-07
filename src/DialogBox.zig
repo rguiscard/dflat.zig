@@ -117,9 +117,8 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
 
 // ------- CREATE_WINDOW Message (Control) -----
 fn CtlCreateWindowMsg(win:*Window) void {
-    const wnd = win.win;
-    if (wnd.*.extension) |extension| {
-        win.ct = @alignCast(@ptrCast(extension));
+    if (win.extension) |extension| {
+        win.ct = @alignCast(@ptrCast(extension.control));
         if (win.ct) |ctl| {
             const ct = ctl;
             ct.win = win;
@@ -127,7 +126,7 @@ fn CtlCreateWindowMsg(win:*Window) void {
     } else {
         win.ct = null;
     }
-    wnd.*.extension = null;
+    win.extension = null;
 }
 
 // ------- KEYBOARD Message (Control) -----

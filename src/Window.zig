@@ -212,20 +212,19 @@ pub fn create(
         if (payload) |py| {
             switch(py) {
                 .filename => {
-                    wnd.*.extension = @ptrCast(@constCast(py.filename));
+                    self.extension = .{.filename = py.filename};
                 },
                 .dbox => {
                     wnd.*.extension = py.dbox;
                 },
                 .control => {
-                    wnd.*.extension = py.control;
+                    self.extension = .{.control = py.control};
                 },
                 .menubar => {
-                    wnd.*.extension = py.menubar;
+                    self.extension = .{.menubar = py.menubar};
                 },
             }
         }
-//        wnd.*.extension = extension;
         wnd.*.rc.rt = df.GetLeft(wnd)+wt-1;
         wnd.*.rc.bt = df.GetTop(wnd)+ht-1;
         wnd.*.ht = ht;

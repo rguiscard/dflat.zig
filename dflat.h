@@ -161,15 +161,12 @@ int GetClass(WINDOW); // use int for CLASS
 #define TestAttribute(w,a)   (GetAttribute(w) & (a))
 #define isHidden(w)          (!(GetAttribute(w) & VISIBLE))
 #define gotoxy(w,x,y) cursor(w->rc.lf+(x)+1,w->rc.tp+(y)+1)
-//WINDOW CreateWindow(int,const char *,int,int,int,int,void*,WINDOW, int); // use int for CLASS
 void writeline(WINDOW, char *, int, int, BOOL);
 
 BOOL CharInView(WINDOW, int, int);
 int CheckAndChangeDir(char *);
 #define SwapVideoBuffer(wnd, ish, fh) swapvideo(wnd, wnd->videosave, ish, fh)
 int LineLength(char *);
-//RECT AdjustRectangle(WINDOW, RECT);
-//BOOL isDerivedFrom(WINDOW, int); // use int for CLASS
 WINDOW GetAncestor(WINDOW);
 void PutWindowChar(WINDOW,int,int,int);
 void PutWindowLine(WINDOW, void *,int,int);
@@ -179,7 +176,7 @@ int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM);
 extern int foreground, background;
 extern char DFlatApplication[];
 extern BOOL ClipString;
-extern int CurrentMenuSelection;
+//extern int CurrentMenuSelection;
 /* --------- space between menubar labels --------- */
 #define MSPACE 2
 /* --------------- border characters ------------- */

@@ -76,7 +76,7 @@ fn CreateWindowMsg(win: *Window) bool {
     SelectStatusBar(win);
 
     const rtn = root.BaseWndProc(k.APPLICATION, win, df.CREATE_WINDOW, 0, 0);
-    if (wnd.*.extension != null) {
+    if (win.extension != null) {
         CreateMenu(win);
     }
 
@@ -635,7 +635,6 @@ fn SelectTitle(win: *Window) void {
 
 // -------- Create the menu bar --------
 fn CreateMenu(win: *Window) void {
-    const wnd = win.win;
     win.AddAttribute(df.HASMENUBAR);
     if (win.MenuBar) |mb| {
         _ = mb.sendMessage(df.CLOSE_WINDOW, 0, 0);
@@ -653,8 +652,10 @@ fn CreateMenu(win: *Window) void {
 
     win.MenuBar = mwnd;
 
-    const ext:df.PARAM = @intCast(@intFromPtr(wnd.*.extension));
-    _ = mwnd.sendMessage(df.BUILDMENU, ext,0);
+    if (win.extension) |extension| {
+        const ext:df.PARAM = @intCast(@intFromPtr(extension.menubar));
+        _ = mwnd.sendMessage(df.BUILDMENU, ext,0);
+    }
     mwnd.AddAttribute(df.VISIBLE);
 }
 
