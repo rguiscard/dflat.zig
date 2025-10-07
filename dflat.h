@@ -86,13 +86,13 @@ typedef struct window {
     /* -------------- linked list pointers ---------------- */
 
 //	struct window *childfocus;	// child that ha(s/d) focus
-    int attrib;                 /* Window attributes        */
+//    int attrib;                 /* Window attributes        */
 //    char *videosave;            /* video save buffer        */
 //    enum Condition condition;   /* Restored, Maximized,
 //                                   Minimized, Closing       */
 //    enum Condition oldcondition;/* previous condition       */
 //  BOOL wasCleared;
-    int restored_attrib;        /* attributes when restored */
+//    int restored_attrib;        /* attributes when restored */
 //    void *extension;      /* menus, dialogs, documents, etc */
 //	void *wrapper;             /* used by C++ wrapper class. not in use. */
 //    struct window *PrevMouse;   /* previous mouse capture   */
@@ -135,31 +135,41 @@ typedef struct window {
 /* ------- window methods ----------- */
 #define WindowHeight(w)      ((w)->ht)
 #define WindowWidth(w)       ((w)->wd)
-#define BorderAdj(w)         (TestAttribute(w,HASBORDER)?1:0)
-#define BottomBorderAdj(w)   (TestAttribute(w,HASSTATUSBAR)?1:BorderAdj(w))
-#define TopBorderAdj(w)      ((TestAttribute(w,HASTITLEBAR) &&   \
-                              TestAttribute(w,HASMENUBAR)) ?  \
-                              2 : (TestAttribute(w,HASTITLEBAR | \
-                              HASMENUBAR | HASBORDER) ? 1 : 0))
-#define ClientWidth(w)       (WindowWidth(w)-BorderAdj(w)*2)
-#define ClientHeight(w)      (WindowHeight(w)-TopBorderAdj(w)-\
-                              BottomBorderAdj(w))
+//#define BorderAdj(w)         (TestAttribute(w,HASBORDER)?1:0)
+//#define BottomBorderAdj(w)   (TestAttribute(w,HASSTATUSBAR)?1:BorderAdj(w))
+//#define TopBorderAdj(w)      ((TestAttribute(w,HASTITLEBAR) &&   \
+//                              TestAttribute(w,HASMENUBAR)) ?  \
+//                              2 : (TestAttribute(w,HASTITLEBAR | \
+//                              HASMENUBAR | HASBORDER) ? 1 : 0))
+//#define ClientWidth(w)       (WindowWidth(w)-BorderAdj(w)*2)
+//#define ClientHeight(w)      (WindowHeight(w)-TopBorderAdj(w)-\
+//                              BottomBorderAdj(w))
+int c_BorderAdj(WINDOW);
+int c_TopBorderAdj(WINDOW);
+int c_ClientWidth(WINDOW);
+int c_ClientHeight(WINDOW);
 #define WindowRect(w)        ((w)->rc)
 #define GetTop(w)            (RectTop(WindowRect(w)))
 #define GetBottom(w)         (RectBottom(WindowRect(w)))
 #define GetLeft(w)           (RectLeft(WindowRect(w)))
 #define GetRight(w)          (RectRight(WindowRect(w)))
-#define GetClientTop(w)      (GetTop(w)+TopBorderAdj(w))
-#define GetClientBottom(w)   (GetBottom(w)-BottomBorderAdj(w))
-#define GetClientLeft(w)     (GetLeft(w)+BorderAdj(w))
-#define GetClientRight(w)    (GetRight(w)-BorderAdj(w))
+int c_GetClientLeft(WINDOW);
+int c_GetClientTop(WINDOW);
+int c_GetClientBottom(WINDOW);
+int c_GetClientRight(WINDOW);
+//#define GetClientTop(w)      (GetTop(w)+TopBorderAdj(w))
+//#define GetClientBottom(w)   (GetBottom(w)-BottomBorderAdj(w))
+//#define GetClientLeft(w)     (GetLeft(w)+BorderAdj(w))
+//#define GetClientRight(w)    (GetRight(w)-BorderAdj(w))
 char *GetTitle(WINDOW);
 WINDOW GetParent(WINDOW);
 int GetClass(WINDOW); // use int for CLASS
-#define GetAttribute(w)      ((w)->attrib)
-#define AddAttribute(w,a)    (GetAttribute(w) |= a)
-#define TestAttribute(w,a)   (GetAttribute(w) & (a))
-#define isHidden(w)          (!(GetAttribute(w) & VISIBLE))
+//#define GetAttribute(w)      ((w)->attrib)
+//#define AddAttribute(w,a)    (GetAttribute(w) |= a)
+//#define TestAttribute(w,a)   (GetAttribute(w) & (a))
+//#define isHidden(w)          (!(GetAttribute(w) & VISIBLE))
+int c_AddAttribute(WINDOW, int);
+int c_TestAttribute(WINDOW, int);
 #define gotoxy(w,x,y) cursor(w->rc.lf+(x)+1,w->rc.tp+(y)+1)
 void writeline(WINDOW, char *, int, int, BOOL);
 
@@ -232,9 +242,9 @@ int InputBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 void SetStandardColor(WINDOW);
 void SetReverseColor(WINDOW);
 BOOL isAncestor(WINDOW, WINDOW);
-#define HitControlBox(wnd, p1, p2)     \
-     (TestAttribute(wnd, CONTROLBOX) && \
-     p1 == 2 && p2 == 0)
+//#define HitControlBox(wnd, p1, p2)     \
+//     (TestAttribute(wnd, CONTROLBOX) && \
+//     p1 == 2 && p2 == 0)
 unsigned char WndForeground(WINDOW);
 unsigned char WndBackground(WINDOW);
 unsigned char FrameForeground(WINDOW);

@@ -165,7 +165,7 @@ void cParagraphCmd(WINDOW wnd)
     bb = bbl;
     while (bbl < bel)    {
         bbl++;
-        if ((int)(bbl - bb) == ClientWidth(wnd)-1)    {
+        if ((int)(bbl - bb) == c_ClientWidth(wnd)-1)    {
             while (*bbl != ' ' && bbl > bb)
                 --bbl;
             if (*bbl != ' ')    {

@@ -368,7 +368,6 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 
 // -------- CREATE_WINDOW Message ---------
 fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
     var rtn = false;
     if (win.extension) |extension| {
         const db:*Dialogs.DBOX = extension.dbox;
@@ -396,15 +395,15 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
                 break;
             }
             var attrib:c_int = 0;
-            if (wnd.*.attrib & df.NOCLIP > 0)
-                attrib = attrib | df.NOCLIP;
-            if (win.*.modal)
-                attrib = attrib | df.SAVESELF;
+            if (win.TestAttribute(df.NOCLIP))
+                attrib |= df.NOCLIP;
+            if (win.modal)
+                attrib |= df.SAVESELF;
             ctl.*.setting = ctl.*.isetting;
             if ((ctl.*.Class == k.EDITBOX) and (ctl.*.dwnd.h > 1)) {
-                attrib = attrib | (df.MULTILINE | df.HASBORDER);
+                attrib |= df.MULTILINE | df.HASBORDER;
             } else if ((ctl.*.Class == k.LISTBOX or ctl.*.Class == k.TEXTBOX) and ctl.*.dwnd.h > 2) {
-                attrib = attrib | df.HASBORDER;
+                attrib |= df.HASBORDER;
             }
 
             var cwnd = Window.create(ctl.*.Class,
@@ -430,12 +429,10 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
 
 // -------- LEFT_BUTTON Message ---------
 fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
-
     if (normal.WindowSizing or normal.WindowMoving)
         return true;
 
-    if (df.HitControlBox(wnd, p1-win.GetLeft(), p2-win.GetTop())) {
+    if (win.HitControlBox(@intCast(p1-win.GetLeft()), @intCast(p2-win.GetTop()))) {
         q.PostMessage(win, df.KEYBOARD, ' ', df.ALTKEY);
         return true;
     }

@@ -127,6 +127,7 @@ void wputch(WINDOW wnd, int c, int x, int y)
 
 // this is part of Window.zig already.
 // use zig version in the future.
+#if 0
 static BOOL isVisible(WINDOW wnd)
 {
     while (wnd != NULL)    {
@@ -136,6 +137,9 @@ static BOOL isVisible(WINDOW wnd)
     }
     return TRUE;
 }
+#endif
+
+BOOL c_isVisible(WINDOW);
 
 /* ------- write a string to a window ---------- */
 void wputs(WINDOW wnd, void *s, int x, int y)
@@ -143,7 +147,7 @@ void wputs(WINDOW wnd, void *s, int x, int y)
 	int x1 = GetLeft(wnd)+x;
 	int x2 = x1;
 	int y1 = GetTop(wnd)+y;
-    if (x1 < SCREENWIDTH && y1 < SCREENHEIGHT && isVisible(wnd))	{
+    if (x1 < SCREENWIDTH && y1 < SCREENHEIGHT && c_isVisible(wnd))	{
 		short ln[MAXCOLS];
 		short *cp1 = ln;
 	    unsigned char *str = s;
@@ -182,12 +186,12 @@ void wputs(WINDOW wnd, void *s, int x, int y)
    		if (x1+len > SCREENWIDTH)
        		len = SCREENWIDTH-x1;
 
-		if (!ClipString && !TestAttribute(wnd, NOCLIP))	{
+		if (!ClipString && !c_TestAttribute(wnd, NOCLIP))	{
 			/* -- clip the line to within ancestor windows -- */
 			RECT rc = WindowRect(wnd);
 			WINDOW nwnd = GetParent(wnd);
 			while (len > 0 && nwnd != NULL)	{
-				if (!isVisible(nwnd))	{
+				if (!c_isVisible(nwnd))	{
 					len = 0;
 					break;
 				}

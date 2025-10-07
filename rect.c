@@ -62,10 +62,10 @@ RECT ClientRect(void *wnd)
 {
     RECT rc;
 
-    RectLeft(rc) = GetClientLeft((WINDOW)wnd);
-    RectTop(rc) = GetClientTop((WINDOW)wnd);
-    RectRight(rc) = GetClientRight((WINDOW)wnd);
-    RectBottom(rc) = GetClientBottom((WINDOW)wnd);
+    RectLeft(rc) = c_GetClientLeft((WINDOW)wnd);
+    RectTop(rc) = c_GetClientTop((WINDOW)wnd);
+    RectRight(rc) = c_GetClientRight((WINDOW)wnd);
+    RectBottom(rc) = c_GetClientBottom((WINDOW)wnd);
     return rc;
 }
 
@@ -87,7 +87,7 @@ RECT ClipRectangle(void *wnd, RECT rc)
     RectLeft(sr) = RectTop(sr) = 0;
     RectRight(sr) = SCREENWIDTH-1;
     RectBottom(sr) = SCREENHEIGHT-1;
-    if (!TestAttribute((WINDOW)wnd, NOCLIP))
+    if (!c_TestAttribute((WINDOW)wnd, NOCLIP))
         while ((wnd = GetParent((WINDOW)wnd)) != NULL)
             rc = subRectangle(rc, ClientRect(wnd));
     return subRectangle(rc, sr);

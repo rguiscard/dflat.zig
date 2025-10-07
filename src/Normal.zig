@@ -318,11 +318,10 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
 
 // --------- DOUBLE_CLICK Message ----------
 fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const wnd = win.win;
-    const mx = p1 - win.GetLeft();
-    const my = p2 - win.GetTop();
+    const mx:usize = @intCast(p1 - win.GetLeft());
+    const my:usize = @intCast(p2 - win.GetTop());
     if ((WindowSizing == false) and (WindowMoving == false)) {
-        if (df.HitControlBox(wnd, mx, my)) {
+        if (win.HitControlBox(mx, my)) {
             q.PostMessage(win, df.CLOSE_WINDOW, 0, 0);
             lists.SkipApplicationControls();
         }
@@ -331,13 +330,12 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
 // --------- LEFT_BUTTON Message ----------
 fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const wnd = win.win; // this may change
     const dwnd = getDummy();
-    const mx = p1 - win.GetLeft();
-    const my = p2 - win.GetTop();
+    const mx:usize = @intCast(p1 - win.GetLeft());
+    const my:usize = @intCast(p2 - win.GetTop());
     if (WindowSizing or WindowMoving)
         return;
-    if (df.HitControlBox(wnd, mx, my)) {
+    if (win.HitControlBox(mx, my)) {
         sysmenu.BuildSystemMenu(win);
         return;
     }
@@ -576,8 +574,8 @@ fn MaximizeMsg(win:*Window) void {
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
     _ = win.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
-    if (wnd.*.restored_attrib == 0) {
-        wnd.*.restored_attrib = wnd.*.attrib;
+    if (win.restored_attrib == 0) {
+        win.restored_attrib = win.attrib;
     }
     win.ClearAttribute(df.SHADOW);
     _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
@@ -598,8 +596,8 @@ fn MinimizeMsg(win:*Window) void {
     if (win == Window.inFocus) {
         lists.SetNextFocus();
     }
-    if (wnd.*.restored_attrib == 0) {
-        wnd.*.restored_attrib = wnd.*.attrib;
+    if (win.restored_attrib == 0) {
+        win.restored_attrib = win.attrib;
     }
     win.ClearAttribute( df.SHADOW | df.SIZEABLE | df.HASMENUBAR |
                         df.VSCROLLBAR | df.HSCROLLBAR);
@@ -615,8 +613,8 @@ fn RestoreMsg(win:*Window) void {
     win.condition = .ISRESTORED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
-    wnd.*.attrib = wnd.*.restored_attrib;
-    wnd.*.restored_attrib = 0;
+    win.attrib = win.restored_attrib;
+    win.restored_attrib = 0;
     _ = win.sendMessage(df.MOVE, wnd.*.RestoredRC.lf, wnd.*.RestoredRC.tp);
     wnd.*.RestoredRC = holdrc;
     _ = win.sendMessage(df.SIZE, wnd.*.RestoredRC.rt, wnd.*.RestoredRC.bt);
@@ -834,7 +832,7 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
     dwnd.*.wd = @intCast(win.WindowWidth());
     if (Window.get_zin(dwnd)) |dwin| {
         dwin.parent = win.parent;
-        dwnd.*.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
+        dwin.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
         dwin.InitWindowColors();
         SaveBorder(dwnd.*.rc);
         dwin.RepaintBorder(null);
@@ -1181,12 +1179,10 @@ pub fn isAncestor(w: *Window, awnd: *Window) bool {
     }
     return false;
 }
-//pub fn isAncestor(w: df.WINDOW, awnd: df.WINDOW) bool {
-//    var wnd = w;
-//    while (wnd != null) {
-//        if (wnd == awnd)
-//            return true;
-//        wnd = df.GetParent(wnd);
-//    }
-//    return false;
-//}
+
+pub export fn c_isVisible(wnd:df.WINDOW) df.BOOL {
+    if (Window.get_zin(wnd)) |win| {
+        return if (win.isVisible()) df.TRUE else df.FALSE;
+    }
+    return df.FALSE;
+}

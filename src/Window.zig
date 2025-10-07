@@ -56,6 +56,8 @@ nextsibling:?*TopLevelFields = null,  // next sibling
 prevsibling:?*TopLevelFields = null,  // previous sibling
 childfocus:?*TopLevelFields  = null,  // child that ha(s/d) focus
 
+attrib:c_int = 0,                     // Window attributes
+restored_attrib:c_int = 0,            // attributes when restored
 videosave:?[]u8 = null,               // video save buffer
 condition: Condition = .ISRESTORED,   // Restored, Maximized, Minimized, Closing
 oldcondition: Condition = .ISRESTORED,// previous condition
@@ -168,11 +170,11 @@ pub fn create(
         } else {
             wnd.*.rc.tp = top;
         }
-        wnd.*.attrib = attrib;
+        self.attrib = attrib;
         if (ttl) |tt| {
             if (tt.len > 0) {
                 // df.AddAttribute(wnd, df.HASTITLEBAR);
-                 wnd.*.attrib = wnd.*.attrib | df.HASTITLEBAR;
+                 self.attrib |= df.HASTITLEBAR;
             }
         }
         if (wndproc == null) {
@@ -188,14 +190,14 @@ pub fn create(
             const cls = Klass.defs[@intCast(@intFromEnum(base))];
             const attr:c_int = @intCast(cls[3]); // attributes
             // df.AddAttribute(wnd, attr);
-            wnd.*.attrib = wnd.*.attrib | attr;
+            self.attrib |= attr;
             base = cls[1]; // base
         }
 
         // ---- adjust position with parent ----
         var pt = parent;
         if (parent) |pw| {
-            if (df.TestAttribute(wnd, df.NOCLIP) == 0) {
+            if (self.TestAttribute(df.NOCLIP) == false) {
                 // -- keep upper left within borders of parent -
                 wnd.*.rc.lf = @intCast(@max(wnd.*.rc.lf, pw.GetClientLeft()));
                 wnd.*.rc.tp = @intCast(@max(wnd.*.rc.tp, pw.GetClientTop()));
@@ -883,39 +885,32 @@ pub fn getClass(self: *TopLevelFields) CLASS {
 }
 
 pub fn GetAttribute(self: *TopLevelFields) c_int {
-    const wnd = self.win;
-    return wnd.*.attrib;
+    return self.attrib;
 }
 
 pub fn AddAttribute(self: *TopLevelFields, attr: c_int) void {
-    const wnd = self.win;
-    wnd.*.attrib = wnd.*.attrib | attr;
+    self.attrib |= attr;
 }
 
 pub fn ClearAttribute(self: *TopLevelFields, attr: c_int) void {
-    const wnd = self.win;
-    wnd.*.attrib = wnd.*.attrib & (~attr);
+    self.attrib &= ~attr;
 }
 
 pub fn TestAttribute(self: *TopLevelFields, attr: c_int) bool {
-    const wnd = self.win;
-    return (wnd.*.attrib & attr) > 0;
+    return (self.attrib & attr) > 0;
 }
 
 pub fn isHidden(self: *TopLevelFields) bool {
-    const wnd = self.win;
-    const rtn =  (wnd.*.attrib & df.VISIBLE);
+    const rtn = (self.attrib & df.VISIBLE);
     return (rtn == 0);
 }
 
 pub fn SetVisible(self: *TopLevelFields) void {
-    const wnd = self.win;
-    wnd.*.attrib |= df.VISIBLE;
+    self.attrib |= df.VISIBLE;
 }
 
 pub fn ClearVisible(self: *TopLevelFields) void {
-    const wnd = self.win;
-    wnd.*.attrib &= ~df.VISIBLE;
+    self.attrib &= ~df.VISIBLE;
 }
 
 pub fn isVisible(self: *TopLevelFields) bool {
@@ -1024,4 +1019,77 @@ pub fn getGapBuffer(self:*TopLevelFields, size:usize) ?*GapBuf {
         }
     }
     return self.gapbuf orelse null;
+}
+
+pub export fn c_ClientWidth(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.ClientWidth());
+    }
+    return 0;
+}
+
+pub export fn c_ClientHeight(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.ClientHeight());
+    }
+    return 0;
+}
+
+pub export fn c_GetClientLeft(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.GetClientLeft());
+    }
+    return 0;
+}
+
+pub export fn c_GetClientTop(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.GetClientTop());
+    }
+    return 0;
+}
+
+pub export fn c_GetClientRight(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.GetClientRight());
+    }
+    return 0;
+}
+
+pub export fn c_GetClientBottom(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.GetClientBottom());
+    }
+    return 0;
+}
+
+pub export fn c_TestAttribute(wnd:df.WINDOW, attrib:c_int) df.BOOL {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return if (win.TestAttribute(attrib)) df.TRUE else df.FALSE;
+    }
+    return df.FALSE;
+}
+
+pub export fn c_AddAttribute(wnd:df.WINDOW, attrib:c_int) void {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        win.AddAttribute(attrib);
+    }
+}
+
+pub export fn c_BorderAdj(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.BorderAdj());
+    }
+    return 0;
+}
+
+pub export fn c_TopBorderAdj(wnd:df.WINDOW) c_int {
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return @intCast(win.TopBorderAdj());
+    }
+    return 0;
+}
+
+pub fn HitControlBox(self:*TopLevelFields, x:usize, y:usize) bool {
+    return (self.TestAttribute(df.CONTROLBOX) and x == 2 and y == 0);
 }

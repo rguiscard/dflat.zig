@@ -477,7 +477,6 @@ pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
     mp.menu.DeactivateCommand(&menu.MainMenu, .ID_PASTE);
     mp.menu.DeactivateCommand(&menu.MainMenu, .ID_UNDO);
     if (w) |win| {
-        const wnd = win.win;
         if (win.getClass() == mp.CLASS.EDITBOX) {
            if (win.isMultiLine()) {
                if (mp.textbox.TextBlockMarked(win)) {
@@ -487,7 +486,7 @@ pub fn PrepEditMenu(w:?*mp.Window, mnu:*mp.menus.MENU) void {
                    mp.menu.ActivateCommand(&menu.MainMenu, .ID_DELETETEXT);
                }
                mp.menu.ActivateCommand(&menu.MainMenu, .ID_PARAGRAPH);
-               if ((df.TestAttribute(wnd, df.READONLY) == 0)) {
+               if ((win.TestAttribute(df.READONLY) == false)) {
                    if (mp.clipboard.Clipboard) |_| {
                        mp.menu.ActivateCommand(&menu.MainMenu, .ID_PASTE);
                    }

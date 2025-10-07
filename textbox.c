@@ -194,7 +194,7 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
         SetStandardColor(wnd);
     /* ------- display the line -------- */
     writeline(wnd, line+dif,
-                RectLeft(rc)+BorderAdj(wnd),
-                    y-wnd->wtop+TopBorderAdj(wnd), FALSE);
+                RectLeft(rc)+c_BorderAdj(wnd),
+                    y-wnd->wtop+c_TopBorderAdj(wnd), FALSE);
     free(svlp);
 }

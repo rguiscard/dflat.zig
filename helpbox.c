@@ -74,8 +74,8 @@ BOOL cHelpBoxKeyboardMsg(WINDOW wnd, WINDOW cwnd, PARAM p1)
     }
     if (thisword->lineno < cwnd->wtop ||
             thisword->lineno >=
-                cwnd->wtop + ClientHeight(cwnd))  {
-        int distance = ClientHeight(cwnd)/2;
+                cwnd->wtop + c_ClientHeight(cwnd))  {
+        int distance = c_ClientHeight(cwnd)/2;
         do    {
             cwnd->wtop = thisword->lineno-distance;
             distance /= 2;
@@ -115,8 +115,8 @@ int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
     int rtn, mx, my, i;
 
     rtn = DefaultWndProc(wnd, LEFT_BUTTON, p1, p2);
-    mx = (int)p1 - GetClientLeft(wnd);
-    my = (int)p2 - GetClientTop(wnd);
+    mx = (int)p1 - c_GetClientLeft(wnd);
+    my = (int)p2 - c_GetClientTop(wnd);
     my += wnd->wtop;
     thisword = KeyWords;
     for (i = 0; i < keywordcount; i++)    {
@@ -198,15 +198,15 @@ void cReadHelp(WINDOW wnd, WINDOW cwnd)
         }
         PutItemText(wnd, ID_HELPTEXT, hline);
         /* -- display help text as soon as window is full -- */
-        if (++linectr == ClientHeight(cwnd))	{
+        if (++linectr == c_ClientHeight(cwnd))	{
 			struct keywords *holdthis = thisword;
 		    thisword = NULL;
             SendMessage(cwnd, PAINT, 0, 0);
 		    thisword = holdthis;
 		}
-        if (linectr > ClientHeight(cwnd) &&
-                !TestAttribute(cwnd, VSCROLLBAR))    {
-            AddAttribute(cwnd, VSCROLLBAR);
+        if (linectr > c_ClientHeight(cwnd) &&
+                !c_TestAttribute(cwnd, VSCROLLBAR))    {
+            c_AddAttribute(cwnd, VSCROLLBAR);
             SendMessage(cwnd, BORDER, 0, 0);
         }
     }
