@@ -286,22 +286,22 @@ fn PictureRect(x:c_int, y:c_int, len:c_int, hv:c_int) df.RECT {
     return rc;
 }
 
-pub fn DrawVector(wnd:df.WINDOW, x:c_int, y:c_int, len:c_int, hv:c_int) void {
+pub fn DrawVector(win:*Window, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
-    _ = df.SendMessage(wnd, df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), 0);
+    _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), 0);
 }
 
-pub fn DrawBox(wnd:df.WINDOW, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
+pub fn DrawBox(win:*Window, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
     const rc:df.RECT = .{
         .lf = x,
         .tp = y,
         .rt = x+wd-1,
         .bt = y+ht-1
     };
-    _ = df.SendMessage(wnd, df.DRAWBOX, @intCast(@intFromPtr(&rc)), 0);
+    _ = win.sendMessage(df.DRAWBOX, @intCast(@intFromPtr(&rc)), 0);
 }
 
-pub fn DrawBar(wnd:df.WINDOW, vt:df.VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
+pub fn DrawBar(win:*Window, vt:df.VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
-    _ = df.SendMessage(wnd, df.DRAWBAR, @intCast(@intFromPtr(&rc)), @intCast(vt));
+    _ = win.sendMessage(df.DRAWBAR, @intCast(@intFromPtr(&rc)), @intCast(vt));
 }

@@ -63,14 +63,14 @@ pub export fn BarChart(pwin: *Window) void {
             _ = win.sendTextMessage(df.ADDTEXT, "", 0);
             for(ProjChart, 0..) |proj, i| {
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(proj[0]), 0);
-                pict.DrawBar(win.win, @intCast(df.SOLIDBAR+(i%4)),
+                pict.DrawBar(win, @intCast(df.SOLIDBAR+(i%4)),
                            @intCast(11 + proj[1] * COLWIDTH), @intCast(2+i),
                            @intCast((1 + proj[2]-proj[1]) * COLWIDTH),
                            df.TRUE);
             }
             _ = win.sendTextMessage(df.ADDTEXT, "", 0);
             _ = win.sendTextMessage(df.ADDTEXT, @constCast(Months), 0);
-            pict.DrawBox(win.win, 10, 1, pct+2, 25);
+            pict.DrawBox(win, 10, 1, pct+2, 25);
         }
     }
     if (Bwnd) |w| {

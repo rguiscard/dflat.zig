@@ -42,15 +42,15 @@ fn BuildDateArray() void {
     }
 }
 
-fn CreateWindowMsg(wnd: df.WINDOW) void {
+fn CreateWindowMsg(win:*Window) void {
     var x:isize = 5;
     var y:isize = 4;
-    pict.DrawBox(wnd, 1, 2, CALHEIGHT-4, CALWIDTH-4);
+    pict.DrawBox(win, 1, 2, CALHEIGHT-4, CALWIDTH-4);
     while(x < CALWIDTH-4) : (x += 4) {
-        pict.DrawVector(wnd, @intCast(x), 2, CALHEIGHT-4, df.FALSE);
+        pict.DrawVector(win, @intCast(x), 2, CALHEIGHT-4, df.FALSE);
     }
     while(y < CALHEIGHT-3) : (y += 2) {
-        pict.DrawVector(wnd, 1, @intCast(y), CALWIDTH-4, df.TRUE);
+        pict.DrawVector(win, 1, @intCast(y), CALWIDTH-4, df.TRUE);
     }
 }
 
@@ -60,7 +60,8 @@ const months = [_][]const u8{
     "August", "September", "October", "November", "December"
 };
 
-fn DisplayDates(wnd:df.WINDOW) void {
+fn DisplayDates(win:*Window) void {
+    const wnd = win.win;
     var dyln:[10]u8 = .{0} ** 10;
 //    int offset;
 //    char banner[CALWIDTH-1];
@@ -146,11 +147,10 @@ fn DisplayDates(wnd:df.WINDOW) void {
 
 
 pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             _ = root.zDefaultWndProc(win, msg, p1, p2);
-            CreateWindowMsg(wnd);
+            CreateWindowMsg(win);
             return true;
         },
         df.KEYBOARD => {
@@ -159,7 +159,7 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         },
         df.PAINT => {
             _ = root.zDefaultWndProc(win, msg, p1, p2);
-            DisplayDates(wnd);
+            DisplayDates(win);
             return true;
         },
         df.COMMAND => {
