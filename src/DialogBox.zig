@@ -307,20 +307,12 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.SETFOCUS => {
             const pwin = win.parent;
-            var pwnd:df.WINDOW = null;
-            var db:?*Dialogs.DBOX = null;
-            if (pwin) |pw| {
-                pwnd = pw.win; // only dummy and application window is null
-                db = @alignCast(@ptrCast(pwnd.*.extension));
-            }
-
             if (p1 > 0) {
                 const oldFocus = Window.inFocus;
                 // we assume df.inFocus is not null
                 if (oldFocus) |oldWin| {
                     if (pwin) |pw| {
                         if ((oldWin.getClass() != k.APPLICATION) and
-//                                       (normal.isAncestor(oldWin.win, pwnd) == false)) {
                                        (normal.isAncestor(oldWin, pw) == false)) {
                             Window.inFocus = null;
                             _ = oldWin.sendMessage(df.BORDER, 0, 0);
@@ -351,6 +343,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                     oldWin.SetVisible();
                     if (pwin) |pw| {
                         pw.dfocus = win;
+                        const db = if (pw.extension) |extension| extension.dbox else null;
                         _ = pw.sendCommandMessage(inFocusCommand(db), df.ENTERFOCUS);
                     }
                     return true;
@@ -358,6 +351,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             } else {
                 // assume pwin (parent) exists. seems work.
                 if (pwin) |pw| {
+                    const db = if (pw.extension) |extension| extension.dbox else null;
                     _ = pw.sendMessage(df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
                 }
 //                _ = q.SendMessage(pwnd, df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
@@ -375,57 +369,59 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 // -------- CREATE_WINDOW Message ---------
 fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
-    const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
     var rtn = false;
-    var idx:isize = -1;
+    if (win.extension) |extension| {
+        const db:*Dialogs.DBOX = extension.dbox;
+        var idx:isize = -1;
 
-    const dbs = getDialogBoxes();
+        const dbs = getDialogBoxes();
 
-    // ---- build a table of processed dialog boxes ----
-    for (dbs.items, 0..) |item, i| {
-        if (db == item) {
-            idx = @intCast(i);
-            break;
+        // ---- build a table of processed dialog boxes ----
+        for (dbs.items, 0..) |item, i| {
+            if (db == item) {
+                idx = @intCast(i);
+                break;
+            }
         }
-    }
-    if (idx < 0) { // not found
-        if (dbs.append(root.global_allocator, db)) {
-        } else |_| { // error
+        if (idx < 0) { // not found
+            if (dbs.append(root.global_allocator, db)) {
+            } else |_| { // error
+            }
         }
-    }
-    rtn = root.BaseWndProc(k.DIALOG, win, df.CREATE_WINDOW, p1, p2);
+        rtn = root.BaseWndProc(k.DIALOG, win, df.CREATE_WINDOW, p1, p2);
 
-    for(0..Dialogs.MAXCONTROLS) |i| {
-        const ctl:*Dialogs.CTLWINDOW = @ptrCast(&db.*.ctl[i]);
-        if (ctl.*.Class == k.NORMAL) { // Class as 0 is used as end of array
-            break;
-        }
-        var attrib:c_int = 0;
-        if (wnd.*.attrib & df.NOCLIP > 0)
-            attrib = attrib | df.NOCLIP;
-        if (win.*.modal)
-            attrib = attrib | df.SAVESELF;
-        ctl.*.setting = ctl.*.isetting;
-        if ((ctl.*.Class == k.EDITBOX) and (ctl.*.dwnd.h > 1)) {
-            attrib = attrib | (df.MULTILINE | df.HASBORDER);
-        } else if ((ctl.*.Class == k.LISTBOX or ctl.*.Class == k.TEXTBOX) and ctl.*.dwnd.h > 2) {
-            attrib = attrib | df.HASBORDER;
-        }
+        for(0..Dialogs.MAXCONTROLS) |i| {
+            const ctl:*Dialogs.CTLWINDOW = @ptrCast(&db.*.ctl[i]);
+            if (ctl.*.Class == k.NORMAL) { // Class as 0 is used as end of array
+                break;
+            }
+            var attrib:c_int = 0;
+            if (wnd.*.attrib & df.NOCLIP > 0)
+                attrib = attrib | df.NOCLIP;
+            if (win.*.modal)
+                attrib = attrib | df.SAVESELF;
+            ctl.*.setting = ctl.*.isetting;
+            if ((ctl.*.Class == k.EDITBOX) and (ctl.*.dwnd.h > 1)) {
+                attrib = attrib | (df.MULTILINE | df.HASBORDER);
+            } else if ((ctl.*.Class == k.LISTBOX or ctl.*.Class == k.TEXTBOX) and ctl.*.dwnd.h > 2) {
+                attrib = attrib | df.HASBORDER;
+            }
 
-        var cwnd = Window.create(ctl.*.Class,
-                        ctl.*.dwnd.title,
-                        @intCast(ctl.*.dwnd.x+win.GetClientLeft()),
-                        @intCast(ctl.*.dwnd.y+win.GetClientTop()),
-                        ctl.*.dwnd.h,
-                        ctl.*.dwnd.w,
-                        .{.control = ctl},
-                        win,
-                        ControlProc,
-                        attrib);
-        if ((ctl.*.Class == k.EDITBOX or ctl.*.Class == k.TEXTBOX or
-                ctl.*.Class == k.COMBOBOX)) {
-            if (getCtlWindowText(ctl)) |text| {
-                _ = cwnd.sendTextMessage(df.SETTEXT, @constCast(text), 0);
+            var cwnd = Window.create(ctl.*.Class,
+                            ctl.*.dwnd.title,
+                            @intCast(ctl.*.dwnd.x+win.GetClientLeft()),
+                            @intCast(ctl.*.dwnd.y+win.GetClientTop()),
+                            ctl.*.dwnd.h,
+                            ctl.*.dwnd.w,
+                            .{.control = ctl},
+                            win,
+                            ControlProc,
+                            attrib);
+            if ((ctl.*.Class == k.EDITBOX or ctl.*.Class == k.TEXTBOX or
+                    ctl.*.Class == k.COMBOBOX)) {
+                if (getCtlWindowText(ctl)) |text| {
+                    _ = cwnd.sendTextMessage(df.SETTEXT, @constCast(text), 0);
+                }
             }
         }
     }
@@ -474,51 +470,51 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 // -------- KEYBOARD Message ---------
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.*.win;
-
     if (normal.WindowMoving or normal.WindowSizing)
         return false;
 
-    const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
+    if (win.extension) |extension| {
+        const db:*Dialogs.DBOX = extension.dbox;
 
-    switch (p1) {
-        df.SHIFT_HT,
-        df.BS,
-        df.UP => {
-            PrevFocus(db);
-        },
-        df.ALT_F6,
-        '\t',
-        df.FWD,
-        df.DN => {
-            NextFocus(db);
-        },
-        ' ' => {
-            if (((p2 & df.ALTKEY)>0) and win.TestAttribute(df.CONTROLBOX)) {
-                SysMenuOpen = true;
-                sysmenu.BuildSystemMenu(win);
-                return true;
-            }
-        },
-        df.CTRL_F4,
-        df.ESC => {
-            _ = win.sendCommandMessage(.ID_CANCEL, 0);
-        },
-        df.F1 => {
-            if (Window.inFocus) |focus| {
-                if (focus.GetControl()) |ct| {
-                    if (ct.*.help) |help| {
-                        if (helpbox.DisplayHelp(win, help)) {
-                            return true;
+        switch (p1) {
+            df.SHIFT_HT,
+            df.BS,
+            df.UP => {
+                PrevFocus(db);
+            },
+            df.ALT_F6,
+            '\t',
+            df.FWD,
+            df.DN => {
+                NextFocus(db);
+            },
+            ' ' => {
+                if (((p2 & df.ALTKEY)>0) and win.TestAttribute(df.CONTROLBOX)) {
+                    SysMenuOpen = true;
+                    sysmenu.BuildSystemMenu(win);
+                    return true;
+                }
+            },
+            df.CTRL_F4,
+            df.ESC => {
+                _ = win.sendCommandMessage(.ID_CANCEL, 0);
+            },
+            df.F1 => {
+                if (Window.inFocus) |focus| {
+                    if (focus.GetControl()) |ct| {
+                        if (ct.*.help) |help| {
+                            if (helpbox.DisplayHelp(win, help)) {
+                                return true;
+                            }
                         }
                     }
                 }
+            },
+            else => {
+                // ------ search all the shortcut keys -----
+                if (dbShortcutKeys(db, @intCast(p1)))
+                    return true;
             }
-        },
-        else => {
-            // ------ search all the shortcut keys -----
-            if (dbShortcutKeys(db, @intCast(p1)))
-                return true;
         }
     }
     return win.modal;
@@ -526,7 +522,6 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 // -------- COMMAND Message ---------
 fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.*.win;
     const cmd:c = @enumFromInt(p1);
     switch (cmd) {
         .ID_OK, .ID_CANCEL => {
@@ -544,8 +539,10 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
             if (p2 != 0)
                 return true;
 
-            const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-            return helpbox.DisplayHelp(win, db.*.HelpName);
+            if (win.extension) |extension| {
+                const db:*Dialogs.DBOX = extension.dbox;
+                return helpbox.DisplayHelp(win, db.*.HelpName);
+            }
         },
         else => {
         }
@@ -555,7 +552,6 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 // ----- window-processing module, DIALOG window class -----
 pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
     var p2_new = p2;
 
     switch (msg) {
@@ -580,8 +576,8 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         df.LB_SELECTION, df.LB_CHOOSE => {
             if (SysMenuOpen)
                 return true;
-            if (wnd.*.extension) |extension| {
-                const db:*Dialogs.DBOX = @alignCast(@ptrCast(extension));
+            if (win.extension) |extension| {
+                const db:*Dialogs.DBOX = extension.dbox;
                 _ = win.sendCommandMessage(inFocusCommand(db), msg);
             }
         },
@@ -677,42 +673,46 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:CLAS
 
 // ------- set the text of a control window ------
 pub export fn PutItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8) callconv(.c) void {
-    const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-    var control = FindCommand(db, cmd, k.EDITBOX);
+    if (Window.get_zin(wnd)) |win| {
+        if (win.extension) |extension| {
+            const db:*Dialogs.DBOX = extension.dbox;
+            var control = FindCommand(db, cmd, .EDITBOX);
 
-    if (control == null)
-        control = FindCommand(db, cmd, k.TEXTBOX);
-    if (control == null)
-        control = FindCommand(db, cmd, k.COMBOBOX);
-    if (control == null)
-        control = FindCommand(db, cmd, k.LISTBOX);
-    if (control == null)
-        control = FindCommand(db, cmd, k.SPINBUTTON);
-    if (control == null)
-        control = FindCommand(db, cmd, k.TEXT);
-    if (control) |ct| {
-        // assume cwnd cannot be null ?
-        if (ct.win) |cwin| {
-            switch (ct.*.Class) {
-                k.COMBOBOX,
-                k.EDITBOX => {
-                    _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
-                    _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
-                    if (cwin.isMultiLine() == false) {
-                        _ = cwin.sendMessage(df.PAINT, 0, 0);
+            if (control == null)
+                control = FindCommand(db, cmd, .TEXTBOX);
+            if (control == null)
+                control = FindCommand(db, cmd, .COMBOBOX);
+            if (control == null)
+                control = FindCommand(db, cmd, .LISTBOX);
+            if (control == null)
+                control = FindCommand(db, cmd, .SPINBUTTON);
+            if (control == null)
+                control = FindCommand(db, cmd, .TEXT);
+            if (control) |ct| {
+                // assume cwnd cannot be null ?
+                if (ct.win) |cwin| {
+                    switch (ct.*.Class) {
+                        .COMBOBOX,
+                        .EDITBOX => {
+                            _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+                            _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                            if (cwin.isMultiLine() == false) {
+                                _ = cwin.sendMessage(df.PAINT, 0, 0);
+                            }
+                        },
+                        .LISTBOX,
+                        .TEXTBOX,
+                        .SPINBUTTON => {
+                            _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                        },
+                        .TEXT => {
+                            _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+                            _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                            _ = cwin.sendMessage(df.PAINT, 0, 0);
+                        },
+                        else => {
+                        }
                     }
-                },
-                k.LISTBOX,
-                k.TEXTBOX,
-                k.SPINBUTTON => {
-                    _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
-                },
-                k.TEXT => {
-                    _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
-                    _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
-                    _ = cwin.sendMessage(df.PAINT, 0, 0);
-                },
-                else => {
                 }
             }
         }
@@ -721,53 +721,54 @@ pub export fn PutItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8) callconv(.c) void {
 
 // ------- get the text of a control window ------
 pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
-    const wnd = win.win;
-    const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-    var control = FindCommand(db, cmd, k.EDITBOX);
+    if (win.extension) |extension| {
+        const db:*Dialogs.DBOX = extension.dbox;
+        var control = FindCommand(db, cmd, k.EDITBOX);
 
-    if (control == null)
-        control = FindCommand(db, cmd, k.COMBOBOX);
-    if (control == null)
-        control = FindCommand(db, cmd, k.TEXTBOX);
-    if (control == null)
-        control = FindCommand(db, cmd, k.TEXT);
-    if (control) |ct| {
-        if (ct.win) |cwin| {
-            switch (ct.*.Class) {
-                k.TEXT => {
-                    if (cwin.gapbuf) |buf| {
-                        const t = buf.toString();
-                        if (std.mem.indexOfScalar(u8, t, '\n')) |pos| {
-                            @memcpy(text[0..pos], t[0..pos]);
-                        } else {
-                            // no text;
-                            text.* = 0;
-                        }
+        if (control == null)
+            control = FindCommand(db, cmd, k.COMBOBOX);
+        if (control == null)
+            control = FindCommand(db, cmd, k.TEXTBOX);
+        if (control == null)
+            control = FindCommand(db, cmd, k.TEXT);
+        if (control) |ct| {
+            if (ct.win) |cwin| {
+                switch (ct.*.Class) {
+                    .TEXT => {
+                        if (cwin.gapbuf) |buf| {
+                            const t = buf.toString();
+                            if (std.mem.indexOfScalar(u8, t, '\n')) |pos| {
+                                @memcpy(text[0..pos], t[0..pos]);
+                            } else {
+                                // no text;
+                                text.* = 0;
+                            }
 //                            cp = strchr(cwnd_text, '\n');
 //                            if (cp != null)
 //                                len = (int) (cp - cwnd_text);
 //                            strncpy(text, cwnd_text, len);
 //                            *(text+len) = '\0';
-                    }
-                },
-                k.TEXTBOX => {
-                    if (cwin.gapbuf) |buf| {
-                        const t = buf.toString();
-                        var l:usize = @intCast(len);
-                        if (std.mem.indexOfScalar(u8, t, 0)) |pos| {
-                            if (pos < len)
-                                l = pos; // be sure length is the small one.
                         }
-                        @memcpy(text[0..l], t[0..l]);
-                    }
+                    },
+                    .TEXTBOX => {
+                        if (cwin.gapbuf) |buf| {
+                            const t = buf.toString();
+                            var l:usize = @intCast(len);
+                            if (std.mem.indexOfScalar(u8, t, 0)) |pos| {
+                                if (pos < len)
+                                    l = pos; // be sure length is the small one.
+                            }
+                            @memcpy(text[0..l], t[0..l]);
+                        }
 //                        if (cwnd_text != null)
 //                            strncpy(text, cwnd_text, len);
-                },
-                k.COMBOBOX,
-                k.EDITBOX => {
-                    _ = cwin.sendMessage(df.GETTEXT,@intCast(@intFromPtr(text)),len);
-                },
-                else => {
+                    },
+                    .COMBOBOX,
+                    .EDITBOX => {
+                        _ = cwin.sendMessage(df.GETTEXT,@intCast(@intFromPtr(text)),len);
+                    },
+                    else => {
+                    }
                 }
             }
         }
@@ -776,14 +777,15 @@ pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
 
 // ------- set the text of a listbox control window ------
 pub fn GetDlgListText(win: *Window, text:[*c]u8, cmd:c) void {
-    const wnd = win.win;
-    const db:*Dialogs.DBOX = @alignCast(@ptrCast(wnd.*.extension));
-    const control = FindCommand(db, cmd, k.LISTBOX);
-    if (control) |ct| {
-        var sel:c_int = -1; // cannot use isize here, otherwise, ListBox.zig GetTextMsg will fail
-        if (ct.win) |cwin| {
-            _ = cwin.sendMessage(df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&sel)), 0);
-            _ = cwin.sendMessage(df.LB_GETTEXT, @intCast(@intFromPtr(text)), @intCast(sel));
+    if (win.extension) |extension| {
+        const db:*Dialogs.DBOX = extension.dbox;
+        const control = FindCommand(db, cmd, k.LISTBOX);
+        if (control) |ct| {
+            var sel:c_int = -1; // cannot use isize here, otherwise, ListBox.zig GetTextMsg will fail
+            if (ct.win) |cwin| {
+                _ = cwin.sendMessage(df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&sel)), 0);
+                _ = cwin.sendMessage(df.LB_GETTEXT, @intCast(@intFromPtr(text)), @intCast(sel));
+            }
         }
     }
 }

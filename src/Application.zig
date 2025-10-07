@@ -357,13 +357,12 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
 
 // -------- return the name of a document window -------
 fn WindowName(win:*Window) ?[:0]const u8 {
-    const wnd = win.win;
     if (win.title) |title| {
         return title;
     } else {
         if (win.Class == k.DIALOG) {
-            if (wnd.*.extension) |ext| {
-                const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
+            if (win.extension) |extension| {
+                const dbox:*Dialogs.DBOX = extension.dbox;
                 return dbox.*.HelpName;
             }
         } else {

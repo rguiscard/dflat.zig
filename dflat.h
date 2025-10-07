@@ -93,7 +93,7 @@ typedef struct window {
 //    enum Condition oldcondition;/* previous condition       */
 //  BOOL wasCleared;
     int restored_attrib;        /* attributes when restored */
-    void *extension;      /* menus, dialogs, documents, etc */
+//    void *extension;      /* menus, dialogs, documents, etc */
 //	void *wrapper;             /* used by C++ wrapper class. not in use. */
 //    struct window *PrevMouse;   /* previous mouse capture   */
 //    struct window *PrevKeyboard;/* previous keyboard capture*/

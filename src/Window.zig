@@ -215,7 +215,7 @@ pub fn create(
                     self.extension = .{.filename = py.filename};
                 },
                 .dbox => {
-                    wnd.*.extension = py.dbox;
+                    self.extension = .{.dbox = py.dbox};
                 },
                 .control => {
                     self.extension = .{.control = py.control};

@@ -73,9 +73,8 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch (msg) {
         df.CREATE_WINDOW => {
             const rtn = root.zDefaultWndProc(win, msg, p1, p2);
-            var db:*Dialogs.DBOX = undefined;
-            if (wnd.*.extension) |extension| {
-                db = @ptrCast(@alignCast(extension));
+            if (win.extension) |extension| {
+                const db:*Dialogs.DBOX = extension.dbox;
                 if (DialogBox.ControlWindow(db, .ID_FILENAME)) |cwin| {
                     _ = cwin.sendMessage(df.SETTEXTLENGTH, 64, 0);
                 }
@@ -100,15 +99,14 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                         }
                         if (IncompleteFilename(&fName)) {
                             // --- no file name yet ---
-                            var db:*Dialogs.DBOX = undefined;
-                            if (wnd.*.extension) |extension| {
-                                db = @ptrCast(@alignCast(extension));
-                            }
-                            set_fileSpec(&fName);
-                            set_srchSpec(&fName);
-                            InitDlgBox(win);
-                            if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
-                                _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                            if (win.extension) |extension| {
+                                const db:*Dialogs.DBOX = extension.dbox;
+                                set_fileSpec(&fName);
+                                set_srchSpec(&fName);
+                                InitDlgBox(win);
+                                if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
+                                    _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                                }
                             }
                             return true;
                         }

@@ -9,9 +9,8 @@ const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
 
 fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
-    const wnd = win.win;
-    if (wnd.*.extension) |ext| {
-        const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
+    if (win.extension) |extension| {
+        const dbox:*Dialogs.DBOX = extension.dbox;
         const control = DialogBox.FindCommand(dbox,
                         if (dirs) c.ID_DIRECTORY else c.ID_FILES, k.LISTBOX);
         if (control) |ct| {
@@ -35,9 +34,8 @@ pub fn BuildDirectoryList(win:*Window) void {
 }
 
 pub fn BuildPathDisplay(win:*Window) void {
-    const wnd = win.win;
-    if (wnd.*.extension) |ext| {
-        const dbox:*Dialogs.DBOX = @ptrCast(@alignCast(ext));
+    if (win.extension) |extension| {
+        const dbox:*Dialogs.DBOX = extension.dbox;
         const control = DialogBox.FindCommand(dbox, c.ID_PATH, k.TEXT);
         if (control) |ct| {
             const path = std.mem.zeroes([df.MAXPATH]u8);
