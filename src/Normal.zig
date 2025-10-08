@@ -283,8 +283,6 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
                 if (app.ApplicationWindow) |awin| {
                     var ffwin = awin.firstWindow();
                     while (ffwin) |ff| {
-//                        const ffwnd = ff.win;
-//                        if (isAncestor(wnd, ffwnd) == false) {
                         if (isAncestor(win, ff) == false) {
                             rc = df.subRectangle(win.WindowRect(),ff.WindowRect());
                             if (df.ValidRect(rc)) {

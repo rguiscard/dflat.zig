@@ -268,7 +268,6 @@ pub fn sendCommandMessage(self: *TopLevelFields, p1: c, p2: df.PARAM) bool {
 
 // --------- send a message to a window -----------
 pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = self.win;
     var rtn = true;
 
     switch (msg) {
@@ -313,7 +312,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
-    return q.ProcessMessage(wnd, msg, p1, p2, rtn);
+    return q.ProcessMessage(self, msg, p1, p2, rtn);
 }
 
 // -------- add a title to a window ---------
