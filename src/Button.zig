@@ -16,7 +16,7 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
     if (win.isVisible()) {
         if (win.TestAttribute(df.SHADOW) and (cfg.config.mono == 0)) {
             // -------- draw the button's shadow -------
-            df.background = df.WndBackground(win.getParent().win);
+            df.background = r.WndBackground(win.getParent());
             df.foreground = r.BLACK;
             for(1..@intCast(win.WindowWidth()+1)) |x| {
                 df.wputch(wnd, 223, @intCast(x), 1);
@@ -31,11 +31,11 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
                 var start:usize = 0;
                 if (ct.*.setting == df.OFF) {
                   txt[0] = df.CHANGECOLOR;
-                  txt[1] = wnd.*.WindowColors[df.HILITE_COLOR][df.FG] | 0x80;
-                  txt[2] = wnd.*.WindowColors[df.STD_COLOR][df.BG] | 0x80;
+                  txt[1] = win.WindowColors[df.HILITE_COLOR][df.FG] | 0x80;
+                  txt[2] = win.WindowColors[df.STD_COLOR][df.BG] | 0x80;
                   start = 3;
                 }
-                _ = popdown.CopyCommand(txt[start..],itext, (ct.*.setting == df.OFF), df.WndBackground(wnd));
+                _ = popdown.CopyCommand(txt[start..],itext, (ct.*.setting == df.OFF), r.WndBackground(win));
                 _ = win.sendMessage(df.CLEARTEXT, 0, 0);
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(txt), 0);
             } else |_| {
@@ -50,8 +50,8 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     const wnd = win.win;
     if (cfg.config.mono == 0) {
         // --------- draw a pushed button --------
-        df.background = df.WndBackground(win.getParent().win);
-        df.foreground = df.WndBackground(wnd);
+        df.background = r.WndBackground(win.getParent());
+        df.foreground = r.WndBackground(win);
         df.wputch(wnd, ' ', 0, 0);
         for (0..@intCast(win.WindowWidth())) |x| {
             df.wputch(wnd, 220, @intCast(x+1), 0);

@@ -82,7 +82,7 @@ typedef struct window {
 //    int ht, wd;            /* window height and width       */
     RECT RestoredRC;       /* restored condition rect       */
 	/* ----------------- window colors -------------------- */
-    char WindowColors[4][2];
+//    char WindowColors[4][2];
     /* -------------- linked list pointers ---------------- */
 
 //	struct window *childfocus;	// child that ha(s/d) focus
@@ -228,18 +228,18 @@ BOOL isAncestor(WINDOW, WINDOW);
 //#define HitControlBox(wnd, p1, p2)     \
 //     (TestAttribute(wnd, CONTROLBOX) && \
 //     p1 == 2 && p2 == 0)
-unsigned char WndForeground(WINDOW);
-unsigned char WndBackground(WINDOW);
-unsigned char FrameForeground(WINDOW);
-unsigned char FrameBackground(WINDOW);
-unsigned char SelectForeground(WINDOW);
-unsigned char SelectBackground(WINDOW);
-unsigned char HighlightForeground(WINDOW);
-unsigned char HighlightBackground(WINDOW);
-unsigned char WindowClientColor(WINDOW, unsigned char, unsigned char);
-unsigned char WindowReverseColor(WINDOW, unsigned char, unsigned char);
-unsigned char WindowFrameColor(WINDOW, unsigned char, unsigned char);
-unsigned char WindowHighlightColor(WINDOW, unsigned char, unsigned char);
+unsigned char c_WndForeground(WINDOW);
+unsigned char c_WndBackground(WINDOW);
+//unsigned char FrameForeground(WINDOW);
+//unsigned char FrameBackground(WINDOW);
+//unsigned char SelectForeground(WINDOW);
+//unsigned char SelectBackground(WINDOW);
+//unsigned char HighlightForeground(WINDOW);
+//unsigned char HighlightBackground(WINDOW);
+//unsigned char WindowClientColor(WINDOW, unsigned char, unsigned char);
+//unsigned char WindowReverseColor(WINDOW, unsigned char, unsigned char);
+//unsigned char WindowFrameColor(WINDOW, unsigned char, unsigned char);
+//unsigned char WindowHighlightColor(WINDOW, unsigned char, unsigned char);
 /* -------- text box prototypes ---------- */
 #define TextLine(wnd, sel) \
       (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))

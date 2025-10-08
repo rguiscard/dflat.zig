@@ -122,7 +122,7 @@ void scroll_window(WINDOW wnd, RECT rc, int d)
 {
 	if (RectTop(rc) != RectBottom(rc))	{
 		hide_mousecursor();
-        scroll_video(d, 1, clr(WndForeground(wnd),WndBackground(wnd)),
+        scroll_video(d, 1, clr(c_WndForeground(wnd),c_WndBackground(wnd)),
             RectTop(rc), RectLeft(rc), RectBottom(rc), RectRight(rc));
 		show_mousecursor();
 	}

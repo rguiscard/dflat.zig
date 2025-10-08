@@ -4,11 +4,11 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
+const colors = @import("Colors.zig");
 const DialogBox = @import("DialogBox.zig");
 const popdown = @import("PopDown.zig");
 
 fn drawText(win:*Window) void {
-    const wnd = win.win;
     if (win.GetControl()) |ct| {
         const ctl_text = DialogBox.getCtlWindowText(ct);
         if (ctl_text == null)
@@ -26,7 +26,7 @@ fn drawText(win:*Window) void {
                     if (root.global_allocator.allocSentinel(u8, mlen, 0)) |buf| {
                         @memset(buf, 0);
                         defer root.global_allocator.free(buf);
-                        _ = popdown.CopyCommand(buf, line, false, df.WndBackground(wnd));
+                        _ = popdown.CopyCommand(buf, line, false, colors.WndBackground(win));
                         _ = win.sendTextMessage(df.ADDTEXT, @constCast(buf), 0);
                     } else |_| {
                     }

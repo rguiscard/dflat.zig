@@ -86,7 +86,6 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
-    const wnd = win.win;
     const buf = sel;
     if (win.mnu) |mnu| {
 //        const ActivePopDown = &mnu.*.Selections[0];
@@ -99,8 +98,8 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
         if (pd1.*.Attrib.INACTIVE) {
             // ------ inactive menu selection -----
             buf[0] = df.CHANGECOLOR;
-            buf[1] = wnd.*.WindowColors [df.HILITE_COLOR] [df.FG]|0x80;
-            buf[2] = wnd.*.WindowColors [df.STD_COLOR] [df.BG]|0x80;
+            buf[1] = win.WindowColors [df.HILITE_COLOR] [df.FG]|0x80;
+            buf[2] = win.WindowColors [df.STD_COLOR] [df.BG]|0x80;
             idx += 3;
         }
         buf[idx] = ' ';
@@ -115,7 +114,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
 
         var len=CopyCommand(buf[idx..], pd1.*.SelectionTitle.?,
                  pd1.*.Attrib.INACTIVE,
-                 wnd.*.WindowColors [df.STD_COLOR] [df.BG]);
+                 win.WindowColors [df.STD_COLOR] [df.BG]);
         idx += len;
 
         if (pd1.*.Accelerator>0) {

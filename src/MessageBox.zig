@@ -89,14 +89,13 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
                     -1,-1,MsgHeight(msg)+2,MsgWidth(msg)+2,
                     null,null,null,
                     df.HASBORDER | df.SHADOW | df.SAVESELF);
-    const wnd = win.*.win;
 
     _ = win.sendTextMessage(df.SETTEXT, @constCast(msg), 0);
     if (cfg.config.mono == 0) {
-        wnd.*.WindowColors[df.STD_COLOR][df.FG] = r.WHITE;
-        wnd.*.WindowColors[df.STD_COLOR][df.BG] = r.GREEN;
-        wnd.*.WindowColors[df.FRAME_COLOR][df.FG] = r.WHITE;
-        wnd.*.WindowColors[df.FRAME_COLOR][df.BG] = r.GREEN;
+        win.WindowColors[df.STD_COLOR][df.FG] = r.WHITE;
+        win.WindowColors[df.STD_COLOR][df.BG] = r.GREEN;
+        win.WindowColors[df.FRAME_COLOR][df.FG] = r.WHITE;
+        win.WindowColors[df.FRAME_COLOR][df.BG] = r.GREEN;
     }
     _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
     return win;
@@ -144,11 +143,10 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     switch (msg)    {
         df.CREATE_WINDOW => {
             win.Class = df.ERRORBOX;
-            df.InitWindowColors(wnd);
+            win.InitWindowColors();
         },
         df.KEYBOARD => {
               //  This do nothing

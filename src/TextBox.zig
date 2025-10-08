@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
+const colors = @import("Colors.zig");
 const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const GapBuffer = @import("GapBuffer.zig");
@@ -245,8 +246,8 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
     if (VSliding) {
         // ---- dragging the vertical scroll box ---
         if (my-1 != win.VScrollBox) {
-            df.foreground = df.FrameForeground(wnd);
-            df.background = df.FrameBackground(wnd);
+            df.foreground = colors.FrameForeground(win);
+            df.background = colors.FrameBackground(win);
             df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1), @intCast(win.VScrollBox+1));
             win.VScrollBox = @intCast(my-1);
             df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(win.WindowWidth()-1), @intCast(my));
@@ -256,8 +257,8 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
     if (HSliding) {
         // --- dragging the horizontal scroll box ---
         if (mx-1 != win.HScrollBox) {
-            df.foreground = df.FrameForeground(wnd);
-            df.background = df.FrameBackground(wnd);
+            df.foreground = colors.FrameForeground(win);
+            df.background = colors.FrameBackground(win);
             df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.HScrollBox+1), @intCast(win.WindowHeight()-1));
             win.HScrollBox = @intCast(mx-1);
             df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(mx), @intCast(win.WindowHeight()-1));
@@ -929,8 +930,8 @@ pub fn BuildTextPointers(win:*Window) void {
 
 fn MoveScrollBox(win:*Window, vscrollbox:usize) void {
     const wnd = win.win;
-    df.foreground = df.FrameForeground(wnd);
-    df.background = df.FrameBackground(wnd);
+    df.foreground = colors.FrameForeground(win);
+    df.background = colors.FrameBackground(win);
     df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1),
             @intCast(win.VScrollBox+1));
     df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(win.WindowWidth()-1),

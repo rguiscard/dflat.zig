@@ -208,20 +208,19 @@ fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 fn FixColors(win:*Window) void {
-    const wnd = win.win;
     if (win.GetControl()) |ct| {
         if (ct.*.Class != k.BUTTON) {
             if ((ct.*.Class != k.SPINBUTTON) and (ct.*.Class != k.COMBOBOX)) {
                 if ((ct.*.Class != k.EDITBOX) and (ct.*.Class != k.LISTBOX)) {
-                    const pwnd = win.getParent().win;
-                    wnd.*.WindowColors[df.FRAME_COLOR][df.FG] =
-                                            pwnd.*.WindowColors[df.FRAME_COLOR][df.FG];
-                    wnd.*.WindowColors[df.FRAME_COLOR][df.BG] =
-                                            pwnd.*.WindowColors[df.FRAME_COLOR][df.BG];
-                    wnd.*.WindowColors[df.STD_COLOR][df.FG] =
-                                            pwnd.*.WindowColors[df.STD_COLOR][df.FG];
-                    wnd.*.WindowColors[df.STD_COLOR][df.BG] =
-                                            pwnd.*.WindowColors[df.STD_COLOR][df.BG];
+                    const pwin = win.getParent();
+                    win.WindowColors[df.FRAME_COLOR][df.FG] =
+                                            pwin.WindowColors[df.FRAME_COLOR][df.FG];
+                    win.WindowColors[df.FRAME_COLOR][df.BG] =
+                                            pwin.WindowColors[df.FRAME_COLOR][df.BG];
+                    win.WindowColors[df.STD_COLOR][df.FG] =
+                                            pwin.WindowColors[df.STD_COLOR][df.FG];
+                    win.WindowColors[df.STD_COLOR][df.BG] =
+                                            pwin.WindowColors[df.STD_COLOR][df.BG];
                 }
             }
         }

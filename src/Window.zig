@@ -53,7 +53,7 @@ ht:isize = 0,                // window height and width. -1 for full screen.
 wd:isize = 0,
 
 // ----------------- window colors --------------------
-//WindowColors:[4][2]u8 = @splat(@splat(0)),
+WindowColors:[4][2]u8 = @splat(@splat(0)),
 
 // -------------- linked list pointers ----------------
 parent:?*TopLevelFields = null,       // parent window
@@ -606,8 +606,8 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
         }
     }
 
-    df.foreground = colors.FrameForeground(wnd);
-    df.background = colors.FrameBackground(wnd);
+    df.foreground = colors.FrameForeground(self);
+    df.background = colors.FrameBackground(self);
     const clrc = self.AdjustRectangle(rc);
 
     var lin:u8 = 0;
@@ -782,7 +782,8 @@ pub fn InitWindowColors(win:*TopLevelFields) void {
     // ---------- set the colors ----------
     for (0..2) |fbg| {
         for (0..4) |col| {
-            win.win.*.WindowColors[col][fbg] = cfg.config.clr[icls][col][fbg];
+//            win.win.*.WindowColors[col][fbg] = cfg.config.clr[icls][col][fbg];
+            win.WindowColors[col][fbg] = cfg.config.clr[icls][col][fbg];
         }
     }
 }
@@ -1099,7 +1100,10 @@ pub export fn c_TopBorderAdj(wnd:df.WINDOW) c_int {
 }
 
 pub export fn c_WindowColors(wnd:df.WINDOW, color:c_int, ground:c_int) u8 {
-    return (wnd.*.WindowColors[@intCast(color)][@intCast(ground)] & 255) | 0x80;
+    if (TopLevelFields.get_zin(wnd)) |win| {
+        return (win.WindowColors[@intCast(color)][@intCast(ground)] & 255) | 0x80;
+    }
+    return 0;
 }
 
 pub fn HitControlBox(self:*TopLevelFields, x:usize, y:usize) bool {

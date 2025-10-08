@@ -2,6 +2,8 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Classes = @import("Classes.zig");
+const Window = @import("Window.zig");
+
 const CLASSCOUNT:usize = @intFromEnum(Classes.CLASS.CLASSCOUNT);
 
 // ============= Color Type =============
@@ -460,65 +462,83 @@ pub const reverse = [CLASSCOUNT][4][2]u8{
 };
 
 // Accessories
-pub export fn WndForeground(wnd:df.WINDOW) u8 {
-    return wnd.*.WindowColors [STD_COLOR] [FG];
+pub export fn c_WndForeground(wnd:df.WINDOW) u8 {
+    if (Window.get_zin(wnd)) |win| {
+        return WndForeground(win);
+    }
+    return 0;
 }
 
-pub export fn WndBackground(wnd:df.WINDOW) u8 {
-    return wnd.*.WindowColors [STD_COLOR] [BG];
+pub export fn c_WndBackground(wnd:df.WINDOW) u8 {
+    if (Window.get_zin(wnd)) |win| {
+        return WndBackground(win);
+    }
+    return 0;
 }
 
-pub export fn FrameForeground(wnd:df.WINDOW) u8 {
-    return wnd.*.WindowColors [FRAME_COLOR] [FG];
+pub fn WndForeground(win:*Window) u8 {
+    return win.WindowColors [STD_COLOR] [FG];
 }
 
-pub export fn FrameBackground(wnd:df.WINDOW) u8 {
-    return wnd.*.WindowColors [FRAME_COLOR] [BG];
+pub fn WndBackground(win:*Window) u8 {
+    return win.WindowColors [STD_COLOR] [BG];
 }
 
-pub export fn SelectForeground(wnd:df.WINDOW) u8 {
-    return wnd.*.WindowColors [SELECT_COLOR] [FG];
+pub fn FrameForeground(win:*Window) u8 {
+    return win.WindowColors [FRAME_COLOR] [FG];
 }
 
-pub export fn SelectBackground(wnd:df.WINDOW) u8 {
-    return wnd.*.WindowColors [SELECT_COLOR] [BG];
+pub fn FrameBackground(win:*Window) u8 {
+    return win.WindowColors [FRAME_COLOR] [BG];
 }
 
-pub export fn HighlightForeground(wnd:df.WINDOW) u8 {
-    return wnd.*.WindowColors [HILITE_COLOR] [FG];
+pub fn SelectForeground(win:*Window) u8 {
+    return win.WindowColors [SELECT_COLOR] [FG];
 }
 
-pub export fn HighlightBackground(wnd:df.WINDOW) u8 {
-    return wnd.*.WindowColors [HILITE_COLOR] [BG];
+pub fn SelectBackground(win:*Window) u8 {
+    return win.WindowColors [SELECT_COLOR] [BG];
 }
 
-pub export fn WindowClientColor(wnd:df.WINDOW, fg:u8, bg:u8) void {
-    wnd.*.WindowColors [STD_COLOR] [FG] = fg;
-    wnd.*.WindowColors [STD_COLOR] [BG] = bg;
+pub fn HighlightForeground(win:*Window) u8 {
+    return win.WindowColors [HILITE_COLOR] [FG];
 }
 
-pub export fn WindowReverseColor(wnd:df.WINDOW, fg:u8, bg:u8) void {
-    wnd.*.WindowColors [SELECT_COLOR] [FG] = fg;
-    wnd.*.WindowColors [SELECT_COLOR] [BG] = bg;
+pub fn HighlightBackground(win:*Window) u8 {
+    return win.WindowColors [HILITE_COLOR] [BG];
 }
 
-pub export fn WindowFrameColor(wnd:df.WINDOW, fg:u8, bg:u8) void {
-    wnd.*.WindowColors [FRAME_COLOR] [FG] = fg;
-    wnd.*.WindowColors [FRAME_COLOR] [BG] = bg;
+pub fn WindowClientColor(win:*Window, fg:u8, bg:u8) void {
+    win.WindowColors [STD_COLOR] [FG] = fg;
+    win.WindowColors [STD_COLOR] [BG] = bg;
 }
 
-pub export fn WindowHighlightColor(wnd:df.WINDOW, fg:u8, bg:u8) void {
-    wnd.*.WindowColors [HILITE_COLOR] [FG] = fg;
-    wnd.*.WindowColors [HILITE_COLOR] [BG] = bg;
+pub fn WindowReverseColor(win:*Window, fg:u8, bg:u8) void {
+    win.WindowColors [SELECT_COLOR] [FG] = fg;
+    win.WindowColors [SELECT_COLOR] [BG] = bg;
+}
+
+pub fn WindowFrameColor(win:*Window, fg:u8, bg:u8) void {
+    win.WindowColors [FRAME_COLOR] [FG] = fg;
+    win.WindowColors [FRAME_COLOR] [BG] = bg;
+}
+
+pub fn WindowHighlightColor(win:*Window, fg:u8, bg:u8) void {
+    win.WindowColors [HILITE_COLOR] [FG] = fg;
+    win.WindowColors [HILITE_COLOR] [BG] = bg;
 }
 
 // --------- set window colors ---------
 pub export fn SetStandardColor(wnd:df.WINDOW) void {
-    df.foreground = WndForeground(wnd);
-    df.background = WndBackground(wnd);
+    if (Window.get_zin(wnd)) |win| {
+        df.foreground = WndForeground(win);
+        df.background = WndBackground(win);
+    }
 }
 
 pub export fn SetReverseColor(wnd:df.WINDOW) void {
-    df.foreground = SelectForeground(wnd);
-    df.background = SelectBackground(wnd);
+    if (Window.get_zin(wnd)) |win| {
+        df.foreground = SelectForeground(win);
+        df.background = SelectBackground(win);
+    }
 }
