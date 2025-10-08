@@ -494,8 +494,8 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
     wnd.*.rc.rt = @intCast(p1);
     wnd.*.rc.bt = @intCast(p2);
-    wnd.*.ht = @intCast(win.GetBottom()-win.GetTop()+1);
-    wnd.*.wd = @intCast(win.GetRight()-win.GetLeft()+1);
+    win.ht = win.GetBottom()-win.GetTop()+1;
+    win.wd = win.GetRight()-win.GetLeft()+1;
 
     if (win.condition == .ISRESTORED)
         wnd.*.RestoredRC = df.WindowRect(wnd);
@@ -832,8 +832,8 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
     dwnd.*.rc.tp = y;
     dwnd.*.rc.rt = @intCast(dwnd.*.rc.lf+win.WindowWidth()-1);
     dwnd.*.rc.bt = @intCast(dwnd.*.rc.tp+win.WindowHeight()-1);
-    dwnd.*.ht = @intCast(win.WindowHeight());
-    dwnd.*.wd = @intCast(win.WindowWidth());
+    dwin.ht = win.WindowHeight();
+    dwin.wd = win.WindowWidth();
     dwin.parent = win.parent;
     dwin.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
     dwin.InitWindowColors();
@@ -864,8 +864,8 @@ fn sizeborder(win:*Window, rt:c_int, bt:c_int) void {
         RestoreBorder(dwnd.*.rc);
 
     // ------- change the dummy window --------
-    dwnd.*.ht = bt-dwnd.*.rc.tp+1;
-    dwnd.*.wd = rt-dwnd.*.rc.lf+1;
+    dwin.ht = @intCast(bt-dwnd.*.rc.tp+1);
+    dwin.wd = @intCast(rt-dwnd.*.rc.lf+1);
     dwnd.*.rc.rt = new_rt;
     dwnd.*.rc.bt = new_bt;
     if ((new_rt != px) or (new_bt != py)) {

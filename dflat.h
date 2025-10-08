@@ -79,7 +79,7 @@ typedef struct window {
     /* ---------------- window dimensions ----------------- */
     RECT rc;               /* window coordinates
                                             (0/0 to 79/24)  */
-    int ht, wd;            /* window height and width       */
+//    int ht, wd;            /* window height and width       */
     RECT RestoredRC;       /* restored condition rect       */
 	/* ----------------- window colors -------------------- */
 	char WindowColors[4][2];
@@ -135,15 +135,6 @@ typedef struct window {
 /* ------- window methods ----------- */
 #define WindowHeight(w)      ((w)->ht)
 #define WindowWidth(w)       ((w)->wd)
-//#define BorderAdj(w)         (TestAttribute(w,HASBORDER)?1:0)
-//#define BottomBorderAdj(w)   (TestAttribute(w,HASSTATUSBAR)?1:BorderAdj(w))
-//#define TopBorderAdj(w)      ((TestAttribute(w,HASTITLEBAR) &&   \
-//                              TestAttribute(w,HASMENUBAR)) ?  \
-//                              2 : (TestAttribute(w,HASTITLEBAR | \
-//                              HASMENUBAR | HASBORDER) ? 1 : 0))
-//#define ClientWidth(w)       (WindowWidth(w)-BorderAdj(w)*2)
-//#define ClientHeight(w)      (WindowHeight(w)-TopBorderAdj(w)-\
-//                              BottomBorderAdj(w))
 int c_BorderAdj(WINDOW);
 int c_TopBorderAdj(WINDOW);
 int c_ClientWidth(WINDOW);
@@ -157,17 +148,9 @@ int c_GetClientLeft(WINDOW);
 int c_GetClientTop(WINDOW);
 int c_GetClientBottom(WINDOW);
 int c_GetClientRight(WINDOW);
-//#define GetClientTop(w)      (GetTop(w)+TopBorderAdj(w))
-//#define GetClientBottom(w)   (GetBottom(w)-BottomBorderAdj(w))
-//#define GetClientLeft(w)     (GetLeft(w)+BorderAdj(w))
-//#define GetClientRight(w)    (GetRight(w)-BorderAdj(w))
 char *GetTitle(WINDOW);
 WINDOW GetParent(WINDOW);
 int GetClass(WINDOW); // use int for CLASS
-//#define GetAttribute(w)      ((w)->attrib)
-//#define AddAttribute(w,a)    (GetAttribute(w) |= a)
-//#define TestAttribute(w,a)   (GetAttribute(w) & (a))
-//#define isHidden(w)          (!(GetAttribute(w) & VISIBLE))
 int c_AddAttribute(WINDOW, int);
 int c_TestAttribute(WINDOW, int);
 #define gotoxy(w,x,y) cursor(w->rc.lf+(x)+1,w->rc.tp+(y)+1)

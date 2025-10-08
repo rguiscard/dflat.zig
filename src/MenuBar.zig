@@ -330,8 +330,8 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         }
         mwin = Window.create(k.POPDOWNMENU, null,
                     mx, my,
-                    popdown.MenuHeight(@constCast(&selections)),
-                    wd,
+                    @intCast(popdown.MenuHeight(@constCast(&selections))),
+                    @intCast(wd),
                     null,
                     win,
                     null,

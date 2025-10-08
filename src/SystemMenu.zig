@@ -49,11 +49,11 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
 
 // ------- Build a system menu --------
 pub fn BuildSystemMenu(win: *Window) void {
-    var lf:c_int = @intCast(win.GetLeft()+1);
-    var tp:c_int = @intCast(win.GetTop()+1);
+    var lf:isize = win.GetLeft()+1;
+    var tp:isize = win.GetTop()+1;
     const selections:[]menus.PopDown = &menus.SystemMenu.PullDown[0].Selections;
-    const ht:c_int = popdown.MenuHeight(@constCast(&selections));
-    const wd:c_int = popdown.MenuWidth(@constCast(&selections));
+    const ht:isize = @intCast(popdown.MenuHeight(@constCast(&selections)));
+    const wd:isize = @intCast(popdown.MenuWidth(@constCast(&selections)));
 
     if (win.getClass() == k.APPLICATION) {
         menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.ALT_F4;
@@ -61,13 +61,17 @@ pub fn BuildSystemMenu(win: *Window) void {
         menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.CTRL_F4;
     }
 
-    if (lf+wd > df.SCREENWIDTH-1)
-        lf = (df.SCREENWIDTH-1) - wd;
-    if (tp+ht > df.SCREENHEIGHT-2)
-        tp = (df.SCREENHEIGHT-2) - ht;
+    if (lf+wd > df.SCREENWIDTH-1) {
+        const screen_wd:isize = @intCast(df.SCREENWIDTH-1);
+        lf = screen_wd - wd;
+    }
+    if (tp+ht > df.SCREENHEIGHT-2) {
+        const screen_ht:isize = @intCast(df.SCREENHEIGHT-2);
+        tp = screen_ht - ht;
+    }
 
     const SystemMenuWin = Window.create(k.POPDOWNMENU, null,
-                lf,tp,ht,wd,null,win,SystemMenuProc, 0);
+                @intCast(lf),@intCast(tp),ht,wd,null,win,SystemMenuProc, 0);
 
     if (win.condition == .ISRESTORED) {
         menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSRESTORE);

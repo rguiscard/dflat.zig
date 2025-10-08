@@ -48,6 +48,10 @@ Class:CLASS,                 // window class
 title:?[:0]const u8 = null,  // window title
 wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
 
+// ---------------- window dimensions -----------------
+ht:isize = 0,                // window height and width. -1 for full screen.
+wd:isize = 0,
+
 // -------------- linked list pointers ----------------
 parent:?*TopLevelFields = null,       // parent window
 firstchild:?*TopLevelFields  = null,  // first child this parent
@@ -128,7 +132,7 @@ pub fn create(
     klass: CLASS,               // class of this window
     ttl: ?[:0]const u8,         // title or NULL
     left:c_int, top:c_int,      // upper left coordinates
-    height:c_int, width:c_int,  // dimensions
+    height:isize, width:isize,  // dimensions
 //    extension:?*anyopaque,      // pointer to additional data
     payload:?Payload,         // pointer to additional data
     parent: ?*TopLevelFields,   // parent of this window
@@ -155,18 +159,21 @@ pub fn create(
         // ----- height, width = -1: fill the screen -------
         var ht = height;
         if (ht == -1)
-            ht = df.SCREENHEIGHT;
+            ht = @intCast(df.SCREENHEIGHT);
         var wt = width;
         if (wt == -1)
-            wt = df.SCREENWIDTH;
+            wt = @intCast(df.SCREENWIDTH);
+
         // ----- coordinates -1, -1 = center the window ----
+        const hht:c_int = @intCast(ht);
+        const wwt:c_int = @intCast(wt);
         if (left == -1) {
-            wnd.*.rc.lf = @divFloor(df.SCREENWIDTH-wt, 2);
+            wnd.*.rc.lf = @divFloor(df.SCREENWIDTH-wwt, 2);
         } else {
             wnd.*.rc.lf = left;
         }
         if (top == -1) {
-            wnd.*.rc.tp = @divFloor(df.SCREENHEIGHT-ht, 2);
+            wnd.*.rc.tp = @divFloor(df.SCREENHEIGHT-hht, 2);
         } else {
             wnd.*.rc.tp = top;
         }
@@ -227,10 +234,12 @@ pub fn create(
                 },
             }
         }
-        wnd.*.rc.rt = df.GetLeft(wnd)+wt-1;
-        wnd.*.rc.bt = df.GetTop(wnd)+ht-1;
-        wnd.*.ht = ht;
-        wnd.*.wd = wt;
+
+
+        wnd.*.rc.rt = df.GetLeft(wnd)+wwt-1;
+        wnd.*.rc.bt = df.GetTop(wnd)+hht-1;
+        self.ht = ht;
+        self.wd = wt;
         if (ttl != null) {
             InsertTitle(self, title);
         }
@@ -784,18 +793,15 @@ pub fn PutWindowChar(self: *TopLevelFields, chr:c_int, x:c_int, y:c_int) void {
 
 // ------- window methods -----------
 pub fn WindowHeight(self: *TopLevelFields) isize {
-    const wnd = self.win;
-    return wnd.*.ht;
+    return self.ht;
 }
 
 pub fn SetWindowHeight(self: *TopLevelFields, height: isize) void {
-    const wnd = self.win;
-    wnd.*.ht = @intCast(height);
+    self.ht = height;
 }
 
 pub fn WindowWidth(self: *TopLevelFields) isize {
-    const wnd = self.win;
-    return wnd.*.wd;
+    return self.wd;
 }
 
 pub fn BorderAdj(self: *TopLevelFields) isize {

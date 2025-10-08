@@ -234,7 +234,7 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
                             null,
                             @intCast(hw.GetClientLeft()),
                             @intCast(hw.GetClientTop()+y),
-                            @min(help.*.hheight, MAXHEIGHT)+3,
+                            @intCast(@min(help.*.hheight, MAXHEIGHT)+3),
                             @intCast(help.*.hwidth+2),
                             null,
                             win,
