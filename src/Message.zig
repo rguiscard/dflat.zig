@@ -204,10 +204,12 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
                 if (win) |w| { // wnd is not null
                     if (p2 > 0) {
                         const pp2:usize = @intCast(p2);
-                        const wp2:df.WINDOW = @ptrFromInt(pp2);
-                        if (Window.get_zin(wp2)) |p2win| {
-                            p2win.PrevKeyboard=CaptureKeyboard;
-                        }
+                        const p2win:*Window = @ptrFromInt(pp2);
+                        p2win.PrevKeyboard = CaptureKeyboard;
+//                        const wp2:df.WINDOW = @ptrFromInt(pp2);
+//                        if (Window.get_zin(wp2)) |p2win| {
+//                            p2win.PrevKeyboard=CaptureKeyboard;
+//                        }
                     } else {
                         w.PrevKeyboard = CaptureKeyboard;
                     }
@@ -320,10 +322,12 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
                 if (win) |w| { // wnd is not null
                     if (p2>0) {
                         const pp2:usize = @intCast(p2);
-                        const pp2_ptr:df.WINDOW = @ptrFromInt(pp2);
-                        if (Window.get_zin(pp2_ptr)) |p2win| {
-                            p2win.PrevMouse = CaptureMouse;
-                        }
+                        const p2win:*Window = @ptrFromInt(pp2);
+                        p2win.PrevMouse = CaptureMouse;
+//                        const pp2_ptr:df.WINDOW = @ptrFromInt(pp2);
+//                        if (Window.get_zin(pp2_ptr)) |p2win| {
+//                            p2win.PrevMouse = CaptureMouse;
+//                        }
                     } else {
                         w.PrevMouse = CaptureMouse;
                     }
