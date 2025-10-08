@@ -17,10 +17,10 @@ void MoveScrollBox(WINDOW, int);
 void cWriteTextLine(WINDOW, RECT, int, BOOL);
 
 // pictbox.c
-typedef struct {
-    enum VectTypes vt;
-    RECT rc;
-} VECT;
+//typedef struct {
+//    enum VectTypes vt;
+//    RECT rc;
+//} VECT;
 
 // editbox.c
 //void ShiftTabKey(WINDOW, PARAM);

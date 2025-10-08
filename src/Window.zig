@@ -15,6 +15,7 @@ const app = @import("Application.zig");
 const menus = @import("Menus.zig");
 const GapBuf = @import("GapBuffer.zig");
 const cfg = @import("Config.zig");
+const picture = @import("PictureBox.zig");
 
 pub const Condition = enum {
     ISRESTORED,
@@ -119,7 +120,7 @@ oldFocus:?*TopLevelFields = null,
 TimePosted:bool = false,        // True if time has been posted
 
 // ------------- picture box fields -------------------
-VectorList:?[]df.VECT = null,   // list of picture box vectors
+VectorList:?[]picture.VECT = null,   // list of picture box vectors
 
 win: df.WINDOW,
 

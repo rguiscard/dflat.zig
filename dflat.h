@@ -225,21 +225,8 @@ int InputBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 void SetStandardColor(WINDOW);
 void SetReverseColor(WINDOW);
 BOOL isAncestor(WINDOW, WINDOW);
-//#define HitControlBox(wnd, p1, p2)     \
-//     (TestAttribute(wnd, CONTROLBOX) && \
-//     p1 == 2 && p2 == 0)
 unsigned char c_WndForeground(WINDOW);
 unsigned char c_WndBackground(WINDOW);
-//unsigned char FrameForeground(WINDOW);
-//unsigned char FrameBackground(WINDOW);
-//unsigned char SelectForeground(WINDOW);
-//unsigned char SelectBackground(WINDOW);
-//unsigned char HighlightForeground(WINDOW);
-//unsigned char HighlightBackground(WINDOW);
-//unsigned char WindowClientColor(WINDOW, unsigned char, unsigned char);
-//unsigned char WindowReverseColor(WINDOW, unsigned char, unsigned char);
-//unsigned char WindowFrameColor(WINDOW, unsigned char, unsigned char);
-//unsigned char WindowHighlightColor(WINDOW, unsigned char, unsigned char);
 /* -------- text box prototypes ---------- */
 #define TextLine(wnd, sel) \
       (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
@@ -270,9 +257,8 @@ void PutComboListText(WINDOW, int, char *);
 void GetItemText(WINDOW, int, char *, int);
 void SetFocusCursor(WINDOW);
 
-
 /* ---- types of vectors that can be in a picture box ------- */
-enum VectTypes {VECTOR, SOLIDBAR, HEAVYBAR, CROSSBAR, LIGHTBAR};
+//enum VectTypes {VECTOR, SOLIDBAR, HEAVYBAR, CROSSBAR, LIGHTBAR};
 
 /* ------------- help box prototypes ------------- */
 void LoadHelpFile(char *);

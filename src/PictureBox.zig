@@ -4,6 +4,14 @@ const k = @import("Classes.zig").CLASS;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 
+// ---- types of vectors that can be in a picture box -------
+pub const VectTypes = enum { VECTOR, SOLIDBAR, HEAVYBAR, CROSSBAR, LIGHTBAR };
+
+pub const VECT = struct {
+    vt: VectTypes,
+    rc: df.RECT,
+};
+
 pub const CharInWnd = [_]u8{0xC4, 0xB3, 0xDA, 0xBF, 0xD9, 0xC0, 0xC5, 0xC3, 0xB4, 0xC1, 0xC2};
 
 pub const VectCvt:[3][11][2][3]u8 = .{
@@ -149,11 +157,11 @@ fn PaintVector(win:*Window, rc:df.RECT) void {
     }
 }
 
-fn PaintBar(win:*Window, rc:df.RECT, vt:df.VectTypes) void {
+fn PaintBar(win:*Window, rc:df.RECT, vt:VectTypes) void {
     var len:c_int = 0;
     var vertbar:c_int = 0;
     const tys = [_]c_int{219, 178, 177, 176};
-    const nc:c_int = tys[vt-1];
+    const nc:c_int = tys[@intFromEnum(vt)-1];
 
     if (rc.rt == rc.lf) {
         // ------ vertical bar -------
@@ -180,7 +188,7 @@ fn PaintBar(win:*Window, rc:df.RECT, vt:df.VectTypes) void {
 fn PaintMsg(win:*Window) void {
     if (win.VectorList) |vectors| {
         for(vectors) |v| {
-            if (v.vt == df.VECTOR) {
+            if (v.vt == VectTypes.VECTOR) {
                 PaintVector(win, v.rc);
             } else {
                 PaintBar(win, v.rc, v.vt);
@@ -189,13 +197,13 @@ fn PaintMsg(win:*Window) void {
     }
 }
 
-fn DrawVectorMsg(win:*Window, p1:df.PARAM, vt:df.VectTypes) void {
+fn DrawVectorMsg(win:*Window, p1:df.PARAM, vt:VectTypes) void {
     if (p1 != 0) {
-        var vectors:std.ArrayList(df.VECT) = undefined;
+        var vectors:std.ArrayList(VECT) = undefined;
         if (win.VectorList) |list| {
-            vectors = std.ArrayList(df.VECT).fromOwnedSlice(list);
+            vectors = std.ArrayList(VECT).fromOwnedSlice(list);
         } else {
-            if (std.ArrayList(df.VECT).initCapacity(root.global_allocator, 0)) |list| {
+            if (std.ArrayList(VECT).initCapacity(root.global_allocator, 0)) |list| {
                 vectors = list;
             } else |_| {
                 // error
@@ -247,7 +255,7 @@ pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
             return true;
         },
         df.DRAWVECTOR => {
-            DrawVectorMsg(win, p1, df.VECTOR);
+            DrawVectorMsg(win, p1, VectTypes.VECTOR);
             return true;
         },
         df.DRAWBOX => {
@@ -255,7 +263,7 @@ pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
             return true;
         },
         df.DRAWBAR => {
-            DrawVectorMsg(win, p1, @intCast(p2));
+            DrawVectorMsg(win, p1, @enumFromInt(p2));
             return true;
         },
         df.CLOSE_WINDOW => {
@@ -301,7 +309,7 @@ pub fn DrawBox(win:*Window, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
     _ = win.sendMessage(df.DRAWBOX, @intCast(@intFromPtr(&rc)), 0);
 }
 
-pub fn DrawBar(win:*Window, vt:df.VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
+pub fn DrawBar(win:*Window, vt:VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
-    _ = win.sendMessage(df.DRAWBAR, @intCast(@intFromPtr(&rc)), @intCast(vt));
+    _ = win.sendMessage(df.DRAWBAR, @intCast(@intFromPtr(&rc)), @intFromEnum(vt));
 }
