@@ -82,7 +82,7 @@ typedef struct window {
 //    int ht, wd;            /* window height and width       */
     RECT RestoredRC;       /* restored condition rect       */
 	/* ----------------- window colors -------------------- */
-	char WindowColors[4][2];
+    char WindowColors[4][2];
     /* -------------- linked list pointers ---------------- */
 
 //	struct window *childfocus;	// child that ha(s/d) focus

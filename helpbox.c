@@ -14,7 +14,8 @@ char HelpFileName[9];
 
 int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
 int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
-void cReadHelp(WINDOW wnd, WINDOW cwnd);
+void cReadHelp(WINDOW, WINDOW);
+char c_WindowColors(WINDOW, int, int);
 
 /* --- keywords in the current help text -------- */
 struct keywords { // private
@@ -95,15 +96,11 @@ int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
         char *cp;
         cp = TextLine(wnd, thisword->lineno);
         cp += thisword->off1;
-        *(cp+1) =
-            (pwnd->WindowColors[SELECT_COLOR][FG] & 255) | 0x80;
-        *(cp+2) =
-            (pwnd->WindowColors[SELECT_COLOR][BG] & 255) | 0x80;
+        *(cp+1) = c_WindowColors(pwnd, SELECT_COLOR, FG);
+        *(cp+2) = c_WindowColors(pwnd, SELECT_COLOR, BG);
         rtn = DefaultWndProc(wnd, PAINT, p1, p2);
-        *(cp+1) =
-            (pwnd->WindowColors[HILITE_COLOR][FG] & 255) | 0x80;
-        *(cp+2) =
-            (pwnd->WindowColors[HILITE_COLOR][BG] & 255) | 0x80;
+        *(cp+1) = c_WindowColors(pwnd, HILITE_COLOR, FG);
+        *(cp+2) = c_WindowColors(pwnd, HILITE_COLOR, BG);
         return rtn;
     }
     return DefaultWndProc(wnd, PAINT, p1, p2);
@@ -170,10 +167,8 @@ void cReadHelp(WINDOW wnd, WINDOW cwnd)
                 thisword->isDefinition = *(cp+1) == '*';
                 colorct++;
                 *cp++ = CHANGECOLOR;
-                *cp++ =
-            (wnd->WindowColors [HILITE_COLOR] [FG] & 255) | 0x80;
-                *cp++ =
-            (wnd->WindowColors [HILITE_COLOR] [BG] & 255) | 0x80;
+                *cp++ = c_WindowColors(wnd, HILITE_COLOR, FG);
+                *cp++ = c_WindowColors(wnd, HILITE_COLOR, BG);
                 cp1 = cp;
                 if ((cp = strchr(cp, ']')) != NULL)    {
                     if (thisword != NULL)
