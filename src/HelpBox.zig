@@ -400,13 +400,13 @@ fn BestFit(win:*Window, dwnd:*Dialogs.DIALOGWINDOW) void {
     }
 
     // --- compute above overlap ----
-    const above:c_int = OverLap(dwnd.*.h, @intCast(win.GetTop()));
+    const above:c_int = OverLap(@intCast(dwnd.*.h), @intCast(win.GetTop()));
     // --- compute below overlap ----
-    const below:c_int = OverLap(@intCast(win.GetBottom()), df.SCREENHEIGHT-dwnd.*.h);
+    const below:c_int = OverLap(@intCast(win.GetBottom()), @intCast(df.SCREENHEIGHT-dwnd.*.h));
     // --- compute right overlap ----
-    const right:c_int = OverLap(@intCast(win.GetRight()), df.SCREENWIDTH-dwnd.*.w);
+    const right:c_int = OverLap(@intCast(win.GetRight()), @intCast(df.SCREENWIDTH-dwnd.*.w));
     // --- compute left  overlap ----
-    const left:c_int = OverLap(dwnd.*.w, @intCast(win.GetLeft()));
+    const left:c_int = OverLap(@intCast(dwnd.*.w), @intCast(win.GetLeft()));
 
     if (above < below) {
         dwnd.*.y = @intCast(@max(0, win.GetTop()-dwnd.*.h-2));

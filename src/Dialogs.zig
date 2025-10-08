@@ -12,10 +12,10 @@ pub const MAXRADIOS = 20;
 // -------- dialog box and control window structure -------
 pub const DIALOGWINDOW = struct  {
     title:?[:0]const u8,  // window title
-    x:c_int,              // relative coordinates
-    y:c_int,
-    h:c_int,              // size
-    w:c_int,
+    x:isize,              // relative coordinates
+    y:isize,
+    h:isize,              // size
+    w:isize,
 };
 
 // ------ one of these for each control window -------
