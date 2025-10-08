@@ -1080,11 +1080,11 @@ pub export fn c_TestAttribute(wnd:df.WINDOW, attrib:c_int) df.BOOL {
     return df.FALSE;
 }
 
-pub export fn c_AddAttribute(wnd:df.WINDOW, attrib:c_int) void {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        win.AddAttribute(attrib);
-    }
-}
+//pub export fn c_AddAttribute(wnd:df.WINDOW, attrib:c_int) void {
+//    if (TopLevelFields.get_zin(wnd)) |win| {
+//        win.AddAttribute(attrib);
+//    }
+//}
 
 pub export fn c_BorderAdj(wnd:df.WINDOW) c_int {
     if (TopLevelFields.get_zin(wnd)) |win| {

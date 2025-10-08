@@ -69,7 +69,6 @@ pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *Dial
 }
 
 fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             const rtn = root.zDefaultWndProc(win, msg, p1, p2);
@@ -118,7 +117,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                             // selected a different filename
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
                             DialogBox.GetDlgListText(win, &fName, c.ID_FILES);
-                            DialogBox.PutItemText(wnd, c.ID_FILENAME, &fName);
+                            DialogBox.PutItemText(win, c.ID_FILENAME, &fName);
                             set_fileName(&fName);
                         },
                         df.LB_CHOOSE => {
@@ -137,7 +136,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                     switch (subcmd) {
                         df.ENTERFOCUS => {
                             if (_fileSpec) |f| {
-                                DialogBox.PutItemText(wnd, c.ID_FILENAME, @constCast(f.ptr));
+                                DialogBox.PutItemText(win, c.ID_FILENAME, @constCast(f.ptr));
                             }
                         },
                         df.LB_CHOOSE => {
@@ -165,11 +164,10 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
 
 //  Initialize the dialog box
 fn InitDlgBox(win:*Window) void {
-    const wnd = win.win;
     var sspec:[*c]u8 = null;
     var rtn = df.FALSE;
     if (_fileSpec) |f| {
-        DialogBox.PutItemText(wnd, .ID_FILENAME, @constCast(f.ptr));
+        DialogBox.PutItemText(win, .ID_FILENAME, @constCast(f.ptr));
     }
     if (_srchSpec) |s| {
         sspec = @constCast(s.ptr);

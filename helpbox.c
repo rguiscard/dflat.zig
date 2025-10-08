@@ -32,7 +32,7 @@ char hline [160];
 BOOL Helping;
 
 void SelectHelp(WINDOW, struct helps *, BOOL);
-void ReadHelp(WINDOW);
+//void ReadHelp(WINDOW);
 struct helps *FindHelp(char *);
 void DisplayDefinition(WINDOW, char *);
 void cDisplayDefinition(WINDOW, char *);
@@ -88,6 +88,7 @@ BOOL cHelpBoxKeyboardMsg(WINDOW wnd, WINDOW cwnd, PARAM p1)
 }
 
 /* ---- PAINT message for the helpbox text editbox ---- */
+#if 0
 int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int rtn;
@@ -105,6 +106,7 @@ int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     return DefaultWndProc(wnd, PAINT, p1, p2);
 }
+#endif
 
 /* ---- LEFT_BUTTON message for the helpbox text editbox ---- */
 int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
@@ -138,6 +140,7 @@ int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 }
 
 /* -------- read the help text into the editbox ------- */
+#if 0
 void cReadHelp(WINDOW wnd, WINDOW cwnd)
 {
     int linectr = 0;
@@ -191,22 +194,23 @@ void cReadHelp(WINDOW wnd, WINDOW cwnd)
 				keywordcount++;
             }
         }
-        PutItemText(wnd, ID_HELPTEXT, hline);
+//        PutItemText(wnd, ID_HELPTEXT, hline);
         /* -- display help text as soon as window is full -- */
-        if (++linectr == c_ClientHeight(cwnd))	{
-			struct keywords *holdthis = thisword;
-		    thisword = NULL;
-            SendMessage(cwnd, PAINT, 0, 0);
-		    thisword = holdthis;
-		}
-        if (linectr > c_ClientHeight(cwnd) &&
-                !c_TestAttribute(cwnd, VSCROLLBAR))    {
-            c_AddAttribute(cwnd, VSCROLLBAR);
-            SendMessage(cwnd, BORDER, 0, 0);
-        }
+//        if (++linectr == c_ClientHeight(cwnd))	{
+//			struct keywords *holdthis = thisword;
+//		    thisword = NULL;
+//            SendMessage(cwnd, PAINT, 0, 0);
+//		    thisword = holdthis;
+//		}
+//        if (linectr > c_ClientHeight(cwnd) &&
+//                !c_TestAttribute(cwnd, VSCROLLBAR))    {
+//            c_AddAttribute(cwnd, VSCROLLBAR);
+//            SendMessage(cwnd, BORDER, 0, 0);
+//        }
     }
     thisword = NULL;
 }
+#endif
 
 /* ---- compute the displayed length of a help text line --- */
 static int HelpLength(char *s)

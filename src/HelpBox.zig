@@ -17,6 +17,19 @@ const MAXHELPSTACK = 100;
 var HelpStack = [_]usize{0}**MAXHELPSTACK;
 var stacked:usize = 0;
 
+// --- keywords in the current help text --------
+const keywords  = struct {
+    hkey:*df.helps = undefined,
+    lineno:c_int = 0,
+    off1:usize = 0,
+    off2:usize = 0,
+    off3:usize = 0,
+    isDefinition:bool = false,
+};
+
+var KeyWords = [_]keywords{.{}}**MAXHELPKEYWORDS;
+var keywordcount:usize = 0;
+
 var ThisHelp:?*df.helps = null;
 
 // ------------- CREATE_WINDOW message ------------
@@ -31,17 +44,92 @@ fn CreateWindowMsg(win:*Window) void {
 }
 
 // -------- read the help text into the editbox -------
-pub export fn ReadHelp(wnd:df.WINDOW) callconv(.c) void {
-    if (Window.get_zin(wnd)) |win| {
-        if (win.extension) |extension| {
-            const dbox:*Dialogs.DBOX = extension.dbox;
-            if (DialogBox.ControlWindow(dbox, c.ID_HELPTEXT)) |cwin| {
-                cwin.wndproc = HelpTextProc;
-                _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
-                df.cReadHelp(wnd, cwin.win);
-            }
+pub fn ReadHelp(win:*Window) void {
+    if (win.extension) |extension| {
+        const dbox:*Dialogs.DBOX = extension.dbox;
+        if (DialogBox.ControlWindow(dbox, c.ID_HELPTEXT)) |cwin| {
+            cwin.wndproc = HelpTextProc;
+            _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+            //df.cReadHelp(wnd, cwin.win);
+            // ----- read the help text -------
+            var hline = [_]u8{0}**100;
+            var linectr:usize = 0;
+            while (true) { // per line
+                var colorct:usize = 0;
+                if (df.GetHelpLine(&hline) == null)
+                    break;
+                if (hline[0] == '<')
+                    break;
+                // remove last \n
+                if (std.mem.indexOfScalar(u8, &hline, 0)) |end| {
+                    hline[end-1] = 0;
+                }
+                var pos:usize = 0;
+                while (true) { // per character
+                    if (std.mem.indexOfScalarPos(u8, &hline, pos, '[')) |idx| {
+                        // ----- hit a new key word -----
+                        if (hline[idx+1] != '.' and hline[idx+1] != '*') {
+                            pos = idx+1;
+                            continue;
+                        }
+                        KeyWords[keywordcount].lineno = @intCast(cwin.win.*.wlines);
+                        KeyWords[keywordcount].off1 = idx;
+                        KeyWords[keywordcount].off2 = idx - colorct*4;
+                        KeyWords[keywordcount].isDefinition = (hline[idx+1] == '*');
+                        colorct += 1;
+                        pos = idx;
+                        hline[pos] = df.CHANGECOLOR;
+                        pos += 1;
+                        hline[pos] = win.WindowColors[df.HILITE_COLOR][df.FG];
+                        pos += 1;
+                        hline[pos] = win.WindowColors[df.HILITE_COLOR][df.BG];
+                        pos += 1;
+                        const begin = pos;
+                        if (std.mem.indexOfScalarPos(u8, &hline, pos, ']')) |end| {
+                            // thisword cannot be null at this point ?
+                            //if (thisword != NULL)
+                            KeyWords[keywordcount].off3 = KeyWords[keywordcount].off2 + (end-begin);
+                            hline[end] = df.RESETCOLOR;
+                            pos = end+1;
+                            
+                        }
+                        if (std.mem.indexOfScalarPos(u8, &hline, pos, '<')) |nbeg| {
+                            if (std.mem.indexOfScalarPos(u8, &hline, nbeg, '>')) |nend| {
+                                var hname:[80]u8 = @splat(0);
+                                @memset(hname[0..hname.len], 0); // why this is needed ?
+                                @memcpy(hname[0..(nend-nbeg-1)], hline[nbeg+1..nend]);
+                                const n:[*c]u8 = @ptrCast(&hname);
+                                const help:*df.helps = df.FindHelp(n);
+                                KeyWords[keywordcount].hkey = help;
+                                @memmove(hline[nbeg..hline.len-(nend+1-nbeg)], hline[nend+1..hline.len]);
+                            }
+                        }
+                        keywordcount += 1;
+			if (keywordcount >= MAXHELPKEYWORDS)
+			    break;
+
+                    } else {
+                        break;
+                    }
+                }
+                DialogBox.PutItemText(win, .ID_HELPTEXT, &hline);
+                // -- display help text as soon as window is full --
+                linectr += 1;
+                if (linectr == cwin.ClientHeight())  {
+                    const holdthis = df.thisword;
+                    df.thisword = null;
+                    _ = cwin.sendMessage(df.PAINT, 0, 0);
+                    df.thisword = holdthis;
+                }
+                if (linectr > cwin.ClientHeight() and
+                    cwin.TestAttribute(df.VSCROLLBAR) == false) {
+                    cwin.AddAttribute(df.VSCROLLBAR);
+                    _ = cwin.sendMessage(df.BORDER, 0, 0);
+                }
+            } // per line
         }
     }
+    df.thisword = null;
 }
 
 // ------------- COMMAND message ------------
@@ -92,13 +180,12 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
 }
 
 pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             CreateWindowMsg(win);
         },
         df.INITIATE_DIALOG => {
-            ReadHelp(wnd);
+            ReadHelp(win);
         },
         df.COMMAND => {
             if (p2 == 0) {
@@ -124,6 +211,23 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
     return root.BaseWndProc(k.HELPBOX, win, msg, p1, p2);
 }
 
+// ---- PAINT message for the helpbox text editbox ----
+fn PaintMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+    const wnd = win.win;
+    if (df.thisword) |word| {
+        const pwin = win.getParent();
+        var pos:usize = win.TextPointers[@intCast(word.*.lineno)];
+        pos += @intCast(word.*.off1);
+        wnd.*.text[pos+1] = pwin.WindowColors[df.SELECT_COLOR][df.FG];
+        wnd.*.text[pos+2] = pwin.WindowColors[df.SELECT_COLOR][df.BG];
+        const rtn = root.zDefaultWndProc(win, df.PAINT, p1, p2);
+        wnd.*.text[pos+1] = pwin.WindowColors[df.HILITE_COLOR][df.FG];
+        wnd.*.text[pos+2] = pwin.WindowColors[df.HILITE_COLOR][df.BG];
+        return rtn;
+    }
+    return root.zDefaultWndProc(win, df.PAINT, p1, p2);
+}
+
 // --- window processing module for HELPBOX's text EDITBOX --
 pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const wnd = win.win;
@@ -131,7 +235,7 @@ pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
         df.KEYBOARD => {
         },
         df.PAINT => {
-            return if (df.HelpTextPaintMsg(wnd, p1, p2) == df.TRUE) true else false;
+            return PaintMsg(win, p1, p2);
         },
         df.LEFT_BUTTON => {
             return if (df.HelpTextLeftButtonMsg(wnd, p1, p2) == df.TRUE) true else false;
@@ -374,7 +478,7 @@ pub export fn SelectHelp(wnd:df.WINDOW, newhelp:[*c]df.helps, recall:df.BOOL) ca
                 }
             }
             // --- read the help text into the help window ---
-            df.ReadHelp(wnd);
+            ReadHelp(win);
             lists.ReFocus(win);
             _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
         }

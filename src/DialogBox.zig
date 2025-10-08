@@ -668,46 +668,44 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:CLAS
 }
 
 // ------- set the text of a control window ------
-pub export fn PutItemText(wnd:df.WINDOW, cmd:c, text:[*c]u8) callconv(.c) void {
-    if (Window.get_zin(wnd)) |win| {
-        if (win.extension) |extension| {
-            const db:*Dialogs.DBOX = extension.dbox;
-            var control = FindCommand(db, cmd, .EDITBOX);
+pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
+    if (win.extension) |extension| {
+        const db:*Dialogs.DBOX = extension.dbox;
+        var control = FindCommand(db, cmd, .EDITBOX);
 
-            if (control == null)
-                control = FindCommand(db, cmd, .TEXTBOX);
-            if (control == null)
-                control = FindCommand(db, cmd, .COMBOBOX);
-            if (control == null)
-                control = FindCommand(db, cmd, .LISTBOX);
-            if (control == null)
-                control = FindCommand(db, cmd, .SPINBUTTON);
-            if (control == null)
-                control = FindCommand(db, cmd, .TEXT);
-            if (control) |ct| {
-                // assume cwnd cannot be null ?
-                if (ct.win) |cwin| {
-                    switch (ct.*.Class) {
-                        .COMBOBOX,
-                        .EDITBOX => {
-                            _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
-                            _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
-                            if (cwin.isMultiLine() == false) {
-                                _ = cwin.sendMessage(df.PAINT, 0, 0);
-                            }
-                        },
-                        .LISTBOX,
-                        .TEXTBOX,
-                        .SPINBUTTON => {
-                            _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
-                        },
-                        .TEXT => {
-                            _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
-                            _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+        if (control == null)
+            control = FindCommand(db, cmd, .TEXTBOX);
+        if (control == null)
+            control = FindCommand(db, cmd, .COMBOBOX);
+        if (control == null)
+            control = FindCommand(db, cmd, .LISTBOX);
+        if (control == null)
+            control = FindCommand(db, cmd, .SPINBUTTON);
+        if (control == null)
+            control = FindCommand(db, cmd, .TEXT);
+        if (control) |ct| {
+            // assume cwnd cannot be null ?
+            if (ct.win) |cwin| {
+                switch (ct.*.Class) {
+                    .COMBOBOX,
+                    .EDITBOX => {
+                        _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                        if (cwin.isMultiLine() == false) {
                             _ = cwin.sendMessage(df.PAINT, 0, 0);
-                        },
-                        else => {
                         }
+                    },
+                    .LISTBOX,
+                    .TEXTBOX,
+                    .SPINBUTTON => {
+                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                    },
+                    .TEXT => {
+                        _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                        _ = cwin.sendMessage(df.PAINT, 0, 0);
+                    },
+                    else => {
                     }
                 }
             }

@@ -16,16 +16,7 @@ int ComputeHScrollBox(WINDOW);
 void MoveScrollBox(WINDOW, int);
 void cWriteTextLine(WINDOW, RECT, int, BOOL);
 
-// pictbox.c
-//typedef struct {
-//    enum VectTypes vt;
-//    RECT rc;
-//} VECT;
-
 // editbox.c
-//void ShiftTabKey(WINDOW, PARAM);
-//void TabKey(WINDOW, PARAM);
-
 int CommandMsg(WINDOW, PARAM);
 void TextBlockToN(char *, char *);
 void cParagraphCmd(WINDOW);
@@ -54,6 +45,16 @@ void cReadHelp(WINDOW wnd, WINDOW cwnd);
 extern FILE *helpfp;
 extern char hline [160];
 extern BOOL Helping;
+
+struct keywords { // private
+        struct helps *hkey;
+    int lineno;
+    int off1, off2, off3;
+    char isDefinition;
+};
+
+extern struct keywords *thisword; // private
+extern int keywordcount; // private
 
 #define MAXHELPSTACK 100
 extern int HelpStack[MAXHELPSTACK];
