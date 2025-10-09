@@ -738,7 +738,80 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
             defer root.global_allocator.free(buf);
             @memset(buf, 0);
             @memmove(buf[0..len], wnd.*.text[beg..pos]);
-            df.cWriteTextLine(wnd, rc, y, buf.ptr, if (reverse) df.TRUE else df.FALSE);
+
+            // -------- insert block color change controls -------
+            var lnlen = df.LineLength(buf.ptr);
+            if (TextBlockMarked(win)) {
+                var bbl = win.BlkBegLine;
+                var bel = win.BlkEndLine;
+                var bbc = win.BlkBegCol;
+                var bec = win.BlkEndCol;
+                const by:usize = @intCast(y);
+
+                // ----- put lowest marker first -----
+                if (bbl > bel) {
+                    var temp = bbl;
+                    bbl = bel;
+                    bel = temp;
+
+                    temp = bbc;
+                    bbc = bec;
+                    bec = temp;
+//                    swap(bbl, bel);
+//                    swap(bbc, bec);
+                }
+                if (bbl == bel and bbc > bec) {
+                    const temp = bbc;
+                    bbc = bec;
+                    bec = temp;
+//                    swap(bbc, bec);
+                }
+
+                if (by >= bbl and by <= bel) {
+                    // ------ the block includes this line -----
+                    var blkbeg:usize = 0;
+                    var blkend:usize = @intCast(lnlen);
+                    if ((by > bbl and by < bel) == false) {
+                        // --- the entire line is not in the block --
+                        if (by == bbl) {
+                            // ---- the block begins on this line ---
+                            blkbeg = bbc;
+                        }
+                        if (by == bel) {
+                            // ---- the block ends on this line ----
+                            blkend = bec;
+                        }
+                    }
+                    if (blkend == 0 and lnlen == 0)  {
+                        buf[0] = ' ';
+                        blkend += 1;
+//                                strcpy(lp, " ");
+//                                blkend++;
+                    }
+                    // ----- insert the reset color token -----
+                    if (std.mem.indexOfScalarPos(u8, buf, blkend, 0)) |loc| {
+                        @memmove(buf[blkend+1..loc+2], buf[blkend..loc+1]);
+                        buf[blkend] = df.RESETCOLOR;
+                    }
+//                    memmove(lp+blkend+1,lp+blkend,strlen(lp+blkend)+1);
+//                    lp[blkend] = RESETCOLOR;
+                    // ----- insert the change color token -----
+                    if (std.mem.indexOfScalarPos(u8, buf, blkbeg, 0)) |loc| {
+                        @memmove(buf[blkbeg+3..loc+4], buf[blkbeg..loc+1]);
+                        buf[blkbeg] = df.CHANGECOLOR;
+                    }
+//                    memmove(lp+blkbeg+3,lp+blkbeg,strlen(lp+blkbeg)+1);
+//                    lp[blkbeg] = CHANGECOLOR;
+                    // ----- insert the color tokens -----
+                    colors.SetReverseColor(wnd);
+                    buf[blkbeg+1] = @intCast(df.foreground | 0x80);
+                    buf[blkbeg+2] = @intCast(df.background | 0x80);
+                    lnlen += 4;
+                }
+            }
+
+            df.cWriteTextLine(wnd, rc, lnlen, y, buf.ptr, if (reverse) df.TRUE else df.FALSE);
+
         } else |_| {
         }
     }

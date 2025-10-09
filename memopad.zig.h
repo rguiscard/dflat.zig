@@ -14,7 +14,7 @@ void ComputeWindowLeft(WINDOW);
 int ComputeVScrollBox(WINDOW);
 int ComputeHScrollBox(WINDOW);
 void MoveScrollBox(WINDOW, int);
-void cWriteTextLine(WINDOW, RECT, int, char*, BOOL);
+void cWriteTextLine(WINDOW, RECT, int, int, char*, BOOL);
 
 // editbox.c
 int CommandMsg(WINDOW, PARAM);

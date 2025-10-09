@@ -10,32 +10,13 @@ int getBlkBegCol(WINDOW);
 int getBlkEndCol(WINDOW);
 BOOL cTextBlockMarked(WINDOW);
 
-/* ----- get the text to a specified line ----- */
-#if 0
-static char *GetTextLine(WINDOW wnd, int selection)
-{
-    char *line;
-    int len = 0;
-    char *cp, *cp1;
-    cp = cp1 = TextLine(wnd, selection);
-    while (*cp && *cp != '\n')    {
-        len++;
-        cp++;
-    }
-    line = DFmalloc(len+7);
-    memmove(line, cp1, len);
-    line[len] = '\0';
-    return line;
-}
-#endif
-
 /* ------- write a line of text to a textbox window ------- */
-void cWriteTextLine(WINDOW wnd, RECT rc, int y, char *src, BOOL reverse)
+void cWriteTextLine(WINDOW wnd, RECT rc, int l, int y, char *src, BOOL reverse)
 {
     int len = 0;
     int dif = 0;
     unsigned char *lp; //, *svlp;
-    int lnlen;
+    int lnlen = l;
     int i;
     BOOL trunc = FALSE;
     unsigned char line[MAXCOLS];
@@ -45,7 +26,7 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, char *src, BOOL reverse)
     lp = src;
 //    if (svlp == NULL)
 //        return;
-    lnlen = LineLength(lp);
+//    lnlen = LineLength(lp);
 
 //    FIXME: protect is not in use now
 //	if (wnd->protect)	{
@@ -58,6 +39,7 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, char *src, BOOL reverse)
 //	}
 
     /* -------- insert block color change controls ------- */
+#if 0
     if (cTextBlockMarked(wnd))    {
         int bbl = getBlkBegLine(wnd);
         int bel = getBlkEndLine(wnd);
@@ -103,6 +85,7 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, char *src, BOOL reverse)
             lnlen += 4;
         }
     }
+#endif
     /* - make sure left margin doesn't overlap color change - */
     for (i = 0; i < wnd->wleft+3; i++)    {
         if (*(lp+i) == '\0')
