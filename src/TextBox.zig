@@ -38,7 +38,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
 // ------------ DELETETEXT Message --------------
 fn DeleteTextMsg(win:*Window, lno:usize) void {
     const wnd = win.win;
-    wnd.*.wlines -= 1;
+    win.wlines -|= 1;
 
     if (win.gapbuf) |buf| {
         const pos2 = buf.indexOfLine(lno+1, false);
@@ -114,9 +114,9 @@ fn ClearTextMsg(win:*Window) void {
         buf.clear();
         wnd.*.text = null;
         wnd.*.textlen = 0;
-        wnd.*.wlines = 0;
+        win.wlines = 0;
         wnd.*.textwidth = 0;
-        wnd.*.wtop = 0;
+        win.wtop = 0;
         wnd.*.wleft = 0;
     }
 
@@ -295,16 +295,16 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
     // ---- vertical scroll one line ----
     if (p1>0) {
         // ----- scroll one line up -----
-        if (wnd.*.wtop+@as(c_int, @intCast(win.ClientHeight())) >= wnd.*.wlines) {
+        if (win.wtop+win.ClientHeight() >= win.wlines) {
             return false;
         }
-        wnd.*.wtop += 1;
+        win.wtop += 1;
     } else {
         // ----- scroll one line down -----
-        if (wnd.*.wtop == 0) {
+        if (win.wtop == 0) {
             return false;
         }
-        wnd.*.wtop -= 1;
+        win.wtop -|= 1;
     }
     if (win.isVisible()) {
         const rc = df.ClipRectangle(wnd, rect.ClientRect(win));
@@ -316,11 +316,11 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
                 df.scroll_window(wnd, rc, @intCast(p1));
                 if (p1 == 0) {
                     // -- write top line (down) --
-                    WriteTextLine(win,null,wnd.*.wtop,false);
+                    WriteTextLine(win,null,win.wtop,false);
                 } else {
                     // -- write bottom line (up) --
-                    const y:c_int=df.RectBottom(rc)-@as(c_int, @intCast(win.GetClientTop()));
-                    WriteTextLine(win,null,wnd.*.wtop+y,false);
+                    const y:usize=@as(usize, @intCast(rc.bt))-win.GetClientTop();
+                    WriteTextLine(win,null,win.wtop+y,false);
                 }
             }
         }
@@ -357,26 +357,25 @@ fn HorizScrollMsg(win:*Window,p1:df.PARAM) bool {
 
 // ------------  SCROLLPAGE Message --------------
 fn ScrollPageMsg(win:*Window,p1:df.PARAM) void {
-    const wnd = win.win;
-    const clientHeight:c_int = @intCast(win.ClientHeight());
+    const clientHeight:usize = win.ClientHeight();
     // --- vertical scroll one page ---
     if (p1 == df.FALSE)    {
         // ---- page up ----
-        if (wnd.*.wtop>0) {
-            wnd.*.wtop -= clientHeight;
+        if (win.wtop > 0) {
+            win.wtop -|= clientHeight;
         }
     } else {
         // ---- page down ----
-        if (wnd.*.wtop+clientHeight < wnd.*.wlines) {
-            wnd.*.wtop += clientHeight;
-            if (wnd.*.wtop>wnd.*.wlines-clientHeight) {
-                wnd.*.wtop=@intCast(wnd.*.wlines-clientHeight);
+        if (win.wtop+clientHeight < win.wlines) {
+            win.wtop += clientHeight;
+            if (win.wtop>win.wlines-clientHeight) {
+                win.wtop=win.wlines-clientHeight;
             }
         }
     }
-    if (wnd.*.wtop < 0) {
-        wnd.*.wtop = 0;
-    }
+//    if (wnd.*.wtop < 0) {
+//        wnd.*.wtop = 0;
+//    }
     _ = win.sendMessage(df.PAINT, 0, 0);
 }
 
@@ -404,13 +403,13 @@ fn HorizScrollPageMsg(win:*Window,p1:df.PARAM) void {
 // ------------ SCROLLDOC Message --------------
 fn ScrollDocMsg(win:*Window,p1:df.PARAM) void {
     const wnd = win.win;
-    const clientHeight:c_int = @intCast(win.ClientHeight());
+    const clientHeight:usize = win.ClientHeight();
     // --- scroll to beginning or end of document ---
     if (p1>0) {
-        wnd.*.wtop = 0;
+        win.wtop = 0;
         wnd.*.wleft = 0;
-    } else if (wnd.*.wtop+clientHeight < wnd.*.wlines) {
-        wnd.*.wtop = wnd.*.wlines-clientHeight;
+    } else if (win.wtop+clientHeight < win.wlines) {
+        win.wtop = win.wlines-clientHeight;
         wnd.*.wleft = 0;
     }
     _ = win.sendMessage(df.PAINT, 0, 0);
@@ -464,10 +463,13 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
                 continue;
             }
         }
-        const yy:c_int = @intCast(y-win.TopBorderAdj()); // not sure this number will be negative
-        if (yy < wnd.*.wlines-wnd.*.wtop) {
+        var yy:usize = 0;
+        if (y > win.TopBorderAdj()) {
+            yy = y-win.TopBorderAdj();
+        }
+        if (yy < win.wlines-win.wtop) {
             // ---- paint a text line ----
-            WriteTextLine(win, &rc, @intCast(yy+wnd.*.wtop), false);
+            WriteTextLine(win, &rc, @intCast(yy+win.wtop), false);
         } else {
             // ---- paint a blank line ----
             df.SetStandardColor(wnd);
@@ -497,7 +499,7 @@ fn CloseWindowMsg(win:*Window) void {
     const wnd = win.win;
     _ = win.sendMessage(df.CLEARTEXT, 0, 0);
     if (wnd.*.TextPointers != null) {
-        root.global_allocator.free(wnd.*.TextPointers[0..@intCast(wnd.*.wlines)]);
+        root.global_allocator.free(wnd.*.TextPointers[0..win.wlines]);
 //        free(wnd->TextPointers);
         wnd.*.TextPointers = null;
     }
@@ -603,9 +605,11 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
 // ------ compute the vertical scroll box position from
 //                   the text pointers ---------
 fn ComputeVScrollBox(win:*Window) usize {
-    const wnd = win.win;
     // will this go negative ?
-    const pagelen:usize = @as(usize, @intCast(wnd.*.wlines)) - win.ClientHeight();
+    var pagelen:usize = 0;
+    if (win.wlines > win.ClientHeight()) {
+        pagelen = win.wlines - win.ClientHeight();
+    }
     const barlen:usize = win.ClientHeight()-2;
     var lines_tick:usize = 0;
     var vscrollbox:usize = 0;
@@ -618,10 +622,10 @@ fn ComputeVScrollBox(win:*Window) usize {
         } else {
             lines_tick = @intCast(@divFloor(barlen, pagelen));
         }
-        const wtop:usize = @intCast(wnd.*.wtop);
+        const wtop:usize = win.wtop;
         vscrollbox = 1 + @divFloor(wtop, lines_tick);
         if (vscrollbox > win.ClientHeight()-2 or
-                wnd.*.wtop + @as(c_int, @intCast(win.ClientHeight())) >= wnd.*.wlines) {
+                win.wtop + win.ClientHeight() >= win.wlines) {
             vscrollbox = @intCast(win.ClientHeight()-2);
         }
     }
@@ -630,12 +634,11 @@ fn ComputeVScrollBox(win:*Window) usize {
 
 // ---- compute top text line from scroll box position ----
 fn ComputeWindowTop(win:*Window) void {
-    const wnd = win.win;
-    const pagelen:usize = @as(usize, @intCast(wnd.*.wlines)) - win.ClientHeight();
+    const pagelen:usize = win.wlines - win.ClientHeight();
     if (win.VScrollBox == 0) {
-        wnd.*.wtop = 0;
+        win.wtop = 0;
     } else if (win.VScrollBox == win.ClientHeight()-2) {
-        wnd.*.wtop = @intCast(pagelen);
+        win.wtop = pagelen;
     } else {
         const barlen:usize = @intCast(win.ClientHeight()-2);
         var lines_tick:usize = 0;
@@ -645,12 +648,12 @@ fn ComputeWindowTop(win:*Window) void {
         } else {
             lines_tick = if (pagelen>0) @divFloor(barlen, pagelen) else 0;
         }
-        wnd.*.wtop = @intCast((win.VScrollBox-1) * lines_tick);
-        if (wnd.*.wtop + @as(c_int, @intCast(win.ClientHeight())) > wnd.*.wlines)
-            wnd.*.wtop = @intCast(pagelen);
+        win.wtop = @intCast((win.VScrollBox-1) * lines_tick);
+        if (win.wtop + win.ClientHeight() > win.wlines)
+            win.wtop = pagelen;
     }
-    if (wnd.*.wtop < 0)
-        wnd.*.wtop = 0;
+//    if (win.*.wtop < 0)
+//        wnd.*.wtop = 0;
 }
 
 // ------ compute the horizontal scroll box position from
@@ -711,11 +714,11 @@ fn ComputeWindowLeft(win:*Window) void {
 }
 
 // ------- write a line of text to a textbox window -------
-pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
+pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:usize, reverse:bool) void {
     const wnd = win.win;
 
     // ------ make sure y is inside the window -----
-    if (y < wnd.*.wtop or y >= @as(usize, @intCast(wnd.*.wtop))+win.ClientHeight())
+    if (y < win.wtop or y >= win.wtop+win.ClientHeight())
         return;
 
     // ---- build the retangle within which can write ----
@@ -736,7 +739,7 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
     if (rc.rt == 0)
         return;
     rc = win.AdjustRectangle(rc);
-    if (y-wnd.*.wtop < rc.tp or y-wnd.*.wtop > rc.bt)
+    if (y-win.wtop < rc.tp or y-win.wtop > rc.bt)
         return;
 
     // ----- get the text to a specified line -----
@@ -845,7 +848,7 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
             }
             // ------- display the line --------
             df.writeline(wnd, &line[dif], @intCast(rc.lf+@as(c_int, @intCast(win.BorderAdj()))),
-                         @intCast(y-wnd.*.wtop+@as(c_int, @intCast(win.TopBorderAdj()))), df.FALSE);
+                         @intCast(y-win.wtop+win.TopBorderAdj()), df.FALSE);
 
         } else |_| {
         }
@@ -907,7 +910,7 @@ pub fn ClearTextPointers(win:*Window) void {
         wnd.*.TextPointers = pointers.ptr;
     } else |_| {}
     // set wnd.*.wlines to zero ?
-    wnd.*.wlines = 0;
+    win.wlines = 0;
 
 //    wnd->TextPointers = DFrealloc(wnd->TextPointers, sizeof(int));
 //    *(wnd->TextPointers) = 0;
@@ -987,12 +990,12 @@ pub fn BuildTextPointers(win:*Window) void {
 //    }
 
     if (wnd.*.text) |text| {
-        wnd.*.wlines = 0;
+        win.wlines = 0;
         wnd.*.textwidth = 0;
         var next_pos:usize= 0;
 
         if (arraylist.append(allocator, 0)) {} else |_| {} // first line
-        wnd.*.wlines += 1;
+        win.wlines += 1;
 
         // this only cound to last '\n'
         while (std.mem.indexOfScalarPos(u8, text[0..wnd.*.textlen], next_pos, '\n')) |pos| {
@@ -1002,7 +1005,7 @@ pub fn BuildTextPointers(win:*Window) void {
                 // add next line if there are still content
                 // otherwise, it is the end of line and end of text
                 if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
-                wnd.*.wlines += 1;
+                win.wlines += 1;
             }
         }
         if (next_pos < wnd.*.textlen) {
@@ -1053,8 +1056,7 @@ fn MoveScrollBox(win:*Window, vscrollbox:usize) void {
 }
 
 pub fn TextLineNumber(win:*Window, pos:usize) usize {
-    const wnd = win.win;
-    const len:usize = @intCast(wnd.*.wlines);
+    const len:usize = win.wlines;
     var line:usize = 0;
     for (win.TextPointers, 0..) |lp, idx| {
         if (pos > lp) {

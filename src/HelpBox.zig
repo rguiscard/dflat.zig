@@ -20,7 +20,7 @@ var stacked:usize = 0;
 // --- keywords in the current help text --------
 const keywords  = struct {
     hkey:*df.helps = undefined,
-    lineno:c_int = 0,
+    lineno:usize = 0,
     off1:usize = 0,
     off2:usize = 0,
     off3:usize = 0,
@@ -75,7 +75,7 @@ pub fn ReadHelp(win:*Window) void {
                             pos = idx+1;
                             continue;
                         }
-                        KeyWords[keywordcount].lineno = @intCast(cwin.win.*.wlines);
+                        KeyWords[keywordcount].lineno = cwin.wlines;
                         KeyWords[keywordcount].off1 = idx;
                         KeyWords[keywordcount].off2 = idx - colorct*4;
                         KeyWords[keywordcount].isDefinition = (hline[idx+1] == '*');
@@ -218,8 +218,8 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
                     }
                 }
                 if (thisword) |word| {
-                    if (word.lineno < cwin.win.*.wtop or
-                        word.lineno >= cwin.win.*.wtop + @as(c_int, @intCast(cwin.ClientHeight())))  {
+                    if (word.lineno < cwin.wtop or
+                        word.lineno >= cwin.wtop + cwin.ClientHeight())  {
 // FIXME: this loop looks weird.
 //                        var distance = @divFloor(cwin.ClientHeight(), 2);
 //                        do {
@@ -274,7 +274,7 @@ fn PaintMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     if (thisword) |word| {
         const pwin = win.getParent();
-        var pos:usize = win.TextPointers[@intCast(word.*.lineno)];
+        var pos:usize = win.TextPointers[word.*.lineno];
         pos += @intCast(word.*.off1);
         wnd.*.text[pos+1] = pwin.WindowColors[df.SELECT_COLOR][df.FG];
         wnd.*.text[pos+2] = pwin.WindowColors[df.SELECT_COLOR][df.BG];
@@ -293,7 +293,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const pp1:usize = @intCast(p1);
     const pp2:usize = @intCast(p2);
     const mx:usize = pp1 - win.GetClientLeft();
-    const my:usize = pp2 - win.GetClientTop() + @as(usize, @intCast(win.win.*.wtop));
+    const my:usize = pp2 - win.GetClientTop() + win.wtop;
 
     for (&KeyWords, 0..) |*word, idx| {
         if (my == word.lineno) {

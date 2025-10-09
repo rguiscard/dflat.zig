@@ -232,7 +232,7 @@ fn FixColors(win:*Window) void {
 fn SetScrollBars(win:*Window) void {
     const wnd = win.win;
     const oldattr = win.GetAttribute();
-    if (wnd.*.wlines > win.ClientHeight()) {
+    if (win.wlines > win.ClientHeight()) {
         win.AddAttribute(df.VSCROLLBAR);
     } else {
         win.ClearAttribute(df.VSCROLLBAR);

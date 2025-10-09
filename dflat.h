@@ -102,8 +102,8 @@ typedef struct window {
 //	struct window *StatusBar; /* status bar                 */
 //    int isHelping;	    /* > 0 when help is being displayed */
     /* ----------------- text box fields ------------------ */
-    int wlines;     /* number of lines of text              */
-    int wtop;       /* text line that is on the top display */
+//    int wlines;     /* number of lines of text              */
+//    int wtop;       /* text line that is on the top display */
     unsigned char *text; /* window text                     */
     unsigned int textlen;  /* text length                   */
     int wleft;      /* left position in window viewport     */
@@ -235,7 +235,7 @@ BOOL cTextBlockMarked(WINDOW);
 #define TextBlockBegin(wnd) (TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol)
 #define TextBlockEnd(wnd)   (TextLine(wnd,wnd->BlkEndLine)+wnd->BlkEndCol)
 #define GetText(w)        ((w)->text)
-#define GetTextLines(w)   ((w)->wlines)
+//#define GetTextLines(w)   ((w)->wlines)
 void ClearTextPointers(WINDOW);
 void BuildTextPointers(WINDOW);
 int TextLineNumber(WINDOW, char *);

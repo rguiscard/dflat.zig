@@ -80,6 +80,9 @@ StatusBar:?*TopLevelFields    = null, // status bar
 isHelping:u32 = 0,                    // > 0 when help is being displayed
 
 // ----------------- text box fields ------------------
+wlines:usize = 0,             // number of lines of text
+wtop:usize = 0,               // text line that is on the top display
+
 gapbuf:?*GapBuf = null,       // gap buffer
 
 BlkBegLine:usize = 0,         // beginning line of marked block

@@ -43,14 +43,13 @@ fn CreateWindowMsg(win:*Window) bool {
 
 // --------- LEFT_BUTTON Message ---------
 fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
-    const wnd = win.win;
     const pp2:usize = @intCast(p2);
-    const my:c_int = @intCast(pp2 - win.GetTop());
+    const my:usize = @intCast(pp2 - win.GetTop());
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win))) {
         if (my != py) {
             _ = win.sendMessage(df.LB_SELECTION,
-                    @intCast(wnd.*.wtop+my-1), df.TRUE);
-            py = my;
+                    @intCast(win.wtop+my-1), df.TRUE);
+            py = @intCast(my);
         }
     } else {
         if (win.parent) |pw| {
@@ -242,7 +241,6 @@ fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
 
 // ---------- KEYBOARD Message ---------
 fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
-    const wnd = win.win;
     if (win.mnu) |mnu| {
         var c:c_uint = @intCast(p1);
         if (c < 128) { // FIXME unicode
@@ -305,16 +303,16 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.UP => {
             if (win.selection == 0) {
-                if (wnd.*.wlines == win.ClientHeight()) {
+                if (win.wlines == win.ClientHeight()) {
                     q.PostMessage(win, df.LB_SELECTION,
-                                    @intCast(wnd.*.wlines-1), df.FALSE);
+                                    @intCast(win.wlines-1), df.FALSE);
                     return true;
                 }
             }
         },
         df.DN => {
-            if (win.selection == wnd.*.wlines-1) {
-                if (wnd.*.wlines == win.ClientHeight()) {
+            if (win.selection == win.wlines-1) {
+                if (win.wlines == win.ClientHeight()) {
                     q.PostMessage(win, df.LB_SELECTION, 0, df.FALSE);
                     return true;
                 }

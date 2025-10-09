@@ -16,8 +16,8 @@ const cfg = @import("Config.zig");
 var KeyBoardMarking = false;
 var ButtonDown = false;
 var TextMarking = false;
-var ButtonX:c_int = 0;
-var ButtonY:c_int = 0;
+var ButtonX:usize = 0;
+var ButtonY:usize = 0;
 var PrevY:c_int = -1;
 
 fn isWhite(chr:u8) bool {
@@ -100,12 +100,12 @@ fn ClearTextMsg(win:*Window) bool {
 //    }
 //    wnd.*.text = @ptrCast(df.DFrealloc(wnd.*.text, blen));
 //    _ = df.memset(wnd.*.text, 0, blen);
-    wnd.*.wlines = 0;
+    win.wlines = 0;
     wnd.*.CurrLine = 0;
     wnd.*.CurrCol = 0;
     wnd.*.WndRow = 0;
     wnd.*.wleft = 0;
-    wnd.*.wtop = 0;
+    win.wtop = 0;
     wnd.*.textwidth = 0;
     win.TextChanged = false;
     return rtn;
@@ -168,7 +168,7 @@ fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
     wnd.*.CurrCol = @intCast(p1 + wnd.*.wleft);
     wnd.*.WndRow = @intCast(p2);
-    wnd.*.CurrLine = @intCast(p2 + wnd.*.wtop);
+    wnd.*.CurrLine = @intCast(p2 + @as(c_int, @intCast(win.wtop)));
     if (win == Window.inFocus) {
         if (df.CharInView(wnd, @intCast(p1), @intCast(p2))>0)
             _ = q.SendMessage(null, df.SHOW_CURSOR,
@@ -190,7 +190,7 @@ fn SizeMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     }
     if (wnd.*.WndRow > clientHeight-1) {
         wnd.*.WndRow = clientHeight-1;
-        wnd.*.CurrLine = wnd.*.WndRow+wnd.*.wtop;
+        wnd.*.CurrLine = wnd.*.WndRow+@as(c_int, @intCast(win.wtop));
     }
     _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
     return rtn;
@@ -256,7 +256,7 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
     if (win.isMultiLine())    {
         rtn = root.BaseWndProc(k.EDITBOX, win, df.SCROLLPAGE, p1, 0);
 //        SetLinePointer(wnd, wnd->wtop+wnd->WndRow);
-        wnd.*.CurrLine = wnd.*.wtop+wnd.*.WndRow;
+        wnd.*.CurrLine = @as(c_int, @intCast(win.wtop))+wnd.*.WndRow;
         StickEnd(win);
         _ = win.sendMessage(df.KEYBOARD_CURSOR,@intCast(WndCol(win)), @intCast(wnd.*.WndRow));
     }
@@ -278,37 +278,37 @@ fn HorizPageMsg(win:*Window, p1:df.PARAM) bool {
 }
 
 // ----- Extend the marked block to the new x,y position ----
-fn ExtendBlock(win:*Window, xx:c_int, yy:c_int) void {
+fn ExtendBlock(win:*Window, xx:usize, yy:usize) void {
     const wnd = win.win;
     var x = xx;
     var y = yy;
-    var ptop = @min(win.BlkBegLine, win.BlkEndLine);
-    var pbot = @max(win.BlkBegLine, win.BlkEndLine);
+    var ptop:usize = @min(win.BlkBegLine, win.BlkEndLine);
+    var pbot:usize = @max(win.BlkBegLine, win.BlkEndLine);
 //    const lp = df.TextLine(wnd, wnd.*.wtop+y);
 //    const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
-    const lp = win.textLine(@intCast(wnd.*.wtop+y));
-    var len:c_int = 0;
+    const lp = win.textLine(win.wtop+y);
+    var len:usize = 0;
     if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], lp, '\n')) |pos| {
         len = @intCast(pos-lp);
     }
     x = @max(0, @min(x, len));
     y = @max(0, y);
-    win.BlkEndCol = @intCast(@min(len, x+wnd.*.wleft));
-    win.BlkEndLine = @intCast(y+wnd.*.wtop);
-    const bbl = @min(win.BlkBegLine, win.BlkEndLine);
-    const bel = @max(win.BlkBegLine, win.BlkEndLine);
+    win.BlkEndCol = @min(len, x+@as(usize, @intCast(wnd.*.wleft)));
+    win.BlkEndLine = y+win.wtop;
+    const bbl:usize = @min(win.BlkBegLine, win.BlkEndLine);
+    const bel:usize = @max(win.BlkBegLine, win.BlkEndLine);
     while (ptop < bbl) {
-        textbox.WriteTextLine(win, null, @intCast(ptop), false);
+        textbox.WriteTextLine(win, null, ptop, false);
         ptop += 1;
     }
-    for (@intCast(bbl)..@intCast(bel+1)) |ydx| {
-        textbox.WriteTextLine(win, null, @intCast(ydx), false);
+    for (bbl..bel+1) |ydx| {
+        textbox.WriteTextLine(win, null, ydx, false);
     }
 //    for (y = bbl; y <= bel; y++)
 //        WriteTextLine(wnd, NULL, y, FALSE);
     while (pbot > bel) {
-        textbox.WriteTextLine(win, null, @intCast(pbot), false);
-        pbot -= 1;
+        textbox.WriteTextLine(win, null, pbot, false);
+        pbot -|= 1;
     }
 }
 
@@ -317,8 +317,8 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     const pp1:usize = @intCast(p1);
     const pp2:usize = @intCast(p2);
-    var MouseX:c_int = @intCast(pp1 - win.GetClientLeft());
-    var MouseY:c_int = @intCast(pp2 - win.GetClientTop());
+    var MouseX:usize = pp1 - win.GetClientLeft();
+    var MouseY:usize = pp2 - win.GetClientTop();
     const rc = rect.ClientRect(win);
     if (KeyBoardMarking)
         return true;
@@ -363,10 +363,10 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         textbox.ClearTextBlock(win);
         _ = win.sendMessage(df.PAINT, 0, 0);
     }
-    if (wnd.*.wlines>0) {
-        if (MouseY > wnd.*.wlines-1)
+    if (win.wlines>0) {
+        if (MouseY > win.wlines-1)
             return true;
-        const sel:c_uint = @intCast(MouseY+wnd.*.wtop);
+        const sel:usize = MouseY+win.wtop;
 //        const lp = df.TextLine(wnd, sel);
 //        const pos = df.strchr(lp, '\n');
 //        var len:c_int = 0;
@@ -374,9 +374,9 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 //            len = @intCast(df.strchr(lp, '\n') - lp);
 //        }
         const lp = win.textLine(sel);
-        var len:c_int = 0;
+        var len:usize = 0;
         if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], lp, '\n')) |pos| {
-            len = @intCast(pos-lp);
+            len = pos-lp;
         }
         MouseX = @min(MouseX, len);
         if (MouseX < wnd.*.wleft) {
@@ -390,13 +390,13 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         MouseX = 0;
         MouseY = 0;
     }
-    wnd.*.WndRow = MouseY;
-    wnd.*.CurrLine = MouseY+wnd.*.wtop;
+    wnd.*.WndRow = @intCast(MouseY);
+    wnd.*.CurrLine = @intCast(MouseY+win.wtop);
 
     if (win.isMultiLine() or
         ((textbox.TextBlockMarked(win) == false) and
-            (MouseX+wnd.*.wleft < df.strlen(wnd.*.text)))) {
-        wnd.*.CurrCol = @intCast(MouseX+wnd.*.wleft);
+            (MouseX+@as(usize, @intCast(wnd.*.wleft)) < df.strlen(wnd.*.text)))) {
+        wnd.*.CurrCol = @as(c_int, @intCast(MouseX))+wnd.*.wleft;
     }
     _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
     return true;
@@ -407,15 +407,15 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     const pp1:usize = @intCast(p1);
     const pp2:usize = @intCast(p2);
-    const MouseX:c_int = @intCast(pp1 - win.GetClientLeft());
-    const MouseY:c_int = @intCast(pp2 - win.GetClientTop());
+    const MouseX:usize = pp1 - win.GetClientLeft();
+    const MouseY:usize = pp2 - win.GetClientTop();
     var rc = rect.ClientRect(win);
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false)
         return false;
-    if (MouseY > wnd.*.wlines-1)
+    if (MouseY > win.wlines-1)
         return false;
     if (ButtonDown) {
-        SetAnchor(win, @intCast(ButtonX+wnd.*.wleft), @intCast(ButtonY+wnd.*.wtop));
+        SetAnchor(win, ButtonX+@as(usize, @intCast(wnd.*.wleft)), @intCast(ButtonY+win.wtop));
         TextMarking = true;
         rc = win.WindowRect();
         _ = q.SendMessage(null,df.MOUSE_TRAVEL,@intCast(@intFromPtr(&rc)), 0);
@@ -725,7 +725,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     DoMultiLines(win, p1, p2);
     if (DoScrolling(win, @intCast(p1), p2)) {
         if (KeyBoardMarking)
-            ExtendBlock(win, WndCol(win), wnd.*.WndRow);
+            ExtendBlock(win, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
     } else if (win.TestAttribute(df.READONLY) == false) {
         DoKeyStroke(win, @intCast(p1), p2);
         _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
@@ -769,10 +769,10 @@ fn DeleteTextCmd(win:*Window) void {
 //        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl-bcol);
         wnd.*.CurrLine = @intCast(win.BlkBegLine);
         wnd.*.CurrCol = @intCast(win.BlkBegCol);
-        const begline:c_int = @intCast(win.BlkBegLine);
-        wnd.*.WndRow = begline - wnd.*.wtop;
+        const begline:usize = win.BlkBegLine;
+        wnd.*.WndRow = @intCast(begline - win.wtop);
         if (wnd.*.WndRow < 0) {
-            wnd.*.wtop = @intCast(win.BlkBegLine);
+            win.wtop = win.BlkBegLine;
             wnd.*.WndRow = 0;
         }
         _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
@@ -801,11 +801,11 @@ fn ClearCmd(win:*Window) void {
 //        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl);
         wnd.*.CurrLine = @intCast(win.BlkBegLine);
         wnd.*.CurrCol = @intCast(win.BlkBegCol);
-        const begline:c_int = @intCast(win.BlkBegLine);
-        wnd.*.WndRow = begline - wnd.*.wtop;
+        const begline:usize = win.BlkBegLine;
+        wnd.*.WndRow = @intCast(begline - win.wtop);
         if (wnd.*.WndRow < 0) {
             wnd.*.WndRow = 0;
-            wnd.*.wtop = @intCast(win.BlkBegLine);
+            win.wtop = win.BlkBegLine;
         }
 
 //        char *bbl=TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol;
@@ -867,7 +867,7 @@ fn ParagraphCmd(win:*Window) void {
     textbox.ClearTextBlock(win);
 
     // ---- forming paragraph from cursor position ---
-    const fl = wnd.*.wtop + wnd.*.WndRow;
+    const fl:usize = win.wtop + @as(usize, @intCast(wnd.*.WndRow));
 //    const bl = df.TextLine(wnd, wnd.*.CurrLine);
     const saved_line = wnd.*.CurrLine;
     var bc = wnd.*.CurrCol;
@@ -883,9 +883,9 @@ fn ParagraphCmd(win:*Window) void {
 //    wnd.*.CurrLine = df.TextLineNumber(wnd, bl);
     wnd.*.CurrLine = saved_line;
     wnd.*.CurrCol = bc;
-    if (fl < wnd.*.wtop)
-        wnd.*.wtop = fl;
-    wnd.*.WndRow = fl - wnd.*.wtop;
+    if (fl < win.wtop)
+        win.wtop = fl;
+    wnd.*.WndRow = @intCast(fl - win.wtop);
 
     _ = win.sendMessage(df.PAINT, 0, 0);
     _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
@@ -1131,13 +1131,13 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
         },
         df.CTRL_END => {
             if (win.isMultiLine() and
-                wnd.*.WndRow+wnd.*.wtop+1 < wnd.*.wlines and
-                wnd.*.wlines > 0) {
+                @as(usize, @intCast(wnd.*.WndRow))+win.wtop+1 < win.wlines and
+                win.wlines > 0) {
                 _ = win.sendMessage(df.SCROLLDOC, df.FALSE, 0);
-                wnd.*.CurrLine = wnd.*.wlines-1;
-//                _ = df.SetLinePointer(wnd, wnd.*.wlines-1);
+                wnd.*.CurrLine = @as(c_int, @intCast(win.wlines-1));
+//                _ = df.SetLinePointer(wnd, win.wlines-1);
                 wnd.*.WndRow =
-                    @intCast(@min(win.ClientHeight()-1, wnd.*.wlines-1));
+                    @intCast(@min(win.ClientHeight()-1, win.wlines-1));
                 Home(win);
             }
             End(win);
@@ -1292,7 +1292,7 @@ fn StickEnd(win:*Window) void {
 fn Downward(win:*Window) void {
     const wnd = win.win;
     if (win.isMultiLine() and
-            wnd.*.WndRow+wnd.*.wtop+1 < wnd.*.wlines)  {
+            @as(usize, @intCast(wnd.*.WndRow))+win.wtop+1 < win.wlines)  {
         wnd.*.CurrLine += 1;
         if (wnd.*.WndRow == win.ClientHeight()-1)
             _ = win.sendMessage(df.SCROLL, df.TRUE, 0);
@@ -1362,7 +1362,7 @@ fn Home(win:*Window) void {
 // modern escape does not have \f
 fn NextWord(win:*Window) void {
     const wnd = win.win;
-    const savetop = wnd.*.wtop;
+    const savetop = win.wtop;
     const saveleft = wnd.*.wleft;
     win.ClearVisible();
 
@@ -1396,7 +1396,7 @@ fn NextWord(win:*Window) void {
 //    }
     win.SetVisible();
     _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
-    if (wnd.*.wtop != savetop or wnd.*.wleft != saveleft)
+    if (win.wtop != savetop or wnd.*.wleft != saveleft)
         _ = win.sendMessage(df.PAINT, 0, 0);
 }
 
@@ -1404,7 +1404,7 @@ fn NextWord(win:*Window) void {
 // not tested as NextWord()
 fn PrevWord(win:*Window) void {
     const wnd = win.win;
-    const savetop = wnd.*.wtop;
+    const savetop = win.wtop;
     const saveleft = wnd.*.wleft;
     win.ClearVisible();
     Backward(win);
@@ -1443,7 +1443,7 @@ fn PrevWord(win:*Window) void {
         }
     }
     _ = win.sendMessage(df.KEYBOARD_CURSOR, WndCol(win), wnd.*.WndRow);
-    if (wnd.*.wtop != savetop or wnd.*.wleft != saveleft)
+    if (win.wtop != savetop or wnd.*.wleft != saveleft)
         _ = win.sendMessage(df.PAINT, 0, 0);
 }
 
@@ -1463,7 +1463,7 @@ fn SetAnchor(win:*Window, mx:usize, my:usize) void {
 // Not in use, but could be useful
 fn ModTextPointers(win:*Window, lineno:usize, incr:c_int) void {
     const wnd = win.win;
-    for (lineno..wnd.*.wlines) |idx| {
+    for (lineno..win.wlines) |idx| {
         wnd.*.TextPointers[idx] += incr;
     }
 //    while (lineno < wnd->wlines)

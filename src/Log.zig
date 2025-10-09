@@ -51,9 +51,8 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             const cmd:c = @enumFromInt(p1);
             if (cmd == .ID_OK) {
                 if (control) |cwin| {
-                    const cwnd = cwin.win;
-                    const tl = df.GetTextLines(cwnd);
-                    for(0..@intCast(tl)) |item| {
+                    const tl = cwin.wlines;
+                    for(0..tl) |item| {
                         if (listbox.ItemSelected(cwin, @intCast(item))) {
                             messages[item][0] = df.LISTSELECTOR;
                         }
