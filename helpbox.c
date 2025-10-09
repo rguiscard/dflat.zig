@@ -8,119 +8,11 @@
 #define MAXHELPSTACK 100
 
 struct helps *FirstHelp;
-//struct helps *ThisHelp;
 int HelpCount;
 char HelpFileName[9];
 
-int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
-int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
-void cReadHelp(WINDOW, WINDOW);
-char c_WindowColors(WINDOW, int, int);
-
-/* --- keywords in the current help text -------- */
-struct keywords { // private
-	struct helps *hkey;
-    int lineno;
-    int off1, off2, off3;
-    char isDefinition;
-} KeyWords[MAXHELPKEYWORDS];
-struct keywords *thisword; // private
-int keywordcount; // private
-
 FILE *helpfp;
-char hline [160];
 BOOL Helping;
-
-void SelectHelp(WINDOW, struct helps *, BOOL);
-//void ReadHelp(WINDOW);
-struct helps *FindHelp(char *);
-void DisplayDefinition(WINDOW, char *);
-void cDisplayDefinition(WINDOW, char *);
-
-//int HelpTextProc(WINDOW, MESSAGE, PARAM, PARAM);
-
-extern int ID_HELPTEXT; // from zig side
-
-/* ------------- KEYBOARD message ------------ */
-#if 0
-BOOL cHelpBoxKeyboardMsg(WINDOW wnd, WINDOW cwnd, PARAM p1)
-{
-    // cwnd is not null, checked by zig side
-    switch ((int)p1)    {
-        case '\r':
-			if (keywordcount)
-	            if (thisword != NULL)    {
-					char *hp = thisword->hkey->hname;
-        	        if (thisword->isDefinition)
-            	        DisplayDefinition(GetParent(wnd), hp);
-                	else
-                    	SelectHelp(wnd, thisword->hkey, TRUE);
-	            }
-            return TRUE;
-        case '\t':
-			if (!keywordcount)
-				return TRUE;
-            if (thisword == NULL ||
-					++thisword == KeyWords+keywordcount)
-	            thisword = KeyWords;
-            break;
-        case SHIFT_HT:
-			if (!keywordcount)
-				return TRUE;
-			if (thisword == NULL || thisword == KeyWords)
-				thisword = KeyWords+keywordcount;
-			--thisword;
-			break;;
-        default:
-			return FALSE;
-    }
-    if (thisword->lineno < cwnd->wtop ||
-            thisword->lineno >=
-                cwnd->wtop + c_ClientHeight(cwnd))  {
-        int distance = c_ClientHeight(cwnd)/2;
-        do    {
-            cwnd->wtop = thisword->lineno-distance;
-            distance /= 2;
-        }
-        while (cwnd->wtop < 0);
-    }
-    SendMessage(cwnd, PAINT, 0, 0);
-    return TRUE;
-}
-#endif
-
-/* ---- LEFT_BUTTON message for the helpbox text editbox ---- */
-#if 0
-int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int rtn, mx, my, i;
-
-    rtn = DefaultWndProc(wnd, LEFT_BUTTON, p1, p2);
-    mx = (int)p1 - c_GetClientLeft(wnd);
-    my = (int)p2 - c_GetClientTop(wnd);
-    my += wnd->wtop;
-    thisword = KeyWords;
-    for (i = 0; i < keywordcount; i++)    {
-        if (my == thisword->lineno)    {
-            if (mx >= thisword->off2 &&
-                        mx < thisword->off3)    {
-                SendMessage(wnd, PAINT, 0, 0);
-                if (thisword->isDefinition)    {
-                    WINDOW pwnd = GetParent(wnd);
-                    if (pwnd != NULL)
-                        DisplayDefinition(GetParent(pwnd),
-                            thisword->hkey->hname);
-                }
-                break;
-            }
-        }
-        thisword++;
-    }
-	if (i == keywordcount)
-		thisword = NULL;
-    return rtn;
-}
-#endif
 
 /* ---- compute the displayed length of a help text line --- */
 static int HelpLength(char *s)

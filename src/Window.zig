@@ -1080,12 +1080,6 @@ pub export fn c_TestAttribute(wnd:df.WINDOW, attrib:c_int) df.BOOL {
     return df.FALSE;
 }
 
-//pub export fn c_AddAttribute(wnd:df.WINDOW, attrib:c_int) void {
-//    if (TopLevelFields.get_zin(wnd)) |win| {
-//        win.AddAttribute(attrib);
-//    }
-//}
-
 pub export fn c_BorderAdj(wnd:df.WINDOW) c_int {
     if (TopLevelFields.get_zin(wnd)) |win| {
         return @intCast(win.BorderAdj());
@@ -1096,13 +1090,6 @@ pub export fn c_BorderAdj(wnd:df.WINDOW) c_int {
 pub export fn c_TopBorderAdj(wnd:df.WINDOW) c_int {
     if (TopLevelFields.get_zin(wnd)) |win| {
         return @intCast(win.TopBorderAdj());
-    }
-    return 0;
-}
-
-pub export fn c_WindowColors(wnd:df.WINDOW, color:c_int, ground:c_int) u8 {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return (win.WindowColors[@intCast(color)][@intCast(ground)] & 255) | 0x80;
     }
     return 0;
 }

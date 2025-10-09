@@ -143,14 +143,14 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
         c.ID_PREV => {
             if (ThisHelp) |help| {
                 const prevhlp:usize = @intCast(help.*.prevhlp);
-                SelectHelp(win, df.FirstHelp+prevhlp, df.TRUE);
+                SelectHelp(win, df.FirstHelp+prevhlp, true);
             }
             return true;
         },
         c.ID_NEXT => {
             if (ThisHelp) |help| {
                 const nexthlp:usize = @intCast(help.*.nexthlp);
-                SelectHelp(win, df.FirstHelp+nexthlp, df.TRUE);
+                SelectHelp(win, df.FirstHelp+nexthlp, true);
             }
             return true;
         },
@@ -159,7 +159,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
                 stacked -= 1;
                 const stked:usize = stacked;
                 const helpstack:usize = HelpStack[stked];
-                SelectHelp(win, df.FirstHelp+helpstack, df.FALSE);
+                SelectHelp(win, df.FirstHelp+helpstack, false);
             }
             return true;
         },
@@ -182,7 +182,7 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
                                 if (word.isDefinition) {
                                     DisplayDefinition(win.getParent().win, hp);
                                 } else {
-                                    SelectHelp(win, word.hkey, df.TRUE);
+                                    SelectHelp(win, word.hkey, true);
                                 }
                             }
                         }
@@ -405,7 +405,6 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
             // ------- display the help window -----
             _ = DialogBox.create(null, &Dialogs.HelpBox, df.TRUE, HelpBoxProc);
 
-//            df.free(Dialogs.HelpBox.dwnd.title);
             if (Dialogs.HelpBox.dwnd.title) |ttl| {
                 root.global_allocator.free(ttl);
                 Dialogs.HelpBox.dwnd.title = null;
@@ -453,14 +452,16 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
                 df.SeekHelpLine(help.*.hptr, help.*.bit);
                 while (true) {
                     //  df.clearBIOSbuffer(); // no function
-                    if (df.GetHelpLine(&df.hline) == null)
+                    var hline = [_]u8{0}**100;
+                    if (df.GetHelpLine(&hline) == null)
                         break;
-                    if (df.hline[0] == '<')
+                    if (hline[0] == '<')
                         break;
-                    const len:usize = df.strlen(&df.hline);
-                    df.hline[len] = 0;
+                    if (std.mem.indexOfScalar(u8, &hline, 0)) |end| {
+                        hline[end-1] = 0;
+                    }
 //                    _ = q.SendMessage(dwnd,df.ADDTEXT, @intCast(@intFromPtr(&df.hline)),0);
-                    _ = dwin.sendTextMessage(df.ADDTEXT, &df.hline,0);
+                    _ = dwin.sendTextMessage(df.ADDTEXT, &hline,0);
                 }
                 _ = dwin.sendMessage(df.SHOW_WINDOW, 0, 0);
                 _ = q.SendMessage(null, df.WAITKEYBOARD, 0, 0);
@@ -480,24 +481,24 @@ fn BuildHelpBox(win:?*Window) void {
         df.SeekHelpLine(help.*.hptr, help.*.bit);
 
         // ----- read the title -----
-        _ = df.GetHelpLine(&df.hline);
-        const len:usize = df.strlen(&df.hline);
-        df.hline[len-1] = 0;
-
+        var hline = [_]u8{0}**100;
+        var len:usize = 0;
+        _ = df.GetHelpLine(&hline);
+        if (std.mem.indexOfScalar(u8, &hline, 0)) |end| {
+            hline[end-1] = 0;
+            len = end;
+        }
+        
         // FIXME: should replace with zig allocator
         if (Dialogs.HelpBox.dwnd.title) |ttl| {
             root.global_allocator.free(ttl);
             Dialogs.HelpBox.dwnd.title = null;
         }
 
-        if (root.global_allocator.dupeZ(u8, df.hline[0..len])) |buf| {
+        if (root.global_allocator.dupeZ(u8, hline[0..len])) |buf| {
             Dialogs.HelpBox.dwnd.title = buf;
         } else |_| {
         }
-
-//    df.free(Dialogs.HelpBox.dwnd.title);
-//    Dialogs.HelpBox.dwnd.title = @ptrCast(@alignCast(df.DFmalloc(len+1)));
-//    _ = df.strcpy(Dialogs.HelpBox.dwnd.title, &df.hline);
 
         // ----- set the height and width -----
         Dialogs.HelpBox.dwnd.h = @min(help.*.hheight, MAXHEIGHT)+7;
@@ -534,12 +535,12 @@ fn BuildHelpBox(win:?*Window) void {
 }
 
 // ----- select a new help window from its name -----
-pub export fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:df.BOOL) callconv(.c) void {
+pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
     if (newhelp != null) {
         _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
 
         if (ThisHelp) |help| {
-            if (recall>0 and stacked < df.MAXHELPSTACK) {
+            if (recall and stacked < df.MAXHELPSTACK) {
                 HelpStack[stacked] = help-df.FirstHelp;
                 stacked += 1;
             }
@@ -589,9 +590,6 @@ pub export fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:df.BOOL) call
 fn OverLap(a: c_int, b: c_int) c_int {
     const ov = a - b;
     return if (ov < 0) 0 else ov;
-//    if (ov < 0)
-//        ov = 0;
-//    return ov;
 }
 
 
