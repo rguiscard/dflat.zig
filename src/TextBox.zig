@@ -168,8 +168,10 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM) bool {
 
 // ------------ LEFT_BUTTON Message --------------
 fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const mx = p1 - win.GetLeft();
-    const my = p2 - win.GetTop();
+    const pp1:usize = @intCast(p1);
+    const pp2:usize = @intCast(p2);
+    const mx:usize = if (pp1 > win.GetLeft()) pp1 - win.GetLeft() else 0;
+    const my:usize = if (pp2 > win.GetTop()) pp2 - win.GetTop() else 0;
     if (win.TestAttribute(df.VSCROLLBAR) and
                         mx == win.WindowWidth()-1) {
         // -------- in the right border -------
@@ -241,8 +243,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
     const wnd = win.win;
-    const mx = p1 - win.GetLeft();
-    const my = p2 - win.GetTop();
+    const pp1:usize = @intCast(p1);
+    const pp2:usize = @intCast(p2);
+    const mx:usize = if (pp1 > win.GetLeft()) pp1-win.GetLeft() else 0;
+    const my:usize = if (pp2 > win.GetTop()) pp2-win.GetTop() else 0;
     if (VSliding) {
         // ---- dragging the vertical scroll box ---
         if (my-1 != win.VScrollBox) {
@@ -291,7 +295,7 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
     // ---- vertical scroll one line ----
     if (p1>0) {
         // ----- scroll one line up -----
-        if (wnd.*.wtop+win.ClientHeight() >= wnd.*.wlines) {
+        if (wnd.*.wtop+@as(c_int, @intCast(win.ClientHeight())) >= wnd.*.wlines) {
             return false;
         }
         wnd.*.wtop += 1;
@@ -315,8 +319,8 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
                     WriteTextLine(win,null,wnd.*.wtop,false);
                 } else {
                     // -- write bottom line (up) --
-                    const y=df.RectBottom(rc)-win.GetClientTop();
-                    WriteTextLine(win,null,@intCast(wnd.*.wtop+y),false);
+                    const y:c_int=df.RectBottom(rc)-@as(c_int, @intCast(win.GetClientTop()));
+                    WriteTextLine(win,null,wnd.*.wtop+y,false);
                 }
             }
         }
@@ -336,7 +340,7 @@ fn HorizScrollMsg(win:*Window,p1:df.PARAM) bool {
     // --- horizontal scroll one column ---
     if (p1>0) {
         // --- scroll left ---
-        if (wnd.*.wleft + win.ClientWidth()-1 >= wnd.*.textwidth) {
+        if (wnd.*.wleft + @as(c_int, @intCast(win.ClientWidth()))-1 >= wnd.*.textwidth) {
             return false;
         }
         wnd.*.wleft += 1;
@@ -354,18 +358,19 @@ fn HorizScrollMsg(win:*Window,p1:df.PARAM) bool {
 // ------------  SCROLLPAGE Message --------------
 fn ScrollPageMsg(win:*Window,p1:df.PARAM) void {
     const wnd = win.win;
+    const clientHeight:c_int = @intCast(win.ClientHeight());
     // --- vertical scroll one page ---
     if (p1 == df.FALSE)    {
         // ---- page up ----
         if (wnd.*.wtop>0) {
-            wnd.*.wtop -= @intCast(win.ClientHeight());
+            wnd.*.wtop -= clientHeight;
         }
     } else {
         // ---- page down ----
-        if (wnd.*.wtop+win.ClientHeight() < wnd.*.wlines) {
-            wnd.*.wtop += @intCast(win.ClientHeight());
-            if (wnd.*.wtop>wnd.*.wlines-win.ClientHeight()) {
-                wnd.*.wtop=@intCast(wnd.*.wlines-win.ClientHeight());
+        if (wnd.*.wtop+clientHeight < wnd.*.wlines) {
+            wnd.*.wtop += clientHeight;
+            if (wnd.*.wtop>wnd.*.wlines-clientHeight) {
+                wnd.*.wtop=@intCast(wnd.*.wlines-clientHeight);
             }
         }
     }
@@ -378,15 +383,16 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) void {
 // ------------ HORIZSCROLLPAGE Message --------------
 fn HorizScrollPageMsg(win:*Window,p1:df.PARAM) void {
     const wnd = win.win;
+    const clientWidth: c_int = @intCast(win.ClientWidth());
     // --- horizontal scroll one page ---
     if (p1 == df.FALSE) {
         // ---- page left -----
-        wnd.*.wleft -= @intCast(win.ClientWidth());
+        wnd.*.wleft -= clientWidth;
     } else {
         // ---- page right -----
-        wnd.*.wleft += @intCast(win.ClientWidth());
-        if (wnd.*.wleft > wnd.*.textwidth-win.ClientWidth()) {
-            wnd.*.wleft = @intCast(wnd.*.textwidth-win.ClientWidth());
+        wnd.*.wleft += clientWidth;
+        if (wnd.*.wleft > wnd.*.textwidth-clientWidth) {
+            wnd.*.wleft = @intCast(wnd.*.textwidth-clientWidth);
         }
     }
     if (wnd.*.wleft < 0) {
@@ -398,12 +404,13 @@ fn HorizScrollPageMsg(win:*Window,p1:df.PARAM) void {
 // ------------ SCROLLDOC Message --------------
 fn ScrollDocMsg(win:*Window,p1:df.PARAM) void {
     const wnd = win.win;
+    const clientHeight:c_int = @intCast(win.ClientHeight());
     // --- scroll to beginning or end of document ---
     if (p1>0) {
         wnd.*.wtop = 0;
         wnd.*.wleft = 0;
-    } else if (wnd.*.wtop+win.ClientHeight() < wnd.*.wlines) {
-        wnd.*.wtop = @intCast(wnd.*.wlines-win.ClientHeight());
+    } else if (wnd.*.wtop+clientHeight < wnd.*.wlines) {
+        wnd.*.wtop = wnd.*.wlines-clientHeight;
         wnd.*.wleft = 0;
     }
     _ = win.sendMessage(df.PAINT, 0, 0);
@@ -457,8 +464,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
                 continue;
             }
         }
-        const yi:isize = @intCast(y);
-        const yy = yi-win.TopBorderAdj(); // not sure this number will be negative
+        const yy:c_int = @intCast(y-win.TopBorderAdj()); // not sure this number will be negative
         if (yy < wnd.*.wlines-wnd.*.wtop) {
             // ---- paint a text line ----
             WriteTextLine(win, &rc, @intCast(yy+wnd.*.wtop), false);
@@ -466,7 +472,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
             // ---- paint a blank line ----
             df.SetStandardColor(wnd);
             df.writeline(wnd, &blankline[@intCast(rect.RectLeft(rcc))],
-                    @intCast(rect.RectLeft(rcc)+win.BorderAdj()), @intCast(yi), df.FALSE);
+                    @intCast(rect.RectLeft(rcc)+@as(c_int, @intCast(win.BorderAdj()))), @intCast(y), df.FALSE);
         }
     }
 
@@ -598,8 +604,9 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
 //                   the text pointers ---------
 fn ComputeVScrollBox(win:*Window) usize {
     const wnd = win.win;
-    const pagelen = wnd.*.wlines - win.ClientHeight();
-    const barlen = win.ClientHeight()-2;
+    // will this go negative ?
+    const pagelen:usize = @as(usize, @intCast(wnd.*.wlines)) - win.ClientHeight();
+    const barlen:usize = win.ClientHeight()-2;
     var lines_tick:usize = 0;
     var vscrollbox:usize = 0;
 
@@ -614,7 +621,7 @@ fn ComputeVScrollBox(win:*Window) usize {
         const wtop:usize = @intCast(wnd.*.wtop);
         vscrollbox = 1 + @divFloor(wtop, lines_tick);
         if (vscrollbox > win.ClientHeight()-2 or
-                wnd.*.wtop + win.ClientHeight() >= wnd.*.wlines) {
+                wnd.*.wtop + @as(c_int, @intCast(win.ClientHeight())) >= wnd.*.wlines) {
             vscrollbox = @intCast(win.ClientHeight()-2);
         }
     }
@@ -624,7 +631,7 @@ fn ComputeVScrollBox(win:*Window) usize {
 // ---- compute top text line from scroll box position ----
 fn ComputeWindowTop(win:*Window) void {
     const wnd = win.win;
-    const pagelen:usize = @intCast(wnd.*.wlines - win.ClientHeight());
+    const pagelen:usize = @as(usize, @intCast(wnd.*.wlines)) - win.ClientHeight();
     if (win.VScrollBox == 0) {
         wnd.*.wtop = 0;
     } else if (win.VScrollBox == win.ClientHeight()-2) {
@@ -639,7 +646,7 @@ fn ComputeWindowTop(win:*Window) void {
             lines_tick = if (pagelen>0) @divFloor(barlen, pagelen) else 0;
         }
         wnd.*.wtop = @intCast((win.VScrollBox-1) * lines_tick);
-        if (wnd.*.wtop + win.ClientHeight() > wnd.*.wlines)
+        if (wnd.*.wtop + @as(c_int, @intCast(win.ClientHeight())) > wnd.*.wlines)
             wnd.*.wtop = @intCast(pagelen);
     }
     if (wnd.*.wtop < 0)
@@ -650,8 +657,11 @@ fn ComputeWindowTop(win:*Window) void {
 //                 the text pointers ---------
 fn ComputeHScrollBox(win:*Window) usize {
     const wnd = win.win;
-    const pagewidth = wnd.*.textwidth - win.ClientWidth();
-    const barlen = win.ClientWidth()-2;
+    var pagewidth:usize = 0;
+    if (wnd.*.textwidth > win.ClientWidth()) {
+        pagewidth = @as(usize, @intCast(wnd.*.textwidth)) - win.ClientWidth();
+    }
+    const barlen:usize = win.ClientWidth()-2;
     var chars_tick:usize = 0;
     var hscrollbox:usize = 0;
 
@@ -667,7 +677,7 @@ fn ComputeHScrollBox(win:*Window) usize {
         const diff:usize = if (chars_tick>0) @divFloor(wleft, chars_tick) else 0;
         hscrollbox = 1 + diff;
         if (hscrollbox > win.ClientWidth()-2 or
-                wnd.*.wleft + win.ClientWidth() >= wnd.*.textwidth) {
+                wnd.*.wleft + @as(c_int, @intCast(win.ClientWidth())) >= wnd.*.textwidth) {
             hscrollbox = @intCast(win.ClientWidth()-2);
         }
     }
@@ -677,7 +687,7 @@ fn ComputeHScrollBox(win:*Window) usize {
 // ---- compute left column from scroll box position ----
 fn ComputeWindowLeft(win:*Window) void {
     const wnd = win.win;
-    const pagewidth:usize = @intCast(wnd.*.textwidth - win.ClientWidth());
+    const pagewidth:usize = @as(usize, @intCast(wnd.*.textwidth)) - win.ClientWidth();
 
     if (win.HScrollBox == 0) {
         wnd.*.wleft = 0;
@@ -693,7 +703,7 @@ fn ComputeWindowLeft(win:*Window) void {
             chars_tick = @divFloor(barlen, pagewidth);
         }
         wnd.*.wleft = @intCast((win.HScrollBox-1) * chars_tick);
-        if (wnd.*.wleft + win.ClientWidth() > wnd.*.textwidth)
+        if (wnd.*.wleft + @as(c_int, @intCast(win.ClientWidth())) > wnd.*.textwidth)
             wnd.*.wleft = @intCast(pagewidth);
     }
     if (wnd.*.wleft < 0)
@@ -705,7 +715,7 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
     const wnd = win.win;
 
     // ------ make sure y is inside the window -----
-    if (y < wnd.*.wtop or y >= wnd.*.wtop+win.ClientHeight())
+    if (y < wnd.*.wtop or y >= @as(usize, @intCast(wnd.*.wtop))+win.ClientHeight())
         return;
 
     // ---- build the retangle within which can write ----
@@ -834,8 +844,8 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
                 colors.SetStandardColor(wnd);
             }
             // ------- display the line --------
-            df.writeline(wnd, &line[dif], @intCast(rc.lf+win.BorderAdj()), 
-                         @intCast(y-wnd.*.wtop+win.TopBorderAdj()), df.FALSE);
+            df.writeline(wnd, &line[dif], @intCast(rc.lf+@as(c_int, @intCast(win.BorderAdj()))),
+                         @intCast(y-wnd.*.wtop+@as(c_int, @intCast(win.TopBorderAdj()))), df.FALSE);
 
         } else |_| {
         }

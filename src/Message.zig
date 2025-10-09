@@ -193,8 +193,10 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
             df.KEYBOARD_CURSOR => {
                 if (win) |w| {
                     if (w == Window.inFocus) {
-                        df.cursor(@intCast(w.GetClientLeft()+p1),
-                                  @intCast(w.GetClientTop()+p2));
+                        const x:c_int = @as(c_int, @intCast(w.GetClientLeft()));
+                        const y:c_int = @as(c_int, @intCast(w.GetClientTop()));
+                        df.cursor(@intCast(x+p1),
+                                  @intCast(y+p2));
                     }
                 } else {
                     df.cursor(@intCast(p1), @intCast(p2));

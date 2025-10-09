@@ -6,8 +6,10 @@ const rect = @import("Rect.zig");
 
 pub export fn CharInView(wnd:df.WINDOW, x:c_int, y:c_int) callconv(.c) df.BOOL {
     if (Window.get_zin(wnd)) |win| {
-        const x1:c_int = @intCast(win.GetLeft()+x);
-        const y1:c_int = @intCast(win.GetTop()+y);
+        const left:c_int = @intCast(win.GetLeft());
+        const top:c_int = @intCast(win.GetTop());
+        const x1:c_int = left+x;
+        const y1:c_int = top+y;
 
         if (win.TestAttribute(df.VISIBLE) == false)
             return df.FALSE;

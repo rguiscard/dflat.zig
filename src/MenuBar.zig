@@ -265,7 +265,8 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
 
 // --------------- LEFT_BUTTON Message ----------
 fn LeftButtonMsg(win:*Window,p1:df.PARAM) void {
-    const mx = p1-win.GetLeft();
+    const pp1:usize = @intCast(p1);
+    const mx:usize = pp1-win.GetLeft();
     // --- compute the selection that the left button hit ---
     for (menupos, 0..) |m, idx| {
         if (m.x1 == -1) {
@@ -286,8 +287,8 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM) void {
 
 // -------------- MB_SELECTION Message --------------
 fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    var mx:c_int = 0;
-    var my:c_int = 0;
+    var mx:usize = 0;
+    var my:usize = 0;
 
     if (p2 == 0) {
         if (ActiveMenuBar) |mbar| {
@@ -308,14 +309,14 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (p2>0) {
             const brd = win.GetRight();
             if (mwin) |zin| {
-                mx = @intCast(zin.GetLeft() + zin.WindowWidth() - 1);
+                mx = zin.GetLeft() + zin.WindowWidth() - 1;
                 if (mx + wd > brd) {
                     mx = @intCast(brd - wd);
                 }
-                my = @intCast(zin.GetTop() + zin.selection);
+                my = zin.GetTop() + @as(usize, @intCast(zin.selection));
             }
         } else {
-            var offset = menupos[@intCast(p1)].x1 - 4 * p1;
+            var offset:usize = @intCast(menupos[@intCast(p1)].x1 - 4 * p1);
             if (mwin) |m| {
                 _ = m.sendMessage(df.CLOSE_WINDOW, 0, 0);
             }
@@ -325,11 +326,11 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             if (offset > win.WindowWidth()-wd) {
                 offset = win.WindowWidth()-wd;
             }
-            mx = @intCast(win.GetLeft()+offset);
-            my = @intCast(win.GetTop()+1);
+            mx = win.GetLeft()+offset;
+            my = win.GetTop()+1;
         }
         mwin = Window.create(k.POPDOWNMENU, null,
-                    mx, my,
+                    @intCast(mx), @intCast(my),
                     @intCast(popdown.MenuHeight(@constCast(&selections))),
                     @intCast(wd),
                     null,

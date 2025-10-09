@@ -50,8 +50,8 @@ title:?[:0]const u8 = null,  // window title
 wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
 
 // ---------------- window dimensions -----------------
-ht:isize = 0,                // window height and width. -1 for full screen.
-wd:isize = 0,
+ht:usize = 0,                // window height and width.
+wd:usize = 0,
 
 // ----------------- window colors --------------------
 WindowColors:[4][2]u8 = @splat(@splat(0)),
@@ -242,8 +242,8 @@ pub fn create(
 
         wnd.*.rc.rt = df.GetLeft(wnd)+wwt-1;
         wnd.*.rc.bt = df.GetTop(wnd)+hht-1;
-        self.ht = ht;
-        self.wd = wt;
+        self.ht = @intCast(ht);
+        self.wd = @intCast(wt);
         if (ttl != null) {
             InsertTitle(self, title);
         }
@@ -397,8 +397,7 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
             const tend:usize = @intCast(self.WindowWidth()-3-self.BorderAdj());
             @memset(line[0..@intCast(self.WindowWidth())],  ' ');
             if (self.condition != .ISMINIMIZED) {
-                const ilen:isize = @intCast(tlen);
-                const pos:usize = @intCast(@divFloor(self.WindowWidth()-2-ilen, 2));
+                const pos:usize = @intCast(@divFloor(self.WindowWidth()-2-tlen, 2));
                 @memcpy(line[pos..pos+tlen], self.title orelse "");
 //                strncpy(line + ((WindowWidth(wnd)-2 - tlen) / 2),
 //                            GetTitle(wnd), tlen);
@@ -427,7 +426,7 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
             if (self != inFocus)
                 df.ClipString += 1;
             df.writeline(wnd, &line[@intCast(rc.lf)],
-                        @intCast(rc.lf+self.BorderAdj()),
+                        rc.lf+@as(c_int, @intCast(self.BorderAdj())),
                         0,
                         df.FALSE);
             df.ClipString = 0;
@@ -440,8 +439,9 @@ fn shadow_char(wnd:df.WINDOW, y:c_int) void {
     if (TopLevelFields.get_zin(wnd)) |win| {
         const fg = df.foreground;
         const bg = df.background;
-        const x:c_int = @intCast(win.WindowWidth());
-        const chr = df.GetVideoChar(@intCast(win.GetLeft()+x), @intCast(win.GetTop()+y)) & 255;
+        const xx:usize = win.WindowWidth();
+        const yy:usize = @intCast(y);
+        const chr = df.GetVideoChar(@intCast(win.GetLeft()+xx), @intCast(win.GetTop()+yy)) & 255;
 
         if (win.TestAttribute(df.SHADOW) == false or
             win.condition == .ISMINIMIZED or
@@ -452,7 +452,7 @@ fn shadow_char(wnd:df.WINDOW, y:c_int) void {
         }
         df.foreground = r.DARKGRAY;
         df.background = r.BLACK;
-        df.wputch(wnd, @intCast(chr), @intCast(x), @intCast(y));
+        df.wputch(wnd, @intCast(chr), @intCast(xx), @intCast(yy));
         df.foreground = fg;
         df.background = bg;
     }
@@ -791,33 +791,31 @@ pub fn InitWindowColors(win:*TopLevelFields) void {
 
 pub fn PutWindowChar(self: *TopLevelFields, chr:c_int, x:c_int, y:c_int) void {
     const wnd = self.win;
+    const xx:usize = @intCast(x);
+    const yy:usize = @intCast(y);
     if (x < self.ClientWidth() and y < self.ClientHeight()) {
-        df.wputch(wnd, chr, @intCast(x+self.BorderAdj()), @intCast(y+self.TopBorderAdj()));
+        df.wputch(wnd, chr, @intCast(xx+self.BorderAdj()), @intCast(yy+self.TopBorderAdj()));
     }
 }
 
 // ------- window methods -----------
-pub fn WindowHeight(self: *TopLevelFields) isize {
+pub fn WindowHeight(self: *TopLevelFields) usize {
     return self.ht;
 }
 
 pub fn SetWindowHeight(self: *TopLevelFields, height: isize) void {
-    self.ht = height;
+    self.ht = @intCast(height);
 }
 
-pub fn WindowWidth(self: *TopLevelFields) isize {
+pub fn WindowWidth(self: *TopLevelFields) usize {
     return self.wd;
 }
 
-pub fn BorderAdj(self: *TopLevelFields) isize {
-    var border:isize = 0;
-    if (self.TestAttribute(df.HASBORDER)) {
-        border = 1;
-    }
-    return border;
+pub fn BorderAdj(self: *TopLevelFields) usize {
+    return if (self.TestAttribute(df.HASBORDER)) 1 else 0;
 }
 
-pub fn BottomBorderAdj(self: *TopLevelFields) isize {
+pub fn BottomBorderAdj(self: *TopLevelFields) usize {
     var border = BorderAdj(self);
     if (self.TestAttribute(df.HASSTATUSBAR)) {
         border = 1;
@@ -825,8 +823,8 @@ pub fn BottomBorderAdj(self: *TopLevelFields) isize {
     return border;
 }
 
-pub fn TopBorderAdj(self: *TopLevelFields) isize {
-    var border:isize = 0;
+pub fn TopBorderAdj(self: *TopLevelFields) usize {
+    var border:usize = 0;
     if ((self.TestAttribute(df.HASTITLEBAR)) and (self.TestAttribute(df.HASMENUBAR))) {
         border = 2;
     } else {
@@ -837,12 +835,19 @@ pub fn TopBorderAdj(self: *TopLevelFields) isize {
     return border;
 }
 
-pub fn ClientWidth(self: *TopLevelFields) isize {
-    return (self.WindowWidth()-BorderAdj(self)*2);
+pub fn ClientWidth(self: *TopLevelFields) usize {
+    if (self.WindowWidth()>self.BorderAdj()*2) {
+        return self.WindowWidth()-self.BorderAdj()*2;
+    }
+    return 0;
 }
 
-pub fn ClientHeight(self: *TopLevelFields) isize {
-    return (self.WindowHeight()-TopBorderAdj(self)-BottomBorderAdj(self));
+pub fn ClientHeight(self: *TopLevelFields) usize {
+    const adj = self.TopBorderAdj()+self.BottomBorderAdj();
+    if (self.WindowHeight() > adj) {
+        return self.WindowHeight() - adj;
+    }
+    return 0;
 }
 
 pub fn WindowRect(self: *TopLevelFields) df.RECT {
@@ -850,43 +855,43 @@ pub fn WindowRect(self: *TopLevelFields) df.RECT {
     return wnd.*.rc;
 }
 
-pub fn GetTop(self: *TopLevelFields) isize {
+pub fn GetTop(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
-    return rect.tp;
+    return @intCast(rect.tp);
 }
 
-pub fn GetBottom(self: *TopLevelFields) isize {
+pub fn GetBottom(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
-    return rect.bt;
+    return @intCast(rect.bt);
 }
 
-pub fn SetBottom(self: *TopLevelFields, bottom: isize) void {
+pub fn SetBottom(self: *TopLevelFields, bottom: usize) void {
     self.win.*.rc.bt = @intCast(bottom);
 }
 
-pub fn GetLeft(self: *TopLevelFields) isize {
+pub fn GetLeft(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
-    return rect.lf;
+    return @intCast(rect.lf);
 }
 
-pub fn GetRight(self: *TopLevelFields) isize {
+pub fn GetRight(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
-    return rect.rt;
+    return @intCast(rect.rt);
 }
 
-pub fn GetClientTop(self: *TopLevelFields) isize {
+pub fn GetClientTop(self: *TopLevelFields) usize {
     return self.GetTop() + self.TopBorderAdj();
 }
 
-pub fn GetClientBottom(self: *TopLevelFields) isize {
+pub fn GetClientBottom(self: *TopLevelFields) usize {
     return self.GetBottom() - self.BottomBorderAdj();
 }
 
-pub fn GetClientLeft(self: *TopLevelFields) isize {
+pub fn GetClientLeft(self: *TopLevelFields) usize {
     return self.GetLeft() + self.BorderAdj();
 }
 
-pub fn GetClientRight(self: *TopLevelFields) isize {
+pub fn GetClientRight(self: *TopLevelFields) usize {
     return self.GetRight() - self.TopBorderAdj();
 }
 

@@ -218,10 +218,10 @@ fn buildDialog(comptime help:[:0]const u8, comptime window:anytype, comptime con
     var result:DBOX = undefined;
 
     var ttl: ?[:0]const u8 = undefined;
-    var x: c_int = undefined;
-    var y: c_int = undefined;
-    var h: c_int = undefined;
-    var w: c_int = undefined;
+    var x: isize = undefined;
+    var y: isize = undefined;
+    var h: isize = undefined;
+    var w: isize = undefined;
     ttl, x, y, h, w = window;
 
     result = .{
@@ -244,10 +244,10 @@ fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
     inline for(controls, 0..) |control, idx| {
         var ty: CLASS = undefined;
         var tx: ?[:0]const u8 = undefined;
-        var x: c_int = undefined;
-        var y: c_int = undefined;
-        var h: c_int = undefined;
-        var w: c_int = undefined;
+        var x: isize = undefined;
+        var y: isize = undefined;
+        var h: isize = undefined;
+        var w: isize = undefined;
         var cc: c = undefined;
         ty, tx, x, y, h, w, cc = control;
 //        const gapbuf:?*GapBuffer = null;

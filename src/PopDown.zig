@@ -44,7 +44,8 @@ fn CreateWindowMsg(win:*Window) bool {
 // --------- LEFT_BUTTON Message ---------
 fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
-    const my:c_int = @intCast(p2 - win.GetTop());
+    const pp2:usize = @intCast(p2);
+    const my:c_int = @intCast(pp2 - win.GetTop());
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win))) {
         if (my != py) {
             _ = win.sendMessage(df.LB_SELECTION,
@@ -65,9 +66,10 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
 // -------- BUTTON_RELEASED Message --------
 fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
+    const pp2:usize = @intCast(p2);
     py = -1;
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win))) {
-        const sel:usize = @intCast(p2 - win.GetClientTop());
+        const sel:usize = pp2 - win.GetClientTop();
 //        const tl = df.TextLine(wnd, sel);
 //        if (tl[0] != df.LINE)
         const tl = win.textLine(sel);
@@ -90,7 +92,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
     if (win.mnu) |mnu| {
 //        const ActivePopDown = &mnu.*.Selections[0];
         const selections:[]menus.PopDown = &mnu.*.Selections;
-        const sel_wd:c_int = SelectionWidth(@constCast(&selections));
+        const sel_wd:usize = SelectionWidth(@constCast(&selections));
         const m_wd:usize = @intCast(MenuWidth(@constCast(&selections)));
         var idx:usize = 0;
 
@@ -119,8 +121,8 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
 
         if (pd1.*.Accelerator>0) {
             // ---- paint accelerator key ----
-            const str_len:c_int = @intCast(pd1.*.SelectionTitle.?.len);
-            const wd1:usize = @intCast(2+sel_wd-str_len);
+            const str_len:usize = @intCast(pd1.*.SelectionTitle.?.len);
+            const wd1:usize = 2+sel_wd-str_len;
             const key = pd1.*.Accelerator;
             if (key > 0 and key < 27) {
                 // --- CTRL+ key ---
@@ -404,8 +406,8 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
 }
 
 // --------- compute menu height --------
-pub fn MenuHeight(pd:*[]menus.PopDown) c_int {
-    var ht:c_int = 0;
+pub fn MenuHeight(pd:*[]menus.PopDown) usize {
+    var ht:usize = 0;
     for (pd.*) |popdown| {
         if (popdown.SelectionTitle != null)
             ht += 1;
@@ -414,9 +416,9 @@ pub fn MenuHeight(pd:*[]menus.PopDown) c_int {
 }
 
 // --------- compute menu width --------
-pub fn MenuWidth(pd:*[]menus.PopDown) c_int {
-    var len:c_int = 0;
-    const wd:c_int = SelectionWidth(pd);
+pub fn MenuWidth(pd:*[]menus.PopDown) usize {
+    var len:usize = 0;
+    const wd:usize = SelectionWidth(pd);
     for (pd.*) |popdown| {
         if (popdown.SelectionTitle == null)
             break; 
@@ -441,8 +443,8 @@ pub fn MenuWidth(pd:*[]menus.PopDown) c_int {
 }
 
 // ---- compute the maximum selection width in a menu ----
-pub fn SelectionWidth(pd:*[]menus.PopDown) c_int {
-    var wd:c_int = 0;
+pub fn SelectionWidth(pd:*[]menus.PopDown) usize {
+    var wd:usize = 0;
     for (pd.*) |popdown| {
         if (popdown.SelectionTitle) |title| {
             const len:c_int = @intCast(title.len-1);

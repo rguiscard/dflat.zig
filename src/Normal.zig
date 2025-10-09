@@ -112,8 +112,8 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const dwin = getDummy();
     if (WindowMoving or WindowSizing) {
         // -- move or size a window with keyboard --
-        var x = if (WindowMoving) dwin.GetLeft() else dwin.GetRight();
-        var y = if (WindowMoving) dwin.GetTop() else dwin.GetBottom();
+        var x:c_int = if (WindowMoving) @intCast(dwin.GetLeft()) else @intCast(dwin.GetRight());
+        var y:c_int = if (WindowMoving) @intCast(dwin.GetTop()) else @intCast(dwin.GetBottom());
         switch (p1)    {
             df.ESC => {
                 TerminateMoveSize();
@@ -319,8 +319,10 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
 
 // --------- DOUBLE_CLICK Message ----------
 fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const mx:usize = @intCast(p1 - win.GetLeft());
-    const my:usize = @intCast(p2 - win.GetTop());
+    const pp1:usize = @intCast(p1);
+    const pp2:usize = @intCast(p2);
+    const mx:usize = pp1 - win.GetLeft();
+    const my:usize = pp2 - win.GetTop();
     if ((WindowSizing == false) and (WindowMoving == false)) {
         if (win.HitControlBox(mx, my)) {
             q.PostMessage(win, df.CLOSE_WINDOW, 0, 0);
@@ -333,8 +335,10 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const dwin = getDummy();
 //    const dwnd = dwin.win;
-    const mx:usize = @intCast(p1 - win.GetLeft());
-    const my:usize = @intCast(p2 - win.GetTop());
+    const pp1:usize = @intCast(p1);
+    const pp2:usize = @intCast(p2);
+    const mx:usize = pp1 - win.GetLeft();
+    const my:usize = pp2 - win.GetTop();
     if (WindowSizing or WindowMoving)
         return;
     if (win.HitControlBox(mx, my)) {
@@ -448,8 +452,8 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
     const wasVisible = win.isVisible();
-    const xdif = p1 - win.GetLeft();
-    const ydif = p2 - win.GetTop();
+    const xdif = p1 - @as(c_int, @intCast(win.GetLeft()));
+    const ydif = p2 - @as(c_int, @intCast(win.GetTop()));
 
     if ((xdif == 0) and (ydif == 0)) {
         return;
@@ -482,10 +486,8 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
     const wasVisible = win.isVisible();
-    const xdif = p1 - win.GetRight();
-    const ydif = p2 - win.GetBottom();
 
-    if ((xdif == 0) and (ydif == 0)) {
+    if ((p1 == win.GetRight()) and (p2 == win.GetBottom())) {
         return;
     }
     win.wasCleared = false;
@@ -830,8 +832,8 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
     // ------- build the dummy window --------
     dwnd.*.rc.lf = x;
     dwnd.*.rc.tp = y;
-    dwnd.*.rc.rt = @intCast(dwnd.*.rc.lf+win.WindowWidth()-1);
-    dwnd.*.rc.bt = @intCast(dwnd.*.rc.tp+win.WindowHeight()-1);
+    dwnd.*.rc.rt = @intCast(dwnd.*.rc.lf+@as(c_int, @intCast(win.WindowWidth()))-1);
+    dwnd.*.rc.bt = @intCast(dwnd.*.rc.tp+@as(c_int, @intCast(win.WindowHeight()))-1);
     dwin.ht = win.WindowHeight();
     dwin.wd = win.WindowWidth();
     dwin.parent = win.parent;

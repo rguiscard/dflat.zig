@@ -61,7 +61,7 @@ fn UpKey(win:*Window,p2:df.PARAM) void {
 fn DnKey(win:*Window, p2:df.PARAM) void {
     const wnd = win.win;
     if (win.selection < wnd.*.wlines-1) {
-        if (win.selection == wnd.*.wtop+win.ClientHeight()-1) {
+        if (win.selection == wnd.*.wtop+@as(isize, @intCast(win.ClientHeight()))-1) {
             _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, df.DN, p2);
             q.PostMessage(win, df.LB_SELECTION, win.selection+1,
                 if (win.isMultiLine()) p2 else df.FALSE);
@@ -101,7 +101,7 @@ fn HomePgUpKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const wnd = win.win;
     _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, p1, p2);
-    var bot:c_int = @intCast(wnd.*.wtop+win.ClientHeight()-1);
+    var bot:c_int = @intCast(wnd.*.wtop+@as(c_int, @intCast(win.ClientHeight()))-1);
     if (bot > wnd.*.wlines-1)
         bot = @intCast(wnd.*.wlines-1);
     q.PostMessage(win, df.LB_SELECTION, bot,
@@ -161,8 +161,8 @@ fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
             _ = win.sendMessage(df.LB_SELECTION, @intCast(sel),
                 if (win.isMultiLine()) p2 else df.FALSE);
             if (SelectionInWindow(win, sel) == false) {
-                const x:isize = win.ClientHeight();
-                wnd.*.wtop = @intCast(sel-x+1);
+                const x:usize = win.ClientHeight();
+                wnd.*.wtop = @intCast(sel-@as(isize, @intCast(x))+1);
                 _ = win.sendMessage(df.PAINT, 0, 0);
             }
             break;
@@ -226,15 +226,16 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 // ------- LEFT_BUTTON Message --------
 fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    var my:c_int = @intCast(p2 - win.GetTop());
+    const pp2:usize = @intCast(p2);
+    var my:usize = pp2 - win.GetTop();
     if (my >= wnd.*.wlines-wnd.*.wtop)
-        my = wnd.*.wlines - wnd.*.wtop;
+        my = @intCast(wnd.*.wlines - wnd.*.wtop);
 
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win)) == false) {
         return false;
     }
     if ((wnd.*.wlines > 0) and  (my != py)) {
-        const sel:c_int = wnd.*.wtop+my-1;
+        const sel:c_int = wnd.*.wtop+@as(c_int, @intCast(my))-1;
 
 //#ifdef INCLUDE_EXTENDEDSELECTIONS
 //        int sh = getshift();
@@ -247,7 +248,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 //#endif
 
         _ = win.sendMessage(df.LB_SELECTION, sel, df.TRUE);
-        py = my;
+        py = @intCast(my);
     }
     return true;
 }
@@ -404,7 +405,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 fn SelectionInWindow(win:*Window, sel:isize) bool {
     const wnd = win.win;
     return ((wnd.*.wlines>0) and (sel >= wnd.*.wtop) and
-            (sel < wnd.*.wtop+win.ClientHeight()));
+            (sel < @as(usize, @intCast(wnd.*.wtop))+win.ClientHeight()));
 }
 
 fn WriteSelection(win:*Window, sel:isize, reverse:bool, rc:?*df.RECT) void {

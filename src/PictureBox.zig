@@ -132,8 +132,10 @@ fn PaintVector(win:*Window, rc:df.RECT) void {
             xi = @intCast(i);
         }
 
-        const ch_x:c_int = @intCast(win.GetClientLeft()+rc.lf+xi);
-        const ch_y:c_int = @intCast(win.GetClientTop()+rc.tp+yi);
+        const left:c_int = @intCast(win.GetClientLeft());
+        const top:c_int = @intCast(win.GetClientTop());
+        const ch_x:c_int = left+rc.lf+xi;
+        const ch_y:c_int = top+rc.tp+yi;
         const ch:c_uint = df.videochar(ch_x, ch_y);
     
         for (0..CharInWnd.len) |cw| {

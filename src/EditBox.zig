@@ -64,7 +64,7 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                 wnd.*.CurrLine = 0;
                 wnd.*.CurrCol = @intCast(df.strlen(p1));
                 if (wnd.*.CurrCol >= win.ClientWidth()) {
-                    wnd.*.wleft = @intCast(wnd.*.CurrCol-win.ClientWidth());
+                    wnd.*.wleft = wnd.*.CurrCol-@as(c_int, @intCast(win.ClientWidth()));
                     wnd.*.CurrCol -= wnd.*.wleft;
                 }
                 win.BlkEndCol = @intCast(wnd.*.CurrCol);
@@ -183,11 +183,13 @@ fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn SizeMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     const rtn = root.BaseWndProc(k.EDITBOX, win, df.SIZE, p1, p2);
-    if (WndCol(win) > win.ClientWidth()-1) {
-        wnd.*.CurrCol = @intCast(win.ClientWidth()-1 + wnd.*.wleft);
+    const clientWidth: c_int = @intCast(win.ClientWidth());
+    const clientHeight: c_int = @intCast(win.ClientHeight());
+    if (WndCol(win) > clientWidth-1) {
+        wnd.*.CurrCol = clientWidth-1 + wnd.*.wleft;
     }
-    if (wnd.*.WndRow > win.ClientHeight()-1) {
-        wnd.*.WndRow = @intCast(win.ClientHeight()-1);
+    if (wnd.*.WndRow > clientHeight-1) {
+        wnd.*.WndRow = clientHeight-1;
         wnd.*.CurrLine = wnd.*.WndRow+wnd.*.wtop;
     }
     _ = win.sendMessage(df.KEYBOARD_CURSOR, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
@@ -264,9 +266,10 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
 fn HorizPageMsg(win:*Window, p1:df.PARAM) bool {
     const wnd = win.win;
     const rtn = root.BaseWndProc(k.EDITBOX, win, df.HORIZPAGE, p1, 0);
+    const clientWidth:c_int = @intCast(win.ClientWidth());
     if (p1 == df.FALSE) {
-        if (wnd.*.CurrCol > wnd.*.wleft+win.ClientWidth()-1)
-            wnd.*.CurrCol = @intCast(wnd.*.wleft+win.ClientWidth()-1);
+        if (wnd.*.CurrCol > wnd.*.wleft+clientWidth-1)
+            wnd.*.CurrCol = @intCast(wnd.*.wleft+clientWidth-1);
     } else if (wnd.*.CurrCol < wnd.*.wleft) {
         wnd.*.CurrCol = wnd.*.wleft;
     }
@@ -312,8 +315,10 @@ fn ExtendBlock(win:*Window, xx:c_int, yy:c_int) void {
 // ----------- LEFT_BUTTON Message ---------- 
 fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    var MouseX:c_int = @intCast(p1 - win.GetClientLeft());
-    var MouseY:c_int = @intCast(p2 - win.GetClientTop());
+    const pp1:usize = @intCast(p1);
+    const pp2:usize = @intCast(p2);
+    var MouseX:c_int = @intCast(pp1 - win.GetClientLeft());
+    var MouseY:c_int = @intCast(pp2 - win.GetClientTop());
     const rc = rect.ClientRect(win);
     if (KeyBoardMarking)
         return true;
@@ -400,8 +405,10 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 // ----------- MOUSE_MOVED Message ----------
 fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    const MouseX:c_int = @intCast(p1 - win.GetClientLeft());
-    const MouseY:c_int = @intCast(p2 - win.GetClientTop());
+    const pp1:usize = @intCast(p1);
+    const pp2:usize = @intCast(p2);
+    const MouseX:c_int = @intCast(pp1 - win.GetClientLeft());
+    const MouseY:c_int = @intCast(pp2 - win.GetClientTop());
     var rc = rect.ClientRect(win);
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false)
         return false;
@@ -1262,7 +1269,7 @@ fn StickEnd(win:*Window) void {
     if (wnd.*.wleft > wnd.*.CurrCol) {
         wnd.*.wleft = @max(0, wnd.*.CurrCol - 4);
     } else if (wnd.*.CurrCol-wnd.*.wleft >= win.ClientWidth()) {
-        wnd.*.wleft = @intCast(wnd.*.CurrCol - (win.ClientWidth()-1));
+        wnd.*.wleft = wnd.*.CurrCol - @as(c_int, @intCast(win.ClientWidth()-1));
     }
     _ = win.sendMessage(df.PAINT, 0, 0);
     
@@ -1329,7 +1336,7 @@ fn End(win:*Window) void {
         wnd.*.CurrCol = @intCast(wnd.*.textlen-curr_pos-1);
     }
     if (WndCol(win) >= win.ClientWidth()) {
-        wnd.*.wleft = @intCast(wnd.*.CurrCol - (win.ClientWidth()-1));
+        wnd.*.wleft = wnd.*.CurrCol - @as(c_int, @intCast(win.ClientWidth()-1));
         _ = win.sendMessage(df.PAINT, 0, 0);
     }
 //    while (*CurrChar && *CurrChar != '\n')

@@ -29,9 +29,9 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
                         const text = buf.toString();
                         if (text.len>0) {
                             const wlen = text.len;
-                            var len:isize = @min(wlen, win.WindowWidth()-17);
+                            var len:usize = @min(wlen, win.WindowWidth()-17);
                             if (len > 0) {
-                                const off:isize = @intCast(@divFloor(win.WindowWidth()-len, 2));
+                                const off:usize = @divFloor(win.WindowWidth()-len, 2);
                                 if (len > wlen)
                                     len = @intCast(wlen);
                                 @memcpy(sb[@intCast(off)..@intCast(off+len)], text[0..@intCast(len)]);

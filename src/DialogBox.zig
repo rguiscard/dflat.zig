@@ -407,8 +407,8 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
 
             var cwnd = Window.create(ctl.*.Class,
                             ctl.*.dwnd.title,
-                            @intCast(ctl.*.dwnd.x+win.GetClientLeft()),
-                            @intCast(ctl.*.dwnd.y+win.GetClientTop()),
+                            @intCast(ctl.*.dwnd.x+@as(isize, @intCast(win.GetClientLeft()))),
+                            @intCast(ctl.*.dwnd.y+@as(isize, @intCast(win.GetClientTop()))),
                             ctl.*.dwnd.h,
                             ctl.*.dwnd.w,
                             .{.control = ctl},
@@ -431,7 +431,9 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     if (normal.WindowSizing or normal.WindowMoving)
         return true;
 
-    if (win.HitControlBox(@intCast(p1-win.GetLeft()), @intCast(p2-win.GetTop()))) {
+    const pp1:usize = @intCast(p1);
+    const pp2:usize = @intCast(p2);
+    if (win.HitControlBox(pp1-win.GetLeft(), pp2-win.GetTop())) {
         q.PostMessage(win, df.KEYBOARD, ' ', df.ALTKEY);
         return true;
     }

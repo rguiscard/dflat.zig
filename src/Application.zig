@@ -114,8 +114,8 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if (WasVisible)
         _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
     var p1_new = p1;
-    if (p1-win.GetLeft() < 30)
-        p1_new = win.GetLeft() + 30;
+    if (p1 < 30 + win.GetLeft())
+        p1_new = @intCast(win.GetLeft() + 30);
     _ = root.BaseWndProc(k.APPLICATION, win, df.SIZE, p1_new, p2);
     CreateMenu(win);
     CreateStatusBar(win);
@@ -570,12 +570,12 @@ fn SelectLines(win:*Window) void {
         // --- adjust if current size does not fit ---
         if (win.WindowHeight() > df.SCREENHEIGHT) {
             _ = win.sendMessage(df.SIZE, @intCast(win.GetRight()),
-                @intCast(win.GetTop()+df.SCREENHEIGHT-1));
+                @intCast(@as(c_int, @intCast(win.GetTop()))+df.SCREENHEIGHT-1));
         }
         // --- if window is off-screen, move it on-screen ---
         if (win.GetTop() >= df.SCREENHEIGHT-1) {
             _ = win.sendMessage(df.MOVE, @intCast(win.GetLeft()),
-                    @intCast(df.SCREENHEIGHT-win.WindowHeight()));
+                    @intCast(df.SCREENHEIGHT-@as(c_int, @intCast(win.WindowHeight()))));
         }
     }
 }

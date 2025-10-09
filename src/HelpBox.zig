@@ -219,7 +219,7 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
                 }
                 if (thisword) |word| {
                     if (word.lineno < cwin.win.*.wtop or
-                        word.lineno >= cwin.win.*.wtop + cwin.ClientHeight())  {
+                        word.lineno >= cwin.win.*.wtop + @as(c_int, @intCast(cwin.ClientHeight())))  {
 // FIXME: this loop looks weird.
 //                        var distance = @divFloor(cwin.ClientHeight(), 2);
 //                        do {
@@ -290,8 +290,10 @@ fn PaintMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const rtn = root.zDefaultWndProc(win, df.LEFT_BUTTON, p1, p2);
 
-    const mx:usize = @intCast(p1 - win.GetClientLeft());
-    const my:usize = @intCast(p2 - win.GetClientTop() + win.win.*.wtop);
+    const pp1:usize = @intCast(p1);
+    const pp2:usize = @intCast(p2);
+    const mx:usize = pp1 - win.GetClientLeft();
+    const my:usize = pp2 - win.GetClientTop() + @as(usize, @intCast(win.win.*.wtop));
 
     for (&KeyWords, 0..) |*word, idx| {
         if (my == word.lineno) {
@@ -429,7 +431,7 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
         if (win.Class == k.POPDOWNMENU) {
             hwin = win.parent;
         }
-        var y:c_int = 1;
+        var y:usize = 1;
         if (hwin) |hw| {
             if (hw.Class == k.MENUBAR) {
                 y = 2;
@@ -566,8 +568,8 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
                                     Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1);
         // --- reposition the controls ---
         for (0..5) |i| {
-            var x = Dialogs.HelpBox.ctl[i].dwnd.x+win.GetClientLeft();
-            var y = Dialogs.HelpBox.ctl[i].dwnd.y+win.GetClientTop();
+            var x = Dialogs.HelpBox.ctl[i].dwnd.x+@as(isize, @intCast(win.GetClientLeft()));
+            var y = Dialogs.HelpBox.ctl[i].dwnd.y+@as(isize, @intCast(win.GetClientTop()));
             const cw = Dialogs.HelpBox.ctl[i].win;
             if (cw) |cwin| {
                 _ = cwin.sendMessage(df.MOVE, x, y);
@@ -612,22 +614,22 @@ fn BestFit(win:*Window, dwnd:*Dialogs.DIALOGWINDOW) void {
     const left:c_int = OverLap(@intCast(dwnd.*.w), @intCast(win.GetLeft()));
 
     if (above < below) {
-        dwnd.*.y = @intCast(@max(0, win.GetTop()-dwnd.*.h-2));
+        dwnd.*.y = @intCast(@max(0, @as(isize, @intCast(win.GetTop()))-dwnd.*.h-2));
     } else {
-        dwnd.*.y = @intCast(@min(df.SCREENHEIGHT-dwnd.*.h, win.GetBottom()+2));
+        dwnd.*.y = @intCast(@min(df.SCREENHEIGHT-dwnd.*.h, @as(isize, @intCast(win.GetBottom()))+2));
     }
     if (right < left) {
-        dwnd.*.x = @intCast(@min(win.GetRight()+2, df.SCREENWIDTH-dwnd.*.w));
+        dwnd.*.x = @intCast(@min(@as(isize, @intCast(win.GetRight()))+2, df.SCREENWIDTH-dwnd.*.w));
     } else {
-        dwnd.*.x = @intCast(@max(0, win.GetLeft()-dwnd.*.w-2));
+        dwnd.*.x = @intCast(@max(0, @as(isize, @intCast(win.GetLeft()))-dwnd.*.w-2));
     }
 
     if (dwnd.*.x == win.GetRight()+2 or
-            dwnd.*.x == win.GetLeft()-dwnd.*.w-2) {
+            dwnd.*.x == @as(isize, @intCast(win.GetLeft()))-dwnd.*.w-2) {
         dwnd.*.y = -1;
     }
-    if (dwnd.*.y == win.GetTop()-dwnd.*.h-2 or
-            dwnd.*.y == win.GetBottom()+2) {
+    if (dwnd.*.y == @as(isize, @intCast(win.GetTop()))-dwnd.*.h-2 or
+            dwnd.*.y == @as(isize, @intCast(win.GetBottom()))+2) {
         dwnd.*.x = -1;
     }
 }
