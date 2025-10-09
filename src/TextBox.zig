@@ -733,6 +733,9 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
     // should check out of bound of y?
     const beg = win.TextPointers[@intCast(y)];
     if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], beg, '\n')) |pos| {
+
+        // FIXME: handle protect
+
         const len = pos-beg;
         if (root.global_allocator.alloc(u8, len+7)) |buf| {
             defer root.global_allocator.free(buf);
@@ -810,7 +813,29 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
                 }
             }
 
-            df.cWriteTextLine(wnd, rc, lnlen, y, buf.ptr, if (reverse) df.TRUE else df.FALSE);
+            var line = [_]u8{0}**df.MAXCOLS;
+
+            df.cWriteTextLine(wnd, rc, lnlen, buf.ptr, @constCast(&line));
+
+            var dif:usize = 0;
+            // ------ establish the line's main color -----
+            if (reverse) {
+                colors.SetReverseColor(wnd);
+                var loc:usize = 0;
+                while(std.mem.indexOfScalarPos(u8, @constCast(&line), loc, df.CHANGECOLOR)) |l| {
+                    loc = l+2;
+                    line[loc] = @intCast(df.background | 0x80);
+                    loc += 1;
+                }
+                if (line[0] == df.CHANGECOLOR) {
+                    dif = 3;
+                }
+            } else {
+                colors.SetStandardColor(wnd);
+            }
+            // ------- display the line --------
+            df.writeline(wnd, &line[dif], @intCast(rc.lf+win.BorderAdj()), 
+                         @intCast(y-wnd.*.wtop+win.TopBorderAdj()), df.FALSE);
 
         } else |_| {
         }
@@ -820,13 +845,6 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
 pub fn TextBlockMarked(win:*Window) bool {
     return (win.BlkBegLine>0) or (win.BlkBegCol>0) or
            (win.BlkEndLine>0) or (win.BlkEndCol>0);
-}
-
-pub export fn cTextBlockMarked(wnd:df.WINDOW) df.BOOL {
-    if (Window.get_zin(wnd)) |win| {
-        return if (TextBlockMarked(win)) df.TRUE else df.FALSE;
-    }
-    return df.FALSE;
 }
 
 // not in use

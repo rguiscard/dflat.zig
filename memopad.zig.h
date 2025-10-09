@@ -9,12 +9,7 @@ extern jmp_buf AllocError;
 extern BOOL AltDown;
 
 // textbox.c
-void ComputeWindowTop(WINDOW);
-void ComputeWindowLeft(WINDOW);
-int ComputeVScrollBox(WINDOW);
-int ComputeHScrollBox(WINDOW);
-void MoveScrollBox(WINDOW, int);
-void cWriteTextLine(WINDOW, RECT, int, int, char*, BOOL);
+void cWriteTextLine(WINDOW, RECT, int, char*, char*);
 
 // editbox.c
 int CommandMsg(WINDOW, PARAM);
@@ -38,23 +33,8 @@ extern struct helps *ThisHelp;
 extern int HelpCount;
 extern char HelpFileName[9];
 
-int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2);
-int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2);
-void cReadHelp(WINDOW wnd, WINDOW cwnd);
-
 extern FILE *helpfp;
-extern char hline [160];
 extern BOOL Helping;
-
-struct keywords { // private
-        struct helps *hkey;
-    int lineno;
-    int off1, off2, off3;
-    char isDefinition;
-};
-
-extern struct keywords *thisword; // private
-extern int keywordcount; // private
 
 #define MAXHELPSTACK 100
 extern int HelpStack[MAXHELPSTACK];
@@ -62,8 +42,6 @@ extern int stacked;
 
 FILE *OpenHelpFile(const char *fn, const char *md);
 void ReadHelp(WINDOW);
-BOOL cHelpBoxKeyboardMsg(WINDOW, WINDOW, PARAM);
-void SelectHelp(WINDOW, struct helps *, BOOL);
 
 // decomp.c
 void SeekHelpLine(long, int);

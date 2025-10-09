@@ -33,11 +33,6 @@ pub const cfg = @import("Config.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 
-// for transition
-//pub export const ID_HELPTEXT:c_int = @intFromEnum(Command.ID_HELPTEXT);
-pub export const POPDOWNMENU:c_int = @intFromEnum(CLASS.POPDOWNMENU);
-pub export const MENUBAR:c_int = @intFromEnum(CLASS.MENUBAR);
-
 pub export fn DefaultWndProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
     if (Window.get_zin(wnd)) |zin| {
         const rtn = zDefaultWndProc(zin, msg, p1, p2);

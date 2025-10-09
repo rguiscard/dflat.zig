@@ -14,7 +14,7 @@ const c = @import("Commands.zig").Command;
 
 var log:?*df.FILE = null;
 
-pub export fn LogMessages (win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) void {
+pub fn LogMessages (win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void {
     if (log) |L| {
         const m = messages[@intCast(msg)];
         if (m[0] != ' ') {

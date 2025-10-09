@@ -987,34 +987,6 @@ pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
     return null; // unreachable
 }
 
-//pub export fn getBlkBegLine(wnd:df.WINDOW) c_int {
-//    if (TopLevelFields.get_zin(wnd)) |win| {
-//        return @intCast(win.BlkBegLine);
-//    }
-//    return 0;
-//}
-//
-//pub export fn getBlkEndLine(wnd:df.WINDOW) c_int {
-//    if (TopLevelFields.get_zin(wnd)) |win| {
-//        return @intCast(win.BlkEndLine);
-//    }
-//    return 0;
-//}
-//
-//pub export fn getBlkBegCol(wnd:df.WINDOW) c_int {
-//    if (TopLevelFields.get_zin(wnd)) |win| {
-//        return @intCast(win.BlkBegCol);
-//    }
-//    return 0;
-//}
-//
-//pub export fn getBlkEndCol(wnd:df.WINDOW) c_int {
-//    if (TopLevelFields.get_zin(wnd)) |win| {
-//        return @intCast(win.BlkEndCol);
-//    }
-//    return 0;
-//}
-
 // Accessories
 pub fn GetControl(self:*TopLevelFields) ?*Dialogs.CTLWINDOW {
     return self.ct;
