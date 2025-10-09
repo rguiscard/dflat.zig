@@ -729,7 +729,19 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:c_int, reverse:bool) void {
     if (y-wnd.*.wtop < rc.tp or y-wnd.*.wtop > rc.bt)
         return;
 
-    df.cWriteTextLine(wnd, rc, y, if (reverse) df.TRUE else df.FALSE);
+    // ----- get the text to a specified line -----
+    // should check out of bound of y?
+    const beg = win.TextPointers[@intCast(y)];
+    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], beg, '\n')) |pos| {
+        const len = pos-beg;
+        if (root.global_allocator.alloc(u8, len+7)) |buf| {
+            defer root.global_allocator.free(buf);
+            @memset(buf, 0);
+            @memmove(buf[0..len], wnd.*.text[beg..pos]);
+            df.cWriteTextLine(wnd, rc, y, buf.ptr, if (reverse) df.TRUE else df.FALSE);
+        } else |_| {
+        }
+    }
 }
 
 pub fn TextBlockMarked(win:*Window) bool {

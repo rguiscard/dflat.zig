@@ -11,6 +11,7 @@ int getBlkEndCol(WINDOW);
 BOOL cTextBlockMarked(WINDOW);
 
 /* ----- get the text to a specified line ----- */
+#if 0
 static char *GetTextLine(WINDOW wnd, int selection)
 {
     char *line;
@@ -26,22 +27,24 @@ static char *GetTextLine(WINDOW wnd, int selection)
     line[len] = '\0';
     return line;
 }
+#endif
 
 /* ------- write a line of text to a textbox window ------- */
-void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
+void cWriteTextLine(WINDOW wnd, RECT rc, int y, char *src, BOOL reverse)
 {
     int len = 0;
     int dif = 0;
-    unsigned char *lp, *svlp;
+    unsigned char *lp; //, *svlp;
     int lnlen;
     int i;
     BOOL trunc = FALSE;
     unsigned char line[MAXCOLS];
 
     /* --- get the text and length of the text line --- */
-    lp = svlp = GetTextLine(wnd, y);
-    if (svlp == NULL)
-        return;
+    //lp = svlp = GetTextLine(wnd, y);
+    lp = src;
+//    if (svlp == NULL)
+//        return;
     lnlen = LineLength(lp);
 
 //    FIXME: protect is not in use now
@@ -196,5 +199,5 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int y, BOOL reverse)
     writeline(wnd, line+dif,
                 RectLeft(rc)+c_BorderAdj(wnd),
                     y-wnd->wtop+c_TopBorderAdj(wnd), FALSE);
-    free(svlp);
+//    free(svlp);
 }
