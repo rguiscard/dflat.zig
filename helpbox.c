@@ -42,6 +42,7 @@ void cDisplayDefinition(WINDOW, char *);
 extern int ID_HELPTEXT; // from zig side
 
 /* ------------- KEYBOARD message ------------ */
+#if 0
 BOOL cHelpBoxKeyboardMsg(WINDOW wnd, WINDOW cwnd, PARAM p1)
 {
     // cwnd is not null, checked by zig side
@@ -86,29 +87,10 @@ BOOL cHelpBoxKeyboardMsg(WINDOW wnd, WINDOW cwnd, PARAM p1)
     SendMessage(cwnd, PAINT, 0, 0);
     return TRUE;
 }
-
-/* ---- PAINT message for the helpbox text editbox ---- */
-#if 0
-int HelpTextPaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
-{
-    int rtn;
-    if (thisword != NULL)    {
-        WINDOW pwnd = GetParent(wnd);
-        char *cp;
-        cp = TextLine(wnd, thisword->lineno);
-        cp += thisword->off1;
-        *(cp+1) = c_WindowColors(pwnd, SELECT_COLOR, FG);
-        *(cp+2) = c_WindowColors(pwnd, SELECT_COLOR, BG);
-        rtn = DefaultWndProc(wnd, PAINT, p1, p2);
-        *(cp+1) = c_WindowColors(pwnd, HILITE_COLOR, FG);
-        *(cp+2) = c_WindowColors(pwnd, HILITE_COLOR, BG);
-        return rtn;
-    }
-    return DefaultWndProc(wnd, PAINT, p1, p2);
-}
 #endif
 
 /* ---- LEFT_BUTTON message for the helpbox text editbox ---- */
+#if 0
 int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int rtn, mx, my, i;
@@ -137,78 +119,6 @@ int HelpTextLeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 	if (i == keywordcount)
 		thisword = NULL;
     return rtn;
-}
-
-/* -------- read the help text into the editbox ------- */
-#if 0
-void cReadHelp(WINDOW wnd, WINDOW cwnd)
-{
-    int linectr = 0;
-    thisword = KeyWords;
-	keywordcount = 0;
-
-    /* ----- read the help text ------- */
-    while (TRUE)    {
-        unsigned char *cp = hline, *cp1;
-        int colorct = 0;
-        if (GetHelpLine(hline) == NULL)
-            break;
-        if (*hline == '<')
-            break;
-        hline[strlen(hline)-1] = '\0';
-        /* --- add help text to the help window --- */
-        while (cp != NULL)    {
-            if ((cp = strchr(cp, '[')) != NULL)    {
-                /* ----- hit a new key word ----- */
-                if (*(cp+1) != '.' && *(cp+1) != '*')    {
-                    cp++;
-                    continue;
-                }
-                thisword->lineno = cwnd->wlines;
-                thisword->off1 = (int) ((char *)cp - hline);
-                thisword->off2 = thisword->off1 - colorct * 4;
-                thisword->isDefinition = *(cp+1) == '*';
-                colorct++;
-                *cp++ = CHANGECOLOR;
-                *cp++ = c_WindowColors(wnd, HILITE_COLOR, FG);
-                *cp++ = c_WindowColors(wnd, HILITE_COLOR, BG);
-                cp1 = cp;
-                if ((cp = strchr(cp, ']')) != NULL)    {
-                    if (thisword != NULL)
-                        thisword->off3 =
-                            thisword->off2 + (int) (cp - cp1);
-                    *cp++ = RESETCOLOR;
-                }
-                if ((cp = strchr(cp, '<')) != NULL)    {
-                    char *cp1 = strchr(cp, '>');
-                    if (cp1 != NULL)    {
-						char hname[80];
-                        int len = (int) (cp1 - (char *)cp);
-						memset(hname, 0, 80);
-                        strncpy(hname, cp+1, len-1);
-						thisword->hkey = FindHelp(hname);
-                        memmove(cp, cp1+1, strlen(cp1));
-                    }
-                }
-				thisword++;
-				keywordcount++;
-            }
-        }
-//        PutItemText(wnd, ID_HELPTEXT, hline);
-        /* -- display help text as soon as window is full -- */
-//        if (++linectr == c_ClientHeight(cwnd))	{
-//			struct keywords *holdthis = thisword;
-//		    thisword = NULL;
-//            SendMessage(cwnd, PAINT, 0, 0);
-//		    thisword = holdthis;
-//		}
-//        if (linectr > c_ClientHeight(cwnd) &&
-//                !c_TestAttribute(cwnd, VSCROLLBAR))    {
-//            c_AddAttribute(cwnd, VSCROLLBAR);
-//            SendMessage(cwnd, BORDER, 0, 0);
-//        }
-    }
-    thisword = NULL;
 }
 #endif
 
