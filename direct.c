@@ -110,6 +110,8 @@ static int dircmp(const void *c1, const void *c2)
     return strcasecmp(*(char **)c1, *(char **)c2);
 }
 
+BOOL AddText(WINDOW, char*);
+
 void cBuildList(WINDOW lwnd, char *fspec, BOOL dirs)
 {
 	// ct always exists. it is checked on zig side.
@@ -145,7 +147,8 @@ void cBuildList(WINDOW lwnd, char *fspec, BOOL dirs)
             qsort(dirlist, i, sizeof(void *), dircmp);
             /* ---- send sorted list to list box ---- */
             for (j = 0; j < i; j++)    {
-                SendMessage(lwnd,ADDTEXT,(PARAM)dirlist[j],0);
+	        AddText(lwnd, dirlist[j]);
+//                SendMessage(lwnd,ADDTEXT,(PARAM)dirlist[j],0);
                 free(dirlist[j]);
             }
             free(dirlist);

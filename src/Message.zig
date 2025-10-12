@@ -561,3 +561,12 @@ pub fn dispatch_message() bool {
 
     return true;
 }
+
+pub export fn AddText(wnd:df.WINDOW, text:[*c]u8) df.BOOL {
+    const ptr:usize = @intFromPtr(text);
+    return SendMessage(wnd,df.ADDTEXT,@intCast(ptr),0);
+}
+
+pub export fn KeyboardMsg(wnd:df.WINDOW, chr:u8) df.BOOL {
+    return SendMessage(wnd, df.KEYBOARD, chr, 0);
+}

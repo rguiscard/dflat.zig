@@ -118,6 +118,8 @@ void TextBlockToN(char *bbl, char *bel) {
         }
 }
 
+BOOL KeyboardMsg(WINDOW, char);
+
 /* ----------- ID_PARAGRAPH Command ---------- */
 // Rewrite to be called from  zig size
 void cParagraphCmd(WINDOW wnd)
@@ -144,7 +146,8 @@ void cParagraphCmd(WINDOW wnd)
             bel++;
     }
     if (bel == bbl)    {
-        SendMessage(wnd, KEYBOARD, DN, 0);
+        KeyboardMsg(wnd, DN);
+//        SendMessage(wnd, KEYBOARD, DN, 0);
         return;
     }
     if (*bel == '\0')
