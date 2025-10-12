@@ -11,6 +11,8 @@ const menu = @import("Menu.zig");
 const menus = @import("Menus.zig");
 const popdown = @import("PopDown.zig");
 
+const VOID = q.VOID;
+
 // positions in menu bar & shortcut key value
 var menupos = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
 var mctr:usize = 0;
@@ -27,7 +29,7 @@ fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
     if (p1>0) {
         _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
     } else {
-        _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
+        _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
     }
     return rtn;
 }
@@ -391,7 +393,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn ClosePopdownMsg(win:*Window) void {
     if (casc > 0) {
         casc -= 1;
-        _ = q.SendMessage(Cascaders[casc], df.CLOSE_WINDOW, 0, 0);
+        _ = q.SendMessage(Cascaders[casc], df.CLOSE_WINDOW, VOID, VOID);
     } else {
         mwin = null;
         if (ActiveMenuBar) |mbar| {

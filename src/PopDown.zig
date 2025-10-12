@@ -9,6 +9,8 @@ const helpbox = @import("HelpBox.zig");
 const menus = @import("Menus.zig");
 const cfg = @import("Config.zig");
 
+const VOID = q.VOID;
+
 var py:c_int = -1;
 pub var CurrentMenuSelection:c_int = 0;
 
@@ -34,8 +36,8 @@ fn CreateWindowMsg(win:*Window) bool {
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, 0, 0);
     _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
     _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
-    _ = q.SendMessage(null, df.SAVE_CURSOR, 0, 0);
-    _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
+    _ = q.SendMessage(null, df.SAVE_CURSOR, VOID, VOID);
+    _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
     win.oldFocus = Window.inFocus;
     Window.inFocus = win;
     return rtn;
@@ -333,7 +335,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 fn CloseWindowMsg(win:*Window) bool {
     _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
     _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
-    _ = q.SendMessage(null, df.RESTORE_CURSOR, 0, 0);
+    _ = q.SendMessage(null, df.RESTORE_CURSOR, VOID, VOID);
     Window.inFocus = win.oldFocus;
 
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);

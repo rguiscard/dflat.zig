@@ -10,6 +10,8 @@ const normal = @import("Normal.zig");
 const GapBuffer = @import("GapBuffer.zig");
 const cfg = @import("Config.zig");
 
+const VOID = q.VOID;
+
 const pTab:u8 = '\t' + 0x80;
 const sTab:u8 = 0x0C + 0x80; // '\f'
 
@@ -250,13 +252,13 @@ pub fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 fn TurnOffDisplay(win:*Window) void {
-    _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
+    _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
     win.ClearVisible();
 }
 
 fn TurnOnDisplay(win:*Window) void {
     win.SetVisible();
-    _ = q.SendMessage(null, df.SHOW_CURSOR, 0, 0);
+    _ = q.SendMessage(null, df.SHOW_CURSOR, VOID, VOID);
 }
 
 fn RepaintLine(win:*Window) void {

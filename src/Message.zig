@@ -24,6 +24,18 @@ var NoChildCaptureKeyboard = false;
 
 export var AltDown:df.BOOL = df.FALSE;
 
+pub const Param = union {
+    yesno:bool,   // true or false
+    ival:isize,   // signed value
+    uval:usize,   // unsigned value
+    slice:[]u8,   // text string
+};
+
+pub const VOID = Param{.ival = 0};
+pub const TRUE = Param{.ival = 1};   // FIXME. use bool later
+pub const FALSE = Param{.ival = 0};  // FIXME. use bool later
+
+
 // ---------- event queue ----------
 const Evt = struct {
     event:df.MESSAGE,
@@ -121,12 +133,15 @@ pub fn PostMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void 
 }
 
 // --------- send a message to a window -----------
-pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) callconv(.c) df.BOOL {
+pub fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:Param, p2:Param) df.BOOL {
     const rtn = true;
+
+    const v1 = p1.ival;
+    const v2 = p1.ival;
 
     if (wnd != null) {
         if (Window.get_zin(wnd)) |win| {
-            return if (win.sendMessage(msg, p1, p2)) df.TRUE else df.FALSE;
+            return if (win.sendMessage(msg, v1, v2)) df.TRUE else df.FALSE;
         } else {
             // This shouldn't happen, except dummy window at normal.c for now.
             // Or we can create a Window instance for it here.
@@ -155,10 +170,12 @@ pub export fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
     return if (ProcessMessage(null, msg, p1, p2, rtn)) df.TRUE else df.FALSE;
 }
 
-pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rtn:bool) bool {
-    log.LogMessages(win, msg, p1, p2);
-
+pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:Param, p2:Param, rtn:bool) bool {
     var rrtn = rtn;
+    const p1_val:df.PARAM = @intCast(p1.ival);
+    const p2_val:df.PARAM = @intCast(p2.ival);
+
+    log.LogMessages(win, msg, p1_val, p2_val);
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
@@ -195,24 +212,24 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
                     if (w == Window.inFocus) {
                         const x:c_int = @as(c_int, @intCast(w.GetClientLeft()));
                         const y:c_int = @as(c_int, @intCast(w.GetClientTop()));
-                        df.cursor(@intCast(x+p1),
-                                  @intCast(y+p2));
+                        df.cursor(@intCast(x+p1_val),
+                                  @intCast(y+p2_val));
                     }
                 } else {
-                    df.cursor(@intCast(p1), @intCast(p2));
+                    df.cursor(@intCast(p1_val), @intCast(p2_val));
                 }
             },
             df.CAPTURE_KEYBOARD => {
                 if (win) |w| { // wnd is not null
-                    if (p2 > 0) {
-                        const pp2:usize = @intCast(p2);
+                    if (p2_val > 0) {
+                        const pp2:usize = @intCast(p2_val);
                         const p2win:*Window = @ptrFromInt(pp2);
                         p2win.PrevKeyboard = CaptureKeyboard;
                     } else {
                         w.PrevKeyboard = CaptureKeyboard;
                     }
                     CaptureKeyboard = w;
-                    NoChildCaptureKeyboard = (p1>0);
+                    NoChildCaptureKeyboard = (p1_val>0);
                 } else { // is this necessary
                     CaptureKeyboard = null;
                     NoChildCaptureKeyboard = false;
@@ -220,7 +237,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
             },
             df.RELEASE_KEYBOARD => {
                 if (win) |w| { // wnd is not null
-                    if (CaptureKeyboard == w or (p1>0)) {
+                    if (CaptureKeyboard == w or (p1_val>0)) {
                         CaptureKeyboard = w.PrevKeyboard;
                     } else {
                         var twnd = CaptureKeyboard;
@@ -245,9 +262,9 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
                 var x:c_int = 0;
                 var y:c_int = 0;
                 df.curr_cursor(&x, &y);
-                const pp1:usize = @intCast(p1);
+                const pp1:usize = @intCast(p1_val);
                 const pp1_ptr:*c_int = @ptrFromInt(pp1);
-                const pp2:usize = @intCast(p2);
+                const pp2:usize = @intCast(p2_val);
                 const pp2_ptr:*c_int = @ptrFromInt(pp2);
                 pp1_ptr.* = x;
                 pp2_ptr.* = y;
@@ -265,7 +282,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
                 df.hidecursor();
             },
             df.SHOW_CURSOR => {
-                if (p1>0) {
+                if (p1_val>0) {
                     df.set_cursor_type(0x0106);
                 } else {
                     df.set_cursor_type(0x0607);
@@ -286,13 +303,13 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
             },
             df.MOUSE_TRAVEL => {
                 var rc:df.RECT = .{.lf = 0, .tp = 0, .rt = 0, .bt = 0};
-                if (p1 == 0) {
+                if (p1_val == 0) {
                     rc.lf = 0;
                     rc.tp = 0;
                     rc.rt = df.SCREENWIDTH-1;
                     rc.bt = df.SCREENHEIGHT-1;
                 } else {
-                    const pp1:usize = @intCast(p1);
+                    const pp1:usize = @intCast(p1_val);
                     const rc_ptr:*df.RECT = @ptrFromInt(pp1);
                     rc = rc_ptr.*;
                 }
@@ -305,7 +322,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
                 df.hide_mousecursor();
             },
             df.MOUSE_CURSOR => {
-                df.set_mouseposition(@intCast(p1), @intCast(p2));
+                df.set_mouseposition(@intCast(p1_val), @intCast(p2_val));
             },
             df.CURRENT_MOUSE_CURSOR => {
                 // df.get_mouseposition((int*)p1,(int*)p2); // do nothing in original code
@@ -318,15 +335,15 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
             },
             df.CAPTURE_MOUSE => {
                 if (win) |w| { // wnd is not null
-                    if (p2>0) {
-                        const pp2:usize = @intCast(p2);
+                    if (p2_val>0) {
+                        const pp2:usize = @intCast(p2_val);
                         const p2win:*Window = @ptrFromInt(pp2);
                         p2win.PrevMouse = CaptureMouse;
                     } else {
                         w.PrevMouse = CaptureMouse;
                     }
                     CaptureMouse = w;
-                    NoChildCaptureMouse = (p1>0);
+                    NoChildCaptureMouse = (p1_val>0);
                 } else { // is this necessary ?
                     CaptureMouse = null;
                     NoChildCaptureMouse = false;
@@ -334,7 +351,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM, rt
             },
             df.RELEASE_MOUSE => {
                 if (win) |w| {
-                    if (CaptureMouse == w or (p1>0)) {
+                    if (CaptureMouse == w or (p1_val>0)) {
                         CaptureMouse = w.PrevMouse;
                     } else {
                         var twnd = CaptureMouse;
@@ -470,7 +487,7 @@ pub fn dispatch_message() bool {
                         _ = kw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, ev.event, @intCast(ev.mx), @intCast(ev.my));
+                        _ = SendMessage(null, ev.event, .{.ival=@intCast(ev.mx)}, .{.ival=@intCast(ev.my)});
                     }
                 }
             },
@@ -486,7 +503,7 @@ pub fn dispatch_message() bool {
                                 _ = mw.sendMessage(df.SETFOCUS, df.TRUE, 0);
                             } else {
                                 // could this happen ?
-                                _ = SendMessage(null, df.SETFOCUS, df.TRUE, 0);
+                                _ = SendMessage(null, df.SETFOCUS, TRUE, VOID);
                             }
                         }
                     }
@@ -494,7 +511,7 @@ pub fn dispatch_message() bool {
                         _ = mw.sendMessage(df.LEFT_BUTTON, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, df.LEFT_BUTTON, @intCast(ev.mx), @intCast(ev.my));
+                        _ = SendMessage(null, df.LEFT_BUTTON, .{.ival=@intCast(ev.mx)}, .{.ival=@intCast(ev.my)});
                     }
                 }
             },
@@ -508,7 +525,7 @@ pub fn dispatch_message() bool {
                         _ = mw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, ev.event, @intCast(ev.mx), @intCast(ev.my));
+                        _ = SendMessage(null, ev.event, .{.ival=@intCast(ev.mx)}, .{.ival=@intCast(ev.my)});
                     }
                 }
             },
@@ -518,7 +535,7 @@ pub fn dispatch_message() bool {
                     _ = mw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                 } else {
                     // could this happen ?
-                    _ = SendMessage(null, ev.event, @intCast(ev.mx), @intCast(ev.my));
+                    _ = SendMessage(null, ev.event, .{.ival=@intCast(ev.mx)}, .{.ival=@intCast(ev.my)});
                 }
             },
 //#if MSDOS       // FIXME add MK_FP
@@ -544,7 +561,7 @@ pub fn dispatch_message() bool {
         if (mq.win) |w| {
             _ = w.sendMessage(mq.msg, mq.p1, mq.p2);
         } else {
-            _ = SendMessage(null, mq.msg, mq.p1, mq.p2);
+            _ = SendMessage(null, mq.msg, .{.ival=mq.p1}, .{.ival=mq.p2});
         }
 
         if (mq.msg == df.ENDDIALOG) {
@@ -564,9 +581,9 @@ pub fn dispatch_message() bool {
 
 pub export fn AddText(wnd:df.WINDOW, text:[*c]u8) df.BOOL {
     const ptr:usize = @intFromPtr(text);
-    return SendMessage(wnd,df.ADDTEXT,@intCast(ptr),0);
+    return SendMessage(wnd,df.ADDTEXT,.{.ival = @intCast(ptr)}, VOID);
 }
 
 pub export fn KeyboardMsg(wnd:df.WINDOW, chr:u8) df.BOOL {
-    return SendMessage(wnd, df.KEYBOARD, chr, 0);
+    return SendMessage(wnd, df.KEYBOARD, .{.ival=@intCast(chr)}, VOID);
 }

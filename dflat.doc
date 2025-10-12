@@ -344,7 +344,7 @@ HIDE_CURSOR            hide the keyboard cursor
 
 SHOW_CURSOR            display the keyboard cursor    
   Sent:    to display the keyboard cursor
-  P1:      
+  P1:      yes / no
   P2:      
   Returns: 
 

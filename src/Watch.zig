@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const k = @import("Classes.zig").CLASS;
 const Window = @import("Window.zig");
+const q = @import("Message.zig");
 
 var tick:usize = 0;
 const hands = [_][]const u8{" \xC0 ", " \xDA ", " \xBF ", " \xD9 "};
@@ -26,7 +27,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 if (win.PrevClock) |clock| {
                     _ = clock.sendMessage(msg, p1, p2);
                 } else { // could clock be null ?
-                    _ = df.SendMessage(null, msg, p1, p2);
+                    _ = q.SendMessage(null, msg, .{.ival=@intCast(p1)}, .{.ival=@intCast(p2)});
                 }
                 // (fall through and paint)
                 _ = df.SetStandardColor(wnd);
@@ -65,7 +66,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
 pub fn WatchIcon() *Window {
     var mx:c_int = 10;
     var my:c_int = 10;
-    _ = df.SendMessage(null, df.CURRENT_MOUSE_CURSOR, @intCast(@intFromPtr(&mx)), @intCast(@intFromPtr(&my)));
+    _ = q.SendMessage(null, df.CURRENT_MOUSE_CURSOR, .{.ival=@intCast(@intFromPtr(&mx))}, .{.ival=@intCast(@intFromPtr(&my))});
     const win = Window.create (
                     k.BOX,
                     null,

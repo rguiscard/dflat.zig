@@ -12,6 +12,10 @@ const clipboard = @import("Clipboard.zig");
 const normal = @import("Normal.zig");
 const cfg = @import("Config.zig");
 
+const VOID = q.VOID;
+const TRUE = q.TRUE;
+const FALSE = q.FALSE;
+
 // -------- local variables --------
 var KeyBoardMarking = false;
 var ButtonDown = false;
@@ -172,10 +176,10 @@ fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if (win == Window.inFocus) {
         if (df.CharInView(wnd, @intCast(p1), @intCast(p2))>0)
             _ = q.SendMessage(null, df.SHOW_CURSOR,
-                      if (win.InsertMode and (TextMarking == false)) df.TRUE else df.FALSE,
-                      0);
+                      if (win.InsertMode and (TextMarking == false)) TRUE else FALSE,
+                      VOID);
     } else {
-        _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
+        _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
     }
 }
 
@@ -432,7 +436,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         SetAnchor(win, ButtonX+@as(usize, @intCast(wnd.*.wleft)), @intCast(ButtonY+win.wtop));
         TextMarking = true;
         rc = win.WindowRect();
-        _ = q.SendMessage(null,df.MOUSE_TRAVEL,@intCast(@intFromPtr(&rc)), 0);
+        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.ival=@intCast(@intFromPtr(&rc))}, VOID);
         ButtonDown = false;
     }
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
@@ -447,7 +451,7 @@ fn ButtonReleasedMsg(win:*Window) bool {
     ButtonDown = false;
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
         // release the mouse ouside the edit box
-        _ = q.SendMessage(null, df.MOUSE_TRAVEL, 0, 0);
+        _ = q.SendMessage(null, df.MOUSE_TRAVEL, VOID, VOID);
         StopMarking(win);
         return true;
     }
@@ -969,7 +973,7 @@ fn CommandMsg(win:*Window,p1:df.PARAM) bool {
 // ---------- CLOSE_WINDOW Message -----------
 fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
+    _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
     if (win.DeletedText) |text| {
         root.global_allocator.free(text);
 
@@ -1019,7 +1023,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.SETFOCUS => {
             if (p1 == 0) {
-                _ = q.SendMessage(null, df.HIDE_CURSOR, 0, 0);
+                _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
             }
             // fall through?
             const rtn = root.BaseWndProc(k.EDITBOX, win, msg, p1, p2);

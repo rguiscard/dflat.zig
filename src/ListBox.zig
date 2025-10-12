@@ -8,6 +8,8 @@ const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const textbox = @import("TextBox.zig");
 
+const VOID = q.VOID;
+
 var py:c_int = -1;    // the previous y mouse coordinate
 
 // --------- SHIFT_F8 Key ------------
@@ -20,7 +22,7 @@ fn AddModeKey(win:*Window) void {
         if (win.parent) |pw| {
             _ = pw.sendMessage(df.ADDSTATUS, p1, 0);
         } else {
-            _ = df.SendMessage(null, df.ADDSTATUS, p1, 0);
+            _ = q.SendMessage(null, df.ADDSTATUS, .{.ival=p1}, VOID);
         }
     }
 }
