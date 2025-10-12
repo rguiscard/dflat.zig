@@ -27,8 +27,8 @@ export var AltDown:df.BOOL = df.FALSE;
 // ---------- event queue ----------
 const Evt = struct {
     event:df.MESSAGE,
-    mx:c_int,
-    my:c_int,
+    mx:usize,
+    my:usize,
 };
 
 var EventQueue = [_]Evt{.{.event=0, .mx=0, .my=0}}**MAXMESSAGES;
@@ -95,8 +95,8 @@ fn StopMsg() void {
 pub export fn PostEvent(event:df.MESSAGE, p1:c_int, p2:c_int) callconv(.c) void {
     if (EventQueueCtr != MAXMESSAGES) {
         EventQueue[EventQueueOnCtr].event = event;
-        EventQueue[EventQueueOnCtr].mx = p1;
-        EventQueue[EventQueueOnCtr].my = p2;
+        EventQueue[EventQueueOnCtr].mx = @intCast(p1);
+        EventQueue[EventQueueOnCtr].my = @intCast(p2);
         EventQueueOnCtr += 1;
         if (EventQueueOnCtr == MAXMESSAGES) {
             EventQueueOnCtr = 0;
@@ -389,13 +389,13 @@ fn VisibleRect(win:*Window) df.RECT {
 
 
 // ----- find window that mouse coordinates are in ---
-fn inWindow(w:?*Window, x:c_int, y:c_int) ?*Window {
+fn inWindow(w:?*Window, x:usize, y:usize) ?*Window {
     var ww = w;
     var Hit:?*Window = null;
     while (ww) |win| {
         if (win.isVisible()) {
             const rc = VisibleRect(win);
-            if (rect.InsideRect(x, y, rc))
+            if (rect.InsideRect(@intCast(x), @intCast(y), rc))
                 Hit = win;
             const win1 = inWindow(win.lastWindow(), x, y);
             if (win1 != null)
@@ -408,7 +408,7 @@ fn inWindow(w:?*Window, x:c_int, y:c_int) ?*Window {
     return Hit;
 }
 
-fn MouseWindow(x:c_int, y:c_int) ?*Window {
+fn MouseWindow(x:usize, y:usize) ?*Window {
     // ------ get the window in which a
     //              mouse event occurred ------
     if (app.ApplicationWindow) |awin| {
@@ -467,10 +467,10 @@ pub fn dispatch_message() bool {
             df.KEYBOARD => {
                 if (!handshaking) {
                     if (Kwnd) |kw| {
-                        _ = kw.sendMessage(ev.event, ev.mx, ev.my);
+                        _ = kw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, ev.event, ev.mx, ev.my);
+                        _ = SendMessage(null, ev.event, @intCast(ev.mx), @intCast(ev.my));
                     }
                 }
             },
@@ -491,10 +491,10 @@ pub fn dispatch_message() bool {
                         }
                     }
                     if (Mwnd) |mw| {
-                        _ = mw.sendMessage(df.LEFT_BUTTON, ev.mx, ev.my);
+                        _ = mw.sendMessage(df.LEFT_BUTTON, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, df.LEFT_BUTTON, ev.mx, ev.my);
+                        _ = SendMessage(null, df.LEFT_BUTTON, @intCast(ev.mx), @intCast(ev.my));
                     }
                 }
             },
@@ -505,20 +505,20 @@ pub fn dispatch_message() bool {
                     // Fall through
                     const Mwnd = MouseWindow(ev.mx, ev.my);
                     if (Mwnd) |mw| {
-                        _ = mw.sendMessage(ev.event, ev.mx, ev.my);
+                        _ = mw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, ev.event, ev.mx, ev.my);
+                        _ = SendMessage(null, ev.event, @intCast(ev.mx), @intCast(ev.my));
                     }
                 }
             },
             df.MOUSE_MOVED => {
                 const Mwnd = MouseWindow(ev.mx, ev.my);
                 if (Mwnd) |mw| {
-                    _ = mw.sendMessage(ev.event, ev.mx, ev.my);
+                    _ = mw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                 } else {
                     // could this happen ?
-                    _ = SendMessage(null, ev.event, ev.mx, ev.my);
+                    _ = SendMessage(null, ev.event, @intCast(ev.mx), @intCast(ev.my));
                 }
             },
 //#if MSDOS       // FIXME add MK_FP

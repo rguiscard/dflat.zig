@@ -317,8 +317,14 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     const pp1:usize = @intCast(p1);
     const pp2:usize = @intCast(p2);
-    var MouseX:usize = pp1 - win.GetClientLeft();
-    var MouseY:usize = pp2 - win.GetClientTop();
+    var MouseX:usize = 0;
+    if (pp1 > win.GetClientLeft()) {
+        MouseX = pp1 - win.GetClientLeft();
+    }
+    var MouseY:usize = 0;
+    if (pp2 > win.GetClientTop()) {
+        MouseY = pp2 - win.GetClientTop();
+    }
     const rc = rect.ClientRect(win);
     if (KeyBoardMarking)
         return true;
@@ -407,12 +413,20 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
     const pp1:usize = @intCast(p1);
     const pp2:usize = @intCast(p2);
-    const MouseX:usize = pp1 - win.GetClientLeft();
-    const MouseY:usize = pp2 - win.GetClientTop();
+    var MouseX:usize = 0;
+    if (pp1 > win.GetClientLeft()) {
+        MouseX = pp1 - win.GetClientLeft();
+    }
+    var MouseY:usize = 0;
+    if (pp2 > win.GetClientTop()) {
+        MouseY = pp2 - win.GetClientTop();
+    }
     var rc = rect.ClientRect(win);
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false)
         return false;
-    if (MouseY > win.wlines-1)
+    var wlines = win.wlines;
+    wlines -|= 1;
+    if (MouseY > wlines)
         return false;
     if (ButtonDown) {
         SetAnchor(win, ButtonX+@as(usize, @intCast(wnd.*.wleft)), @intCast(ButtonY+win.wtop));
