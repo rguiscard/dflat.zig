@@ -172,7 +172,7 @@ fn KeyboardCursorMsg(win:*Window, col:usize, row:usize) void {
     if (win == Window.inFocus) {
         if (df.CharInView(wnd, @intCast(col), @intCast(row))>0)
             _ = q.SendMessage(null, df.SHOW_CURSOR,
-                      .{.legacy=.{ if (win.InsertMode and (TextMarking == false)) df.TRUE else df.FALSE, 0}});
+                      .{.yes = if (win.InsertMode and (TextMarking == false)) true else false});
     } else {
         _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     }

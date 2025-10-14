@@ -402,7 +402,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
                     _ = win.getParent().sendCommandMessage(.ID_INSERT, 0);
                     win.InsertMode = mp.cfg.config.InsertMode;
                     _ = mp.q.SendMessage(null, df.SHOW_CURSOR,
-                                             .{.legacy = .{if (win.InsertMode) df.TRUE else df.FALSE, 0}});
+                                             .{.yes = if (win.InsertMode) true else false});
                 },
                 else => {
                 }

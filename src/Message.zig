@@ -33,7 +33,6 @@ pub const Pointer = struct {usize, usize};     // pointer & len (or 0)
 pub const Character = struct {u8, u8};         // char & shift
 pub const CaptureDevice = struct {bool, ?*Window};
 pub const Cursor = struct {*usize, *usize};    // return current cursor position
-pub const Boolean = struct {bool};             // yes or no
 
 pub const ParamsType = enum {
     legacy,
@@ -56,7 +55,7 @@ pub const Params = union(ParamsType) {
     char:Character,         // key and shift
     capture:CaptureDevice,
     cursor:Cursor,          // *x, *y
-    yes:Boolean,            // true/false
+    yes:bool,               // true/false
 };
 
 pub const none:Params = .{.void=.{}};
@@ -298,8 +297,8 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 df.hidecursor();
             },
             df.SHOW_CURSOR => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
-                if (p1_val>0) {
+                const p1_val:bool = params.yes;
+                if (p1_val) {
                     df.set_cursor_type(0x0106);
                 } else {
                     df.set_cursor_type(0x0607);

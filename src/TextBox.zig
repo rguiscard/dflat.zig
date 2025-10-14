@@ -627,7 +627,7 @@ fn ComputeVScrollBox(win:*Window) usize {
     if (win.wlines > win.ClientHeight()) {
         pagelen = win.wlines - win.ClientHeight();
     }
-    const barlen:usize = win.ClientHeight()-2;
+    const barlen:usize = if (win.ClientHeight()>2) win.ClientHeight()-2 else 0;
     var lines_tick:usize = 0;
     var vscrollbox:usize = 0;
 
@@ -651,13 +651,13 @@ fn ComputeVScrollBox(win:*Window) usize {
 
 // ---- compute top text line from scroll box position ----
 fn ComputeWindowTop(win:*Window) void {
-    const pagelen:usize = win.wlines - win.ClientHeight();
+    const pagelen:usize = if (win.wlines > win.ClientHeight()) win.wlines - win.ClientHeight() else 0;
     if (win.VScrollBox == 0) {
         win.wtop = 0;
     } else if (win.VScrollBox == win.ClientHeight()-2) {
         win.wtop = pagelen;
     } else {
-        const barlen:usize = @intCast(win.ClientHeight()-2);
+        const barlen:usize = if (win.ClientHeight() > 2) win.ClientHeight()-2 else 0;
         var lines_tick:usize = 0;
 
         if (pagelen > barlen) {
@@ -681,7 +681,7 @@ fn ComputeHScrollBox(win:*Window) usize {
     if (wnd.*.textwidth > win.ClientWidth()) {
         pagewidth = @as(usize, @intCast(wnd.*.textwidth)) - win.ClientWidth();
     }
-    const barlen:usize = win.ClientWidth()-2;
+    const barlen:usize = if (win.ClientWidth() > 2) win.ClientWidth()-2 else 0;
     var chars_tick:usize = 0;
     var hscrollbox:usize = 0;
 

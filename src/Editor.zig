@@ -260,7 +260,7 @@ fn TurnOffDisplay(win:*Window) void {
 
 fn TurnOnDisplay(win:*Window) void {
     win.SetVisible();
-    _ = q.SendMessage(null, df.SHOW_CURSOR, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.SHOW_CURSOR, .{.yes=false});
 }
 
 fn RepaintLine(win:*Window) void {
