@@ -325,7 +325,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const my:usize = pp2 - win.GetTop();
     if ((WindowSizing == false) and (WindowMoving == false)) {
         if (win.HitControlBox(mx, my)) {
-            q.PostMessage(win, df.CLOSE_WINDOW, 0, 0);
+            q.PostMessage(win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
             lists.SkipApplicationControls();
         }
     }
@@ -648,12 +648,12 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                 return true;
             // ------- fall through -------
             if (win.parent) |pw| {
-                q.PostMessage(pw, msg, p1, p2);
+                q.PostMessage(pw, msg, .{.legacy=.{p1, p2}});
             }
         },
         df.ADDSTATUS, df.SHIFT_CHANGED => {
             if (win.parent) |pw| {
-                q.PostMessage(pw, msg, p1, p2);
+                q.PostMessage(pw, msg, .{.legacy=.{p1, p2}});
             }
         },
         df.PAINT => {
@@ -711,9 +711,9 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                 const dwin = getDummy();
                 const dwnd = dwin.win;
                 if (WindowMoving) {
-                    q.PostMessage(win,df.MOVE,dwnd.*.rc.lf,dwnd.*.rc.tp);
+                    q.PostMessage(win,df.MOVE,.{.legacy=.{dwnd.*.rc.lf,dwnd.*.rc.tp}});
                 } else {
-                    q.PostMessage(win,df.SIZE,dwnd.*.rc.rt,dwnd.*.rc.bt);
+                    q.PostMessage(win,df.SIZE,.{.legacy=.{dwnd.*.rc.rt,dwnd.*.rc.bt}});
                 }
                 TerminateMoveSize();
             }

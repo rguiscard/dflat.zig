@@ -347,7 +347,7 @@ pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             return LeftButtonMsg(win, p1, p2);
         },
         df.DOUBLE_CLICK => {
-            q.PostMessage(win, df.KEYBOARD, '\r', 0);
+            q.PostMessage(win, df.KEYBOARD, .{.legacy=.{'\r', 0}});
         },
         else => {
         }

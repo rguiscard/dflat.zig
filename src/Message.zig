@@ -103,7 +103,7 @@ pub fn init_messages() bool {
 
     NoChildCaptureMouse = false;
     NoChildCaptureKeyboard = false;
-    PostMessage(null,df.START,0,0);
+    PostMessage(null,df.START,.{.legacy=.{0,0}});
 //    lagdelay = FIRSTDELAY; // not in use
     return true;
 }
@@ -131,11 +131,11 @@ pub export fn PostEvent(event:df.MESSAGE, p1:c_int, p2:c_int) callconv(.c) void 
 }
 
 // ----- post a message and parameters to msg queue ----
-pub fn PostMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void {
+pub fn PostMessage(win:?*Window, msg:df.MESSAGE, params: Params) void {
     if (MsgQueueCtr != MAXMESSAGES) {
         MsgQueue[MsgQueueOnCtr].win = win;
         MsgQueue[MsgQueueOnCtr].msg = msg;
-        MsgQueue[MsgQueueOnCtr].params = .{.legacy=.{p1, p2}};
+        MsgQueue[MsgQueueOnCtr].params = params;
         MsgQueueOnCtr += 1;
         if (MsgQueueOnCtr == MAXMESSAGES) {
             MsgQueueOnCtr = 0;
@@ -577,7 +577,7 @@ pub fn dispatch_message() bool {
             return false;
         }
         if (mq.msg == df.STOP) {
-            PostMessage(null, df.STOP, 0, 0);
+            PostMessage(null, df.STOP, .{.legacy=.{0, 0}});
             return false;
         }
     }

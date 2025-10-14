@@ -55,7 +55,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
         if (win.parent) |pw| {
             if (p2 == pw.GetTop()) {
                 if (pw.Class == k.MENUBAR) {
-                    q.PostMessage(pw, df.LEFT_BUTTON, p1, p2);
+                    q.PostMessage(pw, df.LEFT_BUTTON, .{.legacy=.{p1, p2}});
                 }
             }
         }
@@ -231,7 +231,7 @@ fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
             }
             if (win.parent) |pw| {
                 CurrentMenuSelection = @intCast(p1);
-                q.PostMessage(pw, df.COMMAND, @intFromEnum(popdown.*.ActionId), 0); // p2 was p1
+                q.PostMessage(pw, df.COMMAND, .{.legacy=.{@intFromEnum(popdown.*.ActionId), 0}}); // p2 was p1
             }
         } else {
             df.beep();
@@ -256,8 +256,8 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                     }
                     if ((sc == c) or ((a > 0) and (sc == a)) or
                            (popdown.Accelerator == c)) {
-                        q.PostMessage(win, df.LB_SELECTION, @intCast(sel), 0);
-                        q.PostMessage(win, df.LB_CHOOSE, @intCast(sel), df.TRUE);
+                        q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{@intCast(sel), 0}});
+                        q.PostMessage(win, df.LB_CHOOSE, .{.legacy=.{@intCast(sel), df.TRUE}});
                         return true;
                     }
                 }
@@ -293,7 +293,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         df.BS => {
             if (win.parent) |pw| {
                 if (pw.Class == k.MENUBAR) {
-                    q.PostMessage(pw, df.KEYBOARD, p1, p2);
+                    q.PostMessage(pw, df.KEYBOARD, .{.legacy=.{p1, p2}});
                 }
             }
 //            if (win.getParent().getClass() == k.MENUBAR) {
@@ -305,7 +305,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             if (win.selection == 0) {
                 if (win.wlines == win.ClientHeight()) {
                     q.PostMessage(win, df.LB_SELECTION,
-                                    @intCast(win.wlines-1), df.FALSE);
+                                    .{.legacy=.{@intCast(win.wlines-1), df.FALSE}});
                     return true;
                 }
             }
@@ -313,7 +313,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         df.DN => {
             if (win.selection == win.wlines-1) {
                 if (win.wlines == win.ClientHeight()) {
-                    q.PostMessage(win, df.LB_SELECTION, 0, df.FALSE);
+                    q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{0, df.FALSE}});
                     return true;
                 }
             }

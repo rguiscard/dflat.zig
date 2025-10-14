@@ -28,11 +28,11 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
             }
         },
         df.LB_CHOOSE => {
-            q.PostMessage(win, df.CLOSE_WINDOW, 0, 0);
+            q.PostMessage(win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
         },
         df.DOUBLE_CLICK => {
             if (p2 == win.getParent().GetTop()) {
-                q.PostMessage(win.parent, msg, p1, p2);
+                q.PostMessage(win.parent, msg, .{.legacy=.{p1, p2}});
                 _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
             }
             return true;

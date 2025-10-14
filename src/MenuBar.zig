@@ -165,7 +165,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
                                     pd.Attrib.CHECKED = !pd.Attrib.CHECKED;
                                 }
                                 _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
-                                q.PostMessage(win.parent, df.COMMAND, @intFromEnum(pd.ActionId), 0);
+                                q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{@intFromEnum(pd.ActionId), 0}});
                             }
                         }
                     }
@@ -382,7 +382,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 _ = m.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
             }
             _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
-            q.PostMessage(win.parent, df.COMMAND, p1, p2);
+            q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{p1, p2}});
         }
     }
 }

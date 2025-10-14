@@ -31,8 +31,8 @@ fn UpKey(win:*Window,p2:df.PARAM) void {
     if (win.selection > 0)    {
         if (win.selection == win.wtop) {
             _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, df.UP, p2);
-            q.PostMessage(win, df.LB_SELECTION, win.selection-1,
-                if (win.isMultiLine()) p2 else df.FALSE);
+            q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{win.selection-1,
+                if (win.isMultiLine()) p2 else df.FALSE}});
         } else {
             var newsel:isize = win.selection-1;
             if (win.wlines == win.ClientHeight()) {
@@ -51,8 +51,8 @@ fn UpKey(win:*Window,p2:df.PARAM) void {
 //                while (*TextLine(wnd, newsel) == LINE)
 //                    --newsel;
             }
-            q.PostMessage(win, df.LB_SELECTION, @intCast(newsel),
-                if (win.isMultiLine()) p2 else df.FALSE); // EXTENDEDSELECTIONS
+            q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{@intCast(newsel),
+                if (win.isMultiLine()) p2 else df.FALSE}}); // EXTENDEDSELECTIONS
         }
     }
 }
@@ -63,8 +63,8 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
     if (win.selection < win.wlines-1) {
         if (win.selection == win.wtop+win.ClientHeight()-1) {
             _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, df.DN, p2);
-            q.PostMessage(win, df.LB_SELECTION, win.selection+1,
-                if (win.isMultiLine()) p2 else df.FALSE);
+            q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{win.selection+1,
+                if (win.isMultiLine()) p2 else df.FALSE}});
         } else {
             var newsel:usize = @intCast(win.selection+1);
             if (win.wlines == win.ClientHeight()) {
@@ -83,8 +83,8 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
 //                while (*TextLine(wnd, newsel) == LINE)
 //                    newsel++;
             }
-            q.PostMessage(win, df.LB_SELECTION, @intCast(newsel),
-                if (win.isMultiLine()) p2 else df.FALSE);  // EXTENDEDSELECTIONS
+            q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{@intCast(newsel),
+                if (win.isMultiLine()) p2 else df.FALSE}});  // EXTENDEDSELECTIONS
         }
     }
 }
@@ -92,8 +92,8 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
 // --------- HOME and PGUP Keys ------------
 fn HomePgUpKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, p1, p2);
-    q.PostMessage(win, df.LB_SELECTION, @intCast(win.wtop),
-        if (win.isMultiLine()) p2 else df.FALSE);  // EXTENDEDSELECTIONS
+    q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{@intCast(win.wtop),
+        if (win.isMultiLine()) p2 else df.FALSE}});  // EXTENDEDSELECTIONS
 }
 
 // --------- END and PGDN Keys ------------
@@ -102,8 +102,8 @@ fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     var bot:usize = win.wtop+win.ClientHeight()-1;
     if (bot > win.wlines-1)
         bot = win.wlines-1;
-    q.PostMessage(win, df.LB_SELECTION, @intCast(bot),
-        if (win.isMultiLine()) p2 else df.FALSE);  // EXTENDEDSELECTIONS
+    q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{@intCast(bot),
+        if (win.isMultiLine()) p2 else df.FALSE}});  // EXTENDEDSELECTIONS
 }
 
 // --------- Space Bar Key ------------ 
