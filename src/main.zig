@@ -55,7 +55,7 @@ pub fn main() !void {
 fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch(msg) {
         df.CREATE_WINDOW => {
-            const rtn = mp.zDefaultWndProc(win, msg, p1, p2);
+            const rtn = mp.DefaultWndProc(win, msg, p1, p2);
             if (mp.cfg.config.InsertMode == true)
                 mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
             if (mp.cfg.config.WordWrap == true)
@@ -168,7 +168,7 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         else => {
         }
     }
-    return mp.zDefaultWndProc(win, msg, p1, p2);
+    return mp.DefaultWndProc(win, msg, p1, p2);
 }
 
 // --- The New command. Open an empty editor window ---
@@ -375,7 +375,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 win.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
                 win.WordWrapMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_WRAP);
             }
-            rtn = mp.zDefaultWndProc(win, msg, p1, p2);
+            rtn = mp.DefaultWndProc(win, msg, p1, p2);
             if (p1 == 0) {
                 _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
             } else {
@@ -384,7 +384,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             return rtn;
         },
         df.KEYBOARD_CURSOR => {
-            rtn = mp.zDefaultWndProc(win, msg, p1, p2);
+            rtn = mp.DefaultWndProc(win, msg, p1, p2);
             ShowPosition(win);
             return rtn;
         },
@@ -439,7 +439,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return mp.zDefaultWndProc(win, msg, p1, p2);
+    return mp.DefaultWndProc(win, msg, p1, p2);
 }
 
 // ------ display the row and column in the statusbar ------

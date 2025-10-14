@@ -303,7 +303,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             if (win.getClass() == k.EDITBOX) {
                 const oldFocus = Window.inFocus;
                 Window.inFocus = null;
-                _ = root.zDefaultWndProc(win, msg, p1, p2);
+                _ = root.DefaultWndProc(win, msg, p1, p2);
                 Window.inFocus = oldFocus;
                 return true;
             }
@@ -342,7 +342,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 //                            pwnd.*.wasCleared = df.FALSE;
 //                        }
                     }
-                    _ = root.zDefaultWndProc(win, msg, p1, p2);
+                    _ = root.DefaultWndProc(win, msg, p1, p2);
                     oldWin.SetVisible();
                     if (pwin) |pw| {
                         pw.dfocus = win;
@@ -366,7 +366,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.zDefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, p1, p2);
 }
 
 // -------- CREATE_WINDOW Message ---------

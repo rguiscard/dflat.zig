@@ -71,7 +71,7 @@ pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *Dial
 fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch (msg) {
         df.CREATE_WINDOW => {
-            const rtn = root.zDefaultWndProc(win, msg, p1, p2);
+            const rtn = root.DefaultWndProc(win, msg, p1, p2);
             if (win.extension) |extension| {
                 const db:*Dialogs.DBOX = extension.dbox;
                 if (DialogBox.ControlWindow(db, .ID_FILENAME)) |cwin| {
@@ -158,7 +158,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
         else => {
         }
     }
-    return root.zDefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, p1, p2);
 }
 
 

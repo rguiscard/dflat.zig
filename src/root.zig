@@ -33,15 +33,6 @@ pub const cfg = @import("Config.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 
-pub export fn DefaultWndProc(wnd: df.WINDOW, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) callconv(.c) c_int {
-    if (Window.get_zin(wnd)) |zin| {
-        const rtn = zDefaultWndProc(zin, msg, p1, p2);
-        return if (rtn) df.TRUE else df.FALSE;
-    }
-    return df.FALSE;
-    // Is it possible that wnd is null ?
-}
-
 pub fn BaseWndProc(klass: CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const base_idx:usize = @intCast(@intFromEnum(klass));
     const base_class = Klass.defs[base_idx][1]; // base
@@ -53,7 +44,7 @@ pub fn BaseWndProc(klass: CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2:
     return false;
 }
 
-pub fn zDefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn DefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     const klass = win.Class;
     const idx:usize = @intCast(@intFromEnum(klass));
     if (Klass.defs[idx][2]) |proc| { // wndproc

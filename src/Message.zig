@@ -24,6 +24,23 @@ var NoChildCaptureKeyboard = false;
 
 export var AltDown:df.BOOL = df.FALSE;
 
+// Handle different combination of parameters p1 & p2
+pub const Position = struct {usize, usize}; // x & y
+pub const Void = struct {};
+pub const Paint = struct {usize, bool}; // &RECT, bool
+
+pub const ParamsType = enum {
+    void,
+    position,
+    paint,
+};
+
+pub const Params = union(ParamsType) {
+    void:Void,          // 0 & 0
+    position:Position,  // x & y
+    paint:Paint,        // &RECT & bool
+};
+
 pub const Param = union {
     yesno:bool,   // true or false
     ival:isize,   // signed value

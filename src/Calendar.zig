@@ -149,7 +149,7 @@ fn DisplayDates(win:*Window) void {
 pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     switch (msg) {
         df.CREATE_WINDOW => {
-            _ = root.zDefaultWndProc(win, msg, p1, p2);
+            _ = root.DefaultWndProc(win, msg, p1, p2);
             CreateWindowMsg(win);
             return true;
         },
@@ -158,7 +158,7 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
 //                return true;
         },
         df.PAINT => {
-            _ = root.zDefaultWndProc(win, msg, p1, p2);
+            _ = root.DefaultWndProc(win, msg, p1, p2);
             DisplayDates(win);
             return true;
         },
@@ -175,7 +175,7 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.zDefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, p1, p2);
 }
 
 pub fn Calendar(pwin: *Window) void {

@@ -14,7 +14,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
         switch (msg) {
             df.CREATE_WINDOW => {
                 tick = 0;
-                const rtn = root.zDefaultWndProc(win, msg, p1, p2);
+                const rtn = root.DefaultWndProc(win, msg, p1, p2);
                 _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
                 _ = win.sendMessage(df.HIDE_MOUSE, 0, 0);
                 _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
@@ -40,7 +40,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 return true;
             },
             df.BORDER => {
-                const rtn = root.zDefaultWndProc(win, msg, p1, p2);
+                const rtn = root.DefaultWndProc(win, msg, p1, p2);
                 df.writeline(wnd, @constCast(bo.ptr), 2, 0, df.FALSE);
                 return rtn;
             },
@@ -60,7 +60,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             }
         }
 
-    return root.zDefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, p1, p2);
 }
 
 pub fn WatchIcon() *Window {

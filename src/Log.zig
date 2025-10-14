@@ -63,7 +63,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
         else => {
         }
     }
-    return root.zDefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, p1, p2);
 }
 
 pub fn MessageLog(win:*Window) void {
