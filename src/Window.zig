@@ -47,7 +47,7 @@ var line = [_]u8{0}**df.MAXCOLS;
 
 Class:CLASS,                 // window class
 title:?[:0]const u8 = null,  // window title
-wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
+wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, params:q.Params) bool,
 
 // ---------------- window dimensions -----------------
 ht:usize = 0,                // window height and width.
@@ -143,7 +143,7 @@ pub fn create(
 //    extension:?*anyopaque,      // pointer to additional data
     payload:?Payload,         // pointer to additional data
     parent: ?*TopLevelFields,   // parent of this window
-    wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
+    wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, params:q.Params) bool,
     attrib: c_int) *TopLevelFields {
 
     const title = ttl;
@@ -286,9 +286,6 @@ pub fn sendCommandMessage(self: *TopLevelFields, p1: c, p2: df.PARAM) bool {
 pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, params:q.Params) bool {
     var rtn = true;
 
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
-
     switch (msg) {
         df.PAINT,
         df.BORDER => {
@@ -296,7 +293,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, params:q.Params) bool 
             //    window is visible --------
             if (self.isVisible()) {
                 if (self.wndproc) |wndproc| {
-                    rtn = wndproc(self, msg, p1, p2);
+                    rtn = wndproc(self, msg, params);
                 }
             }
         },
@@ -308,7 +305,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, params:q.Params) bool 
             //  window is visible or has captured the mouse --
             if ((self.isVisible()) or (self == q.CaptureMouse)) {
                 if (self.wndproc) |wndproc| {
-                    rtn = wndproc(self, msg, p1, p2);
+                    rtn = wndproc(self, msg, params);
                 }
             }
         },
@@ -318,13 +315,13 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, params:q.Params) bool 
             //  window is visible or has captured the keyboard --
             if ((self.isVisible()) or (self == q.CaptureKeyboard)) {
                 if (self.wndproc) |wndproc| {
-                    rtn = wndproc(self, msg, p1, p2);
+                    rtn = wndproc(self, msg, params);
                 }
             }
         },
         else => {
             if (self.wndproc) |wndproc| {
-                rtn = wndproc(self, msg, p1, p2);
+                rtn = wndproc(self, msg, params);
             }
         }
     }

@@ -11,10 +11,11 @@ const Menu = @import("Menu.zig");
 const menubar = @import("MenuBar.zig");
 const listbox = @import("ListBox.zig");
 const c = @import("Commands.zig").Command;
+const q = @import("Message.zig");
 
 var log:?*df.FILE = null;
 
-pub fn LogMessages (win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void {
+pub fn LogMessages (win:?*Window, msg:df.MESSAGE, params:q.Params) void {
     if (log) |L| {
         const m = messages[@intCast(msg)];
         if (m[0] != ' ') {
@@ -27,14 +28,20 @@ pub fn LogMessages (win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void
                     title = w.title;
                 }
             }
-            _ = df.fprintf(L, "%-20.20s %-12.12s %-20.20s, %5.5ld, %5.5ld\n", 
+            _ = df.fprintf(L, "%-20.20s %-12.12s %-20.20s\n", 
                                if (title) |ttl| ttl.ptr else null, 
-                               @constCast(class.ptr), m, p1, p2);
+                               @constCast(class.ptr), m);
+// FIXME: print p1 & p2
+            _ = params;
+//            _ = df.fprintf(L, "%-20.20s %-12.12s %-20.20s, %5.5ld, %5.5ld\n", 
+//                               if (title) |ttl| ttl.ptr else null, 
+//                               @constCast(class.ptr), m, p1, p2);
         }
     }
 }
 
-pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn LogProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
     const control = DialogBox.ControlWindow(&Dialogs.Log, .ID_LOGLIST);
     switch (msg)    {
         df.INITIATE_DIALOG => {
@@ -63,7 +70,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
         else => {
         }
     }
-    return root.DefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, params);
 }
 
 pub fn MessageLog(win:*Window) void {

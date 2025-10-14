@@ -6,6 +6,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
 const helpbox = @import("HelpBox.zig");
+const q = @import("Message.zig");
 
 const ctime = @cImport({
     @cInclude("time.h");
@@ -146,10 +147,11 @@ fn DisplayDates(win:*Window) void {
 //}
 
 
-pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn CalendarProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
     switch (msg) {
         df.CREATE_WINDOW => {
-            _ = root.DefaultWndProc(win, msg, p1, p2);
+            _ = root.DefaultWndProc(win, msg, params);
             CreateWindowMsg(win);
             return true;
         },
@@ -158,7 +160,7 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
 //                return true;
         },
         df.PAINT => {
-            _ = root.DefaultWndProc(win, msg, p1, p2);
+            _ = root.DefaultWndProc(win, msg, params);
             DisplayDates(win);
             return true;
         },
@@ -175,7 +177,7 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.DefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, params);
 }
 
 pub fn Calendar(pwin: *Window) void {

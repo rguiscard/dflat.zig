@@ -5,8 +5,9 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
 
-pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
+    const p1 = params.legacy[0];
     switch (msg) {
         df.CREATE_WINDOW => {
             _ = win.sendMessage(df.CAPTURE_CLOCK, .{.legacy=.{0, 0}});
@@ -81,9 +82,9 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
             df.PutWindowLine(wnd, @ptrFromInt(pp), @intCast(win.WindowWidth()-8), 0);
             win.TimePosted = true;
             if (win.PrevClock) |clock| {
-                _ = clock.sendMessage(msg, .{.legacy=.{p1, p2}});
+                _ = clock.sendMessage(msg, params);
             } else { // can it be null ?
-                _ = q.SendMessage(null, msg, .{.legacy = .{p1, p2}});
+                _ = q.SendMessage(null, msg, params);
             }
             return true;
         },
@@ -93,5 +94,5 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
         else => {
         }
     }
-    return root.BaseWndProc(k.STATUSBAR, win, msg, p1, p2);
+    return root.BaseWndProc(k.STATUSBAR, win, msg, params);
 }

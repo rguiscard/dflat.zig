@@ -41,7 +41,7 @@ fn drawText(win:*Window) void {
     }
 }
 
-pub fn TextProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn TextProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
     switch (msg)    {
         df.SETFOCUS => {
             return true;
@@ -55,5 +55,5 @@ pub fn TextProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
         else => {
         }
     }
-    return root.BaseWndProc(k.TEXT, win, msg, p1, p2);
+    return root.BaseWndProc(k.TEXT, win, msg, params);
 }

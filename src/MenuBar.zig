@@ -23,7 +23,7 @@ var ActiveMenu:?*[menus.MAXPULLDOWNS+1]menus.MENU = null; // this should be priv
 
 // ----------- SETFOCUS Message -----------
 fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
-    const rtn = root.BaseWndProc(k.MENUBAR, win, df.SETFOCUS, p1, 0);
+    const rtn = root.BaseWndProc(k.MENUBAR, win, df.SETFOCUS, .{.legacy=.{p1, 0}});
     if (p1>0) {
         _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
     } else {
@@ -357,7 +357,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const cmd:c = @enumFromInt(p1);
     if (cmd == .ID_HELP) {
-        _ = root.BaseWndProc(k.MENUBAR, win, df.COMMAND, p1, p2);
+        _ = root.BaseWndProc(k.MENUBAR, win, df.COMMAND, .{.legacy=.{p1, p2}});
         return;
     }
     if (ActiveMenuBar) |mbar| {
@@ -421,8 +421,10 @@ fn CloseWindowMsg(win:*Window) void {
     ActiveMenuBar = null;
 }
 
-pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             reset_menubar(win);
@@ -468,14 +470,14 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             return true;
         },
         df.CLOSE_WINDOW => {
-            const rtn = root.BaseWndProc(k.MENUBAR, win, msg, p1, p2);
+            const rtn = root.BaseWndProc(k.MENUBAR, win, msg, params);
             CloseWindowMsg(win);
             return rtn;
         },
         else => {
         }
     }
-    return root.BaseWndProc(k.MENUBAR, win, msg, p1, p2);
+    return root.BaseWndProc(k.MENUBAR, win, msg, params);
 }
 
 // ------------- reset the MENUBAR --------------

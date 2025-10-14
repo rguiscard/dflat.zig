@@ -31,7 +31,7 @@ fn CreateWindowMsg(win:*Window) bool {
         wnd.*.rc.lf += adj;
         wnd.*.rc.rt += adj;
     }
-    const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, 0, 0);
+    const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, .{.legacy=.{0, 0}});
     _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
     _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{0, 0}});
     _ = q.SendMessage(null, df.SAVE_CURSOR, .{.legacy=.{0,0}});
@@ -205,7 +205,7 @@ fn BorderMsg(win:*Window) bool {
     if (win.mnu) |_| {
         const currFocus = Window.inFocus;
         Window.inFocus = null;
-        rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.BORDER, 0, 0);
+        rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.BORDER, .{.legacy=.{0, 0}});
         Window.inFocus = currFocus;
         for (0..@intCast(win.ClientHeight())) |i| {
             const pos = win.textLine(i);
@@ -336,14 +336,16 @@ fn CloseWindowMsg(win:*Window) bool {
     _ = q.SendMessage(null, df.RESTORE_CURSOR, .{.legacy=.{0,0}});
     Window.inFocus = win.oldFocus;
 
-    const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
+    const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
     _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, .{.legacy=.{0, 0}});
     return rtn;
 }
 
 // - Window processing module for POPDOWNMENU window class -
-pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             return CreateWindowMsg(win);
@@ -400,7 +402,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.BaseWndProc(k.POPDOWNMENU, win, msg, p1, p2);
+    return root.BaseWndProc(k.POPDOWNMENU, win, msg, params);
 }
 
 // --------- compute menu height --------

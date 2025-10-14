@@ -4,20 +4,20 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const DialogBox = @import("DialogBox.zig");
 const k = @import("Classes.zig").CLASS;
+const q = @import("Message.zig");
 
-pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn BoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
-//    const ct:?*df.CTLWINDOW = df.GetControl(wnd);
     if (win.GetControl()) |ct| {
         switch (msg) {
             df.SETFOCUS, df.PAINT => {
                 return false;
             },
             df.LEFT_BUTTON, df.BUTTON_RELEASED => {
-                return win.getParent().sendMessage(msg, .{.legacy=.{p1, p2}});
+                return win.getParent().sendMessage(msg, params);
             },
             df.BORDER => {
-                const rtn = root.BaseWndProc(k.BOX, win, msg, p1, p2);
+                const rtn = root.BaseWndProc(k.BOX, win, msg, params);
 //                if (ct.*.itext) |txt| {
 //                    df.writeline(wnd, txt, 1, 0, df.FALSE);
 //                }
@@ -30,5 +30,5 @@ pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             }
         }
     }
-    return root.BaseWndProc(k.BOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.BOX, win, msg, params);
 }

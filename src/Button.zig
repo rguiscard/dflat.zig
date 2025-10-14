@@ -71,11 +71,12 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     }
 }
 
-pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn ButtonProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
-                _ = root.BaseWndProc(k.BUTTON, win, msg, p1, p2);
+                _ = root.BaseWndProc(k.BUTTON, win, msg, params);
                 // ---- fall through ----
                 PaintMsg(win, ct, null);
                 return true;
@@ -103,6 +104,6 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             }
         }
     }
-    return root.BaseWndProc(k.BUTTON, win, msg, p1, p2);
+    return root.BaseWndProc(k.BUTTON, win, msg, params);
 }
  

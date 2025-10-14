@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const k = @import("Classes.zig").CLASS;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
+const q = @import("Message.zig");
 
 // ---- types of vectors that can be in a picture box -------
 pub const VectTypes = enum { VECTOR, SOLIDBAR, HEAVYBAR, CROSSBAR, LIGHTBAR };
@@ -249,10 +250,12 @@ fn DrawBoxMsg(win:*Window, p1:df.PARAM) void {
     }
 }
 
-pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn PictureProc(win:*Window, message: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (message) {
         df.PAINT => {
-            _ = root.BaseWndProc(k.PICTUREBOX, win, message, p1, p2);
+            _ = root.BaseWndProc(k.PICTUREBOX, win, message, params);
             PaintMsg(win);
             return true;
         },
@@ -276,7 +279,7 @@ pub fn PictureProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM)
         else => {
         }
     }
-    return root.BaseWndProc(k.PICTUREBOX, win, message, p1, p2);
+    return root.BaseWndProc(k.PICTUREBOX, win, message, params);
 }
 
 fn PictureRect(x:c_int, y:c_int, len:c_int, hv:c_int) df.RECT {

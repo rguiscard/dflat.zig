@@ -2,6 +2,7 @@ const df = @import("ImportC.zig").df;
 const Window = @import("Window.zig");
 const normal = @import("Normal.zig");
 const helpbox = @import("HelpBox.zig");
+const q = @import("Message.zig");
 
 // This is temporarily put all wndproc together.
 // Once each file in c is ported to zig, this will not be in use.
@@ -22,23 +23,21 @@ const helpbox = @import("HelpBox.zig");
 //    return if (normal.NormalProc(win, msg, p1, p2)) df.TRUE else df.FALSE;
 //}
 
-pub fn ComboProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+pub fn ComboProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
     _ = wnd;
     _ = msg;
-    _ = p1;
-    _ = p2;
+    _ = params;
     return false;
 // not currently in use. port later.
 //    return df.cComboProc(wnd, msg, p1, p2);
 }
 
-pub fn SpinButtonProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+pub fn SpinButtonProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
     _ = wnd;
     _ = msg;
-    _ = p1;
-    _ = p2;
+    _ = params;
     return false;
 // not currently in use. port later.
 //    return df.cSpinButtonProc(wnd, msg, p1, p2);

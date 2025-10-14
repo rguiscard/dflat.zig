@@ -18,6 +18,7 @@ const statusbar = @import("StatusBar.zig");
 const popdown = @import("PopDown.zig");
 const editor = @import("Editor.zig");
 const helpbox = @import("HelpBox.zig");
+const q = @import("Message.zig");
 
 // ----------- classes.h ------------
 //
@@ -68,7 +69,7 @@ pub const CLASS = enum (i8) {
 pub const defs = [_]struct{
     []const u8,
     CLASS,
-    ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
+    ?*const fn (win:*Window, msg: df.MESSAGE, params:q.Params) bool,
     isize} {
 
     .{"NORMAL",      CLASS.FORCEINTTYPE, normal.NormalProc,        0              },

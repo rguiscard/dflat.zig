@@ -10,7 +10,9 @@ const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
 const q = @import("Message.zig");
 
-pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             win.holdmenu = menubar.ActiveMenuBar;
@@ -46,7 +48,7 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
         else => {
         }
     }
-    return root.DefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, params);
 }
 
 // ------- Build a system menu --------

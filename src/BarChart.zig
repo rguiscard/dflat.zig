@@ -2,6 +2,7 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
+const q = @import("Message.zig");
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
@@ -26,7 +27,8 @@ const ProjChart = [_]struct{[]const u8, isize, isize} {
 const Title =  "              PROJECT SCHEDULE";
 const Months = "           Jan Feb Mar Apr May Jun";
 
-fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+fn BarChartProc(win:*Window, message: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
     switch (message) {
         df.COMMAND => {
             const cmd:c = @enumFromInt(p1);
@@ -41,7 +43,7 @@ fn BarChartProc(win:*Window, message: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.DefaultWndProc(win, message, p1, p2);
+    return root.DefaultWndProc(win, message, params);
 }
 
 pub fn BarChart(pwin: *Window) void {

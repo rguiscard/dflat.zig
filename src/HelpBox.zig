@@ -237,7 +237,9 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
     return false;
 }
 
-pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             CreateWindowMsg(win);
@@ -266,7 +268,7 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return root.BaseWndProc(k.HELPBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.HELPBOX, win, msg, params);
 }
 
 // ---- PAINT message for the helpbox text editbox ----
@@ -278,17 +280,17 @@ fn PaintMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         pos += @intCast(word.*.off1);
         wnd.*.text[pos+1] = pwin.WindowColors[df.SELECT_COLOR][df.FG];
         wnd.*.text[pos+2] = pwin.WindowColors[df.SELECT_COLOR][df.BG];
-        const rtn = root.DefaultWndProc(win, df.PAINT, p1, p2);
+        const rtn = root.DefaultWndProc(win, df.PAINT, .{.legacy=.{p1, p2}});
         wnd.*.text[pos+1] = pwin.WindowColors[df.HILITE_COLOR][df.FG];
         wnd.*.text[pos+2] = pwin.WindowColors[df.HILITE_COLOR][df.BG];
         return rtn;
     }
-    return root.DefaultWndProc(win, df.PAINT, p1, p2);
+    return root.DefaultWndProc(win, df.PAINT, .{.legacy=.{p1, p2}});
 }
 
 // ---- LEFT_BUTTON message for the helpbox text editbox ----
 fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
-    const rtn = root.DefaultWndProc(win, df.LEFT_BUTTON, p1, p2);
+    const rtn = root.DefaultWndProc(win, df.LEFT_BUTTON, .{.legacy=.{p1, p2}});
 
     const pp1:usize = @intCast(p1);
     const pp2:usize = @intCast(p2);
@@ -336,7 +338,9 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // --- window processing module for HELPBOX's text EDITBOX --
-pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.KEYBOARD => {
         },
@@ -352,7 +356,7 @@ pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
         else => {
         }
     }
-    return root.DefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, params);
 }
 
 // ---- strip tildes from the help name ----

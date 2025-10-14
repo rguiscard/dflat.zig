@@ -9,12 +9,14 @@ var tick:usize = 0;
 const hands = [_][]const u8{" \xC0 ", " \xDA ", " \xBF ", " \xD9 "};
 const bo = "\xCD";
 
-pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     const wnd = win.win;
         switch (msg) {
             df.CREATE_WINDOW => {
                 tick = 0;
-                const rtn = root.DefaultWndProc(win, msg, p1, p2);
+                const rtn = root.DefaultWndProc(win, msg, params);
                 _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
                 _ = win.sendMessage(df.HIDE_MOUSE, .{.legacy=.{0, 0}});
                 _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{0, 0}});
@@ -40,7 +42,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 return true;
             },
             df.BORDER => {
-                const rtn = root.DefaultWndProc(win, msg, p1, p2);
+                const rtn = root.DefaultWndProc(win, msg, params);
                 df.writeline(wnd, @constCast(bo.ptr), 2, 0, df.FALSE);
                 return rtn;
             },
@@ -60,7 +62,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             }
         }
 
-    return root.DefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, params);
 }
 
 pub fn WatchIcon() *Window {

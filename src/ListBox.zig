@@ -30,7 +30,7 @@ fn UpKey(win:*Window,p2:df.PARAM) void {
     const wnd = win.win;
     if (win.selection > 0)    {
         if (win.selection == win.wtop) {
-            _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, df.UP, p2);
+            _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.legacy=.{df.UP, p2}});
             q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{win.selection-1,
                 if (win.isMultiLine()) p2 else df.FALSE}});
         } else {
@@ -62,7 +62,7 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
     const wnd = win.win;
     if (win.selection < win.wlines-1) {
         if (win.selection == win.wtop+win.ClientHeight()-1) {
-            _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, df.DN, p2);
+            _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.legacy=.{df.DN, p2}});
             q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{win.selection+1,
                 if (win.isMultiLine()) p2 else df.FALSE}});
         } else {
@@ -91,14 +91,14 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
 
 // --------- HOME and PGUP Keys ------------
 fn HomePgUpKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, p1, p2);
+    _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
     q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{@intCast(win.wtop),
         if (win.isMultiLine()) p2 else df.FALSE}});  // EXTENDEDSELECTIONS
 }
 
 // --------- END and PGDN Keys ------------
 fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, p1, p2);
+    _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
     var bot:usize = win.wtop+win.ClientHeight()-1;
     if (bot > win.wlines-1)
         bot = win.wlines-1;
@@ -258,7 +258,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     if (normal.WindowMoving or normal.WindowSizing)
         return false;
     if (win.wlines>0) {
-        _ = root.BaseWndProc(k.LISTBOX, win, df.DOUBLE_CLICK, p1, p2);
+        _ = root.BaseWndProc(k.LISTBOX, win, df.DOUBLE_CLICK, .{.legacy=.{p1, p2}});
         if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win)))
             _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{win.selection, 0}});
     }
@@ -267,7 +267,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 // ------------ ADDTEXT Message --------------
 fn AddTextMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
-    const rtn = root.BaseWndProc(k.LISTBOX, win, df.ADDTEXT, p1, p2);
+    const rtn = root.BaseWndProc(k.LISTBOX, win, df.ADDTEXT, .{.legacy=.{p1, p2}});
     if (win.selection == -1)
         _ = win.sendMessage(df.LB_SETSELECTION, .{.legacy=.{0, 0}});
 //#ifdef INCLUDE_EXTENDEDSELECTIONS
@@ -300,10 +300,12 @@ fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
 }
 
-pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
-            _ = root.BaseWndProc(k.LISTBOX, win, msg, p1, p2);
+            _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
             win.selection = -1;
             win.AnchorPoint = -1;
             return true;
@@ -342,7 +344,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             win.SelectCount = 0;
         },
         df.PAINT => {
-            _ = root.BaseWndProc(k.LISTBOX, win, msg, p1, p2);
+            _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
             if (p1 > 0) {
                 const pp1:usize = @intCast(p1);
                 const rc:*df.RECT = @ptrFromInt(pp1);
@@ -353,7 +355,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.SETFOCUS => {
-            _ = root.BaseWndProc(k.LISTBOX, win, msg, p1, p2);
+            _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
             if (p1>0)
                 WriteSelection(win, @intCast(win.selection), true, null);
             return true;
@@ -363,7 +365,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         df.SCROLLPAGE,
         df.HORIZPAGE,
         df.SCROLLDOC => {
-            _ = root.BaseWndProc(k.LISTBOX, win, msg, p1, p2);
+            _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
             WriteSelection(win, @intCast(win.selection),true,null);
             return true;
         },
@@ -398,7 +400,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.BaseWndProc(k.LISTBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.LISTBOX, win, msg, params);
 }
 
 fn SelectionInWindow(win:*Window, sel:isize) bool {

@@ -506,7 +506,9 @@ fn CloseWindowMsg(win:*Window) void {
 }
 
 // ----------- TEXTBOX Message-processing Module -----------
-pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             win.HScrollBox = 1;
@@ -593,7 +595,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) boo
         else => {
         }
     }
-    return root.BaseWndProc(k.TEXTBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.TEXTBOX, win, msg, params);
 }
 
 //#define TextLine(wnd, sel) \

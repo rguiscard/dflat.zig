@@ -75,7 +75,7 @@ pub fn ClearDialogBoxes() void {
 
 // ------- create and execute a dialog box ----------
 pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
-    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool) bool {
+    wndproc: ?*const fn (win:*Window, msg: df.MESSAGE, params: q.Params) bool) bool {
 
     const box = db;
 
@@ -276,7 +276,9 @@ fn CtlCloseWindowMsg(win:*Window) void {
 }
 
 // -- generic window processor used by dialog box controls --
-pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     // win can be null ? probably not.
     switch(msg) {
         df.CREATE_WINDOW => {
@@ -299,7 +301,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             if (win.getClass() == k.EDITBOX) {
                 const oldFocus = Window.inFocus;
                 Window.inFocus = null;
-                _ = root.DefaultWndProc(win, msg, p1, p2);
+                _ = root.DefaultWndProc(win, msg, params);
                 Window.inFocus = oldFocus;
                 return true;
             }
@@ -338,7 +340,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 //                            pwnd.*.wasCleared = df.FALSE;
 //                        }
                     }
-                    _ = root.DefaultWndProc(win, msg, p1, p2);
+                    _ = root.DefaultWndProc(win, msg, params);
                     oldWin.SetVisible();
                     if (pwin) |pw| {
                         pw.dfocus = win;
@@ -362,7 +364,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.DefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, params);
 }
 
 // -------- CREATE_WINDOW Message ---------
@@ -386,7 +388,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
             } else |_| { // error
             }
         }
-        rtn = root.BaseWndProc(k.DIALOG, win, df.CREATE_WINDOW, p1, p2);
+        rtn = root.BaseWndProc(k.DIALOG, win, df.CREATE_WINDOW, .{.legacy=.{p1, p2}});
 
         for(0..Dialogs.MAXCONTROLS) |i| {
             const ctl:*Dialogs.CTLWINDOW = @ptrCast(&db.*.ctl[i]);
@@ -433,7 +435,9 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
     const pp1:usize = @intCast(p1);
     const pp2:usize = @intCast(p2);
-    if (win.HitControlBox(pp1-win.GetLeft(), pp2-win.GetTop())) {
+    const ux = if (pp1>win.GetLeft()) pp1-win.GetLeft() else 0;
+    const uy = if (pp2>win.GetTop()) pp2-win.GetTop() else 0;
+    if (win.HitControlBox(ux, uy)) {
         q.PostMessage(win, df.KEYBOARD,.{.legacy=.{' ', df.ALTKEY}});
         return true;
     }
@@ -549,7 +553,9 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ----- window-processing module, DIALOG window class -----
-pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     var p2_new = p2;
 
     switch (msg) {
@@ -594,7 +600,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             p2_new = df.TRUE;
         },
         df.MOVE, df.SIZE => {
-            const rtn = root.BaseWndProc(k.DIALOG, win, msg, p1, p2);
+            const rtn = root.BaseWndProc(k.DIALOG, win, msg, params);
             if (win.isVisible()) {
                 if (win.dfocus) |dfocus| {
                     _ = dfocus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
@@ -612,7 +618,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         }
     }
     // Note, p2 will be changed.
-    return root.BaseWndProc(k.DIALOG, win, msg, p1, p2_new);
+    return root.BaseWndProc(k.DIALOG, win, msg, .{.legacy=.{p1, p2_new}});
 }
 
 // ---- return pointer to the text of a control window ----

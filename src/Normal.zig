@@ -337,8 +337,8 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 //    const dwnd = dwin.win;
     const pp1:usize = @intCast(p1);
     const pp2:usize = @intCast(p2);
-    const mx:usize = pp1 - win.GetLeft();
-    const my:usize = pp2 - win.GetTop();
+    const mx:usize = if (pp1>win.GetLeft()) pp1 - win.GetLeft() else 0;
+    const my:usize = if (pp2>win.GetTop()) pp2 - win.GetTop() else 0;
     if (WindowSizing or WindowMoving)
         return;
     if (win.HitControlBox(mx, my)) {
@@ -629,7 +629,9 @@ fn RestoreMsg(win:*Window) void {
     }
 }
 
-pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             CreateWindowMsg(win);
@@ -648,12 +650,12 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
                 return true;
             // ------- fall through -------
             if (win.parent) |pw| {
-                q.PostMessage(pw, msg, .{.legacy=.{p1, p2}});
+                q.PostMessage(pw, msg, params);
             }
         },
         df.ADDSTATUS, df.SHIFT_CHANGED => {
             if (win.parent) |pw| {
-                q.PostMessage(pw, msg, .{.legacy=.{p1, p2}});
+                q.PostMessage(pw, msg, params);
             }
         },
         df.PAINT => {

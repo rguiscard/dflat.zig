@@ -184,7 +184,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
     const p1_val:df.PARAM = @intCast(params.legacy[0]);
     const p2_val:df.PARAM = @intCast(params.legacy[1]);
 
-    log.LogMessages(win, msg, p1_val, p2_val);
+    log.LogMessages(win, msg, params);
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----

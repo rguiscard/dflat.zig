@@ -8,7 +8,6 @@ pub const df = @import("ImportC.zig").df;
 pub const dialogs = @import("Dialogs.zig");
 pub const menus = @import("Menus.zig");
 pub const Window = @import("Window.zig");
-pub const Message = @import("Message.zig");
 pub const Klass = @import("Classes.zig");
 pub const CLASS = @import("Classes.zig").CLASS;
 pub const BarChart = @import("BarChart.zig");
@@ -33,24 +32,24 @@ pub const cfg = @import("Config.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 
-pub fn BaseWndProc(klass: CLASS, win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn BaseWndProc(klass: CLASS, win:*Window, msg: df.MESSAGE, params:q.Params) bool {
     const base_idx:usize = @intCast(@intFromEnum(klass));
     const base_class = Klass.defs[base_idx][1]; // base
 
     const idx:usize = @intCast(@intFromEnum(base_class));
     if (Klass.defs[idx][2]) |proc| { // wndproc
-        return proc(win, msg, p1, p2);
+        return proc(win, msg, params);
     }
     return false;
 }
 
-pub fn DefaultWndProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn DefaultWndProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
     const klass = win.Class;
     const idx:usize = @intCast(@intFromEnum(klass));
     if (Klass.defs[idx][2]) |proc| { // wndproc
-        return proc(win, msg, p1, p2);
+        return proc(win, msg, params);
     }
-    return BaseWndProc(klass, win, msg, p1, p2);
+    return BaseWndProc(klass, win, msg, params);
 }
 
 pub export fn add(a: i32, b: i32) i32 {

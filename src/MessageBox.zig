@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const cmd = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
 const r = @import("Colors.zig");
+const q = @import("Message.zig");
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
@@ -35,20 +36,16 @@ pub fn CancelBox(win:?*Window, msg: [:0]const u8) bool {
 }
 
 fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct: c_int,
-                  wndproc: *const fn (win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool,
+                  wndproc: *const fn (win:*Window, msg: df.MESSAGE, params:q.Params) bool,
                   button1: ?[:0]const u8, button2: ?[:0]const u8, c1: cmd, c2: cmd, isModal: bool) bool {
     var mBox = Dialogs.MsgBox;
 
-//    const ptr:[*c]u8 = @constCast(msg.ptr);
-//    const m = std.mem.span(ptr);
     const m = msg;
 
     var ttl_w:c_int = 0;
     mBox.dwnd.title = null;
     if (title) |t| {
         ttl_w = @intCast(t.len+2);
-//        const pp:[*c]u8 = @constCast(t.ptr);
-//        mBox.dwnd.title = std.mem.span(pp);
         mBox.dwnd.title = t;
     }
 
@@ -101,7 +98,7 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
     return win;
 }
 
-fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+fn MessageBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
     switch (msg) {
         df.CREATE_WINDOW => {
             win.Class = k.MESSAGEBOX;
@@ -116,10 +113,11 @@ fn MessageBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.BaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.MESSAGEBOX, win, msg, params);
 }
 
-fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
     switch (msg) {
         df.CREATE_WINDOW => {
             win.Class = k.MESSAGEBOX;
@@ -139,10 +137,10 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.BaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.MESSAGEBOX, win, msg, params);
 }
 
-fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
     switch (msg)    {
         df.CREATE_WINDOW => {
             win.Class = df.ERRORBOX;
@@ -156,10 +154,10 @@ fn ErrorBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.BaseWndProc(df.ERRORBOX, win, msg, p1, p2);
+    return root.BaseWndProc(df.ERRORBOX, win, msg, params);
 }
 
-fn CancelProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+fn CancelProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
     switch (msg) {
         // There is no CancelWnd.
 //        case CREATE_WINDOW:
@@ -180,7 +178,7 @@ fn CancelProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         else => {
         }
     }
-    return root.BaseWndProc(k.MESSAGEBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.MESSAGEBOX, win, msg, params);
 }
 
 pub fn MsgHeight(msg:[:0]const u8) c_int {

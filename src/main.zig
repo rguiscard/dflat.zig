@@ -42,16 +42,17 @@ pub fn main() !void {
 //        --argc;
 //        argv++;
 //    }
-    while (mp.Message.dispatch_message()) {
+    while (mp.q.dispatch_message()) {
     }
 }
 
 // ------- window processing module for the
 //                    memopad application window -----
-fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
+    const p1 = params.legacy[0];
     switch(msg) {
         df.CREATE_WINDOW => {
-            const rtn = mp.DefaultWndProc(win, msg, p1, p2);
+            const rtn = mp.DefaultWndProc(win, msg, params);
             if (mp.cfg.config.InsertMode == true)
                 mp.menu.SetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
             if (mp.cfg.config.WordWrap == true)
@@ -164,7 +165,7 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         else => {
         }
     }
-    return mp.DefaultWndProc(win, msg, p1, p2);
+    return mp.DefaultWndProc(win, msg, params);
 }
 
 // --- The New command. Open an empty editor window ---
@@ -362,8 +363,8 @@ fn FixTabMenu() void {
 }
 
 // ----- window processing module for the editboxes -----
-fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
-//    const wnd = win.win;
+fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
+    const p1 = params.legacy[0];
     var rtn = false;
     switch (msg) {
         df.SETFOCUS => {
@@ -371,7 +372,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 win.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
                 win.WordWrapMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_WRAP);
             }
-            rtn = mp.DefaultWndProc(win, msg, p1, p2);
+            rtn = mp.DefaultWndProc(win, msg, params);
             if (p1 == 0) {
                 _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
             } else {
@@ -380,7 +381,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
             return rtn;
         },
         df.KEYBOARD_CURSOR => {
-            rtn = mp.DefaultWndProc(win, msg, p1, p2);
+            rtn = mp.DefaultWndProc(win, msg, params);
             ShowPosition(win);
             return rtn;
         },
@@ -436,7 +437,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         else => {
         }
     }
-    return mp.DefaultWndProc(win, msg, p1, p2);
+    return mp.DefaultWndProc(win, msg, params);
 }
 
 // ------ display the row and column in the statusbar ------

@@ -8,19 +8,20 @@ const k = @import("Classes.zig").CLASS;
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
-pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
                 if (p1 == 0)
                     _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
                 // fall off ?
-                const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
+                const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, params);
                 DialogBox.SetFocusCursor(win);
                 return rtn;
             },
             df.MOVE => {
-                const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
+                const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, params);
                 DialogBox.SetFocusCursor(win);
                 return rtn;
             },
@@ -49,7 +50,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             }
         }
     }
-    return root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
+    return root.BaseWndProc(k.CHECKBOX, win, msg, params);
 }
 
 

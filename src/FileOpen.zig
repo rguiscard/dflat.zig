@@ -6,6 +6,7 @@ const Window = @import("Window.zig");
 const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const dir = @import("Directory.zig");
+const q = @import("Message.zig");
 
 var _fileSpec:?[:0]const u8 = null;
 var _srchSpec:?[:0]const u8 = null;
@@ -68,10 +69,12 @@ pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *Dial
     return rtn;
 }
 
-fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
+fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
-            const rtn = root.DefaultWndProc(win, msg, p1, p2);
+            const rtn = root.DefaultWndProc(win, msg, params);
             if (win.extension) |extension| {
                 const db:*Dialogs.DBOX = extension.dbox;
                 if (DialogBox.ControlWindow(db, .ID_FILENAME)) |cwin| {
@@ -158,7 +161,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
         else => {
         }
     }
-    return root.DefaultWndProc(win, msg, p1, p2);
+    return root.DefaultWndProc(win, msg, params);
 }
 
 
