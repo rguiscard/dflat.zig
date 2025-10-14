@@ -507,8 +507,6 @@ fn CloseWindowMsg(win:*Window) void {
 
 // ----------- TEXTBOX Message-processing Module -----------
 pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             win.HScrollBox = 1;
@@ -516,16 +514,20 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             ClearTextPointers(win);
         },
         df.ADDTEXT => {
+            const p1 = params.legacy[0];
             const pp1:usize = @intCast(p1);
             const txt:[*c]u8 = @ptrFromInt(pp1);
             const len = df.strlen(txt);
             return AddTextMsg(win, txt[0..len]);
         },
         df.DELETETEXT => {
+            const p1 = params.legacy[0];
             DeleteTextMsg(win, @intCast(p1));
             return true;
         },
         df.INSERTTEXT => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             const pp1:usize = @intCast(p1);
             const txt:[*c]u8 = @ptrFromInt(pp1);
             const len = df.strlen(txt);
@@ -533,6 +535,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.SETTEXT => {
+            const p1 = params.legacy[0];
             const pp1:usize = @intCast(p1);
             const txt:[*c]u8 = @ptrFromInt(pp1);
             const len = df.strlen(txt);
@@ -543,6 +546,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             ClearTextMsg(win);
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
             if ((normal.WindowMoving == false) and (normal.WindowSizing == false)) {
                 if (KeyboardMsg(win, p1)) {
                     return true;
@@ -550,6 +554,8 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (normal.WindowMoving or normal.WindowSizing) {
                 return false;
             }
@@ -558,6 +564,8 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.MOUSE_MOVED => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (MouseMovedMsg(win, p1, p2)) {
                 return true;
             }
@@ -566,24 +574,31 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             ButtonReleasedMsg(win);
         },
         df.SCROLL => {
+            const p1 = params.legacy[0];
             return ScrollMsg(win, p1);
         },
         df.HORIZSCROLL => {
+            const p1 = params.legacy[0];
             return HorizScrollMsg(win, p1);
         },
         df.SCROLLPAGE => {
+            const p1 = params.legacy[0];
             ScrollPageMsg(win, p1);
             return true;
         },
         df.HORIZPAGE => {
+            const p1 = params.legacy[0];
             HorizScrollPageMsg(win, p1);
             return true;
         },
         df.SCROLLDOC => {
+            const p1 = params.legacy[0];
             ScrollDocMsg(win, p1);
             return true;
         },
         df.PAINT => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (win.isVisible()) {
                 PaintMsg(win, p1, p2);
                 return false;

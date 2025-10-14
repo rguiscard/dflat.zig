@@ -7,12 +7,12 @@ const k = @import("Classes.zig").CLASS;
 
 pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
-    const p1 = params.legacy[0];
     switch (msg) {
         df.CREATE_WINDOW => {
-            _ = win.sendMessage(df.CAPTURE_CLOCK, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.CAPTURE_CLOCK, q.none);
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
             if (p1 == df.CTRL_F4)
                 return true;
         },
@@ -77,6 +77,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.CLOCKTICK => {
+            const p1 = params.legacy[0];
             df.SetStandardColor(wnd);
             const pp:usize = @intCast(p1);
             df.PutWindowLine(wnd, @ptrFromInt(pp), @intCast(win.WindowWidth()-8), 0);
@@ -89,7 +90,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.CLOSE_WINDOW => {
-            _ = win.sendMessage(df.RELEASE_CLOCK, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.RELEASE_CLOCK, q.none);
         },
         else => {
         }

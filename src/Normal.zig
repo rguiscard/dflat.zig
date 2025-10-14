@@ -535,7 +535,7 @@ fn CloseWindowMsg(win:*Window) void {
 
     // ----- release captured resources ------
     if (win.PrevClock) |_| {
-        _ = win.sendMessage(df.RELEASE_CLOCK, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.RELEASE_CLOCK, q.none);
     }
     if (win.PrevMouse) |_| {
         _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
@@ -630,22 +630,26 @@ fn RestoreMsg(win:*Window) void {
 }
 
 pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             CreateWindowMsg(win);
         },
         df.SHOW_WINDOW => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             ShowWindowMsg(win, p1, p2);
         },
         df.HIDE_WINDOW => {
             HideWindowMsg(win);
         },
         df.INSIDE_WINDOW => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return InsideWindow(win, @intCast(p1), @intCast(p2));
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (KeyboardMsg(win, p1, p2))
                 return true;
             // ------- fall through -------
@@ -659,6 +663,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.PAINT => {
+            const p1 = params.legacy[0];
             if (isVisible(win)) {
                 if (win.wasCleared) {
                     PaintUnderLappers(win);
@@ -676,6 +681,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.BORDER => {
+            const p1 = params.legacy[0];
             if (isVisible(win)) {
                 var pp1:?*df.RECT = null;
                 if (p1>0) {
@@ -692,18 +698,26 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
             CommandMsg(win, p1);
         },
         df.SETFOCUS => {
+            const p1 = params.legacy[0];
             SetFocusMsg(win, p1);
         },
         df.DOUBLE_CLICK => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             DoubleClickMsg(win, p1, p2);
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             LeftButtonMsg(win, p1, p2);
         },
         df.MOUSE_MOVED => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (MouseMovedMsg(win, p1, p2)) {
                 return true;
             }
@@ -721,9 +735,13 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.MOVE => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             MoveMsg(win, p1, p2);
         },
         df.SIZE => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             SizeMsg(win, p1, p2);
         },
         df.CLOSE_WINDOW => {
@@ -747,6 +765,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.DISPLAY_HELP => {
+            const p1 = params.legacy[0];
             const p1_addr:usize = @intCast(p1);
             const pp1:[*c]u8 = @ptrFromInt(p1_addr);
             return helpbox.DisplayHelp(win, std.mem.span(pp1));

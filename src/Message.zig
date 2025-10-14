@@ -50,6 +50,8 @@ pub const Params = union(ParamsType) {
     char:Character,     // key and shift
 };
 
+pub const none:Params = .{.void=.{}};
+
 // ---------- event queue ----------
 const Evt = struct {
     event:df.MESSAGE,
@@ -181,8 +183,6 @@ pub fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, params:Params) bool {
 
 pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bool {
     var rrtn = rtn;
-    const p1_val:df.PARAM = @intCast(params.legacy[0]);
-    const p2_val:df.PARAM = @intCast(params.legacy[1]);
 
     log.LogMessages(win, msg, params);
 
@@ -217,6 +217,8 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
             },
             // -------- keyboard messages -------
             df.KEYBOARD_CURSOR => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
+                const p2_val:df.PARAM = @intCast(params.legacy[1]);
                 if (win) |w| {
                     if (w == Window.inFocus) {
                         const x:c_int = @as(c_int, @intCast(w.GetClientLeft()));
@@ -229,6 +231,8 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 }
             },
             df.CAPTURE_KEYBOARD => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
+                const p2_val:df.PARAM = @intCast(params.legacy[1]);
                 if (win) |w| { // wnd is not null
                     if (p2_val > 0) {
                         const pp2:usize = @intCast(p2_val);
@@ -245,6 +249,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 }
             },
             df.RELEASE_KEYBOARD => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
                 if (win) |w| { // wnd is not null
                     if (CaptureKeyboard == w or (p1_val>0)) {
                         CaptureKeyboard = w.PrevKeyboard;
@@ -268,6 +273,8 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 NoChildCaptureKeyboard = false;
             },
             df.CURRENT_KEYBOARD_CURSOR => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
+                const p2_val:df.PARAM = @intCast(params.legacy[1]);
                 var x:c_int = 0;
                 var y:c_int = 0;
                 df.curr_cursor(&x, &y);
@@ -291,6 +298,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 df.hidecursor();
             },
             df.SHOW_CURSOR => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
                 if (p1_val>0) {
                     df.set_cursor_type(0x0106);
                 } else {
@@ -311,6 +319,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 rrtn = if (df.mouse_installed()>0) true else false;
             },
             df.MOUSE_TRAVEL => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
                 var rc:df.RECT = .{.lf = 0, .tp = 0, .rt = 0, .bt = 0};
                 if (p1_val == 0) {
                     rc.lf = 0;
@@ -331,6 +340,8 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 df.hide_mousecursor();
             },
             df.MOUSE_CURSOR => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
+                const p2_val:df.PARAM = @intCast(params.legacy[1]);
                 df.set_mouseposition(@intCast(p1_val), @intCast(p2_val));
             },
             df.CURRENT_MOUSE_CURSOR => {
@@ -343,6 +354,8 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 rrtn = if (df.mousebuttons()>0) true else false;
             },
             df.CAPTURE_MOUSE => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
+                const p2_val:df.PARAM = @intCast(params.legacy[1]);
                 if (win) |w| { // wnd is not null
                     if (p2_val>0) {
                         const pp2:usize = @intCast(p2_val);
@@ -359,6 +372,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 }
             },
             df.RELEASE_MOUSE => {
+                const p1_val:df.PARAM = @intCast(params.legacy[0]);
                 if (win) |w| {
                     if (CaptureMouse == w or (p1_val>0)) {
                         CaptureMouse = w.PrevMouse;
