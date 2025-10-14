@@ -34,8 +34,8 @@ fn CreateWindowMsg(win:*Window) bool {
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, .{.legacy=.{0, 0}});
     _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
     _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{false, null}});
-    _ = q.SendMessage(null, df.SAVE_CURSOR, .{.legacy=.{0,0}});
-    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.SAVE_CURSOR, q.none);
+    _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     win.oldFocus = Window.inFocus;
     Window.inFocus = win;
     return rtn;
@@ -44,7 +44,7 @@ fn CreateWindowMsg(win:*Window) bool {
 // --------- LEFT_BUTTON Message ---------
 fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
     const pp2:usize = @intCast(p2);
-    const my:usize = @intCast(pp2 - win.GetTop());
+    const my:usize = if (pp2 > win.GetTop()) pp2 - win.GetTop() else 0;
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win))) {
         if (my != py) {
             _ = win.sendMessage(df.LB_SELECTION,
@@ -333,7 +333,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 fn CloseWindowMsg(win:*Window) bool {
     _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
     _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
-    _ = q.SendMessage(null, df.RESTORE_CURSOR, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.RESTORE_CURSOR, q.none);
     Window.inFocus = win.oldFocus;
 
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});

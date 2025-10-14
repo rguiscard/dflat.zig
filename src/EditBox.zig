@@ -174,7 +174,7 @@ fn KeyboardCursorMsg(win:*Window, col:usize, row:usize) void {
             _ = q.SendMessage(null, df.SHOW_CURSOR,
                       .{.legacy=.{ if (win.InsertMode and (TextMarking == false)) df.TRUE else df.FALSE, 0}});
     } else {
-        _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
+        _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     }
 }
 
@@ -965,7 +965,7 @@ fn CommandMsg(win:*Window,p1:df.PARAM) bool {
 // ---------- CLOSE_WINDOW Message -----------
 fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     if (win.DeletedText) |text| {
         root.global_allocator.free(text);
 
@@ -1024,7 +1024,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
         df.SETFOCUS => {
             const p1 = params.legacy[0];
             if (p1 == 0) {
-                _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
+                _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
             }
             // fall through?
             const rtn = root.BaseWndProc(k.EDITBOX, win, msg, params);

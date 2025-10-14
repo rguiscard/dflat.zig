@@ -254,7 +254,7 @@ pub fn EditorProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
 }
 
 fn TurnOffDisplay(win:*Window) void {
-    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     win.ClearVisible();
 }
 

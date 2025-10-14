@@ -339,12 +339,14 @@ CURRENT_KEYBOARD_CURSOR    read the cursor position
   Sent:    to retrieve the cursor position
   P1:      x (relative to the screen)
   P2:      y (relative to the screen)
+  PARAMS:  Cursor
   Returns: 
 
 HIDE_CURSOR            hide the keyboard cursor       
   Sent:    to hide the keyboard cursor
   P1:      
   P2:      
+  PARAMS:  Void
   Returns: 
 
 SHOW_CURSOR            display the keyboard cursor    
@@ -357,12 +359,14 @@ SAVE_CURSOR            save the cursor's configuration
   Sent:    to save the keyboard cursor's current configuration 
   P1:      
   P2:      
+  PARAMS:  Void
   Returns: 
 
 RESTORE_CURSOR         restore the saved cursor       
   Sent:    to restore a keyboard cursor's saved configuration 
   P1:      
   P2:      
+  PARAMS:  Void
   Returns: 
 
 SHIFT_CHANGED          the shift status changed       

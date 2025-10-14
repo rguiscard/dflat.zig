@@ -27,7 +27,7 @@ fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
     if (p1>0) {
         _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
     } else {
-        _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
+        _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     }
     return rtn;
 }

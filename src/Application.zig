@@ -159,7 +159,7 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
     } else if (df.AltDown > 0)    {
         df.AltDown = df.FALSE;
         if (win.MenuBar != Window.inFocus) {
-            _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
+            _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
         }
         if (win.MenuBar) |mb| {
             _ = mb.sendMessage(df.KEYBOARD, .{.legacy=.{df.F10, 0}});
@@ -348,7 +348,7 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
         }
     }
     Window.inFocus = if (p1) win else null;
-    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
 
     if (win.isVisible()) {
         _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
@@ -687,9 +687,9 @@ fn CreateStatusBar(win: *Window) void {
 
 // SHELLDOS
 fn SwitchCursor() void {
-    _ = q.SendMessage(null, df.SAVE_CURSOR, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.SAVE_CURSOR, q.none);
     df.SwapCursorStack();
-    _ = q.SendMessage(null, df.RESTORE_CURSOR, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.RESTORE_CURSOR, q.none);
 }
 
 // ------- Shell out to DOS ----------

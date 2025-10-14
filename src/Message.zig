@@ -29,9 +29,11 @@ pub const Legacy = struct {df.PARAM, df.PARAM};   // PARAM & PARAM
 pub const Void = struct {};
 pub const Position = struct {usize, usize};    // x & y
 pub const Paint = struct {usize, bool};        // &RECT, bool
-pub const Pointer = struct{usize, usize};      // pointer & len (or 0)
-pub const Character = struct{u8, u8};          // char & shift
-pub const CaptureDevice = struct{bool, ?*Window}; // convert usize to *Window later
+pub const Pointer = struct {usize, usize};     // pointer & len (or 0)
+pub const Character = struct {u8, u8};         // char & shift
+pub const CaptureDevice = struct {bool, ?*Window};
+pub const Cursor = struct {*usize, *usize};    // return current cursor position
+pub const Boolean = struct {bool};             // yes or no
 
 pub const ParamsType = enum {
     legacy,
@@ -41,6 +43,8 @@ pub const ParamsType = enum {
     pointer,
     char,
     capture,
+    cursor,
+    yes,
 };
 
 pub const Params = union(ParamsType) {
@@ -51,6 +55,8 @@ pub const Params = union(ParamsType) {
     pointer:Pointer,        // usize for now & len (or 0)
     char:Character,         // key and shift
     capture:CaptureDevice,
+    cursor:Cursor,          // *x, *y
+    yes:Boolean,            // true/false
 };
 
 pub const none:Params = .{.void=.{}};
@@ -272,19 +278,14 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 NoChildCaptureKeyboard = false;
             },
             df.CURRENT_KEYBOARD_CURSOR => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
-                const p2_val:df.PARAM = @intCast(params.legacy[1]);
                 var x:c_int = 0;
                 var y:c_int = 0;
                 df.curr_cursor(&x, &y);
-                const pp1:usize = @intCast(p1_val);
-                const pp1_ptr:*c_int = @ptrFromInt(pp1);
-                const pp2:usize = @intCast(p2_val);
-                const pp2_ptr:*c_int = @ptrFromInt(pp2);
-                pp1_ptr.* = x;
-                pp2_ptr.* = y;
-//                *(int*)p1 = x;
-//                *(int*)p2 = y;
+
+                const pp1_ptr:*usize = params.cursor[0];
+                const pp2_ptr:*usize = params.cursor[1];
+                pp1_ptr.* = @intCast(x);
+                pp2_ptr.* = @intCast(y);
             },
             df.SAVE_CURSOR => {
                 df.savecursor();
