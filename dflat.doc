@@ -317,6 +317,7 @@ CAPTURE_KEYBOARD       capture keyboard into a window
            regardless of focus
   P1:      
   P2:      
+  PARAMS:  CaptureDevice
   Returns: 
 
 RELEASE_KEYBOARD       release keyboard to system     

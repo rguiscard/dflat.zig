@@ -11,8 +11,6 @@ const k = @import("Classes.zig").CLASS;
 const q = @import("Message.zig");
 
 pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             win.holdmenu = menubar.ActiveMenuBar;
@@ -20,6 +18,8 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             menus.SystemMenu.PullDown[0].Selection = 0;
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             const pp1:usize = @intCast(p1);
             const pp2:usize = @intCast(p2);
             const mx:usize = if (pp1 > win.GetLeft()) pp1 - win.GetLeft() else 0;
@@ -33,6 +33,8 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             q.PostMessage(win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
         },
         df.DOUBLE_CLICK => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (p2 == win.getParent().GetTop()) {
                 q.PostMessage(win.parent, msg, .{.legacy=.{p1, p2}});
                 _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});

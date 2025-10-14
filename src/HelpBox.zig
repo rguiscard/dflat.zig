@@ -238,8 +238,6 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
 }
 
 pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             CreateWindowMsg(win);
@@ -248,12 +246,15 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             ReadHelp(win);
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (p2 == 0) {
                 if (CommandMsg(win, p1))
                     return true;
             }
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
             if (normal.WindowMoving == false) {
                 if (HelpBoxKeyboardMsg(win, p1))
                     return true;
@@ -339,15 +340,17 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 
 // --- window processing module for HELPBOX's text EDITBOX --
 pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.KEYBOARD => {
         },
         df.PAINT => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return PaintMsg(win, p1, p2);
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return LeftButtonMsg(win, p1, p2);
         },
         df.DOUBLE_CLICK => {

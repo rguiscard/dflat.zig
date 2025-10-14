@@ -104,7 +104,7 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
     q.PostMessage(win, df.INITIATE_DIALOG, .{.legacy=.{0, 0}});
     if (Modal == df.TRUE) {
         _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
-        _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{false, null}});
         while (q.dispatch_message()) {
         }
         rtn = (win.ReturnCode == .ID_OK);
@@ -555,12 +555,10 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 // ----- window-processing module, DIALOG window class -----
 pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
-    var p2_new = p2;
-
     switch (msg) {
         df.CREATE_WINDOW => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return CreateWindowMsg(win, p1, p2);
         },
         df.SHIFT_CHANGED => {
@@ -568,10 +566,14 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 return true;
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (LeftButtonMsg(win, p1, p2))
                 return true;
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (KeyboardMsg(win, p1, p2))
                 return true;
         },
@@ -587,6 +589,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.SETFOCUS => {
+            const p1 = params.legacy[0];
             if ((p1 != 0) and win.isVisible()) {
                 if (win.dfocus) |dfocus| {
                     return dfocus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
@@ -594,11 +597,14 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (CommandMsg(win, p1, p2))
                 return true;
         },
         df.PAINT => {
-            p2_new = df.TRUE;
+            const p1 = params.legacy[0];
+            return root.BaseWndProc(k.DIALOG, win, msg, .{.legacy=.{p1, df.TRUE}});
         },
         df.MOVE, df.SIZE => {
             const rtn = root.BaseWndProc(k.DIALOG, win, msg, params);
@@ -610,6 +616,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return rtn;
         },
         df.CLOSE_WINDOW => {
+            const p1 = params.legacy[0];
             if (p1 == 0) {
                 _ = win.sendCommandMessage(.ID_CANCEL, 0);
                 return true;
@@ -618,8 +625,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
         else => {
         }
     }
-    // Note, p2 will be changed.
-    return root.BaseWndProc(k.DIALOG, win, msg, .{.legacy=.{p1, p2_new}});
+    return root.BaseWndProc(k.DIALOG, win, msg, params);
 }
 
 // ---- return pointer to the text of a control window ----

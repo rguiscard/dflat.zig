@@ -185,14 +185,14 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
     switch (cmd) {
         .ID_SYSMOVE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, dwin_p2}});
-            _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{df.TRUE, dwin_p2}});
+            _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{true, dwin}});
             _ = win.sendMessage(df.MOUSE_CURSOR, .{.legacy=.{@intCast(win.GetLeft()), @intCast(win.GetTop())}});
             WindowMoving = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         .ID_SYSSIZE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, dwin_p2}});
-            _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{df.TRUE, dwin_p2}});
+            _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{true, dwin}});
             _ = win.sendMessage(df.MOUSE_CURSOR, .{.legacy=.{@intCast(win.GetRight()), @intCast(win.GetBottom())}});
             WindowSizing = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));

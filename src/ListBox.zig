@@ -301,8 +301,6 @@ fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 }
 
 pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
@@ -311,16 +309,22 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if ((normal.WindowMoving == false) and (normal.WindowSizing == false)) {
                 if (KeyboardMsg(win, p1, p2))
                     return true;
             }
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (LeftButtonMsg(win, p1, p2))
                 return true;
         },
         df.DOUBLE_CLICK => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (DoubleClickMsg(win, p1, p2))
                 return true;
         },
@@ -332,9 +336,13 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             }
         },
         df.ADDTEXT => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return AddTextMsg(win, p1, p2);
         },
         df.LB_GETTEXT => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             GetTextMsg(win, p1, p2);
             return true;
         },
@@ -344,6 +352,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             win.SelectCount = 0;
         },
         df.PAINT => {
+            const p1 = params.legacy[0];
             _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
             if (p1 > 0) {
                 const pp1:usize = @intCast(p1);
@@ -355,6 +364,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.SETFOCUS => {
+            const p1 = params.legacy[0];
             _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
             if (p1>0)
                 WriteSelection(win, @intCast(win.selection), true, null);
@@ -370,15 +380,20 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.LB_CHOOSE => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             _ = win.getParent().sendMessage(df.LB_CHOOSE, .{.legacy=.{p1, p2}});
             return true;
         },
         df.LB_SELECTION => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             ChangeSelection(win, @intCast(p1), @intCast(p2));
             _ = win.getParent().sendMessage(df.LB_SELECTION, .{.legacy=.{win.selection, 0}});
             return true;
         },
         df.LB_CURRENTSELECTION => {
+            const p1 = params.legacy[0];
             if (p1 > 0) {
                 const pp:usize = @intCast(p1);
                 const a:*c_int = @ptrFromInt(pp);
@@ -388,6 +403,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return false;
         },
         df.LB_SETSELECTION => {
+            const p1 = params.legacy[0];
             ChangeSelection(win, @intCast(p1), 0);
             return true;
         },

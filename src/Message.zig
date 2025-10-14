@@ -27,10 +27,11 @@ export var AltDown:df.BOOL = df.FALSE;
 // Handle different combination of parameters p1 & p2
 pub const Legacy = struct {df.PARAM, df.PARAM};   // PARAM & PARAM
 pub const Void = struct {};
-pub const Position = struct {usize, usize}; // x & y
-pub const Paint = struct {usize, bool};     // &RECT, bool
-pub const Pointer = struct{usize, usize};   // pointer & len (or 0)
-pub const Character = struct{u8, u8};    // char & shift
+pub const Position = struct {usize, usize};    // x & y
+pub const Paint = struct {usize, bool};        // &RECT, bool
+pub const Pointer = struct{usize, usize};      // pointer & len (or 0)
+pub const Character = struct{u8, u8};          // char & shift
+pub const CaptureDevice = struct{bool, ?*Window}; // convert usize to *Window later
 
 pub const ParamsType = enum {
     legacy,
@@ -39,15 +40,17 @@ pub const ParamsType = enum {
     paint,
     pointer,
     char,
+    capture,
 };
 
 pub const Params = union(ParamsType) {
-    legacy:Legacy,      // c_int & c_int
-    void:Void,          // 0 & 0
-    position:Position,  // x & y
-    paint:Paint,        // &RECT & bool
-    pointer:Pointer,    // usize for now & len (or 0)
-    char:Character,     // key and shift
+    legacy:Legacy,          // c_int & c_int
+    void:Void,              // 0 & 0
+    position:Position,      // x & y
+    paint:Paint,            // &RECT & bool
+    pointer:Pointer,        // usize for now & len (or 0)
+    char:Character,         // key and shift
+    capture:CaptureDevice,
 };
 
 pub const none:Params = .{.void=.{}};
@@ -229,18 +232,16 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 }
             },
             df.CAPTURE_KEYBOARD => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
-                const p2_val:df.PARAM = @intCast(params.legacy[1]);
+                const p1_val:bool= params.capture[0];
+                const p2_val:?*Window = params.capture[1];
                 if (win) |w| { // wnd is not null
-                    if (p2_val > 0) {
-                        const pp2:usize = @intCast(p2_val);
-                        const p2win:*Window = @ptrFromInt(pp2);
+                    if (p2_val) |p2win| {
                         p2win.PrevKeyboard = CaptureKeyboard;
                     } else {
                         w.PrevKeyboard = CaptureKeyboard;
                     }
                     CaptureKeyboard = w;
-                    NoChildCaptureKeyboard = (p1_val>0);
+                    NoChildCaptureKeyboard = p1_val;
                 } else { // is this necessary
                     CaptureKeyboard = null;
                     NoChildCaptureKeyboard = false;

@@ -70,8 +70,6 @@ pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *Dial
 }
 
 fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             const rtn = root.DefaultWndProc(win, msg, params);
@@ -87,6 +85,8 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             InitDlgBox(win);
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             const cmd:c = @enumFromInt(p1);
             const subcmd:isize = @intCast(p2);
             switch(cmd) {

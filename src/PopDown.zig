@@ -33,7 +33,7 @@ fn CreateWindowMsg(win:*Window) bool {
     }
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, .{.legacy=.{0, 0}});
     _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
-    _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{false, null}});
     _ = q.SendMessage(null, df.SAVE_CURSOR, .{.legacy=.{0,0}});
     _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
     win.oldFocus = Window.inFocus;
@@ -344,13 +344,13 @@ fn CloseWindowMsg(win:*Window) bool {
 // - Window processing module for POPDOWNMENU window class -
 pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             return CreateWindowMsg(win);
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             LeftButtonMsg(win, p1, p2);
             return false;
         },
@@ -358,6 +358,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.LB_SELECTION => {
+            const p1 = params.legacy[0];
             const sel:usize = @intCast(p1);
 //            const l = df.TextLine(wnd, sel);
 //            if (l[0] == df.LINE) {
@@ -370,10 +371,13 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.BUTTON_RELEASED => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (ButtonReleasedMsg(win, p1, p2))
                 return true;
         },
         df.BUILD_SELECTIONS => {
+            const p1 = params.legacy[0];
             const pp:usize = @intCast(p1);
             win.mnu = @ptrFromInt(pp);
             if (win.mnu) |mnu| {
@@ -389,10 +393,13 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return BorderMsg(win);
         },
         df.LB_CHOOSE => {
+            const p1 = params.legacy[0];
             LBChooseMsg(win, p1);
             return true;
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (KeyboardMsg(win, p1, p2))
                 return true;
         },

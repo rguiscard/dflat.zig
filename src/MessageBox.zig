@@ -117,7 +117,6 @@ fn MessageBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
 }
 
 fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
     switch (msg) {
         df.CREATE_WINDOW => {
             win.Class = k.MESSAGEBOX;
@@ -125,6 +124,7 @@ fn YesNoBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             win.ClearAttribute(df.CONTROLBOX);
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
             if (p1 < 128) {
                 const cc = std.ascii.toLower(@intCast(p1));
                 if (cc == 'y') {
