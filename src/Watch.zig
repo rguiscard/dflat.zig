@@ -53,7 +53,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             df.CLOSE_WINDOW => {
                 _ = win.sendMessage(df.RELEASE_CLOCK, q.none);
                 _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
-                _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
                 _ = win.sendMessage(df.SHOW_MOUSE, .{.legacy=.{0, 0}});
             },
             else => {

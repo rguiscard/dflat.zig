@@ -248,9 +248,9 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 }
             },
             df.RELEASE_KEYBOARD => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
+                const p1_val:bool = params.capture[0];
                 if (win) |w| { // wnd is not null
-                    if (CaptureKeyboard == w or (p1_val>0)) {
+                    if (CaptureKeyboard == w or p1_val) {
                         CaptureKeyboard = w.PrevKeyboard;
                     } else {
                         var twnd = CaptureKeyboard;

@@ -88,10 +88,10 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c) void {
 }
 
 pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
     if (win.GetControl()) |ct| {
         switch (msg) {
             df.SETFOCUS => {
+                const p1 = params.legacy[0];
                 if (p1 == 0)
                     _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
             },
@@ -109,6 +109,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                 DialogBox.SetFocusCursor(win);
             },
             df.KEYBOARD => {
+                const p1 = params.legacy[0];
                 if (p1 == ' ') {
                     // fall through
                     if (win.parent) |pw| {

@@ -109,7 +109,7 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
         }
         rtn = (win.ReturnCode == .ID_OK);
         _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
-        _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
         _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
     }
     return rtn;

@@ -324,6 +324,7 @@ RELEASE_KEYBOARD       release keyboard to system
   Sent:    by window to itelf to release the captured keyboard
   P1:      
   P2:      
+  PARAMS:  CaptureDevice (p2 is always null)
   Returns: 
 
 KEYBOARD_CURSOR        position the keyboard cursor   

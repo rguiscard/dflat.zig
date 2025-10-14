@@ -541,7 +541,7 @@ fn CloseWindowMsg(win:*Window) void {
         _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
     }
     if (win.PrevKeyboard) |_| {
-        _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
     }
     // --- change focus if this window had it --
     if (win == Window.inFocus)
@@ -838,7 +838,7 @@ fn TerminateMoveSize() void {
     py = -1;
     diff = 0;
     _ = dwin.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{df.TRUE, 0}});
-    _ = dwin.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{df.TRUE, 0}});
+    _ = dwin.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{true, null}});
     RestoreBorder(dwin.win.*.rc);
     WindowMoving = false;
     WindowSizing = false;

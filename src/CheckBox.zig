@@ -9,10 +9,10 @@ const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
 pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
+                const p1 = params.legacy[0];
                 if (p1 == 0)
                     _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
                 // fall off ?
@@ -34,6 +34,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                 DialogBox.SetFocusCursor(win);
             },
             df.KEYBOARD => {
+                const p1 = params.legacy[0];
                 if (p1 == ' ') {
                     // fall through
                     ct.*.setting ^= df.ON;

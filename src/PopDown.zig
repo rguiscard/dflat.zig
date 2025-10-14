@@ -332,7 +332,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 // ----------- CLOSE_WINDOW Message ----------
 fn CloseWindowMsg(win:*Window) bool {
     _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
-    _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
     _ = q.SendMessage(null, df.RESTORE_CURSOR, .{.legacy=.{0,0}});
     Window.inFocus = win.oldFocus;
 
