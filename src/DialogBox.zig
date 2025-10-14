@@ -98,19 +98,19 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
                         wndproc,
                         save);
 
-    _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
+    _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
     win.*.modal = (Modal == df.TRUE);
     FirstFocus(db);
     q.PostMessage(win, df.INITIATE_DIALOG, 0, 0);
     if (Modal == df.TRUE) {
-        _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
-        _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
+        _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{0, 0}});
         while (q.dispatch_message()) {
         }
         rtn = (win.ReturnCode == .ID_OK);
-        _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
-        _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
-        _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
+        _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
     }
     return rtn;
 }
@@ -243,7 +243,7 @@ fn SetScrollBars(win:*Window) void {
         win.ClearAttribute(df.HSCROLLBAR);
     }
     if (win.GetAttribute() != oldattr)
-        _ = win.sendMessage(df.BORDER, 0, 0);
+        _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
 }
 
 // ------- CLOSE_WINDOW Message (Control) -----
@@ -314,8 +314,8 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                         if ((oldWin.getClass() != k.APPLICATION) and
                                        (normal.isAncestor(oldWin, pw) == false)) {
                             Window.inFocus = null;
-                            _ = oldWin.sendMessage(df.BORDER, 0, 0);
-                            _ = pw.sendMessage(df.SHOW_WINDOW, 0, 0);
+                            _ = oldWin.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+                            _ = pw.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
                             Window.inFocus = oldFocus;
                             oldWin.ClearVisible();
                         }
@@ -323,8 +323,8 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 //                    if ((pwnd != null) and (oldWin.getClass() != k.APPLICATION) and
 //                                       (normal.isAncestor(oldWin.win, pwnd) == false)) {
 //                        Window.inFocus = null;
-//                        _ = oldWin.sendMessage(df.BORDER, 0, 0);
-//                        _ = q.SendMessage(pwnd, df.SHOW_WINDOW, 0, 0);
+//                        _ = oldWin.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+//                        _ = q.SendMessage(pwnd, df.SHOW_WINDOW, .{.legacy=.{0, 0}});
 //                        Window.inFocus = oldFocus;
 //                        oldWin.ClearVisible();
 //                    }
@@ -351,7 +351,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
                 // assume pwin (parent) exists. seems work.
                 if (pwin) |pw| {
                     const db = if (pw.extension) |extension| extension.dbox else null;
-                    _ = pw.sendMessage(df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
+                    _ = pw.sendMessage(df.COMMAND, .{.legacy=.{@intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS}});
                 }
 //                _ = q.SendMessage(pwnd, df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
             }
@@ -529,7 +529,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
             if (win.modal) {
                 _ = q.PostMessage(win, df.ENDDIALOG, 0, 0);
             } else {
-                _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
+                _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
             }
             return true;
         },
@@ -582,7 +582,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         df.SETFOCUS => {
             if ((p1 != 0) and win.isVisible()) {
                 if (win.dfocus) |dfocus| {
-                    return dfocus.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                    return dfocus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                 }
             }
         },
@@ -597,7 +597,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
             const rtn = root.BaseWndProc(k.DIALOG, win, msg, p1, p2);
             if (win.isVisible()) {
                 if (win.dfocus) |dfocus| {
-                    _ = dfocus.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                    _ = dfocus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                 }
             }
             return rtn;
@@ -662,9 +662,9 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:CLAS
             if (text) |txt| {
                 _ = w.sendTextMessage(df.SETTEXT, @constCast(txt), 0);
             } else {
-                _ = w.sendMessage(df.CLEARTEXT, 0, 0);
+                _ = w.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
             }
-            _ = w.sendMessage(df.PAINT, 0, 0);
+            _ = w.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
         }
     }
 }
@@ -691,10 +691,10 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
                 switch (ct.*.Class) {
                     .COMBOBOX,
                     .EDITBOX => {
-                        _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+                        _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                         _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                         if (cwin.isMultiLine() == false) {
-                            _ = cwin.sendMessage(df.PAINT, 0, 0);
+                            _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                         }
                     },
                     .LISTBOX,
@@ -703,9 +703,9 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
                         _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                     },
                     .TEXT => {
-                        _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+                        _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                         _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
-                        _ = cwin.sendMessage(df.PAINT, 0, 0);
+                        _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                     },
                     else => {
                     }
@@ -761,7 +761,7 @@ pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
                     },
                     .COMBOBOX,
                     .EDITBOX => {
-                        _ = cwin.sendMessage(df.GETTEXT,@intCast(@intFromPtr(text)),len);
+                        _ = cwin.sendMessage(df.GETTEXT,.{.legacy=.{@intCast(@intFromPtr(text)),len}});
                     },
                     else => {
                     }
@@ -779,8 +779,8 @@ pub fn GetDlgListText(win: *Window, text:[*c]u8, cmd:c) void {
         if (control) |ct| {
             var sel:c_int = -1; // cannot use isize here, otherwise, ListBox.zig GetTextMsg will fail
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&sel)), 0);
-                _ = cwin.sendMessage(df.LB_GETTEXT, @intCast(@intFromPtr(text)), @intCast(sel));
+                _ = cwin.sendMessage(df.LB_CURRENTSELECTION, .{.legacy=.{@intCast(@intFromPtr(&sel)), 0}});
+                _ = cwin.sendMessage(df.LB_GETTEXT, .{.legacy=.{@intCast(@intFromPtr(text)), @intCast(sel)}});
             }
         }
     }
@@ -897,11 +897,11 @@ pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: c_int) bool {
                                 radio.SetRadioButton(db, ct);
                             } else if (ct.*.Class == k.CHECKBOX) {
                                 ct.*.setting ^= df.ON;
-                                _ = cwin.sendMessage(df.PAINT, 0, 0);
+                                _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                             }  else if (ct.*.Class != k.NORMAL) { // this IF is not necessary
-                                _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                                _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                                 if (ct.*.Class == k.BUTTON)
-                                   _ = cwin.sendMessage(df.KEYBOARD, '\r',0);
+                                   _ = cwin.sendMessage(df.KEYBOARD, .{.legacy=.{'\r',0}});
                             }
                             return true;
                         }
@@ -921,7 +921,7 @@ pub fn FirstFocus(db:*Dialogs.DBOX) void {
         if (ct.*.Class != k.NORMAL) {
             if ((ct.*.Class != k.TEXT) and (ct.*.Class != k.BOX)) {
                 if (ct.win) |cwin| {
-                    _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                    _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                 }
                 return;
             }
@@ -960,7 +960,7 @@ pub fn NextFocus(db:*Dialogs.DBOX) void {
                 continue;
             }
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
             }
             break;
         }
@@ -998,7 +998,7 @@ pub fn PrevFocus(db:*Dialogs.DBOX) void {
                 continue;
             }
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
             }
             break;
         }

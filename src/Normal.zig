@@ -64,13 +64,13 @@ fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         }
         win.SetVisible();
 
-        _ = win.sendMessage(df.PAINT, 0, df.TRUE);
-        _ = win.sendMessage(df.BORDER, 0, 0);
+        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, df.TRUE}});
+        _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
         // --- show the children of this window ---
         var cwin = win.firstWindow();
         while (cwin) |cw| {
             if (cw.condition != .ISCLOSING) {
-                _ = cw.sendMessage(df.SHOW_WINDOW, p1, p2);
+                _ = cw.sendMessage(df.SHOW_WINDOW, .{.legacy=.{p1, p2}});
             }
             cwin = cw.nextWindow();
         }
@@ -136,14 +136,14 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                     x -= 1;
             },
             '\r' => {
-                _ = win.sendMessage(df.BUTTON_RELEASED,x,y);
+                _ = win.sendMessage(df.BUTTON_RELEASED,.{.legacy=.{x,y}});
             },
             else => {
                 return true;
             }
         }
-        _ = win.sendMessage(df.MOUSE_CURSOR, x, y);
-        _ = win.sendMessage(df.MOUSE_MOVED, x, y);
+        _ = win.sendMessage(df.MOUSE_CURSOR, .{.legacy=.{x, y}});
+        _ = win.sendMessage(df.MOUSE_MOVED, .{.legacy=.{x, y}});
         return true;
     }
     switch (p1) {
@@ -164,7 +164,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.CTRL_F4 => {
             if (win.TestAttribute(df.CONTROLBOX)) {
-                _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
+                _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
                 lists.SkipApplicationControls();
                 return true;
             }
@@ -184,31 +184,31 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
     const cmd:c = @enumFromInt(p1);
     switch (cmd) {
         .ID_SYSMOVE => {
-            _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwin_p2);
-            _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwin_p2);
-            _ = win.sendMessage(df.MOUSE_CURSOR, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, dwin_p2}});
+            _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{df.TRUE, dwin_p2}});
+            _ = win.sendMessage(df.MOUSE_CURSOR, .{.legacy=.{@intCast(win.GetLeft()), @intCast(win.GetTop())}});
             WindowMoving = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         .ID_SYSSIZE => {
-            _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, dwin_p2);
-            _ = win.sendMessage(df.CAPTURE_KEYBOARD, df.TRUE, dwin_p2);
-            _ = win.sendMessage(df.MOUSE_CURSOR, @intCast(win.GetRight()), @intCast(win.GetBottom()));
+            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, dwin_p2}});
+            _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{df.TRUE, dwin_p2}});
+            _ = win.sendMessage(df.MOUSE_CURSOR, .{.legacy=.{@intCast(win.GetRight()), @intCast(win.GetBottom())}});
             WindowSizing = true;
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         },
         .ID_SYSCLOSE => {
-            _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
+            _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
             lists.SkipApplicationControls();
         },
         .ID_SYSRESTORE => {
-            _ = win.sendMessage(df.RESTORE, 0, 0);
+            _ = win.sendMessage(df.RESTORE, .{.legacy=.{0, 0}});
         },
         .ID_SYSMINIMIZE => {
-            _ = win.sendMessage(df.MINIMIZE, 0, 0);
+            _ = win.sendMessage(df.MINIMIZE, .{.legacy=.{0, 0}});
         },
         .ID_SYSMAXIMIZE => {
-            _ = win.sendMessage(df.MAXIMIZE, 0, 0);
+            _ = win.sendMessage(df.MAXIMIZE, .{.legacy=.{0, 0}});
         },
         .ID_HELP => {
             const idx:usize = @intCast(@intFromEnum(win.getClass()));
@@ -277,7 +277,7 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
             thatpar = thatp.parent;
         }
         if (Window.inFocus) |focus| {
-            _ = focus.sendMessage(df.SETFOCUS, df.FALSE, 0);
+            _ = focus.sendMessage(df.SETFOCUS, .{.legacy=.{df.FALSE, 0}});
         }
         Window.inFocus = win;
         if ((that != null) and isVisible(win)) {
@@ -303,17 +303,17 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         lists.ReFocus(win);
         if ((this != null) and ((isVisible(this.?) == false) or (this.?.TestAttribute(df.SAVESELF) == false))) {
             win.wasCleared = false;
-            _ = this.?.sendMessage(df.SHOW_WINDOW, 0, 0);
+            _ = this.?.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
         } else if (isVisible(win) == false) {
-            _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+            _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
         } else {
-            _ = win.sendMessage(df.BORDER, 0, 0);
+            _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
         }
     }
     else if ((p1 == 0) and (Window.inFocus == win)) {
         // -------- clearing focus ---------
         Window.inFocus = null;
-        _ = win.sendMessage(df.BORDER, 0, 0);
+        _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
     }
 }
 
@@ -352,17 +352,17 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             if (mx == win.WindowWidth()-2) {
                 if (win.condition != .ISRESTORED) {
                     // --- hit the restore box ---
-                    _ = win.sendMessage(df.RESTORE, 0, 0);
+                    _ = win.sendMessage(df.RESTORE, .{.legacy=.{0, 0}});
                 } else {
                     // --- hit the maximize box ---
-                    _ = win.sendMessage(df.MAXIMIZE, 0, 0);
+                    _ = win.sendMessage(df.MAXIMIZE, .{.legacy=.{0, 0}});
                 }
                 return;
             }
             if (mx == win.WindowWidth()-3) {
                 // --- hit the minimize box ---
                 if (win.condition != .ISMINIMIZED) {
-                    _ = win.sendMessage(df.MINIMIZE, 0, 0);
+                    _ = win.sendMessage(df.MINIMIZE, .{.legacy=.{0, 0}});
                 }
                 return;
             }
@@ -375,7 +375,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             px = @intCast(mx);
             py = @intCast(my);
             diff = @intCast(mx);
-            _ = win.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(dwin)));
+            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, @intCast(@intFromPtr(dwin))}});
             dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
         }
         return;
@@ -404,7 +404,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 return;
         }
         WindowSizing = true;
-        _ = ww.sendMessage(df.CAPTURE_MOUSE, df.TRUE, @intCast(@intFromPtr(dwin)));
+        _ = ww.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, @intCast(@intFromPtr(dwin))}});
         dragborder(ww, @intCast(ww.GetLeft()), @intCast(ww.GetTop()));
     }
 }
@@ -460,7 +460,7 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
     win.wasCleared = false;
     if (wasVisible) {
-        _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+        _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
     }
     wnd.*.rc.lf = @intCast(p1);
     wnd.*.rc.tp = @intCast(p2);
@@ -474,11 +474,11 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     var cwin = win.firstWindow();
     while (cwin) |cw| {
         const cwnd = cw.win;
-        _ = cw.sendMessage(df.MOVE, cwnd.*.rc.lf+xdif, cwnd.*.rc.tp+ydif);
+        _ = cw.sendMessage(df.MOVE, .{.legacy=.{cwnd.*.rc.lf+xdif, cwnd.*.rc.tp+ydif}});
         cwin = cw.nextWindow();
     }
     if (wasVisible)
-        _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+        _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
 }
 
 
@@ -492,7 +492,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     }
     win.wasCleared = false;
     if (wasVisible) {
-        _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+        _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
     }
     wnd.*.rc.rt = @intCast(p1);
     wnd.*.rc.bt = @intCast(p2);
@@ -507,13 +507,13 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     var cwin = win.firstWindow();
     while (cwin) |cw| {
         if (cw.condition == .ISMAXIMIZED) {
-            _ = cw.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
+            _ = cw.sendMessage(df.SIZE, .{.legacy=.{df.RectRight(rc), df.RectBottom(rc)}});
         }
         cwin = cw.nextWindow();
     }
 
     if (wasVisible)
-        _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+        _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
 }
 
 // --------- CLOSE_WINDOW Message ----------
@@ -521,7 +521,7 @@ fn CloseWindowMsg(win:*Window) void {
     const wnd = win.win;
     win.condition = .ISCLOSING;
     // ----------- hide this window ------------
-    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+    _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
 
     // --- close the children of this window ---
     var cwin = win.lastWindow();
@@ -529,19 +529,19 @@ fn CloseWindowMsg(win:*Window) void {
         if (Window.inFocus == cw) {
             Window.inFocus = win;
         }
-        _ = cw.sendMessage(df.CLOSE_WINDOW,0,0);
+        _ = cw.sendMessage(df.CLOSE_WINDOW,.{.legacy=.{0,0}});
         cwin = win.lastWindow();
     }
 
     // ----- release captured resources ------
     if (win.PrevClock) |_| {
-        _ = win.sendMessage(df.RELEASE_CLOCK, 0, 0);
+        _ = win.sendMessage(df.RELEASE_CLOCK, .{.legacy=.{0, 0}});
     }
     if (win.PrevMouse) |_| {
-        _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
+        _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
     }
     if (win.PrevKeyboard) |_| {
-        _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
+        _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{0, 0}});
     }
     // --- change focus if this window had it --
     if (win == Window.inFocus)
@@ -575,14 +575,14 @@ fn MaximizeMsg(win:*Window) void {
     win.oldcondition = win.condition;
     win.condition = .ISMAXIMIZED;
     win.wasCleared = false;
-    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
-    _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
-    _ = win.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
+    _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.MOVE, .{.legacy=.{df.RectLeft(rc), df.RectTop(rc)}});
+    _ = win.sendMessage(df.SIZE, .{.legacy=.{df.RectRight(rc), df.RectBottom(rc)}});
     if (win.restored_attrib == 0) {
         win.restored_attrib = win.attrib;
     }
     win.ClearAttribute(df.SHADOW);
-    _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
     wnd.*.RestoredRC = holdrc;
 }
 
@@ -594,9 +594,9 @@ fn MinimizeMsg(win:*Window) void {
     win.oldcondition = win.condition;
     win.condition = .ISMINIMIZED;
     win.wasCleared = false;
-    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
-    _ = win.sendMessage(df.MOVE, df.RectLeft(rc), df.RectTop(rc));
-    _ = win.sendMessage(df.SIZE, df.RectRight(rc), df.RectBottom(rc));
+    _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.MOVE, .{.legacy=.{df.RectLeft(rc), df.RectTop(rc)}});
+    _ = win.sendMessage(df.SIZE, .{.legacy=.{df.RectRight(rc), df.RectBottom(rc)}});
     if (win == Window.inFocus) {
         lists.SetNextFocus();
     }
@@ -605,7 +605,7 @@ fn MinimizeMsg(win:*Window) void {
     }
     win.ClearAttribute( df.SHADOW | df.SIZEABLE | df.HASMENUBAR |
                         df.VSCROLLBAR | df.HSCROLLBAR);
-    _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
     wnd.*.RestoredRC = holdrc;
 }
 
@@ -616,16 +616,16 @@ fn RestoreMsg(win:*Window) void {
     win.oldcondition = win.condition;
     win.condition = .ISRESTORED;
     win.wasCleared = false;
-    _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+    _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
     win.attrib = win.restored_attrib;
     win.restored_attrib = 0;
-    _ = win.sendMessage(df.MOVE, wnd.*.RestoredRC.lf, wnd.*.RestoredRC.tp);
+    _ = win.sendMessage(df.MOVE, .{.legacy=.{wnd.*.RestoredRC.lf, wnd.*.RestoredRC.tp}});
     wnd.*.RestoredRC = holdrc;
-    _ = win.sendMessage(df.SIZE, wnd.*.RestoredRC.rt, wnd.*.RestoredRC.bt);
+    _ = win.sendMessage(df.SIZE, .{.legacy=.{wnd.*.RestoredRC.rt, wnd.*.RestoredRC.bt}});
     if (win != Window.inFocus) {
-        _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
+        _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
     } else {
-        _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+        _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
     }
 }
 
@@ -738,7 +738,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool
         df.RESTORE => {
             if (win.condition != .ISRESTORED) {
                 if (win.oldcondition == .ISMAXIMIZED) {
-                    _ = win.sendMessage(df.MAXIMIZE, 0, 0);
+                    _ = win.sendMessage(df.MAXIMIZE, .{.legacy=.{0, 0}});
                 } else {
                     RestoreMsg(win);
                 }
@@ -816,8 +816,8 @@ fn TerminateMoveSize() void {
     px = -1;
     py = -1;
     diff = 0;
-    _ = dwin.sendMessage(df.RELEASE_MOUSE, df.TRUE, 0);
-    _ = dwin.sendMessage(df.RELEASE_KEYBOARD, df.TRUE, 0);
+    _ = dwin.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{df.TRUE, 0}});
+    _ = dwin.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{df.TRUE, 0}});
     RestoreBorder(dwin.win.*.rc);
     WindowMoving = false;
     WindowSizing = false;
@@ -929,10 +929,10 @@ fn PaintOverLap(win:*Window, rc:df.RECT) void {
                         rc.bt == win.WindowHeight();
         if (isData) {
             win.wasCleared = false;
-            _ = win.sendMessage(df.PAINT, @intCast(@intFromPtr(&rc)), df.TRUE);
+            _ = win.sendMessage(df.PAINT, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.TRUE}});
         }
         if (isBorder) {
-            _ = win.sendMessage(df.BORDER, @intCast(@intFromPtr(&rc)), 0);
+            _ = win.sendMessage(df.BORDER, .{.legacy=.{@intCast(@intFromPtr(&rc)), 0}});
         } else if (isTitle) {
             win.DisplayTitle(@constCast(&rc));
         }

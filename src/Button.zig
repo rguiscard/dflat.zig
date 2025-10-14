@@ -36,7 +36,7 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
                   start = 3;
                 }
                 _ = popdown.CopyCommand(txt[start..],itext, (ct.*.setting == df.OFF), r.WndBackground(win));
-                _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+                _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(txt), 0);
             } else |_| {
             }
@@ -63,7 +63,7 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     } else {
         _ = q.SendMessage(null, df.WAITKEYBOARD, .{.legacy=.{0,0}});
     }
-    _ = win.sendMessage(df.PAINT, 0, 0);
+    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
     if (ct.*.setting == df.ON) {
         q.PostMessage(win.parent, df.COMMAND, @intFromEnum(ct.*.command), 0);
     } else {

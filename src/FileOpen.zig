@@ -75,7 +75,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
             if (win.extension) |extension| {
                 const db:*Dialogs.DBOX = extension.dbox;
                 if (DialogBox.ControlWindow(db, .ID_FILENAME)) |cwin| {
-                    _ = cwin.sendMessage(df.SETTEXTLENGTH, 64, 0);
+                    _ = cwin.sendMessage(df.SETTEXTLENGTH, .{.legacy=.{64, 0}});
                 }
             }
             return rtn;
@@ -104,7 +104,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                                 set_srchSpec(&fName);
                                 InitDlgBox(win);
                                 if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
-                                    _ = cwin.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                                    _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                                 }
                             }
                             return true;

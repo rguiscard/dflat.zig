@@ -76,6 +76,6 @@ pub fn BarChart(pwin: *Window) void {
     }
     if (Bwnd) |w| {
         var win = w;
-        _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
+        _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
     }
 }

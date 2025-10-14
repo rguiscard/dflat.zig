@@ -44,7 +44,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                     const x = std.mem.span(m);
                     _ = cwin.sendTextMessage(df.ADDTEXT, x, 0);
                 }
-                _ = cwin.sendMessage(df.SHOW_WINDOW, 0, 0);
+                _ = cwin.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
             }
         },
         df.COMMAND => {

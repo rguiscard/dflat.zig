@@ -28,7 +28,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 var cb = "[ ]";
                 if (ct.*.setting > 0)
                     cb = "[X]";
-                _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+                _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(cb), 0);
                 DialogBox.SetFocusCursor(win);
             },
@@ -36,13 +36,13 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 if (p1 == ' ') {
                     // fall through
                     ct.*.setting ^= df.ON;
-                    _ = win.sendMessage(df.PAINT, 0, 0);
+                    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                     return true;
                 }
             },
             df.LEFT_BUTTON => {
                 ct.*.setting ^= df.ON;
-                _ = win.sendMessage(df.PAINT, 0, 0);
+                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                 return true;
             },
             else => {

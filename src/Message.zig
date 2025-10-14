@@ -25,7 +25,7 @@ var NoChildCaptureKeyboard = false;
 export var AltDown:df.BOOL = df.FALSE;
 
 // Handle different combination of parameters p1 & p2
-pub const Legacy = struct {isize, isize};   // PARAM & PARAM
+pub const Legacy = struct {df.PARAM, df.PARAM};   // PARAM & PARAM
 pub const Position = struct {usize, usize}; // x & y
 pub const Void = struct {};
 pub const Paint = struct {usize, bool};     // &RECT, bool
@@ -150,12 +150,9 @@ pub fn PostMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void 
 pub fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, params:Params) bool {
     const rtn = true;
 
-    const v1:isize = params.legacy[0];
-    const v2:isize = params.legacy[1];
-
     if (wnd != null) {
         if (Window.get_zin(wnd)) |win| {
-            return win.sendMessage(msg, v1, v2);
+            return win.sendMessage(msg, params);
         } else {
             // This shouldn't happen, except dummy window at normal.c for now.
             // Or we can create a Window instance for it here.
@@ -498,7 +495,7 @@ pub fn dispatch_message() bool {
             df.KEYBOARD => {
                 if (!handshaking) {
                     if (Kwnd) |kw| {
-                        _ = kw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
+                        _ = kw.sendMessage(ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
                     } else {
                         // could this happen ?
                         _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
@@ -514,7 +511,7 @@ pub fn dispatch_message() bool {
                                   normal.isAncestor(Mwnd.?, CaptureMouse.?) == true)) {
                         if (Mwnd != Window.inFocus) {
                             if (Mwnd) |mw| {
-                                _ = mw.sendMessage(df.SETFOCUS, df.TRUE, 0);
+                                _ = mw.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                             } else {
                                 // could this happen ?
                                 _ = SendMessage(null, df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
@@ -522,7 +519,7 @@ pub fn dispatch_message() bool {
                         }
                     }
                     if (Mwnd) |mw| {
-                        _ = mw.sendMessage(df.LEFT_BUTTON, @intCast(ev.mx), @intCast(ev.my));
+                        _ = mw.sendMessage(df.LEFT_BUTTON, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
                     } else {
                         // could this happen ?
                         _ = SendMessage(null, df.LEFT_BUTTON, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
@@ -536,7 +533,7 @@ pub fn dispatch_message() bool {
                     // Fall through
                     const Mwnd = MouseWindow(ev.mx, ev.my);
                     if (Mwnd) |mw| {
-                        _ = mw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
+                        _ = mw.sendMessage(ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
                     } else {
                         // could this happen ?
                         _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
@@ -546,7 +543,7 @@ pub fn dispatch_message() bool {
             df.MOUSE_MOVED => {
                 const Mwnd = MouseWindow(ev.mx, ev.my);
                 if (Mwnd) |mw| {
-                    _ = mw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
+                    _ = mw.sendMessage(ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
                 } else {
                     // could this happen ?
                     _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
@@ -573,7 +570,7 @@ pub fn dispatch_message() bool {
         MsgQueueCtr -= 1;
 
         if (mq.win) |w| {
-            _ = w.sendMessage(mq.msg, mq.p1, mq.p2);
+            _ = w.sendMessage(mq.msg, .{.legacy=.{mq.p1, mq.p2}});
         } else {
             _ = SendMessage(null, mq.msg, .{.legacy=.{mq.p1, mq.p2}});
         }

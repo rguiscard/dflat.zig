@@ -97,7 +97,7 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
         win.WindowColors[df.FRAME_COLOR][df.FG] = r.WHITE;
         win.WindowColors[df.FRAME_COLOR][df.BG] = r.GREEN;
     }
-    _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+    _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
     return win;
 }
 

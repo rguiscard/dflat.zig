@@ -9,7 +9,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
     const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
-            _ = win.sendMessage(df.CAPTURE_CLOCK, 0, 0);
+            _ = win.sendMessage(df.CAPTURE_CLOCK, .{.legacy=.{0, 0}});
         },
         df.KEYBOARD => {
             if (p1 == df.CTRL_F4)
@@ -81,14 +81,14 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
             df.PutWindowLine(wnd, @ptrFromInt(pp), @intCast(win.WindowWidth()-8), 0);
             win.TimePosted = true;
             if (win.PrevClock) |clock| {
-                _ = clock.sendMessage(msg, p1, p2);
+                _ = clock.sendMessage(msg, .{.legacy=.{p1, p2}});
             } else { // can it be null ?
                 _ = q.SendMessage(null, msg, .{.legacy = .{p1, p2}});
             }
             return true;
         },
         df.CLOSE_WINDOW => {
-            _ = win.sendMessage(df.RELEASE_CLOCK, 0, 0);
+            _ = win.sendMessage(df.RELEASE_CLOCK, .{.legacy=.{0, 0}});
         },
         else => {
         }

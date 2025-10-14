@@ -18,7 +18,7 @@ fn AddModeKey(win:*Window) void {
         const mode = "Add Mode";
         const p1:c_int = if (win.AddMode) @intCast(@intFromPtr(mode.ptr)) else 0;
         if (win.parent) |pw| {
-            _ = pw.sendMessage(df.ADDSTATUS, p1, 0);
+            _ = pw.sendMessage(df.ADDSTATUS, .{.legacy=.{p1, 0}});
         } else {
             _ = q.SendMessage(null, df.ADDSTATUS, .{.legacy=.{p1, 0}});
         }
@@ -110,7 +110,7 @@ fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn SpacebarKey(win:*Window, p2:df.PARAM) void {
     if (win.isMultiLine()) {
         var sel:isize = -1;
-        _ = win.sendMessage(df.LB_CURRENTSELECTION, @intCast(@intFromPtr(&sel)), 0);
+        _ = win.sendMessage(df.LB_CURRENTSELECTION, .{.legacy=.{@intCast(@intFromPtr(&sel)), 0}});
         if (sel != -1) {
             if (win.AddMode) {
                 FlipSelection(win, sel);
@@ -124,7 +124,7 @@ fn SpacebarKey(win:*Window, p2:df.PARAM) void {
             } else {
                 win.AnchorPoint = -1;
             }
-            _ = win.sendMessage(df.PAINT, 0, 0);
+            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
         }
     }
 }
@@ -132,8 +132,8 @@ fn SpacebarKey(win:*Window, p2:df.PARAM) void {
 // --------- Enter ('\r') Key ------------
 fn EnterKey(win:*Window) void {
     if (win.selection != -1) {
-        _ = win.sendMessage(df.LB_SELECTION, win.selection, df.TRUE);
-        _ = win.sendMessage(df.LB_CHOOSE, win.selection, 0);
+        _ = win.sendMessage(df.LB_SELECTION, .{.legacy=.{win.selection, df.TRUE}});
+        _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{win.selection, 0}});
     }
 }
 
@@ -156,15 +156,15 @@ fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
             pos += 1;
         const first = wnd.*.text[pos];
         if ((first < 256) and (std.ascii.toLower(first) == p1)) {
-            _ = win.sendMessage(df.LB_SELECTION, @intCast(sel),
-                if (win.isMultiLine()) p2 else df.FALSE);
+            _ = win.sendMessage(df.LB_SELECTION, .{.legacy=.{@intCast(sel),
+                if (win.isMultiLine()) p2 else df.FALSE}});
             if (SelectionInWindow(win, sel) == false) {
                 const x:usize = win.ClientHeight();
                 win.wtop = 0;
                 if (sel > x-1) {
                     win.wtop = @as(usize, @intCast(sel))-(x-1);
                 }
-                _ = win.sendMessage(df.PAINT, 0, 0);
+                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
             }
             break;
         }
@@ -247,7 +247,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 //        }
 //#endif
 
-        _ = win.sendMessage(df.LB_SELECTION, @intCast(sel), df.TRUE);
+        _ = win.sendMessage(df.LB_SELECTION, .{.legacy=.{@intCast(sel), df.TRUE}});
         py = @intCast(my);
     }
     return true;
@@ -260,7 +260,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     if (win.wlines>0) {
         _ = root.BaseWndProc(k.LISTBOX, win, df.DOUBLE_CLICK, p1, p2);
         if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win)))
-            _ = win.sendMessage(df.LB_CHOOSE, win.selection, 0);
+            _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{win.selection, 0}});
     }
     return true;
 }
@@ -269,7 +269,7 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 fn AddTextMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
     const rtn = root.BaseWndProc(k.LISTBOX, win, df.ADDTEXT, p1, p2);
     if (win.selection == -1)
-        _ = win.sendMessage(df.LB_SETSELECTION, 0, 0);
+        _ = win.sendMessage(df.LB_SETSELECTION, .{.legacy=.{0, 0}});
 //#ifdef INCLUDE_EXTENDEDSELECTIONS
 //    if (*(char *)p1 == LISTSELECTOR)
 //        win.SelectCount += 1;
@@ -368,12 +368,12 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.LB_CHOOSE => {
-            _ = win.getParent().sendMessage(df.LB_CHOOSE, p1, p2);
+            _ = win.getParent().sendMessage(df.LB_CHOOSE, .{.legacy=.{p1, p2}});
             return true;
         },
         df.LB_SELECTION => {
             ChangeSelection(win, @intCast(p1), @intCast(p2));
-            _ = win.getParent().sendMessage(df.LB_SELECTION, win.selection, 0);
+            _ = win.getParent().sendMessage(df.LB_SELECTION, .{.legacy=.{win.selection, 0}});
             return true;
         },
         df.LB_CURRENTSELECTION => {
@@ -392,7 +392,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         df.CLOSE_WINDOW => {
             if (win.isMultiLine() and win.AddMode) {
                 win.AddMode = false;
-                _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
+                _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
             }
         },
         else => {
@@ -420,7 +420,7 @@ fn TestExtended(win:*Window, p2:df.PARAM) void {
     if (win.isMultiLine() and (win.AddMode == false) and p2n == 0) {
         if (win.SelectCount > 1) {
             ClearAllSelections(win);
-            _ = win.sendMessage(df.PAINT, 0, 0);
+            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
         }
     }
 }
@@ -516,7 +516,7 @@ fn ChangeSelection(win:*Window,sel:isize,shift:usize) void {
             }
             const sels = ExtendSelections(win, sel, shift);
             if (sels > 1) {
-                _ = win.sendMessage(df.PAINT, 0, 0);
+                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
             }
             if (sels == 0 and win.AddMode == false) {
                 ClearSelection(win, win.selection);

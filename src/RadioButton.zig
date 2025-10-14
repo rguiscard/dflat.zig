@@ -72,7 +72,7 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c) void {
                 }
                 if (wason > 0) {
                     if (ctl.win) |cwin| {
-                       _ = cwin.sendMessage(df.PAINT, 0, 0);
+                       _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                     }
                 }
             }
@@ -82,7 +82,7 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c) void {
         if (Setting)
             ct.*.isetting = df.ON;
         if (ct.win) |cwin| {
-            _ = cwin.sendMessage(df.PAINT, 0, 0);
+            _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
         }
     }
 }
@@ -103,7 +103,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
                 var rb = "( )";
                 if (ct.*.setting > 0)
                     rb = "(\x07)";
-                _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+                _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(rb), 0);
                 DialogBox.SetFocusCursor(win);
             },

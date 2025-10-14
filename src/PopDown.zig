@@ -32,8 +32,8 @@ fn CreateWindowMsg(win:*Window) bool {
         wnd.*.rc.rt += adj;
     }
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, 0, 0);
-    _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
-    _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
+    _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{0, 0}});
     _ = q.SendMessage(null, df.SAVE_CURSOR, .{.legacy=.{0,0}});
     _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
     win.oldFocus = Window.inFocus;
@@ -48,7 +48,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
     if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win))) {
         if (my != py) {
             _ = win.sendMessage(df.LB_SELECTION,
-                    @intCast(win.wtop+my-1), df.TRUE);
+                    .{.legacy=.{@intCast(win.wtop+my-1), df.TRUE}});
             py = @intCast(my);
         }
     } else {
@@ -73,14 +73,14 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 //        if (tl[0] != df.LINE)
         const tl = win.textLine(sel);
         if (wnd.*.text[tl] != df.LINE)
-            _ = win.sendMessage(df.LB_CHOOSE, win.selection, 0);
+            _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{win.selection, 0}});
     } else {
         const pwin = win.getParent();
         if ((pwin.getClass() == k.MENUBAR) and (p2==pwin.GetTop()))
             return false;
         if (p1 == pwin.GetLeft()+2)
             return false;
-        _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
+        _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
         return true;
     }
     return false;
@@ -184,7 +184,7 @@ fn PaintMsg(win:*Window) void {
         const wd:usize = @intCast(MenuWidth(@constCast(&selections))-2);
         sep[wd] = 0; // minimal of width and maxwidth ?
 
-        _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+        _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
         win.selection = mnu.*.Selection;
         for (mnu.*.Selections) |m| {
             if (m.SelectionTitle) |title| {
@@ -275,7 +275,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                     }
                 }
             }
-            _ = win.getParent().sendMessage(df.KEYBOARD, p1, p2);
+            _ = win.getParent().sendMessage(df.KEYBOARD, .{.legacy=.{p1, p2}});
  
 //            if (win.mnu.*.Selections[0].SelectionTitle == null) {
 //                _ = win.getParent().sendMessage(df.KEYBOARD, p1, p2);
@@ -286,7 +286,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         df.ESC => {
-            _ = win.sendMessage(df.CLOSE_WINDOW, 0, 0);
+            _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
             return true;
         },
         df.FWD,
@@ -331,13 +331,13 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 
 // ----------- CLOSE_WINDOW Message ----------
 fn CloseWindowMsg(win:*Window) bool {
-    _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
-    _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
+    _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{0, 0}});
     _ = q.SendMessage(null, df.RESTORE_CURSOR, .{.legacy=.{0,0}});
     Window.inFocus = win.oldFocus;
 
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, 0, 0);
-    _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, 0, 0);
+    _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, .{.legacy=.{0, 0}});
     return rtn;
 }
 

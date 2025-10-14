@@ -33,7 +33,7 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
         df.DOUBLE_CLICK => {
             if (p2 == win.getParent().GetTop()) {
                 q.PostMessage(win.parent, msg, p1, p2);
-                _ = win.sendMessage(df.CLOSE_WINDOW, df.TRUE, 0);
+                _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
             }
             return true;
         },
@@ -110,7 +110,7 @@ pub fn BuildSystemMenu(win: *Window) void {
     }
 
     _ = SystemMenuWin.sendMessage(df.BUILD_SELECTIONS,
-                  @intCast(@intFromPtr(&menus.SystemMenu.PullDown[0])), 0);
-    _ = SystemMenuWin.sendMessage(df.SETFOCUS, df.TRUE, 0);
-    _ = SystemMenuWin.sendMessage(df.SHOW_WINDOW, 0, 0);
+                  .{.legacy=.{@intCast(@intFromPtr(&menus.SystemMenu.PullDown[0])), 0}});
+    _ = SystemMenuWin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+    _ = SystemMenuWin.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
 }

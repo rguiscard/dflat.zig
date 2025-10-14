@@ -14,7 +14,7 @@ pub fn BoxProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
                 return false;
             },
             df.LEFT_BUTTON, df.BUTTON_RELEASED => {
-                return win.getParent().sendMessage(msg, p1, p2);
+                return win.getParent().sendMessage(msg, .{.legacy=.{p1, p2}});
             },
             df.BORDER => {
                 const rtn = root.BaseWndProc(k.BOX, win, msg, p1, p2);

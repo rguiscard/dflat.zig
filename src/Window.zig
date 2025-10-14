@@ -257,9 +257,9 @@ pub fn create(
 //        wnd.*.condition = df.ISRESTORED;
         wnd.*.RestoredRC = wnd.*.rc;
         InitWindowColors(self);
-        _ = self.sendMessage(df.CREATE_WINDOW, 0, 0);
+        _ = self.sendMessage(df.CREATE_WINDOW, .{.legacy=.{0, 0}});
         if (self.isVisible()) {
-            _ = self.sendMessage(df.SHOW_WINDOW, 0, 0);
+            _ = self.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
         }
     }
 
@@ -271,7 +271,7 @@ pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.P
     // Be sure to send null-terminated string to c.
     if (root.global_allocator.dupeZ(u8, p1)) |txt| {
         defer root.global_allocator.free(txt);
-        return self.sendMessage(msg, @intCast(@intFromPtr(txt.ptr)), p2);
+        return self.sendMessage(msg, .{.legacy=.{@intCast(@intFromPtr(txt.ptr)), p2}});
     } else |_| {
         // error
     }
@@ -279,12 +279,15 @@ pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.P
 }
 
 pub fn sendCommandMessage(self: *TopLevelFields, p1: c, p2: df.PARAM) bool {
-    return self.sendMessage(df.COMMAND, @intFromEnum(p1), p2);
+    return self.sendMessage(df.COMMAND, .{.legacy=.{@intFromEnum(p1), p2}});
 }
 
 // --------- send a message to a window -----------
-pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
+pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, params:q.Params) bool {
     var rtn = true;
+
+    const p1 = params.legacy[0];
+    const p2 = params.legacy[1];
 
     switch (msg) {
         df.PAINT,
@@ -328,13 +331,13 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
-    return q.ProcessMessage(self, msg, .{.legacy = .{@intCast(p1), @intCast(p2)}}, rtn);
+    return q.ProcessMessage(self, msg, params, rtn);
 }
 
 // -------- add a title to a window ---------
 pub fn AddTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
     InsertTitle(self, ttl);
-    _ = self.sendMessage(df.BORDER, 0, 0);
+    _ = self.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
 }
 
 // ----- insert a title into a window ----------
@@ -386,7 +389,7 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
             rc = df.RelativeWindowRect(wnd, self.WindowRect());
         }
         rc = self.AdjustRectangle(rc);
-        if (self.sendMessage(df.TITLE, @intCast(@intFromPtr(rcc)), 0)) {
+        if (self.sendMessage(df.TITLE, .{.legacy=.{@intCast(@intFromPtr(rcc)), 0}})) {
             const title_color = cfg.config.clr[@intCast(@intFromEnum(k.TITLEBAR))];
             if (self == inFocus) {
                 df.foreground = title_color [r.HILITE_COLOR] [r.FG];

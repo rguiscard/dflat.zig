@@ -15,9 +15,9 @@ fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
                         if (dirs) c.ID_DIRECTORY else c.ID_FILES, k.LISTBOX);
         if (control) |ct| {
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+                _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                 _ = df.cBuildList(cwin.win, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
-                _ = cwin.sendMessage(df.SHOW_WINDOW, 0, 0);
+                _ = cwin.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
             }
         }
     }
@@ -41,8 +41,8 @@ pub fn BuildPathDisplay(win:*Window) void {
             const path = std.mem.zeroes([df.MAXPATH]u8);
             _ = df.getcwd(@constCast(&path), path.len);
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.SETTEXT, @intCast(@intFromPtr(&path)), 0);
-                _ = cwin.sendMessage(df.PAINT, 0, 0);
+                _ = cwin.sendMessage(df.SETTEXT, .{.legacy=.{@intCast(@intFromPtr(&path)), 0}});
+                _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
             }
         }
     }

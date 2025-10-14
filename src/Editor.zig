@@ -121,7 +121,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             TurnOnDisplay(win);
             RepaintLine(win);
             if (delnl) {
-                _ = win.sendMessage(df.PAINT, 0, 0);
+                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
             }
             return true;
         },
@@ -147,7 +147,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                 TurnOnDisplay(win);
                 RepaintLine(win);
                 if (p1 == '\r') {
-                    _ = win.sendMessage(df.PAINT, 0, 0);
+                    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                 }
                 return true;
             }
@@ -263,6 +263,6 @@ fn TurnOnDisplay(win:*Window) void {
 
 fn RepaintLine(win:*Window) void {
     const wnd = win.win;
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, editbox.WndCol(win), @intCast(wnd.*.WndRow));
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{editbox.WndCol(win), @intCast(wnd.*.WndRow)}});
     textbox.WriteTextLine(win, null, @intCast(wnd.*.CurrLine), false);
 }

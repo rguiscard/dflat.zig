@@ -15,17 +15,17 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
             df.CREATE_WINDOW => {
                 tick = 0;
                 const rtn = root.DefaultWndProc(win, msg, p1, p2);
-                _ = win.sendMessage(df.CAPTURE_MOUSE, 0, 0);
-                _ = win.sendMessage(df.HIDE_MOUSE, 0, 0);
-                _ = win.sendMessage(df.CAPTURE_KEYBOARD, 0, 0);
-                _ = win.sendMessage(df.CAPTURE_CLOCK, 0, 0);
+                _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.HIDE_MOUSE, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.CAPTURE_CLOCK, .{.legacy=.{0, 0}});
                 return rtn;
             },
             df.CLOCKTICK => {
                 tick = tick + 1;
                 tick = tick & 3; // the same as tick % 4 for positive number
                 if (win.PrevClock) |clock| {
-                    _ = clock.sendMessage(msg, p1, p2);
+                    _ = clock.sendMessage(msg, .{.legacy=.{p1, p2}});
                 } else { // could clock be null ?
                     _ = q.SendMessage(null, msg, .{.legacy=.{@intCast(p1), @intCast(p2)}});
                 }
@@ -45,16 +45,16 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 return rtn;
             },
             df.MOUSE_MOVED => {
-                _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
-                _ = win.sendMessage(df.MOVE, p1, p2);
-                _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+                _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.MOVE, .{.legacy=.{p1, p2}});
+                _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
                 return true;
             },
             df.CLOSE_WINDOW => {
-                _ = win.sendMessage(df.RELEASE_CLOCK, 0, 0);
-                _ = win.sendMessage(df.RELEASE_MOUSE, 0, 0);
-                _ = win.sendMessage(df.RELEASE_KEYBOARD, 0, 0);
-                _ = win.sendMessage(df.SHOW_MOUSE, 0, 0);
+                _ = win.sendMessage(df.RELEASE_CLOCK, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.SHOW_MOUSE, .{.legacy=.{0, 0}});
             },
             else => {
             }

@@ -25,7 +25,7 @@ var ActiveMenu:?*[menus.MAXPULLDOWNS+1]menus.MENU = null; // this should be priv
 fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
     const rtn = root.BaseWndProc(k.MENUBAR, win, df.SETFOCUS, p1, 0);
     if (p1>0) {
-        _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
+        _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
     } else {
         _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
     }
@@ -85,7 +85,7 @@ fn PaintMsg(win:*Window) void {
     if (Selecting)
         return;
     if (win == Window.inFocus) {
-        _ = win.getParent().sendMessage(df.ADDSTATUS, 0, 0);
+        _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
     }
     df.SetStandardColor(wnd);
 
@@ -142,8 +142,8 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
         for (menupos, 0..) |m, idx| {
             if (((Window.inFocus == win) and (m.sc == cc)) or
                 ((a > 0) and (m.sc == a))) {
-                _ = win.sendMessage(df.SETFOCUS, df.TRUE, 0);
-                _ = win.sendMessage(df.MB_SELECTION, @intCast(idx), 0);
+                _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                _ = win.sendMessage(df.MB_SELECTION, .{.legacy=.{@intCast(idx), 0}});
                 return;
             }
         }
@@ -164,7 +164,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
                                 if (pd.Attrib.TOGGLE) {
                                     pd.Attrib.CHECKED = !pd.Attrib.CHECKED;
                                 }
-                                _ = GetDocFocus().sendMessage(df.SETFOCUS, df.TRUE, 0);
+                                _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                                 q.PostMessage(win.parent, df.COMMAND, @intFromEnum(pd.ActionId), 0);
                             }
                         }
@@ -277,7 +277,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM) void {
                (mx <= menupos[idx].x2-4*i-5)) {
             if (ActiveMenuBar) |mbar| {
                 if ((idx != mbar.*.ActiveSelection) or (mwin == null)) {
-                    _ = win.sendMessage(df.MB_SELECTION, i, 0);
+                    _ = win.sendMessage(df.MB_SELECTION, .{.legacy=.{i, 0}});
                 }
             }
             break;
@@ -294,7 +294,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (ActiveMenuBar) |mbar| {
             mbar.*.ActiveSelection = -1;
         }
-        _ = win.sendMessage(df.PAINT, 0, 0);
+        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
     }
     Selecting = true;
     // should use Menu or Menu* ?
@@ -318,7 +318,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         } else {
             var offset:usize = @intCast(menupos[@intCast(p1)].x1 - 4 * p1);
             if (mwin) |m| {
-                _ = m.sendMessage(df.CLOSE_WINDOW, 0, 0);
+                _ = m.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
             }
             if (ActiveMenuBar) |mbar| { 
                 mbar.*.ActiveSelection = @intCast(p1);
@@ -339,14 +339,14 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                     df.SHADOW);
         if (p2 == 0) {
             Selecting = false;
-            _ = win.sendMessage(df.PAINT, 0, 0);
+            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
             Selecting = true;
         }
         if (mnu.*.Selections[0].SelectionTitle != null) {
             if (mwin) |m| {
-                _ = m.sendMessage(df.BUILD_SELECTIONS, @intCast(@intFromPtr(mnu)), 0);
-                _ = m.sendMessage(df.SETFOCUS, df.TRUE, 0);
-                _ = m.sendMessage(df.SHOW_WINDOW, 0, 0);
+                _ = m.sendMessage(df.BUILD_SELECTIONS, .{.legacy=.{@intCast(@intFromPtr(mnu)), 0}});
+                _ = m.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                _ = m.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
             }
         }
     }
@@ -372,16 +372,16 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                         if (casc < menus.MAXCASCADES) {
                             Cascaders[casc] = if (mwin) |m| m.win else null;
                             casc += 1;
-                            _ = win.sendMessage(df.MB_SELECTION, @intCast(del), df.TRUE);
+                            _ = win.sendMessage(df.MB_SELECTION, .{.legacy=.{@intCast(del), df.TRUE}});
                         }
                         break;
                 }
             }
         } else {
             if (mwin) |m| {
-                _ = m.sendMessage(df.CLOSE_WINDOW, 0, 0);
+                _ = m.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
             }
-            _ = GetDocFocus().sendMessage(df.SETFOCUS, df.TRUE, 0);
+            _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
             q.PostMessage(win.parent, df.COMMAND, p1, p2);
         }
     }
@@ -398,8 +398,8 @@ fn ClosePopdownMsg(win:*Window) void {
             mbar.*.ActiveSelection = -1;
         }
         if (Selecting == false) {
-            _ = GetDocFocus().sendMessage(df.SETFOCUS, df.TRUE, 0);
-            _ = win.sendMessage(df.PAINT, 0, 0);
+            _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
         }
     }
 }
@@ -441,7 +441,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
         },
         df.BORDER => {
             if (mwin == null) {
-                _ = win.sendMessage(df.PAINT, 0, 0);
+                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
             }
             return true;
         },

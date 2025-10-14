@@ -51,7 +51,7 @@ pub fn ReadHelp(win:*Window) void {
         const dbox:*Dialogs.DBOX = extension.dbox;
         if (DialogBox.ControlWindow(dbox, c.ID_HELPTEXT)) |cwin| {
             cwin.wndproc = HelpTextProc;
-            _ = cwin.sendMessage(df.CLEARTEXT, 0, 0);
+            _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
             //df.cReadHelp(wnd, cwin.win);
             // ----- read the help text -------
             var hline = [_]u8{0}**100;
@@ -121,13 +121,13 @@ pub fn ReadHelp(win:*Window) void {
                 if (linectr == cwin.ClientHeight())  {
                     const holdthis = thisword;
                     thisword = null;
-                    _ = cwin.sendMessage(df.PAINT, 0, 0);
+                    _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                     thisword = holdthis;
                 }
                 if (linectr > cwin.ClientHeight() and
                     cwin.TestAttribute(df.VSCROLLBAR) == false) {
                     cwin.AddAttribute(df.VSCROLLBAR);
-                    _ = cwin.sendMessage(df.BORDER, 0, 0);
+                    _ = cwin.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
                 }
             } // per line
         }
@@ -228,7 +228,7 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
 //                        } while (cwnd->wtop < 0);
                     }
                 }
-                _ = cwin.sendMessage(df.PAINT, 0, 0);
+                _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                 return true;
 //                return if (df.cHelpBoxKeyboardMsg(wnd, cwin.win, p1) == df.TRUE) true else false;
             }
@@ -300,7 +300,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             if (mx >= word.off2 and mx < word.off3) {
                 thisword = word;
                 thisword_idx = idx;
-                _ = win.sendMessage(df.PAINT, 0, 0);
+                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
                 if (word.isDefinition) {
                     if (win.parent) |pw| {
                         DisplayDefinition(pw.win, word.hkey.*.hname); 
@@ -464,10 +464,10 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
                     }
                     _ = dwin.sendTextMessage(df.ADDTEXT, &hline,0);
                 }
-                _ = dwin.sendMessage(df.SHOW_WINDOW, 0, 0);
+                _ = dwin.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
                 _ = q.SendMessage(null, df.WAITKEYBOARD, .{.legacy=.{0,0}});
                 _ = q.SendMessage(null, df.WAITMOUSE, .{.legacy=.{0,0}});
-                _ = dwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
+                _ = dwin.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
             }
         }
     }
@@ -538,7 +538,7 @@ fn BuildHelpBox(win:?*Window) void {
 // ----- select a new help window from its name -----
 pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
     if (newhelp != null) {
-        _ = win.sendMessage(df.HIDE_WINDOW, 0, 0);
+        _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
 
         if (ThisHelp) |help| {
             if (recall and stacked < df.MAXHELPSTACK) {
@@ -546,7 +546,7 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
                 stacked += 1;
             }
             ThisHelp = newhelp;
-            _ = win.getParent().sendMessage(df.DISPLAY_HELP, @intCast(@intFromPtr(help.*.hname)), 0);
+            _ = win.getParent().sendMessage(df.DISPLAY_HELP, .{.legacy=.{@intCast(@intFromPtr(help.*.hname)), 0}});
         }
 
         if (stacked>0) {
@@ -561,30 +561,30 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
         // --- reposition and resize the help window ---
         Dialogs.HelpBox.dwnd.x = @divFloor(df.SCREENWIDTH-Dialogs.HelpBox.dwnd.w, 2);
         Dialogs.HelpBox.dwnd.y = @divFloor(df.SCREENHEIGHT-Dialogs.HelpBox.dwnd.h, 2);
-        _ = win.sendMessage(df.MOVE, Dialogs.HelpBox.dwnd.x, Dialogs.HelpBox.dwnd.y);
+        _ = win.sendMessage(df.MOVE, .{.legacy=.{Dialogs.HelpBox.dwnd.x, Dialogs.HelpBox.dwnd.y}});
         _ = win.sendMessage(df.SIZE,
-                                    Dialogs.HelpBox.dwnd.x + Dialogs.HelpBox.dwnd.w - 1,
-                                    Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1);
+                        .{.legacy=.{Dialogs.HelpBox.dwnd.x + Dialogs.HelpBox.dwnd.w - 1,
+                                    Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1}});
         // --- reposition the controls ---
         for (0..5) |i| {
             var x = Dialogs.HelpBox.ctl[i].dwnd.x+@as(isize, @intCast(win.GetClientLeft()));
             var y = Dialogs.HelpBox.ctl[i].dwnd.y+@as(isize, @intCast(win.GetClientTop()));
             const cw = Dialogs.HelpBox.ctl[i].win;
             if (cw) |cwin| {
-                _ = cwin.sendMessage(df.MOVE, x, y);
+                _ = cwin.sendMessage(df.MOVE, .{.legacy=.{x, y}});
             }
             if (i == 0) {
                 x += Dialogs.HelpBox.ctl[i].dwnd.w - 1;
                 y += Dialogs.HelpBox.ctl[i].dwnd.h - 1;
                 if (cw) |cwin| {
-                    _ = cwin.sendMessage(df.SIZE, x, y);
+                    _ = cwin.sendMessage(df.SIZE, .{.legacy=.{x, y}});
                 }
             }
         }
         // --- read the help text into the help window ---
         ReadHelp(win);
         lists.ReFocus(win);
-        _ = win.sendMessage(df.SHOW_WINDOW, 0, 0);
+        _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
     }
 }
 

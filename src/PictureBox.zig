@@ -236,16 +236,16 @@ fn DrawBoxMsg(win:*Window, p1:df.PARAM) void {
         const p1_ptr:*df.RECT = @ptrFromInt(p1_addr); 
         var rc:df.RECT = p1_ptr.*;
         rc.bt = rc.tp;
-        _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.TRUE);
+        _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.TRUE}});
         rc = p1_ptr.*;
         rc.lf = rc.rt;
-        _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.FALSE);
+        _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.FALSE}});
         rc = p1_ptr.*;
         rc.tp = rc.bt;
-        _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.TRUE);
+        _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.TRUE}});
         rc = p1_ptr.*;
         rc.rt = rc.lf;
-        _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), df.FALSE);
+        _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.FALSE}});
     }
 }
 
@@ -298,7 +298,7 @@ fn PictureRect(x:c_int, y:c_int, len:c_int, hv:c_int) df.RECT {
 
 pub fn DrawVector(win:*Window, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
-    _ = win.sendMessage(df.DRAWVECTOR, @intCast(@intFromPtr(&rc)), 0);
+    _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), 0}});
 }
 
 pub fn DrawBox(win:*Window, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
@@ -308,10 +308,10 @@ pub fn DrawBox(win:*Window, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
         .rt = x+wd-1,
         .bt = y+ht-1
     };
-    _ = win.sendMessage(df.DRAWBOX, @intCast(@intFromPtr(&rc)), 0);
+    _ = win.sendMessage(df.DRAWBOX, .{.legacy=.{@intCast(@intFromPtr(&rc)), 0}});
 }
 
 pub fn DrawBar(win:*Window, vt:VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
-    _ = win.sendMessage(df.DRAWBAR, @intCast(@intFromPtr(&rc)), @intFromEnum(vt));
+    _ = win.sendMessage(df.DRAWBAR, .{.legacy=.{@intCast(@intFromPtr(&rc)), @intFromEnum(vt)}});
 }

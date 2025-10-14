@@ -96,7 +96,7 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
     const wnd = win.win;
     // -- assign new text value to textbox buffer --
-    _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+    _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
     
     if (win.getGapBuffer(txt.len)) |buf| {
         buf.clear();
@@ -131,34 +131,34 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM) bool {
 
     switch (p1) {
         df.UP => {
-            rtn = win.sendMessage(df.SCROLL,df.FALSE,0);
+            rtn = win.sendMessage(df.SCROLL,.{.legacy=.{df.FALSE,0}});
         },
         df.DN => {
-            rtn = win.sendMessage(df.SCROLL,df.TRUE,0);
+            rtn = win.sendMessage(df.SCROLL,.{.legacy=.{df.TRUE,0}});
         },
         df.FWD => {
-            rtn = win.sendMessage(df.HORIZSCROLL,df.TRUE,0);
+            rtn = win.sendMessage(df.HORIZSCROLL,.{.legacy=.{df.TRUE,0}});
         },
         df.BS => {
-            rtn = win.sendMessage(df.HORIZSCROLL,df.FALSE,0);
+            rtn = win.sendMessage(df.HORIZSCROLL,.{.legacy=.{df.FALSE,0}});
         },
         df.PGUP => {
-            rtn = win.sendMessage(df.SCROLLPAGE,df.FALSE,0);
+            rtn = win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.FALSE,0}});
         },
         df.PGDN => {
-            rtn = win.sendMessage(df.SCROLLPAGE,df.TRUE,0);
+            rtn = win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.TRUE,0}});
         },
         df.CTRL_PGUP => {
-            rtn = win.sendMessage(df.HORIZPAGE,df.FALSE,0);
+            rtn = win.sendMessage(df.HORIZPAGE,.{.legacy=.{df.FALSE,0}});
         },
         df.CTRL_PGDN => {
-            rtn = win.sendMessage(df.HORIZPAGE,df.TRUE,0);
+            rtn = win.sendMessage(df.HORIZPAGE,.{.legacy=.{df.TRUE,0}});
         },
         df.HOME => {
-            rtn = win.sendMessage(df.SCROLLDOC,df.TRUE,0);
+            rtn = win.sendMessage(df.SCROLLDOC,.{.legacy=.{df.TRUE,0}});
         },
         df.END => {
-            rtn = win.sendMessage(df.SCROLLDOC,df.FALSE,0);
+            rtn = win.sendMessage(df.SCROLLDOC,.{.legacy=.{df.FALSE,0}});
         },
         else => {
         }
@@ -181,11 +181,11 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         }
         if (my == 1) {
             // -------- top scroll button ---------
-            return win.sendMessage(df.SCROLL, df.FALSE, 0);
+            return win.sendMessage(df.SCROLL, .{.legacy=.{df.FALSE, 0}});
         }
         if (my == win.ClientHeight()) {
             // -------- bottom scroll button ---------
-            return win.sendMessage(df.SCROLL, df.TRUE, 0);
+            return win.sendMessage(df.SCROLL, .{.legacy=.{df.TRUE, 0}});
         }
         // ---------- in the scroll bar -----------
         if ((VSliding == false) and (my-1 == win.VScrollBox)) {
@@ -199,10 +199,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy = .{@intCast(@intFromPtr(&rc)), 0}});
         }
         if (my-1 < win.VScrollBox) {
-            return win.sendMessage(df.SCROLLPAGE,df.FALSE,0);
+            return win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.FALSE,0}});
         }
         if (my-1 > win.VScrollBox) {
-            return win.sendMessage(df.SCROLLPAGE,df.TRUE,0);
+            return win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.TRUE,0}});
         }
     }
     if (win.TestAttribute(df.HSCROLLBAR) and
@@ -213,10 +213,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return false;
         }
         if (mx == 1) {
-            return win.sendMessage(df.HORIZSCROLL,df.FALSE,0);
+            return win.sendMessage(df.HORIZSCROLL,.{.legacy=.{df.FALSE,0}});
         }
         if (mx == win.WindowWidth()-2) {
-            return win.sendMessage(df.HORIZSCROLL,df.TRUE,0);
+            return win.sendMessage(df.HORIZSCROLL,.{.legacy=.{df.TRUE,0}});
         }
         if ((HSliding == false) and (mx-1 == win.HScrollBox)) {
             // --- hit the scroll box ---
@@ -232,10 +232,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         }
         if (mx-1 < win.HScrollBox) {
-            return win.sendMessage(df.HORIZPAGE,df.FALSE,0);
+            return win.sendMessage(df.HORIZPAGE,.{.legacy=.{df.FALSE,0}});
         }
         if (mx-1 > win.HScrollBox) {
-            return win.sendMessage(df.HORIZPAGE,df.TRUE,0);
+            return win.sendMessage(df.HORIZPAGE,.{.legacy=.{df.TRUE,0}});
         }
     }
     return false;
@@ -282,8 +282,8 @@ fn ButtonReleasedMsg(win:*Window) void {
         } else {
             ComputeWindowLeft(win);
         }
-        _ = win.sendMessage(df.PAINT, 0, 0);
-        _ = win.sendMessage(df.KEYBOARD_CURSOR, 0, 0);
+        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{0, 0}});
         VSliding = false;
         HSliding = false;
     }
@@ -311,7 +311,7 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
         if (df.ValidRect(rc))    {
             // ---- scroll the window ----- 
             if (win != Window.inFocus) {
-                _ = win.sendMessage(df.PAINT, 0, 0);
+                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
             } else {
                 df.scroll_window(wnd, rc, @intCast(p1));
                 if (p1 == 0) {
@@ -351,7 +351,7 @@ fn HorizScrollMsg(win:*Window,p1:df.PARAM) bool {
         }
         wnd.*.wleft -= 1;
     }
-    _ = win.sendMessage(df.PAINT, 0, 0);
+    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
     return true;
 }
 
@@ -376,7 +376,7 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) void {
 //    if (wnd.*.wtop < 0) {
 //        wnd.*.wtop = 0;
 //    }
-    _ = win.sendMessage(df.PAINT, 0, 0);
+    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
 }
 
 // ------------ HORIZSCROLLPAGE Message --------------
@@ -397,7 +397,7 @@ fn HorizScrollPageMsg(win:*Window,p1:df.PARAM) void {
     if (wnd.*.wleft < 0) {
         wnd.*.wleft = 0;
     }
-    _ = win.sendMessage(df.PAINT, 0, 0);
+    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
 }
 
 // ------------ SCROLLDOC Message --------------
@@ -412,7 +412,7 @@ fn ScrollDocMsg(win:*Window,p1:df.PARAM) void {
         win.wtop = win.wlines-clientHeight;
         wnd.*.wleft = 0;
     }
-    _ = win.sendMessage(df.PAINT, 0, 0);
+    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
 }
 
 // ------------ PAINT Message --------------
@@ -486,7 +486,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
                 (vscrollbox != win.VScrollBox)) {
             win.HScrollBox = hscrollbox;
             win.VScrollBox = vscrollbox;
-            _ = win.sendMessage(df.BORDER, p1, 0);
+            _ = win.sendMessage(df.BORDER, .{.legacy=.{p1, 0}});
         }
     }
     if ((p2 == 0) and (win != Window.inFocus)) {
@@ -497,7 +497,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
 // ------------ CLOSE_WINDOW Message --------------
 fn CloseWindowMsg(win:*Window) void {
     const wnd = win.win;
-    _ = win.sendMessage(df.CLEARTEXT, 0, 0);
+    _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
     if (wnd.*.TextPointers != null) {
         root.global_allocator.free(wnd.*.TextPointers[0..win.wlines]);
 //        free(wnd->TextPointers);
