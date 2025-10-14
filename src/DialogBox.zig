@@ -277,14 +277,14 @@ fn CtlCloseWindowMsg(win:*Window) void {
 
 // -- generic window processor used by dialog box controls --
 pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     // win can be null ? probably not.
     switch(msg) {
         df.CREATE_WINDOW => {
             CtlCreateWindowMsg(win);
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (CtlKeyboardMsg(win, p1, p2))
                 return true;
         },
@@ -307,6 +307,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             }
         },
         df.SETFOCUS => {
+            const p1 = params.legacy[0];
             const pwin = win.parent;
             if (p1 > 0) {
                 const oldFocus = Window.inFocus;
@@ -1027,7 +1028,7 @@ pub fn SetFocusCursor(win:?*Window) void {
     const wnd = if (win) |w| w.win else null;
     if (win == Window.inFocus) {
         _ = q.SendMessage(null, df.SHOW_CURSOR, .{.legacy=.{0,0}});
-        _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, .{.legacy=.{df.TRUE,0}});
+        _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, .{.position=.{1,0}});
     }
 }
 

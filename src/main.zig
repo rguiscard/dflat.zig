@@ -364,10 +364,10 @@ fn FixTabMenu() void {
 
 // ----- window processing module for the editboxes -----
 fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
-    const p1 = params.legacy[0];
     var rtn = false;
     switch (msg) {
         df.SETFOCUS => {
+            const p1 = params.legacy[0];
             if (p1 > 0) {
                 win.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
                 win.WordWrapMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_WRAP);
@@ -386,6 +386,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
             return rtn;
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
             const cmd:mp.Command = @enumFromInt(p1);
             switch(cmd) {
                 .ID_HELP => {

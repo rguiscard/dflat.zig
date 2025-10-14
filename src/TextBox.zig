@@ -283,7 +283,7 @@ fn ButtonReleasedMsg(win:*Window) void {
             ComputeWindowLeft(win);
         }
         _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
-        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{0, 0}});
         VSliding = false;
         HSliding = false;
     }

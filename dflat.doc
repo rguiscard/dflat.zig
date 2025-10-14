@@ -293,12 +293,14 @@ CAPTURE_CLOCK          capture clock into a window
            message to wnd->PrevClock when you receive the message.
   P1:      
   P2:      
+  PARAMS:  Void
   Returns: 
 
 RELEASE_CLOCK          release clock to the system    
   Sent:    to release the captured clock
   P1:      
   P2:      
+  PARAMS:  Void
   Returns: 
 
 
@@ -328,6 +330,7 @@ KEYBOARD_CURSOR        position the keyboard cursor
   P1:      x (if sent by window, 0 = left client area)
   P2:      y (if sent by window, 0 = top client area)
            if sent with NULL, x/y are relative to the screen
+  PARAMS:  Position
   Returns: 
 
 CURRENT_KEYBOARD_CURSOR    read the cursor position

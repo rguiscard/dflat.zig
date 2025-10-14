@@ -26,8 +26,8 @@ export var AltDown:df.BOOL = df.FALSE;
 
 // Handle different combination of parameters p1 & p2
 pub const Legacy = struct {df.PARAM, df.PARAM};   // PARAM & PARAM
-pub const Position = struct {usize, usize}; // x & y
 pub const Void = struct {};
+pub const Position = struct {usize, usize}; // x & y
 pub const Paint = struct {usize, bool};     // &RECT, bool
 pub const Pointer = struct{usize, usize};   // pointer & len (or 0)
 pub const Character = struct{u8, u8};    // char & shift
@@ -217,14 +217,12 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
             },
             // -------- keyboard messages -------
             df.KEYBOARD_CURSOR => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
-                const p2_val:df.PARAM = @intCast(params.legacy[1]);
+                const p1_val = params.position[0];
+                const p2_val = params.position[1];
                 if (win) |w| {
                     if (w == Window.inFocus) {
-                        const x:c_int = @as(c_int, @intCast(w.GetClientLeft()));
-                        const y:c_int = @as(c_int, @intCast(w.GetClientTop()));
-                        df.cursor(@intCast(x+p1_val),
-                                  @intCast(y+p2_val));
+                        df.cursor(@intCast(p1_val + w.GetClientLeft()),
+                                  @intCast(p2_val + w.GetClientTop()));
                     }
                 } else {
                     df.cursor(@intCast(p1_val), @intCast(p2_val));

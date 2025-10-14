@@ -69,7 +69,7 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                 }
                 win.BlkEndCol = @intCast(wnd.*.CurrCol);
                 _ = win.sendMessage(df.KEYBOARD_CURSOR,
-                                     .{.legacy=.{@intCast(WndCol(win)), wnd.*.WndRow}}); // WndCol
+                                     .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}}); // WndCol
             }
         }
     }
@@ -164,13 +164,13 @@ fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
 }
 
 // ----------- KEYBOARD_CURSOR Message ----------
-fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+fn KeyboardCursorMsg(win:*Window, col:usize, row:usize) void {
     const wnd = win.win;
-    wnd.*.CurrCol = @intCast(p1 + wnd.*.wleft);
-    wnd.*.WndRow = @intCast(p2);
-    wnd.*.CurrLine = @intCast(p2 + @as(c_int, @intCast(win.wtop)));
+    wnd.*.CurrCol = @as(c_int, @intCast(col)) + wnd.*.wleft;
+    wnd.*.WndRow = @intCast(row);
+    wnd.*.CurrLine = @intCast(row + win.wtop);
     if (win == Window.inFocus) {
-        if (df.CharInView(wnd, @intCast(p1), @intCast(p2))>0)
+        if (df.CharInView(wnd, @intCast(col), @intCast(row))>0)
             _ = q.SendMessage(null, df.SHOW_CURSOR,
                       .{.legacy=.{ if (win.InsertMode and (TextMarking == false)) df.TRUE else df.FALSE, 0}});
     } else {
@@ -191,7 +191,7 @@ fn SizeMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         wnd.*.WndRow = clientHeight-1;
         wnd.*.CurrLine = wnd.*.WndRow+@as(c_int, @intCast(win.wtop));
     }
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     return rtn;
 }
 
@@ -221,7 +221,7 @@ fn ScrollMsg(win:*Window, p1:df.PARAM) bool {
                     wnd.*.WndRow += 1;
                 }
             }
-            _ = win.sendMessage(df.KEYBOARD_CURSOR,.{.legacy=.{@intCast(WndCol(win)),@intCast(wnd.*.WndRow)}});
+            _ = win.sendMessage(df.KEYBOARD_CURSOR,.{.position=.{@intCast(WndCol(win)),@intCast(wnd.*.WndRow)}});
         }
     }
     return rtn;
@@ -242,7 +242,7 @@ fn HorizScrollMsg(win:*Window, p1:df.PARAM) bool {
             } else if (WndCol(win) == win.ClientWidth()) {
                 wnd.*.CurrCol -= 1;
             }
-            _ = win.sendMessage(df.KEYBOARD_CURSOR,.{.legacy=.{@intCast(WndCol(win)),@intCast(wnd.*.WndRow)}});
+            _ = win.sendMessage(df.KEYBOARD_CURSOR,.{.position=.{@intCast(WndCol(win)),@intCast(wnd.*.WndRow)}});
         }
     }
     return rtn;
@@ -257,7 +257,7 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
 //        SetLinePointer(wnd, wnd->wtop+wnd->WndRow);
         wnd.*.CurrLine = @as(c_int, @intCast(win.wtop))+wnd.*.WndRow;
         StickEnd(win);
-        _ = win.sendMessage(df.KEYBOARD_CURSOR,.{.legacy=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
+        _ = win.sendMessage(df.KEYBOARD_CURSOR,.{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     }
     return rtn;
 }
@@ -272,7 +272,7 @@ fn HorizPageMsg(win:*Window, p1:df.PARAM) bool {
     } else if (wnd.*.CurrCol < wnd.*.wleft) {
         wnd.*.CurrCol = wnd.*.wleft;
     }
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     return rtn;
 }
 
@@ -403,7 +403,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             (MouseX+@as(usize, @intCast(wnd.*.wleft)) < df.strlen(wnd.*.text)))) {
         wnd.*.CurrCol = @as(c_int, @intCast(MouseX))+wnd.*.wleft;
     }
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{WndCol(win), wnd.*.WndRow}});
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     return true;
 }
 
@@ -738,7 +738,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             ExtendBlock(win, @intCast(WndCol(win)), @intCast(wnd.*.WndRow));
     } else if (win.TestAttribute(df.READONLY) == false) {
         DoKeyStroke(win, @intCast(p1), p2);
-        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{WndCol(win), wnd.*.WndRow}});
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     } else if (p1 == '\t') {
         q.PostMessage(win.parent, df.KEYBOARD, .{.legacy=.{@intCast('\t'), p2}});
     } else {
@@ -785,7 +785,7 @@ fn DeleteTextCmd(win:*Window) void {
             win.wtop = win.BlkBegLine;
             wnd.*.WndRow = 0;
         }
-        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
         textbox.ClearTextBlock(win);
         textbox.BuildTextPointers(win);
     }
@@ -843,7 +843,7 @@ fn ClearCmd(win:*Window) void {
 
         textbox.ClearTextBlock(win);
         textbox.BuildTextPointers(win);
-        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
+        _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
         win.TextChanged = true;
 
 //        ClearTextBlock(wnd);
@@ -898,7 +898,7 @@ fn ParagraphCmd(win:*Window) void {
     wnd.*.WndRow = @intCast(fl - win.wtop);
 
     _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     win.TextChanged = true;
     textbox.BuildTextPointers(win);
 }
@@ -990,66 +990,85 @@ fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 
 pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             return CreateWindowMsg(win);
         },
         df.ADDTEXT => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return AddTextMsg(win, p1, p2);
         },
         df.SETTEXT => {
+            const p1 = params.legacy[0];
             return SetTextMsg(win, p1);
         },
         df.CLEARTEXT => {
             return ClearTextMsg(win);
         },
         df.GETTEXT => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return GetTextMsg(win, p1, p2);
         },
         df.SETTEXTLENGTH => {
+            const p1 = params.legacy[0];
             return SetTextLengthMsg(win, p1);
         },
         df.KEYBOARD_CURSOR => {
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             KeyboardCursorMsg(win, p1, p2);
             return true;
         },
         df.SETFOCUS => {
+            const p1 = params.legacy[0];
             if (p1 == 0) {
                 _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
             }
             // fall through?
             const rtn = root.BaseWndProc(k.EDITBOX, win, msg, params);
-            _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{@intCast(wnd.*.CurrCol-wnd.*.wleft), wnd.*.WndRow}});
+            _ = win.sendMessage(df.KEYBOARD_CURSOR,
+                                .{.position=.{@intCast(wnd.*.CurrCol-wnd.*.wleft), @intCast(wnd.*.WndRow)}});
             return rtn;
         },
         df.PAINT,
         df.MOVE => {
             const rtn = root.BaseWndProc(k.EDITBOX, win, msg, params);
-            _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{@intCast(wnd.*.CurrCol-wnd.*.wleft), wnd.*.WndRow}});
+            _ = win.sendMessage(df.KEYBOARD_CURSOR,
+                                .{.position=.{@intCast(wnd.*.CurrCol-wnd.*.wleft), @intCast(wnd.*.WndRow)}});
             return rtn;
         },
         df.SIZE => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return SizeMsg(win, p1, p2);
         },
         df.SCROLL => {
+            const p1 = params.legacy[0];
             return ScrollMsg(win, p1);
         },
         df.HORIZSCROLL => {
+            const p1 = params.legacy[0];
             return HorizScrollMsg(win, p1);
         },
         df.SCROLLPAGE => {
+            const p1 = params.legacy[0];
             return ScrollPageMsg(win, p1);
         },
         df.HORIZPAGE => {
+            const p1 = params.legacy[0];
             return HorizPageMsg(win, p1);
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (LeftButtonMsg(win, p1, p2))
                 return true;
         },
         df.MOUSE_MOVED => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (MouseMovedMsg(win, p1, p2))
                 return true;
         },
@@ -1058,17 +1077,23 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
                 return true;
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             if (KeyboardMsg(win, p1, p2))
                 return true;
         },
         df.SHIFT_CHANGED => {
+            const p1 = params.legacy[0];
             ShiftChangedMsg(win, p1);
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
             if (CommandMsg(win, p1))
                 return true;
         },
         df.CLOSE_WINDOW => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return CloseWindowMsg(win, p1, p2);
         },
         else => {
@@ -1188,7 +1213,7 @@ fn DoScrolling(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         textbox.ClearTextBlock(win);
         _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
     }
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{WndCol(win), wnd.*.WndRow}});
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     return true;
 }
 
@@ -1407,7 +1432,7 @@ fn NextWord(win:*Window) void {
 //        Forward(wnd);
 //    }
     win.SetVisible();
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     if (win.wtop != savetop or wnd.*.wleft != saveleft)
         _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
 }
@@ -1454,7 +1479,7 @@ fn PrevWord(win:*Window) void {
                 wnd.*.wleft = saveleft;
         }
     }
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{WndCol(win), wnd.*.WndRow}});
+    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     if (win.wtop != savetop or wnd.*.wleft != saveleft)
         _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
 }

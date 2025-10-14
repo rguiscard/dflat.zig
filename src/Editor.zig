@@ -265,6 +265,7 @@ fn TurnOnDisplay(win:*Window) void {
 
 fn RepaintLine(win:*Window) void {
     const wnd = win.win;
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{editbox.WndCol(win), @intCast(wnd.*.WndRow)}});
+    _ = win.sendMessage(df.KEYBOARD_CURSOR,
+                        .{.position=.{@intCast(editbox.WndCol(win)), @intCast(wnd.*.WndRow)}});
     textbox.WriteTextLine(win, null, @intCast(wnd.*.CurrLine), false);
 }

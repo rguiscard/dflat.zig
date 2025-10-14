@@ -142,7 +142,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 }
 
                 _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
-                _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.legacy=.{editbox.WndCol(win), wnd.*.WndRow}});
+                _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(editbox.WndCol(win)), @intCast(wnd.*.WndRow)}});
 
 //                if (Replacing)    {
 //                    if (rpl || YesNoBox("Replace the text?"))  {
