@@ -27,7 +27,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
                 if (win.PrevClock) |clock| {
                     _ = clock.sendMessage(msg, p1, p2);
                 } else { // could clock be null ?
-                    _ = q.SendMessage(null, msg, .{.ival=@intCast(p1)}, .{.ival=@intCast(p2)});
+                    _ = q.SendMessage(null, msg, .{.legacy=.{@intCast(p1), @intCast(p2)}});
                 }
                 // (fall through and paint)
                 _ = df.SetStandardColor(wnd);
@@ -66,7 +66,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) b
 pub fn WatchIcon() *Window {
     var mx:c_int = 10;
     var my:c_int = 10;
-    _ = q.SendMessage(null, df.CURRENT_MOUSE_CURSOR, .{.ival=@intCast(@intFromPtr(&mx))}, .{.ival=@intCast(@intFromPtr(&my))});
+    _ = q.SendMessage(null, df.CURRENT_MOUSE_CURSOR, .{.legacy=.{@intCast(@intFromPtr(&mx)), @intCast(@intFromPtr(&my))}});
     const win = Window.create (
                     k.BOX,
                     null,

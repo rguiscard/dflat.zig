@@ -12,8 +12,6 @@ const GapBuffer = @import("GapBuffer.zig");
 pub var VSliding = false; // also used in ListBox
 var HSliding = false;
 
-const VOID = q.VOID;
-
 // ------------ ADDTEXT Message --------------
 fn AddTextMsg(win:*Window, txt:[]const u8) bool {
     const wnd = win.win;
@@ -198,7 +196,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 .tp = @intCast(win.GetTop()+2),
                 .bt = @intCast(win.GetBottom()-2),
             };
-            return (df.TRUE == q.SendMessage(null, df.MOUSE_TRAVEL, .{.ival = @intCast(@intFromPtr(&rc))}, VOID));
+            return q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy = .{@intCast(@intFromPtr(&rc)), 0}});
         }
         if (my-1 < win.VScrollBox) {
             return win.sendMessage(df.SCROLLPAGE,df.FALSE,0);
@@ -230,7 +228,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 .bt = @intCast(win.GetBottom()),
             };
             // - keep the mouse in the scroll bar -
-            _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.ival = @intCast(@intFromPtr(&rc))}, VOID);
+            _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy = .{@intCast(@intFromPtr(&rc)), 0}});
             return true;
         }
         if (mx-1 < win.HScrollBox) {
@@ -278,7 +276,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
 fn ButtonReleasedMsg(win:*Window) void {
     if (HSliding or VSliding) {
         // release the mouse ouside the scroll bar
-        _ = q.SendMessage(null, df.MOUSE_TRAVEL, VOID, VOID);
+        _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy=.{0,0}});
         if (VSliding) {
             ComputeWindowTop(win);
         } else {

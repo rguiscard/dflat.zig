@@ -14,8 +14,6 @@ const sysmenu = @import("SystemMenu.zig");
 const Classes = @import("Classes.zig");
 const app = @import("Application.zig");
 
-const VOID = q.VOID;
-
 const ICONHEIGHT = 3;
 const ICONWIDTH = 10;
 
@@ -48,8 +46,8 @@ fn getDummy() *Window {
 // --------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) void {
     lists.AppendWindow(win);
-    const rtn = q.SendMessage(null, df.MOUSE_INSTALLED, VOID, VOID);
-    if (rtn == 0) {
+    const rtn = q.SendMessage(null, df.MOUSE_INSTALLED, .{.legacy=.{0,0}});
+    if (rtn == false) {
         win.ClearAttribute(df.VSCROLLBAR | df.HSCROLLBAR);
     }
     if (win.TestAttribute(df.SAVESELF) and isVisible(win)) {
@@ -434,7 +432,7 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             x = @min(x, rightmost);
             y = @max(y, topmost);
             y = @min(y, bottommost);
-            _ = q.SendMessage(null,df.MOUSE_CURSOR,.{.ival=x+diff},.{.ival = y});
+            _ = q.SendMessage(null,df.MOUSE_CURSOR,.{.legacy=.{x+diff, y}});
         }
         if ((x != px) or  (y != py))    {
             px = x;
@@ -862,7 +860,7 @@ fn sizeborder(win:*Window, rt:c_int, bt:c_int) void {
     var new_bt:c_int = @min(bt, bottommost);
     new_rt = @max(new_rt, leftmost);
     new_bt = @max(new_bt, topmost);
-    _ = q.SendMessage(null, df.MOUSE_CURSOR, .{.ival=@intCast(new_rt)}, .{.ival=@intCast(new_bt)});
+    _ = q.SendMessage(null, df.MOUSE_CURSOR, .{.legacy=.{@intCast(new_rt), @intCast(new_bt)}});
 
     if ((new_rt != px) or (new_bt != py))
         RestoreBorder(dwnd.*.rc);

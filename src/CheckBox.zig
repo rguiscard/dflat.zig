@@ -8,14 +8,12 @@ const k = @import("Classes.zig").CLASS;
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
-const VOID = q.VOID;
-
 pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bool {
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
                 if (p1 == 0)
-                    _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
+                    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
                 // fall off ?
                 const rtn = root.BaseWndProc(k.CHECKBOX, win, msg, p1, p2);
                 DialogBox.SetFocusCursor(win);

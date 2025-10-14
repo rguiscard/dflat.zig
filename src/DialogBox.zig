@@ -14,10 +14,6 @@ const CLASS = @import("Classes.zig").CLASS;
 const k = CLASS; // abbreviation
 const GapBuffer = @import("GapBuffer.zig");
 
-const VOID = q.VOID;
-const TRUE = q.TRUE;
-const FALSE = q.FALSE;
-
 var SysMenuOpen = false;
 var dialogboxes:?std.ArrayList(*Dialogs.DBOX) = null;
 
@@ -1024,8 +1020,8 @@ pub fn SetFocusCursor(win:?*Window) void {
     // Could win be null ?
     const wnd = if (win) |w| w.win else null;
     if (win == Window.inFocus) {
-        _ = q.SendMessage(null, df.SHOW_CURSOR, VOID, VOID);
-        _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, TRUE, VOID);
+        _ = q.SendMessage(null, df.SHOW_CURSOR, .{.legacy=.{0,0}});
+        _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, .{.legacy=.{df.TRUE,0}});
     }
 }
 

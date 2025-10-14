@@ -19,9 +19,6 @@ const popdown = @import("PopDown.zig");
 const Colors = @import("Colors.zig");
 const cfg = @import("Config.zig");
 
-const VOID = q.VOID;
-const TRUE = q.TRUE;
-
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
 var WindowSel:c_int = 0;
@@ -85,7 +82,7 @@ fn CreateWindowMsg(win: *Window) bool {
 
     CreateStatusBar(win);
 
-    _ = q.SendMessage(null, df.SHOW_MOUSE, VOID, VOID);
+    _ = q.SendMessage(null, df.SHOW_MOUSE, .{.legacy=.{0,0}});
 
     return rtn;
 }
@@ -162,7 +159,7 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
     } else if (df.AltDown > 0)    {
         df.AltDown = df.FALSE;
         if (win.MenuBar != Window.inFocus) {
-            _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
+            _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
         }
         if (win.MenuBar) |mb| {
             _ = mb.sendMessage(df.KEYBOARD, df.F10, 0);
@@ -222,7 +219,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 if (oldFocus) |focus| { // cannot sure old focus can be null
                     _ = focus.sendMessage(df.SETFOCUS, df.TRUE, 0);
                 } else {
-                    _ = q.SendMessage(null, df.SETFOCUS, TRUE, VOID);
+                    _ = q.SendMessage(null, df.SETFOCUS, .{.legacy=.{df.TRUE,0}});
                 }
             }
         },
@@ -349,7 +346,7 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
         }
     }
     Window.inFocus = if (p1) win else null;
-    _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
+    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
 
     if (win.isVisible()) {
         _ = win.sendMessage(df.BORDER, 0, 0);
@@ -686,9 +683,9 @@ fn CreateStatusBar(win: *Window) void {
 
 // SHELLDOS
 fn SwitchCursor() void {
-    _ = q.SendMessage(null, df.SAVE_CURSOR, VOID, VOID);
+    _ = q.SendMessage(null, df.SAVE_CURSOR, .{.legacy=.{0,0}});
     df.SwapCursorStack();
-    _ = q.SendMessage(null, df.RESTORE_CURSOR, VOID, VOID);
+    _ = q.SendMessage(null, df.RESTORE_CURSOR, .{.legacy=.{0,0}});
 }
 
 // ------- Shell out to DOS ----------
@@ -698,7 +695,7 @@ fn ShellDOS(win:*Window) void {
     SwitchCursor();
     if (ScreenHeight != df.SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
-    _ = q.SendMessage(null, df.HIDE_MOUSE, VOID, VOID);
+    _ = q.SendMessage(null, df.HIDE_MOUSE, .{.legacy=.{0,0}});
     _ = df.fflush(df.stdout);
     df.tty_restore();
     _ = df.runshell();
@@ -711,5 +708,5 @@ fn ShellDOS(win:*Window) void {
     if (oldFocus) |focus| {
         _ = focus.sendMessage(df.SETFOCUS, df.TRUE, 0);
     }
-    _ = q.SendMessage(null, df.SHOW_MOUSE, VOID, VOID);
+    _ = q.SendMessage(null, df.SHOW_MOUSE, .{.legacy=.{0,0}});
 }

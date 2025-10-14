@@ -6,10 +6,6 @@ pub const DFlatApplication = "memopad";
 const sUntitled:[:0]const u8 = "Untitled";
 var wndpos:c_int = 0;
 
-const VOID = mp.Message.VOID;
-const TRUE = mp.Message.TRUE;
-const FALSE = mp.Message.FALSE;
-
 pub fn main() !void {
 //    const argc: c_int = @intCast(std.os.argv.len);
     const argv = std.os.argv.ptr; // already C-compatible
@@ -298,7 +294,7 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
                 } else |_| {
                 }
                 win.AddTitle(@ptrCast(fname));
-                _ = mp.q.SendMessage(wnd, df.BORDER, VOID, VOID);
+                _ = mp.q.SendMessage(wnd, df.BORDER, .{.legacy = .{0, 0}});
             } else |_| {
             }
         } else {
@@ -339,7 +335,7 @@ fn DeleteFile(win:*mp.Window) void {
                     if (std.fs.cwd().deleteFileZ(path)) |_| {
                     } else |_| {
                     }
-                    _ = mp.q.SendMessage(wnd, df.CLOSE_WINDOW, VOID, VOID);
+                    _ = mp.q.SendMessage(wnd, df.CLOSE_WINDOW, .{.legacy = .{0, 0}});
                 }
             } else |_| {
             }
@@ -403,7 +399,8 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) bo
                 .ID_INSERT => {
                     _ = win.getParent().sendCommandMessage(.ID_INSERT, 0);
                     win.InsertMode = mp.cfg.config.InsertMode;
-                    _ = mp.q.SendMessage(null, df.SHOW_CURSOR, if (win.InsertMode) TRUE else FALSE, VOID);
+                    _ = mp.q.SendMessage(null, df.SHOW_CURSOR,
+                                             .{.legacy = .{if (win.InsertMode) df.TRUE else df.FALSE, 0}});
                 },
                 else => {
                 }

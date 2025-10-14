@@ -11,8 +11,6 @@ const k = @import("Classes.zig").CLASS;
 const lists = @import("Lists.zig");
 const normal = @import("Normal.zig");
 
-const VOID = q.VOID;
-
 const MAXHELPKEYWORDS = 50; // --- maximum keywords in a window ---
 const MAXHELPSTACK = 100;
 
@@ -464,12 +462,11 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
                     if (std.mem.indexOfScalar(u8, &hline, 0)) |end| {
                         hline[end-1] = 0;
                     }
-//                    _ = q.SendMessage(dwnd,df.ADDTEXT, @intCast(@intFromPtr(&df.hline)),0);
                     _ = dwin.sendTextMessage(df.ADDTEXT, &hline,0);
                 }
                 _ = dwin.sendMessage(df.SHOW_WINDOW, 0, 0);
-                _ = q.SendMessage(null, df.WAITKEYBOARD, VOID, VOID);
-                _ = q.SendMessage(null, df.WAITMOUSE, VOID, VOID);
+                _ = q.SendMessage(null, df.WAITKEYBOARD, .{.legacy=.{0,0}});
+                _ = q.SendMessage(null, df.WAITMOUSE, .{.legacy=.{0,0}});
                 _ = dwin.sendMessage(df.CLOSE_WINDOW, 0, 0);
             }
         }

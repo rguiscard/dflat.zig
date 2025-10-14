@@ -12,10 +12,6 @@ const clipboard = @import("Clipboard.zig");
 const normal = @import("Normal.zig");
 const cfg = @import("Config.zig");
 
-const VOID = q.VOID;
-const TRUE = q.TRUE;
-const FALSE = q.FALSE;
-
 // -------- local variables --------
 var KeyBoardMarking = false;
 var ButtonDown = false;
@@ -176,10 +172,9 @@ fn KeyboardCursorMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if (win == Window.inFocus) {
         if (df.CharInView(wnd, @intCast(p1), @intCast(p2))>0)
             _ = q.SendMessage(null, df.SHOW_CURSOR,
-                      if (win.InsertMode and (TextMarking == false)) TRUE else FALSE,
-                      VOID);
+                      .{.legacy=.{ if (win.InsertMode and (TextMarking == false)) df.TRUE else df.FALSE, 0}});
     } else {
-        _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
+        _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
     }
 }
 
@@ -436,7 +431,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         SetAnchor(win, ButtonX+@as(usize, @intCast(wnd.*.wleft)), @intCast(ButtonY+win.wtop));
         TextMarking = true;
         rc = win.WindowRect();
-        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.ival=@intCast(@intFromPtr(&rc))}, VOID);
+        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.legacy=.{@intCast(@intFromPtr(&rc)), 0}});
         ButtonDown = false;
     }
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
@@ -451,7 +446,7 @@ fn ButtonReleasedMsg(win:*Window) bool {
     ButtonDown = false;
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
         // release the mouse ouside the edit box
-        _ = q.SendMessage(null, df.MOUSE_TRAVEL, VOID, VOID);
+        _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy=.{0,0}});
         StopMarking(win);
         return true;
     }
@@ -547,13 +542,10 @@ fn KeyTyped(win:*Window, cc:c_int) void {
         // ---------- test end of window --------- 
         if (WndCol(win) == win.ClientWidth()-1) {
             if (win.isMultiLine() == false)  {
-//                if (!(currchar == (char *)wnd->text+wnd->MaxTextLength-2))
-//                    SendMessage(wnd, HORIZSCROLL, TRUE, 0);
                 if (!(currpos == win.MaxTextLength))
                     _ = win.sendMessage(df.HORIZSCROLL, df.TRUE, 0);
             } else {
                 var cp = currchar;
-//                const lchr:u8 = @intCast(df.TextLine(wnd, wnd.*.CurrLine)[0]);
                 const pos = win.textLine(@intCast(wnd.*.CurrLine));
                 const lchr = wnd.*.text[pos];
                 while (cp != ' ' and cp != lchr)
@@ -973,7 +965,7 @@ fn CommandMsg(win:*Window,p1:df.PARAM) bool {
 // ---------- CLOSE_WINDOW Message -----------
 fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const wnd = win.win;
-    _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
+    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
     if (win.DeletedText) |text| {
         root.global_allocator.free(text);
 
@@ -1023,7 +1015,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
         },
         df.SETFOCUS => {
             if (p1 == 0) {
-                _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
+                _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
             }
             // fall through?
             const rtn = root.BaseWndProc(k.EDITBOX, win, msg, p1, p2);

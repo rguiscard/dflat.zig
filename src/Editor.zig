@@ -252,13 +252,13 @@ pub fn EditorProc(win:*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 fn TurnOffDisplay(win:*Window) void {
-    _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
+    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
     win.ClearVisible();
 }
 
 fn TurnOnDisplay(win:*Window) void {
     win.SetVisible();
-    _ = q.SendMessage(null, df.SHOW_CURSOR, VOID, VOID);
+    _ = q.SendMessage(null, df.SHOW_CURSOR, .{.legacy=.{0,0}});
 }
 
 fn RepaintLine(win:*Window) void {

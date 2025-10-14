@@ -8,8 +8,6 @@ const k = @import("Classes.zig").CLASS;
 const DialogBox = @import("DialogBox.zig");
 const Dialogs = @import("Dialogs.zig");
 
-const VOID = q.VOID;
-
 var rct = [_]?*Dialogs.CTLWINDOW{null}**Dialogs.MAXRADIOS;
 var Setting:bool = true;
 
@@ -94,7 +92,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM
         switch (msg) {
             df.SETFOCUS => {
                 if (p1 == 0)
-                    _ = q.SendMessage(null, df.HIDE_CURSOR, VOID, VOID);
+                    _ = q.SendMessage(null, df.HIDE_CURSOR, .{.legacy=.{0,0}});
             },
             df.MOVE => {
                 const rtn = root.BaseWndProc(k.RADIOBUTTON,win,msg,p1,p2);

@@ -11,8 +11,6 @@ const popdown = @import("PopDown.zig");
 const textbox = @import("TextBox.zig");
 const cfg = @import("Config.zig");
 
-const VOID = q.VOID;
-
 fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
     const wnd = win.win;
     if (win.isVisible()) {
@@ -61,9 +59,9 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
         }
     }
     if (msg == df.LEFT_BUTTON) {
-        _ = q.SendMessage(null, df.WAITMOUSE, VOID, VOID);
+        _ = q.SendMessage(null, df.WAITMOUSE, .{.legacy=.{0,0}});
     } else {
-        _ = q.SendMessage(null, df.WAITKEYBOARD, VOID, VOID);
+        _ = q.SendMessage(null, df.WAITKEYBOARD, .{.legacy=.{0,0}});
     }
     _ = win.sendMessage(df.PAINT, 0, 0);
     if (ct.*.setting == df.ON) {

@@ -25,33 +25,30 @@ var NoChildCaptureKeyboard = false;
 export var AltDown:df.BOOL = df.FALSE;
 
 // Handle different combination of parameters p1 & p2
+pub const Legacy = struct {isize, isize};   // PARAM & PARAM
 pub const Position = struct {usize, usize}; // x & y
 pub const Void = struct {};
-pub const Paint = struct {usize, bool}; // &RECT, bool
+pub const Paint = struct {usize, bool};     // &RECT, bool
+pub const Pointer = struct{usize, usize};   // pointer & len (or 0)
+pub const Character = struct{u8, u8};    // char & shift
 
 pub const ParamsType = enum {
+    legacy,
     void,
     position,
     paint,
+    pointer,
+    char,
 };
 
 pub const Params = union(ParamsType) {
+    legacy:Legacy,      // c_int & c_int
     void:Void,          // 0 & 0
     position:Position,  // x & y
     paint:Paint,        // &RECT & bool
+    pointer:Pointer,    // usize for now & len (or 0)
+    char:Character,     // key and shift
 };
-
-pub const Param = union {
-    yesno:bool,   // true or false
-    ival:isize,   // signed value
-    uval:usize,   // unsigned value
-    slice:[]u8,   // text string
-};
-
-pub const VOID = Param{.ival = 0};
-pub const TRUE = Param{.ival = 1};   // FIXME. use bool later
-pub const FALSE = Param{.ival = 0};  // FIXME. use bool later
-
 
 // ---------- event queue ----------
 const Evt = struct {
@@ -150,15 +147,15 @@ pub fn PostMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void 
 }
 
 // --------- send a message to a window -----------
-pub fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:Param, p2:Param) df.BOOL {
+pub fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, params:Params) bool {
     const rtn = true;
 
-    const v1 = p1.ival;
-    const v2 = p1.ival;
+    const v1:isize = params.legacy[0];
+    const v2:isize = params.legacy[1];
 
     if (wnd != null) {
         if (Window.get_zin(wnd)) |win| {
-            return if (win.sendMessage(msg, v1, v2)) df.TRUE else df.FALSE;
+            return win.sendMessage(msg, v1, v2);
         } else {
             // This shouldn't happen, except dummy window at normal.c for now.
             // Or we can create a Window instance for it here.
@@ -167,7 +164,7 @@ pub fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:Param, p2:Param) df.BOOL {
                 wnd.*.zin = @constCast(win);
                 // Should call sendMessage() for it ?
                 // Segment fault if call sendMessage(), seems ok to call ProcessMessage().
-                return if (ProcessMessage(win, msg, p1, p2, rtn)) df.TRUE else df.FALSE;
+                return ProcessMessage(win, msg, params, rtn);
             } else |_| {
                 // error
             }
@@ -184,13 +181,13 @@ pub fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, p1:Param, p2:Param) df.BOOL {
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
-    return if (ProcessMessage(null, msg, p1, p2, rtn)) df.TRUE else df.FALSE;
+    return ProcessMessage(null, msg, params, rtn);
 }
 
-pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, p1:Param, p2:Param, rtn:bool) bool {
+pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bool {
     var rrtn = rtn;
-    const p1_val:df.PARAM = @intCast(p1.ival);
-    const p2_val:df.PARAM = @intCast(p2.ival);
+    const p1_val:df.PARAM = @intCast(params.legacy[0]);
+    const p2_val:df.PARAM = @intCast(params.legacy[1]);
 
     log.LogMessages(win, msg, p1_val, p2_val);
 
@@ -504,7 +501,7 @@ pub fn dispatch_message() bool {
                         _ = kw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, ev.event, .{.ival=@intCast(ev.mx)}, .{.ival=@intCast(ev.my)});
+                        _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
                     }
                 }
             },
@@ -520,7 +517,7 @@ pub fn dispatch_message() bool {
                                 _ = mw.sendMessage(df.SETFOCUS, df.TRUE, 0);
                             } else {
                                 // could this happen ?
-                                _ = SendMessage(null, df.SETFOCUS, TRUE, VOID);
+                                _ = SendMessage(null, df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                             }
                         }
                     }
@@ -528,7 +525,7 @@ pub fn dispatch_message() bool {
                         _ = mw.sendMessage(df.LEFT_BUTTON, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, df.LEFT_BUTTON, .{.ival=@intCast(ev.mx)}, .{.ival=@intCast(ev.my)});
+                        _ = SendMessage(null, df.LEFT_BUTTON, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
                     }
                 }
             },
@@ -542,7 +539,7 @@ pub fn dispatch_message() bool {
                         _ = mw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, ev.event, .{.ival=@intCast(ev.mx)}, .{.ival=@intCast(ev.my)});
+                        _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
                     }
                 }
             },
@@ -552,7 +549,7 @@ pub fn dispatch_message() bool {
                     _ = mw.sendMessage(ev.event, @intCast(ev.mx), @intCast(ev.my));
                 } else {
                     // could this happen ?
-                    _ = SendMessage(null, ev.event, .{.ival=@intCast(ev.mx)}, .{.ival=@intCast(ev.my)});
+                    _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
                 }
             },
 //#if MSDOS       // FIXME add MK_FP
@@ -578,7 +575,7 @@ pub fn dispatch_message() bool {
         if (mq.win) |w| {
             _ = w.sendMessage(mq.msg, mq.p1, mq.p2);
         } else {
-            _ = SendMessage(null, mq.msg, .{.ival=mq.p1}, .{.ival=mq.p2});
+            _ = SendMessage(null, mq.msg, .{.legacy=.{mq.p1, mq.p2}});
         }
 
         if (mq.msg == df.ENDDIALOG) {
@@ -598,9 +595,9 @@ pub fn dispatch_message() bool {
 
 pub export fn AddText(wnd:df.WINDOW, text:[*c]u8) df.BOOL {
     const ptr:usize = @intFromPtr(text);
-    return SendMessage(wnd,df.ADDTEXT,.{.ival = @intCast(ptr)}, VOID);
+    return if (SendMessage(wnd,df.ADDTEXT,.{.legacy = .{@intCast(ptr), 0}})) df.TRUE else df.FALSE;
 }
 
 pub export fn KeyboardMsg(wnd:df.WINDOW, chr:u8) df.BOOL {
-    return SendMessage(wnd, df.KEYBOARD, .{.ival=@intCast(chr)}, VOID);
+    return if (SendMessage(wnd, df.KEYBOARD, .{.legacy = .{@intCast(chr), 0}})) df.TRUE else df.FALSE;
 }

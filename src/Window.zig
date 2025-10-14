@@ -328,7 +328,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, p1:df.PARAM, p2:df.PAR
 
     // ----- window processor returned true or the message was sent
     //  to no window at all (NULL) -----
-    return q.ProcessMessage(self, msg, .{.ival = @intCast(p1)}, .{.ival = @intCast(p2)}, rtn);
+    return q.ProcessMessage(self, msg, .{.legacy = .{@intCast(p1), @intCast(p2)}}, rtn);
 }
 
 // -------- add a title to a window ---------

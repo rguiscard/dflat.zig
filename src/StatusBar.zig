@@ -83,7 +83,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, p1: df.PARAM, p2: df.PARAM) 
             if (win.PrevClock) |clock| {
                 _ = clock.sendMessage(msg, p1, p2);
             } else { // can it be null ?
-                _ = q.SendMessage(null, msg, q.Param{.ival = p1}, q.Param{.ival = p2});
+                _ = q.SendMessage(null, msg, .{.legacy = .{p1, p2}});
             }
             return true;
         },
