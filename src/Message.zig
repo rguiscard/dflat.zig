@@ -67,11 +67,10 @@ var EventQueueCtr:usize = 0;
 const Msg = struct {
     win:?*Window,
     msg:df.MESSAGE,
-    p1:df.PARAM,
-    p2:df.PARAM,
+    params:Params,
 };
 
-var MsgQueue = [_]Msg{.{.win=null, .msg=0, .p1=0, .p2=0}}**MAXMESSAGES;
+var MsgQueue = [_]Msg{.{.win=null, .msg=0, .params=undefined}}**MAXMESSAGES;
 
 var MsgQueueOnCtr:usize = 0;
 var MsgQueueOffCtr:usize = 0;
@@ -136,8 +135,7 @@ pub fn PostMessage(win:?*Window, msg:df.MESSAGE, p1:df.PARAM, p2:df.PARAM) void 
     if (MsgQueueCtr != MAXMESSAGES) {
         MsgQueue[MsgQueueOnCtr].win = win;
         MsgQueue[MsgQueueOnCtr].msg = msg;
-        MsgQueue[MsgQueueOnCtr].p1 = p1;
-        MsgQueue[MsgQueueOnCtr].p2 = p2;
+        MsgQueue[MsgQueueOnCtr].params = .{.legacy=.{p1, p2}};
         MsgQueueOnCtr += 1;
         if (MsgQueueOnCtr == MAXMESSAGES) {
             MsgQueueOnCtr = 0;
@@ -570,9 +568,9 @@ pub fn dispatch_message() bool {
         MsgQueueCtr -= 1;
 
         if (mq.win) |w| {
-            _ = w.sendMessage(mq.msg, .{.legacy=.{mq.p1, mq.p2}});
+            _ = w.sendMessage(mq.msg, mq.params);
         } else {
-            _ = SendMessage(null, mq.msg, .{.legacy=.{mq.p1, mq.p2}});
+            _ = SendMessage(null, mq.msg, mq.params);
         }
 
         if (mq.msg == df.ENDDIALOG) {
