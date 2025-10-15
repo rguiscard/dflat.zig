@@ -389,6 +389,7 @@ RESET_MOUSE            reset the mouse
   Sent:    to reset the mouse to the current screen configuration
   P1:
   P2:      
+  PARAMS:  Void
   Returns: 
 
 MOUSE_TRAVEL        set the mouse's travel
@@ -401,6 +402,7 @@ MOUSE_INSTALLED        test for mouse installed
   Sent:    to see if the mouse is installed
   P1:      
   P2:      
+  PARAMS:  Void
   Returns: true or false
 
 RIGHT_BUTTON           right button pressed           
@@ -455,18 +457,21 @@ MOUSE_CURSOR           set mouse position
   Sent:    to set the current mouse position
   P1:      x
   P2:      y
+  PARAMS:  Position
   Returns: 
 
 SHOW_MOUSE             make mouse cursor visible      
   Sent:    to display the mouse cursor
   P1:      
   P2:      
+  Params:  Void
   Returns: 
 
 HIDE_MOUSE             hide mouse cursor              
   Sent:    to hide the mouse cursor
   P1:      
   P2:      
+  Params:  Void
   Returns: 
 
 WAITMOUSE              wait until button released     

@@ -82,7 +82,7 @@ fn CreateWindowMsg(win: *Window) bool {
 
     CreateStatusBar(win);
 
-    _ = q.SendMessage(null, df.SHOW_MOUSE, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.SHOW_MOUSE, q.none);
 
     return rtn;
 }
@@ -699,7 +699,7 @@ fn ShellDOS(win:*Window) void {
     SwitchCursor();
     if (ScreenHeight != df.SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
-    _ = q.SendMessage(null, df.HIDE_MOUSE, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.HIDE_MOUSE, q.none);
     _ = df.fflush(df.stdout);
     df.tty_restore();
     _ = df.runshell();
@@ -712,5 +712,5 @@ fn ShellDOS(win:*Window) void {
     if (oldFocus) |focus| {
         _ = focus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
     }
-    _ = q.SendMessage(null, df.SHOW_MOUSE, .{.legacy=.{0,0}});
+    _ = q.SendMessage(null, df.SHOW_MOUSE, q.none);
 }

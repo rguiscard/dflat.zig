@@ -431,7 +431,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         SetAnchor(win, ButtonX+@as(usize, @intCast(wnd.*.wleft)), @intCast(ButtonY+win.wtop));
         TextMarking = true;
         rc = win.WindowRect();
-        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.legacy=.{@intCast(@intFromPtr(&rc)), 0}});
+        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.area=rc});
         ButtonDown = false;
     }
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
@@ -446,7 +446,7 @@ fn ButtonReleasedMsg(win:*Window) bool {
     ButtonDown = false;
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {
         // release the mouse ouside the edit box
-        _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy=.{0,0}});
+        _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.area=null});
         StopMarking(win);
         return true;
     }

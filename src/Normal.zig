@@ -21,7 +21,7 @@ var dummyWin:?Window = null;
 var dummy:df.window = undefined; // need to be static or it will crash;
 var px:c_int = -1;
 var py:c_int = -1;
-var diff:c_int = 0;
+var diff:usize = 0;
 pub var WindowMoving = false;
 pub var WindowSizing = false;
 
@@ -46,7 +46,7 @@ fn getDummy() *Window {
 // --------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) void {
     lists.AppendWindow(win);
-    const rtn = q.SendMessage(null, df.MOUSE_INSTALLED, .{.legacy=.{0,0}});
+    const rtn = q.SendMessage(null, df.MOUSE_INSTALLED, q.none);
     if (rtn == false) {
         win.ClearAttribute(df.VSCROLLBAR | df.HSCROLLBAR);
     }
@@ -112,8 +112,8 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     const dwin = getDummy();
     if (WindowMoving or WindowSizing) {
         // -- move or size a window with keyboard --
-        var x:c_int = if (WindowMoving) @intCast(dwin.GetLeft()) else @intCast(dwin.GetRight());
-        var y:c_int = if (WindowMoving) @intCast(dwin.GetTop()) else @intCast(dwin.GetBottom());
+        var x:usize= if (WindowMoving) dwin.GetLeft() else dwin.GetRight();
+        var y:usize= if (WindowMoving) dwin.GetTop() else dwin.GetBottom();
         switch (p1)    {
             df.ESC => {
                 TerminateMoveSize();
@@ -121,29 +121,29 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             },
             df.UP => {
                 if (y>0)
-                    y -= 1;
+                    y -|= 1;
             },
             df.DN => {
                 if (y < df.SCREENHEIGHT-1)
-                    y += 1;
+                    y +|= 1;
             },
             df.FWD => {
                 if (x < df.SCREENWIDTH-1)
-                    x += 1;
+                    x +|= 1;
             },
             df.BS => {
                 if (x>0)
-                    x -= 1;
+                    x -|= 1;
             },
             '\r' => {
-                _ = win.sendMessage(df.BUTTON_RELEASED,.{.legacy=.{x,y}});
+                _ = win.sendMessage(df.BUTTON_RELEASED,.{.legacy=.{@intCast(x),@intCast(y)}});
             },
             else => {
                 return true;
             }
         }
-        _ = win.sendMessage(df.MOUSE_CURSOR, .{.legacy=.{x, y}});
-        _ = win.sendMessage(df.MOUSE_MOVED, .{.legacy=.{x, y}});
+        _ = win.sendMessage(df.MOUSE_CURSOR, .{.position=.{x, y}});
+        _ = win.sendMessage(df.MOUSE_MOVED, .{.legacy=.{@intCast(x), @intCast(y)}});
         return true;
     }
     switch (p1) {
@@ -186,16 +186,16 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
         .ID_SYSMOVE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, dwin_p2}});
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{true, dwin}});
-            _ = win.sendMessage(df.MOUSE_CURSOR, .{.legacy=.{@intCast(win.GetLeft()), @intCast(win.GetTop())}});
+            _ = win.sendMessage(df.MOUSE_CURSOR, .{.position=.{win.GetLeft(), win.GetTop()}});
             WindowMoving = true;
-            dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+            dragborder(win, win.GetLeft(), win.GetTop());
         },
         .ID_SYSSIZE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, dwin_p2}});
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{true, dwin}});
-            _ = win.sendMessage(df.MOUSE_CURSOR, .{.legacy=.{@intCast(win.GetRight()), @intCast(win.GetBottom())}});
+            _ = win.sendMessage(df.MOUSE_CURSOR, .{.position=.{win.GetRight(), win.GetBottom()}});
             WindowSizing = true;
-            dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+            dragborder(win, win.GetLeft(), win.GetTop());
         },
         .ID_SYSCLOSE => {
             _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
@@ -374,9 +374,9 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             WindowMoving = true;
             px = @intCast(mx);
             py = @intCast(my);
-            diff = @intCast(mx);
+            diff = mx;
             _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, @intCast(@intFromPtr(dwin))}});
-            dragborder(win, @intCast(win.GetLeft()), @intCast(win.GetTop()));
+            dragborder(win, win.GetLeft(), win.GetTop());
         }
         return;
     }
@@ -405,26 +405,26 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         }
         WindowSizing = true;
         _ = ww.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, @intCast(@intFromPtr(dwin))}});
-        dragborder(ww, @intCast(ww.GetLeft()), @intCast(ww.GetTop()));
+        dragborder(ww, ww.GetLeft(), ww.GetTop());
     }
 }
 
 // --------- MOUSE_MOVED Message ----------
 fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     if (WindowMoving) {
-        var leftmost:c_int = 0;
-        var topmost:c_int = 0;
-        var bottommost:c_int = df.SCREENHEIGHT-2;
-        var rightmost:c_int = df.SCREENWIDTH-2;
-        var x:c_int = @intCast(p1 - diff);
-        var y:c_int = @intCast(p2);
+        var leftmost:usize = 0;
+        var topmost:usize = 0;
+        var bottommost:usize = @intCast(df.SCREENHEIGHT-2);
+        var rightmost:usize = @intCast(df.SCREENWIDTH-2);
+        var x:usize = @as(usize, @intCast(p1)) - diff;
+        var y:usize = @as(usize, @intCast(p2));
         if ((win.parent != null) and
                 (win.TestAttribute(df.NOCLIP) == false)) {
             const win1 = win.getParent();
-            topmost    = @intCast(win1.GetClientTop());
-            leftmost   = @intCast(win1.GetClientLeft());
-            bottommost = @intCast(win1.GetClientBottom());
-            rightmost  = @intCast(win1.GetClientRight());
+            topmost    = win1.GetClientTop();
+            leftmost   = win1.GetClientLeft();
+            bottommost = win1.GetClientBottom();
+            rightmost  = win1.GetClientRight();
         }
         if ((x < leftmost) or (x > rightmost) or
                 (y < topmost) or (y > bottommost))    {
@@ -432,11 +432,11 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             x = @min(x, rightmost);
             y = @max(y, topmost);
             y = @min(y, bottommost);
-            _ = q.SendMessage(null,df.MOUSE_CURSOR,.{.legacy=.{x+diff, y}});
+            _ = q.SendMessage(null,df.MOUSE_CURSOR,.{.position=.{x+diff, y}});
         }
         if ((x != px) or  (y != py))    {
-            px = x;
-            py = y;
+            px = @intCast(x);
+            py = @intCast(y);
             dragborder(win, x, y);
         }
         return true;
@@ -845,16 +845,16 @@ fn TerminateMoveSize() void {
 }
 
 // ---- build a dummy window border for moving or sizing ---
-fn dragborder(win:*Window, x:c_int, y:c_int) void {
+fn dragborder(win:*Window, x:usize, y:usize) void {
     const dwin = getDummy();
     const dwnd = dwin.win;
 
     RestoreBorder(dwnd.*.rc);
     // ------- build the dummy window --------
-    dwnd.*.rc.lf = x;
-    dwnd.*.rc.tp = y;
-    dwnd.*.rc.rt = @intCast(dwnd.*.rc.lf+@as(c_int, @intCast(win.WindowWidth()))-1);
-    dwnd.*.rc.bt = @intCast(dwnd.*.rc.tp+@as(c_int, @intCast(win.WindowHeight()))-1);
+    dwnd.*.rc.lf = @intCast(x);
+    dwnd.*.rc.tp = @intCast(y);
+    dwnd.*.rc.rt = dwnd.*.rc.lf+@as(c_int, @intCast(win.WindowWidth()))-1;
+    dwnd.*.rc.bt = dwnd.*.rc.tp+@as(c_int, @intCast(win.WindowHeight()))-1;
     dwin.ht = win.WindowHeight();
     dwin.wd = win.WindowWidth();
     dwin.parent = win.parent;
@@ -865,35 +865,35 @@ fn dragborder(win:*Window, x:c_int, y:c_int) void {
 }
 
 // ---- write the dummy window border for sizing ----
-fn sizeborder(win:*Window, rt:c_int, bt:c_int) void {
+fn sizeborder(win:*Window, rt:usize, bt:usize) void {
     const dwin = getDummy();
     const dwnd = dwin.win;
 
-    const leftmost:c_int = @intCast(win.GetLeft()+10);
-    const topmost:c_int = @intCast(win.GetTop()+3);
-    var bottommost:c_int = @intCast(df.SCREENHEIGHT-1);
-    var rightmost:c_int = @intCast(df.SCREENWIDTH-1);
+    const leftmost:usize = win.GetLeft()+10;
+    const topmost:usize = win.GetTop()+3;
+    var bottommost:usize = @intCast(df.SCREENHEIGHT-1);
+    var rightmost:usize = @intCast(df.SCREENWIDTH-1);
     if (win.parent) |pwin| {
-        bottommost = @intCast(@min(bottommost, pwin.GetClientBottom()));
-        rightmost  = @intCast(@min(rightmost, pwin.GetClientRight()));
+        bottommost = @min(bottommost, pwin.GetClientBottom());
+        rightmost  = @min(rightmost, pwin.GetClientRight());
     }
-    var new_rt:c_int = @min(rt, rightmost);
-    var new_bt:c_int = @min(bt, bottommost);
+    var new_rt:usize = @min(rt, rightmost);
+    var new_bt:usize = @min(bt, bottommost);
     new_rt = @max(new_rt, leftmost);
     new_bt = @max(new_bt, topmost);
-    _ = q.SendMessage(null, df.MOUSE_CURSOR, .{.legacy=.{@intCast(new_rt), @intCast(new_bt)}});
+    _ = q.SendMessage(null, df.MOUSE_CURSOR, .{.position=.{new_rt, new_bt}});
 
     if ((new_rt != px) or (new_bt != py))
         RestoreBorder(dwnd.*.rc);
 
     // ------- change the dummy window --------
-    dwin.ht = @intCast(bt-dwnd.*.rc.tp+1);
-    dwin.wd = @intCast(rt-dwnd.*.rc.lf+1);
-    dwnd.*.rc.rt = new_rt;
-    dwnd.*.rc.bt = new_bt;
+    dwin.ht = bt-@as(usize, @intCast(dwnd.*.rc.tp))+1;
+    dwin.wd = rt-@as(usize, @intCast(dwnd.*.rc.lf))+1;
+    dwnd.*.rc.rt = @intCast(new_rt);
+    dwnd.*.rc.bt = @intCast(new_bt);
     if ((new_rt != px) or (new_bt != py)) {
-        px = new_rt;
-        py = new_bt;
+        px = @intCast(new_rt);
+        py = @intCast(new_bt);
         SaveBorder(dwnd.*.rc);
         dwin.RepaintBorder(null);
     }

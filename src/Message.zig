@@ -44,6 +44,7 @@ pub const ParamsType = enum {
     capture,
     cursor,
     yes,
+    area,
 };
 
 pub const Params = union(ParamsType) {
@@ -55,7 +56,9 @@ pub const Params = union(ParamsType) {
     char:Character,         // key and shift
     capture:CaptureDevice,
     cursor:Cursor,          // *x, *y
+
     yes:bool,               // true/false
+    area:?df.RECT,         // area
 };
 
 pub const none:Params = .{.void=.{}};
@@ -225,15 +228,15 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
             },
             // -------- keyboard messages -------
             df.KEYBOARD_CURSOR => {
-                const p1_val = params.position[0];
-                const p2_val = params.position[1];
+                const x = params.position[0];
+                const y = params.position[1];
                 if (win) |w| {
                     if (w == Window.inFocus) {
-                        df.cursor(@intCast(p1_val + w.GetClientLeft()),
-                                  @intCast(p2_val + w.GetClientTop()));
+                        df.cursor(@intCast(x + w.GetClientLeft()),
+                                  @intCast(y + w.GetClientTop()));
                     }
                 } else {
-                    df.cursor(@intCast(p1_val), @intCast(p2_val));
+                    df.cursor(@intCast(x), @intCast(y));
                 }
             },
             df.CAPTURE_KEYBOARD => {
@@ -318,17 +321,10 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 rrtn = if (df.mouse_installed()>0) true else false;
             },
             df.MOUSE_TRAVEL => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
-                var rc:df.RECT = .{.lf = 0, .tp = 0, .rt = 0, .bt = 0};
-                if (p1_val == 0) {
-                    rc.lf = 0;
-                    rc.tp = 0;
-                    rc.rt = df.SCREENWIDTH-1;
-                    rc.bt = df.SCREENHEIGHT-1;
-                } else {
-                    const pp1:usize = @intCast(p1_val);
-                    const rc_ptr:*df.RECT = @ptrFromInt(pp1);
-                    rc = rc_ptr.*;
+                const p1_val:?df.RECT = params.area;
+                var rc:df.RECT = .{.lf = 0, .tp = 0, .rt = df.SCREENWIDTH-1, .bt = df.SCREENHEIGHT-1};
+                if (p1_val) |area| {
+                    rc = area;
                 }
                 df.set_mousetravel(rc.lf, rc.rt, rc.tp, rc.bt);
             },
@@ -339,9 +335,9 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 df.hide_mousecursor();
             },
             df.MOUSE_CURSOR => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
-                const p2_val:df.PARAM = @intCast(params.legacy[1]);
-                df.set_mouseposition(@intCast(p1_val), @intCast(p2_val));
+                const x = params.position[0];
+                const y = params.position[1];
+                df.set_mouseposition(@intCast(x), @intCast(y));
             },
             df.CURRENT_MOUSE_CURSOR => {
                 // df.get_mouseposition((int*)p1,(int*)p2); // do nothing in original code

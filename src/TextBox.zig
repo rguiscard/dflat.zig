@@ -196,7 +196,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 .tp = @intCast(win.GetTop()+2),
                 .bt = @intCast(win.GetBottom()-2),
             };
-            return q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy = .{@intCast(@intFromPtr(&rc)), 0}});
+            return q.SendMessage(null, df.MOUSE_TRAVEL, .{.area = rc});
         }
         if (my-1 < win.VScrollBox) {
             return win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.FALSE,0}});
@@ -228,7 +228,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 .bt = @intCast(win.GetBottom()),
             };
             // - keep the mouse in the scroll bar -
-            _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy = .{@intCast(@intFromPtr(&rc)), 0}});
+            _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.area = rc});
             return true;
         }
         if (mx-1 < win.HScrollBox) {
@@ -276,7 +276,7 @@ fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
 fn ButtonReleasedMsg(win:*Window) void {
     if (HSliding or VSliding) {
         // release the mouse ouside the scroll bar
-        _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.legacy=.{0,0}});
+        _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.area=null});
         if (VSliding) {
             ComputeWindowTop(win);
         } else {

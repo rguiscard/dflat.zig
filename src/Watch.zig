@@ -16,7 +16,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 tick = 0;
                 const rtn = root.DefaultWndProc(win, msg, params);
                 _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
-                _ = win.sendMessage(df.HIDE_MOUSE, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.HIDE_MOUSE, q.none);
                 _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{false, null}});
                 _ = win.sendMessage(df.CAPTURE_CLOCK, q.none);
                 return rtn;
@@ -54,7 +54,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 _ = win.sendMessage(df.RELEASE_CLOCK, q.none);
                 _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
                 _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
-                _ = win.sendMessage(df.SHOW_MOUSE, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.SHOW_MOUSE, q.none);
             },
             else => {
             }
