@@ -75,7 +75,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 
             if (textbox.TextBlockMarked(win)) {
                 textbox.ClearTextBlock(win);
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
             // search for a match starting at cursor position
             cp1 = df.zCurrChar(wnd);
@@ -141,7 +141,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                     wnd.*.WndRow = 0;
                 }
 
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
                 _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(editbox.WndCol(win)), @intCast(wnd.*.WndRow)}});
 
 //                if (Replacing)    {
@@ -155,7 +155,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 //                            }
 //                    }
 //                    win.ClearTextBlock();
-//                    _ = win.sendMessage(msg.PAINT, .{.legacy=.{0, 0}});
+//                    _ = win.sendMessage(msg.PAINT, .{.paint=.{null, false}});
 //                }
                 return;
             }

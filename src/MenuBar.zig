@@ -294,7 +294,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (ActiveMenuBar) |mbar| {
             mbar.*.ActiveSelection = -1;
         }
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
     Selecting = true;
     // should use Menu or Menu* ?
@@ -339,7 +339,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                     df.SHADOW);
         if (p2 == 0) {
             Selecting = false;
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             Selecting = true;
         }
         if (mnu.*.Selections[0].SelectionTitle != null) {
@@ -399,7 +399,7 @@ fn ClosePopdownMsg(win:*Window) void {
         }
         if (Selecting == false) {
             _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         }
     }
 }
@@ -423,16 +423,16 @@ fn CloseWindowMsg(win:*Window) void {
 
 pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
     const wnd = win.win;
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             reset_menubar(win);
         },
         df.SETFOCUS => {
+            const p1 = params.legacy[0];
             return SetFocusMsg(win, p1);
         },
         df.BUILDMENU => {
+            const p1 = params.legacy[0];
             BuildMenuMsg(win, p1);
         },
         df.PAINT => {
@@ -443,26 +443,34 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
         },
         df.BORDER => {
             if (mwin == null) {
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
             return true;
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
             KeyboardMsg(win, p1);
             return true;
         },
         df.LEFT_BUTTON => {
+            const p1 = params.legacy[0];
             LeftButtonMsg(win, p1);
             return true;
         },
         df.MB_SELECTION => {
-           SelectionMsg(win, p1, p2);
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
+            SelectionMsg(win, p1, p2);
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             CommandMsg(win, p1, p2);
             return true;
         },
         df.INSIDE_WINDOW => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return rect.InsideRect(@intCast(p1), @intCast(p2), win.WindowRect());
         },
         df.CLOSE_POPDOWN => {

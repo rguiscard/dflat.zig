@@ -282,7 +282,7 @@ fn ButtonReleasedMsg(win:*Window) void {
         } else {
             ComputeWindowLeft(win);
         }
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{0, 0}});
         VSliding = false;
         HSliding = false;
@@ -311,7 +311,7 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
         if (df.ValidRect(rc))    {
             // ---- scroll the window ----- 
             if (win != Window.inFocus) {
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             } else {
                 df.scroll_window(wnd, rc, @intCast(p1));
                 if (p1 == 0) {
@@ -351,7 +351,7 @@ fn HorizScrollMsg(win:*Window,p1:df.PARAM) bool {
         }
         wnd.*.wleft -= 1;
     }
-    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     return true;
 }
 
@@ -376,7 +376,7 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) void {
 //    if (wnd.*.wtop < 0) {
 //        wnd.*.wtop = 0;
 //    }
-    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
 
 // ------------ HORIZSCROLLPAGE Message --------------
@@ -397,7 +397,7 @@ fn HorizScrollPageMsg(win:*Window,p1:df.PARAM) void {
     if (wnd.*.wleft < 0) {
         wnd.*.wleft = 0;
     }
-    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
 
 // ------------ SCROLLDOC Message --------------
@@ -412,22 +412,20 @@ fn ScrollDocMsg(win:*Window,p1:df.PARAM) void {
         win.wtop = win.wlines-clientHeight;
         wnd.*.wleft = 0;
     }
-    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
 
 // ------------ PAINT Message --------------
-fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
+fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
     const wnd = win.win;
     // ------ paint the client area -----
     var rc:df.RECT = undefined;
 
     // ----- build the rectangle to paint -----
-    if (p1 == 0) { // does it equal to (RECT *)p1 == NULL ?
-        rc = df.RelativeWindowRect(wnd, win.WindowRect());
+    if (p1) |rect1| {
+        rc = rect1;
     } else {
-        const pp1:usize = @intCast(p1);
-        const rect1:*df.RECT = @ptrFromInt(pp1);
-        rc = rect1.*;
+        rc = df.RelativeWindowRect(wnd, win.WindowRect());
     }
    
     if (win.TestAttribute(df.HASBORDER) and
@@ -439,7 +437,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
     }
     const rcc = win.AdjustRectangle(rc);
 
-    if ((p2 == 0) and (win != Window.inFocus)) {
+    if ((p2 == false) and (win != Window.inFocus)) {
         df.ClipString += 1;
     }
 
@@ -469,7 +467,7 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
         }
         if (yy < win.wlines-win.wtop) {
             // ---- paint a text line ----
-            WriteTextLine(win, &rc, @intCast(yy+win.wtop), false);
+            WriteTextLine(win, rc, @intCast(yy+win.wtop), false);
         } else {
             // ---- paint a blank line ----
             df.SetStandardColor(wnd);
@@ -486,10 +484,10 @@ fn PaintMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) void {
                 (vscrollbox != win.VScrollBox)) {
             win.HScrollBox = hscrollbox;
             win.VScrollBox = vscrollbox;
-            _ = win.sendMessage(df.BORDER, .{.legacy=.{p1, 0}});
+            _ = win.sendMessage(df.BORDER, .{.paint=.{p1, false}});
         }
     }
-    if ((p2 == 0) and (win != Window.inFocus)) {
+    if ((p2 == false) and (win != Window.inFocus)) {
         df.ClipString -= 1;
     }
 }
@@ -597,8 +595,8 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.PAINT => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:?df.RECT = params.paint[0];
+            const p2:bool = params.paint[1];
             if (win.isVisible()) {
                 PaintMsg(win, p1, p2);
                 return false;
@@ -731,7 +729,7 @@ fn ComputeWindowLeft(win:*Window) void {
 }
 
 // ------- write a line of text to a textbox window -------
-pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:usize, reverse:bool) void {
+pub fn WriteTextLine(win:*Window, rcc:?df.RECT, y:usize, reverse:bool) void {
     const wnd = win.win;
 
     // ------ make sure y is inside the window -----
@@ -741,7 +739,7 @@ pub fn WriteTextLine(win:*Window, rcc:?*df.RECT, y:usize, reverse:bool) void {
     // ---- build the retangle within which can write ----
     var rc:df.RECT = undefined;
     if (rcc) |cc| {
-        rc = cc.*;
+        rc = cc;
     } else {
         rc = df.RelativeWindowRect(wnd, win.WindowRect());
         if (win.TestAttribute(df.HASBORDER) and

@@ -357,7 +357,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                 if (win.sendMessage(msg, .{.legacy=.{dir, 0}})) {
                     ExtendBlock(win, x, y);
                 }
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
         }
         return true;
@@ -366,7 +366,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         return false;
     if (textbox.TextBlockMarked(win)) {
         textbox.ClearTextBlock(win);
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
     if (win.wlines>0) {
         if (MouseY > win.wlines-1)
@@ -527,7 +527,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
         wnd.*.text = @constCast(buf.toString().ptr);
         wnd.*.textlen = @intCast(buf.len());
         textbox.BuildTextPointers(win);
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         win.TextChanged = true;
 
         if (cc == '\n')    {
@@ -535,7 +535,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
             textbox.BuildTextPointers(win);
             End(win);
             Forward(win);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return;
         }
 
@@ -587,7 +587,7 @@ fn DelKey(win:*Window) void {
 
     if (textbox.TextBlockMarked(win))    {
         _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         return;
     }
     if (win.isMultiLine() and curr_char == '\n' and  wnd.*.text[curr_pos+1] == 0)
@@ -599,13 +599,13 @@ fn DelKey(win:*Window) void {
         wnd.*.textlen = @intCast(buf.len());
         // always repaint for now
         textbox.BuildTextPointers(win);
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
 
 //    memmove(currchar, currchar+1, strlen(currchar+1));
 //    if (repaint) {
 //        BuildTextPointers(win);
-//        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+//        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 //    } else {
 //        ModTextPointers(win, wnd->CurrLine+1, -1);
 //        WriteTextLine(wnd, NULL, wnd->WndRow+wnd->wtop, FALSE);
@@ -679,7 +679,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
                 // fall through
                 if (textbox.TextBlockMarked(win)) {
                     _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
-                    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
                 }
                 KeyTyped(win, chr);
             }
@@ -687,7 +687,7 @@ fn DoKeyStroke(win:*Window, cc:c_int, p2:df.PARAM) void {
         else => {
             if (textbox.TextBlockMarked(win)) {
                 _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
             KeyTyped(win, cc);
         }
@@ -860,7 +860,7 @@ fn UndoCmd(win:*Window) void {
         root.global_allocator.free(text);
         win.DeletedText = null;
         win.DeletedLength = 0;
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
 //    if (wnd->DeletedText != NULL)    {
 //        PasteText(wnd, wnd->DeletedText, wnd->DeletedLength);
@@ -897,7 +897,7 @@ fn ParagraphCmd(win:*Window) void {
         win.wtop = fl;
     wnd.*.WndRow = @intCast(fl - win.wtop);
 
-    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     win.TextChanged = true;
     textbox.BuildTextPointers(win);
@@ -922,38 +922,38 @@ fn CommandMsg(win:*Window,p1:df.PARAM) bool {
         .ID_CUT => {
             clipboard.CopyToClipboard(win);
             _ = win.sendCommandMessage(c.ID_DELETETEXT, 0);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return true;
         },
         .ID_COPY => {
             clipboard.CopyToClipboard(win);
             textbox.ClearTextBlock(win);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return true;
         },
         .ID_PASTE => {
             _ = clipboard.PasteFromClipboard(win);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return true;
         },
         .ID_DELETETEXT => {
             DeleteTextCmd(win);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return true;
         },
         .ID_CLEAR => {
             ClearCmd(win);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return true;
         },
         .ID_UNDO => {
             UndoCmd(win);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return true;
         },
         .ID_PARAGRAPH => {
             ParagraphCmd(win);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return true;
         },
         else => {
@@ -1211,7 +1211,7 @@ fn DoScrolling(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 
     if (!KeyBoardMarking and textbox.TextBlockMarked(win)) {
         textbox.ClearTextBlock(win);
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
     _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     return true;
@@ -1308,7 +1308,7 @@ fn StickEnd(win:*Window) void {
     } else if (wnd.*.CurrCol-wnd.*.wleft >= win.ClientWidth()) {
         wnd.*.wleft = wnd.*.CurrCol - @as(c_int, @intCast(win.ClientWidth()-1));
     }
-    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     
 //    char *cp = TextLine(wnd, wnd->CurrLine);
 //    char *cp1 = strchr(cp, '\n');
@@ -1374,7 +1374,7 @@ fn End(win:*Window) void {
     }
     if (WndCol(win) >= win.ClientWidth()) {
         wnd.*.wleft = wnd.*.CurrCol - @as(c_int, @intCast(win.ClientWidth()-1));
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
 //    while (*CurrChar && *CurrChar != '\n')
 //        ++wnd->CurrCol;
@@ -1390,7 +1390,7 @@ fn Home(win:*Window) void {
     wnd.*.CurrCol = 0;
     if (wnd.*.wleft != 0) {
         wnd.*.wleft = 0;
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
 }
 
@@ -1434,7 +1434,7 @@ fn NextWord(win:*Window) void {
     win.SetVisible();
     _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     if (win.wtop != savetop or wnd.*.wleft != saveleft)
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
 
 // -- Ctrl+cursor left key: to beginning of previous word --
@@ -1481,7 +1481,7 @@ fn PrevWord(win:*Window) void {
     }
     _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(WndCol(win)), @intCast(wnd.*.WndRow)}});
     if (win.wtop != savetop or wnd.*.wleft != saveleft)
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
 
 // ----- set anchor point for marking text block -----
@@ -1492,7 +1492,7 @@ fn SetAnchor(win:*Window, mx:usize, my:usize) void {
     win.BlkEndLine = my;
     win.BlkBegCol = mx;
     win.BlkEndCol = mx;
-    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
   
 // ----- modify text pointers from a specified position

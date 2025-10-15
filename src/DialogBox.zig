@@ -243,7 +243,7 @@ fn SetScrollBars(win:*Window) void {
         win.ClearAttribute(df.HSCROLLBAR);
     }
     if (win.GetAttribute() != oldattr)
-        _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.BORDER, .{.paint=.{null, false}});
 }
 
 // ------- CLOSE_WINDOW Message (Control) -----
@@ -317,7 +317,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
                         if ((oldWin.getClass() != k.APPLICATION) and
                                        (normal.isAncestor(oldWin, pw) == false)) {
                             Window.inFocus = null;
-                            _ = oldWin.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+                            _ = oldWin.sendMessage(df.BORDER, .{.paint=.{null, false}});
                             _ = pw.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
                             Window.inFocus = oldFocus;
                             oldWin.ClearVisible();
@@ -326,7 +326,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
 //                    if ((pwnd != null) and (oldWin.getClass() != k.APPLICATION) and
 //                                       (normal.isAncestor(oldWin.win, pwnd) == false)) {
 //                        Window.inFocus = null;
-//                        _ = oldWin.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+//                        _ = oldWin.sendMessage(df.BORDER, .{.paint=.{null, false}});
 //                        _ = q.SendMessage(pwnd, df.SHOW_WINDOW, .{.legacy=.{0, 0}});
 //                        Window.inFocus = oldFocus;
 //                        oldWin.ClearVisible();
@@ -603,8 +603,8 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 return true;
         },
         df.PAINT => {
-            const p1 = params.legacy[0];
-            return root.BaseWndProc(k.DIALOG, win, msg, .{.legacy=.{p1, df.TRUE}});
+            const p1 = params.paint[0];
+            return root.BaseWndProc(k.DIALOG, win, msg, .{.paint=.{p1, true}});
         },
         df.MOVE, df.SIZE => {
             const rtn = root.BaseWndProc(k.DIALOG, win, msg, params);
@@ -677,7 +677,7 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:CLAS
             } else {
                 _ = w.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
             }
-            _ = w.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = w.sendMessage(df.PAINT, .{.paint=.{null, false}});
         }
     }
 }
@@ -707,7 +707,7 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
                         _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                         _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                         if (cwin.isMultiLine() == false) {
-                            _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                            _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                         }
                     },
                     .LISTBOX,
@@ -718,7 +718,7 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
                     .TEXT => {
                         _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                         _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
-                        _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                        _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                     },
                     else => {
                     }
@@ -910,7 +910,7 @@ pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: c_int) bool {
                                 radio.SetRadioButton(db, ct);
                             } else if (ct.*.Class == k.CHECKBOX) {
                                 ct.*.setting ^= df.ON;
-                                _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                                _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                             }  else if (ct.*.Class != k.NORMAL) { // this IF is not necessary
                                 _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
                                 if (ct.*.Class == k.BUTTON)

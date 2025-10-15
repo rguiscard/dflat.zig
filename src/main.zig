@@ -49,7 +49,6 @@ pub fn main() !void {
 // ------- window processing module for the
 //                    memopad application window -----
 fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
-    const p1 = params.legacy[0];
     switch(msg) {
         df.CREATE_WINDOW => {
             const rtn = mp.DefaultWndProc(win, msg, params);
@@ -61,6 +60,7 @@ fn MemoPadProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
             return rtn;
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
             const cmd:mp.Command = @enumFromInt(p1);
             switch(cmd) {
                 .ID_NEW => {
@@ -343,7 +343,7 @@ fn FixTabMenu() void {
         if (std.mem.indexOfScalar(u8, cmd, '(')) |_| {
             if (mp.Window.inFocus) |focus| {
                 if (focus.getClass() == mp.CLASS.POPDOWNMENU) {
-                    _ = focus.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                    _ = focus.sendMessage(df.PAINT, .{.paint=.{null, false}});
                 }
             }
         }

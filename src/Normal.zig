@@ -64,8 +64,8 @@ fn ShowWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         }
         win.SetVisible();
 
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, df.TRUE}});
-        _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, true}});
+        _ = win.sendMessage(df.BORDER, .{.paint=.{null, false}});
         // --- show the children of this window ---
         var cwin = win.firstWindow();
         while (cwin) |cw| {
@@ -304,13 +304,13 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
         } else if (isVisible(win) == false) {
             _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
         } else {
-            _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.BORDER, .{.paint=.{null, false}});
         }
     }
     else if ((p1 == 0) and (Window.inFocus == win)) {
         // -------- clearing focus ---------
         Window.inFocus = null;
-        _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.BORDER, .{.paint=.{null, false}});
     }
 }
 
@@ -660,37 +660,22 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.PAINT => {
-            const p1 = params.legacy[0];
             if (isVisible(win)) {
                 if (win.wasCleared) {
                     PaintUnderLappers(win);
                 } else {
                     win.wasCleared = true;
-
-                    var pp1:?*df.RECT = null;
-                    if (p1>0) {
-                        const p1_addr:usize = @intCast(p1);
-                        pp1 = @ptrFromInt(p1_addr);
-                    }
-
-                    win.ClearWindow(pp1, ' '); // pp1 can be null
+                    win.ClearWindow(params.paint[0], ' '); // pp1 can be null
                 }
             }
         },
         df.BORDER => {
-            const p1 = params.legacy[0];
             if (isVisible(win)) {
-                var pp1:?*df.RECT = null;
-                if (p1>0) {
-                    const p1_addr:usize = @intCast(p1);
-                    pp1 = @ptrFromInt(p1_addr);
-                }
-
-                // pp1 (p1) could be null
+                const p1:?df.RECT = params.paint[0];
                 if (win.TestAttribute(df.HASBORDER)) {
-                    win.RepaintBorder(pp1);
+                    win.RepaintBorder(p1);
                 } else if (win.TestAttribute(df.HASTITLEBAR)) {
-                    win.DisplayTitle(pp1);
+                    win.DisplayTitle(p1);
                 }
             }
         },
@@ -947,12 +932,12 @@ fn PaintOverLap(win:*Window, rc:df.RECT) void {
                         rc.bt == win.WindowHeight();
         if (isData) {
             win.wasCleared = false;
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.TRUE}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{rc, true}});
         }
         if (isBorder) {
-            _ = win.sendMessage(df.BORDER, .{.legacy=.{@intCast(@intFromPtr(&rc)), 0}});
+            _ = win.sendMessage(df.BORDER, .{.paint=.{rc, false}});
         } else if (isTitle) {
-            win.DisplayTitle(@constCast(&rc));
+            win.DisplayTitle(rc);
         }
     }
 }

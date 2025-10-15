@@ -38,13 +38,13 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                 if (p1 == ' ') {
                     // fall through
                     ct.*.setting ^= df.ON;
-                    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
                     return true;
                 }
             },
             df.LEFT_BUTTON => {
                 ct.*.setting ^= df.ON;
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
                 return true;
             },
             else => {

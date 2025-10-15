@@ -224,6 +224,7 @@ PAINT                  paint the window's data space
   P1:      address of RECT relative to window (0/0 = upper left) 
            to paint or 0 to paint entire client area
   P2:      True to make non-focus window paint without clipping
+  Params:  Paint
   Returns: 
 
 BORDER                 paint the window's border      
@@ -231,6 +232,7 @@ BORDER                 paint the window's border
   P1:      address of RECT relative to window (0/0 = upper left) 
            to paint or 0 to paint entire border
   P2:      
+  Params:  Paint
   Returns: FALSE to suppress D-Flat title display 
            (e.g. the window displays its own border)
 
@@ -239,6 +241,7 @@ TITLE                  display the window's title
   P1:      address of RECT relative to window (0/0 = upper left) 
            to paint or 0 to paint entire title
   P2:      
+  Params:  Paint
   Returns: FALSE to suppress D-Flat title display 
            (e.g. the window displays its own title)
 
@@ -246,12 +249,14 @@ MOVE                   move the window
   Sent:    to move a window
   P1:      new left coordinate
   P2:      new upper coordinate
+  Params:  Position
   Returns: 
 
 SIZE                   change the window's size       
   Sent:    to resize a window
   P1:      new right coordinate
   P2:      new lower coordinate
+  Params:  Position
   Returns: 
 
 MAXIMIZE               maximize the window            

@@ -11,7 +11,7 @@ const popdown = @import("PopDown.zig");
 const textbox = @import("TextBox.zig");
 const cfg = @import("Config.zig");
 
-fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?*df.RECT) void {
+fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?df.RECT) void {
     const wnd = win.win;
     if (win.isVisible()) {
         if (win.TestAttribute(df.SHADOW) and (cfg.config.mono == 0)) {
@@ -63,7 +63,7 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     } else {
         _ = q.SendMessage(null, df.WAITKEYBOARD, .{.legacy=.{0,0}});
     }
-    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     if (ct.*.setting == df.ON) {
         q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{@intFromEnum(ct.*.command), 0}});
     } else {
@@ -72,7 +72,6 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
 }
 
 pub fn ButtonProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
     if (win.GetControl()) |ct| {
         switch (msg)    {
             df.SETFOCUS => {
@@ -82,11 +81,12 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 return true;
             },
             df.PAINT => {
-                const ptr:usize = @intCast(p1);
-                PaintMsg(win, ct, @ptrFromInt(ptr));
+                const rect:?df.RECT = params.paint[0];
+                PaintMsg(win, ct, rect);
                 return true;
             },
             df.KEYBOARD => {
+                const p1 = params.legacy[0];
                 if (p1 == '\r') {
                     // ---- fall through ----
                     LeftButtonMsg(win, msg, ct);

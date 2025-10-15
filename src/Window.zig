@@ -376,17 +376,17 @@ pub fn AdjustRectangle(self:*TopLevelFields, rcc:df.RECT) df.RECT {
 }
 
 // -------- display a window's title ---------
-pub fn DisplayTitle(self:*TopLevelFields, rcc:?*df.RECT) void {
+pub fn DisplayTitle(self:*TopLevelFields, rcc:?df.RECT) void {
     const wnd = self.win;
     if (self.title) |_| {
         var rc:df.RECT = undefined;
         if (rcc) |cc| {
-            rc = cc.*;
+            rc = cc;
         } else {
             rc = df.RelativeWindowRect(wnd, self.WindowRect());
         }
         rc = self.AdjustRectangle(rc);
-        if (self.sendMessage(df.TITLE, .{.legacy=.{@intCast(@intFromPtr(rcc)), 0}})) {
+        if (self.sendMessage(df.TITLE, .{.paint=.{rcc, false}})) {
             const title_color = cfg.config.clr[@intCast(@intFromEnum(k.TITLEBAR))];
             if (self == inFocus) {
                 df.foreground = title_color [r.HILITE_COLOR] [r.FG];
@@ -530,11 +530,11 @@ fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
     }
 }
 
-fn ParamRect(self:*TopLevelFields, rcc:?*df.RECT) df.RECT {
+fn ParamRect(self:*TopLevelFields, rcc:?df.RECT) df.RECT {
     const wnd = self.win;
     var rc:df.RECT = undefined;
     if (rcc) |cc| {
-        rc = cc.*;
+        rc = cc;
     } else {
         rc = df.RelativeWindowRect(wnd, self.WindowRect());
         if (self.TestAttribute(df.SHADOW)) {
@@ -594,7 +594,7 @@ fn TopLine(self:*TopLevelFields, lin:u8, rcc:df.RECT) void {
 }
 
 // ------- display a window's border -----
-pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
+pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
     const wnd = self.win;
 
     if (self.TestAttribute(df.HASBORDER) == false)
@@ -605,7 +605,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
     if (self.TestAttribute(df.HASTITLEBAR)) {
         if (rc.tp == 0) {
             if (rc.lf < self.WindowWidth()-self.BorderAdj()) {
-                self.DisplayTitle(@constCast(&rc));
+                self.DisplayTitle(rc);
             }
         }
     }
@@ -729,12 +729,12 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?*df.RECT) void {
 }
 
 // ------ clear the data space of a window -------- 
-pub fn ClearWindow(win:*TopLevelFields, rcc:?*df.RECT, clrchar:u8) void {
+pub fn ClearWindow(win:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
     const wnd = win.win;
     if (win.isVisible()) {
         var rc:df.RECT = undefined;
         if (rcc) |cc| {
-            rc = cc.*;
+            rc = cc;
         } else {
             rc = df.RelativeWindowRect(wnd, win.WindowRect());
         }

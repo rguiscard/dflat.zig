@@ -42,7 +42,7 @@ pub fn BuildPathDisplay(win:*Window) void {
             _ = df.getcwd(@constCast(&path), path.len);
             if (ct.win) |cwin| {
                 _ = cwin.sendMessage(df.SETTEXT, .{.legacy=.{@intCast(@intFromPtr(&path)), 0}});
-                _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
         }
     }

@@ -205,7 +205,7 @@ fn BorderMsg(win:*Window) bool {
     if (win.mnu) |_| {
         const currFocus = Window.inFocus;
         Window.inFocus = null;
-        rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.BORDER, .{.legacy=.{0, 0}});
+        rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.BORDER, .{.paint=.{null, false}});
         Window.inFocus = currFocus;
         for (0..@intCast(win.ClientHeight())) |i| {
             const pos = win.textLine(i);

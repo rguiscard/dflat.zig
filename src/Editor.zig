@@ -121,7 +121,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             TurnOnDisplay(win);
             RepaintLine(win);
             if (delnl) {
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
             return true;
         },
@@ -147,7 +147,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                 TurnOnDisplay(win);
                 RepaintLine(win);
                 if (p1 == '\r') {
-                    _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
                 }
                 return true;
             }

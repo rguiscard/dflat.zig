@@ -72,7 +72,7 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c) void {
                 }
                 if (wason > 0) {
                     if (ctl.win) |cwin| {
-                       _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                       _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                     }
                 }
             }
@@ -82,7 +82,7 @@ pub fn PushRadioButton(db:*Dialogs.DBOX, cmd:c) void {
         if (Setting)
             ct.*.isetting = df.ON;
         if (ct.win) |cwin| {
-            _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
         }
     }
 }

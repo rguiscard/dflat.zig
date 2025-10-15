@@ -124,7 +124,7 @@ fn SpacebarKey(win:*Window, p2:df.PARAM) void {
             } else {
                 win.AnchorPoint = -1;
             }
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         }
     }
 }
@@ -164,7 +164,7 @@ fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
                 if (sel > x-1) {
                     win.wtop = @as(usize, @intCast(sel))-(x-1);
                 }
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
             break;
         }
@@ -352,11 +352,9 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             win.SelectCount = 0;
         },
         df.PAINT => {
-            const p1 = params.legacy[0];
+            const p1:?df.RECT = params.paint[0];
             _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
-            if (p1 > 0) {
-                const pp1:usize = @intCast(p1);
-                const rc:*df.RECT = @ptrFromInt(pp1);
+            if (p1) |rc| {
                 WriteSelection(win, @intCast(win.selection), true, rc);
             } else {
                 WriteSelection(win, @intCast(win.selection), true, null);
@@ -424,7 +422,7 @@ fn SelectionInWindow(win:*Window, sel:isize) bool {
             (sel < win.wtop+win.ClientHeight()));
 }
 
-fn WriteSelection(win:*Window, sel:isize, reverse:bool, rc:?*df.RECT) void {
+fn WriteSelection(win:*Window, sel:isize, reverse:bool, rc:?df.RECT) void {
     if (win.isVisible()) {
         if (SelectionInWindow(win, sel)) {
             textbox.WriteTextLine(win, rc, @intCast(sel), reverse);
@@ -438,7 +436,7 @@ fn TestExtended(win:*Window, p2:df.PARAM) void {
     if (win.isMultiLine() and (win.AddMode == false) and p2n == 0) {
         if (win.SelectCount > 1) {
             ClearAllSelections(win);
-            _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         }
     }
 }
@@ -534,7 +532,7 @@ fn ChangeSelection(win:*Window,sel:isize,shift:usize) void {
             }
             const sels = ExtendSelections(win, sel, shift);
             if (sels > 1) {
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
             if (sels == 0 and win.AddMode == false) {
                 ClearSelection(win, win.selection);

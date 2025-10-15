@@ -104,7 +104,7 @@ fn AddStatusMsg(win: *Window, p1: df.PARAM) void {
         } else {
             _ = sb.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
         }
-        _ = sb.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = sb.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
 }
 
@@ -266,8 +266,6 @@ fn CloseWindowMsg(win:*Window) bool {
 }
 
 pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.CREATE_WINDOW => {
             return CreateWindowMsg(win);
@@ -277,10 +275,12 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 Window.inFocus = null;
         },
         df.ADDSTATUS => {
+            const p1 = params.legacy[0];
             AddStatusMsg(win, p1);
             return true;
         },
         df.SETFOCUS => {
+            const p1 = params.legacy[0];
             const p1b = (p1 > 0);
             if (p1b == (Window.inFocus != win)) {
                 SetFocusMsg(win, p1b);
@@ -288,6 +288,8 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.SIZE => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             SizeMsg(win, p1, p2);
             return true;
         },
@@ -295,21 +297,26 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.KEYBOARD => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             return KeyboardMsg(win, p1, p2);
         },
         df.SHIFT_CHANGED => {
+            const p1 = params.legacy[0];
             ShiftChangedMsg(win, p1);
             return true;
         },
         df.PAINT => {
+            const p1:?df.RECT = params.paint[0];
             if (win.isVisible())    {
                 const cl:u8 = if (cfg.config.Texture) df.APPLCHAR else ' ';
-                const pptr:usize = @intCast(p1);
-                win.ClearWindow(@ptrFromInt(pptr), cl);
+                win.ClearWindow(p1, cl);
             }
             return true;
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             CommandMsg(win, p1, p2);
             return true;
         },
@@ -337,7 +344,7 @@ fn CloseAll(win:*Window, closing:bool) void {
     }
 
     if (closing == false)
-        _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
 
 // -------- SETFOCUS Message --------
@@ -351,7 +358,7 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
     _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
 
     if (win.isVisible()) {
-        _ = win.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.BORDER, .{.paint=.{null, false}});
     } else {
         _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
     }

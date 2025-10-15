@@ -25,10 +25,10 @@ var NoChildCaptureKeyboard = false;
 export var AltDown:df.BOOL = df.FALSE;
 
 // Handle different combination of parameters p1 & p2
-pub const Legacy = struct {df.PARAM, df.PARAM};   // PARAM & PARAM
+pub const Legacy = struct {df.PARAM, df.PARAM};// PARAM & PARAM
 pub const Void = struct {};
 pub const Position = struct {usize, usize};    // x & y
-pub const Paint = struct {usize, bool};        // &RECT, bool
+pub const Paint = struct {?df.RECT, bool};     // RECT, bool for PAINT and BORDER
 pub const Pointer = struct {usize, usize};     // pointer & len (or 0)
 pub const Character = struct {u8, u8};         // char & shift
 pub const CaptureDevice = struct {bool, ?*Window};
@@ -52,14 +52,14 @@ pub const Params = union(ParamsType) {
     legacy:Legacy,          // c_int & c_int
     void:Void,              // 0 & 0
     position:Position,      // x & y
-    paint:Paint,            // &RECT & bool
+    paint:Paint,            // RECT & bool
     pointer:Pointer,        // usize for now & len (or 0)
     char:Character,         // key and shift
     capture:CaptureDevice,
     cursor:Cursor,          // *x, *y
 
     yes:bool,               // true/false
-    area:?df.RECT,         // area
+    area:?df.RECT,          // area
 };
 
 pub const none:Params = .{.void=.{}};

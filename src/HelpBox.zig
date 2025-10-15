@@ -121,13 +121,13 @@ pub fn ReadHelp(win:*Window) void {
                 if (linectr == cwin.ClientHeight())  {
                     const holdthis = thisword;
                     thisword = null;
-                    _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                    _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                     thisword = holdthis;
                 }
                 if (linectr > cwin.ClientHeight() and
                     cwin.TestAttribute(df.VSCROLLBAR) == false) {
                     cwin.AddAttribute(df.VSCROLLBAR);
-                    _ = cwin.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+                    _ = cwin.sendMessage(df.BORDER, .{.paint=.{null, false}});
                 }
             } // per line
         }
@@ -228,7 +228,7 @@ fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
 //                        } while (cwnd->wtop < 0);
                     }
                 }
-                _ = cwin.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                 return true;
 //                return if (df.cHelpBoxKeyboardMsg(wnd, cwin.win, p1) == df.TRUE) true else false;
             }
@@ -273,7 +273,7 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
 }
 
 // ---- PAINT message for the helpbox text editbox ----
-fn PaintMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn PaintMsg(win:*Window, params:q.Params) bool {
     const wnd = win.win;
     if (thisword) |word| {
         const pwin = win.getParent();
@@ -281,12 +281,12 @@ fn PaintMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         pos += @intCast(word.*.off1);
         wnd.*.text[pos+1] = pwin.WindowColors[df.SELECT_COLOR][df.FG];
         wnd.*.text[pos+2] = pwin.WindowColors[df.SELECT_COLOR][df.BG];
-        const rtn = root.DefaultWndProc(win, df.PAINT, .{.legacy=.{p1, p2}});
+        const rtn = root.DefaultWndProc(win, df.PAINT, params);
         wnd.*.text[pos+1] = pwin.WindowColors[df.HILITE_COLOR][df.FG];
         wnd.*.text[pos+2] = pwin.WindowColors[df.HILITE_COLOR][df.BG];
         return rtn;
     }
-    return root.DefaultWndProc(win, df.PAINT, .{.legacy=.{p1, p2}});
+    return root.DefaultWndProc(win, df.PAINT, params);
 }
 
 // ---- LEFT_BUTTON message for the helpbox text editbox ----
@@ -303,7 +303,7 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             if (mx >= word.off2 and mx < word.off3) {
                 thisword = word;
                 thisword_idx = idx;
-                _ = win.sendMessage(df.PAINT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
                 if (word.isDefinition) {
                     if (win.parent) |pw| {
                         DisplayDefinition(pw.win, word.hkey.*.hname); 
@@ -344,9 +344,7 @@ pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
         df.KEYBOARD => {
         },
         df.PAINT => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            return PaintMsg(win, p1, p2);
+            return PaintMsg(win, params);
         },
         df.LEFT_BUTTON => {
             const p1 = params.legacy[0];
