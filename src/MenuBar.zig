@@ -16,7 +16,7 @@ var menupos = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**1
 var mctr:usize = 0;
 var mwin:?*Window = null;
 var Selecting:bool = false;
-var Cascaders = [_]df.WINDOW{0}**menus.MAXCASCADES;
+var Cascaders = [_]?*Window{null}**menus.MAXCASCADES;
 var casc:usize = 0;
 pub var ActiveMenuBar:?*menus.MBAR = null;
 var ActiveMenu:?*[menus.MAXPULLDOWNS+1]menus.MENU = null; // this should be private
@@ -370,7 +370,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 if ((mnu.CascadeId != -1) and // instead of using -1 for title, check CascadeId.
                     (mnu.CascadeId == p1)) {
                         if (casc < menus.MAXCASCADES) {
-                            Cascaders[casc] = if (mwin) |m| m.win else null;
+                            Cascaders[casc] = mwin;
                             casc += 1;
                             _ = win.sendMessage(df.MB_SELECTION, .{.legacy=.{@intCast(del), df.TRUE}});
                         }

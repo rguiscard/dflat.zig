@@ -274,10 +274,8 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
     const wnd = win.win;
     const fspec:[:0]const u8 = "*";
     var filename = std.mem.zeroes([df.MAXPATH]u8);
-//    if ((wnd.*.extension == null) or (Saveas == true)) {
     if ((win.extension == null) or (Saveas == true)) {
         if (mp.fileopen.SaveAsDialogBox(fspec, null, &filename)) {
-//            if (wnd.*.extension) |ext| {
             if (win.extension) |ext| {
                 _ = ext;
 //  FIXME: free memory
@@ -290,12 +288,11 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
                 const fname = std.mem.span(ptr);
                 if (mp.global_allocator.allocSentinel(u8, fname.len, 0)) |buf| {
                     @memcpy(buf[0..fname.len], fname);
-//                    wnd.*.extension = @ptrCast(buf.ptr);
                     win.extension = .{.filename = buf};
                 } else |_| {
                 }
                 win.AddTitle(@ptrCast(fname));
-                _ = mp.q.SendMessage(wnd, df.BORDER, .{.legacy = .{0, 0}});
+                _ = mp.q.SendMessage(win, df.BORDER, .{.legacy = .{0, 0}});
             } else |_| {
             }
         } else {
@@ -323,11 +320,7 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
 
 // -------- delete a file ------------
 fn DeleteFile(win:*mp.Window) void {
-    const wnd = win.win;
-//    if (wnd.*.extension) |ext| {
     if (win.extension) |ext| {
-//        const ptr = @as([*:0]u8, @ptrCast(ext));
-//        const path = std.mem.span(ptr);
         const path:[:0]const u8 = @ptrCast(ext.filename);
         if (std.mem.eql(u8, path, sUntitled) == false) {
             if (std.fmt.allocPrintSentinel(mp.global_allocator, "Delete {s} ?", .{path}, 0)) |m| {
@@ -336,7 +329,7 @@ fn DeleteFile(win:*mp.Window) void {
                     if (std.fs.cwd().deleteFileZ(path)) |_| {
                     } else |_| {
                     }
-                    _ = mp.q.SendMessage(wnd, df.CLOSE_WINDOW, .{.legacy = .{0, 0}});
+                    _ = mp.q.SendMessage(win, df.CLOSE_WINDOW, .{.legacy = .{0, 0}});
                 }
             } else |_| {
             }

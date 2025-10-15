@@ -1031,10 +1031,9 @@ pub fn PrevFocus(db:*Dialogs.DBOX) void {
 
 pub fn SetFocusCursor(win:?*Window) void {
     // Could win be null ?
-    const wnd = if (win) |w| w.win else null;
     if (win == Window.inFocus) {
         _ = q.SendMessage(null, df.SHOW_CURSOR, .{.yes=false});
-        _ = q.SendMessage(wnd, df.KEYBOARD_CURSOR, .{.position=.{1,0}});
+        _ = q.SendMessage(win, df.KEYBOARD_CURSOR, .{.position=.{1,0}});
     }
 }
 

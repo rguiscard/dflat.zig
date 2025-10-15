@@ -159,33 +159,11 @@ pub fn PostMessage(win:?*Window, msg:df.MESSAGE, params: Params) void {
 }
 
 // --------- send a message to a window -----------
-pub fn SendMessage(wnd: df.WINDOW, msg:df.MESSAGE, params:Params) bool {
+pub fn SendMessage(win:?*Window, msg:df.MESSAGE, params:Params) bool {
     const rtn = true;
 
-    if (wnd != null) {
-        if (Window.get_zin(wnd)) |win| {
-            return win.sendMessage(msg, params);
-        } else {
-            // This shouldn't happen, except dummy window at normal.c for now.
-            // Or we can create a Window instance for it here.
-            if (root.global_allocator.create(Window)) |win| {
-                win.* = Window.init(wnd);
-                wnd.*.zin = @constCast(win);
-                // Should call sendMessage() for it ?
-                // Segment fault if call sendMessage(), seems ok to call ProcessMessage().
-                return ProcessMessage(win, msg, params, rtn);
-            } else |_| {
-                // error
-            }
-
-            // Should rtn be TRUE or FALSE or call sendMessage() ?
-//            if (Window.GetClass(wnd) != @intFromEnum(k.DUMMY)) {
-//                // Try to catch any window which is not dummy nor created by Window.create()
-//                _ = df.printf("Not dummy !! \n");
-//                while(true) {}
-//                return df.FALSE;
-//            }
-        }
+    if (win) |w| {
+        return w.sendMessage(msg, params);
     }
 
     // ----- window processor returned true or the message was sent
@@ -599,9 +577,15 @@ pub fn dispatch_message() bool {
 
 pub export fn AddText(wnd:df.WINDOW, text:[*c]u8) df.BOOL {
     const ptr:usize = @intFromPtr(text);
-    return if (SendMessage(wnd,df.ADDTEXT,.{.legacy = .{@intCast(ptr), 0}})) df.TRUE else df.FALSE;
+    if (Window.get_zin(wnd)) |win| {
+        return if (win.sendMessage(df.ADDTEXT,.{.legacy = .{@intCast(ptr), 0}})) df.TRUE else df.FALSE;
+    }
+    return df.FALSE;
 }
 
 pub export fn KeyboardMsg(wnd:df.WINDOW, chr:u8) df.BOOL {
-    return if (SendMessage(wnd, df.KEYBOARD, .{.legacy = .{@intCast(chr), 0}})) df.TRUE else df.FALSE;
+    if (Window.get_zin(wnd)) |win| {
+        return if (win.sendMessage(df.KEYBOARD, .{.legacy = .{@intCast(chr), 0}})) df.TRUE else df.FALSE;
+    }
+    return df.FALSE;
 }
