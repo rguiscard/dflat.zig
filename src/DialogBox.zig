@@ -103,12 +103,12 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
     FirstFocus(db);
     q.PostMessage(win, df.INITIATE_DIALOG, .{.legacy=.{0, 0}});
     if (Modal == df.TRUE) {
-        _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{false, null}});
         _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{false, null}});
         while (q.dispatch_message()) {
         }
         rtn = (win.ReturnCode == .ID_OK);
-        _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.RELEASE_MOUSE, .{.capture=.{false, null}});
         _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
         _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
     }

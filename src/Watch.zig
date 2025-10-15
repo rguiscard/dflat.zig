@@ -15,7 +15,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             df.CREATE_WINDOW => {
                 tick = 0;
                 const rtn = root.DefaultWndProc(win, msg, params);
-                _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{false, null}});
                 _ = win.sendMessage(df.HIDE_MOUSE, q.none);
                 _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{false, null}});
                 _ = win.sendMessage(df.CAPTURE_CLOCK, q.none);
@@ -52,7 +52,7 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             },
             df.CLOSE_WINDOW => {
                 _ = win.sendMessage(df.RELEASE_CLOCK, q.none);
-                _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.RELEASE_MOUSE, .{.capture=.{false, null}});
                 _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
                 _ = win.sendMessage(df.SHOW_MOUSE, q.none);
             },
@@ -64,13 +64,13 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
 }
 
 pub fn WatchIcon() *Window {
-    var mx:c_int = 10;
-    var my:c_int = 10;
-    _ = q.SendMessage(null, df.CURRENT_MOUSE_CURSOR, .{.legacy=.{@intCast(@intFromPtr(&mx)), @intCast(@intFromPtr(&my))}});
+    var mx:usize = 10;
+    var my:usize = 10;
+    _ = q.SendMessage(null, df.CURRENT_MOUSE_CURSOR, .{.cursor=.{&mx, &my}});
     const win = Window.create (
                     k.BOX,
                     null,
-                    mx, my, 3, 5,
+                    @intCast(mx), @intCast(my), 3, 5,
                     null, null,
                     WatchIconProc,
                     df.VISIBLE | df.HASBORDER | df.SHADOW | df.SAVESELF);

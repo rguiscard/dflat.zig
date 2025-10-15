@@ -450,8 +450,10 @@ CURRENT_MOUSE_CURSOR   get mouse position
   Sent:    to determine the current mouse position
   P1:      address of x
   P2:      address of y
-  Returns: mouse coordinates in x and y. If no mouse is installed,
-           returns -1 in x and y.
+  PARAMS:  Cursor
+  Returns: mouse coordinates in x and y.
+           (Currently not the case:
+           If no mouse is installed, returns -1 in x and y.)
 
 MOUSE_CURSOR           set mouse position             
   Sent:    to set the current mouse position
@@ -478,12 +480,14 @@ WAITMOUSE              wait until button released
   Sent:    to wait until the user releases the mouse button
   P1:      
   P2:      
+  Params:  Void
   Returns: 
 
 TESTMOUSE              test any mouse button pressed  
   Sent:    to see if either mouse button is pressed
   P1:      
   P2:      
+  Params:  Void
   Returns: true or false
 
 CAPTURE_MOUSE          capture mouse into a window    
@@ -491,12 +495,14 @@ CAPTURE_MOUSE          capture mouse into a window
            regardless of whether it occurs inside this window
   P1:      
   P2:      
+  PARAMS:  CaptureDevice
   Returns: 
 
 RELEASE_MOUSE          release the mouse to system    
   Sent:    release a captured mouse
   P1:      
   P2:      
+  PARAMS:  CaptureDevice
   Returns: 
 
 

@@ -32,7 +32,8 @@ pub const Paint = struct {usize, bool};        // &RECT, bool
 pub const Pointer = struct {usize, usize};     // pointer & len (or 0)
 pub const Character = struct {u8, u8};         // char & shift
 pub const CaptureDevice = struct {bool, ?*Window};
-pub const Cursor = struct {*usize, *usize};    // return current cursor position
+pub const Cursor = struct {*usize, *usize};    // return current cursor position. 
+                                               // use isize (-1) for no information ?
 
 pub const ParamsType = enum {
     legacy,
@@ -349,27 +350,26 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 rrtn = if (df.mousebuttons()>0) true else false;
             },
             df.CAPTURE_MOUSE => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
-                const p2_val:df.PARAM = @intCast(params.legacy[1]);
+                const p1_val:bool= params.capture[0];
+                const p2_val:?*Window = params.capture[1];
+
                 if (win) |w| { // wnd is not null
-                    if (p2_val>0) {
-                        const pp2:usize = @intCast(p2_val);
-                        const p2win:*Window = @ptrFromInt(pp2);
+                    if (p2_val) |p2win| {
                         p2win.PrevMouse = CaptureMouse;
                     } else {
                         w.PrevMouse = CaptureMouse;
                     }
                     CaptureMouse = w;
-                    NoChildCaptureMouse = (p1_val>0);
+                    NoChildCaptureMouse = p1_val;
                 } else { // is this necessary ?
                     CaptureMouse = null;
                     NoChildCaptureMouse = false;
                 }
             },
             df.RELEASE_MOUSE => {
-                const p1_val:df.PARAM = @intCast(params.legacy[0]);
+                const p1_val:bool = params.capture[0];
                 if (win) |w| {
-                    if (CaptureMouse == w or (p1_val>0)) {
+                    if (CaptureMouse == w or p1_val) {
                         CaptureMouse = w.PrevMouse;
                     } else {
                         var twnd = CaptureMouse;

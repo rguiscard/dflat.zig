@@ -178,20 +178,17 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 // --------- COMMAND Message ----------
 fn CommandMsg(win:*Window, p1:df.PARAM) void {
     const dwin = getDummy();
-//    const dwnd = dwin.win;
-    const dwin_p2:df.PARAM = @intCast(@intFromPtr(dwin));
-//    const dwnd_p2:df.PARAM = @intCast(@intFromPtr(dwnd));
     const cmd:c = @enumFromInt(p1);
     switch (cmd) {
         .ID_SYSMOVE => {
-            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, dwin_p2}});
+            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{true, dwin}});
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{true, dwin}});
             _ = win.sendMessage(df.MOUSE_CURSOR, .{.position=.{win.GetLeft(), win.GetTop()}});
             WindowMoving = true;
             dragborder(win, win.GetLeft(), win.GetTop());
         },
         .ID_SYSSIZE => {
-            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, dwin_p2}});
+            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{true, dwin}});
             _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{true, dwin}});
             _ = win.sendMessage(df.MOUSE_CURSOR, .{.position=.{win.GetRight(), win.GetBottom()}});
             WindowSizing = true;
@@ -375,7 +372,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             px = @intCast(mx);
             py = @intCast(my);
             diff = mx;
-            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, @intCast(@intFromPtr(dwin))}});
+            _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{true, dwin}});
             dragborder(win, win.GetLeft(), win.GetTop());
         }
         return;
@@ -404,7 +401,7 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 return;
         }
         WindowSizing = true;
-        _ = ww.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{df.TRUE, @intCast(@intFromPtr(dwin))}});
+        _ = ww.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{true, dwin}});
         dragborder(ww, ww.GetLeft(), ww.GetTop());
     }
 }
@@ -538,7 +535,7 @@ fn CloseWindowMsg(win:*Window) void {
         _ = win.sendMessage(df.RELEASE_CLOCK, q.none);
     }
     if (win.PrevMouse) |_| {
-        _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.RELEASE_MOUSE, .{.capture=.{false, null}});
     }
     if (win.PrevKeyboard) |_| {
         _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
@@ -837,7 +834,7 @@ fn TerminateMoveSize() void {
     px = -1;
     py = -1;
     diff = 0;
-    _ = dwin.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{df.TRUE, 0}});
+    _ = dwin.sendMessage(df.RELEASE_MOUSE, .{.capture=.{true, null}});
     _ = dwin.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{true, null}});
     RestoreBorder(dwin.win.*.rc);
     WindowMoving = false;

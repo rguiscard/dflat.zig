@@ -32,7 +32,7 @@ fn CreateWindowMsg(win:*Window) bool {
         wnd.*.rc.rt += adj;
     }
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, .{.legacy=.{0, 0}});
-    _ = win.sendMessage(df.CAPTURE_MOUSE, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{false, null}});
     _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{false, null}});
     _ = q.SendMessage(null, df.SAVE_CURSOR, q.none);
     _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
@@ -331,7 +331,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 
 // ----------- CLOSE_WINDOW Message ----------
 fn CloseWindowMsg(win:*Window) bool {
-    _ = win.sendMessage(df.RELEASE_MOUSE, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.RELEASE_MOUSE, .{.capture=.{false, null}});
     _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
     _ = q.SendMessage(null, df.RESTORE_CURSOR, q.none);
     Window.inFocus = win.oldFocus;
