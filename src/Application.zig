@@ -116,7 +116,7 @@ fn SizeMsg(win:*Window, x:usize, y:usize) void {
     var x_new:usize = x;
     if (x < 30 + win.GetLeft())
         x_new = win.GetLeft() + 30;
-    _ = root.BaseWndProc(k.APPLICATION, win, df.SIZE, .{.position=.{x, y}});
+    _ = root.BaseWndProc(k.APPLICATION, win, df.SIZE, .{.position=.{x_new, y}});
     CreateMenu(win);
     CreateStatusBar(win);
     if (WasVisible)

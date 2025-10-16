@@ -241,12 +241,10 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     return false;
 }
 
-fn MouseMovedMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
+fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
     const wnd = win.win;
-    const pp1:usize = @intCast(p1);
-    const pp2:usize = @intCast(p2);
-    const mx:usize = if (pp1 > win.GetLeft()) pp1-win.GetLeft() else 0;
-    const my:usize = if (pp2 > win.GetTop()) pp2-win.GetTop() else 0;
+    const mx:usize = if (x > win.GetLeft()) x-win.GetLeft() else 0;
+    const my:usize = if (y > win.GetTop()) y-win.GetTop() else 0;
     if (VSliding) {
         // ---- dragging the vertical scroll box ---
         if (my-1 != win.VScrollBox) {
@@ -562,8 +560,8 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.MOUSE_MOVED => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             if (MouseMovedMsg(win, p1, p2)) {
                 return true;
             }

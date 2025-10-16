@@ -528,10 +528,10 @@ pub fn dispatch_message() bool {
             df.MOUSE_MOVED => {
                 const Mwnd = MouseWindow(ev.mx, ev.my);
                 if (Mwnd) |mw| {
-                    _ = mw.sendMessage(ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
+                    _ = mw.sendMessage(ev.event, .{.position=.{ev.mx, ev.my}});
                 } else {
                     // could this happen ?
-                    _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
+                    _ = SendMessage(null, ev.event, .{.position=.{ev.mx, ev.my}});
                 }
             },
 //#if MSDOS       // FIXME add MK_FP

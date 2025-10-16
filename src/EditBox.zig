@@ -408,20 +408,12 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ----------- MOUSE_MOVED Message ----------
-fn MouseMovedMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
     const wnd = win.win;
-    const pp1:usize = @intCast(p1);
-    const pp2:usize = @intCast(p2);
-    var MouseX:usize = 0;
-    if (pp1 > win.GetClientLeft()) {
-        MouseX = pp1 - win.GetClientLeft();
-    }
-    var MouseY:usize = 0;
-    if (pp2 > win.GetClientTop()) {
-        MouseY = pp2 - win.GetClientTop();
-    }
+    const MouseX = if (x > win.GetClientLeft()) x - win.GetClientLeft() else 0;
+    const MouseY = if (y > win.GetClientTop()) y - win.GetClientTop() else 0;
     var rc = rect.ClientRect(win);
-    if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false)
+    if (rect.InsideRect(@intCast(x), @intCast(y), rc) == false)
         return false;
     var wlines = win.wlines;
     wlines -|= 1;
@@ -1067,8 +1059,8 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
                 return true;
         },
         df.MOUSE_MOVED => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             if (MouseMovedMsg(win, p1, p2))
                 return true;
         },

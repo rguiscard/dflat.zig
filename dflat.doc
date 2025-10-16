@@ -441,6 +441,7 @@ MOUSE_MOVED            mouse changed position
             or the window has captured the mouse)
   P1:      x
   P2:      y
+  Params:  Position
   Returns: 
 
 BUTTON_RELEASED        mouse button released          

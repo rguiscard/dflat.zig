@@ -143,7 +143,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             }
         }
         _ = win.sendMessage(df.MOUSE_CURSOR, .{.position=.{x, y}});
-        _ = win.sendMessage(df.MOUSE_MOVED, .{.legacy=.{@intCast(x), @intCast(y)}});
+        _ = win.sendMessage(df.MOUSE_MOVED, .{.position=.{x, y}});
         return true;
     }
     switch (p1) {
@@ -407,14 +407,14 @@ fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 }
 
 // --------- MOUSE_MOVED Message ----------
-fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn MouseMovedMsg(win:*Window, p1:usize, p2:usize) bool {
     if (WindowMoving) {
         var leftmost:usize = 0;
         var topmost:usize = 0;
         var bottommost:usize = @intCast(df.SCREENHEIGHT-2);
         var rightmost:usize = @intCast(df.SCREENWIDTH-2);
-        var x:usize = @as(usize, @intCast(p1)) - diff;
-        var y:usize = @as(usize, @intCast(p2));
+        var x:usize = if (p1 > diff) p1 - diff else 0;
+        var y:usize = p2;
         if ((win.parent != null) and
                 (win.TestAttribute(df.NOCLIP) == false)) {
             const win1 = win.getParent();
@@ -449,10 +449,11 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 fn MoveMsg(win:*Window, x:usize, y:usize) void {
     const wnd = win.win;
     const wasVisible = win.isVisible();
-    const xdif:usize = if (x > win.GetLeft()) x - win.GetLeft() else 0;
-    const ydif:usize = if (y > win.GetTop()) y - win.GetTop() else 0;
 
-    if ((xdif == 0) and (ydif == 0)) {
+    const win_x:usize = win.GetLeft();
+    const win_y:usize = win.GetTop();
+
+    if ((x == win_x) and (y == win_y)) {
         return;
     }
     win.wasCleared = false;
@@ -471,8 +472,13 @@ fn MoveMsg(win:*Window, x:usize, y:usize) void {
     var cwin = win.firstWindow();
     while (cwin) |cw| {
         const cwnd = cw.win;
-        _ = cw.sendMessage(df.MOVE, .{.position=.{@as(usize, @intCast(cwnd.*.rc.lf))+xdif, 
-                                                  @as(usize, @intCast(cwnd.*.rc.tp))+ydif}});
+
+        var x_new:usize = @as(usize, @intCast(cwnd.*.rc.lf)) + x;
+        var y_new:usize = @as(usize, @intCast(cwnd.*.rc.tp)) + y;
+        x_new -|= win_x;
+        y_new -|= win_y;
+        _ = cw.sendMessage(df.MOVE, .{.position=.{x_new, y_new}});
+
         cwin = cw.nextWindow();
     }
     if (wasVisible)
@@ -699,9 +705,9 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             LeftButtonMsg(win, p1, p2);
         },
         df.MOUSE_MOVED => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            if (MouseMovedMsg(win, p1, p2)) {
+            const x = params.position[0];
+            const y = params.position[1];
+            if (MouseMovedMsg(win, x, y)) {
                 return true;
             }
         },
