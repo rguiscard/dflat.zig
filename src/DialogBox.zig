@@ -429,14 +429,12 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
 }
 
 // -------- LEFT_BUTTON Message ---------
-fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
     if (normal.WindowSizing or normal.WindowMoving)
         return true;
 
-    const pp1:usize = @intCast(p1);
-    const pp2:usize = @intCast(p2);
-    const ux = if (pp1>win.GetLeft()) pp1-win.GetLeft() else 0;
-    const uy = if (pp2>win.GetTop()) pp2-win.GetTop() else 0;
+    const ux = if (x>win.GetLeft()) x-win.GetLeft() else 0;
+    const uy = if (y>win.GetTop()) y-win.GetTop() else 0;
     if (win.HitControlBox(ux, uy)) {
         q.PostMessage(win, df.KEYBOARD,.{.legacy=.{' ', df.ALTKEY}});
         return true;
@@ -565,8 +563,8 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 return true;
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             if (LeftButtonMsg(win, p1, p2))
                 return true;
         },

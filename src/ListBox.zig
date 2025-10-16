@@ -225,13 +225,12 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ------- LEFT_BUTTON Message --------
-fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
-    const pp2:usize = @intCast(p2);
-    var my:usize = pp2 - win.GetTop();
+fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
+    var my:usize = if (y > win.GetTop()) y - win.GetTop() else 0;
     if (my >= win.wlines-win.wtop)
         my = win.wlines - win.wtop;
 
-    if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win)) == false) {
+    if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win)) == false) {
         return false;
     }
     if ((win.wlines > 0) and  (my != py)) {
@@ -254,12 +253,12 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ------------- DOUBLE_CLICK Message ------------
-fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn DoubleClickMsg(win:*Window, x:usize, y:usize) bool {
     if (normal.WindowMoving or normal.WindowSizing)
         return false;
     if (win.wlines>0) {
-        _ = root.BaseWndProc(k.LISTBOX, win, df.DOUBLE_CLICK, .{.legacy=.{p1, p2}});
-        if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win)))
+        _ = root.BaseWndProc(k.LISTBOX, win, df.DOUBLE_CLICK, .{.position=.{x, y}});
+        if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win)))
             _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{win.selection, 0}});
     }
     return true;
@@ -317,14 +316,14 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             }
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             if (LeftButtonMsg(win, p1, p2))
                 return true;
         },
         df.DOUBLE_CLICK => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             if (DoubleClickMsg(win, p1, p2))
                 return true;
         },

@@ -417,6 +417,7 @@ RIGHT_BUTTON           right button pressed
             or the window has captured the mouse)
   P1:      x
   P2:      y
+  Params:  Position
   Returns: 
 
 LEFT_BUTTON            left button pressed            
@@ -425,6 +426,7 @@ LEFT_BUTTON            left button pressed
             or the window has captured the mouse)
   P1:      x
   P2:      y
+  Params:  Position
   Returns: 
 
 DOUBLE_CLICK           left button doubleclicked    
@@ -434,6 +436,7 @@ DOUBLE_CLICK           left button doubleclicked
            (a LEFT_BUTTON message will have preceded this one)
   P1:      x
   P2:      y
+  Params:  Position
   Returns: 
 
 MOUSE_MOVED            mouse changed position         
@@ -451,6 +454,7 @@ BUTTON_RELEASED        mouse button released
             or the window has captured the mouse)
   P1:      x
   P2:      y
+  Params:  Position
   Returns: 
 
 CURRENT_MOUSE_CURSOR   get mouse position             

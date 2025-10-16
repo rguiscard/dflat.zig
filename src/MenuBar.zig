@@ -264,9 +264,8 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
 }
 
 // --------------- LEFT_BUTTON Message ----------
-fn LeftButtonMsg(win:*Window,p1:df.PARAM) void {
-    const pp1:usize = @intCast(p1);
-    const mx:usize = pp1-win.GetLeft();
+fn LeftButtonMsg(win:*Window, x:usize) void {
+    const mx:usize = if (x > win.GetLeft()) x-win.GetLeft() else 0;
     // --- compute the selection that the left button hit ---
     for (menupos, 0..) |m, idx| {
         if (m.x1 == -1) {
@@ -452,7 +451,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
+            const p1 = params.position[0];
             LeftButtonMsg(win, p1);
             return true;
         },

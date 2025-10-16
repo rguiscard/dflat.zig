@@ -167,11 +167,9 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM) bool {
 }
 
 // ------------ LEFT_BUTTON Message --------------
-fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const pp1:usize = @intCast(p1);
-    const pp2:usize = @intCast(p2);
-    const mx:usize = if (pp1 > win.GetLeft()) pp1 - win.GetLeft() else 0;
-    const my:usize = if (pp2 > win.GetTop()) pp2 - win.GetTop() else 0;
+fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
+    const mx:usize = if (x > win.GetLeft()) x - win.GetLeft() else 0;
+    const my:usize = if (y > win.GetTop()) y - win.GetTop() else 0;
     if (win.TestAttribute(df.VSCROLLBAR) and
                         mx == win.WindowWidth()-1) {
         // -------- in the right border -------
@@ -550,12 +548,12 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const x = params.position[0];
+            const y = params.position[1];
             if (normal.WindowMoving or normal.WindowSizing) {
                 return false;
             }
-            if (LeftButtonMsg(win, p1, p2)) {
+            if (LeftButtonMsg(win, x, y)) {
                 return true;
             }
         },

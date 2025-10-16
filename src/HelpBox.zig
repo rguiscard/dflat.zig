@@ -290,13 +290,10 @@ fn PaintMsg(win:*Window, params:q.Params) bool {
 }
 
 // ---- LEFT_BUTTON message for the helpbox text editbox ----
-fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
-    const rtn = root.DefaultWndProc(win, df.LEFT_BUTTON, .{.legacy=.{p1, p2}});
-
-    const pp1:usize = @intCast(p1);
-    const pp2:usize = @intCast(p2);
-    const mx:usize = pp1 - win.GetClientLeft();
-    const my:usize = pp2 - win.GetClientTop() + win.wtop;
+fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
+    const rtn = root.DefaultWndProc(win, df.LEFT_BUTTON, .{.position=.{x, y}});
+    const mx:usize = if (x > win.GetClientLeft()) x - win.GetClientLeft() else 0;
+    const my:usize = if (y+win.wtop > win.GetClientTop()) y - win.GetClientTop() + win.wtop else 0;
 
     for (&KeyWords, 0..) |*word, idx| {
         if (my == word.lineno) {
@@ -347,8 +344,8 @@ pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return PaintMsg(win, params);
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             return LeftButtonMsg(win, p1, p2);
         },
         df.DOUBLE_CLICK => {

@@ -136,7 +136,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                     x -|= 1;
             },
             '\r' => {
-                _ = win.sendMessage(df.BUTTON_RELEASED,.{.legacy=.{@intCast(x),@intCast(y)}});
+                _ = win.sendMessage(df.BUTTON_RELEASED,.{.position=.{x, y}});
             },
             else => {
                 return true;
@@ -315,11 +315,9 @@ fn SetFocusMsg(win:*Window, yes:bool) void {
 }
 
 // --------- DOUBLE_CLICK Message ----------
-fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const pp1:usize = @intCast(p1);
-    const pp2:usize = @intCast(p2);
-    const mx:usize = pp1 - win.GetLeft();
-    const my:usize = pp2 - win.GetTop();
+fn DoubleClickMsg(win:*Window, x:usize, y:usize) void {
+    const mx:usize = if (x > win.GetLeft()) x - win.GetLeft() else 0;
+    const my:usize = if (y > win.GetTop()) y - win.GetTop() else 0;
     if ((WindowSizing == false) and (WindowMoving == false)) {
         if (win.HitControlBox(mx, my)) {
             q.PostMessage(win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
@@ -329,13 +327,10 @@ fn DoubleClickMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 }
 
 // --------- LEFT_BUTTON Message ----------
-fn LeftButtonMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+fn LeftButtonMsg(win:*Window, x:usize, y:usize) void {
     const dwin = getDummy();
-//    const dwnd = dwin.win;
-    const pp1:usize = @intCast(p1);
-    const pp2:usize = @intCast(p2);
-    const mx:usize = if (pp1>win.GetLeft()) pp1 - win.GetLeft() else 0;
-    const my:usize = if (pp2>win.GetTop()) pp2 - win.GetTop() else 0;
+    const mx:usize = if (x > win.GetLeft()) x - win.GetLeft() else 0;
+    const my:usize = if (y > win.GetTop()) y - win.GetTop() else 0;
     if (WindowSizing or WindowMoving)
         return;
     if (win.HitControlBox(mx, my)) {
@@ -694,13 +689,13 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             SetFocusMsg(win, params.yes);
         },
         df.DOUBLE_CLICK => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             DoubleClickMsg(win, p1, p2);
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             LeftButtonMsg(win, p1, p2);
         },
         df.MOUSE_MOVED => {

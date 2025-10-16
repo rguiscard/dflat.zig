@@ -42,10 +42,9 @@ fn CreateWindowMsg(win:*Window) bool {
 }
 
 // --------- LEFT_BUTTON Message ---------
-fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
-    const pp2:usize = @intCast(p2);
-    const my:usize = if (pp2 > win.GetTop()) pp2 - win.GetTop() else 0;
-    if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win))) {
+fn LeftButtonMsg(win:*Window, x:usize, y:usize) void {
+    const my:usize = if (y > win.GetTop()) y - win.GetTop() else 0;
+    if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win))) {
         if (my != py) {
             _ = win.sendMessage(df.LB_SELECTION,
                     .{.legacy=.{@intCast(win.wtop+my-1), df.TRUE}});
@@ -53,9 +52,9 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
         }
     } else {
         if (win.parent) |pw| {
-            if (p2 == pw.GetTop()) {
+            if (y == pw.GetTop()) {
                 if (pw.Class == k.MENUBAR) {
-                    q.PostMessage(pw, df.LEFT_BUTTON, .{.legacy=.{p1, p2}});
+                    q.PostMessage(pw, df.LEFT_BUTTON, .{.position=.{x, y}});
                 }
             }
         }
@@ -63,12 +62,11 @@ fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
 }
 
 // -------- BUTTON_RELEASED Message --------
-fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn ButtonReleasedMsg(win:*Window, x:usize, y:usize) bool {
     const wnd = win.win;
-    const pp2:usize = @intCast(p2);
     py = -1;
-    if (rect.InsideRect(@intCast(p1), @intCast(p2), rect.ClientRect(win))) {
-        const sel:usize = pp2 - win.GetClientTop();
+    if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win))) {
+        const sel:usize = y - win.GetClientTop();
 //        const tl = df.TextLine(wnd, sel);
 //        if (tl[0] != df.LINE)
         const tl = win.textLine(sel);
@@ -76,9 +74,9 @@ fn ButtonReleasedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{win.selection, 0}});
     } else {
         const pwin = win.getParent();
-        if ((pwin.getClass() == k.MENUBAR) and (p2==pwin.GetTop()))
+        if ((pwin.getClass() == k.MENUBAR) and (y==pwin.GetTop()))
             return false;
-        if (p1 == pwin.GetLeft()+2)
+        if (x == pwin.GetLeft()+2)
             return false;
         _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
         return true;
@@ -349,8 +347,8 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return CreateWindowMsg(win);
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             LeftButtonMsg(win, p1, p2);
             return false;
         },
@@ -371,8 +369,8 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.BUTTON_RELEASED => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             if (ButtonReleasedMsg(win, p1, p2))
                 return true;
         },

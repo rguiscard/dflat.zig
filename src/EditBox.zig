@@ -312,18 +312,10 @@ fn ExtendBlock(win:*Window, xx:usize, yy:usize) void {
 }
 
 // ----------- LEFT_BUTTON Message ---------- 
-fn LeftButtonMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+fn LeftButtonMsg(win:*Window,p1:usize, p2:usize) bool {
     const wnd = win.win;
-    const pp1:usize = @intCast(p1);
-    const pp2:usize = @intCast(p2);
-    var MouseX:usize = 0;
-    if (pp1 > win.GetClientLeft()) {
-        MouseX = pp1 - win.GetClientLeft();
-    }
-    var MouseY:usize = 0;
-    if (pp2 > win.GetClientTop()) {
-        MouseY = pp2 - win.GetClientTop();
-    }
+    var MouseX:usize = if (p1 > win.GetClientLeft()) p1 - win.GetClientLeft() else 0;
+    var MouseY:usize = if (p2 > win.GetClientTop()) p2 - win.GetClientTop() else 0;
     const rc = rect.ClientRect(win);
     if (KeyBoardMarking)
         return true;
@@ -1052,8 +1044,8 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return HorizPageMsg(win, p1);
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             if (LeftButtonMsg(win, p1, p2))
                 return true;
         },

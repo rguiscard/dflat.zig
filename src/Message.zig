@@ -504,10 +504,10 @@ pub fn dispatch_message() bool {
                         }
                     }
                     if (Mwnd) |mw| {
-                        _ = mw.sendMessage(df.LEFT_BUTTON, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
+                        _ = mw.sendMessage(df.LEFT_BUTTON, .{.position=.{ev.mx, ev.my}});
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, df.LEFT_BUTTON, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
+                        _ = SendMessage(null, df.LEFT_BUTTON, .{.position=.{ev.mx, ev.my}});
                     }
                 }
             },
@@ -518,10 +518,10 @@ pub fn dispatch_message() bool {
                     // Fall through
                     const Mwnd = MouseWindow(ev.mx, ev.my);
                     if (Mwnd) |mw| {
-                        _ = mw.sendMessage(ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
+                        _ = mw.sendMessage(ev.event, .{.position=.{ev.mx, ev.my}});
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
+                        _ = SendMessage(null, ev.event, .{.position=.{ev.mx, ev.my}});
                     }
                 }
             },
