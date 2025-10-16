@@ -561,30 +561,39 @@ SCROLL                 vertical scroll of text box
   Sent:    to scroll a text window vertically one line
   P1:      true = scroll up, false = scroll down
   P2:
+  Params:  yes/no
   Returns: 
 
 HORIZSCROLL            horizontal scroll of text box 
   Sent:    to scroll a text window horizontally one column
   P1:      true = scroll left, false = scroll right
   P2:
+  Params:  yes/no
   Returns: 
 
 SCROLLPAGE             vertical scroll of text box 1 page
   Sent:    to scroll a text window vertically one page
   P1:      true = scroll up, false = scroll down
   P2:
+  Params:  yes/no
   Returns: 
 
 HORIZSCROLLPAGE        horizontal scroll of text box 1 page
   Sent:    to scroll a text window horizontally one page
   P1:      true = scroll left, false = scroll right
   P2:
+  Params:  yes/no
   Returns: 
 
 SCROLLDOC             document scroll of text box
   Sent:    to scroll a text window to beginning/end of document
   P1:      true = scroll to beginning, false = scroll to end
   P2:
+  Params:  yes/no
+  Returns:
+
+HORIZPAGE             horizontal scroll of a page ?
+  Params:  yes/no
   Returns: 
 
 Edit Box Messages  

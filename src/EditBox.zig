@@ -196,13 +196,13 @@ fn SizeMsg(win:*Window, x:usize, y:usize) bool {
 }
 
 // ----------- SCROLL Message ----------
-fn ScrollMsg(win:*Window, p1:df.PARAM) bool {
+fn ScrollMsg(win:*Window, p1:bool) bool {
     const wnd = win.win;
     var rtn = false;
     if (win.isMultiLine()) {
-        rtn = root.BaseWndProc(k.EDITBOX,win,df.SCROLL,.{.legacy=.{p1,0}});
+        rtn = root.BaseWndProc(k.EDITBOX, win, df.SCROLL, .{.yes=p1});
         if (rtn) {
-            if (p1>0) {
+            if (p1) {
                 // -------- scrolling up ---------
                 if (wnd.*.WndRow == 0)    {
                     wnd.*.CurrLine += 1;
@@ -228,14 +228,14 @@ fn ScrollMsg(win:*Window, p1:df.PARAM) bool {
 }
 
 // ----------- HORIZSCROLL Message ----------
-fn HorizScrollMsg(win:*Window, p1:df.PARAM) bool {
+fn HorizScrollMsg(win:*Window, p1:bool) bool {
     const wnd = win.win;
     var rtn = false;
 //    char *currchar = CurrChar;
     const curr_char = df.zCurrChar(wnd);
-    if (((p1>0) and (wnd.*.CurrCol == wnd.*.wleft) and
+    if ((p1 and (wnd.*.CurrCol == wnd.*.wleft) and
                (curr_char[0] == '\n')) == false)  {
-        rtn = root.BaseWndProc(k.EDITBOX, win, df.HORIZSCROLL, .{.legacy=.{p1, 0}});
+        rtn = root.BaseWndProc(k.EDITBOX, win, df.HORIZSCROLL, .{.yes=p1});
         if (rtn) {
             if (wnd.*.CurrCol < wnd.*.wleft) {
                 wnd.*.CurrCol += 1;
@@ -249,11 +249,11 @@ fn HorizScrollMsg(win:*Window, p1:df.PARAM) bool {
 }
 
 // ----------- SCROLLPAGE Message ----------
-fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
+fn ScrollPageMsg(win:*Window,p1:bool) bool {
     const wnd = win.win;
     var rtn = false;
     if (win.isMultiLine())    {
-        rtn = root.BaseWndProc(k.EDITBOX, win, df.SCROLLPAGE, .{.legacy=.{p1, 0}});
+        rtn = root.BaseWndProc(k.EDITBOX, win, df.SCROLLPAGE, .{.yes=p1});
 //        SetLinePointer(wnd, wnd->wtop+wnd->WndRow);
         wnd.*.CurrLine = @as(c_int, @intCast(win.wtop))+wnd.*.WndRow;
         StickEnd(win);
@@ -262,11 +262,11 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) bool {
     return rtn;
 }
 // ----------- HORIZSCROLLPAGE Message ----------
-fn HorizPageMsg(win:*Window, p1:df.PARAM) bool {
+fn HorizPageMsg(win:*Window, p1:bool) bool {
     const wnd = win.win;
-    const rtn = root.BaseWndProc(k.EDITBOX, win, df.HORIZPAGE, .{.legacy=.{p1, 0}});
+    const rtn = root.BaseWndProc(k.EDITBOX, win, df.HORIZPAGE, .{.yes=p1});
     const clientWidth:c_int = @intCast(win.ClientWidth());
-    if (p1 == df.FALSE) {
+    if (p1 == false) {
         if (wnd.*.CurrCol > wnd.*.wleft+clientWidth-1)
             wnd.*.CurrCol = @intCast(wnd.*.wleft+clientWidth-1);
     } else if (wnd.*.CurrCol < wnd.*.wleft) {
@@ -527,7 +527,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
         if (WndCol(win) == win.ClientWidth()-1) {
             if (win.isMultiLine() == false)  {
                 if (!(currpos == win.MaxTextLength))
-                    _ = win.sendMessage(df.HORIZSCROLL, .{.legacy=.{df.TRUE, 0}});
+                    _ = win.sendMessage(df.HORIZSCROLL, .{.yes=true});
             } else {
                 var cp = currchar;
                 const pos = win.textLine(@intCast(wnd.*.CurrLine));
@@ -535,7 +535,7 @@ fn KeyTyped(win:*Window, cc:c_int) void {
                 while (cp != ' ' and cp != lchr)
                     cp -= 1;
                 if (cp == lchr or (win.WordWrapMode == false)) {
-                    _ = win.sendMessage(df.HORIZSCROLL, .{.legacy=.{df.TRUE, 0}});
+                    _ = win.sendMessage(df.HORIZSCROLL, .{.yes=true});
                 } else {
 //                    int dif = 0;
 //                    if (c != ' ')    {
@@ -1011,15 +1011,17 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             }
             // fall through?
             const rtn = root.BaseWndProc(k.EDITBOX, win, msg, params);
-            _ = win.sendMessage(df.KEYBOARD_CURSOR,
-                                .{.position=.{@intCast(wnd.*.CurrCol-wnd.*.wleft), @intCast(wnd.*.WndRow)}});
+            const x:usize = if (wnd.*.CurrCol > wnd.*.wleft) @intCast(wnd.*.CurrCol-wnd.*.wleft) else 0;
+            const y:usize = @intCast(wnd.*.WndRow);
+            _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{x, y}});
             return rtn;
         },
         df.PAINT,
         df.MOVE => {
             const rtn = root.BaseWndProc(k.EDITBOX, win, msg, params);
-            _ = win.sendMessage(df.KEYBOARD_CURSOR,
-                                .{.position=.{@intCast(wnd.*.CurrCol-wnd.*.wleft), @intCast(wnd.*.WndRow)}});
+            const x:usize = if (wnd.*.CurrCol > wnd.*.wleft) @intCast(wnd.*.CurrCol-wnd.*.wleft) else 0;
+            const y:usize = @intCast(wnd.*.WndRow);
+            _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{x, y}});
             return rtn;
         },
         df.SIZE => {
@@ -1028,20 +1030,16 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return SizeMsg(win, p1, p2);
         },
         df.SCROLL => {
-            const p1 = params.legacy[0];
-            return ScrollMsg(win, p1);
+            return ScrollMsg(win, params.yes);
         },
         df.HORIZSCROLL => {
-            const p1 = params.legacy[0];
-            return HorizScrollMsg(win, p1);
+            return HorizScrollMsg(win, params.yes);
         },
         df.SCROLLPAGE => {
-            const p1 = params.legacy[0];
-            return ScrollPageMsg(win, p1);
+            return ScrollPageMsg(win, params.yes);
         },
         df.HORIZPAGE => {
-            const p1 = params.legacy[0];
-            return HorizPageMsg(win, p1);
+            return HorizPageMsg(win, params.yes);
         },
         df.LEFT_BUTTON => {
             const p1 = params.position[0];
@@ -1141,7 +1139,7 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
         },
         df.CTRL_HOME => {
             if (win.isMultiLine()) {
-                _ = win.sendMessage(df.SCROLLDOC, .{.legacy=.{df.TRUE, 0}});
+                _ = win.sendMessage(df.SCROLLDOC, .{.yes=true});
                 wnd.*.CurrLine = 0;
                 wnd.*.WndRow = 0;
             }
@@ -1151,7 +1149,7 @@ fn ScrollingKey(win:*Window, cc:c_int, p2:df.PARAM) bool {
             if (win.isMultiLine() and
                 @as(usize, @intCast(wnd.*.WndRow))+win.wtop+1 < win.wlines and
                 win.wlines > 0) {
-                _ = win.sendMessage(df.SCROLLDOC, .{.legacy=.{df.FALSE, 0}});
+                _ = win.sendMessage(df.SCROLLDOC, .{.yes=false});
                 wnd.*.CurrLine = @as(c_int, @intCast(win.wlines-1));
 //                _ = df.SetLinePointer(wnd, win.wlines-1);
                 wnd.*.WndRow =
@@ -1257,7 +1255,7 @@ fn Forward(win:*Window) void {
     } else {
         wnd.*.CurrCol += 1;
         if (WndCol(win) == win.ClientWidth())
-            _ = win.sendMessage(df.HORIZSCROLL, .{.legacy=.{df.TRUE, 0}});
+            _ = win.sendMessage(df.HORIZSCROLL, .{.yes=true});
     }
 //    char *cc = CurrChar+1;
 //    if (*cc == '\0')
@@ -1313,7 +1311,7 @@ fn Downward(win:*Window) void {
             @as(usize, @intCast(wnd.*.WndRow))+win.wtop+1 < win.wlines)  {
         wnd.*.CurrLine += 1;
         if (wnd.*.WndRow == win.ClientHeight()-1)
-            _ = win.sendMessage(df.SCROLL, .{.legacy=.{df.TRUE, 0}});
+            _ = win.sendMessage(df.SCROLL, .{.yes=true});
         wnd.*.WndRow += 1;
         StickEnd(win);
     }
@@ -1325,7 +1323,7 @@ fn Upward(win:*Window) void {
     if (win.isMultiLine() and wnd.*.CurrLine != 0) {
         wnd.*.CurrLine -= 1;
         if (wnd.*.WndRow == 0)
-            _ = win.sendMessage(df.SCROLL, .{.legacy=.{df.FALSE, 0}});
+            _ = win.sendMessage(df.SCROLL, .{.yes=false});
         wnd.*.WndRow -= 1;
         StickEnd(win);
     }
@@ -1337,7 +1335,7 @@ fn Backward(win:*Window) void {
     if (wnd.*.CurrCol>0) {
         wnd.*.CurrCol -= 1;
         if (wnd.*.CurrCol < wnd.*.wleft)
-            _ = win.sendMessage(df.HORIZSCROLL, .{.legacy=.{df.FALSE, 0}});
+            _ = win.sendMessage(df.HORIZSCROLL, .{.yes=false});
     } else if (win.isMultiLine() and wnd.*.CurrLine != 0) {
         Upward(win);
         End(win);

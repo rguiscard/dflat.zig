@@ -131,34 +131,34 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM) bool {
 
     switch (p1) {
         df.UP => {
-            rtn = win.sendMessage(df.SCROLL,.{.legacy=.{df.FALSE,0}});
+            rtn = win.sendMessage(df.SCROLL,.{.yes=false});
         },
         df.DN => {
-            rtn = win.sendMessage(df.SCROLL,.{.legacy=.{df.TRUE,0}});
+            rtn = win.sendMessage(df.SCROLL,.{.yes=true});
         },
         df.FWD => {
-            rtn = win.sendMessage(df.HORIZSCROLL,.{.legacy=.{df.TRUE,0}});
+            rtn = win.sendMessage(df.HORIZSCROLL,.{.yes=true});
         },
         df.BS => {
-            rtn = win.sendMessage(df.HORIZSCROLL,.{.legacy=.{df.FALSE,0}});
+            rtn = win.sendMessage(df.HORIZSCROLL,.{.yes=false});
         },
         df.PGUP => {
-            rtn = win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.FALSE,0}});
+            rtn = win.sendMessage(df.SCROLLPAGE,.{.yes=false});
         },
         df.PGDN => {
-            rtn = win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.TRUE,0}});
+            rtn = win.sendMessage(df.SCROLLPAGE,.{.yes=true});
         },
         df.CTRL_PGUP => {
-            rtn = win.sendMessage(df.HORIZPAGE,.{.legacy=.{df.FALSE,0}});
+            rtn = win.sendMessage(df.HORIZPAGE,.{.yes=false});
         },
         df.CTRL_PGDN => {
-            rtn = win.sendMessage(df.HORIZPAGE,.{.legacy=.{df.TRUE,0}});
+            rtn = win.sendMessage(df.HORIZPAGE,.{.yes=true});
         },
         df.HOME => {
-            rtn = win.sendMessage(df.SCROLLDOC,.{.legacy=.{df.TRUE,0}});
+            rtn = win.sendMessage(df.SCROLLDOC,.{.yes=true});
         },
         df.END => {
-            rtn = win.sendMessage(df.SCROLLDOC,.{.legacy=.{df.FALSE,0}});
+            rtn = win.sendMessage(df.SCROLLDOC,.{.yes=false});
         },
         else => {
         }
@@ -179,11 +179,11 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
         }
         if (my == 1) {
             // -------- top scroll button ---------
-            return win.sendMessage(df.SCROLL, .{.legacy=.{df.FALSE, 0}});
+            return win.sendMessage(df.SCROLL, .{.yes=false});
         }
         if (my == win.ClientHeight()) {
             // -------- bottom scroll button ---------
-            return win.sendMessage(df.SCROLL, .{.legacy=.{df.TRUE, 0}});
+            return win.sendMessage(df.SCROLL, .{.yes=true});
         }
         // ---------- in the scroll bar -----------
         if ((VSliding == false) and (my-1 == win.VScrollBox)) {
@@ -197,10 +197,10 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
             return q.SendMessage(null, df.MOUSE_TRAVEL, .{.area = rc});
         }
         if (my-1 < win.VScrollBox) {
-            return win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.FALSE,0}});
+            return win.sendMessage(df.SCROLLPAGE,.{.yes=false});
         }
         if (my-1 > win.VScrollBox) {
-            return win.sendMessage(df.SCROLLPAGE,.{.legacy=.{df.TRUE,0}});
+            return win.sendMessage(df.SCROLLPAGE,.{.yes=true});
         }
     }
     if (win.TestAttribute(df.HSCROLLBAR) and
@@ -211,10 +211,10 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
             return false;
         }
         if (mx == 1) {
-            return win.sendMessage(df.HORIZSCROLL,.{.legacy=.{df.FALSE,0}});
+            return win.sendMessage(df.HORIZSCROLL,.{.yes=false});
         }
         if (mx == win.WindowWidth()-2) {
-            return win.sendMessage(df.HORIZSCROLL,.{.legacy=.{df.TRUE,0}});
+            return win.sendMessage(df.HORIZSCROLL,.{.yes=true});
         }
         if ((HSliding == false) and (mx-1 == win.HScrollBox)) {
             // --- hit the scroll box ---
@@ -230,10 +230,10 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
             return true;
         }
         if (mx-1 < win.HScrollBox) {
-            return win.sendMessage(df.HORIZPAGE,.{.legacy=.{df.FALSE,0}});
+            return win.sendMessage(df.HORIZPAGE,.{.yes=false});
         }
         if (mx-1 > win.HScrollBox) {
-            return win.sendMessage(df.HORIZPAGE,.{.legacy=.{df.TRUE,0}});
+            return win.sendMessage(df.HORIZPAGE,.{.yes=true});
         }
     }
     return false;
@@ -286,10 +286,10 @@ fn ButtonReleasedMsg(win:*Window) void {
 }
 
 // ------------ SCROLL Message --------------
-fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
+fn ScrollMsg(win:*Window,p1:bool) bool {
     const wnd = win.win;
     // ---- vertical scroll one line ----
-    if (p1>0) {
+    if (p1) {
         // ----- scroll one line up -----
         if (win.wtop+win.ClientHeight() >= win.wlines) {
             return false;
@@ -309,8 +309,8 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
             if (win != Window.inFocus) {
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             } else {
-                df.scroll_window(wnd, rc, @intCast(p1));
-                if (p1 == 0) {
+                df.scroll_window(wnd, rc, if (p1) 1 else 0);
+                if (p1 == false) {
                     // -- write top line (down) --
                     WriteTextLine(win,null,win.wtop,false);
                 } else {
@@ -331,10 +331,10 @@ fn ScrollMsg(win:*Window,p1:df.PARAM) bool {
     return true;
 }
 
-fn HorizScrollMsg(win:*Window,p1:df.PARAM) bool {
+fn HorizScrollMsg(win:*Window,p1:bool) bool {
     const wnd = win.win;
     // --- horizontal scroll one column ---
-    if (p1>0) {
+    if (p1) {
         // --- scroll left ---
         if (wnd.*.wleft + @as(c_int, @intCast(win.ClientWidth()))-1 >= wnd.*.textwidth) {
             return false;
@@ -352,10 +352,10 @@ fn HorizScrollMsg(win:*Window,p1:df.PARAM) bool {
 }
 
 // ------------  SCROLLPAGE Message --------------
-fn ScrollPageMsg(win:*Window,p1:df.PARAM) void {
+fn ScrollPageMsg(win:*Window,p1:bool) void {
     const clientHeight:usize = win.ClientHeight();
     // --- vertical scroll one page ---
-    if (p1 == df.FALSE)    {
+    if (p1 == false)    {
         // ---- page up ----
         if (win.wtop > 0) {
             win.wtop -|= clientHeight;
@@ -376,11 +376,11 @@ fn ScrollPageMsg(win:*Window,p1:df.PARAM) void {
 }
 
 // ------------ HORIZSCROLLPAGE Message --------------
-fn HorizScrollPageMsg(win:*Window,p1:df.PARAM) void {
+fn HorizScrollPageMsg(win:*Window,p1:bool) void {
     const wnd = win.win;
     const clientWidth: c_int = @intCast(win.ClientWidth());
     // --- horizontal scroll one page ---
-    if (p1 == df.FALSE) {
+    if (p1 == false) {
         // ---- page left -----
         wnd.*.wleft -= clientWidth;
     } else {
@@ -397,11 +397,11 @@ fn HorizScrollPageMsg(win:*Window,p1:df.PARAM) void {
 }
 
 // ------------ SCROLLDOC Message --------------
-fn ScrollDocMsg(win:*Window,p1:df.PARAM) void {
+fn ScrollDocMsg(win:*Window,p1:bool) void {
     const wnd = win.win;
     const clientHeight:usize = win.ClientHeight();
     // --- scroll to beginning or end of document ---
-    if (p1>0) {
+    if (p1) {
         win.wtop = 0;
         wnd.*.wleft = 0;
     } else if (win.wtop+clientHeight < win.wlines) {
@@ -568,26 +568,21 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             ButtonReleasedMsg(win);
         },
         df.SCROLL => {
-            const p1 = params.legacy[0];
-            return ScrollMsg(win, p1);
+            return ScrollMsg(win, params.yes);
         },
         df.HORIZSCROLL => {
-            const p1 = params.legacy[0];
-            return HorizScrollMsg(win, p1);
+            return HorizScrollMsg(win, params.yes);
         },
         df.SCROLLPAGE => {
-            const p1 = params.legacy[0];
-            ScrollPageMsg(win, p1);
+            ScrollPageMsg(win, params.yes);
             return true;
         },
         df.HORIZPAGE => {
-            const p1 = params.legacy[0];
-            HorizScrollPageMsg(win, p1);
+            HorizScrollPageMsg(win, params.yes);
             return true;
         },
         df.SCROLLDOC => {
-            const p1 = params.legacy[0];
-            ScrollDocMsg(win, p1);
+            ScrollDocMsg(win, params.yes);
             return true;
         },
         df.PAINT => {
