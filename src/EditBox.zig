@@ -36,7 +36,7 @@ pub fn WndCol(win:*Window) c_int {
 // ----------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) bool {
     const wnd = win.win;
-    const rtn = root.BaseWndProc(k.EDITBOX, win, df.CREATE_WINDOW, .{.legacy=.{0, 0}});
+    const rtn = root.BaseWndProc(k.EDITBOX, win, df.CREATE_WINDOW, q.none);
     win.MaxTextLength = df.MAXTEXTLEN+1;
     wnd.*.textlen = EditBufLen(win);
 //    win.textlen = EditBufLen(win);
@@ -947,7 +947,7 @@ fn CommandMsg(win:*Window,p1:df.PARAM) bool {
 }
 
 // ---------- CLOSE_WINDOW Message -----------
-fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn CloseWindowMsg(win:*Window) bool {
     const wnd = win.win;
     _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     if (win.DeletedText) |text| {
@@ -957,7 +957,7 @@ fn CloseWindowMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         win.DeletedText = null;
     }
 
-    const rtn = root.BaseWndProc(k.EDITBOX, win, df.CLOSE_WINDOW, .{.legacy=.{p1, p2}});
+    const rtn = root.BaseWndProc(k.EDITBOX, win, df.CLOSE_WINDOW, .{.yes=false});
 //    if (win.text) |text| {
 //        root.global_allocator.free(text);
 //        win.text = null;
@@ -1075,9 +1075,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
                 return true;
         },
         df.CLOSE_WINDOW => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            return CloseWindowMsg(win, p1, p2);
+            return CloseWindowMsg(win);
         },
         else => {
         }

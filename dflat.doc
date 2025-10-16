@@ -187,30 +187,35 @@ CREATE_WINDOW          create a window
   Sent:    by DFLAT to new window after window is created
   P1:      
   P2:      
+  Params:  Void
   Returns: 
 
 OPEN_WINDOW           open a window                
   Sent:    (posted) by DFLAT to new window after window is created
   P1:      
   P2:      
+  Params:  Void
   Returns: 
 
 SHOW_WINDOW            show a window                  
   Sent:    by the app to the window to display the window
   P1:      
   P2:      
+  Params:  Void
   Returns: 
 
 HIDE_WINDOW            hide a window                  
   Sent:    by the app to the window to hide the window
   P1:      
   P2:      
+  Params:  Void
   Returns: 
 
 CLOSE_WINDOW           delete a window                
   Sent:    by the app to destroy a window
   P1:      
   P2:      
+  Params:  yes/no (as cancel for dialog)
   Returns: 
 
 SETFOCUS               set and clear the focus        

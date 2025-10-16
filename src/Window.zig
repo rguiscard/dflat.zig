@@ -257,9 +257,9 @@ pub fn create(
 //        wnd.*.condition = df.ISRESTORED;
         wnd.*.RestoredRC = wnd.*.rc;
         InitWindowColors(self);
-        _ = self.sendMessage(df.CREATE_WINDOW, .{.legacy=.{0, 0}});
+        _ = self.sendMessage(df.CREATE_WINDOW, q.none);
         if (self.isVisible()) {
-            _ = self.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+            _ = self.sendMessage(df.SHOW_WINDOW, q.none);
         }
     }
 

@@ -18,26 +18,23 @@ pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             menus.SystemMenu.PullDown[0].Selection = 0;
         },
         df.LEFT_BUTTON => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            const pp1:usize = @intCast(p1);
-            const pp2:usize = @intCast(p2);
-            const mx:usize = if (pp1 > win.GetLeft()) pp1 - win.GetLeft() else 0;
-            const my:usize = if (pp2 > win.GetTop()) pp2 - win.GetTop() else 0;
+            const p1 = params.position[0];
+            const p2 = params.position[1];
+            const mx:usize = if (p1 > win.GetLeft()) p1 - win.GetLeft() else 0;
+            const my:usize = if (p2 > win.GetTop()) p2 - win.GetTop() else 0;
             if (win.parent) |pw| {
                 if (pw.HitControlBox(mx, my))
                     return true;
             }
         },
         df.LB_CHOOSE => {
-            q.PostMessage(win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+            q.PostMessage(win, df.CLOSE_WINDOW, .{.yes=false});
         },
         df.DOUBLE_CLICK => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p2 = params.position[1];
             if (p2 == win.getParent().GetTop()) {
-                q.PostMessage(win.parent, msg, .{.legacy=.{p1, p2}});
-                _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
+                q.PostMessage(win.parent, msg, params);
+                _ = win.sendMessage(df.CLOSE_WINDOW, .{.yes=true});
             }
             return true;
         },
@@ -116,5 +113,5 @@ pub fn BuildSystemMenu(win: *Window) void {
     _ = SystemMenuWin.sendMessage(df.BUILD_SELECTIONS,
                   .{.legacy=.{@intCast(@intFromPtr(&menus.SystemMenu.PullDown[0])), 0}});
     _ = SystemMenuWin.sendMessage(df.SETFOCUS, .{.yes=true});
-    _ = SystemMenuWin.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+    _ = SystemMenuWin.sendMessage(df.SHOW_WINDOW, q.none);
 }

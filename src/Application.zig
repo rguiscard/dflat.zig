@@ -75,7 +75,7 @@ fn CreateWindowMsg(win: *Window) bool {
     SelectTitle(win);
     SelectStatusBar(win);
 
-    const rtn = root.BaseWndProc(k.APPLICATION, win, df.CREATE_WINDOW, .{.legacy=.{0, 0}});
+    const rtn = root.BaseWndProc(k.APPLICATION, win, df.CREATE_WINDOW, q.none);
     if (win.extension != null) {
         CreateMenu(win);
     }
@@ -112,7 +112,7 @@ fn AddStatusMsg(win: *Window, p1: df.PARAM) void {
 fn SizeMsg(win:*Window, x:usize, y:usize) void {
     const WasVisible = win.isVisible();
     if (WasVisible)
-        _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.HIDE_WINDOW, q.none);
     var x_new:usize = x;
     if (x < 30 + win.GetLeft())
         x_new = win.GetLeft() + 30;
@@ -120,7 +120,7 @@ fn SizeMsg(win:*Window, x:usize, y:usize) void {
     CreateMenu(win);
     CreateStatusBar(win);
     if (WasVisible)
-        _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.SHOW_WINDOW, q.none);
 }
 
 fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
@@ -129,7 +129,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
     switch (p1)  {
         df.ALT_F4 => {
             if (win.TestAttribute(df.CONTROLBOX)) {
-                q.PostMessage(win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+                q.PostMessage(win, df.CLOSE_WINDOW, .{.yes=false});
             }
             return true;
         },
@@ -172,7 +172,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     const cmd:c = @enumFromInt(p1);
     switch (cmd) {
         .ID_EXIT, .ID_SYSCLOSE => {
-            q.PostMessage(win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+            q.PostMessage(win, df.CLOSE_WINDOW, .{.yes=false});
         },
         .ID_HELP => {
             _ = helpbox.DisplayHelp(win, std.mem.span(df.DFlatApplication));
@@ -206,7 +206,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 } else {
                     oldFocus = Window.inFocus;
                 }
-                _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.HIDE_WINDOW, q.none);
                 SelectColors(win);
                 SelectLines(win);
                 SelectBorder(win);
@@ -215,7 +215,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 SelectTexture();
                 CreateMenu(win);
                 CreateStatusBar(win);
-                _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.SHOW_WINDOW, q.none);
                 if (oldFocus) |focus| { // cannot sure old focus can be null
                     _ = focus.sendMessage(df.SETFOCUS, .{.yes=true});
                 } else {
@@ -256,7 +256,7 @@ fn CloseWindowMsg(win:*Window) bool {
     WindowSel = 0;
     q.PostMessage(null, df.STOP, .{.legacy=.{0, 0}});
 
-    const rtn = root.BaseWndProc(k.APPLICATION, win, df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+    const rtn = root.BaseWndProc(k.APPLICATION, win, df.CLOSE_WINDOW, .{.yes=false});
     if (ScreenHeight != df.SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
 
@@ -337,7 +337,7 @@ fn CloseAll(win:*Window, closing:bool) void {
                        (w1.getClass() != k.MENUBAR) and
                        (w1.getClass() != k.STATUSBAR)) {
             w1.ClearVisible();
-            _ = w1.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+            _ = w1.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
         }
         win1 = w1.prevWindow();
     }
@@ -359,7 +359,7 @@ fn SetFocusMsg(win:*Window, p1:bool) void {
     if (win.isVisible()) {
         _ = win.sendMessage(df.BORDER, .{.paint=.{null, false}});
     } else {
-        _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.SHOW_WINDOW, q.none);
     }
 }
 
@@ -468,7 +468,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
                 } 
                 _ = cwin.sendMessage(df.LB_SETSELECTION, .{.legacy=.{WindowSel, 0}});
                 cwin.AddAttribute(df.VSCROLLBAR);
-                q.PostMessage(cwin, df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+                q.PostMessage(cwin, df.SHOW_WINDOW, q.none);
             } else {
                 return false;
             }
@@ -646,7 +646,7 @@ fn SelectTitle(win: *Window) void {
 fn CreateMenu(win: *Window) void {
     win.AddAttribute(df.HASMENUBAR);
     if (win.MenuBar) |mb| {
-        _ = mb.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+        _ = mb.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
     }
     var mwnd = Window.create(k.MENUBAR,
                         null,
@@ -672,7 +672,7 @@ fn CreateMenu(win: *Window) void {
 // ----------- Create the status bar -------------
 fn CreateStatusBar(win: *Window) void {
     if (win.StatusBar) |sb| {
-        _ = sb.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+        _ = sb.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
         win.StatusBar = null;
     }
     if (win.TestAttribute(df.HASSTATUSBAR)) {
@@ -701,7 +701,7 @@ fn SwitchCursor() void {
 // ------- Shell out to DOS ----------
 fn ShellDOS(win:*Window) void {
     oldFocus = Window.inFocus;
-    _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.HIDE_WINDOW, q.none);
     SwitchCursor();
     if (ScreenHeight != df.SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
@@ -714,7 +714,7 @@ fn ShellDOS(win:*Window) void {
     if (df.SCREENHEIGHT != cfg.config.ScreenLines)
         SetScreenHeight(@intCast(cfg.config.ScreenLines));
     SwitchCursor();
-    _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.SHOW_WINDOW, q.none);
     if (oldFocus) |focus| {
         _ = focus.sendMessage(df.SETFOCUS, .{.yes=true});
     }

@@ -317,7 +317,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         } else {
             var offset:usize = @intCast(menupos[@intCast(p1)].x1 - 4 * p1);
             if (mwin) |m| {
-                _ = m.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+                _ = m.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
             }
             if (ActiveMenuBar) |mbar| { 
                 mbar.*.ActiveSelection = @intCast(p1);
@@ -345,7 +345,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             if (mwin) |m| {
                 _ = m.sendMessage(df.BUILD_SELECTIONS, .{.legacy=.{@intCast(@intFromPtr(mnu)), 0}});
                 _ = m.sendMessage(df.SETFOCUS, .{.yes=true});
-                _ = m.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+                _ = m.sendMessage(df.SHOW_WINDOW, q.none);
             }
         }
     }
@@ -378,7 +378,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             }
         } else {
             if (mwin) |m| {
-                _ = m.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+                _ = m.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
             }
             _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.yes=true});
             q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{p1, p2}});
@@ -390,7 +390,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn ClosePopdownMsg(win:*Window) void {
     if (casc > 0) {
         casc -= 1;
-        _ = q.SendMessage(Cascaders[casc], df.CLOSE_WINDOW, .{.legacy=.{0,0}});
+        _ = q.SendMessage(Cascaders[casc], df.CLOSE_WINDOW, .{.yes=false});
     } else {
         mwin = null;
         if (ActiveMenuBar) |mbar| {

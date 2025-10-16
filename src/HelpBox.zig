@@ -466,10 +466,10 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
                     }
                     _ = dwin.sendTextMessage(df.ADDTEXT, &hline,0);
                 }
-                _ = dwin.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+                _ = dwin.sendMessage(df.SHOW_WINDOW, q.none);
                 _ = q.SendMessage(null, df.WAITKEYBOARD, .{.legacy=.{0,0}});
                 _ = q.SendMessage(null, df.WAITMOUSE, .{.legacy=.{0,0}});
-                _ = dwin.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+                _ = dwin.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
             }
         }
     }
@@ -540,7 +540,7 @@ fn BuildHelpBox(win:?*Window) void {
 // ----- select a new help window from its name -----
 pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
     if (newhelp != null) {
-        _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.HIDE_WINDOW, q.none);
 
         if (ThisHelp) |help| {
             if (recall and stacked < df.MAXHELPSTACK) {
@@ -587,7 +587,7 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
         // --- read the help text into the help window ---
         ReadHelp(win);
         lists.ReFocus(win);
-        _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.SHOW_WINDOW, q.none);
     }
 }
 

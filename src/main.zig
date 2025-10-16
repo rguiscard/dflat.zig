@@ -250,7 +250,7 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
         LoadFile(win1);
     }
 
-    _ = wwin.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+    _ = wwin.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
     _ = win1.sendMessage(df.SETFOCUS, .{.yes=true});
 }
 
@@ -314,7 +314,7 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
         } else |_| {
         }
 
-        _ = mwin.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
+        _ = mwin.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
     }
 }
 
@@ -329,7 +329,7 @@ fn DeleteFile(win:*mp.Window) void {
                     if (std.fs.cwd().deleteFileZ(path)) |_| {
                     } else |_| {
                     }
-                    _ = mp.q.SendMessage(win, df.CLOSE_WINDOW, .{.legacy = .{0, 0}});
+                    _ = mp.q.SendMessage(win, df.CLOSE_WINDOW, .{.yes=false});
                 }
             } else |_| {
             }
@@ -403,8 +403,6 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
         df.CLOSE_WINDOW => {
             if (win.TextChanged)    {
                 _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
-//                const tl:[*c]u8 = @ptrCast(wnd.*.title);
-//                const title = std.mem.span(tl);
                 const title = win.title orelse "";
                 if (std.fmt.allocPrintSentinel(mp.global_allocator, "{s}\nText changed. Save it ?", .{title}, 0)) |m| {
                     defer mp.global_allocator.free(m);

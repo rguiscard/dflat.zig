@@ -17,7 +17,7 @@ fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
             if (ct.win) |cwin| {
                 _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
                 _ = df.cBuildList(cwin.win, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
-                _ = cwin.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+                _ = cwin.sendMessage(df.SHOW_WINDOW, q.none);
             }
         }
     }

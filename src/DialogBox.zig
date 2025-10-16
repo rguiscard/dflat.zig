@@ -110,7 +110,7 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
         rtn = (win.ReturnCode == .ID_OK);
         _ = win.sendMessage(df.RELEASE_MOUSE, .{.capture=.{false, null}});
         _ = win.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{false, null}});
-        _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
+        _ = win.sendMessage(df.CLOSE_WINDOW, .{.yes=true});
     }
     return rtn;
 }
@@ -317,7 +317,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
                                        (normal.isAncestor(oldWin, pw) == false)) {
                             Window.inFocus = null;
                             _ = oldWin.sendMessage(df.BORDER, .{.paint=.{null, false}});
-                            _ = pw.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+                            _ = pw.sendMessage(df.SHOW_WINDOW, q.none);
                             Window.inFocus = oldFocus;
                             oldWin.ClearVisible();
                         }
@@ -326,7 +326,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
 //                                       (normal.isAncestor(oldWin.win, pwnd) == false)) {
 //                        Window.inFocus = null;
 //                        _ = oldWin.sendMessage(df.BORDER, .{.paint=.{null, false}});
-//                        _ = q.SendMessage(pwnd, df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+//                        _ = q.SendMessage(pwnd, df.SHOW_WINDOW, q.none);
 //                        Window.inFocus = oldFocus;
 //                        oldWin.ClearVisible();
 //                    }
@@ -368,7 +368,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
 }
 
 // -------- CREATE_WINDOW Message ---------
-fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
+fn CreateWindowMsg(win:*Window) bool {
     var rtn = false;
     if (win.extension) |extension| {
         const db:*Dialogs.DBOX = extension.dbox;
@@ -388,7 +388,7 @@ fn CreateWindowMsg(win:*Window, p1: df.PARAM, p2: df.PARAM) bool {
             } else |_| { // error
             }
         }
-        rtn = root.BaseWndProc(k.DIALOG, win, df.CREATE_WINDOW, .{.legacy=.{p1, p2}});
+        rtn = root.BaseWndProc(k.DIALOG, win, df.CREATE_WINDOW,  q.none);
 
         for(0..Dialogs.MAXCONTROLS) |i| {
             const ctl:*Dialogs.CTLWINDOW = @ptrCast(&db.*.ctl[i]);
@@ -531,7 +531,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
             if (win.modal) {
                 _ = q.PostMessage(win, df.ENDDIALOG, .{.legacy=.{0, 0}});
             } else {
-                _ = win.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{df.TRUE, 0}});
+                _ = win.sendMessage(df.CLOSE_WINDOW, .{.yes=true});
             }
             return true;
         },
@@ -554,9 +554,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
 pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
     switch (msg) {
         df.CREATE_WINDOW => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            return CreateWindowMsg(win, p1, p2);
+            return CreateWindowMsg(win);
         },
         df.SHIFT_CHANGED => {
             if (win.modal)
@@ -612,8 +610,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return rtn;
         },
         df.CLOSE_WINDOW => {
-            const p1 = params.legacy[0];
-            if (p1 == 0) {
+            if (params.yes == false) {
                 _ = win.sendCommandMessage(.ID_CANCEL, 0);
                 return true;
             }

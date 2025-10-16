@@ -45,9 +45,9 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 return rtn;
             },
             df.MOUSE_MOVED => {
-                _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.HIDE_WINDOW, q.none);
                 _ = win.sendMessage(df.MOVE, params);
-                _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.SHOW_WINDOW, q.none);
                 return true;
             },
             df.CLOSE_WINDOW => {

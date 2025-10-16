@@ -50,7 +50,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                     const x = std.mem.span(m);
                     _ = cwin.sendTextMessage(df.ADDTEXT, x, 0);
                 }
-                _ = cwin.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
+                _ = cwin.sendMessage(df.SHOW_WINDOW, q.none);
             }
         },
         df.COMMAND => {
