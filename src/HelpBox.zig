@@ -566,23 +566,24 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
         // --- reposition and resize the help window ---
         Dialogs.HelpBox.dwnd.x = @divFloor(df.SCREENWIDTH-Dialogs.HelpBox.dwnd.w, 2);
         Dialogs.HelpBox.dwnd.y = @divFloor(df.SCREENHEIGHT-Dialogs.HelpBox.dwnd.h, 2);
-        _ = win.sendMessage(df.MOVE, .{.legacy=.{Dialogs.HelpBox.dwnd.x, Dialogs.HelpBox.dwnd.y}});
+        _ = win.sendMessage(df.MOVE, .{.position=.{@intCast(Dialogs.HelpBox.dwnd.x),
+                                                   @intCast(Dialogs.HelpBox.dwnd.y)}});
         _ = win.sendMessage(df.SIZE,
-                        .{.legacy=.{Dialogs.HelpBox.dwnd.x + Dialogs.HelpBox.dwnd.w - 1,
-                                    Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1}});
+                        .{.position=.{@intCast(Dialogs.HelpBox.dwnd.x + Dialogs.HelpBox.dwnd.w - 1),
+                                      @intCast(Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1)}});
         // --- reposition the controls ---
         for (0..5) |i| {
-            var x = Dialogs.HelpBox.ctl[i].dwnd.x+@as(isize, @intCast(win.GetClientLeft()));
-            var y = Dialogs.HelpBox.ctl[i].dwnd.y+@as(isize, @intCast(win.GetClientTop()));
+            var x:usize = @as(usize, @intCast(Dialogs.HelpBox.ctl[i].dwnd.x))+win.GetClientLeft();
+            var y:usize = @as(usize, @intCast(Dialogs.HelpBox.ctl[i].dwnd.y))+win.GetClientTop();
             const cw = Dialogs.HelpBox.ctl[i].win;
             if (cw) |cwin| {
-                _ = cwin.sendMessage(df.MOVE, .{.legacy=.{x, y}});
+                _ = cwin.sendMessage(df.MOVE, .{.position=.{x, y}});
             }
             if (i == 0) {
-                x += Dialogs.HelpBox.ctl[i].dwnd.w - 1;
-                y += Dialogs.HelpBox.ctl[i].dwnd.h - 1;
+                x += @intCast(Dialogs.HelpBox.ctl[i].dwnd.w - 1);
+                y += @intCast(Dialogs.HelpBox.ctl[i].dwnd.h - 1);
                 if (cw) |cwin| {
-                    _ = cwin.sendMessage(df.SIZE, .{.legacy=.{x, y}});
+                    _ = cwin.sendMessage(df.SIZE, .{.position=.{x, y}});
                 }
             }
         }

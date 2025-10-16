@@ -446,11 +446,11 @@ fn MouseMovedMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // --------- MOVE Message ----------
-fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+fn MoveMsg(win:*Window, x:usize, y:usize) void {
     const wnd = win.win;
     const wasVisible = win.isVisible();
-    const xdif = p1 - @as(c_int, @intCast(win.GetLeft()));
-    const ydif = p2 - @as(c_int, @intCast(win.GetTop()));
+    const xdif:usize = if (x > win.GetLeft()) x - win.GetLeft() else 0;
+    const ydif:usize = if (y > win.GetTop()) y - win.GetTop() else 0;
 
     if ((xdif == 0) and (ydif == 0)) {
         return;
@@ -459,8 +459,8 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     if (wasVisible) {
         _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
     }
-    wnd.*.rc.lf = @intCast(p1);
-    wnd.*.rc.tp = @intCast(p2);
+    wnd.*.rc.lf = @intCast(x);
+    wnd.*.rc.tp = @intCast(y);
     // be careful, changing the same struct.
     wnd.*.rc.rt = @intCast(win.GetLeft()+win.WindowWidth()-1);
     wnd.*.rc.bt = @intCast(win.GetTop()+win.WindowHeight()-1);
@@ -471,7 +471,8 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     var cwin = win.firstWindow();
     while (cwin) |cw| {
         const cwnd = cw.win;
-        _ = cw.sendMessage(df.MOVE, .{.legacy=.{cwnd.*.rc.lf+xdif, cwnd.*.rc.tp+ydif}});
+        _ = cw.sendMessage(df.MOVE, .{.position=.{@as(usize, @intCast(cwnd.*.rc.lf))+xdif, 
+                                                  @as(usize, @intCast(cwnd.*.rc.tp))+ydif}});
         cwin = cw.nextWindow();
     }
     if (wasVisible)
@@ -480,19 +481,19 @@ fn MoveMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 
 
 // --------- SIZE Message ----------
-fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+fn SizeMsg(win:*Window, x:usize, y:usize) void {
     const wnd = win.win;
     const wasVisible = win.isVisible();
 
-    if ((p1 == win.GetRight()) and (p2 == win.GetBottom())) {
+    if ((x == win.GetRight()) and (y == win.GetBottom())) {
         return;
     }
     win.wasCleared = false;
     if (wasVisible) {
         _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
     }
-    wnd.*.rc.rt = @intCast(p1);
-    wnd.*.rc.bt = @intCast(p2);
+    wnd.*.rc.rt = @intCast(x);
+    wnd.*.rc.bt = @intCast(y);
     win.ht = win.GetBottom()-win.GetTop()+1;
     win.wd = win.GetRight()-win.GetLeft()+1;
 
@@ -504,7 +505,7 @@ fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
     var cwin = win.firstWindow();
     while (cwin) |cw| {
         if (cw.condition == .ISMAXIMIZED) {
-            _ = cw.sendMessage(df.SIZE, .{.legacy=.{df.RectRight(rc), df.RectBottom(rc)}});
+            _ = cw.sendMessage(df.SIZE, .{.position=.{@intCast(rc.rt), @intCast(rc.bt)}});
         }
         cwin = cw.nextWindow();
     }
@@ -573,8 +574,8 @@ fn MaximizeMsg(win:*Window) void {
     win.condition = .ISMAXIMIZED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
-    _ = win.sendMessage(df.MOVE, .{.legacy=.{df.RectLeft(rc), df.RectTop(rc)}});
-    _ = win.sendMessage(df.SIZE, .{.legacy=.{df.RectRight(rc), df.RectBottom(rc)}});
+    _ = win.sendMessage(df.MOVE, .{.position=.{@intCast(rc.lf), @intCast(rc.tp)}});
+    _ = win.sendMessage(df.SIZE, .{.position=.{@intCast(rc.rt), @intCast(rc.bt)}});
     if (win.restored_attrib == 0) {
         win.restored_attrib = win.attrib;
     }
@@ -592,8 +593,8 @@ fn MinimizeMsg(win:*Window) void {
     win.condition = .ISMINIMIZED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
-    _ = win.sendMessage(df.MOVE, .{.legacy=.{df.RectLeft(rc), df.RectTop(rc)}});
-    _ = win.sendMessage(df.SIZE, .{.legacy=.{df.RectRight(rc), df.RectBottom(rc)}});
+    _ = win.sendMessage(df.MOVE, .{.position=.{@intCast(rc.lf), @intCast(rc.tp)}});
+    _ = win.sendMessage(df.SIZE, .{.position=.{@intCast(rc.rt), @intCast(rc.bt)}});
     if (win == Window.inFocus) {
         lists.SetNextFocus();
     }
@@ -616,9 +617,9 @@ fn RestoreMsg(win:*Window) void {
     _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
     win.attrib = win.restored_attrib;
     win.restored_attrib = 0;
-    _ = win.sendMessage(df.MOVE, .{.legacy=.{wnd.*.RestoredRC.lf, wnd.*.RestoredRC.tp}});
+    _ = win.sendMessage(df.MOVE, .{.position=.{@intCast(wnd.*.RestoredRC.lf), @intCast(wnd.*.RestoredRC.tp)}});
     wnd.*.RestoredRC = holdrc;
-    _ = win.sendMessage(df.SIZE, .{.legacy=.{wnd.*.RestoredRC.rt, wnd.*.RestoredRC.bt}});
+    _ = win.sendMessage(df.SIZE, .{.position=.{@intCast(wnd.*.RestoredRC.rt), @intCast(wnd.*.RestoredRC.bt)}});
     if (win != Window.inFocus) {
         _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
     } else {
@@ -709,22 +710,22 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 const dwin = getDummy();
                 const dwnd = dwin.win;
                 if (WindowMoving) {
-                    q.PostMessage(win,df.MOVE,.{.legacy=.{dwnd.*.rc.lf,dwnd.*.rc.tp}});
+                    q.PostMessage(win,df.MOVE,.{.position=.{@intCast(dwnd.*.rc.lf),@intCast(dwnd.*.rc.tp)}});
                 } else {
-                    q.PostMessage(win,df.SIZE,.{.legacy=.{dwnd.*.rc.rt,dwnd.*.rc.bt}});
+                    q.PostMessage(win,df.SIZE,.{.position=.{@intCast(dwnd.*.rc.rt),@intCast(dwnd.*.rc.bt)}});
                 }
                 TerminateMoveSize();
             }
         },
         df.MOVE => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            MoveMsg(win, p1, p2);
+            const x = params.position[0];
+            const y = params.position[1];
+            MoveMsg(win, x, y);
         },
         df.SIZE => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            SizeMsg(win, p1, p2);
+            const x = params.position[0];
+            const y = params.position[1];
+            SizeMsg(win, x, y);
         },
         df.CLOSE_WINDOW => {
             CloseWindowMsg(win);

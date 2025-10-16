@@ -179,9 +179,9 @@ fn KeyboardCursorMsg(win:*Window, col:usize, row:usize) void {
 }
 
 // ----------- SIZE Message ----------
-fn SizeMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+fn SizeMsg(win:*Window, x:usize, y:usize) bool {
     const wnd = win.win;
-    const rtn = root.BaseWndProc(k.EDITBOX, win, df.SIZE, .{.legacy=.{p1, p2}});
+    const rtn = root.BaseWndProc(k.EDITBOX, win, df.SIZE, .{.position=.{x, y}});
     const clientWidth: c_int = @intCast(win.ClientWidth());
     const clientHeight: c_int = @intCast(win.ClientHeight());
     if (WndCol(win) > clientWidth-1) {
@@ -1040,8 +1040,8 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return rtn;
         },
         df.SIZE => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             return SizeMsg(win, p1, p2);
         },
         df.SCROLL => {

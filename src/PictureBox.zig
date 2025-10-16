@@ -251,8 +251,6 @@ fn DrawBoxMsg(win:*Window, p1:df.PARAM) void {
 }
 
 pub fn PictureProc(win:*Window, message: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (message) {
         df.PAINT => {
             _ = root.BaseWndProc(k.PICTUREBOX, win, message, params);
@@ -260,14 +258,18 @@ pub fn PictureProc(win:*Window, message: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.DRAWVECTOR => {
+            const p1 = params.legacy[0];
             DrawVectorMsg(win, p1, VectTypes.VECTOR);
             return true;
         },
         df.DRAWBOX => {
+            const p1 = params.legacy[0];
             DrawBoxMsg(win, p1);
             return true;
         },
         df.DRAWBAR => {
+            const p1 = params.legacy[0];
+            const p2 = params.legacy[1];
             DrawVectorMsg(win, p1, @enumFromInt(p2));
             return true;
         },

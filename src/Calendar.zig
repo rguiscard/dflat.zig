@@ -148,7 +148,6 @@ fn DisplayDates(win:*Window) void {
 
 
 pub fn CalendarProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
     switch (msg) {
         df.CREATE_WINDOW => {
             _ = root.DefaultWndProc(win, msg, params);
@@ -156,6 +155,7 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.KEYBOARD => {
+//              const p1 = params.legacy[0];
 //            if (KeyboardMsg(wnd, p1))
 //                return true;
         },
@@ -165,6 +165,7 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
             const cmd:c = @enumFromInt(p1);
             if (cmd == c.ID_HELP) {
                 _ = helpbox.DisplayHelp(win, "Calendar");

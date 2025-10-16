@@ -28,9 +28,9 @@ const Title =  "              PROJECT SCHEDULE";
 const Months = "           Jan Feb Mar Apr May Jun";
 
 fn BarChartProc(win:*Window, message: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
     switch (message) {
         df.COMMAND => {
+            const p1 = params.legacy[0];
             const cmd:c = @enumFromInt(p1);
             if (cmd == c.ID_HELP) {
                 _ = helpbox.DisplayHelp(win, "BarChart");

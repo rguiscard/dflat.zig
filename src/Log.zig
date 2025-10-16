@@ -41,7 +41,6 @@ pub fn LogMessages (win:?*Window, msg:df.MESSAGE, params:q.Params) void {
 }
 
 pub fn LogProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
     const control = DialogBox.ControlWindow(&Dialogs.Log, .ID_LOGLIST);
     switch (msg)    {
         df.INITIATE_DIALOG => {
@@ -55,6 +54,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.COMMAND => {
+            const p1 = params.legacy[0];
             const cmd:c = @enumFromInt(p1);
             if (cmd == .ID_OK) {
                 if (control) |cwin| {

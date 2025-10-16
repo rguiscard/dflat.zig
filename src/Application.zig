@@ -109,14 +109,14 @@ fn AddStatusMsg(win: *Window, p1: df.PARAM) void {
 }
 
 // ------- SIZE Message --------
-fn SizeMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+fn SizeMsg(win:*Window, x:usize, y:usize) void {
     const WasVisible = win.isVisible();
     if (WasVisible)
         _ = win.sendMessage(df.HIDE_WINDOW, .{.legacy=.{0, 0}});
-    var p1_new = p1;
-    if (p1 < 30 + win.GetLeft())
-        p1_new = @intCast(win.GetLeft() + 30);
-    _ = root.BaseWndProc(k.APPLICATION, win, df.SIZE, .{.legacy=.{p1_new, p2}});
+    var x_new:usize = x;
+    if (x < 30 + win.GetLeft())
+        x_new = win.GetLeft() + 30;
+    _ = root.BaseWndProc(k.APPLICATION, win, df.SIZE, .{.position=.{x, y}});
     CreateMenu(win);
     CreateStatusBar(win);
     if (WasVisible)
@@ -288,8 +288,8 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.SIZE => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.position[0];
+            const p2 = params.position[1];
             SizeMsg(win, p1, p2);
             return true;
         },
@@ -575,18 +575,18 @@ fn SelectLines(win:*Window) void {
         SetScreenHeight(@intCast(cfg.config.ScreenLines));
         // ---- re-maximize ----
         if (win.condition == .ISMAXIMIZED) {
-            _ = win.sendMessage(df.SIZE, .{.legacy=.{@intCast(win.GetRight()), @intCast(df.SCREENHEIGHT-1)}});
+            _ = win.sendMessage(df.SIZE, .{.position=.{win.GetRight(), @intCast(df.SCREENHEIGHT-1)}});
             return;
         }
         // --- adjust if current size does not fit ---
         if (win.WindowHeight() > df.SCREENHEIGHT) {
-            _ = win.sendMessage(df.SIZE, .{.legacy=.{@intCast(win.GetRight()),
-                @intCast(@as(c_int, @intCast(win.GetTop()))+df.SCREENHEIGHT-1)}});
+            _ = win.sendMessage(df.SIZE, .{.position=.{win.GetRight(),
+                win.GetTop()+@as(usize, @intCast(df.SCREENHEIGHT-1))}});
         }
         // --- if window is off-screen, move it on-screen ---
         if (win.GetTop() >= df.SCREENHEIGHT-1) {
-            _ = win.sendMessage(df.MOVE, .{.legacy=.{@intCast(win.GetLeft()),
-                    @intCast(df.SCREENHEIGHT-@as(c_int, @intCast(win.WindowHeight())))}});
+            _ = win.sendMessage(df.MOVE, .{.position=.{win.GetLeft(),
+                    @as(usize, @intCast(df.SCREENHEIGHT))-win.WindowHeight()}});
         }
     }
 }
