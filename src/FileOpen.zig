@@ -107,7 +107,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                                 set_srchSpec(&fName);
                                 InitDlgBox(win);
                                 if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
-                                    _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                                    _ = cwin.sendMessage(df.SETFOCUS, .{.yes=true});
                                 }
                             }
                             return true;

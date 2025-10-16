@@ -35,7 +35,7 @@ pub fn main() !void {
                         df.MINMAXBOX |
                         df.HASSTATUSBAR);
     df.LoadHelpFile(@constCast(DFlatApplication.ptr));
-    _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+    _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
 
 //    while (argc > 1)    {
 //        OpenPadWindow(wnd, argv[1]);
@@ -189,7 +189,7 @@ fn SelectFile(win: *mp.Window) !void {
 //                const ext:[*c]const u8 = @ptrCast(extension);
 //                if (df.strcasecmp(&filename, ext) == 0) {
                     if (std.ascii.eqlIgnoreCase(filename[0..pos], ext)) {
-                        _ = w1.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                        _ = w1.sendMessage(df.SETFOCUS, .{.yes=true});
                         _ = w1.sendMessage(df.RESTORE, .{.legacy=.{0, 0}});
                         return;
                     } else {
@@ -251,7 +251,7 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
     }
 
     _ = wwin.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
-    _ = win1.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+    _ = win1.sendMessage(df.SETFOCUS, .{.yes=true});
 }
 
 // --- Load the notepad file into the editor text buffer ---
@@ -360,16 +360,15 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
     var rtn = false;
     switch (msg) {
         df.SETFOCUS => {
-            const p1 = params.legacy[0];
-            if (p1 > 0) {
+            if (params.yes) {
                 win.InsertMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_INSERT);
                 win.WordWrapMode = mp.menu.GetCommandToggle(@constCast(@ptrCast(&menu.MainMenu)), .ID_WRAP);
             }
             rtn = mp.DefaultWndProc(win, msg, params);
-            if (p1 == 0) {
-                _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
-            } else {
+            if (params.yes) {
                 ShowPosition(win);
+            } else {
+                _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
             }
             return rtn;
         },
@@ -403,7 +402,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
         },
         df.CLOSE_WINDOW => {
             if (win.TextChanged)    {
-                _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
 //                const tl:[*c]u8 = @ptrCast(wnd.*.title);
 //                const title = std.mem.span(tl);
                 const title = win.title orelse "";

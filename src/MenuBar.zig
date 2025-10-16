@@ -22,9 +22,9 @@ pub var ActiveMenuBar:?*menus.MBAR = null;
 var ActiveMenu:?*[menus.MAXPULLDOWNS+1]menus.MENU = null; // this should be private
 
 // ----------- SETFOCUS Message -----------
-fn SetFocusMsg(win:*Window,p1:df.PARAM) bool {
-    const rtn = root.BaseWndProc(k.MENUBAR, win, df.SETFOCUS, .{.legacy=.{p1, 0}});
-    if (p1>0) {
+fn SetFocusMsg(win:*Window, yes:bool) bool {
+    const rtn = root.BaseWndProc(k.MENUBAR, win, df.SETFOCUS, .{.yes=yes});
+    if (yes) {
         _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
     } else {
         _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
@@ -142,7 +142,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
         for (menupos, 0..) |m, idx| {
             if (((Window.inFocus == win) and (m.sc == cc)) or
                 ((a > 0) and (m.sc == a))) {
-                _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
                 _ = win.sendMessage(df.MB_SELECTION, .{.legacy=.{@intCast(idx), 0}});
                 return;
             }
@@ -164,7 +164,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
                                 if (pd.Attrib.TOGGLE) {
                                     pd.Attrib.CHECKED = !pd.Attrib.CHECKED;
                                 }
-                                _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                                _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.yes=true});
                                 q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{@intFromEnum(pd.ActionId), 0}});
                             }
                         }
@@ -345,7 +345,7 @@ fn SelectionMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         if (mnu.*.Selections[0].SelectionTitle != null) {
             if (mwin) |m| {
                 _ = m.sendMessage(df.BUILD_SELECTIONS, .{.legacy=.{@intCast(@intFromPtr(mnu)), 0}});
-                _ = m.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                _ = m.sendMessage(df.SETFOCUS, .{.yes=true});
                 _ = m.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
             }
         }
@@ -381,7 +381,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             if (mwin) |m| {
                 _ = m.sendMessage(df.CLOSE_WINDOW, .{.legacy=.{0, 0}});
             }
-            _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+            _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.yes=true});
             q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{p1, p2}});
         }
     }
@@ -398,7 +398,7 @@ fn ClosePopdownMsg(win:*Window) void {
             mbar.*.ActiveSelection = -1;
         }
         if (Selecting == false) {
-            _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+            _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.yes=true});
             _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         }
     }
@@ -428,8 +428,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             reset_menubar(win);
         },
         df.SETFOCUS => {
-            const p1 = params.legacy[0];
-            return SetFocusMsg(win, p1);
+            return SetFocusMsg(win, params.yes);
         },
         df.BUILDMENU => {
             const p1 = params.legacy[0];

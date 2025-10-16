@@ -98,7 +98,7 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
                         wndproc,
                         save);
 
-    _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+    _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
     win.*.modal = (Modal == df.TRUE);
     FirstFocus(db);
     q.PostMessage(win, df.INITIATE_DIALOG, .{.legacy=.{0, 0}});
@@ -307,9 +307,8 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             }
         },
         df.SETFOCUS => {
-            const p1 = params.legacy[0];
             const pwin = win.parent;
-            if (p1 > 0) {
+            if (params.yes) {
                 const oldFocus = Window.inFocus;
                 // we assume df.inFocus is not null
                 if (oldFocus) |oldWin| {
@@ -589,10 +588,9 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.SETFOCUS => {
-            const p1 = params.legacy[0];
-            if ((p1 != 0) and win.isVisible()) {
+            if (params.yes and win.isVisible()) {
                 if (win.dfocus) |dfocus| {
-                    return dfocus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                    return dfocus.sendMessage(df.SETFOCUS, .{.yes=true});
                 }
             }
         },
@@ -610,7 +608,7 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             const rtn = root.BaseWndProc(k.DIALOG, win, msg, params);
             if (win.isVisible()) {
                 if (win.dfocus) |dfocus| {
-                    _ = dfocus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                    _ = dfocus.sendMessage(df.SETFOCUS, .{.yes=true});
                 }
             }
             return rtn;
@@ -912,7 +910,7 @@ pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: c_int) bool {
                                 ct.*.setting ^= df.ON;
                                 _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                             }  else if (ct.*.Class != k.NORMAL) { // this IF is not necessary
-                                _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                                _ = cwin.sendMessage(df.SETFOCUS, .{.yes=true});
                                 if (ct.*.Class == k.BUTTON)
                                    _ = cwin.sendMessage(df.KEYBOARD, .{.legacy=.{'\r',0}});
                             }
@@ -934,7 +932,7 @@ pub fn FirstFocus(db:*Dialogs.DBOX) void {
         if (ct.*.Class != k.NORMAL) {
             if ((ct.*.Class != k.TEXT) and (ct.*.Class != k.BOX)) {
                 if (ct.win) |cwin| {
-                    _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                    _ = cwin.sendMessage(df.SETFOCUS, .{.yes=true});
                 }
                 return;
             }
@@ -973,7 +971,7 @@ pub fn NextFocus(db:*Dialogs.DBOX) void {
                 continue;
             }
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                _ = cwin.sendMessage(df.SETFOCUS, .{.yes=true});
             }
             break;
         }
@@ -1011,7 +1009,7 @@ pub fn PrevFocus(db:*Dialogs.DBOX) void {
                 continue;
             }
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                _ = cwin.sendMessage(df.SETFOCUS, .{.yes=true});
             }
             break;
         }

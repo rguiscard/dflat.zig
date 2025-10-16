@@ -217,6 +217,7 @@ SETFOCUS               set and clear the focus
   Sent:    by D-Flat or the app to set or release the focus
   P1:      true = set, false = release
   P2:      
+  Params:  yes/no
   Returns: 
 
 PAINT                  paint the window's data space  

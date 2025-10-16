@@ -362,9 +362,8 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.SETFOCUS => {
-            const p1 = params.legacy[0];
             _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
-            if (p1>0)
+            if (params.yes)
                 WriteSelection(win, @intCast(win.selection), true, null);
             return true;
         },

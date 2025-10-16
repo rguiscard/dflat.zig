@@ -217,9 +217,9 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 CreateStatusBar(win);
                 _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
                 if (oldFocus) |focus| { // cannot sure old focus can be null
-                    _ = focus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                    _ = focus.sendMessage(df.SETFOCUS, .{.yes=true});
                 } else {
-                    _ = q.SendMessage(null, df.SETFOCUS, .{.legacy=.{df.TRUE,0}});
+                    _ = q.SendMessage(null, df.SETFOCUS, .{.yes=true});
                 }
             }
         },
@@ -280,10 +280,9 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.SETFOCUS => {
-            const p1 = params.legacy[0];
-            const p1b = (p1 > 0);
-            if (p1b == (Window.inFocus != win)) {
-                SetFocusMsg(win, p1b);
+            const p1 = params.yes;
+            if (p1 == (Window.inFocus != win)) {
+                SetFocusMsg(win, p1);
                 return true;
             }
         },
@@ -331,7 +330,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
 
 // ----- Close all document windows -----
 fn CloseAll(win:*Window, closing:bool) void {
-    _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+    _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
     var win1 = win.lastWindow();
     while (win1) |w1| {
         if (w1.isVisible() and
@@ -351,7 +350,7 @@ fn CloseAll(win:*Window, closing:bool) void {
 fn SetFocusMsg(win:*Window, p1:bool) void {
     if (p1) {
         if (Window.inFocus) |focus| {
-            _ = focus.sendMessage(df.SETFOCUS, .{.legacy=.{df.FALSE, 0}});
+            _ = focus.sendMessage(df.SETFOCUS, .{.yes=false});
         }
     }
     Window.inFocus = if (p1) win else null;
@@ -526,7 +525,7 @@ fn ChooseWindow(win:*Window, WindowNo:c_int) void {
         cwin = cw.nextWindow();
     }
     if (cwin) |cw| {
-        _ = cw.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+        _ = cw.sendMessage(df.SETFOCUS, .{.yes=true});
         if (cw.condition == .ISMINIMIZED)
             _ = cw.sendMessage(df.RESTORE, .{.legacy=.{0, 0}});
     }
@@ -717,7 +716,7 @@ fn ShellDOS(win:*Window) void {
     SwitchCursor();
     _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
     if (oldFocus) |focus| {
-        _ = focus.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+        _ = focus.sendMessage(df.SETFOCUS, .{.yes=true});
     }
     _ = q.SendMessage(null, df.SHOW_MOUSE, q.none);
 }

@@ -91,8 +91,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
     if (win.GetControl()) |ct| {
         switch (msg) {
             df.SETFOCUS => {
-                const p1 = params.legacy[0];
-                if (p1 == 0)
+                if (params.yes == false)
                     _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
             },
             df.MOVE => {

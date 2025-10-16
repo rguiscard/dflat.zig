@@ -218,9 +218,9 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
 }
 
 // --------- SETFOCUS Message ----------
-fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
+fn SetFocusMsg(win:*Window, yes:bool) void {
     var rc:df.RECT = .{.lf=0, .tp=0, .rt=0, .bt=0};
-    if ((p1>0) and (Window.inFocus != win)) {
+    if (yes and (Window.inFocus != win)) {
         // set focus
         var this:?*Window = null;
         var thispar:?*Window = null;
@@ -274,7 +274,7 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
             thatpar = thatp.parent;
         }
         if (Window.inFocus) |focus| {
-            _ = focus.sendMessage(df.SETFOCUS, .{.legacy=.{df.FALSE, 0}});
+            _ = focus.sendMessage(df.SETFOCUS, .{.yes=false});
         }
         Window.inFocus = win;
         if ((that != null) and isVisible(win)) {
@@ -307,7 +307,7 @@ fn SetFocusMsg(win:*Window, p1:df.PARAM) void {
             _ = win.sendMessage(df.BORDER, .{.paint=.{null, false}});
         }
     }
-    else if ((p1 == 0) and (Window.inFocus == win)) {
+    else if (yes == false and Window.inFocus == win) {
         // -------- clearing focus ---------
         Window.inFocus = null;
         _ = win.sendMessage(df.BORDER, .{.paint=.{null, false}});
@@ -627,7 +627,7 @@ fn RestoreMsg(win:*Window) void {
     wnd.*.RestoredRC = holdrc;
     _ = win.sendMessage(df.SIZE, .{.position=.{@intCast(wnd.*.RestoredRC.rt), @intCast(wnd.*.RestoredRC.bt)}});
     if (win != Window.inFocus) {
-        _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+        _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
     } else {
         _ = win.sendMessage(df.SHOW_WINDOW, .{.legacy=.{0, 0}});
     }
@@ -691,8 +691,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             CommandMsg(win, p1);
         },
         df.SETFOCUS => {
-            const p1 = params.legacy[0];
-            SetFocusMsg(win, p1);
+            SetFocusMsg(win, params.yes);
         },
         df.DOUBLE_CLICK => {
             const p1 = params.legacy[0];

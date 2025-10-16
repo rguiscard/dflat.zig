@@ -198,6 +198,6 @@ pub fn Calendar(pwin: *Window) void {
     }
     if (Cwnd) |cc| {
         var win = cc;
-        _ = win.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+        _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
     }
 }

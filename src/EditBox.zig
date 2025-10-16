@@ -1014,8 +1014,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.SETFOCUS => {
-            const p1 = params.legacy[0];
-            if (p1 == 0) {
+            if (params.yes == false) {
                 _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
             }
             // fall through?

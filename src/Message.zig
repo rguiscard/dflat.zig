@@ -496,10 +496,10 @@ pub fn dispatch_message() bool {
                                   normal.isAncestor(Mwnd.?, CaptureMouse.?) == true)) {
                         if (Mwnd != Window.inFocus) {
                             if (Mwnd) |mw| {
-                                _ = mw.sendMessage(df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                                _ = mw.sendMessage(df.SETFOCUS, .{.yes=true});
                             } else {
                                 // could this happen ?
-                                _ = SendMessage(null, df.SETFOCUS, .{.legacy=.{df.TRUE, 0}});
+                                _ = SendMessage(null, df.SETFOCUS, .{.yes=true});
                             }
                         }
                     }
