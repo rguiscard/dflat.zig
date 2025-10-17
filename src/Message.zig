@@ -564,7 +564,7 @@ pub fn dispatch_message() bool {
             return false;
         }
         if (mq.msg == df.STOP) {
-            PostMessage(null, df.STOP, .{.legacy=.{0, 0}});
+            PostMessage(null, df.STOP, q.none);
             return false;
         }
     }

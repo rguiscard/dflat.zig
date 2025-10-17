@@ -51,7 +51,7 @@ pub fn ReadHelp(win:*Window) void {
         const dbox:*Dialogs.DBOX = extension.dbox;
         if (DialogBox.ControlWindow(dbox, c.ID_HELPTEXT)) |cwin| {
             cwin.wndproc = HelpTextProc;
-            _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+            _ = cwin.sendMessage(df.CLEARTEXT, q.none);
             //df.cReadHelp(wnd, cwin.win);
             // ----- read the help text -------
             var hline = [_]u8{0}**100;
@@ -467,8 +467,8 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
                     _ = dwin.sendTextMessage(df.ADDTEXT, &hline,0);
                 }
                 _ = dwin.sendMessage(df.SHOW_WINDOW, q.none);
-                _ = q.SendMessage(null, df.WAITKEYBOARD, .{.legacy=.{0,0}});
-                _ = q.SendMessage(null, df.WAITMOUSE, .{.legacy=.{0,0}});
+                _ = q.SendMessage(null, df.WAITKEYBOARD, q.none);
+                _ = q.SendMessage(null, df.WAITMOUSE, q.none);
                 _ = dwin.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
             }
         }

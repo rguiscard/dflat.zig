@@ -102,7 +102,7 @@ fn AddStatusMsg(win: *Window, p1: df.PARAM) void {
         if (text) |_| {
             _ = sb.sendMessage(df.SETTEXT, .{.legacy=.{p1, 0}});
         } else {
-            _ = sb.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+            _ = sb.sendMessage(df.CLEARTEXT, q.none);
         }
         _ = sb.sendMessage(df.PAINT, .{.paint=.{null, false}});
     }
@@ -254,7 +254,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 fn CloseWindowMsg(win:*Window) bool {
     CloseAll(win, true);
     WindowSel = 0;
-    q.PostMessage(null, df.STOP, .{.legacy=.{0, 0}});
+    q.PostMessage(null, df.STOP, q.none);
 
     const rtn = root.BaseWndProc(k.APPLICATION, win, df.CLOSE_WINDOW, .{.yes=false});
     if (ScreenHeight != df.SCREENHEIGHT)
@@ -527,7 +527,7 @@ fn ChooseWindow(win:*Window, WindowNo:c_int) void {
     if (cwin) |cw| {
         _ = cw.sendMessage(df.SETFOCUS, .{.yes=true});
         if (cw.condition == .ISMINIMIZED)
-            _ = cw.sendMessage(df.RESTORE, .{.legacy=.{0, 0}});
+            _ = cw.sendMessage(df.RESTORE, q.none);
     }
 }
 
@@ -538,7 +538,7 @@ fn DoWindowColors(win:*Window) void {
         const cwnd = cw.win;
         DoWindowColors(cw);
         if ((cw.getClass() == k.TEXT) and df.GetText(cwnd) != null) {
-            _ = cw.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+            _ = cw.sendMessage(df.CLEARTEXT, q.none);
         }
         cwin = cw.nextWindow();
     }

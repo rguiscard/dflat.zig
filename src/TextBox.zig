@@ -96,7 +96,7 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
     const wnd = win.win;
     // -- assign new text value to textbox buffer --
-    _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.CLEARTEXT, q.none);
     
     if (win.getGapBuffer(txt.len)) |buf| {
         buf.clear();
@@ -491,7 +491,7 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
 // ------------ CLOSE_WINDOW Message --------------
 fn CloseWindowMsg(win:*Window) void {
     const wnd = win.win;
-    _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.CLEARTEXT, q.none);
     if (wnd.*.TextPointers != null) {
         root.global_allocator.free(wnd.*.TextPointers[0..win.wlines]);
 //        free(wnd->TextPointers);

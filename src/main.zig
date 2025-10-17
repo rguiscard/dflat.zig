@@ -190,7 +190,7 @@ fn SelectFile(win: *mp.Window) !void {
 //                if (df.strcasecmp(&filename, ext) == 0) {
                     if (std.ascii.eqlIgnoreCase(filename[0..pos], ext)) {
                         _ = w1.sendMessage(df.SETFOCUS, .{.yes=true});
-                        _ = w1.sendMessage(df.RESTORE, .{.legacy=.{0, 0}});
+                        _ = w1.sendMessage(df.RESTORE, mp.q.none);
                         return;
                     } else {
 //                        _ = df.printf("ff %s %d, ext %s %d\n", ff.ptr, ff.len, ext.ptr, ext.len);

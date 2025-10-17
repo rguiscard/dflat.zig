@@ -15,7 +15,7 @@ fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
                         if (dirs) c.ID_DIRECTORY else c.ID_FILES, k.LISTBOX);
         if (control) |ct| {
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+                _ = cwin.sendMessage(df.CLEARTEXT, q.none);
                 _ = df.cBuildList(cwin.win, @constCast(fspec.ptr), if (dirs) df.TRUE else df.FALSE);
                 _ = cwin.sendMessage(df.SHOW_WINDOW, q.none);
             }

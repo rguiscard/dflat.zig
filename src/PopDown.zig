@@ -182,7 +182,7 @@ fn PaintMsg(win:*Window) void {
         const wd:usize = @intCast(MenuWidth(@constCast(&selections))-2);
         sep[wd] = 0; // minimal of width and maxwidth ?
 
-        _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+        _ = win.sendMessage(df.CLEARTEXT, q.none);
         win.selection = mnu.*.Selection;
         for (mnu.*.Selections) |m| {
             if (m.SelectionTitle) |title| {
@@ -335,7 +335,7 @@ fn CloseWindowMsg(win:*Window) bool {
     Window.inFocus = win.oldFocus;
 
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CLOSE_WINDOW, .{.yes=false});
-    _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, .{.legacy=.{0, 0}});
+    _ = win.getParent().sendMessage(df.CLOSE_POPDOWN, q.none);
     return rtn;
 }
 

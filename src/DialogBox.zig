@@ -668,7 +668,7 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:CLAS
             if (text) |txt| {
                 _ = w.sendTextMessage(df.SETTEXT, @constCast(txt), 0);
             } else {
-                _ = w.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+                _ = w.sendMessage(df.CLEARTEXT, q.none);
             }
             _ = w.sendMessage(df.PAINT, .{.paint=.{null, false}});
         }
@@ -697,7 +697,7 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
                 switch (ct.*.Class) {
                     .COMBOBOX,
                     .EDITBOX => {
-                        _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+                        _ = cwin.sendMessage(df.CLEARTEXT, q.none);
                         _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                         if (cwin.isMultiLine() == false) {
                             _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
@@ -709,7 +709,7 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
                         _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                     },
                     .TEXT => {
-                        _ = cwin.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+                        _ = cwin.sendMessage(df.CLEARTEXT, q.none);
                         _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
                         _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                     },

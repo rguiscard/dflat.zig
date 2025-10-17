@@ -28,7 +28,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                 var cb = "[ ]";
                 if (ct.*.setting > 0)
                     cb = "[X]";
-                _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+                _ = win.sendMessage(df.CLEARTEXT, q.none);
                 _ = win.sendTextMessage(df.ADDTEXT, @constCast(cb), 0);
                 DialogBox.SetFocusCursor(win);
             },

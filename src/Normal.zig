@@ -196,13 +196,13 @@ fn CommandMsg(win:*Window, p1:df.PARAM) void {
             lists.SkipApplicationControls();
         },
         .ID_SYSRESTORE => {
-            _ = win.sendMessage(df.RESTORE, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.RESTORE, q.none);
         },
         .ID_SYSMINIMIZE => {
-            _ = win.sendMessage(df.MINIMIZE, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.MINIMIZE, q.none);
         },
         .ID_SYSMAXIMIZE => {
-            _ = win.sendMessage(df.MAXIMIZE, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.MAXIMIZE, q.none);
         },
         .ID_HELP => {
             const idx:usize = @intCast(@intFromEnum(win.getClass()));
@@ -341,17 +341,17 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) void {
             if (mx == win.WindowWidth()-2) {
                 if (win.condition != .ISRESTORED) {
                     // --- hit the restore box ---
-                    _ = win.sendMessage(df.RESTORE, .{.legacy=.{0, 0}});
+                    _ = win.sendMessage(df.RESTORE, q.none);
                 } else {
                     // --- hit the maximize box ---
-                    _ = win.sendMessage(df.MAXIMIZE, .{.legacy=.{0, 0}});
+                    _ = win.sendMessage(df.MAXIMIZE, q.none);
                 }
                 return;
             }
             if (mx == win.WindowWidth()-3) {
                 // --- hit the minimize box ---
                 if (win.condition != .ISMINIMIZED) {
-                    _ = win.sendMessage(df.MINIMIZE, .{.legacy=.{0, 0}});
+                    _ = win.sendMessage(df.MINIMIZE, q.none);
                 }
                 return;
             }
@@ -736,7 +736,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
         df.RESTORE => {
             if (win.condition != .ISRESTORED) {
                 if (win.oldcondition == .ISMAXIMIZED) {
-                    _ = win.sendMessage(df.MAXIMIZE, .{.legacy=.{0, 0}});
+                    _ = win.sendMessage(df.MAXIMIZE, q.none);
                 } else {
                     RestoreMsg(win);
                 }

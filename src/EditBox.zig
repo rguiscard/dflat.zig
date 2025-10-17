@@ -44,7 +44,7 @@ fn CreateWindowMsg(win:*Window) bool {
     win.InsertMode = true;
     if (win.isMultiLine())
         win.WordWrapMode = true;
-    _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+    _ = win.sendMessage(df.CLEARTEXT, q.none);
     return rtn;
 }
 
@@ -91,7 +91,7 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
 // ----------- CLEARTEXT Message ------------
 fn ClearTextMsg(win:*Window) bool {
     const wnd = win.win;
-    const rtn = root.BaseWndProc(k.EDITBOX, win, df.CLEARTEXT, .{.legacy=.{0, 0}});
+    const rtn = root.BaseWndProc(k.EDITBOX, win, df.CLEARTEXT, q.none);
 //    const blen = EditBufLen(win)+2;
 
 //    if (win.text) |buf| {
@@ -448,7 +448,7 @@ fn KeyTyped(win:*Window, cc:u16) void {
             return;
         }
         if (win.isMultiLine()==false and textbox.TextBlockMarked(win)) {
-            _ = win.sendMessage(df.CLEARTEXT, .{.legacy=.{0, 0}});
+            _ = win.sendMessage(df.CLEARTEXT, q.none);
             currchar = df.zCurrChar(wnd);
         }
         // ---- test typing at end of text ----

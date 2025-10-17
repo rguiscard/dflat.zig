@@ -549,6 +549,7 @@ CLEARTEXT              clear the text box
   Sent:    clear all text from the text box
   P1:      
   P2:      
+  Params:  Void
   Returns: 
 
 SETTEXT                set text buffer contents
