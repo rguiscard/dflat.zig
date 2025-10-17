@@ -30,8 +30,8 @@ pub const Legacy = struct {df.PARAM, df.PARAM};// PARAM & PARAM
 pub const Void = struct {};
 pub const Position = struct {usize, usize};        // x & y
 pub const Paint = struct {?df.RECT, bool};         // RECT, bool for PAINT and BORDER
-pub const Draw = struct {df.RECT, pict.VectTypes}; // RECT, bool for PAINT and BORDER
-pub const Pointer = struct {usize, usize};         // pointer & len (or 0)
+pub const Draw = struct {df.RECT, pict.VectTypes}; // PictureBox
+pub const Selection = struct {?usize, bool};       // ListBox and MenuBar selection
 pub const Character = struct {u16, u8};            // char & shift
 pub const CaptureDevice = struct {bool, ?*Window};
 pub const Cursor = struct {*usize, *usize};        // return current cursor position. 
@@ -43,10 +43,10 @@ pub const ParamsType = enum {
     position,
     paint,
     draw,
-    pointer,
     char,
     capture,
     cursor,
+    select,
     yes,
     area,
     slice,
@@ -58,10 +58,10 @@ pub const Params = union(ParamsType) {
     position:Position,      // x & y
     paint:Paint,            // RECT & bool
     draw:Draw,              // RECT & VectTypes (PictureBox)
-    pointer:Pointer,        // usize for now & len (or 0)
     char:Character,         // key and shift
     capture:CaptureDevice,
     cursor:Cursor,          // *x, *y
+    select:Selection,
 
     yes:bool,               // true/false
     area:?df.RECT,          // area

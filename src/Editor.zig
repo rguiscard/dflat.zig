@@ -16,9 +16,8 @@ const pTab:u16 = '\t' + 0x80;
 const sTab:u16 = 0x0C + 0x80; // '\f'
 
 // ---------- SETTEXT Message ------------
-fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
-    const pp:usize = @intCast(p1);
-    const src:[*c]u8 = @ptrFromInt(pp);
+fn SetTextMsg(win:*Window,p1:[]const u8) bool {
+    const src:[*c]u8 = @constCast(p1.ptr);
     var idx:usize = 0; // source
     var x:usize = 0;   // per line
     const tabs:usize = cfg.config.Tabs;
@@ -69,7 +68,7 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
     // if (buf.insert(0)) {} else |_| {} // gapbuf insert 0 actually
     //  *ttp = '\0';
 
-    return root.BaseWndProc(k.EDITOR, win, df.SETTEXT, .{.legacy=.{@intCast(@intFromPtr(buf.toString().ptr)), 0}});
+    return root.BaseWndProc(k.EDITOR, win, df.SETTEXT, .{.slice=buf.toString()});
 //    return if (df.cSetTextMsg(wnd, @ptrFromInt(pp)) == df.TRUE) true else false;
 }
 
@@ -237,15 +236,15 @@ fn AdjustTab(win:*Window) void {
 
 // ------- Window processing module for EDITBOX class ------ 
 pub fn EditorProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
-    const p1 = params.char[0];
-    const p2 = params.char[1];
     switch (msg) {
         df.KEYBOARD => {
+            const p1 = params.char[0];
+            const p2 = params.char[1];
             if (KeyboardMsg(win, p1, p2))
                 return true;
         },
         df.SETTEXT => {
-            return SetTextMsg(win, p1);
+            return SetTextMsg(win, params.slice);
         },
         else => {
         }
