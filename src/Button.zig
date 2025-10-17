@@ -86,7 +86,7 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 return true;
             },
             df.KEYBOARD => {
-                const p1 = params.legacy[0];
+                const p1 = params.char[0];
                 if (p1 == '\r') {
                     // ---- fall through ----
                     LeftButtonMsg(win, msg, ct);

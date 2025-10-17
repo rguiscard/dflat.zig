@@ -12,7 +12,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             _ = win.sendMessage(df.CAPTURE_CLOCK, q.none);
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
+            const p1 = params.char[0];
             if (p1 == df.CTRL_F4)
                 return true;
         },

@@ -126,7 +126,7 @@ fn ClearTextMsg(win:*Window) void {
 }  
 
 // ------------ KEYBOARD Message --------------
-fn KeyboardMsg(win:*Window, p1:df.PARAM) bool {
+fn KeyboardMsg(win:*Window, p1:u16) bool {
     var rtn = false;
 
     switch (p1) {
@@ -540,7 +540,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             ClearTextMsg(win);
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
+            const p1 = params.char[0];
             if ((normal.WindowMoving == false) and (normal.WindowSizing == false)) {
                 if (KeyboardMsg(win, p1)) {
                     return true;

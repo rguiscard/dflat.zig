@@ -238,7 +238,7 @@ fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
 }
 
 // ---------- KEYBOARD Message ---------
-fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
     if (win.mnu) |mnu| {
         var c:c_uint = @intCast(p1);
         if (c < 128) { // FIXME unicode
@@ -273,7 +273,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
                     }
                 }
             }
-            _ = win.getParent().sendMessage(df.KEYBOARD, .{.legacy=.{p1, p2}});
+            _ = win.getParent().sendMessage(df.KEYBOARD, .{.char=.{p1, p2}});
  
 //            if (win.mnu.*.Selections[0].SelectionTitle == null) {
 //                _ = win.getParent().sendMessage(df.KEYBOARD, p1, p2);
@@ -291,7 +291,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         df.BS => {
             if (win.parent) |pw| {
                 if (pw.Class == k.MENUBAR) {
-                    q.PostMessage(pw, df.KEYBOARD, .{.legacy=.{p1, p2}});
+                    q.PostMessage(pw, df.KEYBOARD, .{.char=.{p1, p2}});
                 }
             }
 //            if (win.getParent().getClass() == k.MENUBAR) {
@@ -396,8 +396,8 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.char[0];
+            const p2 = params.char[1];
             if (KeyboardMsg(win, p1, p2))
                 return true;
         },

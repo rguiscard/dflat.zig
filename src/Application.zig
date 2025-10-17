@@ -123,9 +123,9 @@ fn SizeMsg(win:*Window, x:usize, y:usize) void {
         _ = win.sendMessage(df.SHOW_WINDOW, q.none);
 }
 
-fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn KeyboardMsg(win:*Window, p1:u16, p2:u8) bool {
     if (normal.WindowMoving or normal.WindowSizing or (p1 == df.F1))
-        return root.BaseWndProc(k.APPLICATION, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
+        return root.BaseWndProc(k.APPLICATION, win, df.KEYBOARD, .{.char=.{p1, p2}});
     switch (p1)  {
         df.ALT_F4 => {
             if (win.TestAttribute(df.CONTROLBOX)) {
@@ -147,13 +147,13 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         }
     }
     if (win.MenuBar) |mb| {
-        q.PostMessage(mb, df.KEYBOARD, .{.legacy=.{p1, p2}});
+        q.PostMessage(mb, df.KEYBOARD, .{.char=.{p1, p2}});
     } // also consider null ?
     return true;
 }
 
 // --------- SHIFT_CHANGED Message --------
-fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
+fn ShiftChangedMsg(win:*Window, p1:u16) void {
     if ((p1 & df.ALTKEY) > 0) {
         df.AltDown = df.TRUE;
     } else if (df.AltDown > 0)    {
@@ -162,7 +162,7 @@ fn ShiftChangedMsg(win:*Window, p1:df.PARAM) void {
             _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
         }
         if (win.MenuBar) |mb| {
-            _ = mb.sendMessage(df.KEYBOARD, .{.legacy=.{df.F10, 0}});
+            _ = mb.sendMessage(df.KEYBOARD, .{.char=.{df.F10, 0}});
         } // also consider null ?
     }
 }
@@ -296,12 +296,12 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.char[0];
+            const p2 = params.char[1];
             return KeyboardMsg(win, p1, p2);
         },
         df.SHIFT_CHANGED => {
-            const p1 = params.legacy[0];
+            const p1 = params.char[0];
             ShiftChangedMsg(win, p1);
             return true;
         },

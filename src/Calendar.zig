@@ -113,9 +113,9 @@ fn DisplayDates(win:*Window) void {
     }
 }
 
-//static int KeyboardMsg(WINDOW wnd, PARAM p1)
-//{
-//    switch ((int)p1)    {
+fn KeyboardMsg(win:*Window, p1:u16) bool {
+    _ = win;
+    switch (p1)    {
 //        case BS:
 //        case UP:
 //        case PGUP:
@@ -140,11 +140,11 @@ fn DisplayDates(win:*Window) void {
 //            mktime(&ttm);
 //            DisplayDates(wnd);
 //            return TRUE;
-//        default:
-//            break;
-//    }
-//    return FALSE;
-//}
+        else => {
+        }
+    }
+    return false;
+}
 
 
 pub fn CalendarProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
@@ -155,9 +155,9 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.KEYBOARD => {
-//              const p1 = params.legacy[0];
-//            if (KeyboardMsg(wnd, p1))
-//                return true;
+            const p1 = params.char[0];
+            if (KeyboardMsg(win, p1))
+                return true;
         },
         df.PAINT => {
             _ = root.DefaultWndProc(win, msg, params);

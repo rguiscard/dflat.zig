@@ -334,7 +334,7 @@ pub fn sendMessage(self: *TopLevelFields, msg:df.MESSAGE, params:q.Params) bool 
 // -------- add a title to a window ---------
 pub fn AddTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
     InsertTitle(self, ttl);
-    _ = self.sendMessage(df.BORDER, .{.legacy=.{0, 0}});
+    _ = self.sendMessage(df.BORDER, .{.paint=.{null, false}});
 }
 
 // ----- insert a title into a window ----------

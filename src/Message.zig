@@ -30,7 +30,7 @@ pub const Void = struct {};
 pub const Position = struct {usize, usize};    // x & y
 pub const Paint = struct {?df.RECT, bool};     // RECT, bool for PAINT and BORDER
 pub const Pointer = struct {usize, usize};     // pointer & len (or 0)
-pub const Character = struct {u8, u8};         // char & shift
+pub const Character = struct {u16, u8};        // char & shift
 pub const CaptureDevice = struct {bool, ?*Window};
 pub const Cursor = struct {*usize, *usize};    // return current cursor position. 
                                                // use isize (-1) for no information ?
@@ -480,10 +480,10 @@ pub fn dispatch_message() bool {
             df.KEYBOARD => {
                 if (!handshaking) {
                     if (Kwnd) |kw| {
-                        _ = kw.sendMessage(ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
+                        _ = kw.sendMessage(ev.event, .{.char=.{@intCast(ev.mx), @intCast(ev.my)}});
                     } else {
                         // could this happen ?
-                        _ = SendMessage(null, ev.event, .{.legacy=.{@intCast(ev.mx), @intCast(ev.my)}});
+                        _ = SendMessage(null, ev.event, .{.char=.{@intCast(ev.mx), @intCast(ev.my)}});
                     }
                 }
             },
@@ -583,9 +583,9 @@ pub export fn AddText(wnd:df.WINDOW, text:[*c]u8) df.BOOL {
     return df.FALSE;
 }
 
-pub export fn KeyboardMsg(wnd:df.WINDOW, chr:u8) df.BOOL {
+pub export fn KeyboardMsg(wnd:df.WINDOW, chr:u16) df.BOOL {
     if (Window.get_zin(wnd)) |win| {
-        return if (win.sendMessage(df.KEYBOARD, .{.legacy = .{@intCast(chr), 0}})) df.TRUE else df.FALSE;
+        return if (win.sendMessage(df.KEYBOARD, .{.char = .{chr, 0}})) df.TRUE else df.FALSE;
     }
     return df.FALSE;
 }

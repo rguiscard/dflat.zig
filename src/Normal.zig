@@ -108,7 +108,7 @@ fn InsideWindow(win:*Window, x:c_int, y:c_int) bool {
 }
 
 // --------- KEYBOARD Message ----------
-fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn KeyboardMsg(win:*Window, p1:u16, p2:u8) bool {
     const dwin = getDummy();
     if (WindowMoving or WindowSizing) {
         // -- move or size a window with keyboard --
@@ -120,8 +120,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
             },
             df.UP => {
-                if (y>0)
-                    y -|= 1;
+                y -|= 1;
             },
             df.DN => {
                 if (y < df.SCREENHEIGHT-1)
@@ -132,8 +131,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
                     x +|= 1;
             },
             df.BS => {
-                if (x>0)
-                    x -|= 1;
+                x -|= 1;
             },
             '\r' => {
                 _ = win.sendMessage(df.BUTTON_RELEASED,.{.position=.{x, y}});
@@ -152,8 +150,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             return true;
         },
         ' ' => {
-            const p2_i:isize = p2;
-            if ((p2_i & df.ALTKEY) > 0) {
+            if ((p2 & df.ALTKEY) > 0) {
                 if (win.TestAttribute(df.HASTITLEBAR)) {
                     if (win.TestAttribute(df.CONTROLBOX)) {
                         sysmenu.BuildSystemMenu(win);
@@ -645,8 +642,8 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return InsideWindow(win, @intCast(p1), @intCast(p2));
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:u16 = params.char[0];
+            const p2:u8 = params.char[1];
             if (KeyboardMsg(win, p1, p2))
                 return true;
             // ------- fall through -------

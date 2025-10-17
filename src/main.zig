@@ -292,7 +292,7 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
                 } else |_| {
                 }
                 win.AddTitle(@ptrCast(fname));
-                _ = mp.q.SendMessage(win, df.BORDER, .{.legacy = .{0, 0}});
+                _ = mp.q.SendMessage(win, df.BORDER, .{.paint=.{null, false}});
             } else |_| {
             }
         } else {

@@ -12,8 +12,8 @@ const cfg = @import("Config.zig");
 
 const VOID = q.VOID;
 
-const pTab:u8 = '\t' + 0x80;
-const sTab:u8 = 0x0C + 0x80; // '\f'
+const pTab:u16 = '\t' + 0x80;
+const sTab:u16 = 0x0C + 0x80; // '\f'
 
 // ---------- SETTEXT Message ------------
 fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
@@ -74,13 +74,13 @@ fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
 }
 
 // --------- KEYBOARD Message ----------
-fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
     const wnd = win.win;
 
-    var pn:df.PARAM = p1;
     if (normal.WindowMoving or normal.WindowSizing or ((p2 & df.ALTKEY)>0))
         return false;
 
+    var pn:u16 = p1;
     switch (p1) {
         df.PGUP,
         df.PGDN,
@@ -88,22 +88,22 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         df.DN => {
             pn = df.BS;
             // fall through
-            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
+            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
             TurnOffDisplay(win);
 //            while (*df.CurrChar == pTab) {
             while (df.zCurrChar(wnd)[0] == pTab) {
-                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{pn, p2}});
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pn, p2}});
             }
             TurnOnDisplay(win);
             return true;
         },
         df.FWD,
         df.BS => {
-            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
+            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
             TurnOffDisplay(win);
 //            while (*df.CurrChar == pTab) {
             while (df.zCurrChar(wnd)[0] == pTab) {
-                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{pn, p2}});
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pn, p2}});
             }
             TurnOnDisplay(win);
             return true;
@@ -112,10 +112,10 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             TurnOffDisplay(win);
 //            const delnl = (*df.CurrChar == '\n' or df.TextBlockMarked(wnd));
             const delnl = (df.zCurrChar(wnd)[0] == '\n' or textbox.TextBlockMarked(win));
-            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
+            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
 //            while (*df.CurrChar == pTab) {
             while (df.zCurrChar(wnd)[0] == pTab) {
-                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
             }
             AdjustTab(win);
             TurnOnDisplay(win);
@@ -127,10 +127,10 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
         },
         '\t' => {
             TurnOffDisplay(win);
-            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{@intCast(sTab), p2}});
+            _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{sTab, p2}});
             const tabs:c_int = @intCast(cfg.config.Tabs);
             while (@rem(wnd.*.CurrCol, tabs) != 0) {
-                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{@intCast(pTab), p2}});
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pTab, p2}});
             }
             TurnOnDisplay(win);
             RepaintLine(win);
@@ -142,7 +142,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
             if ( (p1 < 128) and           // FIXME unicode
                                 (std.ascii.isPrint(@intCast(p1)) or p1 == '\r')) {
                 TurnOffDisplay(win);
-                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
                 AdjustTab(win);
                 TurnOnDisplay(win);
                 RepaintLine(win);
@@ -207,11 +207,11 @@ fn AdjustTab(win:*Window) void {
             curr_pos += 1;
             cc = wnd.*.text[curr_pos];
             while (cc == pTab) {
-                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{df.DEL, 0}});
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{df.DEL, 0}});
             }
             while (exp > 0) {
                 exp -= 1;
-                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.legacy=.{pTab, 0}});
+                _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pTab, 0}});
             }
             break;
         }
@@ -237,8 +237,8 @@ fn AdjustTab(win:*Window) void {
 
 // ------- Window processing module for EDITBOX class ------ 
 pub fn EditorProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
+    const p1 = params.char[0];
+    const p2 = params.char[1];
     switch (msg) {
         df.KEYBOARD => {
             if (KeyboardMsg(win, p1, p2))

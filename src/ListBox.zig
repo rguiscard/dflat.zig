@@ -26,11 +26,11 @@ fn AddModeKey(win:*Window) void {
 }
 
 // --------- UP (Up Arrow) Key ------------
-fn UpKey(win:*Window,p2:df.PARAM) void {
+fn UpKey(win:*Window,p2:u8) void {
     const wnd = win.win;
     if (win.selection > 0)    {
         if (win.selection == win.wtop) {
-            _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.legacy=.{df.UP, p2}});
+            _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.char=.{df.UP, p2}});
             q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{win.selection-1,
                 if (win.isMultiLine()) p2 else df.FALSE}});
         } else {
@@ -58,11 +58,11 @@ fn UpKey(win:*Window,p2:df.PARAM) void {
 }
 
 // --------- DN (Down Arrow) Key ------------
-fn DnKey(win:*Window, p2:df.PARAM) void {
+fn DnKey(win:*Window, p2:u8) void {
     const wnd = win.win;
     if (win.selection < win.wlines-1) {
         if (win.selection == win.wtop+win.ClientHeight()-1) {
-            _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.legacy=.{df.DN, p2}});
+            _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.char=.{df.DN, p2}});
             q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{win.selection+1,
                 if (win.isMultiLine()) p2 else df.FALSE}});
         } else {
@@ -90,15 +90,15 @@ fn DnKey(win:*Window, p2:df.PARAM) void {
 }
 
 // --------- HOME and PGUP Keys ------------
-fn HomePgUpKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
+fn HomePgUpKey(win:*Window, p1:u16, p2:u8) void {
+    _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.char=.{p1, p2}});
     q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{@intCast(win.wtop),
         if (win.isMultiLine()) p2 else df.FALSE}});  // EXTENDEDSELECTIONS
 }
 
 // --------- END and PGDN Keys ------------
-fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.legacy=.{p1, p2}});
+fn EndPgDnKey(win:*Window, p1:u16, p2:u8) void {
+    _ = root.BaseWndProc(k.LISTBOX, win, df.KEYBOARD, .{.char=.{p1, p2}});
     var bot:usize = win.wtop+win.ClientHeight()-1;
     if (bot > win.wlines-1)
         bot = win.wlines-1;
@@ -107,7 +107,7 @@ fn EndPgDnKey(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
 }
 
 // --------- Space Bar Key ------------ 
-fn SpacebarKey(win:*Window, p2:df.PARAM) void {
+fn SpacebarKey(win:*Window, p2:u8) void {
     if (win.isMultiLine()) {
         var sel:isize = -1;
         _ = win.sendMessage(df.LB_CURRENTSELECTION, .{.legacy=.{@intCast(@intFromPtr(&sel)), 0}});
@@ -138,7 +138,7 @@ fn EnterKey(win:*Window) void {
 }
 
 // --------- All Other Key Presses ------------
-fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
+fn KeyPress(win:*Window,p1:u16, p2:u8) void {
     const wnd = win.win;
     var sel:isize = win.selection+1;
     while (sel < win.wlines) {
@@ -182,7 +182,7 @@ fn KeyPress(win:*Window,p1:df.PARAM, p2:df.PARAM) void {
 }
 
 // --------- KEYBOARD Message ------------
-fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn KeyboardMsg(win:*Window, p1:u16, p2:u8) bool {
     switch (p1) {
         df.SHIFT_F8 => {
             AddModeKey(win);
@@ -308,8 +308,8 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.char[0];
+            const p2 = params.char[1];
             if ((normal.WindowMoving == false) and (normal.WindowSizing == false)) {
                 if (KeyboardMsg(win, p1, p2))
                     return true;

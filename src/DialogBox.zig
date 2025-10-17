@@ -130,19 +130,19 @@ fn CtlCreateWindowMsg(win:*Window) void {
 }
 
 // ------- KEYBOARD Message (Control) -----
-fn CtlKeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn CtlKeyboardMsg(win:*Window, p1:u16, p2:u8) bool {
     switch (p1) {
         ' ' => {
             if ((p2 & df.ALTKEY) > 0) {
                 // it didn't break. Fall through
-                q.PostMessage(win.parent, df.KEYBOARD, .{.legacy=.{p1, p2}});
+                q.PostMessage(win.parent, df.KEYBOARD, .{.char=.{p1, p2}});
                 return true;
             }
         },
         df.ALT_F6,
         df.CTRL_F4,
         df.ALT_F4 => {
-            q.PostMessage(win.parent, df.KEYBOARD, .{.legacy=.{p1, p2}});
+            q.PostMessage(win.parent, df.KEYBOARD, .{.char=.{p1, p2}});
             return true;
         },
         df.F1 => {
@@ -283,8 +283,8 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             CtlCreateWindowMsg(win);
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.char[0];
+            const p2 = params.char[1];
             if (CtlKeyboardMsg(win, p1, p2))
                 return true;
         },
@@ -436,7 +436,7 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
     const ux = if (x>win.GetLeft()) x-win.GetLeft() else 0;
     const uy = if (y>win.GetTop()) y-win.GetTop() else 0;
     if (win.HitControlBox(ux, uy)) {
-        q.PostMessage(win, df.KEYBOARD,.{.legacy=.{' ', df.ALTKEY}});
+        q.PostMessage(win, df.KEYBOARD,.{.char=.{' ', df.ALTKEY}});
         return true;
     }
 //    Not in use
@@ -469,7 +469,7 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
 }
 
 // -------- KEYBOARD Message ---------
-fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn KeyboardMsg(win:*Window, p1:u16, p2:u8) bool {
     if (normal.WindowMoving or normal.WindowSizing)
         return false;
 
@@ -512,7 +512,7 @@ fn KeyboardMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
             },
             else => {
                 // ------ search all the shortcut keys -----
-                if (dbShortcutKeys(db, @intCast(p1)))
+                if (dbShortcutKeys(db, p1))
                     return true;
             }
         }
@@ -567,8 +567,8 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 return true;
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1 = params.char[0];
+            const p2 = params.char[1];
             if (KeyboardMsg(win, p1, p2))
                 return true;
         },
@@ -884,7 +884,7 @@ fn AssociatedControl(db:*Dialogs.DBOX, Tcmd: c) *Dialogs.CTLWINDOW {
 }
 
 // --- process dialog box shortcut keys ---
-pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: c_int) bool {
+pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: u16) bool {
     const ch = df.AltConvert(@intCast(ky));
 
     if (ch != 0) {
@@ -907,7 +907,7 @@ pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: c_int) bool {
                             }  else if (ct.*.Class != k.NORMAL) { // this IF is not necessary
                                 _ = cwin.sendMessage(df.SETFOCUS, .{.yes=true});
                                 if (ct.*.Class == k.BUTTON)
-                                   _ = cwin.sendMessage(df.KEYBOARD, .{.legacy=.{'\r',0}});
+                                   _ = cwin.sendMessage(df.KEYBOARD, .{.char=.{'\r',0}});
                             }
                             return true;
                         }

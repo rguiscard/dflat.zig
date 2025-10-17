@@ -321,6 +321,7 @@ KEYBOARD               key was pressed
   Sent:    when key is pressed. sent to the window that has the focus 
   P1:      keystroke
   P2:      shift key mask
+  Params:  Character
   Returns: 
 
 CAPTURE_KEYBOARD       capture keyboard into a window 
@@ -385,6 +386,7 @@ SHIFT_CHANGED          the shift status changed
            releases shift, alt, or ctrl key
   P1:      BIOS shift key mask
   P2:      
+  Params:  Character
   Returns: 
 
 WAITKEYBOARD            wait for key release

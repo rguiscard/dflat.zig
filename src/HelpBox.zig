@@ -169,7 +169,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM) bool {
     return false;
 }
 
-fn HelpBoxKeyboardMsg(win: *Window, p1: df.PARAM) bool {
+fn KeyboardMsg(win: *Window, p1: u16) bool {
     if (win.extension) |extension| {
         const dbox:*Dialogs.DBOX = extension.dbox;
         if (DialogBox.ControlWindow(dbox, c.ID_HELPTEXT)) |cwin| {
@@ -254,9 +254,9 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.KEYBOARD => {
-            const p1 = params.legacy[0];
+            const p1 = params.char[0];
             if (normal.WindowMoving == false) {
-                if (HelpBoxKeyboardMsg(win, p1))
+                if (KeyboardMsg(win, p1))
                     return true;
             }
         },
@@ -349,7 +349,7 @@ pub fn HelpTextProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return LeftButtonMsg(win, p1, p2);
         },
         df.DOUBLE_CLICK => {
-            q.PostMessage(win, df.KEYBOARD, .{.legacy=.{'\r', 0}});
+            q.PostMessage(win, df.KEYBOARD, .{.char=.{'\r', 0}});
         },
         else => {
         }
