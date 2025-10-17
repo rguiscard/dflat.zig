@@ -49,20 +49,18 @@ fn CreateWindowMsg(win:*Window) bool {
 }
 
 // ----------- ADDTEXT Message ----------
-fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
+fn AddTextMsg(win:*Window,p1:[]const u8) bool {
     const wnd = win.win;
     var rtn = false;
-    const pp1:usize = @intCast(p1);
-    const ptext:[*c]u8 = @ptrFromInt(pp1);
 
 //    if (df.strlen(ptext)+wnd.*.textlen <= wnd.*.MaxTextLength) {
     const len = if (win.gapbuf) |buf| buf.len() else 0;
-    if (df.strlen(ptext)+len <= win.MaxTextLength) {
-        rtn = root.BaseWndProc(k.EDITBOX, win, df.ADDTEXT, .{.legacy=.{p1, p2}});
+    if (p1.len+len <= win.MaxTextLength) {
+        rtn = root.BaseWndProc(k.EDITBOX, win, df.ADDTEXT, .{.slice=p1});
         if (rtn) {
             if (win.isMultiLine() == false)    {
                 wnd.*.CurrLine = 0;
-                wnd.*.CurrCol = @intCast(df.strlen(p1));
+                wnd.*.CurrCol = @intCast(p1.len);
                 if (wnd.*.CurrCol >= win.ClientWidth()) {
                     wnd.*.wleft = wnd.*.CurrCol-@as(c_int, @intCast(win.ClientWidth()));
                     wnd.*.CurrCol -= wnd.*.wleft;
@@ -77,12 +75,10 @@ fn AddTextMsg(win:*Window,p1:df.PARAM, p2:df.PARAM) bool {
 }
 
 // ----------- SETTEXT Message ----------
-fn SetTextMsg(win:*Window,p1:df.PARAM) bool {
+fn SetTextMsg(win:*Window,p1:[]const u8) bool {
     var rtn = false;
-    const pp1:usize = @intCast(p1);
-    const ptext:[*c]u8 = @ptrFromInt(pp1);
-    if (df.strlen(ptext) <= win.MaxTextLength) {
-        rtn = root.BaseWndProc(k.EDITBOX, win, df.SETTEXT, .{.legacy=.{p1, 0}});
+    if (p1.len <= win.MaxTextLength) {
+        rtn = root.BaseWndProc(k.EDITBOX, win, df.SETTEXT, .{.slice=p1});
         win.TextChanged = false;
     }
     return rtn;
@@ -979,13 +975,10 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return CreateWindowMsg(win);
         },
         df.ADDTEXT => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            return AddTextMsg(win, p1, p2);
+            return AddTextMsg(win, params.slice);
         },
         df.SETTEXT => {
-            const p1 = params.legacy[0];
-            return SetTextMsg(win, p1);
+            return SetTextMsg(win, params.slice);
         },
         df.CLEARTEXT => {
             return ClearTextMsg(win);

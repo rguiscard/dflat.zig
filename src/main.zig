@@ -263,7 +263,7 @@ fn LoadFile(win: *mp.Window) void {
         const filename = ext.filename;
         if (std.fs.cwd().readFileAlloc(mp.global_allocator, filename, 1_048_576)) |content| {
             defer mp.global_allocator.free(content);
-            _ = win.sendTextMessage(df.SETTEXT, content, 0);
+            _ = win.sendTextMessage(df.SETTEXT, content);
         } else |_| {
         }
     }
@@ -368,7 +368,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
             if (params.yes) {
                 ShowPosition(win);
             } else {
-                _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
+                _ = win.getParent().sendTextMessage(df.ADDSTATUS, "");
             }
             return rtn;
         },
@@ -438,7 +438,7 @@ fn ShowPosition(win:*mp.Window) void {
     const cl:u32 = @intCast(wnd.*.CurrCol);
     if (std.fmt.allocPrintSentinel(mp.global_allocator, "Line:{d:4} Column: {d:2}", .{ln, cl}, 0)) |m| {
         defer mp.global_allocator.free(m);
-        _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{@intCast(@intFromPtr(m.ptr)), 0}});
+        _ = win.getParent().sendTextMessage(df.ADDSTATUS, m);
     } else |_| {
         // error
     }

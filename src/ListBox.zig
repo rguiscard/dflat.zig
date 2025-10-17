@@ -15,12 +15,11 @@ fn AddModeKey(win:*Window) void {
     if (win.isMultiLine())    {
         win.AddMode ^= true;
         // parent could be null ?
-        const mode = "Add Mode";
-        const p1:c_int = if (win.AddMode) @intCast(@intFromPtr(mode.ptr)) else 0;
         if (win.parent) |pw| {
-            _ = pw.sendMessage(df.ADDSTATUS, .{.legacy=.{p1, 0}});
-        } else {
-            _ = q.SendMessage(null, df.ADDSTATUS, .{.legacy=.{p1, 0}});
+            const t:[]const u8 = if (win.AddMode) "Add Mode" else "";
+            _ = pw.sendTextMessage(df.ADDSTATUS, t);
+//        } else {
+//            _ = q.SendMessage(null, df.ADDSTATUS, .{.legacy=.{p1, 0}});
         }
     }
 }
@@ -265,8 +264,8 @@ fn DoubleClickMsg(win:*Window, x:usize, y:usize) bool {
 }
 
 // ------------ ADDTEXT Message --------------
-fn AddTextMsg(win:*Window,p1:df.PARAM,p2:df.PARAM) bool {
-    const rtn = root.BaseWndProc(k.LISTBOX, win, df.ADDTEXT, .{.legacy=.{p1, p2}});
+fn AddTextMsg(win:*Window,p1:[]const u8) bool {
+    const rtn = root.BaseWndProc(k.LISTBOX, win, df.ADDTEXT, .{.slice=p1});
     if (win.selection == -1)
         _ = win.sendMessage(df.LB_SETSELECTION, .{.legacy=.{0, 0}});
 //#ifdef INCLUDE_EXTENDEDSELECTIONS
@@ -335,9 +334,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             }
         },
         df.ADDTEXT => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            return AddTextMsg(win, p1, p2);
+            return AddTextMsg(win, params.slice);
         },
         df.LB_GETTEXT => {
             const p1 = params.legacy[0];
@@ -406,7 +403,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
         df.CLOSE_WINDOW => {
             if (win.isMultiLine() and win.AddMode) {
                 win.AddMode = false;
-                _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
+                _ = win.getParent().sendTextMessage(df.ADDSTATUS, "");
             }
         },
         else => {

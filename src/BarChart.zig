@@ -61,18 +61,18 @@ pub fn BarChart(pwin: *Window) void {
         );
         if (Bwnd) |w| {
             var win = w;
-            _ = win.sendTextMessage(df.ADDTEXT, @constCast(Title), 0);
-            _ = win.sendTextMessage(df.ADDTEXT, "", 0);
+            _ = win.sendTextMessage(df.ADDTEXT, Title);
+            _ = win.sendTextMessage(df.ADDTEXT, "");
             for(ProjChart, 0..) |proj, i| {
-                _ = win.sendTextMessage(df.ADDTEXT, @constCast(proj[0]), 0);
+                _ = win.sendTextMessage(df.ADDTEXT, proj[0]);
                 const sel:usize = 1+(i%4);
                 pict.DrawBar(win, @enumFromInt(sel),
                            @intCast(11 + proj[1] * COLWIDTH), @intCast(2+i),
                            @intCast((1 + proj[2]-proj[1]) * COLWIDTH),
                            df.TRUE);
             }
-            _ = win.sendTextMessage(df.ADDTEXT, "", 0);
-            _ = win.sendTextMessage(df.ADDTEXT, @constCast(Months), 0);
+            _ = win.sendTextMessage(df.ADDTEXT, "");
+            _ = win.sendTextMessage(df.ADDTEXT, Months);
             pict.DrawBox(win, 10, 1, pct+2, 25);
         }
     }

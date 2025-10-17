@@ -187,10 +187,10 @@ fn PaintMsg(win:*Window) void {
         for (mnu.*.Selections) |m| {
             if (m.SelectionTitle) |title| {
                 if (title[0] == df.LINE) {
-                    _ = win.sendTextMessage(df.ADDTEXT, sep, 0);
+                    _ = win.sendTextMessage(df.ADDTEXT, sep);
                 } else {
                     PaintPopDownSelection(win, @constCast(&m), sel);
-                    _ = win.sendTextMessage(df.ADDTEXT, sel, 0);
+                    _ = win.sendTextMessage(df.ADDTEXT, sel);
                 }
             }
         }

@@ -90,17 +90,10 @@ fn CreateWindowMsg(win: *Window) bool {
 
 // --------- ADDSTATUS Message ----------
 // This want to make sure p1 point to a buffer which contain text.
-fn AddStatusMsg(win: *Window, p1: df.PARAM) void {
+fn AddStatusMsg(win: *Window, p1: []const u8) void {
     if (win.StatusBar) |sb| {
-        var text:?[]const u8 = null;
-        if (p1 > 0) {
-            const p:usize = @intCast(p1);
-            const t:[*c]u8 = @ptrFromInt(p);
-            const tt = std.mem.span(t);
-            text = if (tt.len == 0) null else tt;
-        }
-        if (text) |_| {
-            _ = sb.sendMessage(df.SETTEXT, .{.legacy=.{p1, 0}});
+        if (p1.len > 0) {
+            _ = sb.sendTextMessage(df.SETTEXT, p1);
         } else {
             _ = sb.sendMessage(df.CLEARTEXT, q.none);
         }
@@ -275,8 +268,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 Window.inFocus = null;
         },
         df.ADDSTATUS => {
-            const p1 = params.legacy[0];
-            AddStatusMsg(win, p1);
+            AddStatusMsg(win, params.slice);
             return true;
         },
         df.SETFOCUS => {
@@ -456,7 +448,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
     
                             const name = WindowName(w1);
                             if (name) |n| {
-                                _ = cwin.sendMessage(df.ADDTEXT, .{.legacy=.{@intCast(@intFromPtr(n.ptr)), 0}});
+                                _ = cwin.sendTextMessage(df.ADDTEXT, n);
                             }
     
                             sel += 1;

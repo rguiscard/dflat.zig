@@ -87,7 +87,7 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
                     null,null,null,
                     df.HASBORDER | df.SHADOW | df.SAVESELF);
 
-    _ = win.sendTextMessage(df.SETTEXT, @constCast(msg), 0);
+    _ = win.sendTextMessage(df.SETTEXT, msg);
     if (cfg.config.mono == 0) {
         win.WindowColors[df.STD_COLOR][df.FG] = r.WHITE;
         win.WindowColors[df.STD_COLOR][df.BG] = r.GREEN;

@@ -41,7 +41,7 @@ pub fn BuildPathDisplay(win:*Window) void {
             const path = std.mem.zeroes([df.MAXPATH]u8);
             _ = df.getcwd(@constCast(&path), path.len);
             if (ct.win) |cwin| {
-                _ = cwin.sendMessage(df.SETTEXT, .{.legacy=.{@intCast(@intFromPtr(&path)), 0}});
+                _ = cwin.sendTextMessage(df.SETTEXT, @constCast(&path));
                 _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
         }

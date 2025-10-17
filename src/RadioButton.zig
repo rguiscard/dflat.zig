@@ -104,7 +104,7 @@ pub fn RadioButtonProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                 if (ct.*.setting > 0)
                     rb = "(\x07)";
                 _ = win.sendMessage(df.CLEARTEXT, q.none);
-                _ = win.sendTextMessage(df.ADDTEXT, @constCast(rb), 0);
+                _ = win.sendTextMessage(df.ADDTEXT, rb);
                 DialogBox.SetFocusCursor(win);
             },
             df.KEYBOARD => {

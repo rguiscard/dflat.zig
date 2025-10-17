@@ -48,7 +48,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                 cwin.AddAttribute(df.MULTILINE | df.VSCROLLBAR);
                 for (messages) |m| {
                     const x = std.mem.span(m);
-                    _ = cwin.sendTextMessage(df.ADDTEXT, x, 0);
+                    _ = cwin.sendTextMessage(df.ADDTEXT, x);
                 }
                 _ = cwin.sendMessage(df.SHOW_WINDOW, q.none);
             }

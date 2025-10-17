@@ -420,7 +420,7 @@ fn CreateWindowMsg(win:*Window) bool {
             if ((ctl.*.Class == k.EDITBOX or ctl.*.Class == k.TEXTBOX or
                     ctl.*.Class == k.COMBOBOX)) {
                 if (getCtlWindowText(ctl)) |text| {
-                    _ = cwnd.sendTextMessage(df.SETTEXT, @constCast(text), 0);
+                    _ = cwnd.sendTextMessage(df.SETTEXT, text);
                 }
             }
         }
@@ -666,7 +666,7 @@ pub fn SetDlgTextString(db:*Dialogs.DBOX, cmd:c, text: ?[:0]const u8, Class:CLAS
         }
         if (ct.win) |w| {
             if (text) |txt| {
-                _ = w.sendTextMessage(df.SETTEXT, @constCast(txt), 0);
+                _ = w.sendTextMessage(df.SETTEXT, txt);
             } else {
                 _ = w.sendMessage(df.CLEARTEXT, q.none);
             }
@@ -698,7 +698,7 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
                     .COMBOBOX,
                     .EDITBOX => {
                         _ = cwin.sendMessage(df.CLEARTEXT, q.none);
-                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text));
                         if (cwin.isMultiLine() == false) {
                             _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                         }
@@ -706,11 +706,11 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
                     .LISTBOX,
                     .TEXTBOX,
                     .SPINBUTTON => {
-                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text));
                     },
                     .TEXT => {
                         _ = cwin.sendMessage(df.CLEARTEXT, q.none);
-                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text), 0);
+                        _ = cwin.sendTextMessage(df.ADDTEXT, std.mem.span(text));
                         _ = cwin.sendMessage(df.PAINT, .{.paint=.{null, false}});
                     },
                     else => {

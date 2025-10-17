@@ -464,7 +464,7 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
                     if (std.mem.indexOfScalar(u8, &hline, 0)) |end| {
                         hline[end-1] = 0;
                     }
-                    _ = dwin.sendTextMessage(df.ADDTEXT, &hline,0);
+                    _ = dwin.sendTextMessage(df.ADDTEXT, &hline);
                 }
                 _ = dwin.sendMessage(df.SHOW_WINDOW, q.none);
                 _ = q.SendMessage(null, df.WAITKEYBOARD, q.none);

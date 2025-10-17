@@ -25,7 +25,7 @@ var ActiveMenu:?*[menus.MAXPULLDOWNS+1]menus.MENU = null; // this should be priv
 fn SetFocusMsg(win:*Window, yes:bool) bool {
     const rtn = root.BaseWndProc(k.MENUBAR, win, df.SETFOCUS, .{.yes=yes});
     if (yes) {
-        _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
+        _ = win.getParent().sendTextMessage(df.ADDSTATUS, "");
     } else {
         _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     }
@@ -85,7 +85,7 @@ fn PaintMsg(win:*Window) void {
     if (Selecting)
         return;
     if (win == Window.inFocus) {
-        _ = win.getParent().sendMessage(df.ADDSTATUS, .{.legacy=.{0, 0}});
+        _ = win.getParent().sendTextMessage(df.ADDSTATUS, "");
     }
     df.SetStandardColor(wnd);
 
@@ -122,7 +122,7 @@ fn PaintMsg(win:*Window) void {
                         if (ActiveMenu) |amenu| {
                             const st = amenu[idx].StatusText;
                             if (st) |txt| {
-                                _ = win.getParent().sendTextMessage(df.ADDSTATUS, @constCast(txt), 0);
+                                _ = win.getParent().sendTextMessage(df.ADDSTATUS, txt);
                             }
                         }
                     }

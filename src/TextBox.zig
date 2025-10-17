@@ -508,11 +508,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             ClearTextPointers(win);
         },
         df.ADDTEXT => {
-            const p1 = params.legacy[0];
-            const pp1:usize = @intCast(p1);
-            const txt:[*c]u8 = @ptrFromInt(pp1);
-            const len = df.strlen(txt);
-            return AddTextMsg(win, txt[0..len]);
+            return AddTextMsg(win, params.slice);
         },
         df.DELETETEXT => {
             const p1 = params.legacy[0];
@@ -529,11 +525,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.SETTEXT => {
-            const p1 = params.legacy[0];
-            const pp1:usize = @intCast(p1);
-            const txt:[*c]u8 = @ptrFromInt(pp1);
-            const len = df.strlen(txt);
-            SetTextMsg(win, txt[0..len]);
+            SetTextMsg(win, params.slice);
             return true;
         },
         df.CLEARTEXT => {

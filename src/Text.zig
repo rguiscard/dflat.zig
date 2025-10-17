@@ -27,11 +27,11 @@ fn drawText(win:*Window) void {
                         @memset(buf, 0);
                         defer root.global_allocator.free(buf);
                         _ = popdown.CopyCommand(buf, line, false, colors.WndBackground(win));
-                        _ = win.sendTextMessage(df.ADDTEXT, @constCast(buf), 0);
+                        _ = win.sendTextMessage(df.ADDTEXT, buf);
                     } else |_| {
                     }
                 } else {
-                    _ = win.sendTextMessage(df.ADDTEXT, @constCast(line), 0);
+                    _ = win.sendTextMessage(df.ADDTEXT, line);
                 }
                 if (idx >= height)
                     break;

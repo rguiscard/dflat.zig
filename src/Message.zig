@@ -46,6 +46,7 @@ pub const ParamsType = enum {
     cursor,
     yes,
     area,
+    slice,
 };
 
 pub const Params = union(ParamsType) {
@@ -60,6 +61,7 @@ pub const Params = union(ParamsType) {
 
     yes:bool,               // true/false
     area:?df.RECT,          // area
+    slice: []const u8,      // slice
 };
 
 pub const none:Params = .{.void=.{}};
@@ -564,7 +566,7 @@ pub fn dispatch_message() bool {
             return false;
         }
         if (mq.msg == df.STOP) {
-            PostMessage(null, df.STOP, q.none);
+            PostMessage(null, df.STOP, none);
             return false;
         }
     }
@@ -576,9 +578,8 @@ pub fn dispatch_message() bool {
 }
 
 pub export fn AddText(wnd:df.WINDOW, text:[*c]u8) df.BOOL {
-    const ptr:usize = @intFromPtr(text);
     if (Window.get_zin(wnd)) |win| {
-        return if (win.sendMessage(df.ADDTEXT,.{.legacy = .{@intCast(ptr), 0}})) df.TRUE else df.FALSE;
+        return if (win.sendTextMessage(df.ADDTEXT, std.mem.span(text))) df.TRUE else df.FALSE;
     }
     return df.FALSE;
 }

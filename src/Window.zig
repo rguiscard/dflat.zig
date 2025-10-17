@@ -267,11 +267,11 @@ pub fn create(
 }
 
 // --------- message prototypes -----------
-pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []u8, p2: df.PARAM) bool {
+pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []const u8) bool {
     // Be sure to send null-terminated string to c.
     if (root.global_allocator.dupeZ(u8, p1)) |txt| {
-        defer root.global_allocator.free(txt);
-        return self.sendMessage(msg, .{.legacy=.{@intCast(@intFromPtr(txt.ptr)), p2}});
+        defer root.global_allocator.free(txt); // does TextBox also make a copy ?
+        return self.sendMessage(msg, .{.slice=txt});
     } else |_| {
         // error
     }
