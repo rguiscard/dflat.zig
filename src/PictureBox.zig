@@ -200,8 +200,8 @@ fn PaintMsg(win:*Window) void {
     }
 }
 
-fn DrawVectorMsg(win:*Window, p1:df.PARAM, vt:VectTypes) void {
-    if (p1 != 0) {
+fn DrawVectorMsg(win:*Window, p1:?df.RECT, vt:VectTypes) void {
+    if (p1) |area| {
         var vectors:std.ArrayList(VECT) = undefined;
         if (win.VectorList) |list| {
             vectors = std.ArrayList(VECT).fromOwnedSlice(list);
@@ -215,9 +215,7 @@ fn DrawVectorMsg(win:*Window, p1:df.PARAM, vt:VectTypes) void {
         }
         if (vectors.addOne(root.global_allocator)) |vc| {
             vc.*.vt = vt;
-            const p1_addr:usize = @intCast(p1);
-            const p1_ptr:*df.RECT = @ptrFromInt(p1_addr);
-            vc.*.rc = p1_ptr.*;
+            vc.*.rc = area;
         } else |_| {
             // error
         }
@@ -231,22 +229,20 @@ fn DrawVectorMsg(win:*Window, p1:df.PARAM, vt:VectTypes) void {
     }
 }
 
-fn DrawBoxMsg(win:*Window, p1:df.PARAM) void {
-    if (p1 != 0)    {
-        const p1_addr:usize = @intCast(p1);
-        const p1_ptr:*df.RECT = @ptrFromInt(p1_addr); 
-        var rc:df.RECT = p1_ptr.*;
+fn DrawBoxMsg(win:*Window, p1:?df.RECT) void {
+    if (p1) |area| {
+        var rc:df.RECT = area;
         rc.bt = rc.tp;
-        _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.TRUE}});
-        rc = p1_ptr.*;
+        _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
+        rc = area;
         rc.lf = rc.rt;
-        _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.FALSE}});
-        rc = p1_ptr.*;
+        _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
+        rc = area;
         rc.tp = rc.bt;
-        _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.TRUE}});
-        rc = p1_ptr.*;
+        _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
+        rc = area;
         rc.rt = rc.lf;
-        _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), df.FALSE}});
+        _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
     }
 }
 
@@ -258,19 +254,15 @@ pub fn PictureProc(win:*Window, message: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.DRAWVECTOR => {
-            const p1 = params.legacy[0];
-            DrawVectorMsg(win, p1, VectTypes.VECTOR);
+            DrawVectorMsg(win, params.draw[0], VectTypes.VECTOR);
             return true;
         },
         df.DRAWBOX => {
-            const p1 = params.legacy[0];
-            DrawBoxMsg(win, p1);
+            DrawBoxMsg(win, params.draw[0]);
             return true;
         },
         df.DRAWBAR => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            DrawVectorMsg(win, p1, @enumFromInt(p2));
+            DrawVectorMsg(win, params.draw[0], params.draw[1]);
             return true;
         },
         df.CLOSE_WINDOW => {
@@ -303,7 +295,7 @@ fn PictureRect(x:c_int, y:c_int, len:c_int, hv:c_int) df.RECT {
 
 pub fn DrawVector(win:*Window, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
-    _ = win.sendMessage(df.DRAWVECTOR, .{.legacy=.{@intCast(@intFromPtr(&rc)), 0}});
+    _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
 }
 
 pub fn DrawBox(win:*Window, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
@@ -313,10 +305,10 @@ pub fn DrawBox(win:*Window, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
         .rt = x+wd-1,
         .bt = y+ht-1
     };
-    _ = win.sendMessage(df.DRAWBOX, .{.legacy=.{@intCast(@intFromPtr(&rc)), 0}});
+    _ = win.sendMessage(df.DRAWBOX, .{.draw = .{rc, .VECTOR}});
 }
 
 pub fn DrawBar(win:*Window, vt:VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
     const rc:df.RECT = PictureRect(x,y,len,hv);
-    _ = win.sendMessage(df.DRAWBAR, .{.legacy=.{@intCast(@intFromPtr(&rc)), @intFromEnum(vt)}});
+    _ = win.sendMessage(df.DRAWBAR,  .{.draw = .{rc, vt}});
 }

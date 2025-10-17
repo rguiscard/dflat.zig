@@ -531,6 +531,7 @@ ADDTEXT                add text to the text box
   P1:      address of null-terminated string without \n
            (textbox makes its own copy. string can go out of scope.)
   P2:      
+  Params:  Slice
   Returns: 
 
 DELETETEXT         delete line of text from the text box       
@@ -558,6 +559,7 @@ SETTEXT                set text buffer contents
            (lines are terminated by \n without \0)
            (textbox makes its own copy. string can go out of scope.)
   P2:      length of text buffer
+  Params:  Slice
   Returns: 
 
 SCROLL                 vertical scroll of text box    
@@ -621,6 +623,7 @@ ADDSTATUS               write text to the status bar
   Sent:    to write to or clear status bar text area
   P1:      address of text (null-terminated string) or NULL to clear
   P2:      
+  Params:  Slice
   Returns: 
 
 List Box Messages  
@@ -673,6 +676,7 @@ DRAWVECTOR           Draws a vector
            (either lf = rt [vertical vector] or tp = bt [horizontal
            vector])
   P2:      
+  Params:  Draw
   Returns: 
 
 DRAWBOX             Draws a box
@@ -680,6 +684,7 @@ DRAWBOX             Draws a box
   P1:      address of RECT that describes the box relative to the
            window's client area
   P2:      
+  Params:  Draw
   Returns: 
 
 DRAWBAR             Draws a barchart bar
@@ -690,6 +695,7 @@ DRAWBAR             Draws a barchart bar
            vector])
   P2:      one of these: SOLIDBAR, HEAVYBAR, CROSSBAR, LIGHTBAR
              (4 different bar textures)
+  Params:  Draw
   Returns: 
 
 =====================================================

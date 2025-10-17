@@ -9,6 +9,7 @@ const DialogBox = @import("DialogBox.zig");
 const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const app = @import("Application.zig");
+const pict = @import("PictureBox.zig");
 
 const MAXMESSAGES = 100;
 
@@ -27,19 +28,21 @@ export var AltDown:df.BOOL = df.FALSE;
 // Handle different combination of parameters p1 & p2
 pub const Legacy = struct {df.PARAM, df.PARAM};// PARAM & PARAM
 pub const Void = struct {};
-pub const Position = struct {usize, usize};    // x & y
-pub const Paint = struct {?df.RECT, bool};     // RECT, bool for PAINT and BORDER
-pub const Pointer = struct {usize, usize};     // pointer & len (or 0)
-pub const Character = struct {u16, u8};        // char & shift
+pub const Position = struct {usize, usize};        // x & y
+pub const Paint = struct {?df.RECT, bool};         // RECT, bool for PAINT and BORDER
+pub const Draw = struct {df.RECT, pict.VectTypes}; // RECT, bool for PAINT and BORDER
+pub const Pointer = struct {usize, usize};         // pointer & len (or 0)
+pub const Character = struct {u16, u8};            // char & shift
 pub const CaptureDevice = struct {bool, ?*Window};
-pub const Cursor = struct {*usize, *usize};    // return current cursor position. 
-                                               // use isize (-1) for no information ?
+pub const Cursor = struct {*usize, *usize};        // return current cursor position. 
+                                                   // use isize (-1) for no information ?
 
 pub const ParamsType = enum {
     legacy,
     void,
     position,
     paint,
+    draw,
     pointer,
     char,
     capture,
@@ -54,6 +57,7 @@ pub const Params = union(ParamsType) {
     void:Void,              // 0 & 0
     position:Position,      // x & y
     paint:Paint,            // RECT & bool
+    draw:Draw,              // RECT & VectTypes (PictureBox)
     pointer:Pointer,        // usize for now & len (or 0)
     char:Character,         // key and shift
     capture:CaptureDevice,
@@ -61,7 +65,7 @@ pub const Params = union(ParamsType) {
 
     yes:bool,               // true/false
     area:?df.RECT,          // area
-    slice: []const u8,      // slice
+    slice: []const u8,      // slice, zero length as null
 };
 
 pub const none:Params = .{.void=.{}};
