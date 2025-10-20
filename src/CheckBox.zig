@@ -33,7 +33,7 @@ pub fn CheckBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                 DialogBox.SetFocusCursor(win);
             },
             df.KEYBOARD => {
-                const p1 = params.legacy[0];
+                const p1 = params.char[0];
                 if (p1 == ' ') {
                     // fall through
                     ct.*.setting ^= df.ON;

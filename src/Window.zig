@@ -94,7 +94,7 @@ VScrollBox:usize = 0,         // position of vertical scroll box
 TextPointers:[]c_uint = &.{}, // -> list of line offsets
 
 // ----------------- list box fields ------------------
-selection:isize = -1,      // current selection, -1 for none
+selection:?usize = null,      // current selection, -1 for none
 AddMode:bool = false,      // adding extended selections mode
 AnchorPoint:isize = -1,    // anchor point for extended selections
 SelectCount:usize = 0,     // count of selected items

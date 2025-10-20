@@ -312,7 +312,7 @@ fn SelectionMsg(win:*Window, p1:?usize, p2:bool) void {
                     if (mx + wd > brd) {
                         mx = @intCast(brd - wd);
                     }
-                    my = zin.GetTop() + @as(usize, @intCast(zin.selection));
+                    my = zin.GetTop() + @as(usize, @intCast(zin.selection orelse 0)); // orelse -1 ?
                 }
             } else {
                 var offset:usize = @intCast(menupos[idx].x1);

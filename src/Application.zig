@@ -21,7 +21,7 @@ const cfg = @import("Config.zig");
 
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
-var WindowSel:c_int = 0;
+var WindowSel:usize = 0; // use optional if it behaves weird
 var oldFocus:?*Window = null;
 var Menus = [_][:0]u8{
     @constCast("~1.                      "),
@@ -217,7 +217,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             }
         },
         .ID_WINDOW => {
-            ChooseWindow(win, popdown.CurrentMenuSelection-2);
+            ChooseWindow(win, @intCast(popdown.CurrentMenuSelection-2));
         },
         .ID_CLOSEALL => {
             CloseAll(win, false);
@@ -435,7 +435,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
     switch (msg) {
         df.INITIATE_DIALOG => {
             if (DialogBox.ControlWindow(&Dialogs.Windows,.ID_WINDOWLIST)) |cwin| {
-                var sel:c_int = 0;
+                var sel:usize = 0;
                 if (ApplicationWindow) |awin| {
                     var win1 = awin.firstWindow();
                     while (win1) |w1| {
@@ -458,7 +458,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
                 } else {
                     // do something ?
                 } 
-                _ = cwin.sendMessage(df.LB_SETSELECTION, .{.legacy=.{WindowSel, 0}});
+                _ = cwin.sendMessage(df.LB_SETSELECTION, .{.legacy=.{@intCast(WindowSel), 0}});
                 cwin.AddAttribute(df.VSCROLLBAR);
                 q.PostMessage(cwin, df.SHOW_WINDOW, q.none);
             } else {
@@ -470,12 +470,12 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
             switch (cmd) {
                 .ID_OK => {
                     if (p2 == 0) {
-                        const val:c_int = -1;
+                        const val:?usize = null;
                         const control = DialogBox.ControlWindow(&Dialogs.Windows, .ID_WINDOWLIST);
                         if (control) |cwin| {
                             _ = cwin.sendMessage(df.LB_CURRENTSELECTION, 
                                                 .{.legacy=.{@intCast(@intFromPtr(&val)), 0}});
-                            WindowSel = val;
+                            WindowSel = val orelse 0;
                         }
 
                     }
@@ -503,7 +503,7 @@ fn MoreWindows(win:*Window) void {
 
 // ----- user chose a window from the Window menu
 //        or the More Window dialog box ----- 
-fn ChooseWindow(win:*Window, WindowNo:c_int) void {
+fn ChooseWindow(win:*Window, WindowNo:usize) void {
     var counter = WindowNo;
     var cwin = win.firstWindow();
     while (cwin) |cw| {

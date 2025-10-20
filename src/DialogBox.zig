@@ -783,10 +783,12 @@ pub fn GetDlgListText(win: *Window, text:[*c]u8, cmd:c) void {
         const db:*Dialogs.DBOX = extension.dbox;
         const control = FindCommand(db, cmd, k.LISTBOX);
         if (control) |ct| {
-            var sel:c_int = -1; // cannot use isize here, otherwise, ListBox.zig GetTextMsg will fail
             if (ct.win) |cwin| {
+                var sel:?usize = null;
                 _ = cwin.sendMessage(df.LB_CURRENTSELECTION, .{.legacy=.{@intCast(@intFromPtr(&sel)), 0}});
-                _ = cwin.sendMessage(df.LB_GETTEXT, .{.legacy=.{@intCast(@intFromPtr(text)), @intCast(sel)}});
+                if (sel) |s| {
+                    _ = cwin.sendMessage(df.LB_GETTEXT, .{.legacy=.{@intCast(@intFromPtr(text)), @intCast(s)}});
+                }
             }
         }
     }

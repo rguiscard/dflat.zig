@@ -70,8 +70,11 @@ fn ButtonReleasedMsg(win:*Window, x:usize, y:usize) bool {
 //        const tl = df.TextLine(wnd, sel);
 //        if (tl[0] != df.LINE)
         const tl = win.textLine(sel);
-        if (wnd.*.text[tl] != df.LINE)
-            _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{win.selection, 0}});
+        if (wnd.*.text[tl] != df.LINE) {
+            if (win.selection) |selection| {
+                _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{@intCast(selection), 0}});
+            }
+        }
     } else {
         const pwin = win.getParent();
         if ((pwin.getClass() == k.MENUBAR) and (y==pwin.GetTop()))
@@ -183,7 +186,7 @@ fn PaintMsg(win:*Window) void {
         sep[wd] = 0; // minimal of width and maxwidth ?
 
         _ = win.sendMessage(df.CLEARTEXT, q.none);
-        win.selection = mnu.*.Selection;
+        win.selection = @intCast(mnu.*.Selection);
         for (mnu.*.Selections) |m| {
             if (m.SelectionTitle) |title| {
                 if (title[0] == df.LINE) {
@@ -267,9 +270,11 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
             // if (ActivePopDown == NULL)
             if (win.mnu) |mnu| {
                 if (mnu.*.Selections[0].SelectionTitle != null) {
-                    if (mnu.*.Selections[@intCast(win.selection)].help) |helpName| {
-                        _ = helpbox.DisplayHelp(win, helpName);
-                        return true;
+                    if (win.selection) |selection| {
+                        if (mnu.*.Selections[selection].help) |helpName| {
+                            _ = helpbox.DisplayHelp(win, helpName);
+                            return true;
+                        }
                     }
                 }
             }
@@ -300,19 +305,23 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
             return true;
         },
         df.UP => {
-            if (win.selection == 0) {
-                if (win.wlines == win.ClientHeight()) {
-                    q.PostMessage(win, df.LB_SELECTION,
-                                    .{.legacy=.{@intCast(win.wlines-1), df.FALSE}});
-                    return true;
+            if (win.selection) |selection| {
+                if (selection == 0) {
+                    if (win.wlines == win.ClientHeight()) {
+                        q.PostMessage(win, df.LB_SELECTION,
+                                        .{.legacy=.{@intCast(win.wlines-1), df.FALSE}});
+                        return true;
+                    }
                 }
             }
         },
         df.DN => {
-            if (win.selection == win.wlines-1) {
-                if (win.wlines == win.ClientHeight()) {
-                    q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{0, df.FALSE}});
-                    return true;
+            if (win.selection) |selection| {
+                if (selection == win.wlines-1) {
+                    if (win.wlines == win.ClientHeight()) {
+                        q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{0, df.FALSE}});
+                        return true;
+                    }
                 }
             }
         },
@@ -379,7 +388,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             const pp:usize = @intCast(p1);
             win.mnu = @ptrFromInt(pp);
             if (win.mnu) |mnu| {
-                win.selection = mnu.*.Selection;
+                win.selection = @intCast(mnu.*.Selection);
             }
         },
         df.PAINT => {
