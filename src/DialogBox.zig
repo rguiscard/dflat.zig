@@ -101,7 +101,7 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
     _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
     win.*.modal = (Modal == df.TRUE);
     FirstFocus(db);
-    q.PostMessage(win, df.INITIATE_DIALOG, .{.legacy=.{0, 0}});
+    q.PostMessage(win, df.INITIATE_DIALOG, q.none);
     if (Modal == df.TRUE) {
         _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{false, null}});
         _ = win.sendMessage(df.CAPTURE_KEYBOARD, .{.capture=.{false, null}});
@@ -529,7 +529,7 @@ fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
                 return true;
             win.ReturnCode = cmd;
             if (win.modal) {
-                _ = q.PostMessage(win, df.ENDDIALOG, .{.legacy=.{0, 0}});
+                _ = q.PostMessage(win, df.ENDDIALOG, q.none);
             } else {
                 _ = win.sendMessage(df.CLOSE_WINDOW, .{.yes=true});
             }

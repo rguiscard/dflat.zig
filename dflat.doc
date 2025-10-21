@@ -158,6 +158,7 @@ START                  start message processing (not used now)
   Sent:    
   P1:      
   P2:      
+  PARAM:   Void
   Returns: 
 
 STOP                   stop message processing        
@@ -165,6 +166,7 @@ STOP                   stop message processing
            dispatch loop
   P1:      
   P2:      
+  PARAM:   Void
   Returns: 
 
 COMMAND                send a command to a window
@@ -635,6 +637,7 @@ LB_SELECTION               list box selection
   P1:      selection number: 0, 1, ...
   P2:      if multi-line selection listbox, shift status mask
            if not, true = selection was same as choice (e.g. mouse)
+  Params:  Selection (?usize, u8)
   Returns: 
 
 LB_CHOOSE               list box choice        
@@ -642,6 +645,7 @@ LB_CHOOSE               list box choice
            from the list box
   P1:      selection number: 0, 1, ...
   P2:      
+  Params:  Selection (?usize, u8)
   Returns: 
 
 LB_CURRENTSELECTION    return the current selection   
@@ -665,6 +669,18 @@ LB_SETSELECTION        sets the listbox selection
   Sent:    To change where the listbox cursor points
   P1:      Line number: 0, 1, ...
   P2:      
+  Params:  Selection (?usize, u8)
+  Returns:
+
+MenuBar Messages
+
+MB_SELECTION               menubar selection
+  Sent:    ? (sent by list box to self and to parent (if parent is not
+           a simple LISTBOX window) when user moves to an entry on 
+           the list box.)
+  P1:      selection number: 0, 1, ...
+  P2:      true / false
+  Params:  Selection
   Returns: 
 
 Picture Box Messages
@@ -697,6 +713,15 @@ DRAWBAR             Draws a barchart bar
              (4 different bar textures)
   Params:  Draw
   Returns: 
+
+
+DialogBox Message
+
+INITIATE_DIALOG
+  Params:  Void
+
+ENDDIALOG
+  Params:  Void
 
 =====================================================
 

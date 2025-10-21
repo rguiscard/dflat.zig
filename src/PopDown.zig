@@ -10,7 +10,7 @@ const menus = @import("Menus.zig");
 const cfg = @import("Config.zig");
 
 var py:c_int = -1;
-pub var CurrentMenuSelection:c_int = 0;
+pub var CurrentMenuSelection:usize = 0;
 
 // ------------ CREATE_WINDOW Message -------------
 fn CreateWindowMsg(win:*Window) bool {
@@ -47,7 +47,7 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) void {
     if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win))) {
         if (my != py) {
             _ = win.sendMessage(df.LB_SELECTION,
-                    .{.legacy=.{@intCast(win.wtop+my-1), df.TRUE}});
+                    .{.select=.{win.wtop+my-1, 1}});
             py = @intCast(my);
         }
     } else {
@@ -72,7 +72,7 @@ fn ButtonReleasedMsg(win:*Window, x:usize, y:usize) bool {
         const tl = win.textLine(sel);
         if (wnd.*.text[tl] != df.LINE) {
             if (win.selection) |selection| {
-                _ = win.sendMessage(df.LB_CHOOSE, .{.legacy=.{@intCast(selection), 0}});
+                _ = win.sendMessage(df.LB_CHOOSE, .{.select=.{selection, 0}});
             }
         }
     } else {
@@ -222,20 +222,22 @@ fn BorderMsg(win:*Window) bool {
 }
 
 // -------------- LB_CHOOSE Message --------------
-fn LBChooseMsg(win:*Window, p1:df.PARAM) void {
+fn LBChooseMsg(win:*Window, p1:?usize) void {
     if (win.mnu) |mnu| {
-        const popdown = &mnu.*.Selections[@intCast(p1)];
-        mnu.*.Selection = @intCast(p1);
-        if (popdown.*.Attrib.INACTIVE == false) {
-            if (popdown.*.Attrib.TOGGLE) {
-                popdown.*.Attrib.CHECKED = !popdown.*.Attrib.CHECKED;
+        if (p1) |selection| {
+            const popdown = &mnu.*.Selections[selection];
+            mnu.*.Selection = @intCast(selection);
+            if (popdown.*.Attrib.INACTIVE == false) {
+                if (popdown.*.Attrib.TOGGLE) {
+                    popdown.*.Attrib.CHECKED = !popdown.*.Attrib.CHECKED;
+                }
+                if (win.parent) |pw| {
+                    CurrentMenuSelection = selection;
+                    q.PostMessage(pw, df.COMMAND, .{.legacy=.{@intFromEnum(popdown.*.ActionId), 0}}); // p2 was p1
+                }
+            } else {
+                df.beep();
             }
-            if (win.parent) |pw| {
-                CurrentMenuSelection = @intCast(p1);
-                q.PostMessage(pw, df.COMMAND, .{.legacy=.{@intFromEnum(popdown.*.ActionId), 0}}); // p2 was p1
-            }
-        } else {
-            df.beep();
         }
     }
 }
@@ -257,8 +259,8 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
                     }
                     if ((sc == c) or ((a > 0) and (sc == a)) or
                            (popdown.Accelerator == c)) {
-                        q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{@intCast(sel), 0}});
-                        q.PostMessage(win, df.LB_CHOOSE, .{.legacy=.{@intCast(sel), df.TRUE}});
+                        q.PostMessage(win, df.LB_SELECTION, .{.select=.{sel, 0}});
+                        q.PostMessage(win, df.LB_CHOOSE, .{.select=.{sel, 1}});
                         return true;
                     }
                 }
@@ -309,7 +311,7 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
                 if (selection == 0) {
                     if (win.wlines == win.ClientHeight()) {
                         q.PostMessage(win, df.LB_SELECTION,
-                                        .{.legacy=.{@intCast(win.wlines-1), df.FALSE}});
+                                        .{.select=.{@intCast(win.wlines-1), 0}});
                         return true;
                     }
                 }
@@ -319,7 +321,7 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
             if (win.selection) |selection| {
                 if (selection == win.wlines-1) {
                     if (win.wlines == win.ClientHeight()) {
-                        q.PostMessage(win, df.LB_SELECTION, .{.legacy=.{0, df.FALSE}});
+                        q.PostMessage(win, df.LB_SELECTION, .{.select=.{0, 0}});
                         return true;
                     }
                 }
@@ -365,16 +367,15 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.LB_SELECTION => {
-            const p1 = params.legacy[0];
-            const sel:usize = @intCast(p1);
-//            const l = df.TextLine(wnd, sel);
-//            if (l[0] == df.LINE) {
-            const l = win.textLine(sel);
-            if (wnd.*.text[l] == df.LINE) {
-                return true;
-            }
-            if (win.mnu) |mnu| {
-                mnu.*.Selection = @intCast(p1);
+            const p1:?usize = params.select[0];
+            if (p1) |sel| {
+                const l = win.textLine(sel);
+                if (wnd.*.text[l] == df.LINE) {
+                    return true;
+                }
+                if (win.mnu) |mnu| {
+                    mnu.*.Selection = if (p1) |_| @intCast(sel) else -1;
+                }
             }
         },
         df.BUTTON_RELEASED => {
@@ -400,7 +401,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return BorderMsg(win);
         },
         df.LB_CHOOSE => {
-            const p1 = params.legacy[0];
+            const p1:?usize = params.select[0];
             LBChooseMsg(win, p1);
             return true;
         },

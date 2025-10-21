@@ -143,7 +143,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
             if (((Window.inFocus == win) and (m.sc == cc)) or
                 ((a > 0) and (m.sc == a))) {
                 _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
-                _ = win.sendMessage(df.MB_SELECTION, .{.select=.{idx, false}});
+                _ = win.sendMessage(df.MB_SELECTION, .{.select=.{idx, 0}});
                 return;
             }
         }
@@ -276,7 +276,7 @@ fn LeftButtonMsg(win:*Window, x:usize) void {
                (mx <= menupos[idx].x2-4*i-5)) {
             if (ActiveMenuBar) |mbar| {
                 if ((idx != mbar.*.ActiveSelection) or (mwin == null)) {
-                    _ = win.sendMessage(df.MB_SELECTION, .{.select=.{idx, false}});
+                    _ = win.sendMessage(df.MB_SELECTION, .{.select=.{idx, 0}});
                 }
             }
             break;
@@ -374,7 +374,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                         if (casc < menus.MAXCASCADES) {
                             Cascaders[casc] = mwin;
                             casc += 1;
-                            _ = win.sendMessage(df.MB_SELECTION, .{.select=.{del, true}});
+                            _ = win.sendMessage(df.MB_SELECTION, .{.select=.{del, 1}});
                         }
                         break;
                 }
@@ -460,7 +460,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
         },
         df.MB_SELECTION => {
             const p1:?usize = params.select[0];
-            const p2:bool = params.select[1];
+            const p2:bool = (params.select[1] == 1);
             SelectionMsg(win, p1, p2);
         },
         df.COMMAND => {

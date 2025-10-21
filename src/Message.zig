@@ -31,8 +31,8 @@ pub const Void = struct {};
 pub const Position = struct {usize, usize};        // x & y
 pub const Paint = struct {?df.RECT, bool};         // RECT, bool for PAINT and BORDER
 pub const Draw = struct {df.RECT, pict.VectTypes}; // PictureBox
-pub const Selection = struct {?usize, bool};       // ListBox and MenuBar selection
-pub const Character = struct {u16, u8};            // char & shift
+pub const Selection = struct {?usize, u8};         // ListBox and MenuBar selection, u8 as bool (1/0) or mask
+pub const Character = struct {u16, u8};            // char & shift (Keyboard)
 pub const CaptureDevice = struct {bool, ?*Window};
 pub const Cursor = struct {*usize, *usize};        // return current cursor position. 
                                                    // use isize (-1) for no information ?
@@ -47,9 +47,12 @@ pub const ParamsType = enum {
     capture,
     cursor,
     select,
+
     yes,
     area,
     slice,
+    usize_addr,
+    slice_addr,
 };
 
 pub const Params = union(ParamsType) {
@@ -66,6 +69,8 @@ pub const Params = union(ParamsType) {
     yes:bool,               // true/false
     area:?df.RECT,          // area
     slice: []const u8,      // slice, zero length as null
+    usize_addr: *?usize,     // get selection from ListBox
+    slice_addr: *[]const u8, // get selection from ListBox
 };
 
 pub const none:Params = .{.void=.{}};
@@ -123,7 +128,7 @@ pub fn init_messages() bool {
 
     NoChildCaptureMouse = false;
     NoChildCaptureKeyboard = false;
-    PostMessage(null,df.START,.{.legacy=.{0,0}});
+    PostMessage(null,df.START,none);
 //    lagdelay = FIRSTDELAY; // not in use
     return true;
 }

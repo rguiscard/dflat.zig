@@ -217,7 +217,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
             }
         },
         .ID_WINDOW => {
-            ChooseWindow(win, @intCast(popdown.CurrentMenuSelection-2));
+            ChooseWindow(win, if (popdown.CurrentMenuSelection > 2) popdown.CurrentMenuSelection-2 else 0);
         },
         .ID_CLOSEALL => {
             CloseAll(win, false);
@@ -458,7 +458,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
                 } else {
                     // do something ?
                 } 
-                _ = cwin.sendMessage(df.LB_SETSELECTION, .{.legacy=.{@intCast(WindowSel), 0}});
+                _ = cwin.sendMessage(df.LB_SETSELECTION, .{.select=.{WindowSel, 0}});
                 cwin.AddAttribute(df.VSCROLLBAR);
                 q.PostMessage(cwin, df.SHOW_WINDOW, q.none);
             } else {
