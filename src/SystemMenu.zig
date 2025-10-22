@@ -111,7 +111,7 @@ pub fn BuildSystemMenu(win: *Window) void {
     }
 
     _ = SystemMenuWin.sendMessage(df.BUILD_SELECTIONS,
-                  .{.legacy=.{@intCast(@intFromPtr(&menus.SystemMenu.PullDown[0])), 0}});
+                  .{.menu=&menus.SystemMenu.PullDown[0]});
     _ = SystemMenuWin.sendMessage(df.SETFOCUS, .{.yes=true});
     _ = SystemMenuWin.sendMessage(df.SHOW_WINDOW, q.none);
 }

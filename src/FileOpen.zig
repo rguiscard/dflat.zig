@@ -76,7 +76,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             if (win.extension) |extension| {
                 const db:*Dialogs.DBOX = extension.dbox;
                 if (DialogBox.ControlWindow(db, .ID_FILENAME)) |cwin| {
-                    _ = cwin.sendMessage(df.SETTEXTLENGTH, .{.legacy=.{64, 0}});
+                    _ = cwin.sendMessage(df.SETTEXTLENGTH, .{.usize=64});
                 }
             }
             return rtn;

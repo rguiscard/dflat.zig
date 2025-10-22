@@ -11,6 +11,7 @@ const normal = @import("Normal.zig");
 const app = @import("Application.zig");
 const pict = @import("PictureBox.zig");
 const cmd = @import("Commands.zig").Command;
+const menus = @import("Menus.zig");
 
 const MAXMESSAGES = 100;
 
@@ -39,6 +40,7 @@ pub const Cursor = struct {*usize, *usize};        // return current cursor posi
                                                    // use isize (-1) for no information ?
 pub const Command = struct {cmd, usize};           // command
 pub const GetText = struct {[]u8, usize};
+pub const PutText = struct {[]const u8, usize};
 
 pub const ParamsType = enum {
     legacy,
@@ -52,11 +54,15 @@ pub const ParamsType = enum {
     select,
     command,
     get_text,
+    put_text,
 
     yes,
     area,
     slice,
+    usize,
     usize_addr,
+    menu,
+    menubar,
 };
 
 pub const Params = union(ParamsType) {
@@ -71,11 +77,15 @@ pub const Params = union(ParamsType) {
     select:Selection,
     command:Command,
     get_text:GetText,
+    put_text:PutText,       // this to replace slice below ?
 
     yes:bool,               // true/false
     area:?df.RECT,          // area
     slice: []const u8,      // slice, zero length as null
-    usize_addr: *?usize,     // get selection from ListBox
+    usize: usize,           // mainly for line number (DELETETEXT)
+    usize_addr: *?usize,    // get selection from ListBox
+    menu: *menus.MENU,
+    menubar: *menus.MBAR,
 };
 
 pub const none:Params = .{.void=.{}};

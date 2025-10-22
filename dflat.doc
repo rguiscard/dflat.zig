@@ -541,6 +541,7 @@ DELETETEXT         delete line of text from the text box
   Sent:    to delete a line of text from the text box
   P1:      line number relative to zero
   P2:      
+  Params:  usize
   Returns: 
 
 INSERTTEXT           insert line of text into the text box       
@@ -610,6 +611,7 @@ GETTEXT             get text from an edit box
   Sent:    Get the line of text from a single-line editbox
   P1:      address of receiving buffer
   P2:      max length to copy
+  Parmas:  GETTEXT
   Returns: 
 
 SETTEXTLENGTH        set maximum text length in an edit box      
@@ -617,6 +619,7 @@ SETTEXTLENGTH        set maximum text length in an edit box
            may hold in its buffer.
   P1:      maximum character count
   P2:      
+  Params:  usize
   Returns: 
 
 
@@ -664,6 +667,7 @@ LB_GETTEXT             return the text of selection
   Sent:    To get a copy of the text at a specified line
   P1:      Address of string to receive copy of text
   P2:      Line number: 0, 1, ...
+  Params:  GETTEXT
   Returns: 
 
 LB_SETSELECTION        sets the listbox selection     

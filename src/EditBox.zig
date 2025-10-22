@@ -131,9 +131,9 @@ fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) bool {
 }
 
 // ----------- SETTEXTLENGTH Message ----------
-fn SetTextLengthMsg(win:*Window, p1:df.PARAM) bool {
+fn SetTextLengthMsg(win:*Window, p1:usize) bool {
     const wnd = win.win;
-    var len:c_int = @intCast(p1);
+    var len:usize = p1;
     len += 1;
     if (len < df.MAXTEXTLEN) {
         win.MaxTextLength = @intCast(len);
@@ -322,27 +322,27 @@ fn LeftButtonMsg(win:*Window,p1:usize, p2:usize) bool {
         if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false) {
             var x = MouseX;
             var y = MouseY;
-            var dir = df.FALSE;
+            var dir = false;
             var msg:df.MESSAGE = 0;
             if (p2 == win.GetTop()) {
-                y += 1;
-                dir = df.FALSE;
+                y +|= 1;
+                dir = false;
                 msg = df.SCROLL;
             } else if (p2 == win.GetBottom()) {
-                y -= 1;
-                dir = df.TRUE;
+                y -|= 1;
+                dir = true;
                 msg = df.SCROLL;
             } else if (p1 == win.GetLeft()) {
-                x -= 1;
-                dir = df.FALSE;
+                x -|= 1;
+                dir = false;
                 msg = df.HORIZSCROLL;
             } else if (p1 == win.GetRight()) {
-                x += 1;
-                dir = df.TRUE;
+                x +|= 1;
+                dir = true;
                 msg = df.HORIZSCROLL;
             }
             if (msg != 0)   {
-                if (win.sendMessage(msg, .{.legacy=.{dir, 0}})) {
+                if (win.sendMessage(msg, .{.yes=dir})) {
                     ExtendBlock(win, x, y);
                 }
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
@@ -989,7 +989,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return GetTextMsg(win, p1, p2);
         },
         df.SETTEXTLENGTH => {
-            const p1 = params.legacy[0];
+            const p1:usize = params.usize;
             return SetTextLengthMsg(win, p1);
         },
         df.KEYBOARD_CURSOR => {

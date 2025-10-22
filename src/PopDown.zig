@@ -385,9 +385,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                 return true;
         },
         df.BUILD_SELECTIONS => {
-            const p1 = params.legacy[0];
-            const pp:usize = @intCast(p1);
-            win.mnu = @ptrFromInt(pp);
+            win.mnu = params.menu;
             if (win.mnu) |mnu| {
                 win.selection = @intCast(mnu.*.Selection);
             }

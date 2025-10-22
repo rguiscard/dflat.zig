@@ -511,17 +511,14 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return AddTextMsg(win, params.slice);
         },
         df.DELETETEXT => {
-            const p1 = params.legacy[0];
-            DeleteTextMsg(win, @intCast(p1));
+            const p1 = params.usize;
+            DeleteTextMsg(win, p1);
             return true;
         },
         df.INSERTTEXT => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            const pp1:usize = @intCast(p1);
-            const txt:[*c]u8 = @ptrFromInt(pp1);
-            const len = df.strlen(txt);
-            InsertTextMsg(win, txt[0..len], @intCast(p2));
+            const p1:[]const u8 = params.put_text[0];
+            const p2:usize = params.put_text[1];
+            InsertTextMsg(win, p1, p2);
             return true;
         },
         df.SETTEXT => {

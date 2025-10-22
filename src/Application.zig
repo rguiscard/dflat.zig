@@ -652,8 +652,7 @@ fn CreateMenu(win: *Window) void {
     win.MenuBar = mwnd;
 
     if (win.extension) |extension| {
-        const ext:df.PARAM = @intCast(@intFromPtr(extension.menubar));
-        _ = mwnd.sendMessage(df.BUILDMENU, .{.legacy=.{ext,0}});
+        _ = mwnd.sendMessage(df.BUILDMENU, .{.menubar=extension.menubar});
     }
     mwnd.AddAttribute(df.VISIBLE);
 }

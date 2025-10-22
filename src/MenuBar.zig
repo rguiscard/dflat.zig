@@ -33,15 +33,14 @@ fn SetFocusMsg(win:*Window, yes:bool) bool {
 }
 
 // --------- BUILDMENU Message ---------
-fn BuildMenuMsg(win:*Window, p1:df.PARAM) void {
+fn BuildMenuMsg(win:*Window, p1:*menus.MBAR,) void {
     const wnd = win.win;
     reset_menubar(win);
     if (win.gapbuf) |buf| {
         const b = [_]u8{0}**80;
         var offset:usize = 3;
         var idx:usize = 0;
-        const pp1:usize = @intCast(p1);
-        ActiveMenuBar = @ptrFromInt(pp1);
+        ActiveMenuBar = p1;
         if (ActiveMenuBar) |mbar| {
             for(mbar.*.PullDown) |m| {
                 if (m.Title) |title| {
@@ -345,7 +344,7 @@ fn SelectionMsg(win:*Window, p1:?usize, p2:bool) void {
             }
             if (mnu.*.Selections[0].SelectionTitle != null) {
                 if (mwin) |m| {
-                    _ = m.sendMessage(df.BUILD_SELECTIONS, .{.legacy=.{@intCast(@intFromPtr(mnu)), 0}});
+                    _ = m.sendMessage(df.BUILD_SELECTIONS, .{.menu=mnu});
                     _ = m.sendMessage(df.SETFOCUS, .{.yes=true});
                     _ = m.sendMessage(df.SHOW_WINDOW, q.none);
                 }
@@ -433,7 +432,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return SetFocusMsg(win, params.yes);
         },
         df.BUILDMENU => {
-            const p1 = params.legacy[0];
+            const p1 = params.menubar;
             BuildMenuMsg(win, p1);
         },
         df.PAINT => {
