@@ -722,7 +722,7 @@ pub fn PutItemText(win:*Window, cmd:c, text:[*c]u8) callconv(.c) void {
 }
 
 // ------- get the text of a control window ------
-pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
+pub fn GetItemText(win: *Window, cmd:c, text:[]u8, len:usize) void {
     if (win.extension) |extension| {
         const db:*Dialogs.DBOX = extension.dbox;
         var control = FindCommand(db, cmd, k.EDITBOX);
@@ -743,7 +743,7 @@ pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
                                 @memcpy(text[0..pos], t[0..pos]);
                             } else {
                                 // no text;
-                                text.* = 0;
+                                text[0] = 0;
                             }
 //                            cp = strchr(cwnd_text, '\n');
 //                            if (cp != null)
@@ -755,7 +755,7 @@ pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
                     .TEXTBOX => {
                         if (cwin.gapbuf) |buf| {
                             const t = buf.toString();
-                            var l:usize = @intCast(len);
+                            var l:usize = len;
                             if (std.mem.indexOfScalar(u8, t, 0)) |pos| {
                                 if (pos < len)
                                     l = pos; // be sure length is the small one.
@@ -767,7 +767,7 @@ pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
                     },
                     .COMBOBOX,
                     .EDITBOX => {
-                        _ = cwin.sendMessage(df.GETTEXT,.{.legacy=.{@intCast(@intFromPtr(text)),len}});
+                        _ = cwin.sendMessage(df.GETTEXT,.{.get_text=.{text, len}});
                     },
                     else => {
                     }

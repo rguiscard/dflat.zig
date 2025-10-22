@@ -108,11 +108,11 @@ fn ClearTextMsg(win:*Window) bool {
 }
 
 // ----------- GETTEXT Message ---------- 
-fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
+fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) bool {
     const wnd = win.win;
-    const pp:usize = @intCast(p1);
-    const dst:[*c]u8 = @ptrFromInt(pp);
-    var len:usize = @intCast(p2);
+//    const pp:usize = @intCast(p1);
+    const dst:[]u8 = p1;
+    var len:usize = p2;
     if (wnd.*.text) |text| {
         if (std.mem.indexOfScalar(u8, text[0..wnd.*.textlen], '\n')) |pos| {
             // pos is usize, overflow if minus 1.
@@ -120,7 +120,7 @@ fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) bool {
         } else {
             len = @min(len, wnd.*.textlen-1); // null at the end
         }
-        @memmove(dst, text[0..len]);
+        @memmove(dst[0..len], text[0..len]);
         dst[len] = 0;
 //        while (p2-- && *cp2 && *cp2 != '\n')
 //            *cp1++ = *cp2++;
@@ -984,8 +984,8 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return ClearTextMsg(win);
         },
         df.GETTEXT => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:[]u8 = params.get_text[0];
+            const p2:usize = params.get_text[1];
             return GetTextMsg(win, p1, p2);
         },
         df.SETTEXTLENGTH => {

@@ -91,7 +91,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 .ID_OK => {
                     if (subcmd == 0) {
                         var fName = std.mem.zeroes([df.MAXPATH]u8);
-                        DialogBox.GetItemText(win, c.ID_FILENAME, &fName, df.MAXPATH);
+                        DialogBox.GetItemText(win, c.ID_FILENAME, fName[0..df.MAXPATH], @intCast(df.MAXPATH));
                         set_fileName(&fName);
                         if (df.CheckAndChangeDir(&fName) > 0) {
                             std.mem.copyForwards(u8, &fName, "*");
