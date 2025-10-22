@@ -353,7 +353,7 @@ pub fn ControlProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
                 // assume pwin (parent) exists. seems work.
                 if (pwin) |pw| {
                     const db = if (pw.extension) |extension| extension.dbox else null;
-                    _ = pw.sendMessage(df.COMMAND, .{.legacy=.{@intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS}});
+                    _ = pw.sendMessage(df.COMMAND, .{.command=.{inFocusCommand(db), df.LEAVEFOCUS}});
                 }
 //                _ = q.SendMessage(pwnd, df.COMMAND, @intFromEnum(inFocusCommand(db)), df.LEAVEFOCUS);
             }
@@ -521,8 +521,8 @@ fn KeyboardMsg(win:*Window, p1:u16, p2:u8) bool {
 }
 
 // -------- COMMAND Message ---------
-fn CommandMsg(win: *Window, p1:df.PARAM, p2:df.PARAM) bool {
-    const cmd:c = @enumFromInt(p1);
+fn CommandMsg(win: *Window, p1:c, p2:usize) bool {
+    const cmd:c = p1;
     switch (cmd) {
         .ID_OK, .ID_CANCEL => {
             if (p2 != 0)
@@ -591,8 +591,8 @@ pub fn DialogProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:c = params.command[0];
+            const p2:usize = params.command[1];
             if (CommandMsg(win, p1, p2))
                 return true;
         },

@@ -165,7 +165,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
                                     pd.Attrib.CHECKED = !pd.Attrib.CHECKED;
                                 }
                                 _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.yes=true});
-                                q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{@intFromEnum(pd.ActionId), 0}});
+                                q.PostMessage(win.parent, df.COMMAND, .{.command=.{pd.ActionId, 0}});
                             }
                         }
                     }
@@ -356,21 +356,21 @@ fn SelectionMsg(win:*Window, p1:?usize, p2:bool) void {
 }
 
 // --------- COMMAND Message ----------
-fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const cmd:c = @enumFromInt(p1);
+fn CommandMsg(win:*Window, p1:c, p2:usize) void {
+    const cmd:c = p1;
     if (cmd == .ID_HELP) {
-        _ = root.BaseWndProc(k.MENUBAR, win, df.COMMAND, .{.legacy=.{p1, p2}});
+        _ = root.BaseWndProc(k.MENUBAR, win, df.COMMAND, .{.command=.{p1, p2}});
         return;
     }
     if (ActiveMenuBar) |mbar| {
-        if (menu.isCascadedCommand(mbar, @enumFromInt(p1))>0) {
+        if (menu.isCascadedCommand(mbar, cmd)>0) {
             // FIXME: Cascade menu will show, but command will not be sent.
             // Could possibly to title is not (void*)-1, but null.
             //
             // find the cascaded menu based on command id in p1
             for(mbar.*.PullDown[mctr..], mctr..) |mnu, del| {
                 if ((mnu.CascadeId != -1) and // instead of using -1 for title, check CascadeId.
-                    (mnu.CascadeId == p1)) {
+                    (mnu.CascadeId == @intFromEnum(p1))) {
                         if (casc < menus.MAXCASCADES) {
                             Cascaders[casc] = mwin;
                             casc += 1;
@@ -384,7 +384,7 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
                 _ = m.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
             }
             _ = GetDocFocus().sendMessage(df.SETFOCUS, .{.yes=true});
-            q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{p1, p2}});
+            q.PostMessage(win.parent, df.COMMAND, .{.command=.{p1, p2}});
         }
     }
 }
@@ -464,8 +464,8 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             SelectionMsg(win, p1, p2);
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:c = params.command[0];
+            const p2:usize = params.command[1];
             CommandMsg(win, p1, p2);
             return true;
         },

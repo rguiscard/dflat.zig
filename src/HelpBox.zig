@@ -137,8 +137,8 @@ pub fn ReadHelp(win:*Window) void {
 }
 
 // ------------- COMMAND message ------------
-fn CommandMsg(win: *Window, p1:df.PARAM) bool {
-    const cmd:c = @enumFromInt(p1);
+fn CommandMsg(win: *Window, p1:c) bool {
+    const cmd:c = p1;
     switch (cmd) {
         c.ID_PREV => {
             if (ThisHelp) |help| {
@@ -246,8 +246,8 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             ReadHelp(win);
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:c = params.command[0];
+            const p2:usize = params.command[1];
             if (p2 == 0) {
                 if (CommandMsg(win, p1))
                     return true;

@@ -884,8 +884,8 @@ fn ParagraphCmd(win:*Window) void {
 }
 
 // ----------- COMMAND Message ----------
-fn CommandMsg(win:*Window,p1:df.PARAM) bool {
-    const cmd:c = @enumFromInt(p1);
+fn CommandMsg(win:*Window,p1:c) bool {
+    const cmd:c = p1;
     switch (cmd) {
         .ID_SEARCH => {
             search.SearchText(win);
@@ -1061,7 +1061,7 @@ pub fn EditBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             ShiftChangedMsg(win, p1);
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
+            const p1:c = params.command[0];
             if (CommandMsg(win, p1))
                 return true;
         },

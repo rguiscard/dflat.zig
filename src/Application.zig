@@ -161,8 +161,8 @@ fn ShiftChangedMsg(win:*Window, p1:u16) void {
 }
 
 // -------- COMMAND Message -------
-fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
-    const cmd:c = @enumFromInt(p1);
+fn CommandMsg(win:*Window, p1:c, p2:usize) void {
+    const cmd:c = p1;
     switch (cmd) {
         .ID_EXIT, .ID_SYSCLOSE => {
             q.PostMessage(win, df.CLOSE_WINDOW, .{.yes=false});
@@ -233,11 +233,11 @@ fn CommandMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
         .ID_SYSMAXIMIZE,
         .ID_SYSMOVE,
         .ID_SYSSIZE => {
-            _ = root.BaseWndProc(k.APPLICATION, win, df.COMMAND, .{.legacy=.{p1, p2}});
+            _ = root.BaseWndProc(k.APPLICATION, win, df.COMMAND, .{.command = .{p1, p2}});
         },
         else => {
             if ((Window.inFocus != win.MenuBar) and (Window.inFocus != win)) {
-                q.PostMessage(Window.inFocus, df.COMMAND, .{.legacy=.{p1, p2}});
+                q.PostMessage(Window.inFocus, df.COMMAND, .{.command = .{p1, p2}});
             }
         }
     }
@@ -306,8 +306,8 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:c = params.command[0];
+            const p2:usize = params.command[1];
             CommandMsg(win, p1, p2);
             return true;
         },
@@ -430,8 +430,6 @@ pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
 
 fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
     const wnd = win.win;
-    const p1 = params.legacy[0];
-    const p2 = params.legacy[1];
     switch (msg) {
         df.INITIATE_DIALOG => {
             if (DialogBox.ControlWindow(&Dialogs.Windows,.ID_WINDOWLIST)) |cwin| {
@@ -466,7 +464,8 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
             }
         },
         df.COMMAND => {
-            const cmd:c = @enumFromInt(p1);
+            const cmd:c = params.command[0];
+            const p2:usize = params.command[1];
             switch (cmd) {
                 .ID_OK => {
                     if (p2 == 0) {

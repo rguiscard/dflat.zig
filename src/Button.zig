@@ -65,7 +65,7 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     }
     _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     if (ct.*.setting == df.ON) {
-        q.PostMessage(win.parent, df.COMMAND, .{.legacy=.{@intFromEnum(ct.*.command), 0}});
+        q.PostMessage(win.parent, df.COMMAND, .{.command=.{ct.*.command, 0}});
     } else {
         df.beep();
     }

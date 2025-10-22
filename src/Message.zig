@@ -10,6 +10,7 @@ const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const app = @import("Application.zig");
 const pict = @import("PictureBox.zig");
+const cmd = @import("Commands.zig").Command;
 
 const MAXMESSAGES = 100;
 
@@ -36,6 +37,7 @@ pub const Character = struct {u16, u8};            // char & shift (Keyboard)
 pub const CaptureDevice = struct {bool, ?*Window};
 pub const Cursor = struct {*usize, *usize};        // return current cursor position. 
                                                    // use isize (-1) for no information ?
+pub const Command = struct {cmd, usize};           // command
 
 pub const ParamsType = enum {
     legacy,
@@ -47,6 +49,7 @@ pub const ParamsType = enum {
     capture,
     cursor,
     select,
+    command,
 
     yes,
     area,
@@ -65,6 +68,7 @@ pub const Params = union(ParamsType) {
     capture:CaptureDevice,
     cursor:Cursor,          // *x, *y
     select:Selection,
+    command:Command,
 
     yes:bool,               // true/false
     area:?df.RECT,          // area

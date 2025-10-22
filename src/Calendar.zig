@@ -165,8 +165,7 @@ pub fn CalendarProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
-            const cmd:c = @enumFromInt(p1);
+            const cmd:c = params.command[0];
             if (cmd == c.ID_HELP) {
                 _ = helpbox.DisplayHelp(win, "Calendar");
                 return true;

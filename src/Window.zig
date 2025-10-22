@@ -279,7 +279,7 @@ pub fn sendTextMessage(self: *TopLevelFields, msg:df.MESSAGE, p1: []const u8) bo
 }
 
 pub fn sendCommandMessage(self: *TopLevelFields, p1: c, p2: df.PARAM) bool {
-    return self.sendMessage(df.COMMAND, .{.legacy=.{@intFromEnum(p1), p2}});
+    return self.sendMessage(df.COMMAND, .{.command=.{p1, @intCast(p2)}});
 }
 
 // --------- send a message to a window -----------

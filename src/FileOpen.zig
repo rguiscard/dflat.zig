@@ -85,10 +85,8 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             InitDlgBox(win);
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            const cmd:c = @enumFromInt(p1);
-            const subcmd:isize = @intCast(p2);
+            const cmd:c = params.command[0];
+            const subcmd:usize = params.command[1];
             switch(cmd) {
                 .ID_OK => {
                     if (subcmd == 0) {

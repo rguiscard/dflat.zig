@@ -54,8 +54,7 @@ pub fn LogProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
-            const cmd:c = @enumFromInt(p1);
+            const cmd:c = params.command[0];
             if (cmd == .ID_OK) {
                 if (control) |cwin| {
                     const tl = cwin.wlines;

@@ -173,9 +173,9 @@ fn KeyboardMsg(win:*Window, p1:u16, p2:u8) bool {
 }
 
 // --------- COMMAND Message ----------
-fn CommandMsg(win:*Window, p1:df.PARAM) void {
+fn CommandMsg(win:*Window, p1:c) void {
     const dwin = getDummy();
-    const cmd:c = @enumFromInt(p1);
+    const cmd:c = p1;
     switch (cmd) {
         .ID_SYSMOVE => {
             _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{true, dwin}});
@@ -677,7 +677,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
+            const p1:c = params.command[0];
             CommandMsg(win, p1);
         },
         df.SETFOCUS => {
