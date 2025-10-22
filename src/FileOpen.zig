@@ -117,14 +117,14 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                         df.ENTERFOCUS, df.LB_SELECTION => {
                             // selected a different filename
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(win, &fName, c.ID_FILES);
+                            DialogBox.GetDlgListText(win, fName[0..df.MAXPATH], c.ID_FILES);
                             DialogBox.PutItemText(win, c.ID_FILENAME, &fName);
                             set_fileName(&fName);
                         },
                         df.LB_CHOOSE => {
                             // chose a file name
                             var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(win, &fName, c.ID_FILES);
+                            DialogBox.GetDlgListText(win, fName[0..df.MAXPATH], c.ID_FILES);
                             _ = win.sendCommandMessage(c.ID_OK, 0);
                             set_fileName(&fName);
                         },
@@ -142,7 +142,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                         },
                         df.LB_CHOOSE => {
                             var dd = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(win, &dd, c.ID_DIRECTORY);
+                            DialogBox.GetDlgListText(win, dd[0..df.MAXPATH], c.ID_DIRECTORY);
                             _ = df.chdir(&dd);
                             InitDlgBox(win);
                             _ = win.sendCommandMessage(c.ID_OK, 0);

@@ -778,7 +778,7 @@ pub fn GetItemText(win: *Window, cmd:c, text:[*c]u8, len:c_int) void {
 }
 
 // ------- set the text of a listbox control window ------
-pub fn GetDlgListText(win: *Window, text:[*c]u8, cmd:c) void {
+pub fn GetDlgListText(win: *Window, text:[]u8, cmd:c) void {
     if (win.extension) |extension| {
         const db:*Dialogs.DBOX = extension.dbox;
         const control = FindCommand(db, cmd, k.LISTBOX);
@@ -787,7 +787,7 @@ pub fn GetDlgListText(win: *Window, text:[*c]u8, cmd:c) void {
                 var sel:?usize = null;
                 _ = cwin.sendMessage(df.LB_CURRENTSELECTION, .{.usize_addr=&sel});
                 if (sel) |s| {
-                    _ = cwin.sendMessage(df.LB_GETTEXT, .{.legacy=.{@intCast(@intFromPtr(text)), @intCast(s)}});
+                    _ = cwin.sendMessage(df.LB_GETTEXT, .{.get_text=.{text, s}});
                 }
             }
         }

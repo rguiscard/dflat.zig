@@ -280,25 +280,13 @@ fn AddTextMsg(win:*Window,p1:[]const u8) bool {
 }
 
 // --------- GETTEXT Message ------------
-fn GetTextMsg(win:*Window, p1:df.PARAM, p2:df.PARAM) void {
+fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) void {
     const wnd = win.win;
-    if (p2 != -1) {
-        const pp1:usize = @intCast(p1);
-        const cp1:[*c]u8 = @ptrFromInt(pp1);
-        const pp2:usize = @intCast(p2);
-        var cp2 = win.textLine(pp2);
-//        const cp2:[*c]u8 = df.TextLine(wnd, pp2);
-//        char *cp1 = (char *)p1;
-//        char *cp2 = TextLine(wnd, (int)p2);
-//        df.ListCopyText(cp1, cp2);
-        var idx:usize = 0;
-//        while(cp2 != null and cp2[idx] != 0 and cp2[idx] != '\n') {
-        while(cp2 != wnd.*.textlen and wnd.*.text[cp2] != 0 and wnd.*.text[cp2] != '\n') {
-            cp1[idx] = wnd.*.text[cp2];
-            idx += 1;
-            cp2 += 1;
-        }
-        cp1[idx] = 0;
+    const cp2 = win.textLine(p2);
+    if (std.mem.indexOfAnyPos(u8, wnd.*.text[0..wnd.*.textlen], cp2, &[_]u8{0, '\n'})) |pos| {
+        const len = pos-cp2;
+        @memmove(p1[0..len], wnd.*.text[cp2..pos]);
+        p1[len] = 0;
     }
 }
 
@@ -341,8 +329,8 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return AddTextMsg(win, params.slice);
         },
         df.LB_GETTEXT => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:[]u8 = params.get_text[0];
+            const p2:usize = params.get_text[1];
             GetTextMsg(win, p1, p2);
             return true;
         },

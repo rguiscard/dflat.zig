@@ -377,8 +377,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
             return rtn;
         },
         df.COMMAND => {
-            const p1 = params.legacy[0];
-            const cmd:mp.Command = @enumFromInt(p1);
+            const cmd:mp.Command = params.command[0];
             switch(cmd) {
                 .ID_HELP => {
 //                    const helpfile:[:0]const u8 = "MEMOPADDOC";

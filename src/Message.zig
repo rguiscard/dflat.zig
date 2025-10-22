@@ -38,6 +38,7 @@ pub const CaptureDevice = struct {bool, ?*Window};
 pub const Cursor = struct {*usize, *usize};        // return current cursor position. 
                                                    // use isize (-1) for no information ?
 pub const Command = struct {cmd, usize};           // command
+pub const GetText = struct {[]u8, usize};
 
 pub const ParamsType = enum {
     legacy,
@@ -50,12 +51,12 @@ pub const ParamsType = enum {
     cursor,
     select,
     command,
+    get_text,
 
     yes,
     area,
     slice,
     usize_addr,
-    slice_addr,
 };
 
 pub const Params = union(ParamsType) {
@@ -69,12 +70,12 @@ pub const Params = union(ParamsType) {
     cursor:Cursor,          // *x, *y
     select:Selection,
     command:Command,
+    get_text:GetText,
 
     yes:bool,               // true/false
     area:?df.RECT,          // area
     slice: []const u8,      // slice, zero length as null
     usize_addr: *?usize,     // get selection from ListBox
-    slice_addr: *[]const u8, // get selection from ListBox
 };
 
 pub const none:Params = .{.void=.{}};
