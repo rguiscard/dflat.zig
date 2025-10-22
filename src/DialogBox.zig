@@ -785,7 +785,7 @@ pub fn GetDlgListText(win: *Window, text:[*c]u8, cmd:c) void {
         if (control) |ct| {
             if (ct.win) |cwin| {
                 var sel:?usize = null;
-                _ = cwin.sendMessage(df.LB_CURRENTSELECTION, .{.legacy=.{@intCast(@intFromPtr(&sel)), 0}});
+                _ = cwin.sendMessage(df.LB_CURRENTSELECTION, .{.usize_addr=&sel});
                 if (sel) |s| {
                     _ = cwin.sendMessage(df.LB_GETTEXT, .{.legacy=.{@intCast(@intFromPtr(text)), @intCast(s)}});
                 }

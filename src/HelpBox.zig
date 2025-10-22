@@ -548,7 +548,8 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
                 stacked += 1;
             }
             ThisHelp = newhelp;
-            _ = win.getParent().sendMessage(df.DISPLAY_HELP, .{.legacy=.{@intCast(@intFromPtr(help.*.hname)), 0}});
+            const hname = std.mem.span(help.*.hname);
+            _ = win.getParent().sendMessage(df.DISPLAY_HELP, .{.slice=hname});
         }
 
         if (stacked>0) {

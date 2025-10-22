@@ -290,6 +290,7 @@ INSIDE_WINDOW          test x/y inside a window
   Sent:    to test to see if coordinates are inside a window
   P1:      x
   P2:      y
+  Params:  Position
   Returns: true or false
 
 

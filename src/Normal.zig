@@ -92,7 +92,7 @@ fn HideWindowMsg(win:*Window) void {
 }
 
 // ----- test if screen coordinates are in a window ----
-fn InsideWindow(win:*Window, x:c_int, y:c_int) bool {
+fn InsideWindow(win:*Window, x:usize, y:usize) bool {
     var rc = win.WindowRect();
     if (win.TestAttribute(df.NOCLIP))    {
         var pwnd = win.parent;
@@ -101,7 +101,7 @@ fn InsideWindow(win:*Window, x:c_int, y:c_int) bool {
             pwnd = pw.parent;
         }
     }
-    if (rect.InsideRect(x, y, rc)) {
+    if (rect.InsideRect(@intCast(x), @intCast(y), rc)) {
         return true;
     }
     return false;
@@ -637,9 +637,9 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             HideWindowMsg(win);
         },
         df.INSIDE_WINDOW => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
-            return InsideWindow(win, @intCast(p1), @intCast(p2));
+            const p1:usize = params.position[0];
+            const p2:usize = params.position[1];
+            return InsideWindow(win, p1, p2);
         },
         df.KEYBOARD => {
             const p1:u16 = params.char[0];
@@ -743,10 +743,8 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.DISPLAY_HELP => {
-            const p1 = params.legacy[0];
-            const p1_addr:usize = @intCast(p1);
-            const pp1:[*c]u8 = @ptrFromInt(p1_addr);
-            return helpbox.DisplayHelp(win, std.mem.span(pp1));
+            const p1:[]const u8 = params.slice;
+            return helpbox.DisplayHelp(win, p1);
         },
         else => {
         }

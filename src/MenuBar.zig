@@ -470,8 +470,8 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.INSIDE_WINDOW => {
-            const p1 = params.legacy[0];
-            const p2 = params.legacy[1];
+            const p1:usize = params.position[0];
+            const p2:usize = params.position[1];
             return rect.InsideRect(@intCast(p1), @intCast(p2), win.WindowRect());
         },
         df.CLOSE_POPDOWN => {

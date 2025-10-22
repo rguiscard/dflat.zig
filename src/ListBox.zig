@@ -113,7 +113,7 @@ fn EndPgDnKey(win:*Window, p1:u16, p2:u8) void {
 fn SpacebarKey(win:*Window, p2:u8) void {
     if (win.isMultiLine()) {
         var sel:?usize = null;
-        _ = win.sendMessage(df.LB_CURRENTSELECTION, .{.legacy=.{@intCast(@intFromPtr(&sel)), 0}});
+        _ = win.sendMessage(df.LB_CURRENTSELECTION, .{.usize_addr=&sel});
         if (sel) |selection| {
             if (win.AddMode) {
                 FlipSelection(win, selection);
@@ -395,14 +395,9 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.LB_CURRENTSELECTION => {
-            const p1 = params.legacy[0];
-            if (p1 > 0) {
-                const pp:usize = @intCast(p1);
-                const a:*?usize= @ptrFromInt(pp);
-                a.* = win.selection;
-                return if (win.selection == null) false else true;
-            }
-            return false;
+            const a:*?usize= params.usize_addr;
+            a.* = win.selection;
+            return if (win.selection == null) false else true;
         },
         df.LB_SETSELECTION => {
             const p1:?usize = params.select[0];

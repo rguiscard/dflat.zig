@@ -472,8 +472,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
                         const val:?usize = null;
                         const control = DialogBox.ControlWindow(&Dialogs.Windows, .ID_WINDOWLIST);
                         if (control) |cwin| {
-                            _ = cwin.sendMessage(df.LB_CURRENTSELECTION, 
-                                                .{.legacy=.{@intCast(@intFromPtr(&val)), 0}});
+                            _ = cwin.sendMessage(df.LB_CURRENTSELECTION, .{.usize_addr=@constCast(&val)});
                             WindowSel = val orelse 0;
                         }
 
