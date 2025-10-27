@@ -16,6 +16,7 @@ const menus = @import("Menus.zig");
 const GapBuf = @import("GapBuffer.zig");
 const cfg = @import("Config.zig");
 const picture = @import("PictureBox.zig");
+const video = @import("Video.zig");
 
 pub const Condition = enum {
     ISRESTORED,
@@ -444,7 +445,8 @@ fn shadow_char(wnd:df.WINDOW, y:c_int) void {
         const bg = df.background;
         const xx:usize = win.WindowWidth();
         const yy:usize = @intCast(y);
-        const chr = df.GetVideoChar(@intCast(win.GetLeft()+xx), @intCast(win.GetTop()+yy)) & 255;
+//        const chr = df.GetVideoChar(@intCast(win.GetLeft()+xx), @intCast(win.GetTop()+yy)) & 255;
+        const chr = video.GetVideoChar(@intCast(win.GetLeft()+xx), @intCast(win.GetTop()+yy)) & 255;
 
         if (win.TestAttribute(df.SHADOW) == false or
             win.condition == .ISMINIMIZED or
@@ -482,7 +484,8 @@ fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
             const y = win.GetBottom()+1;
             const left:usize = @intCast(win.GetLeft());
             for (0..len+1) |idx| {
-                buf[idx] = @intCast(df.GetVideoChar(@intCast(left+idx), @intCast(y)) & 255);
+//                buf[idx] = @intCast(df.GetVideoChar(@intCast(left+idx), @intCast(y)) & 255);
+                buf[idx] = @intCast(video.GetVideoChar(@intCast(left+idx), @intCast(y)) & 255);
             }
             buf[len+1] = 0;
 

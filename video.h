@@ -43,6 +43,6 @@ void scroll_window(WINDOW, RECT, int);
 
 #define clr(fg,bg) ((fg)|((bg)<<4))
 #define vad(x,y) ((y)*(SCREENWIDTH*2)+(x)*2)
-#define videochar(x,y) (GetVideoChar(x,y) & 255)
+// #define videochar(x,y) (GetVideoChar(x,y) & 255)
 
 #endif

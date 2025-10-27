@@ -1052,9 +1052,9 @@ fn SaveBorder(rc:df.RECT) void {
         var pos:usize = Bwd*2;
         for (1..Bht-1) |idx| {
             const i:c_int = @intCast(idx);
-            buf[pos] = @intCast(df.GetVideoChar(rc.lf, rc.tp+i));
+            buf[pos] = video.GetVideoChar(rc.lf, rc.tp+i);
             pos += 1;
-            buf[pos] = @intCast(df.GetVideoChar(rc.rt, rc.tp+i));
+            buf[pos] = video.GetVideoChar(rc.rt, rc.tp+i);
             pos += 1;
         }
     }
@@ -1072,9 +1072,9 @@ fn RestoreBorder(rc:df.RECT) void {
         var pos:usize = @intCast(Bwd*2);
         for (1..Bht-1) |idx| {
             const i:c_int = @intCast(idx);
-            df.PutVideoChar(rc.lf, rc.tp+i, buf[pos]);
+            video.PutVideoChar(rc.lf, rc.tp+i, buf[pos]);
             pos += 1;
-            df.PutVideoChar(rc.rt, rc.tp+i, buf[pos]);
+            video.PutVideoChar(rc.rt, rc.tp+i, buf[pos]);
             pos += 1;
 
         }

@@ -9,7 +9,7 @@ BOOL ClipString;
 
 char *video_address;
 
-static void movefromscreen(void far *bf, int offset, int len);
+//static void movefromscreen(void far *bf, int offset, int len);
 static void movetoscreen(void far *bf, int offset, int len);
 
 /* -- read a rectangle of video memory into a save buffer -- */
@@ -43,24 +43,24 @@ static void movetoscreen(void far *bf, int offset, int len);
 //}
 
 /* -------- read a character of video memory ------- */
-unsigned int GetVideoChar(int x, int y)
-{
-    int c;
-    hide_mousecursor();
-    c = peek(video_address, vad(x,y));
-    show_mousecursor();
-    return c;
-}
+//unsigned int GetVideoChar(int x, int y)
+//{
+//    int c;
+//    hide_mousecursor();
+//    c = peek(video_address, vad(x,y));
+//    show_mousecursor();
+//    return c;
+//}
 
 /* -------- write a character of video memory ------- */
-void PutVideoChar(int x, int y, int c)
-{
-    if (x < SCREENWIDTH && y < SCREENHEIGHT)    {
-        hide_mousecursor();
-        poke(video_address, vad(x,y), c);
-        show_mousecursor();
-    }
-}
+//void PutVideoChar(int x, int y, int c)
+//{
+//    if (x < SCREENWIDTH && y < SCREENHEIGHT)    {
+//        hide_mousecursor();
+//        poke(video_address, vad(x,y), c);
+//        show_mousecursor();
+//    }
+//}
 
 #if 0 // ported
 BOOL CharInView(WINDOW wnd, int x, int y)

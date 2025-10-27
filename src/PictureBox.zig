@@ -4,6 +4,7 @@ const k = @import("Classes.zig").CLASS;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
+const video = @import("Video.zig");
 
 // ---- types of vectors that can be in a picture box -------
 pub const VectTypes = enum { VECTOR, SOLIDBAR, HEAVYBAR, CROSSBAR, LIGHTBAR };
@@ -137,7 +138,7 @@ fn PaintVector(win:*Window, rc:df.RECT) void {
         const top:c_int = @intCast(win.GetClientTop());
         const ch_x:c_int = left+rc.lf+xi;
         const ch_y:c_int = top+rc.tp+yi;
-        const ch:c_uint = df.videochar(ch_x, ch_y);
+        const ch:c_uint = video.GetVideoChar(ch_x, ch_y) & 255;
     
         for (0..CharInWnd.len) |cw| {
             if (ch == CharInWnd[cw]) {
