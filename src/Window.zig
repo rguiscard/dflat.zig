@@ -66,7 +66,7 @@ childfocus:?*TopLevelFields  = null,  // child that ha(s/d) focus
 
 attrib:c_int = 0,                     // Window attributes
 restored_attrib:c_int = 0,            // attributes when restored
-videosave:?[]u8 = null,               // video save buffer
+videosave:?[]u16 = null,              // video save buffer
 condition: Condition = .ISRESTORED,   // Restored, Maximized, Minimized, Closing
 oldcondition: Condition = .ISRESTORED,// previous condition
 wasCleared:bool = false,

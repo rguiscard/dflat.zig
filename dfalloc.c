@@ -21,21 +21,21 @@ static void AllocationError(void)
 	RECT rc = {30,11,47,13};
 
 	if (!OnceIn)	{
-		OnceIn = TRUE;
-		/* ------ close all windows ------ */
-		// FIXME: uncomment after porting.
-		// SendMessage(ApplicationWindow, CLOSE_WINDOW, 0, 0);
-        getvideo(rc, savbuf);
-		for (x = 0; x < 18; x++)	{
-			for (y = 0; y < 3; y++)		{
-				int c = (255 & (*(*(ErrMsg+y)+x))) | 0x7000;
-				PutVideoChar(x+rc.lf, y+rc.tp, c);
-			}
-		}
-		getkey();
-        storevideo(rc, savbuf);
-		if (AllocTesting)
-			longjmp(AllocError, 1);
+	    OnceIn = TRUE;
+            // FIXME: uncomment after porting.
+            // SendMessage(ApplicationWindow, CLOSE_WINDOW, 0, 0);
+	    /* ------ close all windows ------ */
+            // getvideo(rc, savbuf);
+            // for (x = 0; x < 18; x++)	{
+            //     for (y = 0; y < 3; y++)		{
+            //         int c = (255 & (*(*(ErrMsg+y)+x))) | 0x7000;
+            //         PutVideoChar(x+rc.lf, y+rc.tp, c);
+            //     }
+            // }
+            // getkey();
+            // storevideo(rc, savbuf);
+            if (AllocTesting)
+	        longjmp(AllocError, 1);
 	}
 }
 

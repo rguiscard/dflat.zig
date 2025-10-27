@@ -7,45 +7,40 @@ int SCREENWIDTH = 80;
 int SCREENHEIGHT = 24;
 BOOL ClipString;
 
-#if VIDEO_FB
 char *video_address;
-#endif
-#if VIDEO_EGA
-static unsigned video_address = 0xb800;
-#endif
 
 static void movefromscreen(void far *bf, int offset, int len);
 static void movetoscreen(void far *bf, int offset, int len);
 
 /* -- read a rectangle of video memory into a save buffer -- */
-void getvideo(RECT rc, void far *bf)
-{
-    int ht = RectBottom(rc)-RectTop(rc)+1;
-    int bytes_row = (RectRight(rc)-RectLeft(rc)+1) * 2;
-    unsigned vadr = vad(RectLeft(rc), RectTop(rc));
-    hide_mousecursor();
-    while (ht--)    {
-		movefromscreen(bf, vadr, bytes_row);
-        vadr += SCREENWIDTH*2;
-        bf = (char far *)bf + bytes_row;
-    }
-    show_mousecursor();
-}
+//void getvideo(RECT rc, void far *bf)
+//{
+//    int ht = RectBottom(rc)-RectTop(rc)+1;
+//    int bytes_row = (RectRight(rc)-RectLeft(rc)+1) * 2;
+//    unsigned vadr = vad(RectLeft(rc), RectTop(rc));
+//    hide_mousecursor();
+//    while (ht--)    {
+//        movefromscreen(bf, vadr, bytes_row);
+//        vadr += SCREENWIDTH*2;
+//        bf = (char far *)bf + bytes_row;
+//    }
+//    show_mousecursor();
+//}
 
 /* -- write a rectangle of video memory from a save buffer -- */
-void storevideo(RECT rc, void far *bf)
-{
-    int ht = RectBottom(rc)-RectTop(rc)+1;
-    int bytes_row = (RectRight(rc)-RectLeft(rc)+1) * 2;
-    unsigned vadr = vad(RectLeft(rc), RectTop(rc));
-    hide_mousecursor();
-    while (ht--)    {
-		movetoscreen(bf, vadr, bytes_row);
-        vadr += SCREENWIDTH*2;
-        bf = (char far *)bf + bytes_row;
-    }
-    show_mousecursor();
-}
+//void storevideo(RECT rc, void far *bf)
+//{
+//    int ht = RectBottom(rc)-RectTop(rc)+1;
+//    int bytes_row = (RectRight(rc)-RectLeft(rc)+1) * 2;
+//    unsigned vadr = vad(RectLeft(rc), RectTop(rc));
+//    hide_mousecursor();
+//    while (ht--)    {
+//        movetoscreen(bf, vadr, bytes_row);
+//        vadr += SCREENWIDTH*2;
+//        bf = (char far *)bf + bytes_row;
+//    }
+//    show_mousecursor();
+//}
 
 /* -------- read a character of video memory ------- */
 unsigned int GetVideoChar(int x, int y)
@@ -256,15 +251,15 @@ static void movetoscreen(void far *bf, int offset, int len)
 #if VIDEO_FB
     memcpy(video_address + offset, bf, len);
 #else
-	movedata(FP_SEG(bf), FP_OFF(bf), video_address, offset, len);
+    movedata(FP_SEG(bf), FP_OFF(bf), video_address, offset, len);
 #endif
 }
 
-static void movefromscreen(void far *bf, int offset, int len)
-{
-#if VIDEO_FB
-    memcpy(bf, video_address + offset, len);
-#else
-	movedata(video_address, offset,	FP_SEG(bf), FP_OFF(bf),	len);
-#endif
-}
+//static void movefromscreen(void far *bf, int offset, int len)
+//{
+//#if VIDEO_FB
+//    memcpy(bf, video_address + offset, len);
+//#else
+//    movedata(video_address, offset, FP_SEG(bf), FP_OFF(bf), len);
+//#endif
+//}

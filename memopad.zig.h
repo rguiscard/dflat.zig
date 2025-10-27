@@ -46,3 +46,6 @@ void ReadHelp(WINDOW);
 // decomp.c
 void SeekHelpLine(long, int);
 void *GetHelpLine(char *);
+
+// video.c
+extern char *video_address;

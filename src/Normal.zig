@@ -13,6 +13,7 @@ const helpbox = @import("HelpBox.zig");
 const sysmenu = @import("SystemMenu.zig");
 const Classes = @import("Classes.zig");
 const app = @import("Application.zig");
+const video = @import("Video.zig");
 
 const ICONHEIGHT = 3;
 const ICONWIDTH = 10;
@@ -1044,10 +1045,10 @@ fn SaveBorder(rc:df.RECT) void {
     if (Bsave) |buf| {
         var lrc = rc;
         lrc.bt = lrc.tp;
-        df.getvideo(lrc, @ptrCast(buf.ptr));
+        video.getvideo(lrc, buf[0..]);
         lrc.tp = rc.bt;
         lrc.bt = rc.bt;
-        df.getvideo(lrc, @ptrCast(&buf[Bwd]));
+        video.getvideo(lrc, buf[Bwd..]);
         var pos:usize = Bwd*2;
         for (1..Bht-1) |idx| {
             const i:c_int = @intCast(idx);
@@ -1064,10 +1065,10 @@ fn RestoreBorder(rc:df.RECT) void {
     if (Bsave) |buf| {
         var lrc = rc;
         lrc.bt = lrc.tp;
-        df.storevideo(lrc, @constCast(&buf[0]));
+        video.storevideo(lrc, buf[0..]);
         lrc.tp = rc.bt;
         lrc.bt = rc.bt;
-        df.storevideo(lrc, @constCast(&buf[Bwd]));
+        video.storevideo(lrc, buf[Bwd..]);
         var pos:usize = @intCast(Bwd*2);
         for (1..Bht-1) |idx| {
             const i:c_int = @intCast(idx);
@@ -1138,19 +1139,19 @@ fn GetVideoBuffer(win:*Window) void {
     const wd = df.RectRight(rc) - df.RectLeft(rc) + 1;
 //    wnd.*.videosave = @ptrCast(df.DFrealloc(wnd.*.videosave, @intCast(ht * wd * 2)));
     if (win.videosave) |videosave| {
-        if (root.global_allocator.realloc(videosave, @intCast(ht * wd * 2))) |buf| {
+        if (root.global_allocator.realloc(videosave, @intCast(ht * wd))) |buf| {
             win.videosave = buf;
         } else |_| {
         }
     } else {
-        if (root.global_allocator.alloc(u8, @intCast(ht * wd * 2))) |buf| {
+        if (root.global_allocator.alloc(u16, @intCast(ht * wd))) |buf| {
             win.videosave = buf;
         } else |_| {
         }
     }
     if (win.videosave) |videosave| {
         df.get_videomode();
-        df.getvideo(rc, videosave.ptr);
+        video.getvideo(rc, videosave);
     }
 }
 
@@ -1159,7 +1160,7 @@ fn PutVideoBuffer(win:*Window) void {
     if (win.videosave) |videosave| {
         const rc = ClipRect(win);
         df.get_videomode();
-        df.storevideo(rc, videosave.ptr);
+        video.storevideo(rc, videosave);
         root.global_allocator.free(videosave);
         win.videosave = null;
     }
