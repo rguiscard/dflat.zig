@@ -439,28 +439,25 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?df.RECT) void {
 }
 
 // --- display right border shadow character of a window ---
-fn shadow_char(wnd:df.WINDOW, y:c_int) void {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        const fg = df.foreground;
-        const bg = df.background;
-        const xx:usize = win.WindowWidth();
-        const yy:usize = @intCast(y);
-//        const chr = df.GetVideoChar(@intCast(win.GetLeft()+xx), @intCast(win.GetTop()+yy)) & 255;
-        const chr = video.GetVideoChar(@intCast(win.GetLeft()+xx), @intCast(win.GetTop()+yy)) & 255;
+fn shadow_char(self:*TopLevelFields, y:usize) void {
+    const fg = df.foreground;
+    const bg = df.background;
+    const xx:usize = self.WindowWidth();
+    const yy:usize = y;
+    const chr = video.GetVideoChar(@intCast(self.GetLeft()+xx), @intCast(self.GetTop()+yy)) & 255;
 
-        if (win.TestAttribute(df.SHADOW) == false or
-            win.condition == .ISMINIMIZED or
-            win.condition == .ISMAXIMIZED or
-            cfg.config.mono > 0) {
-            // No shadow
-            return;
-        }
-        df.foreground = r.DARKGRAY;
-        df.background = r.BLACK;
-        df.wputch(wnd, @intCast(chr), @intCast(xx), @intCast(yy));
-        df.foreground = fg;
-        df.background = bg;
+    if (self.TestAttribute(df.SHADOW) == false or
+        self.condition == .ISMINIMIZED or
+        self.condition == .ISMAXIMIZED or
+        cfg.config.mono > 0) {
+        // No shadow
+        return;
     }
+    df.foreground = r.DARKGRAY;
+    df.background = r.BLACK;
+    video.wputch(self, chr, xx, yy);
+    df.foreground = fg;
+    df.background = bg;
 }
 
 // --- display the bottom border shadow line for a window --
@@ -644,10 +641,10 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
     // -------- top frame corners ---------
     if (rc.tp == 0) {
         if (rc.lf == 0)
-            df.wputch(wnd, nw, 0, 0);
+            video.wputch(self, nw, 0, 0);
         if (rc.lf < self.WindowWidth()) {
             if (rc.rt >= self.WindowWidth()-1) {
-                df.wputch(wnd, ne, @intCast(self.WindowWidth()-1), 0);
+                video.wputch(self, ne, self.WindowWidth()-1, 0);
             }
             self.TopLine(lin, clrc);
         }
@@ -659,7 +656,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
         if (ydx == 0 or ydx >= self.WindowHeight()-1)
             continue;
         if (rc.lf == 0)
-            df.wputch(wnd, side, 0, @intCast(ydx));
+            video.wputch(self, side, 0, ydx);
         if (rc.lf < self.WindowWidth() and
             rc.rt >= self.WindowWidth()-1) {
             if (self.TestAttribute(df.VSCROLLBAR)) {
@@ -681,20 +678,20 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
             } else {
                 ch = side;
             }
-            df.wputch(wnd, ch, @intCast(self.WindowWidth()-1), @intCast(ydx));
+            video.wputch(self, ch, self.WindowWidth()-1, ydx);
         }
         if (rc.rt == self.WindowWidth())
-            shadow_char(wnd, @intCast(ydx));
+            shadow_char(self, ydx);
     }
 
     if (rc.tp <= self.WindowHeight()-1 and
             rc.bt >= self.WindowHeight()-1) {
         // -------- bottom frame corners ----------
         if (rc.lf == 0)
-            df.wputch(wnd, sw, 0, @intCast(self.WindowHeight()-1));
+            video.wputch(self, sw, 0, self.WindowHeight()-1);
         if (rc.lf < self.WindowWidth() and
                 rc.rt >= self.WindowWidth()-1) {
-            df.wputch(wnd, se, @intCast(self.WindowWidth()-1), @intCast(self.WindowHeight()-1));
+            video.wputch(self, se, self.WindowWidth()-1, self.WindowHeight()-1);
         }
 
         if (self.StatusBar == null) {
@@ -722,7 +719,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
             }
         }
         if (rc.rt == self.WindowWidth())
-            shadow_char(wnd, @intCast(self.WindowHeight()-1));
+            shadow_char(self, self.WindowHeight()-1);
     }
 
     if (rc.bt == self.WindowHeight()) {
@@ -795,12 +792,10 @@ pub fn InitWindowColors(win:*TopLevelFields) void {
     }
 }
 
-pub fn PutWindowChar(self: *TopLevelFields, chr:c_int, x:c_int, y:c_int) void {
-    const wnd = self.win;
-    const xx:usize = @intCast(x);
-    const yy:usize = @intCast(y);
+pub fn PutWindowChar(self: *TopLevelFields, chr:u16, x:c_int, y:c_int) void {
     if (x < self.ClientWidth() and y < self.ClientHeight()) {
-        df.wputch(wnd, chr, @intCast(xx+self.BorderAdj()), @intCast(yy+self.TopBorderAdj()));
+        video.wputch(self, chr, @as(usize, @intCast(x))+self.BorderAdj(), 
+                                @as(usize, @intCast(y))+self.TopBorderAdj());
     }
 }
 

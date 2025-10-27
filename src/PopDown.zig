@@ -8,6 +8,7 @@ const rect = @import("Rect.zig");
 const helpbox = @import("HelpBox.zig");
 const menus = @import("Menus.zig");
 const cfg = @import("Config.zig");
+const video = @import("Video.zig");
 
 var py:c_int = -1;
 pub var CurrentMenuSelection:usize = 0;
@@ -211,10 +212,9 @@ fn BorderMsg(win:*Window) bool {
         for (0..@intCast(win.ClientHeight())) |i| {
             const pos = win.textLine(i);
             const chr = wnd.*.text[pos]; 
-//            if (df.TextLine(wnd, i)[0] == df.LINE) {
             if (chr == df.LINE) {
-                df.wputch(wnd, df.LEDGE, 0, @intCast(i+1));
-                df.wputch(wnd, df.REDGE, @intCast(win.WindowWidth()-1), @intCast(i+1));
+                video.wputch(win, df.LEDGE, 0, i+1);
+                video.wputch(win, df.REDGE, win.WindowWidth()-1, i+1);
             }
         }
     }

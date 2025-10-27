@@ -10,20 +10,19 @@ const Dialogs = @import("Dialogs.zig");
 const popdown = @import("PopDown.zig");
 const textbox = @import("TextBox.zig");
 const cfg = @import("Config.zig");
+const video = @import("Video.zig");
 
 fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?df.RECT) void {
-    const wnd = win.win;
     if (win.isVisible()) {
         if (win.TestAttribute(df.SHADOW) and (cfg.config.mono == 0)) {
             // -------- draw the button's shadow -------
             df.background = r.WndBackground(win.getParent());
             df.foreground = r.BLACK;
             for(1..@intCast(win.WindowWidth()+1)) |x| {
-                df.wputch(wnd, 223, @intCast(x), 1);
+                video.wputch(win, 223, x, 1);
             }
-            df.wputch(wnd, 220, @intCast(win.WindowWidth()), 0);
+            video.wputch(win, 220, win.WindowWidth(), 0);
         }
-//        if (ct.itext) |itext| {
         if (DialogBox.getCtlWindowText(ct)) |itext| {
             if(root.global_allocator.allocSentinel(u8, itext.len+10, 0)) |txt| {
                 defer root.global_allocator.free(txt);
@@ -47,15 +46,14 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?df.RECT) void {
 }
 
 fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
-    const wnd = win.win;
     if (cfg.config.mono == 0) {
         // --------- draw a pushed button --------
         df.background = r.WndBackground(win.getParent());
         df.foreground = r.WndBackground(win);
-        df.wputch(wnd, ' ', 0, 0);
+        video.wputch(win, ' ', 0, 0);
         for (0..@intCast(win.WindowWidth())) |x| {
-            df.wputch(wnd, 220, @intCast(x+1), 0);
-            df.wputch(wnd, 223, @intCast(x+1), 1);
+            video.wputch(win, 220, x+1, 0);
+            video.wputch(win, 223, x+1, 1);
         }
     }
     if (msg == df.LEFT_BUTTON) {

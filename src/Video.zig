@@ -6,9 +6,9 @@ const rect = @import("Rect.zig");
 
 // #define vad(x,y) ((y)*(SCREENWIDTH*2)+(x)*2)
 // video_address is 8 bits (1 bytes, char*)
-fn vad8(x:c_int, y:c_int) usize {
-    return @intCast(y * df.SCREENWIDTH * 2 + x * 2);
-}
+//fn vad8(x:c_int, y:c_int) usize {
+//    return @intCast(y * df.SCREENWIDTH * 2 + x * 2);
+//}
 
 // assume video_address is 16 bites (2 bytes)
 fn vad(x:c_int, y:c_int) usize {
@@ -124,4 +124,22 @@ pub export fn CharInView(wnd:df.WINDOW, x:c_int, y:c_int) callconv(.c) df.BOOL {
         return if ((x1 < df.SCREENWIDTH and y1 < df.SCREENHEIGHT)) df.TRUE else df.FALSE;
     }
     return df.FALSE;
+}
+
+// -------- write a character to a window -------
+pub fn wputch(win:*Window, chr:u16, x:usize, y:usize) void {
+    const wnd = win.win;
+    if (CharInView(wnd, @intCast(x), @intCast(y)) > 0) {
+        // #define clr(fg,bg) ((fg)|((bg)<<4))
+        const ch:u16 = @intCast((chr & 255) | ((df.foreground | (df.background << 4)) << 8));
+        const xc:c_int = @intCast(win.GetLeft()+x);
+        const yc:c_int = @intCast(win.GetTop()+y);
+        df.hide_mousecursor();
+        // #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
+        // poke(video_address, vad(xc, yc), ch);
+        const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
+        const c:[*]u16 = va16_ptr+vad(xc,yc);
+        c[0] = ch;
+        df.show_mousecursor();
+    }
 }

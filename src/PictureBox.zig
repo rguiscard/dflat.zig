@@ -164,8 +164,8 @@ fn PaintVector(win:*Window, rc:df.RECT) void {
 fn PaintBar(win:*Window, rc:df.RECT, vt:VectTypes) void {
     var len:c_int = 0;
     var vertbar:c_int = 0;
-    const tys = [_]c_int{219, 178, 177, 176};
-    const nc:c_int = tys[@intFromEnum(vt)-1];
+    const tys = [_]u16{219, 178, 177, 176};
+    const nc:u16 = tys[@intFromEnum(vt)-1];
 
     if (rc.rt == rc.lf) {
         // ------ vertical bar -------

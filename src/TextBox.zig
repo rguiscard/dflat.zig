@@ -8,6 +8,7 @@ const colors = @import("Colors.zig");
 const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const GapBuffer = @import("GapBuffer.zig");
+const video = @import("Video.zig");
 
 pub var VSliding = false; // also used in ListBox
 var HSliding = false;
@@ -240,7 +241,6 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
 }
 
 fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
-    const wnd = win.win;
     const mx:usize = if (x > win.GetLeft()) x-win.GetLeft() else 0;
     const my:usize = if (y > win.GetTop()) y-win.GetTop() else 0;
     if (VSliding) {
@@ -248,9 +248,9 @@ fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
         if (my-1 != win.VScrollBox) {
             df.foreground = colors.FrameForeground(win);
             df.background = colors.FrameBackground(win);
-            df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1), @intCast(win.VScrollBox+1));
+            video.wputch(win, df.SCROLLBARCHAR, win.WindowWidth()-1, win.VScrollBox+1);
             win.VScrollBox = @intCast(my-1);
-            df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(win.WindowWidth()-1), @intCast(my));
+            video.wputch(win, df.SCROLLBOXCHAR, win.WindowWidth()-1, my);
         }
         return true;
     }
@@ -259,9 +259,9 @@ fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
         if (mx-1 != win.HScrollBox) {
             df.foreground = colors.FrameForeground(win);
             df.background = colors.FrameBackground(win);
-            df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.HScrollBox+1), @intCast(win.WindowHeight()-1));
+            video.wputch(win, df.SCROLLBARCHAR, win.HScrollBox+1, win.WindowHeight()-1);
             win.HScrollBox = @intCast(mx-1);
-            df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(mx), @intCast(win.WindowHeight()-1));
+            video.wputch(win, df.SCROLLBOXCHAR, mx, win.WindowHeight()-1);
         }
         return true;
     }
@@ -1040,13 +1040,10 @@ pub fn BuildTextPointers(win:*Window) void {
 }
 
 fn MoveScrollBox(win:*Window, vscrollbox:usize) void {
-    const wnd = win.win;
     df.foreground = colors.FrameForeground(win);
     df.background = colors.FrameBackground(win);
-    df.wputch(wnd, df.SCROLLBARCHAR, @intCast(win.WindowWidth()-1),
-            @intCast(win.VScrollBox+1));
-    df.wputch(wnd, df.SCROLLBOXCHAR, @intCast(win.WindowWidth()-1),
-            @intCast(vscrollbox+1));
+    video.wputch(win, df.SCROLLBARCHAR, win.WindowWidth()-1, win.VScrollBox+1);
+    video.wputch(win, df.SCROLLBOXCHAR, win.WindowWidth()-1, vscrollbox+1);
     win.VScrollBox = vscrollbox;
 }
 
