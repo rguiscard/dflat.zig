@@ -1052,9 +1052,9 @@ fn SaveBorder(rc:df.RECT) void {
         var pos:usize = Bwd*2;
         for (1..Bht-1) |idx| {
             const i:c_int = @intCast(idx);
-            buf[pos] = video.GetVideoChar(rc.lf, rc.tp+i);
+            buf[pos] = video.GetVideoChar(@intCast(rc.lf), @intCast(rc.tp+i));
             pos += 1;
-            buf[pos] = video.GetVideoChar(rc.rt, rc.tp+i);
+            buf[pos] = video.GetVideoChar(@intCast(rc.rt), @intCast(rc.tp+i));
             pos += 1;
         }
     }
@@ -1072,9 +1072,9 @@ fn RestoreBorder(rc:df.RECT) void {
         var pos:usize = @intCast(Bwd*2);
         for (1..Bht-1) |idx| {
             const i:c_int = @intCast(idx);
-            video.PutVideoChar(rc.lf, rc.tp+i, buf[pos]);
+            video.PutVideoChar(@intCast(rc.lf), @intCast(rc.tp+i), buf[pos]);
             pos += 1;
-            video.PutVideoChar(rc.rt, rc.tp+i, buf[pos]);
+            video.PutVideoChar(@intCast(rc.rt), @intCast(rc.tp+i), buf[pos]);
             pos += 1;
 
         }
@@ -1177,9 +1177,9 @@ pub fn isAncestor(w: *Window, awnd: *Window) bool {
     return false;
 }
 
-pub export fn c_isVisible(wnd:df.WINDOW) df.BOOL {
-    if (Window.get_zin(wnd)) |win| {
-        return if (win.isVisible()) df.TRUE else df.FALSE;
-    }
-    return df.FALSE;
-}
+//pub export fn c_isVisible(wnd:df.WINDOW) df.BOOL {
+//    if (Window.get_zin(wnd)) |win| {
+//        return if (win.isVisible()) df.TRUE else df.FALSE;
+//    }
+//    return df.FALSE;
+//}

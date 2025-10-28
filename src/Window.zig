@@ -777,10 +777,9 @@ pub fn InitWindowColors(win:*TopLevelFields) void {
     }
 }
 
-pub fn PutWindowChar(self: *TopLevelFields, chr:u16, x:c_int, y:c_int) void {
+pub fn PutWindowChar(self: *TopLevelFields, chr:u16, x:usize, y:usize) void {
     if (x < self.ClientWidth() and y < self.ClientHeight()) {
-        video.wputch(self, chr, @as(usize, @intCast(x))+self.BorderAdj(), 
-                                @as(usize, @intCast(y))+self.TopBorderAdj());
+        video.wputch(self, chr, x+self.BorderAdj(), y+self.TopBorderAdj());
     }
 }
 

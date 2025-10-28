@@ -11,8 +11,8 @@
 
 #if VIDEO_FB
 #define far
-#define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
-#define peek(a,o)       (*((unsigned short *)((char *)(a)+(o))))
+//#define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
+//#define peek(a,o)       (*((unsigned short *)((char *)(a)+(o))))
 void convert_screen_to_ansi(void);
 #endif
 
@@ -25,6 +25,6 @@ void wputs(WINDOW, void *, int, int);
 void scroll_window(WINDOW, RECT, int);
 
 #define clr(fg,bg) ((fg)|((bg)<<4))
-#define vad(x,y) ((y)*(SCREENWIDTH*2)+(x)*2)
+//#define vad(x,y) ((y)*(SCREENWIDTH*2)+(x)*2)
 
 #endif

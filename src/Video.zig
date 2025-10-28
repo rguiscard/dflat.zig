@@ -8,13 +8,13 @@ const sTab:u16 = 0x0C + 0x80;
 
 // #define vad(x,y) ((y)*(SCREENWIDTH*2)+(x)*2)
 // video_address is 8 bits (1 bytes, char*)
-fn vad8(x:c_int, y:c_int) usize {
-    return @intCast(y * df.SCREENWIDTH * 2 + x * 2);
-}
+//fn vad8(x:c_int, y:c_int) usize {
+//    return @intCast(y * df.SCREENWIDTH * 2 + x * 2);
+//}
 
 // assume video_address is 16 bites (2 bytes)
-fn vad(x:c_int, y:c_int) usize {
-    return @intCast(y * df.SCREENWIDTH + x);
+fn vad(x:usize, y:usize) usize {
+    return y * @as(usize, @intCast(df.SCREENWIDTH)) + x;
 }
 
 fn movetoscreen(bf:[]u16, offset:usize, len:usize) void {
@@ -33,12 +33,11 @@ fn movefromscreen(bf:[]u16, offset:usize, len:usize) void {
 pub fn getvideo(rc:df.RECT, bf:[]u16) void {
     const ht:usize = @intCast(rc.bt-rc.tp+1);
     const bytes_row:usize = @intCast(rc.rt-rc.lf+1);
-    var vadr = vad(rc.lf, rc.tp);
+    var vadr = vad(@intCast(rc.lf), @intCast(rc.tp));
     df.hide_mousecursor();
     for (0..ht) |idx| {
         movefromscreen(bf[bytes_row*idx..], vadr, bytes_row);
         vadr += @as(usize, @intCast(df.SCREENWIDTH));
-//        bf = bf + bytes_row*idx;
     }
     df.show_mousecursor();
 }
@@ -47,18 +46,17 @@ pub fn getvideo(rc:df.RECT, bf:[]u16) void {
 pub fn storevideo(rc:df.RECT, bf:[]u16) void {
     const ht:usize = @intCast(rc.bt-rc.tp+1);
     const bytes_row:usize = @intCast(rc.rt-rc.lf+1);
-    var vadr = vad(rc.lf, rc.tp);
+    var vadr = vad(@intCast(rc.lf), @intCast(rc.tp));
     df.hide_mousecursor();
     for (0..ht) |idx| {
         movetoscreen(bf[bytes_row*idx..], vadr, bytes_row);
         vadr += @intCast(df.SCREENWIDTH);
-//        bf = bf + bytes_row*idx;
     }
     df.show_mousecursor();
 }
 
 // -------- read a character of video memory -------
-pub fn GetVideoChar(x:c_int, y:c_int) u16 {
+pub fn GetVideoChar(x:usize, y:usize) u16 {
     df.hide_mousecursor();
     // #define peek(a,o)       (*((unsigned short *)((char *)(a)+(o))))
     // const c = peek(video_address, vad(x,y));
@@ -69,7 +67,7 @@ pub fn GetVideoChar(x:c_int, y:c_int) u16 {
 }
 
 // -------- write a character of video memory -------
-pub fn PutVideoChar(x:c_int, y:c_int, chr:u16) void {
+pub fn PutVideoChar(x:usize, y:usize, chr:u16) void {
     if (x < df.SCREENWIDTH and y < df.SCREENHEIGHT) {
         df.hide_mousecursor();
         // #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
@@ -81,61 +79,57 @@ pub fn PutVideoChar(x:c_int, y:c_int, chr:u16) void {
     }
 }
 
-pub export fn CharInView(wnd:df.WINDOW, x:c_int, y:c_int) callconv(.c) df.BOOL {
-    if (Window.get_zin(wnd)) |win| {
-        const left:c_int = @intCast(win.GetLeft());
-        const top:c_int = @intCast(win.GetTop());
-        const x1:c_int = left+x;
-        const y1:c_int = top+y;
+pub fn CharInView(win:*Window, x:usize, y:usize) bool {
+    const left:usize = win.GetLeft();
+    const top:usize = win.GetTop();
+    const x1:usize = left+x;
+    const y1:usize = top+y;
 
-        if (win.TestAttribute(df.VISIBLE) == false)
-            return df.FALSE;
+    if (win.TestAttribute(df.VISIBLE) == false)
+        return false;
 
-        if (win.TestAttribute(df.NOCLIP) == false) {
-            var ww = win.parent;
-            while (ww) |win1| {
-                // --- clip character to parent's borders --
-                if (win1.TestAttribute(df.VISIBLE) == false)
-                    return df.FALSE;
-                if (rect.InsideRect(x1, y1, rect.ClientRect(win1)) == false)
-                    return df.FALSE;
-                ww = win1.parent;
-            }
+    if (win.TestAttribute(df.NOCLIP) == false) {
+        var ww = win.parent;
+        while (ww) |win1| {
+            // --- clip character to parent's borders --
+            if (win1.TestAttribute(df.VISIBLE) == false)
+                return false;
+            if (rect.InsideRect(@intCast(x1), @intCast(y1), rect.ClientRect(win1)) == false)
+                return false;
+            ww = win1.parent;
         }
-
-        var nwin = win.nextWindow();
-        while (nwin) |nw| {
-            if (nw.isHidden() == false) { //  && !isAncestor(wnd, nwnd)
-                var rc = nw.WindowRect();
-                if (nw.TestAttribute(df.SHADOW)) {
-                    rc.bt += 1;
-                    rc.rt += 1;
-                }
-                if (nw.TestAttribute(df.NOCLIP) == false) {
-                    var pp = nw;
-                    while (pp.parent) |pwin| {
-                        pp = pwin;
-                        rc = df.subRectangle(rc, rect.ClientRect(pwin));
-                    }
-                }
-                if (rect.InsideRect(x1,y1,rc))
-                    return df.FALSE;
-            }
-             nwin = nw.nextWindow();
-        }
-        return if ((x1 < df.SCREENWIDTH and y1 < df.SCREENHEIGHT)) df.TRUE else df.FALSE;
     }
-    return df.FALSE;
+
+    var nwin = win.nextWindow();
+    while (nwin) |nw| {
+        if (nw.isHidden() == false) { //  && !isAncestor(wnd, nwnd)
+            var rc = nw.WindowRect();
+            if (nw.TestAttribute(df.SHADOW)) {
+                rc.bt += 1;
+                rc.rt += 1;
+            }
+            if (nw.TestAttribute(df.NOCLIP) == false) {
+                var pp = nw;
+                while (pp.parent) |pwin| {
+                    pp = pwin;
+                    rc = df.subRectangle(rc, rect.ClientRect(pwin));
+                }
+            }
+            if (rect.InsideRect(@intCast(x1),@intCast(y1),rc))
+                return false;
+        }
+         nwin = nw.nextWindow();
+    }
+    return (x1 < df.SCREENWIDTH and y1 < df.SCREENHEIGHT);
 }
 
 // -------- write a character to a window -------
 pub fn wputch(win:*Window, chr:u16, x:usize, y:usize) void {
-    const wnd = win.win;
-    if (CharInView(wnd, @intCast(x), @intCast(y)) > 0) {
+    if (CharInView(win, x, y)) {
         // #define clr(fg,bg) ((fg)|((bg)<<4))
         const ch:u16 = @intCast((chr & 255) | ((df.foreground | (df.background << 4)) << 8));
-        const xc:c_int = @intCast(win.GetLeft()+x);
-        const yc:c_int = @intCast(win.GetTop()+y);
+        const xc:usize = win.GetLeft()+x;
+        const yc:usize = win.GetTop()+y;
         df.hide_mousecursor();
         // #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
         // poke(video_address, vad(xc, yc), ch);
@@ -148,7 +142,6 @@ pub fn wputch(win:*Window, chr:u16, x:usize, y:usize) void {
 
 // ------- write a string to a window ----------
 pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
-    const wnd = win.win;
     const x1 = win.GetLeft()+x;
     const y1 = win.GetTop()+y;
     var xx = x;
@@ -174,16 +167,13 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
             }
             if (s[idx] == ('\t' | 0x80) or s[idx] == (sTab | 0x80)) {
                 ln[ldx] =  @intCast(' ' | ((df.foreground | (df.background << 4)) << 8));
-//                *cp1 = ' ' | (clr(foreground, background) << 8);
             } else {
                 ln[ldx] = @intCast((s[idx] & 255) | ((df.foreground | (df.background << 4)) << 8));
-//                *cp1 = (*str & 255) | (clr(foreground, background) << 8);
                 if (df.ClipString>0) {
-                    if (CharInView(wnd, @intCast(xx), @intCast(y))  == df.FALSE) {
+                    if (CharInView(win, xx, y)  == false) {
                         const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
-                        const c:[*]u16 = va16_ptr+vad(@intCast(x2),@intCast(y1));
+                        const c:[*]u16 = va16_ptr+vad(x2,y1);
                         ln[ldx] = c[0];
-//                        *cp1 = peek(video_address, vad(x2,y1));
                     }
                 }
             }
@@ -198,7 +188,39 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
         if (x1+len > df.SCREENWIDTH)
             len = @as(usize, @intCast(df.SCREENWIDTH))-x1;
 
-        df.c_wputs(wnd, @intCast(len), &ln, @intCast(x1), @intCast(y1), @intCast(x2));
+        var off:usize = 0;
+        if (df.ClipString == 0 and win.TestAttribute(df.NOCLIP) == false) {
+            // -- clip the line to within ancestor windows --
+            var rc = win.WindowRect();
+            var nwnd = win.parent;
+            while (len > 0 and nwnd != null) {
+                const nwin = nwnd.?;
+                if (nwin.isVisible() == false) {
+                    len = 0;
+                    break;
+                }
+                rc = df.subRectangle(rc, rect.ClientRect(nwin));
+                nwnd = nwin.parent;
+            }
+            while (len > 0 and rect.InsideRect(@intCast(x1+off),@intCast(y1),rc) == false) {
+                off += 1;
+                len -|= 1;
+            }
+            if (len > 0) {
+                x2 = x1+len-1;
+                while (len>0 and rect.InsideRect(@intCast(x2),@intCast(y1),rc) == false) {
+                    x2 -|= 1;
+                    len -|= 1;
+                }
+            }
+        }
+        if (len > 0) {
+            df.hide_mousecursor();
+            movetoscreen(ln[off..], vad(x1+off,y1), len);
+//            df.c_wputs(wnd, @intCast(len), &ln, @intCast(x1), @intCast(y1), @intCast(off));
+            df.show_mousecursor();
+        }
+
     }
 }
 

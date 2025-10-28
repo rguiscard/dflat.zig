@@ -10,89 +10,44 @@ BOOL ClipString;
 char *video_address;
 int foreground, background;   /* current video colors */
 
-static void movetoscreen(void far *bf, int offset, int len);
+//static void movetoscreen(void far *bf, int offset, int len);
 
-BOOL c_isVisible(WINDOW);
+//BOOL c_isVisible(WINDOW);
 
 /* ------- write a string to a window ---------- */
-void c_wputs(WINDOW wnd, int len, unsigned short *ln, int x1, int y1, int x2)
-{
-//    int x1 = GetLeft(wnd)+x;
-//    int x2 = x1;
-//    int y1 = GetTop(wnd)+y;
-//
-//    short ln[MAXCOLS];
-//    short *cp1 = ln;
-//    unsigned char *str = s;
-//    int fg = foreground;
-//    int bg = background;
-//    int len;
-//    while (*str) {
-//        if (*str == CHANGECOLOR)    {
-//            str++;
-//            foreground = (*str++) & 0x7f;
-//            background = (*str++) & 0x7f;
-//            continue;
-//        }
-//        if (*str == RESETCOLOR)    {
-//            foreground = fg & 0x7f;
-//            background = bg & 0x7f;
-//            str++;
-//            continue;
-//        }
-//        if (*str == ('\t' | 0x80) || *str == ('\f' | 0x80)) {
-//            *cp1 = ' ' | (clr(foreground, background) << 8);
-//        } else {
-//            *cp1 = (*str & 255) | (clr(foreground, background) << 8);
-//            if (ClipString) {
-//                if (!CharInView(wnd, x, y)) {
-//                    *cp1 = peek(video_address, vad(x2,y1));
-//                }
+//void c_wputs(WINDOW wnd, int len, unsigned short *ln, int x1, int y1, int off)
+//{
+//    int off = 0;
+//    if (!ClipString && !c_TestAttribute(wnd, NOCLIP)) {
+//        /* -- clip the line to within ancestor windows -- */
+//        RECT rc = WindowRect(wnd);
+//        WINDOW nwnd = GetParent(wnd);
+//        while (len > 0 && nwnd != NULL) {
+//            if (!c_isVisible(nwnd))	{
+//                len = 0;
+//                break;
 //            }
-//	}
-//        cp1++;
-//        str++;
-//	x++;
-//        x2++;
+//            rc = subRectangle(rc, ClientRect(nwnd));
+//            nwnd = GetParent(nwnd);
+//        }
+//        while (len > 0 && !InsideRect(x1+off,y1,rc)) {
+//            off++;
+//            --len;
+//        }
+//        if (len > 0) {
+//            x2 = x1+len-1;
+//            while (len && !InsideRect(x2,y1,rc)) {
+//                --x2;
+//                --len;
+//            }
+//        }
 //    }
-//    foreground = fg;
-//    background = bg;
-//   
-//    len = (int)(cp1-ln);
-//    if (x1+len > SCREENWIDTH)
-//        len = SCREENWIDTH-x1;
-//
-    int off = 0;
-    if (!ClipString && !c_TestAttribute(wnd, NOCLIP)) {
-        /* -- clip the line to within ancestor windows -- */
-        RECT rc = WindowRect(wnd);
-        WINDOW nwnd = GetParent(wnd);
-        while (len > 0 && nwnd != NULL) {
-            if (!c_isVisible(nwnd))	{
-                len = 0;
-                break;
-            }
-            rc = subRectangle(rc, ClientRect(nwnd));
-            nwnd = GetParent(nwnd);
-        }
-        while (len > 0 && !InsideRect(x1+off,y1,rc)) {
-            off++;
-            --len;
-        }
-        if (len > 0) {
-            x2 = x1+len-1;
-            while (len && !InsideRect(x2,y1,rc)) {
-                --x2;
-                --len;
-            }
-        }
-    }
-    if (len > 0) {
-        hide_mousecursor();
-        movetoscreen(ln+off, vad(x1+off,y1), len*2);
-        show_mousecursor();
-    }
-}
+//    if (len > 0) {
+//        hide_mousecursor();
+//        movetoscreen(ln+off, vad(x1+off,y1), len*2);
+//        show_mousecursor();
+//    }
+//}
 
 void convert_screen_to_ansi()
 {
@@ -104,7 +59,7 @@ void convert_screen_to_ansi()
     fflush(stdout);
 }
 
-static void movetoscreen(void far *bf, int offset, int len)
-{
-    memcpy(video_address + offset, bf, len);
-}
+//static void movetoscreen(void far *bf, int offset, int len)
+//{
+//    memcpy(video_address + offset, bf, len);
+//}

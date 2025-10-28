@@ -59,8 +59,8 @@ pub const VectCvt:[3][11][2][3]u8 = .{
 };
 
 // -- compute whether character is first, middle, or last --
-fn FindVector(win:*Window, rc:df.RECT, x:c_int, y:c_int) c_int {
-    var coll:c_int = -1;
+fn FindVector(win:*Window, rc:df.RECT, x:c_int, y:c_int) ?usize {
+    var coll:?usize = null;
 
     if (win.VectorList) |vectors| {
         for(vectors) |v| {
@@ -105,46 +105,44 @@ fn FindVector(win:*Window, rc:df.RECT, x:c_int, y:c_int) c_int {
 }
 
 fn PaintVector(win:*Window, rc:df.RECT) void {
-    var len: c_int = 0;
-    var nc: c_uint = 0;
-    var vertvect: c_int = 0;
-    var fml: c_int = 0;
+    var len: usize = 0;
+    var nc: u16 = 0;
+    var vertvect: usize = 0;
+    var fml: usize = 0;
 
     if (rc.rt == rc.lf)    {
         // ------ vertical vector -------
         nc = 0xB3;
         vertvect = 1;
-        len = rc.bt-rc.tp+1;
+        len = @intCast(rc.bt-rc.tp+1);
     } else {
         // ------ horizontal vector -------
         nc = 0xC4;
         vertvect = 0;
-        len = rc.rt-rc.lf+1;
+        len = @intCast(rc.rt-rc.lf+1);
     }
 
-    for (0..@intCast(len)) |i| {
-        var newch:c_uint = nc;
-        var xi: c_int = 0;
-        var yi: c_int = 0;
-        var coll: c_int = 0;
+    for (0..len) |i| {
+        var newch: u16 = nc;
+        var xi: usize = 0;
+        var yi: usize = 0;
 
         if (vertvect > 0) {
-            yi = @intCast(i);
+            yi = i;
         } else {
-            xi = @intCast(i);
+            xi = i;
         }
 
-        const left:c_int = @intCast(win.GetClientLeft());
-        const top:c_int = @intCast(win.GetClientTop());
-        const ch_x:c_int = left+rc.lf+xi;
-        const ch_y:c_int = top+rc.tp+yi;
-        const ch:c_uint = video.GetVideoChar(ch_x, ch_y) & 255;
+        const left:usize = win.GetClientLeft();
+        const top:usize = win.GetClientTop();
+        const ch_x:usize = left+xi+@as(usize, @intCast(rc.lf));
+        const ch_y:usize = top+yi+@as(usize, @intCast(rc.tp));
+        const ch:u16 = video.GetVideoChar(ch_x, ch_y) & 255;
     
         for (0..CharInWnd.len) |cw| {
             if (ch == CharInWnd[cw]) {
                 // ---- hit another vector character ----
-                coll = FindVector(win, rc, xi, yi);
-                if (coll != -1) {
+                if (FindVector(win, rc, @intCast(xi), @intCast(yi))) |coll| {
                     // compute first/middle/last subscript
                     if (i == len-1) {
                         fml = 2;
@@ -153,17 +151,17 @@ fn PaintVector(win:*Window, rc:df.RECT) void {
                     } else {
                         fml = 1;
                     }
-                    newch = VectCvt[@intCast(coll)][cw][@intCast(vertvect)][@intCast(fml)];
+                    newch = VectCvt[coll][cw][vertvect][fml];
                 }
             }
         }
-        win.PutWindowChar(@intCast(newch), rc.lf+xi, rc.tp+yi);
+        win.PutWindowChar(newch, @as(usize, @intCast(rc.lf))+xi, @as(usize, @intCast(rc.tp))+yi);
     }
 }
 
 fn PaintBar(win:*Window, rc:df.RECT, vt:VectTypes) void {
-    var len:c_int = 0;
-    var vertbar:c_int = 0;
+    var len:usize = 0;
+    var vertbar:usize = 0;
     const tys = [_]u16{219, 178, 177, 176};
     const nc:u16 = tys[@intFromEnum(vt)-1];
 
@@ -177,15 +175,15 @@ fn PaintBar(win:*Window, rc:df.RECT, vt:VectTypes) void {
         len = @intCast(rc.rt-rc.lf+1);
     }
 
-    for(0..@intCast(len)) |i| {
-        var xi:c_int = 0;
-        var yi:c_int = 0;
+    for(0..len) |i| {
+        var xi:usize = 0;
+        var yi:usize = 0;
         if (vertbar != 0) {
-            yi = @intCast(i);
+            yi = i;
         } else {
-            xi = @intCast(i);
+            xi = i;
         }
-        win.PutWindowChar(nc, rc.lf+xi, rc.tp+yi);
+        win.PutWindowChar(nc, @as(usize, @intCast(rc.lf))+xi, @as(usize, @intCast(rc.tp))+yi);
     }
 }
 

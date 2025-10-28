@@ -11,6 +11,7 @@ const search = @import("Search.zig");
 const clipboard = @import("Clipboard.zig");
 const normal = @import("Normal.zig");
 const cfg = @import("Config.zig");
+const video = @import("Video.zig");
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -166,7 +167,7 @@ fn KeyboardCursorMsg(win:*Window, col:usize, row:usize) void {
     wnd.*.WndRow = @intCast(row);
     wnd.*.CurrLine = @intCast(row + win.wtop);
     if (win == Window.inFocus) {
-        if (df.CharInView(wnd, @intCast(col), @intCast(row))>0)
+        if (video.CharInView(win, col, row))
             _ = q.SendMessage(null, df.SHOW_CURSOR,
                       .{.yes = if (win.InsertMode and (TextMarking == false)) true else false});
     } else {
