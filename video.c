@@ -11,35 +11,6 @@ char *video_address;
 
 static void movetoscreen(void far *bf, int offset, int len);
 
-/* -------- write a character to a window ------- */
-#if 0
-void wputch(WINDOW wnd, int c, int x, int y)
-{
-	if (CharInView(wnd, x, y))	{
-		int ch = (c & 255) | (clr(foreground, background) << 8);
-		int xc = GetLeft(wnd)+x;
-		int yc = GetTop(wnd)+y;
-        hide_mousecursor();
-        poke(video_address, vad(xc, yc), ch);
-        show_mousecursor();
-	}
-}
-#endif
-
-// this is part of Window.zig already.
-// use zig version in the future.
-#if 0
-static BOOL isVisible(WINDOW wnd)
-{
-    while (wnd != NULL)    {
-        if (isHidden(wnd))
-            return FALSE;
-        wnd = GetParent(wnd);
-    }
-    return TRUE;
-}
-#endif
-
 BOOL c_isVisible(WINDOW);
 
 /* ------- write a string to a window ---------- */

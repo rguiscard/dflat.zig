@@ -47,7 +47,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
                     }
 
                     df.SetStandardColor(wnd);
-                    df.PutWindowLine(wnd, @constCast(@ptrCast(sb.ptr)), 0, 0);
+                    win.PutWindowLine(@ptrCast(sb), 0, 0);
                     return true;
                 } else |_| {
                     // error
@@ -80,7 +80,8 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             const p1 = params.legacy[0];
             df.SetStandardColor(wnd);
             const pp:usize = @intCast(p1);
-            df.PutWindowLine(wnd, @ptrFromInt(pp), @intCast(win.WindowWidth()-8), 0);
+            const str:[*c]u8 = @ptrFromInt(pp);
+            win.PutWindowLine(std.mem.span(str), win.WindowWidth()-8, 0);
             win.TimePosted = true;
             if (win.PrevClock) |clock| {
                 _ = clock.sendMessage(msg, params);

@@ -799,6 +799,47 @@ pub fn PutWindowChar(self: *TopLevelFields, chr:u16, x:c_int, y:c_int) void {
     }
 }
 
+pub fn PutWindowLine(self: *TopLevelFields, s:[:0]const u8, x:usize, y:usize) void {
+    const wnd = self.win;
+    const str:[]u8 = @constCast(s);
+    var saved = false;
+    var sv:u8 = 0;
+
+    if (x < self.ClientWidth() and y < self.ClientHeight()) {
+        var len:usize = s.len;
+        if (std.mem.indexOfScalar(u8, s, 0)) |pos| {
+            len = pos;
+        }
+
+        const limit:usize = self.ClientWidth() - x; // right limit
+        if (len + x > self.ClientWidth()) {
+            sv = str[limit];
+            str[limit] = 0;
+            saved = true;
+        }
+
+        df.ClipString += 1;
+        df.wputs(wnd, str.ptr, @intCast(self.BorderAdj()+x), @intCast(self.TopBorderAdj()+y));
+        df.ClipString -= 1;
+
+        if (saved) {
+            str[limit] = sv;
+        }
+
+//        char *en = (char *)s+c_ClientWidth(wnd)-x;
+//        if (strlen(s)+x > c_ClientWidth(wnd))   {
+//            sv = *en;
+//            *en = '\0';
+//            saved = TRUE;
+//        }
+//        ClipString++;
+//        wputs(wnd, s, x+c_BorderAdj(wnd), y+c_TopBorderAdj(wnd));
+//        --ClipString;
+//        if (saved)
+//            *en = sv;
+    }
+}
+
 // ------- window methods -----------
 pub fn WindowHeight(self: *TopLevelFields) usize {
     return self.ht;

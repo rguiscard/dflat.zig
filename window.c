@@ -41,6 +41,7 @@ int LineLength(char *ln)
     return len;
 }
 
+#if 0
 void PutWindowLine(WINDOW wnd, void *s, int x, int y)
 {
 	int saved = FALSE, sv;
@@ -58,3 +59,4 @@ void PutWindowLine(WINDOW wnd, void *s, int x, int y)
 			*en = sv;
 	}
 }
+#endif
