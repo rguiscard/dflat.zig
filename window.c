@@ -5,6 +5,7 @@
 int foreground, background;   /* current video colors */
 
 /* ------ write a line to video window client area ------ */
+#if 0
 void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
 {
     char *cp;
@@ -23,9 +24,11 @@ void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
     }
     wputs(wnd, wline, x, y);
 }
+#endif
 
 /* ------ compute the logical line length of a window ------ */
-int LineLength(char *ln)
+#if 0
+int cLineLength(char *ln)
 {
     int len = strlen(ln);
     char *cp = ln;
@@ -39,24 +42,5 @@ int LineLength(char *ln)
         --len;
     }
     return len;
-}
-
-#if 0
-void PutWindowLine(WINDOW wnd, void *s, int x, int y)
-{
-	int saved = FALSE, sv;
-	if (x < c_ClientWidth(wnd) && y < c_ClientHeight(wnd))	{
-		char *en = (char *)s+c_ClientWidth(wnd)-x;
-		if (strlen(s)+x > c_ClientWidth(wnd))	{
-			sv = *en;
-			*en = '\0';
-			saved = TRUE;
-		}
-		ClipString++;
-		wputs(wnd, s, x+c_BorderAdj(wnd), y+c_TopBorderAdj(wnd));
-		--ClipString;
-		if (saved)
-			*en = sv;
-	}
 }
 #endif

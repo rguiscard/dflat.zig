@@ -7,7 +7,6 @@ const k = @import("Classes.zig").CLASS;
 const q = @import("Message.zig");
 
 pub fn BoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
-    const wnd = win.win;
     if (win.GetControl()) |ct| {
         switch (msg) {
             df.SETFOCUS, df.PAINT => {
@@ -22,7 +21,7 @@ pub fn BoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
 //                    df.writeline(wnd, txt, 1, 0, df.FALSE);
 //                }
                 if (DialogBox.getCtlWindowText(ct)) |txt| {
-                    df.writeline(wnd, @constCast(txt.ptr), 1, 0, df.FALSE);
+                    win.writeline(txt, 1, 0, false);
                 }
                 return rtn;
             },

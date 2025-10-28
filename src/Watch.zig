@@ -6,7 +6,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 
 var tick:usize = 0;
-const hands = [_][]const u8{" \xC0 ", " \xDA ", " \xBF ", " \xD9 "};
+const hands = [_][:0]const u8{" \xC0 ", " \xDA ", " \xBF ", " \xD9 "};
 const bo = "\xCD";
 
 pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
@@ -31,17 +31,17 @@ pub fn WatchIconProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 }
                 // (fall through and paint)
                 _ = df.SetStandardColor(wnd);
-                df.writeline(wnd, @constCast(hands[tick].ptr), 1, 1, df.FALSE);
+                win.writeline(hands[tick], 1, 1, false);
                 return true;
             },
             df.PAINT => {
                 _ = df.SetStandardColor(wnd);
-                df.writeline(wnd, @constCast(hands[tick].ptr), 1, 1, df.FALSE);
+                win.writeline(hands[tick], 1, 1, false);
                 return true;
             },
             df.BORDER => {
                 const rtn = root.DefaultWndProc(win, msg, params);
-                df.writeline(wnd, @constCast(bo.ptr), 2, 0, df.FALSE);
+                win.writeline(bo, 2, 0, false);
                 return rtn;
             },
             df.MOUSE_MOVED => {

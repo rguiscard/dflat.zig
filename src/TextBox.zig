@@ -467,8 +467,8 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
         } else {
             // ---- paint a blank line ----
             df.SetStandardColor(wnd);
-            df.writeline(wnd, &blankline[@intCast(rect.RectLeft(rcc))],
-                    @intCast(rect.RectLeft(rcc)+@as(c_int, @intCast(win.BorderAdj()))), @intCast(y), df.FALSE);
+            win.writeline(@ptrCast(blankline[@intCast(rcc.lf)..]),
+                    @as(usize, @intCast(rcc.lf))+win.BorderAdj(), y, false);
         }
     }
 
@@ -494,7 +494,6 @@ fn CloseWindowMsg(win:*Window) void {
     _ = win.sendMessage(df.CLEARTEXT, q.none);
     if (wnd.*.TextPointers != null) {
         root.global_allocator.free(wnd.*.TextPointers[0..win.wlines]);
-//        free(wnd->TextPointers);
         wnd.*.TextPointers = null;
     }
 }
@@ -842,8 +841,8 @@ pub fn WriteTextLine(win:*Window, rcc:?df.RECT, y:usize, reverse:bool) void {
                 colors.SetStandardColor(wnd);
             }
             // ------- display the line --------
-            df.writeline(wnd, &line[dif], @intCast(rc.lf+@as(c_int, @intCast(win.BorderAdj()))),
-                         @intCast(y-win.wtop+win.TopBorderAdj()), df.FALSE);
+            win.writeline(@ptrCast(line[dif..]), @as(usize, @intCast(rc.lf))+win.BorderAdj(),
+                                       y-win.wtop+win.TopBorderAdj(), false);
 
         } else |_| {
         }

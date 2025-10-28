@@ -354,6 +354,41 @@ pub fn InsertTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
 //    strcpy(wnd->title, ttl);
 }
 
+// ------ write a line to video window client area ------
+pub fn writeline(self:*TopLevelFields, str:[:0]const u8, x:usize, y:usize, pad:bool) void {
+    const wnd = self.win;
+    var wline = [_]u8{0}**df.MAXCOLS;
+    const len:usize = @intCast(LineLength(@constCast(str.ptr)));
+    const dif = str.len - len;
+    var limit = str.len;
+    if (limit > self.ClientWidth() + dif) {
+        limit = self.ClientWidth() + dif;
+    }
+    @memcpy(wline[0..limit], str[0..limit]);
+    if (pad) {
+        for (limit..self.ClientWidth()-x) |idx|{
+            wline[idx] = ' ';
+        }
+    }
+    df.wputs(wnd, &wline, @intCast(x), @intCast(y));
+
+//    char *cp;
+//    int len;
+//    int dif;
+//        char wline[MAXCOLS];
+//
+//    memset(wline, 0, sizeof(wline));
+//    len = LineLength(str);
+//    dif = strlen(str) - len;
+//    strncpy(wline, str, c_ClientWidth(wnd) + dif);
+//    if (pad)    {
+//        cp = wline+strlen(wline);
+//        while (len++ < c_ClientWidth(wnd)-x)
+//            *cp++ = ' ';
+//    }
+//    wputs(wnd, wline, x, y);
+}
+
 pub fn AdjustRectangle(self:*TopLevelFields, rcc:df.RECT) df.RECT {
     var rc = rcc;
     // -------- adjust the rectangle -------
@@ -429,10 +464,9 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?df.RECT) void {
             line[@intCast(rc.rt+1)] = 0;
             if (self != inFocus)
                 df.ClipString += 1;
-            df.writeline(wnd, &line[@intCast(rc.lf)],
-                        rc.lf+@as(c_int, @intCast(self.BorderAdj())),
-                        0,
-                        df.FALSE);
+            self.writeline(@ptrCast(line[@intCast(rc.lf)..]),
+                        @as(usize, @intCast(rc.lf))+self.BorderAdj(),
+                        0, false);
             df.ClipString = 0;
         }
     }
@@ -563,7 +597,6 @@ fn SeCorner(self:*TopLevelFields, stdse:u8) u8 {
 
 // probably not well tested because most windows have titles
 fn TopLine(self:*TopLevelFields, lin:u8, rcc:df.RECT) void {
-    const wnd = self.win;
     var rc = rcc;
     if (self.TestAttribute(df.HASMENUBAR))
         return;
@@ -580,7 +613,7 @@ fn TopLine(self:*TopLevelFields, lin:u8, rcc:df.RECT) void {
 
     if (rc.lf < rc.rt) {
         // ----------- top line -------------
-        @memset(line[0..@intCast(self.WindowWidth()-1)], lin);
+        @memset(line[0..self.WindowWidth()-1], lin);
 //        @memset(line,lin,WindowWidth(wnd)-1);
         if (self.TestAttribute(df.CONTROLBOX)) {
             @memcpy(line[1..4], "   ");
@@ -589,7 +622,7 @@ fn TopLine(self:*TopLevelFields, lin:u8, rcc:df.RECT) void {
 //                        *(line+2) = CONTROLBOXCHAR;
         }
         line[@intCast(rc.rt)] = 0;
-        df.writeline(wnd, &line[@intCast(rc.lf)], rc.lf, 0, df.FALSE);
+        self.writeline(@ptrCast(line[@intCast(rc.lf)..@intCast(rc.rt)]), @intCast(rc.lf), 0, false);
     }
 }
 
@@ -710,11 +743,10 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
                 if (self != inFocus) {
                     df.ClipString += 1;
                 }
-                df.writeline(wnd,
-                             &line[@intCast(clrc.lf)],
-                             clrc.lf+1,
+                self.writeline(@ptrCast(line[@intCast(clrc.lf)..]),
+                             @intCast(clrc.lf+1),
                              @intCast(self.WindowHeight()-1),
-                             df.FALSE);
+                             false);
                 df.ClipString = 0;
             }
         }
@@ -729,22 +761,22 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
 }
 
 // ------ clear the data space of a window -------- 
-pub fn ClearWindow(win:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
-    const wnd = win.win;
-    if (win.isVisible()) {
+pub fn ClearWindow(self:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
+    const wnd = self.win;
+    if (self.isVisible()) {
         var rc:df.RECT = undefined;
         if (rcc) |cc| {
             rc = cc;
         } else {
-            rc = df.RelativeWindowRect(wnd, win.WindowRect());
+            rc = df.RelativeWindowRect(wnd, self.WindowRect());
         }
-        const top = win.TopBorderAdj();
-        const bot = win.WindowHeight()-1-win.BottomBorderAdj();
+        const top = self.TopBorderAdj();
+        const bot = self.WindowHeight()-1-self.BottomBorderAdj();
 
         if (rc.lf == 0)
-            rc.lf = @intCast(win.BorderAdj());
-        if (rc.rt > win.WindowWidth()-1)
-            rc.rt = @intCast(win.WindowWidth()-1);
+            rc.lf = @intCast(self.BorderAdj());
+        if (rc.rt > self.WindowWidth()-1)
+            rc.rt = @intCast(self.WindowWidth()-1);
         colors.SetStandardColor(wnd);
 
         if (root.global_allocator.allocSentinel(u8, @intCast(rc.rt+1), 0)) |buf| {
@@ -754,7 +786,7 @@ pub fn ClearWindow(win:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
             for (@intCast(rc.tp)..@intCast(rc.bt+1)) |ydx| {
                 if (ydx < top or ydx > bot)
                     continue;
-                df.writeline(wnd, &buf[@intCast(rc.lf)], rc.lf, @intCast(ydx), df.FALSE);
+                self.writeline(@ptrCast(buf[@intCast(rc.lf)..]), @intCast(rc.lf), ydx, false);
             }
         } else |_| {
         }
@@ -772,6 +804,20 @@ pub fn ClearWindow(win:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
 //       }
     }
 }
+
+// ------ compute the logical line length of a window ------
+pub export fn LineLength(ln:[*c]u8) c_int {
+    const str = std.mem.span(ln);
+    var len = str.len;
+
+    var count = std.mem.count(u8, str, &[_]u8{df.CHANGECOLOR});
+    len -= count * 3;
+    count = std.mem.count(u8, str, &[_]u8{df.RESETCOLOR});
+    len -= count;
+
+    return @intCast(len);
+}
+
 
 pub fn InitWindowColors(win:*TopLevelFields) void {
     var cls = win.Class;
@@ -825,18 +871,6 @@ pub fn PutWindowLine(self: *TopLevelFields, s:[:0]const u8, x:usize, y:usize) vo
         if (saved) {
             str[limit] = sv;
         }
-
-//        char *en = (char *)s+c_ClientWidth(wnd)-x;
-//        if (strlen(s)+x > c_ClientWidth(wnd))   {
-//            sv = *en;
-//            *en = '\0';
-//            saved = TRUE;
-//        }
-//        ClipString++;
-//        wputs(wnd, s, x+c_BorderAdj(wnd), y+c_TopBorderAdj(wnd));
-//        --ClipString;
-//        if (saved)
-//            *en = sv;
     }
 }
 
@@ -1057,13 +1091,6 @@ pub export fn c_ClientWidth(wnd:df.WINDOW) c_int {
     return 0;
 }
 
-pub export fn c_ClientHeight(wnd:df.WINDOW) c_int {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return @intCast(win.ClientHeight());
-    }
-    return 0;
-}
-
 pub export fn c_GetClientLeft(wnd:df.WINDOW) c_int {
     if (TopLevelFields.get_zin(wnd)) |win| {
         return @intCast(win.GetClientLeft());
@@ -1097,20 +1124,6 @@ pub export fn c_TestAttribute(wnd:df.WINDOW, attrib:c_int) df.BOOL {
         return if (win.TestAttribute(attrib)) df.TRUE else df.FALSE;
     }
     return df.FALSE;
-}
-
-pub export fn c_BorderAdj(wnd:df.WINDOW) c_int {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return @intCast(win.BorderAdj());
-    }
-    return 0;
-}
-
-pub export fn c_TopBorderAdj(wnd:df.WINDOW) c_int {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return @intCast(win.TopBorderAdj());
-    }
-    return 0;
 }
 
 pub fn HitControlBox(self:*TopLevelFields, x:usize, y:usize) bool {
