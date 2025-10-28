@@ -4,11 +4,13 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const rect = @import("Rect.zig");
 
+const sTab:u16 = 0x0C + 0x80;
+
 // #define vad(x,y) ((y)*(SCREENWIDTH*2)+(x)*2)
 // video_address is 8 bits (1 bytes, char*)
-//fn vad8(x:c_int, y:c_int) usize {
-//    return @intCast(y * df.SCREENWIDTH * 2 + x * 2);
-//}
+fn vad8(x:c_int, y:c_int) usize {
+    return @intCast(y * df.SCREENWIDTH * 2 + x * 2);
+}
 
 // assume video_address is 16 bites (2 bytes)
 fn vad(x:c_int, y:c_int) usize {
@@ -142,4 +144,66 @@ pub fn wputch(win:*Window, chr:u16, x:usize, y:usize) void {
         c[0] = ch;
         df.show_mousecursor();
     }
+}
+
+// ------- write a string to a window ----------
+pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
+    const wnd = win.win;
+    const x1 = win.GetLeft()+x;
+    const y1 = win.GetTop()+y;
+    var xx = x;
+    var x2 = x1;
+    var idx:usize = 0;
+    var ln = [_]u16{0}**df.MAXCOLS;
+    var ldx:usize = 0;
+    const fg = df.foreground;
+    const bg = df.background;
+    if (x1 < df.SCREENWIDTH and y1 < df.SCREENHEIGHT and win.isVisible()) {
+        while ((idx < s.len) and (s[idx] != 0)){
+            if (s[idx] == df.CHANGECOLOR) {
+                df.foreground = s[idx+1] & 0x7f;
+                df.background = s[idx+2] & 0x7f;
+                idx += 3;
+                continue;
+            }
+            if (s[idx] == df.RESETCOLOR) {
+                df.foreground = fg & 0x7f;
+                df.background = bg & 0x7f;
+                idx += 1;
+                continue;
+            }
+            if (s[idx] == ('\t' | 0x80) or s[idx] == (sTab | 0x80)) {
+                ln[ldx] =  @intCast(' ' | ((df.foreground | (df.background << 4)) << 8));
+//                *cp1 = ' ' | (clr(foreground, background) << 8);
+            } else {
+                ln[ldx] = @intCast((s[idx] & 255) | ((df.foreground | (df.background << 4)) << 8));
+//                *cp1 = (*str & 255) | (clr(foreground, background) << 8);
+                if (df.ClipString>0) {
+                    if (CharInView(wnd, @intCast(xx), @intCast(y))  == df.FALSE) {
+                        const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
+                        const c:[*]u16 = va16_ptr+vad(@intCast(x2),@intCast(y1));
+                        ln[ldx] = c[0];
+//                        *cp1 = peek(video_address, vad(x2,y1));
+                    }
+                }
+            }
+            idx += 1;
+            ldx += 1;
+            xx += 1;
+            x2 += 1;
+        }
+        df.foreground = fg;
+        df.background = bg;
+        var len = ldx;
+        if (x1+len > df.SCREENWIDTH)
+            len = @as(usize, @intCast(df.SCREENWIDTH))-x1;
+
+        df.c_wputs(wnd, @intCast(len), &ln, @intCast(x1), @intCast(y1), @intCast(x2));
+    }
+}
+
+// --------- get the current video mode --------
+pub fn get_videomode() void {
+    if (df.video_address == null)
+        df.video_address = df.tty_allocate_screen(df.SCREENWIDTH, df.SCREENHEIGHT);
 }

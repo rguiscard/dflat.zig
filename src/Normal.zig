@@ -1150,7 +1150,7 @@ fn GetVideoBuffer(win:*Window) void {
         }
     }
     if (win.videosave) |videosave| {
-        df.get_videomode();
+        video.get_videomode();
         video.getvideo(rc, videosave);
     }
 }
@@ -1159,7 +1159,7 @@ fn GetVideoBuffer(win:*Window) void {
 fn PutVideoBuffer(win:*Window) void {
     if (win.videosave) |videosave| {
         const rc = ClipRect(win);
-        df.get_videomode();
+        video.get_videomode();
         video.storevideo(rc, videosave);
         root.global_allocator.free(videosave);
         win.videosave = null;

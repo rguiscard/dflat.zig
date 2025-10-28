@@ -10,6 +10,7 @@ const app = @import("Application.zig");
 const menu = @import("Menu.zig");
 const menus = @import("Menus.zig");
 const popdown = @import("PopDown.zig");
+const video = @import("Video.zig");
 
 // positions in menu bar & shortcut key value
 var menupos = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
@@ -93,8 +94,7 @@ fn PaintMsg(win:*Window) void {
         if (root.global_allocator.dupeZ(u8, buf.items)) |text| {
             defer root.global_allocator.free(text);
 
-//            df.wputs(wnd, wnd.*.text, 0, 0);
-            df.wputs(wnd, text.ptr, 0, 0);
+            video.wputs(win, text, 0, 0);
 
             if (ActiveMenuBar) |mbar| {
                 if ((mbar.*.ActiveSelection != -1) and
@@ -104,17 +104,15 @@ fn PaintMsg(win:*Window) void {
                     const offset=menupos[idx].x1;
                     const offset1=menupos[idx].x2;
 
-//                    wnd.*.text[@intCast(offset1)] = 0;
                     text[@intCast(offset1)] = 0;
 
                     df.SetReverseColor(wnd);
-//                    df.cPaintMenu(wnd, @intCast(offset), @intCast(offset1), mbar.*.ActiveSelection);
 
                     if (std.mem.indexOfScalarPos(u8, text, @intCast(offset), df.CHANGECOLOR)) |idxx| {
                         text[idxx+2] = @intCast(df.background | 0x80);
                     }
                     // ActiveSelection suggest how many shortcut symbol ahead
-                    df.wputs(wnd, &text[@intCast(offset)], @intCast(offset-mbar.*.ActiveSelection*4), 0);
+                    video.wputs(win, text[@intCast(offset)..], @intCast(offset-mbar.*.ActiveSelection*4), 0);
                     buf.setChar(@intCast(offset1), ' ');
 
                     if ((mwin == null) and (win == Window.inFocus)) {

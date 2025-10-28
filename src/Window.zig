@@ -158,7 +158,7 @@ pub fn create(
     }
     self.* = init(wnd);
 
-    df.get_videomode();
+    video.get_videomode();
 
     if (wnd != null) {
         // This need to go first. Otherwise, SendMessage() will not have this class available
@@ -356,7 +356,6 @@ pub fn InsertTitle(self: *TopLevelFields, ttl:?[:0]const u8) void {
 
 // ------ write a line to video window client area ------
 pub fn writeline(self:*TopLevelFields, str:[:0]const u8, x:usize, y:usize, pad:bool) void {
-    const wnd = self.win;
     var wline = [_]u8{0}**df.MAXCOLS;
     const len:usize = @intCast(LineLength(@constCast(str.ptr)));
     const dif = str.len - len;
@@ -370,7 +369,7 @@ pub fn writeline(self:*TopLevelFields, str:[:0]const u8, x:usize, y:usize, pad:b
             wline[idx] = ' ';
         }
     }
-    df.wputs(wnd, &wline, @intCast(x), @intCast(y));
+    video.wputs(self, @ptrCast(&wline), x, y);
 }
 
 pub fn AdjustRectangle(self:*TopLevelFields, rcc:df.RECT) df.RECT {
@@ -499,7 +498,6 @@ fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
             const y = win.GetBottom()+1;
             const left:usize = @intCast(win.GetLeft());
             for (0..len+1) |idx| {
-//                buf[idx] = @intCast(df.GetVideoChar(@intCast(left+idx), @intCast(y)) & 255);
                 buf[idx] = @intCast(video.GetVideoChar(@intCast(left+idx), @intCast(y)) & 255);
             }
             buf[len+1] = 0;
@@ -513,7 +511,7 @@ fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
 
             df.ClipString += 1;
 
-            df.wputs(wnd, &buf[@intCast(rc.lf)], rc.lf, @intCast(win.WindowHeight()));
+            video.wputs(win, buf[@intCast(rc.lf)..], @intCast(rc.lf), win.WindowHeight());
 
             df.ClipString -= 1;
 
@@ -521,30 +519,6 @@ fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
             df.background = bg;
         } else |_| {
         }
-
-//    int i;
-//    int y = GetBottom(wnd)+1;
-//
-//    for (i = 0; i < WindowWidth(wnd)+1; i++)
-//        line[i] = videochar(GetLeft(wnd)+i, y);
-//    line[i] = '\0';
-
-//        df.foreground = r.DARKGRAY;
-//        df.background = r.BLACK;
-
-//    line[RectRight(rc)+1] = '\0';
-//    if (RectLeft(rc) == 0)
-//        rc.lf++;
-//
-//        df.ClipString += 1;
-//
-//    wputs(wnd, line+RectLeft(rc), RectLeft(rc),
-//        WindowHeight(wnd));
-//
-//        df.ClipString -= 1;
-//
-//        df.foreground = fg;
-//        df.background = bg;
     }
 }
 
@@ -686,12 +660,6 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
                 } else {
                     ch = df.SCROLLBARCHAR;
                 }
-//                ch = (    y == 1 ? UPSCROLLBOX      :
-//                          y == WindowHeight(wnd)-2  ?
-//                                DOWNSCROLLBOX       :
-//                          y-1 == wnd->VScrollBox    ?
-//                                SCROLLBOXCHAR       :
-//                          SCROLLBARCHAR );
             } else {
                 ch = side;
             }
@@ -774,18 +742,6 @@ pub fn ClearWindow(self:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
             }
         } else |_| {
         }
-
-//        memset(line, clrchar, sizeof line);
-//        line[RectRight(rc)+1] = '\0';
-//        for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
-//           if (y < top || y > bot)
-//               continue;
-//           writeline(wnd,
-//               line+(RectLeft(rc)),
-//               RectLeft(rc),
-//               y,
-//               FALSE);
-//       }
     }
 }
 
@@ -816,7 +772,6 @@ pub fn InitWindowColors(win:*TopLevelFields) void {
     // ---------- set the colors ----------
     for (0..2) |fbg| {
         for (0..4) |col| {
-//            win.win.*.WindowColors[col][fbg] = cfg.config.clr[icls][col][fbg];
             win.WindowColors[col][fbg] = cfg.config.clr[icls][col][fbg];
         }
     }
@@ -830,8 +785,7 @@ pub fn PutWindowChar(self: *TopLevelFields, chr:u16, x:c_int, y:c_int) void {
 }
 
 pub fn PutWindowLine(self: *TopLevelFields, s:[:0]const u8, x:usize, y:usize) void {
-    const wnd = self.win;
-    const str:[]u8 = @constCast(s);
+    const str:[:0]u8 = @constCast(s);
     var saved = false;
     var sv:u8 = 0;
 
@@ -849,7 +803,7 @@ pub fn PutWindowLine(self: *TopLevelFields, s:[:0]const u8, x:usize, y:usize) vo
         }
 
         df.ClipString += 1;
-        df.wputs(wnd, str.ptr, @intCast(self.BorderAdj()+x), @intCast(self.TopBorderAdj()+y));
+        video.wputs(self, str, self.BorderAdj()+x, self.TopBorderAdj()+y);
         df.ClipString -= 1;
 
         if (saved) {
