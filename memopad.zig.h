@@ -49,4 +49,4 @@ void *GetHelpLine(char *);
 
 // video.c
 extern char *video_address;
-void c_wputs(WINDOW, int, unsigned short *, int, int, int);
+//void c_wputs(WINDOW, int, unsigned short *, int, int, int);

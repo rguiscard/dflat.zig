@@ -762,13 +762,6 @@ fn LowerRight(prc:df.RECT) df.RECT {
         .bt = prc.bt - 1,
     };
     return rc;
-
-//    RECT rc;
-//    RectLeft(rc) = RectRight(prc) - ICONWIDTH;
-//    RectTop(rc) = RectBottom(prc) - ICONHEIGHT;
-//    RectRight(rc) = RectLeft(rc)+ICONWIDTH-1;
-//    RectBottom(rc) = RectTop(rc)+ICONHEIGHT-1;
-//    return rc;
 }
 
 // ----- compute a position for a minimized window icon ----
@@ -1126,8 +1119,6 @@ fn ClipRect(win:*Window) df.RECT {
     if (win.TestAttribute(df.SHADOW)) {
         rc.bt += 1;
         rc.rt += 1;
-//        RectBottom(rc)++;
-//        RectRight(rc)++;
     }
     return df.ClipRectangle(wnd, rc);
 }
@@ -1137,7 +1128,6 @@ fn GetVideoBuffer(win:*Window) void {
     const rc = ClipRect(win);
     const ht = df.RectBottom(rc) - df.RectTop(rc) + 1;
     const wd = df.RectRight(rc) - df.RectLeft(rc) + 1;
-//    wnd.*.videosave = @ptrCast(df.DFrealloc(wnd.*.videosave, @intCast(ht * wd * 2)));
     if (win.videosave) |videosave| {
         if (root.global_allocator.realloc(videosave, @intCast(ht * wd))) |buf| {
             win.videosave = buf;
@@ -1176,10 +1166,3 @@ pub fn isAncestor(w: *Window, awnd: *Window) bool {
     }
     return false;
 }
-
-//pub export fn c_isVisible(wnd:df.WINDOW) df.BOOL {
-//    if (Window.get_zin(wnd)) |win| {
-//        return if (win.isVisible()) df.TRUE else df.FALSE;
-//    }
-//    return df.FALSE;
-//}

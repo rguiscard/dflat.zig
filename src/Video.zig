@@ -6,12 +6,6 @@ const rect = @import("Rect.zig");
 
 const sTab:u16 = 0x0C + 0x80;
 
-// #define vad(x,y) ((y)*(SCREENWIDTH*2)+(x)*2)
-// video_address is 8 bits (1 bytes, char*)
-//fn vad8(x:c_int, y:c_int) usize {
-//    return @intCast(y * df.SCREENWIDTH * 2 + x * 2);
-//}
-
 // assume video_address is 16 bites (2 bytes)
 fn vad(x:usize, y:usize) usize {
     return y * @as(usize, @intCast(df.SCREENWIDTH)) + x;
