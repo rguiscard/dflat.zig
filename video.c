@@ -8,6 +8,7 @@ int SCREENHEIGHT = 24;
 BOOL ClipString;
 
 char *video_address;
+int foreground, background;   /* current video colors */
 
 static void movetoscreen(void far *bf, int offset, int len);
 

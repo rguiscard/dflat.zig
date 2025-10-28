@@ -371,22 +371,6 @@ pub fn writeline(self:*TopLevelFields, str:[:0]const u8, x:usize, y:usize, pad:b
         }
     }
     df.wputs(wnd, &wline, @intCast(x), @intCast(y));
-
-//    char *cp;
-//    int len;
-//    int dif;
-//        char wline[MAXCOLS];
-//
-//    memset(wline, 0, sizeof(wline));
-//    len = LineLength(str);
-//    dif = strlen(str) - len;
-//    strncpy(wline, str, c_ClientWidth(wnd) + dif);
-//    if (pad)    {
-//        cp = wline+strlen(wline);
-//        while (len++ < c_ClientWidth(wnd)-x)
-//            *cp++ = ' ';
-//    }
-//    wputs(wnd, wline, x, y);
 }
 
 pub fn AdjustRectangle(self:*TopLevelFields, rcc:df.RECT) df.RECT {
