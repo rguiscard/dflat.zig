@@ -88,19 +88,13 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
         save = df.SAVESELF;
     }
 
-    const center: Window.Center = .{
-        .LEFT   = (box.*.dwnd.x == -1),
-        .TOP    = (box.*.dwnd.y == -1),
-        .WIDTH  = (box.*.dwnd.w == -1),
-        .HEIGHT = (box.*.dwnd.h == -1),
-    };
+    const center = box.*.dwnd.center;
 
     var win = Window.create(k.DIALOG,
                         box.*.dwnd.title,
-                        if (center.LEFT) 0 else @intCast(x), 
-                        if (center.TOP ) 0 else @intCast(y),
-                        if (center.HEIGHT) 0 else @intCast(box.*.dwnd.h),
-                        if (center.WIDTH) 0 else @intCast(box.*.dwnd.w),
+                        x, y,
+                        box.*.dwnd.h,
+                        box.*.dwnd.w,
                         .{.dbox = box},
                         parent,
                         wndproc,
@@ -415,17 +409,14 @@ fn CreateWindowMsg(win:*Window) bool {
                 attrib |= df.HASBORDER;
             }
 
-            const center:Window.Center = .{
-                .WIDTH  = (ctl.*.dwnd.w == -1),
-                .HEIGHT = (ctl.*.dwnd.h == -1),
-            };
+            const center = ctl.*.dwnd.center;
 
             var cwnd = Window.create(ctl.*.Class,
                             ctl.*.dwnd.title,
-                            @intCast(ctl.*.dwnd.x+@as(isize, @intCast(win.GetClientLeft()))),
-                            @intCast(ctl.*.dwnd.y+@as(isize, @intCast(win.GetClientTop()))),
-                            @intCast(ctl.*.dwnd.h),
-                            @intCast(ctl.*.dwnd.w),
+                            ctl.*.dwnd.x+win.GetClientLeft(),
+                            ctl.*.dwnd.y+win.GetClientTop(),
+                            ctl.*.dwnd.h,
+                            ctl.*.dwnd.w,
                             .{.control = ctl},
                             win,
                             ControlProc,

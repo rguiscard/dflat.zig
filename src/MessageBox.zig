@@ -35,7 +35,7 @@ pub fn CancelBox(win:?*Window, msg: [:0]const u8) bool {
     return GenericMessage(win, sWait, msg, 1, CancelProc, sCancel, null, .ID_CANCEL, .ID_NULL, false);
 }
 
-fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct: c_int,
+fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct: usize,
                   wndproc: *const fn (win:*Window, msg: df.MESSAGE, params:q.Params) bool,
                   button1: ?[:0]const u8, button2: ?[:0]const u8, c1: cmd, c2: cmd, isModal: bool) bool {
     var mBox = Dialogs.MsgBox;
@@ -49,8 +49,8 @@ fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct
         mBox.dwnd.title = t;
     }
 
-    mBox.ctl[0].dwnd.h = @intCast(MsgHeight(m));
-    mBox.ctl[0].dwnd.w = @intCast(@max(@max(MsgWidth(m), buttonct*8+buttonct+2),ttl_w));
+    mBox.ctl[0].dwnd.h = MsgHeight(m);
+    mBox.ctl[0].dwnd.w = @max(@max(MsgWidth(m), buttonct*8+buttonct+2),ttl_w);
     mBox.dwnd.h = mBox.ctl[0].dwnd.h+6;
     mBox.dwnd.w = mBox.ctl[0].dwnd.w+4;
     if (buttonct == 1) {

@@ -505,23 +505,22 @@ fn BuildHelpBox(win:?*Window) void {
         }
 
         // ----- set the height and width -----
-        Dialogs.HelpBox.dwnd.h = @min(help.*.hheight, MAXHEIGHT)+7;
-        Dialogs.HelpBox.dwnd.w = @max(45, help.*.hwidth+6);
+        Dialogs.HelpBox.dwnd.h = @intCast(@min(help.*.hheight, MAXHEIGHT)+7);
+        Dialogs.HelpBox.dwnd.w = @intCast(@max(45, help.*.hwidth+6));
 
         // ------ position the help window -----
         if (win) |w| {
             BestFit(w, &Dialogs.HelpBox.dwnd);
         }
         // ------- position the command buttons ------ 
-        Dialogs.HelpBox.ctl[0].dwnd.w = @max(40, help.*.hwidth+2);
+        Dialogs.HelpBox.ctl[0].dwnd.w = @intCast(@max(40, help.*.hwidth+2));
         Dialogs.HelpBox.ctl[0].dwnd.h =
-                    @min(help.*.hheight, MAXHEIGHT)+2;
-        const offset = @divFloor(Dialogs.HelpBox.dwnd.w-40, 2);
+                    @intCast(@min(help.*.hheight, MAXHEIGHT)+2);
+        const offset:usize = @divFloor(Dialogs.HelpBox.dwnd.w-40, 2);
         for (1..5) |i| {
-            const ii:c_int = @intCast(i);
             Dialogs.HelpBox.ctl[i].dwnd.y =
-                            @min(help.*.hheight, MAXHEIGHT)+3;
-            Dialogs.HelpBox.ctl[i].dwnd.x = (ii-1) * 10 + offset;
+                            @intCast(@min(help.*.hheight, MAXHEIGHT)+3);
+            Dialogs.HelpBox.ctl[i].dwnd.x = (i-1) * 10 + offset;
         }
 
         // ---- disable ineffective buttons ----
@@ -563,24 +562,24 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
             win.AddTitle(ttl);
         } // handle null title ?
         // --- reposition and resize the help window ---
-        Dialogs.HelpBox.dwnd.x = @divFloor(df.SCREENWIDTH-Dialogs.HelpBox.dwnd.w, 2);
-        Dialogs.HelpBox.dwnd.y = @divFloor(df.SCREENHEIGHT-Dialogs.HelpBox.dwnd.h, 2);
-        _ = win.sendMessage(df.MOVE, .{.position=.{@intCast(Dialogs.HelpBox.dwnd.x),
-                                                   @intCast(Dialogs.HelpBox.dwnd.y)}});
+        Dialogs.HelpBox.dwnd.x = @divFloor(@as(usize, @intCast(df.SCREENWIDTH))-Dialogs.HelpBox.dwnd.w, 2);
+        Dialogs.HelpBox.dwnd.y = @divFloor(@as(usize, @intCast(df.SCREENHEIGHT))-Dialogs.HelpBox.dwnd.h, 2);
+        _ = win.sendMessage(df.MOVE, .{.position=.{Dialogs.HelpBox.dwnd.x,
+                                                   Dialogs.HelpBox.dwnd.y}});
         _ = win.sendMessage(df.SIZE,
-                        .{.position=.{@intCast(Dialogs.HelpBox.dwnd.x + Dialogs.HelpBox.dwnd.w - 1),
-                                      @intCast(Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1)}});
+                        .{.position=.{Dialogs.HelpBox.dwnd.x + Dialogs.HelpBox.dwnd.w - 1,
+                                      Dialogs.HelpBox.dwnd.y + Dialogs.HelpBox.dwnd.h - 1}});
         // --- reposition the controls ---
         for (0..5) |i| {
-            var x:usize = @as(usize, @intCast(Dialogs.HelpBox.ctl[i].dwnd.x))+win.GetClientLeft();
-            var y:usize = @as(usize, @intCast(Dialogs.HelpBox.ctl[i].dwnd.y))+win.GetClientTop();
+            var x:usize = Dialogs.HelpBox.ctl[i].dwnd.x+win.GetClientLeft();
+            var y:usize = Dialogs.HelpBox.ctl[i].dwnd.y+win.GetClientTop();
             const cw = Dialogs.HelpBox.ctl[i].win;
             if (cw) |cwin| {
                 _ = cwin.sendMessage(df.MOVE, .{.position=.{x, y}});
             }
             if (i == 0) {
-                x += @intCast(Dialogs.HelpBox.ctl[i].dwnd.w - 1);
-                y += @intCast(Dialogs.HelpBox.ctl[i].dwnd.h - 1);
+                x += Dialogs.HelpBox.ctl[i].dwnd.w - 1;
+                y += Dialogs.HelpBox.ctl[i].dwnd.h - 1;
                 if (cw) |cwin| {
                     _ = cwin.sendMessage(df.SIZE, .{.position=.{x, y}});
                 }
@@ -593,9 +592,10 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
     }
 }
 
-fn OverLap(a: c_int, b: c_int) c_int {
-    const ov = a - b;
-    return if (ov < 0) 0 else ov;
+fn OverLap(a: usize, b: usize) usize {
+//    const ov = a - b;
+//    return if (ov < 0) 0 else ov;
+    return if (a < b) 0 else (a-b);
 }
 
 
@@ -603,38 +603,39 @@ fn OverLap(a: c_int, b: c_int) c_int {
 fn BestFit(win:*Window, dwnd:*Dialogs.DIALOGWINDOW) void {
     if (win.getClass() == k.MENUBAR or
         win.getClass() == k.APPLICATION) {
-        dwnd.*.x = -1;
-        dwnd.*.y = -1;
+        dwnd.*.x = 0;
+        dwnd.*.y = 0;
+        dwnd.*.center = Window.CENTER_POSITION;
         return;
     }
 
     // --- compute above overlap ----
-    const above:c_int = OverLap(@intCast(dwnd.*.h), @intCast(win.GetTop()));
+    const above:usize = OverLap(dwnd.*.h, win.GetTop());
     // --- compute below overlap ----
-    const below:c_int = OverLap(@intCast(win.GetBottom()), @intCast(df.SCREENHEIGHT-dwnd.*.h));
+    const below:usize = OverLap(win.GetBottom(), @as(usize, @intCast(df.SCREENHEIGHT))-dwnd.*.h);
     // --- compute right overlap ----
-    const right:c_int = OverLap(@intCast(win.GetRight()), @intCast(df.SCREENWIDTH-dwnd.*.w));
+    const right:usize = OverLap(win.GetRight(), @as(usize, @intCast(df.SCREENWIDTH))-dwnd.*.w);
     // --- compute left  overlap ----
-    const left:c_int = OverLap(@intCast(dwnd.*.w), @intCast(win.GetLeft()));
+    const left:usize = OverLap(dwnd.*.w, win.GetLeft());
 
     if (above < below) {
-        dwnd.*.y = @intCast(@max(0, @as(isize, @intCast(win.GetTop()))-dwnd.*.h-2));
+        dwnd.*.y = @max(0, win.GetTop()-dwnd.*.h-2);
     } else {
-        dwnd.*.y = @intCast(@min(df.SCREENHEIGHT-dwnd.*.h, @as(isize, @intCast(win.GetBottom()))+2));
+        dwnd.*.y = @min(@as(usize, @intCast(df.SCREENHEIGHT))-dwnd.*.h, win.GetBottom()+2);
     }
     if (right < left) {
-        dwnd.*.x = @intCast(@min(@as(isize, @intCast(win.GetRight()))+2, df.SCREENWIDTH-dwnd.*.w));
+        dwnd.*.x = @min(win.GetRight()+2, @as(usize, @intCast(df.SCREENWIDTH))-dwnd.*.w);
     } else {
-        dwnd.*.x = @intCast(@max(0, @as(isize, @intCast(win.GetLeft()))-dwnd.*.w-2));
+        dwnd.*.x = @max(0, win.GetLeft()-dwnd.*.w-2);
     }
 
-    if (dwnd.*.x == win.GetRight()+2 or
-            dwnd.*.x == @as(isize, @intCast(win.GetLeft()))-dwnd.*.w-2) {
-        dwnd.*.y = -1;
+    if (dwnd.*.x == win.GetRight()+2 or dwnd.*.x == win.GetLeft()-dwnd.*.w-2) {
+        dwnd.*.y = 0;
+        dwnd.*.center.TOP = true;
     }
-    if (dwnd.*.y == @as(isize, @intCast(win.GetTop()))-dwnd.*.h-2 or
-            dwnd.*.y == @as(isize, @intCast(win.GetBottom()))+2) {
-        dwnd.*.x = -1;
+    if (dwnd.*.y == win.GetTop()-dwnd.*.h-2 or dwnd.*.y == win.GetBottom()+2) {
+        dwnd.*.x = 0;
+        dwnd.*.center.LEFT = true;
     }
 }
  

@@ -22,6 +22,7 @@ $ zig build run
 - 'Window' at menubar crash if there is no open document.
 - Help tends to crash after closing.
 - SaveDialog return truncated filename by 1.
+- Help window title is not draw to the right most position.
 --------
 
 # D-Flat: Text User Interface for UNIX, ELKS and Cosmopolitan

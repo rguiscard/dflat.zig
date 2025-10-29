@@ -12,15 +12,16 @@ pub const MAXRADIOS = 20;
 // -------- dialog box and control window structure -------
 pub const DIALOGWINDOW = struct  {
     title:?[:0]const u8,  // window title
-    x:isize,              // relative coordinates
-    y:isize,
-    h:isize,              // size
-    w:isize,
+    x:usize,              // relative coordinates
+    y:usize,
+    h:usize,              // size
+    w:usize,
+    center:Window.Center,
 };
 
 // ------ one of these for each control window -------
 pub const CTLWINDOW = struct {
-    dwnd:DIALOGWINDOW = .{.title = null, .x = 0, .y = 0, .h = 0, .w = 0},
+    dwnd:DIALOGWINDOW = .{.title = null, .x = 0, .y = 0, .h = 0, .w = 0, .center = .{}},
     Class:CLASS = k.NORMAL,   // LISTBOX, BUTTON, etc
 //    itext:?[:0]u8 = null,         // initialized text
 //    itext_allocated:bool = false, // itext is allocated in heap (true) or in stack (false)
@@ -45,7 +46,7 @@ pub const DBOX = struct {
 // -------------- the File Open dialog box --------------- 
 pub var FileOpen:DBOX = buildDialog(
     "FileOpen",
-    .{"Open File", -1, -1, 19, 57},
+    .{"Open File", 0, 0, 19, 57},
     .{
         .{k.TEXT,     "~Filename:",    3, 1, 1, 9, .ID_FILENAME,  },
         .{k.EDITBOX,  null,           13, 1, 1,40, .ID_FILENAME,  },
@@ -63,7 +64,7 @@ pub var FileOpen:DBOX = buildDialog(
 // -------------- the Save As dialog box ---------------
 pub var SaveAs:DBOX = buildDialog(
     "SaveAs",
-    .{"Save As", -1, -1, 19, 57},
+    .{"Save As", 0, 0, 19, 57},
     .{
         .{k.TEXT,     "~Filename:",    3, 1, 1, 9, .ID_FILENAME,  },
         .{k.EDITBOX,  null,           13, 1, 1,40, .ID_FILENAME,  },
@@ -81,7 +82,7 @@ pub var SaveAs:DBOX = buildDialog(
 // -------------- the Search Text dialog box ---------------
 pub var SearchTextDB:DBOX = buildDialog(
     "SearchTextDB",
-    .{"Search Text", -1, -1, 9, 48},
+    .{"Search Text", 0, 0, 9, 48},
     .{
         .{k.TEXT,     "~Search for:",             2, 1, 1, 11, .ID_SEARCHFOR, },
         .{k.EDITBOX,  null,                      14, 1, 1, 29, .ID_SEARCHFOR, },
@@ -96,7 +97,7 @@ pub var SearchTextDB:DBOX = buildDialog(
 // -------------- the Replace Text dialog box ---------------
 pub var ReplaceTextDB:DBOX = buildDialog(
     "ReplaceTextDB",
-    .{"Replace Text", -1, -1, 12, 50},
+    .{"Replace Text", 0, 0, 12, 50},
     .{
         .{k.TEXT,     "~Search for:",              2, 1, 1, 11, .ID_SEARCHFOR,    },
         .{k.EDITBOX,  null,                       16, 1, 1, 29, .ID_SEARCHFOR,    },
@@ -115,7 +116,7 @@ pub var ReplaceTextDB:DBOX = buildDialog(
 // -------------- generic message dialog box ---------------
 pub var MsgBox:DBOX = buildDialog(
     "MsgBox",
-    .{null, -1, -1, 0, 0},
+    .{null, 0, 0, 0, 0},
     .{
         .{k.TEXT,   null, 1, 1, 0, 0, .ID_NULL,   },
         .{k.BUTTON, null, 0, 0, 1, 8, .ID_OK,     },
@@ -126,7 +127,7 @@ pub var MsgBox:DBOX = buildDialog(
 // ----------- InputBox Dialog Box ------------
 pub var InputBoxDB:DBOX = buildDialog(
     "InputBoxDB",
-    .{null, -1, -1, 9, 0},
+    .{null, 0, 0, 9, 0},
     .{
         .{k.TEXT,    null,       1, 1, 1, 0, .ID_NULL,       },
         .{k.EDITBOX, null,       1, 3, 1, 0, .ID_INPUTTEXT,  },
@@ -138,7 +139,7 @@ pub var InputBoxDB:DBOX = buildDialog(
 // ----------- SliderBox Dialog Box -------------
 pub var SliderBoxDB:DBOX = buildDialog(
     "SliderBoxDB",
-    .{null, -1, -1, 9, 0},
+    .{null, 0, 0, 9, 0},
     .{
         .{k.TEXT,    null,       0, 1, 1, 0, .ID_NULL,    },
         .{k.TEXT,    null,       0, 3, 1, 0, .ID_NULL,    },
@@ -149,7 +150,7 @@ pub var SliderBoxDB:DBOX = buildDialog(
 // ------------ Display dialog box --------------
 pub var Display:DBOX = buildDialog(
     "Display",
-    .{"Display", -1, -1, 19, 35},
+    .{"Display", 0, 0, 19, 35},
     .{
         .{k.BOX,         "Window",     7, 1, 6,20, .ID_NULL,     },
         .{k.CHECKBOX,    null,         9, 2, 1, 3, .ID_TITLE,    },
@@ -176,7 +177,7 @@ pub var Display:DBOX = buildDialog(
 // ------------ Windows dialog box -------------- 
 pub var Windows:DBOX = buildDialog(
     "Windows",
-    .{"Windows", -1, -1, 19, 24},
+    .{"Windows", 0, 0, 19, 24},
     .{
         .{k.LISTBOX, null,        1, 1,11,20, .ID_WINDOWLIST,  },
         .{k.BUTTON,  "   ~OK   ", 2,13, 1, 8, .ID_OK,          },
@@ -188,7 +189,7 @@ pub var Windows:DBOX = buildDialog(
 // ------------ Message Log dialog box --------------
 pub var Log:DBOX = buildDialog(
     "Log",
-    .{"D-Flat Message Log", -1, -1,18,41},
+    .{"D-Flat Message Log", 0, 0,18,41},
     .{
         .{k.TEXT,    "~Messages",10, 1, 1, 8, .ID_LOGLIST, },
         .{k.LISTBOX, null,        1, 2,14,26, .ID_LOGLIST, },
@@ -204,7 +205,7 @@ pub var Log:DBOX = buildDialog(
 // This need to be mutable because it will be modified at runtime.
 pub var HelpBox:DBOX = buildDialog(
     "HelpBox",
-    .{null, -1, -1,0,45},
+    .{null, 0, 0,0,45},
     .{
         .{k.TEXTBOX, null,        1, 1, 0,40, .ID_HELPTEXT, },
         .{k.BUTTON,  "  ~Close ", 0, 0, 1, 8, .ID_CANCEL,   },
@@ -218,10 +219,10 @@ fn buildDialog(comptime help:[:0]const u8, comptime window:anytype, comptime con
     var result:DBOX = undefined;
 
     var ttl: ?[:0]const u8 = undefined;
-    var x: isize = undefined;
-    var y: isize = undefined;
-    var h: isize = undefined;
-    var w: isize = undefined;
+    var x: usize = undefined;
+    var y: usize = undefined;
+    var h: usize = undefined;
+    var w: usize = undefined;
     ttl, x, y, h, w = window;
 
     result = .{
@@ -232,6 +233,7 @@ fn buildDialog(comptime help:[:0]const u8, comptime window:anytype, comptime con
             .y = y,
             .h = h,
             .w = w,
+            .center = Window.CENTER_POSITION,
         },
         .ctl = buildControls(controls),
     };
@@ -244,10 +246,10 @@ fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
     inline for(controls, 0..) |control, idx| {
         var ty: CLASS = undefined;
         var tx: ?[:0]const u8 = undefined;
-        var x: isize = undefined;
-        var y: isize = undefined;
-        var h: isize = undefined;
-        var w: isize = undefined;
+        var x: usize = undefined;
+        var y: usize = undefined;
+        var h: usize = undefined;
+        var w: usize = undefined;
         var cc: c = undefined;
         ty, tx, x, y, h, w, cc = control;
 //        const gapbuf:?*GapBuffer = null;
@@ -255,7 +257,7 @@ fn buildControls(comptime controls:anytype) [MAXCONTROLS+1]CTLWINDOW {
 //        const itext = if ((ty == df.EDITBOX) or (ty == df.COMBOBOX)) null else if (tx) |t| @constCast(t) else null;
         const dtext = if ((ty == k.EDITBOX) or (ty == k.COMBOBOX)) null else if (tx) |t| @constCast(t) else null;
         result[idx] = .{
-            .dwnd = .{.title = null, .x = x, .y = y, .h = h, .w = w},
+            .dwnd = .{.title = null, .x = x, .y = y, .h = h, .w = w, .center = .{}},
             .Class = ty,
             .dtext = dtext,
 //            .itext = itext,
