@@ -61,9 +61,9 @@ pub fn set_cursor_type(t:c_uint) void {
 fn clear_line(x1:c_int, x2:c_int, y:c_int, attr:c_int) void {
     const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
     for (@intCast(x1)..@intCast(x2+1)) |x| {
-        const offset:usize = @intCast(y * df.SCREENWIDTH + x);
+        const offset:usize = @intCast(y * df.SCREENWIDTH + @as(c_int, @intCast(x)));
         const c:[*]u16 = va16_ptr+offset;
-        c[0] = ' ' | (attr << 8);
+        c[0] = @intCast(' ' | (attr << 8));
     }
 
 //    for (x = x1; x <= x2; x++) {

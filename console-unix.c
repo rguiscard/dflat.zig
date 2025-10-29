@@ -11,6 +11,7 @@ extern char *video_address;
 
 int cx, cy = -1;
 
+#if 0
 /* clear line y from x1 up to and including x2 to attribute attr */
 static void clear_line(int x1, int x2, int y, int attr)
 {
@@ -74,72 +75,5 @@ void scroll_window(WINDOW wnd, RECT rc, int d)
             RectTop(rc), RectLeft(rc), RectBottom(rc), RectRight(rc));
 		show_mousecursor();
 	}
-}
-
-#if 0
-void SwapCursorStack(void)
-{
-#if 0
-	if (cs > 1)	{
-		swap(cursorpos[cs-2], cursorpos[cs-1]);
-		swap(cursorshape[cs-2], cursorshape[cs-1]);
-	}
-#endif
-}
-
-int AltConvert(unsigned int c)
-{
-    if (c >= kAltA && c <= kAltZ)
-        return c - kAltA + 'a';
-    if (c >= kAlt0 && c <= kAlt9)
-        return c - kAlt0 + '0';
-    return c;
-}
-
-/* only called from AllocationError, wait on keyboard read to exit */
-int getkey(void)
-{
-    int n, e;
-    char buf[32];
-
-    convert_screen_to_ansi();
-    for (;;) {
-        if ((n = readansi(0, buf, sizeof(buf))) < 0)
-            break;
-        if ((e = ansi_to_unikey(buf, n)) != -1)
-            return e;
-        /* not keystroke, ignore mouse */
-    }
-    return -1;
-}
-
-void waitformouse(void)
-{
-    int n, e;
-    int mx, my, modkeys;
-    char buf[32];
-    extern int mouse_button;
-
-    if (mouse_button != kMouseLeftDown && mouse_button != kMouseLeftDoubleClick)
-        return;
-    for (;;) {
-        if ((n = readansi(0, buf, sizeof(buf))) < 0)
-            break;
-        if ((n = ansi_to_unimouse(buf, n, &mx, &my, &modkeys, &e)) != -1) {
-            if (n == kMouseLeftUp)
-                return;
-        }
-        /* ignore keystrokes */
-    }
-}
-
-/* ---------- read the keyboard shift status --------- */
-int getshift(void)
-{
-    return 0;
-}
-
-void beep(void)
-{
 }
 #endif

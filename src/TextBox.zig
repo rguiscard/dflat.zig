@@ -9,6 +9,7 @@ const rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const GapBuffer = @import("GapBuffer.zig");
 const video = @import("Video.zig");
+const console = @import("Console.zig");
 
 pub var VSliding = false; // also used in ListBox
 var HSliding = false;
@@ -309,7 +310,7 @@ fn ScrollMsg(win:*Window,p1:bool) bool {
             if (win != Window.inFocus) {
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             } else {
-                df.scroll_window(wnd, rc, if (p1) 1 else 0);
+                console.scroll_window(win, rc, if (p1) 1 else 0);
                 if (p1 == false) {
                     // -- write top line (down) --
                     WriteTextLine(win,null,win.wtop,false);
