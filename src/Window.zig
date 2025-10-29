@@ -884,8 +884,8 @@ pub fn ClientHeight(self: *TopLevelFields) usize {
 pub fn WindowRect(self: *TopLevelFields) Rect {
     const wnd = self.win;
     return Rect{
-        .left = @intCast(wnd.*.rc.lf),
-        .top = @intCast(wnd.*.rc.tp),
+        .left = if (wnd.*.rc.lf > 0) @intCast(wnd.*.rc.lf) else 0,
+        .top = if (wnd.*.rc.tp > 0) @intCast(wnd.*.rc.tp) else 0,
         .right = if (wnd.*.rc.rt > 0) @intCast(wnd.*.rc.rt) else 0,
         .bottom = if (wnd.*.rc.bt > 0) @intCast(wnd.*.rc.bt) else 0,
     };

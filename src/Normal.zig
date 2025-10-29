@@ -3,7 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const lists = @import("Lists.zig");
-const rect = @import("Rect.zig");
+const Rect = @import("Rect.zig");
 const Klass = @import("Classes.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
@@ -98,11 +98,11 @@ fn InsideWindow(win:*Window, x:usize, y:usize) bool {
     if (win.TestAttribute(df.NOCLIP))    {
         var pwnd = win.parent;
         while (pwnd) |pw| {
-            rc = df.subRectangle(rc, rect.ClientRect(pw));
+            rc = df.subRectangle(rc, Rect.ClientRect(pw));
             pwnd = pw.parent;
         }
     }
-    if (rect.InsideRect(@intCast(x), @intCast(y), rc)) {
+    if (Rect.InsideRect(@intCast(x), @intCast(y), rc)) {
         return true;
     }
     return false;
@@ -497,7 +497,7 @@ fn SizeMsg(win:*Window, x:usize, y:usize) void {
     if (win.condition == .ISRESTORED)
         wnd.*.RestoredRC = df.WindowRect(wnd);
 
-    const rc = rect.ClientRect(win);
+    const rc = Rect.ClientRect(win);
 
     var cwin = win.firstWindow();
     while (cwin) |cw| {
@@ -565,7 +565,7 @@ fn MaximizeMsg(win:*Window) void {
     rc.rt = df.SCREENWIDTH-1;
     rc.bt = df.SCREENHEIGHT-1;
     if (win.parent) |pw| {
-        rc = rect.ClientRect(pw);
+        rc = Rect.ClientRect(pw);
     }
     win.oldcondition = win.condition;
     win.condition = .ISMAXIMIZED;
@@ -806,7 +806,7 @@ fn TerminateMoveSize() void {
     diff = 0;
     _ = dwin.sendMessage(df.RELEASE_MOUSE, .{.capture=.{true, null}});
     _ = dwin.sendMessage(df.RELEASE_KEYBOARD, .{.capture=.{true, null}});
-    RestoreBorder(dwin.win.*.rc);
+    RestoreBorder(dwin.WindowRect());
     WindowMoving = false;
     WindowSizing = false;
 }
@@ -814,9 +814,8 @@ fn TerminateMoveSize() void {
 // ---- build a dummy window border for moving or sizing ---
 fn dragborder(win:*Window, x:usize, y:usize) void {
     const dwin = getDummy();
-    const dwnd = dwin.win;
 
-    RestoreBorder(dwnd.*.rc);
+    RestoreBorder(dwin.WindowRect());
     // ------- build the dummy window --------
     dwin.SetLeft(x);
     dwin.SetTop(y);
@@ -827,14 +826,13 @@ fn dragborder(win:*Window, x:usize, y:usize) void {
     dwin.parent = win.parent;
     dwin.attrib = df.VISIBLE | df.HASBORDER | df.NOCLIP;
     dwin.InitWindowColors();
-    SaveBorder(dwnd.*.rc);
+    SaveBorder(dwin.WindowRect());
     dwin.RepaintBorder(null);
 }
 
 // ---- write the dummy window border for sizing ----
 fn sizeborder(win:*Window, rt:usize, bt:usize) void {
     const dwin = getDummy();
-    const dwnd = dwin.win;
 
     const leftmost:usize = win.GetLeft()+10;
     const topmost:usize = win.GetTop()+3;
@@ -851,7 +849,7 @@ fn sizeborder(win:*Window, rt:usize, bt:usize) void {
     _ = q.SendMessage(null, df.MOUSE_CURSOR, .{.position=.{new_rt, new_bt}});
 
     if ((new_rt != px) or (new_bt != py))
-        RestoreBorder(dwnd.*.rc);
+        RestoreBorder(dwin.WindowRect());
 
     // ------- change the dummy window --------
     dwin.ht = bt-dwin.GetTop()+1;
@@ -861,7 +859,7 @@ fn sizeborder(win:*Window, rt:usize, bt:usize) void {
     if ((new_rt != px) or (new_bt != py)) {
         px = @intCast(new_rt);
         py = @intCast(new_bt);
-        SaveBorder(dwnd.*.rc);
+        SaveBorder(dwin.WindowRect());
         dwin.RepaintBorder(null);
     }
 }
@@ -1016,9 +1014,9 @@ fn PaintUnderLappers(win:*Window) void {
 }
 
 // --- save video area to be used by dummy window border ---
-fn SaveBorder(rc:df.RECT) void {
-    Bht = @intCast(rc.bt - rc.tp + 1);
-    Bwd = @intCast(rc.rt - rc.lf + 1);
+fn SaveBorder(rect:Rect) void {
+    Bht = rect.bottom - rect.top + 1;
+    Bwd = rect.right - rect.left + 1;
 
     const size:usize = (Bht+Bwd)*4;
     if (Bsave) |buf| {
@@ -1033,38 +1031,36 @@ fn SaveBorder(rc:df.RECT) void {
         }
     }
     if (Bsave) |buf| {
-        var lrc = rc;
-        lrc.bt = lrc.tp;
-        video.getvideo(lrc, buf[0..]);
-        lrc.tp = rc.bt;
-        lrc.bt = rc.bt;
-        video.getvideo(lrc, buf[Bwd..]);
+        var lrc = rect;
+        lrc.bottom = lrc.top;
+        video.getvideo(lrc.c_Rect(), buf[0..]);
+        lrc.top = rect.bottom;
+        lrc.bottom = rect.bottom;
+        video.getvideo(lrc.c_Rect(), buf[Bwd..]);
         var pos:usize = Bwd*2;
         for (1..Bht-1) |idx| {
-            const i:c_int = @intCast(idx);
-            buf[pos] = video.GetVideoChar(@intCast(rc.lf), @intCast(rc.tp+i));
+            buf[pos] = video.GetVideoChar(rect.left, rect.top+idx);
             pos += 1;
-            buf[pos] = video.GetVideoChar(@intCast(rc.rt), @intCast(rc.tp+i));
+            buf[pos] = video.GetVideoChar(rect.right, rect.top+idx);
             pos += 1;
         }
     }
 }
 
 // ---- restore video area used by dummy window border ---- 
-fn RestoreBorder(rc:df.RECT) void {
+fn RestoreBorder(rect:Rect) void {
     if (Bsave) |buf| {
-        var lrc = rc;
-        lrc.bt = lrc.tp;
-        video.storevideo(lrc, buf[0..]);
-        lrc.tp = rc.bt;
-        lrc.bt = rc.bt;
-        video.storevideo(lrc, buf[Bwd..]);
-        var pos:usize = @intCast(Bwd*2);
+        var lrc = rect;
+        lrc.bottom = lrc.top;
+        video.storevideo(lrc.c_Rect(), buf[0..]);
+        lrc.top = rect.bottom;
+        lrc.bottom = rect.bottom;
+        video.storevideo(lrc.c_Rect(), buf[Bwd..]);
+        var pos:usize = Bwd*2;
         for (1..Bht-1) |idx| {
-            const i:c_int = @intCast(idx);
-            video.PutVideoChar(@intCast(rc.lf), @intCast(rc.tp+i), buf[pos]);
+            video.PutVideoChar(rect.left, rect.top+idx, buf[pos]);
             pos += 1;
-            video.PutVideoChar(@intCast(rc.rt), @intCast(rc.tp+i), buf[pos]);
+            video.PutVideoChar(rect.right, rect.top+idx, buf[pos]);
             pos += 1;
 
         }
