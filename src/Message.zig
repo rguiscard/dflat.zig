@@ -12,6 +12,7 @@ const app = @import("Application.zig");
 const pict = @import("PictureBox.zig");
 const cmd = @import("Commands.zig").Command;
 const menus = @import("Menus.zig");
+const console = @import("Console.zig");
 
 const MAXMESSAGES = 100;
 
@@ -135,8 +136,8 @@ pub fn init_messages() bool {
 
     df.resetmouse();
     df.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
-    df.savecursor();
-    df.hidecursor();
+    console.savecursor();
+    console.hidecursor();
 
     CaptureMouse = null;
     CaptureKeyboard = null;
@@ -151,8 +152,8 @@ pub fn init_messages() bool {
 fn StopMsg() void {
     clipboard.ClearClipboard();
     DialogBox.ClearDialogBoxes();
-    df.restorecursor();
-    df.unhidecursor();
+    console.restorecursor();
+    console.unhidecursor();
     df.hide_mousecursor();
 }
 
@@ -295,23 +296,23 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 pp2_ptr.* = @intCast(y);
             },
             df.SAVE_CURSOR => {
-                df.savecursor();
+                console.savecursor();
             },
             df.RESTORE_CURSOR => {
-                df.restorecursor();
+                console.restorecursor();
             },
             df.HIDE_CURSOR => {
-                df.normalcursor();
-                df.hidecursor();
+                console.normalcursor();
+                console.hidecursor();
             },
             df.SHOW_CURSOR => {
                 const p1_val:bool = params.yes;
                 if (p1_val) {
-                    df.set_cursor_type(0x0106);
+                    console.set_cursor_type(0x0106);
                 } else {
-                    df.set_cursor_type(0x0607);
+                    console.set_cursor_type(0x0607);
                 }
-                df.unhidecursor();
+                console.unhidecursor();
             },
             df.WAITKEYBOARD => {
                 // This one does nothing and is marked as FIXME originally.
