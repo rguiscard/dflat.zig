@@ -76,6 +76,7 @@ void scroll_window(WINDOW wnd, RECT rc, int d)
 	}
 }
 
+#if 0
 void SwapCursorStack(void)
 {
 #if 0
@@ -112,7 +113,6 @@ int getkey(void)
     return -1;
 }
 
-#if 0
 void waitformouse(void)
 {
     int n, e;

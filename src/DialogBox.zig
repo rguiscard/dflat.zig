@@ -13,6 +13,7 @@ const c = @import("Commands.zig").Command;
 const CLASS = @import("Classes.zig").CLASS;
 const k = CLASS; // abbreviation
 const GapBuffer = @import("GapBuffer.zig");
+const console = @import("Console.zig");
 
 var SysMenuOpen = false;
 var dialogboxes:?std.ArrayList(*Dialogs.DBOX) = null;
@@ -892,7 +893,7 @@ fn AssociatedControl(db:*Dialogs.DBOX, Tcmd: c) *Dialogs.CTLWINDOW {
 
 // --- process dialog box shortcut keys ---
 pub fn dbShortcutKeys(db:*Dialogs.DBOX, ky: u16) bool {
-    const ch = df.AltConvert(@intCast(ky));
+    const ch = console.AltConvert(ky);
 
     if (ch != 0) {
         for (&db.*.ctl) |*ctl| {

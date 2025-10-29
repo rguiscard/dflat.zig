@@ -18,6 +18,7 @@ const menus = @import("Menus.zig");
 const popdown = @import("PopDown.zig");
 const Colors = @import("Colors.zig");
 const cfg = @import("Config.zig");
+const console = @import("Console.zig");
 
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
@@ -683,7 +684,7 @@ fn CreateStatusBar(win: *Window) void {
 // SHELLDOS
 fn SwitchCursor() void {
     _ = q.SendMessage(null, df.SAVE_CURSOR, q.none);
-    df.SwapCursorStack();
+    console.SwapCursorStack();
     _ = q.SendMessage(null, df.RESTORE_CURSOR, q.none);
 }
 

@@ -246,11 +246,11 @@ fn LBChooseMsg(win:*Window, p1:?usize) void {
 // ---------- KEYBOARD Message ---------
 fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
     if (win.mnu) |mnu| {
-        var c:c_uint = @intCast(p1);
+        var c:u16 = p1;
         if (c < 128) { // FIXME unicode
             c = std.ascii.toLower(@intCast(c));
         }
-        const a = df.AltConvert(c);
+        const a = console.AltConvert(c);
         for(mnu.*.Selections, 0..) |popdown, sel| {
             if (popdown.SelectionTitle) |title| {
                 if (std.mem.indexOfScalar(u8, title, df.SHORTCUTCHAR)) |idx| {

@@ -140,17 +140,17 @@ pub fn SwapCursorStack() void {
 //    }
 }
 
-pub fn AltConvert(c:c_uint) c_int {
+pub fn AltConvert(c:u16) c_int {
     if (c >= df.kAltA and c <= df.kAltZ)
-        return c - df.kAltA + 'a';
+        return @as(c_int, @intCast(c)) - df.kAltA + 'a';
     if (c >= df.kAlt0 and c <= df.kAlt9)
-        return c - df.kAlt0 + '0';
+        return @as(c_int, @intCast(c)) - df.kAlt0 + '0';
     return c;
 }
 
 // only called from AllocationError, wait on keyboard read to exit
-pub fn getkey() c_int {
-    const buf = [_]u8{0}**32;
+pub export fn getkey() c_int {
+    var buf = [_]u8{0}**32;
 
     df.convert_screen_to_ansi();
     while(true) {

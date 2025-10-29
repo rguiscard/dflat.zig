@@ -132,11 +132,11 @@ fn PaintMsg(win:*Window) void {
 }
 
 // ------------ KEYBOARD Message -------------
-fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
+fn KeyboardMsg(win:*Window,p1:u16) void {
     if ((mwin == null) and (p1 < 256)) {
         // ----- search for menu bar shortcut keys ----
         const cc = std.ascii.toLower(@intCast(p1));
-        const a = df.AltConvert(@intCast(p1));
+        const a = console.AltConvert(p1);
         for (menupos, 0..) |m, idx| {
             if (((Window.inFocus == win) and (m.sc == cc)) or
                 ((a > 0) and (m.sc == a))) {
