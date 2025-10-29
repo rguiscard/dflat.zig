@@ -68,7 +68,7 @@ fn CreateWindowMsg(win: *Window) bool {
                 (df.SCREENHEIGHT-1 < win.GetBottom()))    {
             win.SetWindowHeight(df.SCREENHEIGHT);
             win.SetBottom(win.GetTop()+win.WindowHeight()-1);
-            wnd.*.RestoredRC = win.WindowRect();
+            wnd.*.RestoredRC = win.cWindowRect();
         }
     }
     SelectColors(win);

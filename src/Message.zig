@@ -404,7 +404,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
 }
 
 fn VisibleRect(win:*Window) df.RECT {
-    var rc = win.WindowRect();
+    var rc = win.cWindowRect();
     if (!win.TestAttribute(df.NOCLIP)) {
         if (win.parent) |pw| {
             var prc = rect.ClientRect(pw);

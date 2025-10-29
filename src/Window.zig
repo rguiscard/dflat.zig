@@ -17,6 +17,7 @@ const GapBuf = @import("GapBuffer.zig");
 const cfg = @import("Config.zig");
 const picture = @import("PictureBox.zig");
 const video = @import("Video.zig");
+const Rect = @import("Rect.zig");
 
 pub const Center = packed struct {
     LEFT: bool = false,
@@ -419,7 +420,7 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?df.RECT) void {
         if (rcc) |cc| {
             rc = cc;
         } else {
-            rc = df.RelativeWindowRect(wnd, self.WindowRect());
+            rc = df.RelativeWindowRect(wnd, self.cWindowRect());
         }
         rc = self.AdjustRectangle(rc);
         if (self.sendMessage(df.TITLE, .{.paint=.{rcc, false}})) {
@@ -545,7 +546,7 @@ fn ParamRect(self:*TopLevelFields, rcc:?df.RECT) df.RECT {
     if (rcc) |cc| {
         rc = cc;
     } else {
-        rc = df.RelativeWindowRect(wnd, self.WindowRect());
+        rc = df.RelativeWindowRect(wnd, self.cWindowRect());
         if (self.TestAttribute(df.SHADOW)) {
             rc.rt += 1;
             rc.bt += 1;
@@ -737,7 +738,7 @@ pub fn ClearWindow(self:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
         if (rcc) |cc| {
             rc = cc;
         } else {
-            rc = df.RelativeWindowRect(wnd, self.WindowRect());
+            rc = df.RelativeWindowRect(wnd, self.cWindowRect());
         }
         const top = self.TopBorderAdj();
         const bot = self.WindowHeight()-1-self.BottomBorderAdj();
@@ -880,14 +881,24 @@ pub fn ClientHeight(self: *TopLevelFields) usize {
     return 0;
 }
 
-pub fn WindowRect(self: *TopLevelFields) df.RECT {
+pub fn WindowRect(self: *TopLevelFields) Rect {
+    const wnd = self.win;
+    return Rect{
+        .left = @intCast(wnd.*.rc.lf),
+        .top = @intCast(wnd.*.rc.tp),
+        .right = if (wnd.*.rc.rt > 0) @intCast(wnd.*.rc.rt) else 0,
+        .bottom = if (wnd.*.rc.bt > 0) @intCast(wnd.*.rc.bt) else 0,
+    };
+}
+
+pub fn cWindowRect(self: *TopLevelFields) df.RECT {
     const wnd = self.win;
     return wnd.*.rc;
 }
 
 pub fn GetTop(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
-    return @intCast(rect.tp);
+    return rect.top;
 }
 pub fn SetTop(self: *TopLevelFields, top: usize) void {
     self.win.*.rc.tp = @intCast(top);
@@ -895,7 +906,7 @@ pub fn SetTop(self: *TopLevelFields, top: usize) void {
 
 pub fn GetBottom(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
-    return @intCast(rect.bt);
+    return rect.bottom;
 }
 
 pub fn SetBottom(self: *TopLevelFields, bottom: usize) void {
@@ -904,7 +915,7 @@ pub fn SetBottom(self: *TopLevelFields, bottom: usize) void {
 
 pub fn GetLeft(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
-    return @intCast(rect.lf);
+    return rect.left;
 }
 
 pub fn SetLeft(self: *TopLevelFields, left: usize) void {
@@ -913,7 +924,7 @@ pub fn SetLeft(self: *TopLevelFields, left: usize) void {
 
 pub fn GetRight(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
-    return @intCast(rect.rt);
+    return rect.right;
 }
 
 pub fn SetRight(self: *TopLevelFields, right: usize) void {

@@ -94,7 +94,7 @@ fn HideWindowMsg(win:*Window) void {
 
 // ----- test if screen coordinates are in a window ----
 fn InsideWindow(win:*Window, x:usize, y:usize) bool {
-    var rc = win.WindowRect();
+    var rc = win.cWindowRect();
     if (win.TestAttribute(df.NOCLIP))    {
         var pwnd = win.parent;
         while (pwnd) |pw| {
@@ -276,13 +276,13 @@ fn SetFocusMsg(win:*Window, yes:bool) void {
         }
         Window.inFocus = win;
         if ((that != null) and isVisible(win)) {
-            rc = df.subRectangle(that.?.WindowRect(), this.?.WindowRect());
+            rc = df.subRectangle(that.?.cWindowRect(), this.?.cWindowRect());
             if (df.ValidRect(rc) == false) {
                 if (app.ApplicationWindow) |awin| {
                     var ffwin = awin.firstWindow();
                     while (ffwin) |ff| {
                         if (isAncestor(win, ff) == false) {
-                            rc = df.subRectangle(win.WindowRect(),ff.WindowRect());
+                            rc = df.subRectangle(win.cWindowRect(),ff.cWindowRect());
                             if (df.ValidRect(rc)) {
                                 break;
                             }
@@ -771,13 +771,13 @@ fn PositionIcon(win:*Window) df.RECT {
     };
 
     if (win.parent) |pwin| {
-        const prc = pwin.WindowRect();
+        const prc = pwin.cWindowRect();
         var cwin = pwin.firstWindow();
         rc = LowerRight(prc); // this makes previosu assignment useless ?
         // - search for icon available location -
         while (cwin) |cw| {
             if (cw.condition == .ISMINIMIZED) {
-                const rc1 = cw.WindowRect();
+                const rc1 = cw.cWindowRect();
                 if (rc1.lf == rc.lf and rc1.tp == rc.tp) {
                     rc.lf -= ICONWIDTH;
                     rc.rt -= ICONWIDTH;
@@ -1112,7 +1112,7 @@ pub fn isVisible(win:*Window) bool {
 // -- adjust a window's rectangle to clip it to its parent -
 fn ClipRect(win:*Window) df.RECT {
     const wnd = win.win;
-    var rc = win.WindowRect();
+    var rc = win.cWindowRect();
     if (win.TestAttribute(df.SHADOW)) {
         rc.bt += 1;
         rc.rt += 1;

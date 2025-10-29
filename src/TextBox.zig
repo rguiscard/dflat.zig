@@ -422,7 +422,7 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
     if (p1) |rect1| {
         rc = rect1;
     } else {
-        rc = df.RelativeWindowRect(wnd, win.WindowRect());
+        rc = df.RelativeWindowRect(wnd, win.cWindowRect());
     }
    
     if (win.TestAttribute(df.HASBORDER) and
@@ -721,7 +721,7 @@ pub fn WriteTextLine(win:*Window, rcc:?df.RECT, y:usize, reverse:bool) void {
     if (rcc) |cc| {
         rc = cc;
     } else {
-        rc = df.RelativeWindowRect(wnd, win.WindowRect());
+        rc = df.RelativeWindowRect(wnd, win.cWindowRect());
         if (win.TestAttribute(df.HASBORDER) and
                 rc.rt >= win.WindowWidth()-1) {
             rc.rt = @intCast(win.WindowWidth()-2);

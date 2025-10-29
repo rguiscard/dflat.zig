@@ -97,7 +97,7 @@ pub fn CharInView(win:*Window, x:usize, y:usize) bool {
     var nwin = win.nextWindow();
     while (nwin) |nw| {
         if (nw.isHidden() == false) { //  && !isAncestor(wnd, nwnd)
-            var rc = nw.WindowRect();
+            var rc = nw.cWindowRect();
             if (nw.TestAttribute(df.SHADOW)) {
                 rc.bt += 1;
                 rc.rt += 1;
@@ -185,7 +185,7 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
         var off:usize = 0;
         if (df.ClipString == 0 and win.TestAttribute(df.NOCLIP) == false) {
             // -- clip the line to within ancestor windows --
-            var rc = win.WindowRect();
+            var rc = win.cWindowRect();
             var nwnd = win.parent;
             while (len > 0 and nwnd != null) {
                 const nwin = nwnd.?;
