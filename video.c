@@ -9,6 +9,7 @@ BOOL ClipString;
 
 char *video_address;
 int foreground, background;   /* current video colors */
+int cx, cy = -1; // from console-unix.c
 
 void convert_screen_to_ansi()
 {
