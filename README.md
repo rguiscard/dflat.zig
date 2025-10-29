@@ -23,6 +23,7 @@ $ zig build run
 - Help tends to crash after closing.
 - SaveDialog return truncated filename by 1.
 - Help window title is not draw to the right most position.
+- Open file with double click work, but not using "Open" button.
 --------
 
 # D-Flat: Text User Interface for UNIX, ELKS and Cosmopolitan

@@ -11,64 +11,6 @@ extern char *video_address;
 
 int cx, cy = -1;
 
-void cursor(int x, int y)
-{
-    cx = x;
-    cy = y;
-}
-
-void curr_cursor(int *x, int *y)
-{
-    *x = cx;
-    *y = cy;
-}
-
-#if 0
-void hidecursor(void)
-{
-    cy = -1;
-}
-
-void unhidecursor(void)
-{
-}
-
-void savecursor(void)
-{
-#if 0
-    if (cs < MAXSAVES)    {
-        //getcursor();
-        //cursorshape[cs] = regs.x.cx;
-        //cursorpos[cs] = regs.x.dx;
-        cs++;
-    }
-#endif
-}
-
-void restorecursor(void)
-{
-#if 0
-    if (cs)    {
-        --cs;
-        //videomode();
-        //regs.x.dx = cursorpos[cs];
-        //regs.h.ah = SETCURSOR;
-        //regs.x.bx = video_page;
-        //int86(VIDEO, &regs, &regs);
-        //set_cursor_type(cursorshape[cs]);
-    }
-#endif
-}
-
-void normalcursor(void)
-{
-}
-
-void set_cursor_type(unsigned t)
-{
-}
-#endif
-
 /* clear line y from x1 up to and including x2 to attribute attr */
 static void clear_line(int x1, int x2, int y, int attr)
 {
@@ -170,6 +112,7 @@ int getkey(void)
     return -1;
 }
 
+#if 0
 void waitformouse(void)
 {
     int n, e;
@@ -199,3 +142,4 @@ int getshift(void)
 void beep(void)
 {
 }
+#endif

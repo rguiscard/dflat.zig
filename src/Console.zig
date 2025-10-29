@@ -11,14 +11,14 @@ const Window = @import("Window.zig");
 //var cx:c_int = -1;
 //var cy:c_int = -1;
 
-pub fn cursor(x:c_int, y:c_int) void {
-    df.cx = x;
-    df.cy = y;
+pub fn cursor(x:usize, y:usize) void {
+    df.cx = @intCast(x);
+    df.cy = @intCast(y);
 }
 
-pub fn curr_cursor(x:*c_int, y:*c_int) void {
-    x.* = df.cx;
-    y.* = df.cy;
+pub fn curr_cursor(x:*usize, y:*usize) void {
+    x.* = @as(usize, @intCast(df.cx));
+    y.* = @as(usize, @intCast(df.cy));
 }
 
 pub fn hidecursor() void {
@@ -166,12 +166,12 @@ pub fn getkey() c_int {
 }
 
 pub fn waitformouse() void {
-    const mx:c_int = 0;
-    const my:c_int = 0;
-    const modkeys:c_int = 0;
-    const e:c_int = 0;
+    var mx:c_int = 0;
+    var my:c_int = 0;
+    var modkeys:c_int = 0;
+    var e:c_int = 0;
 
-    const buf = [_]u8{0}**32;
+    var buf = [_]u8{0}**32;
 
     if (df.mouse_button != df.kMouseLeftDown and df.mouse_button != df.kMouseLeftDoubleClick)
         return;

@@ -12,6 +12,7 @@ const clipboard = @import("Clipboard.zig");
 const normal = @import("Normal.zig");
 const cfg = @import("Config.zig");
 const video = @import("Video.zig");
+const console = @import("Console.zig");
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -453,7 +454,7 @@ fn KeyTyped(win:*Window, cc:u16) void {
 //        if (currchar == (char *)wnd->text+wnd->MaxTextLength)    {
         if (currpos == win.MaxTextLength) {
             // ---- typing at the end of maximum buffer ----
-            df.beep();
+            console.beep();
             return;
         }
         const len = buf.len();
@@ -723,7 +724,7 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
     } else if (p1 == '\t') {
         q.PostMessage(win.parent, df.KEYBOARD, .{.char=.{'\t', p2}});
     } else {
-        df.beep();
+        console.beep();
     }
     return true;
 }

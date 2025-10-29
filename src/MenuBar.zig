@@ -11,6 +11,7 @@ const menu = @import("Menu.zig");
 const menus = @import("Menus.zig");
 const popdown = @import("PopDown.zig");
 const video = @import("Video.zig");
+const console = @import("Console.zig");
 
 // positions in menu bar & shortcut key value
 var menupos = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
@@ -156,7 +157,7 @@ fn KeyboardMsg(win:*Window,p1:df.PARAM) void {
                     if (pd.SelectionTitle) |_| {
                         if (pd.Accelerator == p1) {
                             if (pd.Attrib.INACTIVE) {
-                                df.beep();
+                                console.beep();
                             } else {
                                 if (pd.Attrib.TOGGLE) {
                                     pd.Attrib.CHECKED = !pd.Attrib.CHECKED;

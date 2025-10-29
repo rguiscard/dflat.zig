@@ -9,6 +9,7 @@ const helpbox = @import("HelpBox.zig");
 const menus = @import("Menus.zig");
 const cfg = @import("Config.zig");
 const video = @import("Video.zig");
+const console = @import("Console.zig");
 
 var py:c_int = -1;
 pub var CurrentMenuSelection:usize = 0;
@@ -236,7 +237,7 @@ fn LBChooseMsg(win:*Window, p1:?usize) void {
                     q.PostMessage(pw, df.COMMAND, .{.command=.{popdown.*.ActionId, 0}}); // p2 was p1
                 }
             } else {
-                df.beep();
+                console.beep();
             }
         }
     }

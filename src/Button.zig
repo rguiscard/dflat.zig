@@ -11,6 +11,7 @@ const popdown = @import("PopDown.zig");
 const textbox = @import("TextBox.zig");
 const cfg = @import("Config.zig");
 const video = @import("Video.zig");
+const console = @import("Console.zig");
 
 fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?df.RECT) void {
     if (win.isVisible()) {
@@ -65,7 +66,7 @@ fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     if (ct.*.setting == df.ON) {
         q.PostMessage(win.parent, df.COMMAND, .{.command=.{ct.*.command, 0}});
     } else {
-        df.beep();
+        console.beep();
     }
 }
 

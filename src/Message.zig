@@ -238,11 +238,11 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 const y = params.position[1];
                 if (win) |w| {
                     if (w == Window.inFocus) {
-                        df.cursor(@intCast(x + w.GetClientLeft()),
-                                  @intCast(y + w.GetClientTop()));
+                        console.cursor(x + w.GetClientLeft(),
+                                       y + w.GetClientTop());
                     }
                 } else {
-                    df.cursor(@intCast(x), @intCast(y));
+                    console.cursor(x, y);
                 }
             },
             df.CAPTURE_KEYBOARD => {
@@ -286,14 +286,14 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 NoChildCaptureKeyboard = false;
             },
             df.CURRENT_KEYBOARD_CURSOR => {
-                var x:c_int = 0;
-                var y:c_int = 0;
-                df.curr_cursor(&x, &y);
+                var x:usize = 0;
+                var y:usize = 0;
+                console.curr_cursor(&x, &y);
 
                 const pp1_ptr:*usize = params.cursor[0];
                 const pp2_ptr:*usize = params.cursor[1];
-                pp1_ptr.* = @intCast(x);
-                pp2_ptr.* = @intCast(y);
+                pp1_ptr.* = x;
+                pp2_ptr.* = y;
             },
             df.SAVE_CURSOR => {
                 console.savecursor();
@@ -349,7 +349,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 // df.get_mouseposition((int*)p1,(int*)p2); // do nothing in original code
             },
             df.WAITMOUSE => {
-                df.waitformouse();
+                console.waitformouse();
             },
             df.TESTMOUSE => {
                 rrtn = if (df.mousebuttons()>0) true else false;
