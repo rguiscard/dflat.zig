@@ -334,7 +334,7 @@ fn SelectionMsg(win:*Window, p1:?usize, p2:bool) void {
                         null,
                         win,
                         null,
-                        df.SHADOW);
+                        df.SHADOW, .{});
             if (p2 == false) {
                 Selecting = false;
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});

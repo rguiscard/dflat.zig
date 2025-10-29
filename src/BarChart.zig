@@ -51,12 +51,13 @@ pub fn BarChart(pwin: *Window) void {
     if (Bwnd == null) {
         Bwnd = Window.create(k.PICTUREBOX,
                     "BarChart",
-                    -1, -1, BCHEIGHT, BCWIDTH,
+                    0, 0, BCHEIGHT, BCWIDTH,
                     null, pwin, BarChartProc,
                     df.SHADOW     |
                     df.CONTROLBOX |
                     df.MOVEABLE   |
-                    df.HASBORDER
+                    df.HASBORDER,
+                    Window.CENTER_POSITION,
         );
         if (Bwnd) |w| {
             var win = w;

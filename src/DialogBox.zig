@@ -88,15 +88,23 @@ pub fn create(parent:?*Window, db:*Dialogs.DBOX, Modal:df.BOOL,
         save = df.SAVESELF;
     }
 
+    const center: Window.Center = .{
+        .LEFT   = (box.*.dwnd.x == -1),
+        .TOP    = (box.*.dwnd.y == -1),
+        .WIDTH  = (box.*.dwnd.w == -1),
+        .HEIGHT = (box.*.dwnd.h == -1),
+    };
+
     var win = Window.create(k.DIALOG,
                         box.*.dwnd.title,
-                        @intCast(x), @intCast(y),
-                        box.*.dwnd.h,
-                        box.*.dwnd.w,
+                        if (center.LEFT) 0 else @intCast(x), 
+                        if (center.TOP ) 0 else @intCast(y),
+                        if (center.HEIGHT) 0 else @intCast(box.*.dwnd.h),
+                        if (center.WIDTH) 0 else @intCast(box.*.dwnd.w),
                         .{.dbox = box},
                         parent,
                         wndproc,
-                        save);
+                        save, center);
 
     _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
     win.*.modal = (Modal == df.TRUE);
@@ -407,16 +415,22 @@ fn CreateWindowMsg(win:*Window) bool {
                 attrib |= df.HASBORDER;
             }
 
+            const center:Window.Center = .{
+                .WIDTH  = (ctl.*.dwnd.w == -1),
+                .HEIGHT = (ctl.*.dwnd.h == -1),
+            };
+
             var cwnd = Window.create(ctl.*.Class,
                             ctl.*.dwnd.title,
                             @intCast(ctl.*.dwnd.x+@as(isize, @intCast(win.GetClientLeft()))),
                             @intCast(ctl.*.dwnd.y+@as(isize, @intCast(win.GetClientTop()))),
-                            ctl.*.dwnd.h,
-                            ctl.*.dwnd.w,
+                            @intCast(ctl.*.dwnd.h),
+                            @intCast(ctl.*.dwnd.w),
                             .{.control = ctl},
                             win,
                             ControlProc,
-                            attrib);
+                            attrib,
+                            center);
             if ((ctl.*.Class == k.EDITBOX or ctl.*.Class == k.TEXTBOX or
                     ctl.*.Class == k.COMBOBOX)) {
                 if (getCtlWindowText(ctl)) |text| {

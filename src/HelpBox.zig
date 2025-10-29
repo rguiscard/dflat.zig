@@ -450,7 +450,8 @@ pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be p
                             null,
                             win,
                             null,
-                            df.HASBORDER | df.NOCLIP | df.SAVESELF);
+                            df.HASBORDER | df.NOCLIP | df.SAVESELF,
+                            .{});
 //                    df.clearBIOSbuffer(); // no function
                 // ----- read the help text -------
                 df.SeekHelpLine(help.*.hptr, help.*.bit);

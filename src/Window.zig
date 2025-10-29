@@ -18,6 +18,23 @@ const cfg = @import("Config.zig");
 const picture = @import("PictureBox.zig");
 const video = @import("Video.zig");
 
+pub const Center = packed struct {
+    LEFT: bool = false,
+    TOP: bool = false,
+    WIDTH: bool = false,
+    HEIGHT: bool = false,
+};
+
+pub const CENTER_POSITION:Center = .{
+    .LEFT = true,
+    .TOP = true,
+};
+
+pub const CENTER_SIZE:Center = .{
+    .WIDTH = true,
+    .HEIGHT = true,
+};
+
 pub const Condition = enum {
     ISRESTORED,
     ISMINIMIZED,
@@ -137,15 +154,15 @@ pub fn init(wnd: df.WINDOW) TopLevelFields {
 }
 
 pub fn create(
-    klass: CLASS,               // class of this window
-    ttl: ?[:0]const u8,         // title or NULL
-    left:c_int, top:c_int,      // upper left coordinates
-    height:isize, width:isize,  // dimensions
-//    extension:?*anyopaque,      // pointer to additional data
-    payload:?Payload,         // pointer to additional data
-    parent: ?*TopLevelFields,   // parent of this window
+    klass: CLASS,                // class of this window
+    ttl: ?[:0]const u8,          // title or NULL
+    left: usize, top: usize,     // upper left coordinates
+    height: usize, width: usize, // dimensions
+    payload: ?Payload,           // pointer to additional data
+    parent: ?*TopLevelFields,    // parent of this window
     wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, params:q.Params) bool,
-    attrib: c_int) *TopLevelFields {
+    attrib: c_int,
+    position: Center) *TopLevelFields {
 
     const title = ttl;
     const wnd:df.WINDOW = @ptrCast(@alignCast(df.DFcalloc(1, @sizeOf(df.window))));
@@ -166,24 +183,24 @@ pub fn create(
 
         // ----- height, width = -1: fill the screen -------
         var ht = height;
-        if (ht == -1)
+        if (position.HEIGHT)
             ht = @intCast(df.SCREENHEIGHT);
         var wt = width;
-        if (wt == -1)
+        if (position.WIDTH)
             wt = @intCast(df.SCREENWIDTH);
 
         // ----- coordinates -1, -1 = center the window ----
         const hht:c_int = @intCast(ht);
         const wwt:c_int = @intCast(wt);
-        if (left == -1) {
+        if (position.LEFT) {
             wnd.*.rc.lf = @divFloor(df.SCREENWIDTH-wwt, 2);
         } else {
-            wnd.*.rc.lf = left;
+            wnd.*.rc.lf = @intCast(left);
         }
-        if (top == -1) {
+        if (position.TOP) {
             wnd.*.rc.tp = @divFloor(df.SCREENHEIGHT-hht, 2);
         } else {
-            wnd.*.rc.tp = top;
+            wnd.*.rc.tp = @intCast(top);
         }
         self.attrib = attrib;
         if (ttl) |tt| {

@@ -67,12 +67,12 @@ pub fn WatchIcon() *Window {
     var mx:usize = 10;
     var my:usize = 10;
     _ = q.SendMessage(null, df.CURRENT_MOUSE_CURSOR, .{.cursor=.{&mx, &my}});
-    const win = Window.create (
+    const win = Window.create(
                     k.BOX,
                     null,
-                    @intCast(mx), @intCast(my), 3, 5,
+                    mx, my, 3, 5,
                     null, null,
                     WatchIconProc,
-                    df.VISIBLE | df.HASBORDER | df.SHADOW | df.SAVESELF);
+                    df.VISIBLE | df.HASBORDER | df.SHADOW | df.SAVESELF, .{});
     return win;
 }

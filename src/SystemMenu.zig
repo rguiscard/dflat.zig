@@ -74,7 +74,7 @@ pub fn BuildSystemMenu(win: *Window) void {
     }
 
     const SystemMenuWin = Window.create(k.POPDOWNMENU, null,
-                @intCast(lf),@intCast(tp),@intCast(ht),@intCast(wd),null,win,SystemMenuProc, 0);
+                @intCast(lf),@intCast(tp),@intCast(ht),@intCast(wd),null,win,SystemMenuProc, 0, .{});
 
     if (win.condition == .ISRESTORED) {
         menu.DeactivateCommand(&menus.SystemMenu, c.ID_SYSRESTORE);

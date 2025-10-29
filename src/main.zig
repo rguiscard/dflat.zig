@@ -4,7 +4,7 @@
 
 pub const DFlatApplication = "memopad";
 const sUntitled:[:0]const u8 = "Untitled";
-var wndpos:c_int = 0;
+var wndpos:usize = 0;
 
 pub fn main() !void {
 //    const argc: c_int = @intCast(std.os.argv.len);
@@ -25,7 +25,7 @@ pub fn main() !void {
 
     var win = mp.Window.create(mp.CLASS.APPLICATION,
                         "D-Flat MemoPad",
-                        0, 0, -1, -1,
+                        0, 0, 0, 0,
                         .{.menubar = &menu.MainMenu},
                         null,
                         MemoPadProc,
@@ -33,7 +33,9 @@ pub fn main() !void {
                         df.SIZEABLE  |
                         df.HASBORDER |
                         df.MINMAXBOX |
-                        df.HASSTATUSBAR);
+                        df.HASSTATUSBAR,
+                        mp.Window.CENTER_SIZE);
+
     df.LoadHelpFile(@constCast(DFlatApplication.ptr));
     _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
 
@@ -235,7 +237,8 @@ pub fn OpenPadWindow(win:*mp.Window, filename: []const u8) void {
                 df.MOVEABLE   |
                 df.HASBORDER  |
                 df.SIZEABLE   |
-                df.MULTILINE);
+                df.MULTILINE,
+                .{});
 
     if (std.mem.eql(u8, fname, sUntitled) == false) {
         if (mp.global_allocator.allocSentinel(u8, fname.len, 0)) |buf| {

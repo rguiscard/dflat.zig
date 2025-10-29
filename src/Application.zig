@@ -640,14 +640,14 @@ fn CreateMenu(win: *Window) void {
     }
     var mwnd = Window.create(k.MENUBAR,
                         null,
-                        @intCast(win.GetClientLeft()),
-                        @intCast(win.GetClientTop()-1),
+                        win.GetClientLeft(),
+                        win.GetClientTop()-1,
                         1,
-                        @intCast(win.ClientWidth()),
+                        win.ClientWidth(),
                         null,
                         win,
                         null,
-                        0);
+                        0, .{});
 
     win.MenuBar = mwnd;
 
@@ -667,14 +667,14 @@ fn CreateStatusBar(win: *Window) void {
     if (win.TestAttribute(df.HASSTATUSBAR)) {
         var sbar = Window.create(k.STATUSBAR,
                             null,
-                            @intCast(win.GetClientLeft()),
-                            @intCast(win.GetBottom()),
+                            win.GetClientLeft(),
+                            win.GetBottom(),
                             1,
-                            @intCast(win.ClientWidth()),
+                            win.ClientWidth(),
                             null,
                             win,
                             null,
-                            0);
+                            0, .{});
         win.StatusBar = sbar;
         sbar.AddAttribute(df.VISIBLE);
     }

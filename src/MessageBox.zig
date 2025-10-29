@@ -49,8 +49,8 @@ fn GenericMessage(win:?*Window, title: ?[:0]const u8, msg:[:0]const u8, buttonct
         mBox.dwnd.title = t;
     }
 
-    mBox.ctl[0].dwnd.h = MsgHeight(m);
-    mBox.ctl[0].dwnd.w = @max(@max(MsgWidth(m), buttonct*8+buttonct+2),ttl_w);
+    mBox.ctl[0].dwnd.h = @intCast(MsgHeight(m));
+    mBox.ctl[0].dwnd.w = @intCast(@max(@max(MsgWidth(m), buttonct*8+buttonct+2),ttl_w));
     mBox.dwnd.h = mBox.ctl[0].dwnd.h+6;
     mBox.dwnd.w = mBox.ctl[0].dwnd.w+4;
     if (buttonct == 1) {
@@ -83,9 +83,10 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
     var win = Window.create(
                     k.TEXTBOX,
                     null,
-                    -1,-1,MsgHeight(msg)+2,MsgWidth(msg)+2,
+                    0,0,MsgHeight(msg)+2,MsgWidth(msg)+2,
                     null,null,null,
-                    df.HASBORDER | df.SHADOW | df.SAVESELF);
+                    df.HASBORDER | df.SHADOW | df.SAVESELF,
+                    Window.CENTER_POSITION);
 
     _ = win.sendTextMessage(df.SETTEXT, msg);
     if (cfg.config.mono == 0) {
@@ -181,16 +182,16 @@ fn CancelProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
     return root.BaseWndProc(k.MESSAGEBOX, win, msg, params);
 }
 
-pub fn MsgHeight(msg:[:0]const u8) c_int {
-    const h:c_int =  @intCast(std.mem.count(u8, msg, "\n")+1);
-    return @min(h, df.SCREENHEIGHT-10);
+pub fn MsgHeight(msg:[:0]const u8) usize {
+    const h:usize = std.mem.count(u8, msg, "\n")+1;
+    return @intCast(@min(h, df.SCREENHEIGHT-10));
 }
 
-pub fn MsgWidth(msg:[:0]const u8) c_int {
-    var w:c_int = 0;
+pub fn MsgWidth(msg:[:0]const u8) usize {
+    var w:usize = 0;
     var iter = std.mem.splitScalar(u8, msg, '\n'); // split do not include '\n'
     while (iter.next()) |line| {
-        w = @intCast(@max(w, line.len));
+        w = @max(w, line.len);
     }
-    return @min(w, df.SCREENWIDTH-10);
+    return @intCast(@min(w, df.SCREENWIDTH-10));
 }

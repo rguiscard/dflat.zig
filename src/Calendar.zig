@@ -186,13 +186,14 @@ pub fn Calendar(pwin: *Window) void {
         ttm = ctime.localtime(&tim).*;
         Cwnd = Window.create(k.PICTUREBOX,
             "Calendar",
-            -1, -1, CALHEIGHT, CALWIDTH,
+            0, 0, CALHEIGHT, CALWIDTH,
             null, pwin, CalendarProc,
             df.SHADOW     |
             df.MINMAXBOX  |
             df.CONTROLBOX |
             df.MOVEABLE   |
-            df.HASBORDER
+            df.HASBORDER,
+            Window.CENTER_POSITION
         );
     }
     if (Cwnd) |cc| {
