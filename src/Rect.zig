@@ -3,6 +3,26 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 
+left:usize = 0,
+top:usize = 0,
+right:usize = 0,
+bottom:usize = 0,
+
+/// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
+/// name the type here, so it can be easily referenced by other declarations in this file.
+const TopLevelFields = @This();
+
+pub fn c_Rect(self:TopLevelFields) df.RECT {
+    return df.RECT{
+        .lf = @intCast(self.left),
+        .tp = @intCast(self.top),
+        .rt = @intCast(self.right),
+        .bt = @intCast(self.bottom),
+    };
+}
+
+// ------- df.Rect related -------
+
 //#define ValidRect(r)      (RectRight(r) || RectLeft(r) || \
 //                           RectTop(r) || RectBottom(r))
 //#define RectWidth(r)      (RectRight(r)-RectLeft(r)+1)

@@ -462,20 +462,6 @@ pub const reverse = [CLASSCOUNT][4][2]u8{
 };
 
 // Accessories
-pub export fn c_WndForeground(wnd:df.WINDOW) u8 {
-    if (Window.get_zin(wnd)) |win| {
-        return WndForeground(win);
-    }
-    return 0;
-}
-
-pub export fn c_WndBackground(wnd:df.WINDOW) u8 {
-    if (Window.get_zin(wnd)) |win| {
-        return WndBackground(win);
-    }
-    return 0;
-}
-
 pub fn WndForeground(win:*Window) u8 {
     return win.WindowColors [STD_COLOR] [FG];
 }

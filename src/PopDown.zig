@@ -16,22 +16,21 @@ pub var CurrentMenuSelection:usize = 0;
 
 // ------------ CREATE_WINDOW Message -------------
 fn CreateWindowMsg(win:*Window) bool {
-    const wnd = win.win;
     win.ClearAttribute(df.HASTITLEBAR  |
                        df.VSCROLLBAR   |
                        df.MOVEABLE     |
                        df.SIZEABLE     |
                        df.HSCROLLBAR);
     // ------ adjust to keep popdown on screen -----
-    var adj:c_int = df.SCREENHEIGHT-1-wnd.*.rc.bt;
-    if (adj < 0) {
-        wnd.*.rc.tp += adj;
-        wnd.*.rc.bt += adj;
+    if (df.SCREENHEIGHT-1 < win.GetBottom()) {
+        const offset = win.GetBottom()-@as(usize, @intCast(df.SCREENHEIGHT-1));
+        win.SetTop(win.GetTop()-offset);
+        win.SetBottom(win.GetBottom()-offset);
     }
-    adj = df.SCREENWIDTH-1-wnd.*.rc.rt;
-    if (adj < 0) {
-        wnd.*.rc.lf += adj;
-        wnd.*.rc.rt += adj;
+    if (df.SCREENWIDTH-1 < win.GetRight()) {
+        const offset = win.GetRight()-@as(usize, @intCast(df.SCREENWIDTH-1));
+        win.SetLeft(win.GetLeft()-offset);
+        win.SetRight(win.GetRight()-offset);
     }
     const rtn = root.BaseWndProc(k.POPDOWNMENU, win, df.CREATE_WINDOW, q.none);
     _ = win.sendMessage(df.CAPTURE_MOUSE, .{.capture=.{false, null}});

@@ -453,21 +453,19 @@ fn MoveMsg(win:*Window, x:usize, y:usize) void {
     if (wasVisible) {
         _ = win.sendMessage(df.HIDE_WINDOW, q.none);
     }
-    wnd.*.rc.lf = @intCast(x);
-    wnd.*.rc.tp = @intCast(y);
+    win.SetLeft(x);
+    win.SetTop(y);
     // be careful, changing the same struct.
-    wnd.*.rc.rt = @intCast(win.GetLeft()+win.WindowWidth()-1);
-    wnd.*.rc.bt = @intCast(win.GetTop()+win.WindowHeight()-1);
+    win.SetRight(win.GetLeft()+win.WindowWidth()-1);
+    win.SetBottom(win.GetTop()+win.WindowHeight()-1);
     if (win.condition == .ISRESTORED) {
         wnd.*.RestoredRC = wnd.*.rc;
     }
 
     var cwin = win.firstWindow();
     while (cwin) |cw| {
-        const cwnd = cw.win;
-
-        var x_new:usize = @as(usize, @intCast(cwnd.*.rc.lf)) + x;
-        var y_new:usize = @as(usize, @intCast(cwnd.*.rc.tp)) + y;
+        var x_new:usize = cw.GetLeft() + x;
+        var y_new:usize = cw.GetTop() + y;
         x_new -|= win_x;
         y_new -|= win_y;
         _ = cw.sendMessage(df.MOVE, .{.position=.{x_new, y_new}});
@@ -491,8 +489,8 @@ fn SizeMsg(win:*Window, x:usize, y:usize) void {
     if (wasVisible) {
         _ = win.sendMessage(df.HIDE_WINDOW, q.none);
     }
-    wnd.*.rc.rt = @intCast(x);
-    wnd.*.rc.bt = @intCast(y);
+    win.SetRight(x);
+    win.SetBottom(y);
     win.ht = win.GetBottom()-win.GetTop()+1;
     win.wd = win.GetRight()-win.GetLeft()+1;
 
@@ -704,11 +702,10 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
         df.BUTTON_RELEASED => {
             if (WindowMoving or WindowSizing) {
                 const dwin = getDummy();
-                const dwnd = dwin.win;
                 if (WindowMoving) {
-                    q.PostMessage(win,df.MOVE,.{.position=.{@intCast(dwnd.*.rc.lf),@intCast(dwnd.*.rc.tp)}});
+                    q.PostMessage(win,df.MOVE,.{.position=.{dwin.GetLeft(),dwin.GetTop()}});
                 } else {
-                    q.PostMessage(win,df.SIZE,.{.position=.{@intCast(dwnd.*.rc.rt),@intCast(dwnd.*.rc.bt)}});
+                    q.PostMessage(win,df.SIZE,.{.position=.{dwin.GetRight(),dwin.GetBottom()}});
                 }
                 TerminateMoveSize();
             }
@@ -821,10 +818,10 @@ fn dragborder(win:*Window, x:usize, y:usize) void {
 
     RestoreBorder(dwnd.*.rc);
     // ------- build the dummy window --------
-    dwnd.*.rc.lf = @intCast(x);
-    dwnd.*.rc.tp = @intCast(y);
-    dwnd.*.rc.rt = dwnd.*.rc.lf+@as(c_int, @intCast(win.WindowWidth()))-1;
-    dwnd.*.rc.bt = dwnd.*.rc.tp+@as(c_int, @intCast(win.WindowHeight()))-1;
+    dwin.SetLeft(x);
+    dwin.SetTop(y);
+    dwin.SetRight(dwin.GetLeft()+win.WindowWidth()-1);
+    dwin.SetBottom(dwin.GetTop()+win.WindowHeight()-1);
     dwin.ht = win.WindowHeight();
     dwin.wd = win.WindowWidth();
     dwin.parent = win.parent;
@@ -857,10 +854,10 @@ fn sizeborder(win:*Window, rt:usize, bt:usize) void {
         RestoreBorder(dwnd.*.rc);
 
     // ------- change the dummy window --------
-    dwin.ht = bt-@as(usize, @intCast(dwnd.*.rc.tp))+1;
-    dwin.wd = rt-@as(usize, @intCast(dwnd.*.rc.lf))+1;
-    dwnd.*.rc.rt = @intCast(new_rt);
-    dwnd.*.rc.bt = @intCast(new_bt);
+    dwin.ht = bt-dwin.GetTop()+1;
+    dwin.wd = rt-dwin.GetLeft()+1;
+    dwin.SetRight(new_rt);
+    dwin.SetBottom(new_bt);
     if ((new_rt != px) or (new_bt != py)) {
         px = @intCast(new_rt);
         py = @intCast(new_bt);

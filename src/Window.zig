@@ -889,6 +889,9 @@ pub fn GetTop(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
     return @intCast(rect.tp);
 }
+pub fn SetTop(self: *TopLevelFields, top: usize) void {
+    self.win.*.rc.tp = @intCast(top);
+}
 
 pub fn GetBottom(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
@@ -904,9 +907,17 @@ pub fn GetLeft(self: *TopLevelFields) usize {
     return @intCast(rect.lf);
 }
 
+pub fn SetLeft(self: *TopLevelFields, left: usize) void {
+    self.win.*.rc.lf = @intCast(left);
+}
+
 pub fn GetRight(self: *TopLevelFields) usize {
     const rect = self.WindowRect();
     return @intCast(rect.rt);
+}
+
+pub fn SetRight(self: *TopLevelFields, right: usize) void {
+    self.win.*.rc.rt = @intCast(right);
 }
 
 pub fn GetClientTop(self: *TopLevelFields) usize {
