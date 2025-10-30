@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
 const Rect = @import("Rect.zig");
+const mouse = @import("Mouse.zig");
 
 const sTab:u16 = 0x0C + 0x80;
 
@@ -28,12 +29,12 @@ pub fn getvideo(rc:Rect, bf:[]u16) void {
     const ht:usize = rc.bottom-rc.top+1;
     const bytes_row:usize = rc.right-rc.left+1;
     var vadr = vad(rc.left, rc.top);
-    df.hide_mousecursor();
+    mouse.hide_mousecursor();
     for (0..ht) |idx| {
         movefromscreen(bf[bytes_row*idx..], vadr, bytes_row);
         vadr += @as(usize, @intCast(df.SCREENWIDTH));
     }
-    df.show_mousecursor();
+    mouse.show_mousecursor();
 }
 
 // -- write a rectangle of video memory from a save buffer --
@@ -41,35 +42,35 @@ pub fn storevideo(rc:Rect, bf:[]u16) void {
     const ht:usize = rc.bottom-rc.top+1;
     const bytes_row:usize = rc.right-rc.left+1;
     var vadr = vad(rc.left, rc.top);
-    df.hide_mousecursor();
+    mouse.hide_mousecursor();
     for (0..ht) |idx| {
         movetoscreen(bf[bytes_row*idx..], vadr, bytes_row);
         vadr += @intCast(df.SCREENWIDTH);
     }
-    df.show_mousecursor();
+    mouse.show_mousecursor();
 }
 
 // -------- read a character of video memory -------
 pub fn GetVideoChar(x:usize, y:usize) u16 {
-    df.hide_mousecursor();
+    mouse.hide_mousecursor();
     // #define peek(a,o)       (*((unsigned short *)((char *)(a)+(o))))
     // const c = peek(video_address, vad(x,y));
     const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
     const c:[*]u16 = va16_ptr+vad(x,y);
-    df.show_mousecursor();
+    mouse.show_mousecursor();
     return c[0];
 }
 
 // -------- write a character of video memory -------
 pub fn PutVideoChar(x:usize, y:usize, chr:u16) void {
     if (x < df.SCREENWIDTH and y < df.SCREENHEIGHT) {
-        df.hide_mousecursor();
+        mouse.hide_mousecursor();
         // #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
         // poke(video_address, vad(x,y), chr);
         const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
         const c:[*]u16 = va16_ptr+vad(x,y);
         c[0] = chr;
-        df.show_mousecursor();
+        mouse.show_mousecursor();
     }
 }
 
@@ -124,13 +125,13 @@ pub fn wputch(win:*Window, chr:u16, x:usize, y:usize) void {
         const ch:u16 = @intCast((chr & 255) | ((df.foreground | (df.background << 4)) << 8));
         const xc:usize = win.GetLeft()+x;
         const yc:usize = win.GetTop()+y;
-        df.hide_mousecursor();
+        mouse.hide_mousecursor();
         // #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
         // poke(video_address, vad(xc, yc), ch);
         const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
         const c:[*]u16 = va16_ptr+vad(xc,yc);
         c[0] = ch;
-        df.show_mousecursor();
+        mouse.show_mousecursor();
     }
 }
 
@@ -209,9 +210,9 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
             }
         }
         if (len > 0) {
-            df.hide_mousecursor();
+            mouse.hide_mousecursor();
             movetoscreen(ln[off..], vad(x1+off,y1), len);
-            df.show_mousecursor();
+            mouse.show_mousecursor();
         }
 
     }

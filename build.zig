@@ -71,7 +71,6 @@ pub fn build(b: *std.Build) void {
 
             "video.c",
             "events-unix.c",
-            "mouse-ansi.c",
             "kcp437.c",
             "runes.c",
             "unikey.c",

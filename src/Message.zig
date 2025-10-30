@@ -13,6 +13,7 @@ const pict = @import("PictureBox.zig");
 const cmd = @import("Commands.zig").Command;
 const menus = @import("Menus.zig");
 const console = @import("Console.zig");
+const mouse = @import("Mouse.zig");
 
 const MAXMESSAGES = 100;
 
@@ -134,8 +135,8 @@ pub fn init_messages() bool {
         df.SCREENHEIGHT = rows - 1;
     }
 
-    df.resetmouse();
-    df.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
+    mouse.resetmouse();
+    mouse.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
     console.savecursor();
     console.hidecursor();
 
@@ -154,7 +155,7 @@ fn StopMsg() void {
     DialogBox.ClearDialogBoxes();
     console.restorecursor();
     console.unhidecursor();
-    df.hide_mousecursor();
+    mouse.hide_mousecursor();
 }
 
 // ----- post an event and parameters to event queue ----
@@ -320,11 +321,11 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
             },
             // -------- mouse messages --------
             df.RESET_MOUSE => {
-                df.resetmouse();
-                df.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
+                mouse.resetmouse();
+                mouse.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
             },
             df.MOUSE_INSTALLED => {
-                rrtn = if (df.mouse_installed()>0) true else false;
+                rrtn = mouse.mouse_installed();
             },
             df.MOUSE_TRAVEL => {
                 const p1_val:?Rect = params.area;
@@ -333,18 +334,18 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 if (p1_val) |area| {
                     rc = area;
                 }
-                df.set_mousetravel(@intCast(rc.left), @intCast(rc.right), @intCast(rc.top), @intCast(rc.bottom));
+                mouse.set_mousetravel(@intCast(rc.left), @intCast(rc.right), @intCast(rc.top), @intCast(rc.bottom));
             },
             df.SHOW_MOUSE => {
-                df.show_mousecursor();
+                mouse.show_mousecursor();
             },
             df.HIDE_MOUSE => {
-                df.hide_mousecursor();
+                mouse.hide_mousecursor();
             },
             df.MOUSE_CURSOR => {
                 const x = params.position[0];
                 const y = params.position[1];
-                df.set_mouseposition(@intCast(x), @intCast(y));
+                mouse.set_mouseposition(@intCast(x), @intCast(y));
             },
             df.CURRENT_MOUSE_CURSOR => {
                 // df.get_mouseposition((int*)p1,(int*)p2); // do nothing in original code
@@ -353,7 +354,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 console.waitformouse();
             },
             df.TESTMOUSE => {
-                rrtn = if (df.mousebuttons()>0) true else false;
+                rrtn = if (mouse.mousebuttons()>0) true else false;
             },
             df.CAPTURE_MOUSE => {
                 const p1_val:bool= params.capture[0];

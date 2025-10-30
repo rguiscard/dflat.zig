@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const colors = @import("Colors.zig");
 const Window = @import("Window.zig");
+const mouse = @import("Mouse.zig");
 
 //static int near cursorpos[MAXSAVES];
 //static int near cursorshape[MAXSAVES];
@@ -126,10 +127,10 @@ fn scroll_video(up:c_int, n:c_int, at:c_int, y1:c_int, x1:c_int, y2:c_int, x2:c_
 // --------- scroll the window. d: 1 = up, 0 = dn ----------
 pub fn scroll_window(win:*Window, rc:df.RECT, d:c_int) void {
     if (rc.tp != rc.bt) {
-        df.hide_mousecursor();
+        mouse.hide_mousecursor();
         scroll_video(d, 1, colors.WndForeground(win) | (colors.WndBackground(win) << 4),
                      rc.tp, rc.lf, rc.bt, rc.rt);
-        df.show_mousecursor();
+        mouse.show_mousecursor();
     }
 }
 

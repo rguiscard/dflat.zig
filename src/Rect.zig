@@ -98,21 +98,3 @@ pub fn RelativeWindowRect(win:*Window, rc:TopLevelFields) TopLevelFields {
     rcc.bottom -|= win.GetTop();
     return rcc;
 }
-
-// ------- df.Rect related -------
-
-pub fn RectTop(r:df.RECT) callconv(.c) c_int {
-    return r.tp;
-}
-
-pub fn RectBottom(r:df.RECT) callconv(.c) c_int {
-    return r.bt;
-}
-
-pub fn RectLeft(r:df.RECT) callconv(.c) c_int {
-    return r.lf;
-}
-
-pub fn RectRight(r:df.RECT) callconv(.c) c_int {
-    return r.rt;
-}

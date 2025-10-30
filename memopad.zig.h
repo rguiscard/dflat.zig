@@ -54,3 +54,8 @@ extern char *video_address;
 extern int mouse_button;
 extern int cx;
 extern int cy;
+
+// mouse-ansi.c
+extern int mouse_x;        /* set in events-unix.c */
+extern int mouse_y;
+extern int mouse_button;
