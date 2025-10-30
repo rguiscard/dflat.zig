@@ -490,47 +490,45 @@ fn shadow_char(self:*TopLevelFields, y:usize) void {
 }
 
 // --- display the bottom border shadow line for a window --
-fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        var rc = rcc;
-        const fg = df.foreground;
-        const bg = df.background;
+fn shadowline(self:*TopLevelFields, rcc:Rect) void {
+    var rc = rcc;
+    const fg = df.foreground;
+    const bg = df.background;
 
-        if (win.TestAttribute(df.SHADOW) == false or
-            win.condition == .ISMINIMIZED or
-            win.condition == .ISMAXIMIZED or
-            cfg.config.mono > 0) {
-            // No shadow
-            return;
+    if (self.TestAttribute(df.SHADOW) == false or
+        self.condition == .ISMINIMIZED or
+        self.condition == .ISMAXIMIZED or
+        cfg.config.mono > 0) {
+        // No shadow
+        return;
+    }
+
+    const len:usize = self.WindowWidth();
+    if (root.global_allocator.allocSentinel(u8, len+1, 0)) |buf| {
+        defer root.global_allocator.free(buf);
+        const y = self.GetBottom()+1;
+        const left:usize = self.GetLeft();
+        for (0..len+1) |idx| {
+            buf[idx] = @intCast(video.GetVideoChar(@intCast(left+idx), @intCast(y)) & 255);
         }
+        buf[len+1] = 0;
 
-        const len:usize = @intCast(win.WindowWidth());
-        if (root.global_allocator.allocSentinel(u8, len+1, 0)) |buf| {
-            defer root.global_allocator.free(buf);
-            const y = win.GetBottom()+1;
-            const left:usize = @intCast(win.GetLeft());
-            for (0..len+1) |idx| {
-                buf[idx] = @intCast(video.GetVideoChar(@intCast(left+idx), @intCast(y)) & 255);
-            }
-            buf[len+1] = 0;
+        df.foreground = r.DARKGRAY;
+        df.background = r.BLACK;
 
-            df.foreground = r.DARKGRAY;
-            df.background = r.BLACK;
- 
-            buf[@intCast(rc.rt+1)] = 0;
-            if (rc.lf == 0)
-                rc.lf += 1;
+        buf[rc.right+1] = 0;
+        if (rc.left == 0)
+            rc.left += 1;
 
-            df.ClipString += 1;
+        df.ClipString += 1;
 
-            video.wputs(win, buf[@intCast(rc.lf)..], @intCast(rc.lf), win.WindowHeight());
+        video.wputs(self, buf[rc.left..], rc.left, self.WindowHeight());
 
-            df.ClipString -= 1;
+        df.ClipString -= 1;
 
-            df.foreground = fg;
-            df.background = bg;
-        } else |_| {
-        }
+        df.foreground = fg;
+        df.background = bg;
+    } else |_| {
     }
 }
 
@@ -565,22 +563,22 @@ fn SeCorner(self:*TopLevelFields, stdse:u8) u8 {
 }
 
 // probably not well tested because most windows have titles
-fn TopLine(self:*TopLevelFields, lin:u8, rcc:df.RECT) void {
+fn TopLine(self:*TopLevelFields, lin:u8, rcc:Rect) void {
     var rc = rcc;
     if (self.TestAttribute(df.HASMENUBAR))
         return;
     if (self.TestAttribute(df.HASTITLEBAR) and self.title != null)
         return;
 
-    if (rc.lf == 0) {
-        rc.lf += @intCast(self.BorderAdj());
-        rc.rt += @intCast(self.BorderAdj());
+    if (rc.left == 0) {
+        rc.left += self.BorderAdj();
+        rc.right += self.BorderAdj();
     }
 
-    if (rc.rt < self.WindowWidth()-1)
-        rc.rt += 1;
+    if (rc.right < self.WindowWidth()-1)
+        rc.right += 1;
 
-    if (rc.lf < rc.rt) {
+    if (rc.left < rc.right) {
         // ----------- top line -------------
         @memset(line[0..self.WindowWidth()-1], lin);
 //        @memset(line,lin,WindowWidth(wnd)-1);
@@ -590,15 +588,13 @@ fn TopLine(self:*TopLevelFields, lin:u8, rcc:df.RECT) void {
 //                        strncpy(line+1, "   ", 3);
 //                        *(line+2) = CONTROLBOXCHAR;
         }
-        line[@intCast(rc.rt)] = 0;
-        self.writeline(@ptrCast(line[@intCast(rc.lf)..@intCast(rc.rt)]), @intCast(rc.lf), 0, false);
+        line[rc.right] = 0;
+        self.writeline(@ptrCast(line[rc.left..rc.right]), rc.left, 0, false);
     }
 }
 
 // ------- display a window's border -----
 pub fn RepaintBorder(self:*TopLevelFields, rcc:?Rect) void {
-    const wnd = self.win;
-
     if (self.TestAttribute(df.HASBORDER) == false)
         return;
     const rc = self.ParamRect(rcc);
@@ -614,7 +610,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?Rect) void {
 
     df.foreground = colors.FrameForeground(self);
     df.background = colors.FrameBackground(self);
-    const clrc = self.AdjustRectangle(rc).c_Rect();
+    const clrc = self.AdjustRectangle(rc);
 
     var lin:u8 = 0;
     var side:u8 = 0;
@@ -706,9 +702,9 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?Rect) void {
                 if (self != inFocus) {
                     df.ClipString += 1;
                 }
-                self.writeline(@ptrCast(line[@intCast(clrc.lf)..]),
-                             @intCast(clrc.lf+1),
-                             @intCast(self.WindowHeight()-1),
+                self.writeline(@ptrCast(line[clrc.left..]),
+                             clrc.left+1,
+                             self.WindowHeight()-1,
                              false);
                 df.ClipString = 0;
             }
@@ -719,7 +715,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?Rect) void {
 
     if (rc.bottom == self.WindowHeight()) {
         // ---------- bottom shadow -------------
-        shadowline(wnd, rc.c_Rect());
+        shadowline(self, rc);
     }
 }
 
