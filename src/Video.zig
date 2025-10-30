@@ -2,7 +2,7 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
-const rect = @import("Rect.zig");
+const Rect = @import("Rect.zig");
 
 const sTab:u16 = 0x0C + 0x80;
 
@@ -88,7 +88,7 @@ pub fn CharInView(win:*Window, x:usize, y:usize) bool {
             // --- clip character to parent's borders --
             if (win1.TestAttribute(df.VISIBLE) == false)
                 return false;
-            if (rect.InsideRect(@intCast(x1), @intCast(y1), rect.ClientRect(win1)) == false)
+            if (Rect.InsideRect(@intCast(x1), @intCast(y1), Rect.ClientRect(win1)) == false)
                 return false;
             ww = win1.parent;
         }
@@ -97,19 +97,19 @@ pub fn CharInView(win:*Window, x:usize, y:usize) bool {
     var nwin = win.nextWindow();
     while (nwin) |nw| {
         if (nw.isHidden() == false) { //  && !isAncestor(wnd, nwnd)
-            var rc = nw.cWindowRect();
+            var rc = nw.WindowRect();
             if (nw.TestAttribute(df.SHADOW)) {
-                rc.bt += 1;
-                rc.rt += 1;
+                rc.bottom += 1;
+                rc.right += 1;
             }
             if (nw.TestAttribute(df.NOCLIP) == false) {
                 var pp = nw;
                 while (pp.parent) |pwin| {
                     pp = pwin;
-                    rc = df.subRectangle(rc, rect.ClientRect(pwin));
+                    rc = Rect.subRectangle(rc, pwin.ClientRect());
                 }
             }
-            if (rect.InsideRect(@intCast(x1),@intCast(y1),rc))
+            if (Rect.InsideRect(@intCast(x1),@intCast(y1),rc.c_Rect()))
                 return false;
         }
          nwin = nw.nextWindow();
@@ -185,7 +185,7 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
         var off:usize = 0;
         if (df.ClipString == 0 and win.TestAttribute(df.NOCLIP) == false) {
             // -- clip the line to within ancestor windows --
-            var rc = win.cWindowRect();
+            var rc = win.WindowRect();
             var nwnd = win.parent;
             while (len > 0 and nwnd != null) {
                 const nwin = nwnd.?;
@@ -193,16 +193,16 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
                     len = 0;
                     break;
                 }
-                rc = df.subRectangle(rc, rect.ClientRect(nwin));
+                rc = Rect.subRectangle(rc, nwin.ClientRect());
                 nwnd = nwin.parent;
             }
-            while (len > 0 and rect.InsideRect(@intCast(x1+off),@intCast(y1),rc) == false) {
+            while (len > 0 and Rect.InsideRect(@intCast(x1+off),@intCast(y1),rc.c_Rect()) == false) {
                 off += 1;
                 len -|= 1;
             }
             if (len > 0) {
                 x2 = x1+len-1;
-                while (len>0 and rect.InsideRect(@intCast(x2),@intCast(y1),rc) == false) {
+                while (len>0 and Rect.InsideRect(@intCast(x2),@intCast(y1),rc.c_Rect()) == false) {
                     x2 -|= 1;
                     len -|= 1;
                 }
@@ -211,7 +211,6 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
         if (len > 0) {
             df.hide_mousecursor();
             movetoscreen(ln[off..], vad(x1+off,y1), len);
-//            df.c_wputs(wnd, @intCast(len), &ln, @intCast(x1), @intCast(y1), @intCast(off));
             df.show_mousecursor();
         }
 
