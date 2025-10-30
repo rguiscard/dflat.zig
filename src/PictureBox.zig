@@ -5,13 +5,14 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const video = @import("Video.zig");
+const Rect = @import("Rect.zig");
 
 // ---- types of vectors that can be in a picture box -------
 pub const VectTypes = enum { VECTOR, SOLIDBAR, HEAVYBAR, CROSSBAR, LIGHTBAR };
 
 pub const VECT = struct {
     vt: VectTypes,
-    rc: df.RECT,
+    rc: Rect,
 };
 
 pub const CharInWnd = [_]u8{0xC4, 0xB3, 0xDA, 0xBF, 0xD9, 0xC0, 0xC5, 0xC3, 0xB4, 0xC1, 0xC2};
@@ -59,26 +60,26 @@ pub const VectCvt:[3][11][2][3]u8 = .{
 };
 
 // -- compute whether character is first, middle, or last --
-fn FindVector(win:*Window, rc:df.RECT, x:c_int, y:c_int) ?usize {
+fn FindVector(win:*Window, rc:Rect, x:usize, y:usize) ?usize {
     var coll:?usize = null;
 
     if (win.VectorList) |vectors| {
         for(vectors) |v| {
-            const rcc:df.RECT = v.rc;
+            const rcc:Rect = v.rc;
             // --- skip the colliding vector ---
-            if ((rcc.lf == rc.lf) and (rcc.rt == rc.rt) and
-                    (rcc.tp == rc.tp) and (rc.bt == rcc.bt)) {
+            if ((rcc.left == rc.left) and (rcc.right == rc.right) and
+                    (rcc.top == rc.top) and (rc.bottom == rcc.bottom)) {
                 continue;
             }
-            if (rcc.tp == rcc.bt) {
+            if (rcc.top == rcc.bottom) {
                 // ---- horizontal vector,
                 //    see if character is in it ---
-                if (((rc.lf+x) >= rcc.lf) and ((rc.lf+x) <= rcc.rt) and
-                        ((rc.tp+y) == rcc.tp)) {
+                if (((rc.left+x) >= rcc.left) and ((rc.left+x) <= rcc.right) and
+                        ((rc.top+y) == rcc.top)) {
                     // --- it is ---
-                    if (rc.lf+x == rcc.lf) {
+                    if (rc.left+x == rcc.left) {
                         coll = 0;
-                    } else if (rc.lf+x == rcc.rt) {
+                    } else if (rc.left+x == rcc.right) {
                         coll = 2;
                     } else {
                         coll = 1;
@@ -87,12 +88,12 @@ fn FindVector(win:*Window, rc:df.RECT, x:c_int, y:c_int) ?usize {
             } else {
                 // ---- vertical vector,
                 //    see if character is in it ---
-                if (((rc.tp+y) >= rcc.tp) and ((rc.tp+y) <= rcc.bt) and
-                        ((rc.lf+x) == rcc.lf)) {
+                if (((rc.top+y) >= rcc.top) and ((rc.top+y) <= rcc.bottom) and
+                        ((rc.left+x) == rcc.left)) {
                     // --- it is ---
-                    if (rc.tp+y == rcc.tp) {
+                    if (rc.top+y == rcc.top) {
                         coll = 0;
-                    } else if (rc.tp+y == rcc.bt) {
+                    } else if (rc.top+y == rcc.bottom) {
                         coll = 2;
                     } else {
                         coll = 1;
@@ -104,22 +105,22 @@ fn FindVector(win:*Window, rc:df.RECT, x:c_int, y:c_int) ?usize {
     return coll;
 }
 
-fn PaintVector(win:*Window, rc:df.RECT) void {
+fn PaintVector(win:*Window, rc:Rect) void {
     var len: usize = 0;
     var nc: u16 = 0;
     var vertvect: usize = 0;
     var fml: usize = 0;
 
-    if (rc.rt == rc.lf)    {
+    if (rc.right == rc.left)    {
         // ------ vertical vector -------
         nc = 0xB3;
         vertvect = 1;
-        len = @intCast(rc.bt-rc.tp+1);
+        len = rc.bottom-rc.top+1;
     } else {
         // ------ horizontal vector -------
         nc = 0xC4;
         vertvect = 0;
-        len = @intCast(rc.rt-rc.lf+1);
+        len = rc.right-rc.left+1;
     }
 
     for (0..len) |i| {
@@ -135,14 +136,14 @@ fn PaintVector(win:*Window, rc:df.RECT) void {
 
         const left:usize = win.GetClientLeft();
         const top:usize = win.GetClientTop();
-        const ch_x:usize = left+xi+@as(usize, @intCast(rc.lf));
-        const ch_y:usize = top+yi+@as(usize, @intCast(rc.tp));
+        const ch_x:usize = left+xi+rc.left;
+        const ch_y:usize = top+yi+rc.top;
         const ch:u16 = video.GetVideoChar(ch_x, ch_y) & 255;
     
         for (0..CharInWnd.len) |cw| {
             if (ch == CharInWnd[cw]) {
                 // ---- hit another vector character ----
-                if (FindVector(win, rc, @intCast(xi), @intCast(yi))) |coll| {
+                if (FindVector(win, rc, xi, yi)) |coll| {
                     // compute first/middle/last subscript
                     if (i == len-1) {
                         fml = 2;
@@ -155,24 +156,24 @@ fn PaintVector(win:*Window, rc:df.RECT) void {
                 }
             }
         }
-        win.PutWindowChar(newch, @as(usize, @intCast(rc.lf))+xi, @as(usize, @intCast(rc.tp))+yi);
+        win.PutWindowChar(newch, rc.left+xi, rc.top+yi);
     }
 }
 
-fn PaintBar(win:*Window, rc:df.RECT, vt:VectTypes) void {
+fn PaintBar(win:*Window, rc:Rect, vt:VectTypes) void {
     var len:usize = 0;
     var vertbar:usize = 0;
     const tys = [_]u16{219, 178, 177, 176};
     const nc:u16 = tys[@intFromEnum(vt)-1];
 
-    if (rc.rt == rc.lf) {
+    if (rc.right == rc.left) {
         // ------ vertical bar -------
         vertbar = 1;
-        len = @intCast(rc.bt-rc.tp+1);
+        len = rc.bottom-rc.top+1;
     } else {
         // ------ horizontal bar -------
         vertbar = 0;
-        len = @intCast(rc.rt-rc.lf+1);
+        len = rc.right-rc.left+1;
     }
 
     for(0..len) |i| {
@@ -183,7 +184,7 @@ fn PaintBar(win:*Window, rc:df.RECT, vt:VectTypes) void {
         } else {
             xi = i;
         }
-        win.PutWindowChar(nc, @as(usize, @intCast(rc.lf))+xi, @as(usize, @intCast(rc.tp))+yi);
+        win.PutWindowChar(nc, rc.left+xi, rc.top+yi);
     }
 }
 
@@ -199,7 +200,7 @@ fn PaintMsg(win:*Window) void {
     }
 }
 
-fn DrawVectorMsg(win:*Window, p1:?df.RECT, vt:VectTypes) void {
+fn DrawVectorMsg(win:*Window, p1:?Rect, vt:VectTypes) void {
     if (p1) |area| {
         var vectors:std.ArrayList(VECT) = undefined;
         if (win.VectorList) |list| {
@@ -228,19 +229,19 @@ fn DrawVectorMsg(win:*Window, p1:?df.RECT, vt:VectTypes) void {
     }
 }
 
-fn DrawBoxMsg(win:*Window, p1:?df.RECT) void {
+fn DrawBoxMsg(win:*Window, p1:?Rect) void {
     if (p1) |area| {
-        var rc:df.RECT = area;
-        rc.bt = rc.tp;
+        var rc:Rect = area;
+        rc.bottom = rc.top;
         _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
         rc = area;
-        rc.lf = rc.rt;
+        rc.left = rc.right;
         _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
         rc = area;
-        rc.tp = rc.bt;
+        rc.top = rc.bottom;
         _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
         rc = area;
-        rc.rt = rc.lf;
+        rc.right = rc.left;
         _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
     }
 }
@@ -275,39 +276,39 @@ pub fn PictureProc(win:*Window, message: df.MESSAGE, params:q.Params) bool {
     return root.BaseWndProc(k.PICTUREBOX, win, message, params);
 }
 
-fn PictureRect(x:c_int, y:c_int, len:c_int, hv:c_int) df.RECT {
-    var rc:df.RECT = .{
-        .lf = x,
-        .rt = x,
-        .tp = y,
-        .bt = y,
+fn PictureRect(x:usize, y:usize, len:usize, hv:usize) Rect {
+    var rc:Rect = .{
+        .left = x,
+        .right = x,
+        .top = y,
+        .bottom = y,
     };
     if (hv != 0) {
         // ---- horizontal vector ---- 
-        rc.rt += len-1;
+        rc.right += len-1;
     } else {
         // ---- vertical vector ----
-        rc.bt += len-1;
+        rc.bottom += len-1;
     }
     return rc;
 }
 
-pub fn DrawVector(win:*Window, x:c_int, y:c_int, len:c_int, hv:c_int) void {
-    const rc:df.RECT = PictureRect(x,y,len,hv);
+pub fn DrawVector(win:*Window, x:usize, y:usize, len:usize, hv:usize) void {
+    const rc:Rect = PictureRect(x,y,len,hv);
     _ = win.sendMessage(df.DRAWVECTOR, .{.draw = .{rc, .VECTOR}});
 }
 
-pub fn DrawBox(win:*Window, x:c_int, y:c_int, ht:c_int, wd:c_int) void {
-    const rc:df.RECT = .{
-        .lf = x,
-        .tp = y,
-        .rt = x+wd-1,
-        .bt = y+ht-1
+pub fn DrawBox(win:*Window, x:usize, y:usize, ht:usize, wd:usize) void {
+    const rc:Rect = .{
+        .left = x,
+        .top = y,
+        .right = x+wd-1,
+        .bottom = y+ht-1
     };
     _ = win.sendMessage(df.DRAWBOX, .{.draw = .{rc, .VECTOR}});
 }
 
-pub fn DrawBar(win:*Window, vt:VectTypes, x:c_int, y:c_int, len:c_int, hv:c_int) void {
-    const rc:df.RECT = PictureRect(x,y,len,hv);
+pub fn DrawBar(win:*Window, vt:VectTypes, x:usize, y:usize, len:usize, hv:usize) void {
+    const rc:Rect = PictureRect(x,y,len,hv);
     _ = win.sendMessage(df.DRAWBAR,  .{.draw = .{rc, vt}});
 }
