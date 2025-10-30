@@ -12,16 +12,6 @@ bottom:usize = 0,
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
 
-pub fn from_c_Rect(rc:df.RECT) TopLevelFields {
-    const rcc:TopLevelFields = .{
-        .left = if (rc.lf > 0) @intCast(rc.lf) else 0,
-        .top = if (rc.tp > 0) @intCast(rc.tp) else 0,
-        .right = if (rc.rt > 0) @intCast(rc.rt) else 0,
-        .bottom = if (rc.bt > 0) @intCast(rc.bt) else 0,
-    };
-    return rcc;
-}
-
 pub fn c_Rect(self:TopLevelFields) df.RECT {
     return df.RECT{
         .lf = @intCast(self.left),

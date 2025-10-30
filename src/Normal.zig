@@ -587,8 +587,8 @@ fn MinimizeMsg(win:*Window) void {
     win.condition = .ISMINIMIZED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, q.none);
-    _ = win.sendMessage(df.MOVE, .{.position=.{@intCast(rc.lf), @intCast(rc.tp)}});
-    _ = win.sendMessage(df.SIZE, .{.position=.{@intCast(rc.rt), @intCast(rc.bt)}});
+    _ = win.sendMessage(df.MOVE, .{.position=.{rc.left, rc.top}});
+    _ = win.sendMessage(df.SIZE, .{.position=.{rc.right, rc.bottom}});
     if (win == Window.inFocus) {
         lists.SetNextFocus();
     }
@@ -747,42 +747,42 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
 }
 
 // ---- compute lower right icon space in a rectangle ----
-fn LowerRight(prc:df.RECT) df.RECT {
-    const rc = df.RECT{
-        .lf = prc.rt - ICONWIDTH,
-        .tp = prc.bt - ICONHEIGHT,
-        .rt = prc.rt - 1,
-        .bt = prc.bt - 1,
+fn LowerRight(prc:Rect) Rect {
+    const rc = Rect{
+        .left = prc.right - @as(usize, @intCast(ICONWIDTH)),
+        .top = prc.bottom - @as(usize, @intCast(ICONHEIGHT)),
+        .right = prc.right - 1,
+        .bottom = prc.bottom - 1,
     };
     return rc;
 }
 
 // ----- compute a position for a minimized window icon ----
-fn PositionIcon(win:*Window) df.RECT {
-    var rc = df.RECT{
-        .lf = df.SCREENWIDTH-ICONWIDTH,
-        .tp = df.SCREENHEIGHT-ICONHEIGHT,
-        .rt = df.SCREENWIDTH-1,
-        .bt = df.SCREENHEIGHT-1
+fn PositionIcon(win:*Window) Rect {
+    var rc = Rect{
+        .left = @as(usize, @intCast(df.SCREENWIDTH-ICONWIDTH)),
+        .top = @as(usize, @intCast(df.SCREENHEIGHT-ICONHEIGHT)),
+        .right = @as(usize, @intCast(df.SCREENWIDTH-1)),
+        .bottom = @as(usize, @intCast(df.SCREENHEIGHT-1)),
     };
 
     if (win.parent) |pwin| {
-        const prc = pwin.cWindowRect();
+        const prc = pwin.WindowRect();
         var cwin = pwin.firstWindow();
         rc = LowerRight(prc); // this makes previosu assignment useless ?
         // - search for icon available location -
         while (cwin) |cw| {
             if (cw.condition == .ISMINIMIZED) {
-                const rc1 = cw.cWindowRect();
-                if (rc1.lf == rc.lf and rc1.tp == rc.tp) {
-                    rc.lf -= ICONWIDTH;
-                    rc.rt -= ICONWIDTH;
-                    if (rc.lf < prc.lf+1) {
-                        rc.lf = prc.rt-ICONWIDTH;
-                        rc.rt = rc.lf+ICONWIDTH-1;
-                        rc.tp -= ICONHEIGHT;
-                        rc.bt -= ICONHEIGHT;
-                        if (rc.tp < prc.tp+1)
+                const rc1 = cw.WindowRect();
+                if (rc1.left == rc.left and rc1.top == rc.top) {
+                    rc.left -|= @as(usize, @intCast(ICONWIDTH));
+                    rc.right -|= @as(usize, @intCast(ICONWIDTH));
+                    if (rc.left < prc.left+1) {
+                        rc.left = prc.right-@as(usize, @intCast(ICONWIDTH));
+                        rc.right = rc.left+@as(usize, @intCast(ICONWIDTH-1));
+                        rc.top -|= @as(usize, @intCast(ICONHEIGHT));
+                        rc.bottom -|= @as(usize, @intCast(ICONHEIGHT));
+                        if (rc.top < prc.top+1)
                             return LowerRight(prc);
                     }
                     break;

@@ -869,19 +869,6 @@ pub fn ClientHeight(self: *TopLevelFields) usize {
 
 pub fn WindowRect(self: *TopLevelFields) Rect {
     return self.rc;
-//    const wnd = self.win;
-//    return Rect{
-//        .left = if (wnd.*.rc.lf > 0) @intCast(wnd.*.rc.lf) else 0,
-//        .top = if (wnd.*.rc.tp > 0) @intCast(wnd.*.rc.tp) else 0,
-//        .right = if (wnd.*.rc.rt > 0) @intCast(wnd.*.rc.rt) else 0,
-//        .bottom = if (wnd.*.rc.bt > 0) @intCast(wnd.*.rc.bt) else 0,
-//    };
-}
-
-pub fn cWindowRect(self: *TopLevelFields) df.RECT {
-//    const wnd = self.win;
-//    return wnd.*.rc;
-    return self.rc.c_Rect();
 }
 
 pub fn GetTop(self: *TopLevelFields) usize {
@@ -1034,15 +1021,6 @@ pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
     return null;
 }
 
-pub export fn GetParent(wnd:df.WINDOW) df.WINDOW {
-    if (get_zin(wnd)) |win| {
-        if (win.parent) |pw| {
-            return pw.win;
-        }
-    }
-    return null; // unreachable
-}
-
 // Accessories
 pub fn GetControl(self:*TopLevelFields) ?*Dialogs.CTLWINDOW {
     return self.ct;
@@ -1064,41 +1042,6 @@ pub export fn c_ClientWidth(wnd:df.WINDOW) c_int {
         return @intCast(win.ClientWidth());
     }
     return 0;
-}
-
-pub export fn c_GetClientLeft(wnd:df.WINDOW) c_int {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return @intCast(win.GetClientLeft());
-    }
-    return 0;
-}
-
-pub export fn c_GetClientTop(wnd:df.WINDOW) c_int {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return @intCast(win.GetClientTop());
-    }
-    return 0;
-}
-
-pub export fn c_GetClientRight(wnd:df.WINDOW) c_int {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return @intCast(win.GetClientRight());
-    }
-    return 0;
-}
-
-pub export fn c_GetClientBottom(wnd:df.WINDOW) c_int {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return @intCast(win.GetClientBottom());
-    }
-    return 0;
-}
-
-pub export fn c_TestAttribute(wnd:df.WINDOW, attrib:c_int) df.BOOL {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return if (win.TestAttribute(attrib)) df.TRUE else df.FALSE;
-    }
-    return df.FALSE;
 }
 
 pub fn HitControlBox(self:*TopLevelFields, x:usize, y:usize) bool {
