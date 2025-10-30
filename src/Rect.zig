@@ -86,29 +86,20 @@ pub fn ClipRectangle(win:*Window, rc:TopLevelFields) TopLevelFields {
         }
     }
     return subRectangle(rcc, sr);
-//    RectLeft(sr) = RectTop(sr) = 0;
-//    RectRight(sr) = SCREENWIDTH-1;
-//    RectBottom(sr) = SCREENHEIGHT-1;
-//    if (!c_TestAttribute((WINDOW)wnd, NOCLIP))
-//        while ((wnd = GetParent((WINDOW)wnd)) != NULL)
-//            rc = subRectangle(rc, ClientRect(wnd));
-//    return subRectangle(rc, sr);
+}
+
+// ----- return the rectangle relative to
+//            its window's screen position --------
+pub fn RelativeWindowRect(win:*Window, rc:TopLevelFields) TopLevelFields {
+    var rcc = rc;
+    rcc.left -|= win.GetLeft();
+    rcc.right -|= win.GetLeft();
+    rcc.top -|= win.GetTop();
+    rcc.bottom -|= win.GetTop();
+    return rcc;
 }
 
 // ------- df.Rect related -------
-
-//#define ValidRect(r)      (RectRight(r) || RectLeft(r) || \
-//                           RectTop(r) || RectBottom(r))
-//#define RectWidth(r)      (RectRight(r)-RectLeft(r)+1)
-//#define RectHeight(r)     (RectBottom(r)-RectTop(r)+1)
-//RECT subRectangle(RECT, RECT);
-//RECT ClientRect(void *);
-//RECT RelativeWindowRect(void *, RECT);
-//RECT ClipRectangle(void *, RECT);
-
-//pub export fn within(p:c_int, v1:c_int, v2:c_int) callconv(.c) bool {
-//    return ((p >= v1) and (p <= v2));
-//}
 
 pub fn RectTop(r:df.RECT) callconv(.c) c_int {
     return r.tp;
@@ -125,14 +116,3 @@ pub fn RectLeft(r:df.RECT) callconv(.c) c_int {
 pub fn RectRight(r:df.RECT) callconv(.c) c_int {
     return r.rt;
 }
-
-// ------- return the client rectangle of a window ------
-//pub fn ClientRect(win:*Window) df.RECT {
-//    const rc:df.RECT = .{
-//        .lf = @intCast(win.GetClientLeft()),
-//        .tp = @intCast(win.GetClientTop()),
-//        .rt = @intCast(win.GetClientRight()),
-//        .bt = @intCast(win.GetClientBottom()),
-//    };
-//    return rc;
-//}

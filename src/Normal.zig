@@ -877,49 +877,49 @@ fn adjShadow(win:*Window) Rect {
 }
 
 // --- repaint a rectangular subsection of a window ---
-fn PaintOverLap(win:*Window, rc:df.RECT) void {
+fn PaintOverLap(win:*Window, rc:Rect) void {
     if (isVisible(win)) {
         var isBorder = false;
         var isTitle = false;
         var isData = true;
         if (win.TestAttribute(df.HASBORDER)) {
-            isBorder =  rc.lf == 0 and
-                        rc.tp < win.WindowHeight();
-            isBorder |= rc.lf < win.WindowWidth() and
-                        rc.rt >= win.WindowWidth()-1 and
-                        rc.tp < win.WindowHeight();
-            isBorder |= rc.tp == 0 and
-                        rc.lf < win.WindowWidth();
-            isBorder |= rc.tp < win.WindowHeight() and
-                        rc.bt >= win.WindowHeight()-1 and
-                        rc.lf < win.WindowWidth();
+            isBorder =  rc.left == 0 and
+                        rc.top < win.WindowHeight();
+            isBorder |= rc.left < win.WindowWidth() and
+                        rc.right >= win.WindowWidth()-1 and
+                        rc.top < win.WindowHeight();
+            isBorder |= rc.top == 0 and
+                        rc.left < win.WindowWidth();
+            isBorder |= rc.top < win.WindowHeight() and
+                        rc.bottom >= win.WindowHeight()-1 and
+                        rc.left < win.WindowWidth();
         } else if (win.TestAttribute(df.HASTITLEBAR)) {
-            isTitle = rc.tp == 0 and
-                      rc.rt > 0 and
-                      rc.lf < win.WindowWidth()-win.BorderAdj();
+            isTitle = rc.top == 0 and
+                      rc.right > 0 and
+                      rc.left < win.WindowWidth()-win.BorderAdj();
         }
 
-        if (rc.lf >= win.WindowWidth()-win.BorderAdj())
+        if (rc.left >= win.WindowWidth()-win.BorderAdj())
             isData = false;
-        if (rc.tp >= win.WindowHeight()-win.BottomBorderAdj())
+        if (rc.top >= win.WindowHeight()-win.BottomBorderAdj())
             isData = false;
         if (win.TestAttribute(df.HASBORDER)) {
-            if (rc.rt == 0)
+            if (rc.right == 0)
                 isData = false;
-            if (rc.bt == 0)
+            if (rc.bottom == 0)
                 isData = false;
         }
         if (win.TestAttribute(df.SHADOW))
-            isBorder |= rc.rt == win.WindowWidth() or
-                        rc.bt == win.WindowHeight();
+            isBorder |= rc.right == win.WindowWidth() or
+                        rc.bottom == win.WindowHeight();
         if (isData) {
             win.wasCleared = false;
-            _ = win.sendMessage(df.PAINT, .{.paint=.{rc, true}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{rc.c_Rect(), true}});
         }
         if (isBorder) {
-            _ = win.sendMessage(df.BORDER, .{.paint=.{rc, false}});
+            _ = win.sendMessage(df.BORDER, .{.paint=.{rc.c_Rect(), false}});
         } else if (isTitle) {
-            win.DisplayTitle(rc);
+            win.DisplayTitle(rc.c_Rect());
         }
     }
 }
@@ -927,12 +927,11 @@ fn PaintOverLap(win:*Window, rc:df.RECT) void {
 // ------ paint the part of a window that is overlapped
 //            by another window that is being hidden -------
 fn PaintOver(win:*Window) void {
-    const wnd = win.win;
     const wrc = adjShadow(HiddenWindow);
     var rc = adjShadow(win);
     rc = Rect.subRectangle(rc, wrc);
     if (Rect.ValidRect(rc))
-        PaintOverLap(win, df.RelativeWindowRect(wnd, rc.c_Rect()));
+        PaintOverLap(win, Rect.RelativeWindowRect(win, rc));
 }
 
 // --- paint the overlapped parts of all children ---
