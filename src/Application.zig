@@ -19,6 +19,7 @@ const popdown = @import("PopDown.zig");
 const Colors = @import("Colors.zig");
 const cfg = @import("Config.zig");
 const console = @import("Console.zig");
+const Rect = @import("Rect.zig");
 
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
@@ -299,7 +300,7 @@ pub fn ApplicationProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.PAINT => {
-            const p1:?df.RECT = params.paint[0];
+            const p1:?Rect = params.paint[0];
             if (win.isVisible())    {
                 const cl:u8 = if (cfg.config.Texture) df.APPLCHAR else ' ';
                 win.ClearWindow(p1, cl);

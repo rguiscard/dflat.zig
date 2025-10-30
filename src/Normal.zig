@@ -667,9 +667,9 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
         },
         df.BORDER => {
             if (isVisible(win)) {
-                const p1:?df.RECT = params.paint[0];
+                const p1:?Rect = params.paint[0];
                 if (win.TestAttribute(df.HASBORDER)) {
-                    win.RepaintBorder(if (p1) |rc| Rect.from_c_Rect(rc) else null);
+                    win.RepaintBorder(p1);
                 } else if (win.TestAttribute(df.HASTITLEBAR)) {
                     win.DisplayTitle(p1);
                 }
@@ -914,12 +914,12 @@ fn PaintOverLap(win:*Window, rc:Rect) void {
                         rc.bottom == win.WindowHeight();
         if (isData) {
             win.wasCleared = false;
-            _ = win.sendMessage(df.PAINT, .{.paint=.{rc.c_Rect(), true}});
+            _ = win.sendMessage(df.PAINT, .{.paint=.{rc, true}});
         }
         if (isBorder) {
-            _ = win.sendMessage(df.BORDER, .{.paint=.{rc.c_Rect(), false}});
+            _ = win.sendMessage(df.BORDER, .{.paint=.{rc, false}});
         } else if (isTitle) {
-            win.DisplayTitle(rc.c_Rect());
+            win.DisplayTitle(rc);
         }
     }
 }

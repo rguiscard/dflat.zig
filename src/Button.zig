@@ -12,8 +12,9 @@ const textbox = @import("TextBox.zig");
 const cfg = @import("Config.zig");
 const video = @import("Video.zig");
 const console = @import("Console.zig");
+const Rect = @import("Rect.zig");
 
-fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?df.RECT) void {
+fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?Rect) void {
     if (win.isVisible()) {
         if (win.TestAttribute(df.SHADOW) and (cfg.config.mono == 0)) {
             // -------- draw the button's shadow -------
@@ -80,7 +81,7 @@ pub fn ButtonProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 return true;
             },
             df.PAINT => {
-                const rect:?df.RECT = params.paint[0];
+                const rect:?Rect = params.paint[0];
                 PaintMsg(win, ct, rect);
                 return true;
             },

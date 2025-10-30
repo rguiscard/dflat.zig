@@ -413,14 +413,9 @@ pub fn AdjustRectangle(self:*TopLevelFields, rcc:Rect) Rect {
 }
 
 // -------- display a window's title ---------
-pub fn DisplayTitle(self:*TopLevelFields, rcc:?df.RECT) void {
+pub fn DisplayTitle(self:*TopLevelFields, rcc:?Rect) void {
     if (self.title) |_| {
-        var rc:Rect = undefined;
-        if (rcc) |cc| {
-            rc = Rect.from_c_Rect(cc);
-        } else {
-            rc = Rect.RelativeWindowRect(self, self.WindowRect());
-        }
+        var rc:Rect = rcc orelse Rect.RelativeWindowRect(self, self.WindowRect());
         rc = self.AdjustRectangle(rc);
         if (self.sendMessage(df.TITLE, .{.paint=.{rcc, false}})) {
             const title_color = cfg.config.clr[@intCast(@intFromEnum(k.TITLEBAR))];
@@ -612,7 +607,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?Rect) void {
     if (self.TestAttribute(df.HASTITLEBAR)) {
         if (rc.top == 0) {
             if (rc.left < self.WindowWidth()-self.BorderAdj()) {
-                self.DisplayTitle(rc.c_Rect());
+                self.DisplayTitle(rc);
             }
         }
     }
@@ -729,15 +724,10 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?Rect) void {
 }
 
 // ------ clear the data space of a window -------- 
-pub fn ClearWindow(self:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
+pub fn ClearWindow(self:*TopLevelFields, rcc:?Rect, clrchar:u8) void {
     const wnd = self.win;
     if (self.isVisible()) {
-        var rc:Rect = undefined;
-        if (rcc) |cc| {
-            rc = Rect.from_c_Rect(cc);
-        } else {
-            rc = Rect.RelativeWindowRect(self, self.WindowRect());
-        }
+        var rc:Rect = rcc orelse Rect.RelativeWindowRect(self, self.WindowRect());
         const top = self.TopBorderAdj();
         const bot = self.WindowHeight()-1-self.BottomBorderAdj();
 

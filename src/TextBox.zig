@@ -412,17 +412,11 @@ fn ScrollDocMsg(win:*Window,p1:bool) void {
 }
 
 // ------------ PAINT Message --------------
-fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
+fn PaintMsg(win:*Window,p1:?Rect,p2:bool) void {
     const wnd = win.win;
     // ------ paint the client area -----
-    var rc:Rect = undefined;
-
     // ----- build the rectangle to paint -----
-    if (p1) |rect1| {
-        rc = Rect.from_c_Rect(rect1);
-    } else {
-        rc = Rect.RelativeWindowRect(win, win.WindowRect());
-    }
+    var rc:Rect = p1 orelse Rect.RelativeWindowRect(win, win.WindowRect());
    
     if (win.TestAttribute(df.HASBORDER) and
             (rc.right >= win.WindowWidth()-1)) {
@@ -463,7 +457,7 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
         }
         if (yy < win.wlines-win.wtop) {
             // ---- paint a text line ----
-            WriteTextLine(win, rc.c_Rect(), @intCast(yy+win.wtop), false);
+            WriteTextLine(win, rc, @intCast(yy+win.wtop), false);
         } else {
             // ---- paint a blank line ----
             df.SetStandardColor(wnd);
@@ -574,7 +568,7 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             return true;
         },
         df.PAINT => {
-            const p1:?df.RECT = params.paint[0];
+            const p1:?Rect = params.paint[0];
             const p2:bool = params.paint[1];
             if (win.isVisible()) {
                 PaintMsg(win, p1, p2);
@@ -708,7 +702,7 @@ fn ComputeWindowLeft(win:*Window) void {
 }
 
 // ------- write a line of text to a textbox window -------
-pub fn WriteTextLine(win:*Window, rcc:?df.RECT, y:usize, reverse:bool) void {
+pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
     const wnd = win.win;
 
     // ------ make sure y is inside the window -----
@@ -718,7 +712,7 @@ pub fn WriteTextLine(win:*Window, rcc:?df.RECT, y:usize, reverse:bool) void {
     // ---- build the retangle within which can write ----
     var rc:Rect = undefined;
     if (rcc) |cc| {
-        rc = Rect.from_c_Rect(cc);
+        rc = cc;
     } else {
         rc = Rect.RelativeWindowRect(win, win.WindowRect());
         if (win.TestAttribute(df.HASBORDER) and

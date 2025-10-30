@@ -340,7 +340,7 @@ pub fn ListBoxProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
             win.SelectCount = 0;
         },
         df.PAINT => {
-            const p1:?df.RECT = params.paint[0];
+            const p1:?Rect = params.paint[0];
             _ = root.BaseWndProc(k.LISTBOX, win, msg, params);
             if (win.selection) |selection| {
                 if (p1) |rc| {
@@ -409,7 +409,7 @@ fn SelectionInWindow(win:*Window, sel:usize) bool {
             (sel < win.wtop+win.ClientHeight()));
 }
 
-fn WriteSelection(win:*Window, sel:usize, reverse:bool, rc:?df.RECT) void {
+fn WriteSelection(win:*Window, sel:usize, reverse:bool, rc:?Rect) void {
     if (win.isVisible()) {
         if (SelectionInWindow(win, sel)) {
             textbox.WriteTextLine(win, rc, sel, reverse);
