@@ -4,6 +4,7 @@
 
  /* --- Produce the vector end points produced by the overlap
         of two other vectors --- */
+#if 0
 static void subVector(int *v1, int *v2,
                         int t1, int t2, int o1, int o2)
 {
@@ -56,6 +57,7 @@ RECT subRectangle(RECT r1, RECT r2)
         RectBottom(r) = 0;
     return r;
 }
+#endif
 
 /* ------- return the client rectangle of a window ------ */
 RECT ClientRect(void *wnd)
@@ -79,18 +81,3 @@ RECT RelativeWindowRect(void *wnd, RECT rc)
     RectBottom(rc) -= GetTop((WINDOW)wnd);
     return rc;
 }
-
-/* ----- clip a rectangle to the parents of the window ----- */
-#if 0
-RECT ClipRectangle(void *wnd, RECT rc)
-{
-    RECT sr;
-    RectLeft(sr) = RectTop(sr) = 0;
-    RectRight(sr) = SCREENWIDTH-1;
-    RectBottom(sr) = SCREENHEIGHT-1;
-    if (!c_TestAttribute((WINDOW)wnd, NOCLIP))
-        while ((wnd = GetParent((WINDOW)wnd)) != NULL)
-            rc = subRectangle(rc, ClientRect(wnd));
-    return subRectangle(rc, sr);
-}
-#endif

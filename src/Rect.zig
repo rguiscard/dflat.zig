@@ -106,9 +106,9 @@ pub fn ClipRectangle(win:*Window, rc:TopLevelFields) TopLevelFields {
 //RECT RelativeWindowRect(void *, RECT);
 //RECT ClipRectangle(void *, RECT);
 
-pub export fn within(p:c_int, v1:c_int, v2:c_int) callconv(.c) bool {
-    return ((p >= v1) and (p <= v2));
-}
+//pub export fn within(p:c_int, v1:c_int, v2:c_int) callconv(.c) bool {
+//    return ((p >= v1) and (p <= v2));
+//}
 
 pub fn RectTop(r:df.RECT) callconv(.c) c_int {
     return r.tp;
@@ -127,12 +127,12 @@ pub fn RectRight(r:df.RECT) callconv(.c) c_int {
 }
 
 // ------- return the client rectangle of a window ------
-pub fn ClientRect(win:*Window) df.RECT {
-    const rc:df.RECT = .{
-        .lf = @intCast(win.GetClientLeft()),
-        .tp = @intCast(win.GetClientTop()),
-        .rt = @intCast(win.GetClientRight()),
-        .bt = @intCast(win.GetClientBottom()),
-    };
-    return rc;
-}
+//pub fn ClientRect(win:*Window) df.RECT {
+//    const rc:df.RECT = .{
+//        .lf = @intCast(win.GetClientLeft()),
+//        .tp = @intCast(win.GetClientTop()),
+//        .rt = @intCast(win.GetClientRight()),
+//        .bt = @intCast(win.GetClientBottom()),
+//    };
+//    return rc;
+//}

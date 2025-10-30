@@ -497,12 +497,12 @@ fn SizeMsg(win:*Window, x:usize, y:usize) void {
     if (win.condition == .ISRESTORED)
         wnd.*.RestoredRC = df.WindowRect(wnd);
 
-    const rc = Rect.ClientRect(win);
+    const rc = win.ClientRect();
 
     var cwin = win.firstWindow();
     while (cwin) |cw| {
         if (cw.condition == .ISMAXIMIZED) {
-            _ = cw.sendMessage(df.SIZE, .{.position=.{@intCast(rc.rt), @intCast(rc.bt)}});
+            _ = cw.sendMessage(df.SIZE, .{.position=.{rc.right, rc.bottom}});
         }
         cwin = cw.nextWindow();
     }
@@ -560,19 +560,19 @@ fn CloseWindowMsg(win:*Window) void {
 // --------- MAXIMIZE Message ----------
 fn MaximizeMsg(win:*Window) void {
     const wnd = win.win;
-    var rc:df.RECT = .{.lf=0, .tp=0, .rt=0, .bt=0};
+    var rc:Rect = .{.left=0, .top=0, .right=0, .bottom=0};
     const holdrc = wnd.*.RestoredRC;
-    rc.rt = df.SCREENWIDTH-1;
-    rc.bt = df.SCREENHEIGHT-1;
+    rc.right = @intCast(df.SCREENWIDTH-1);
+    rc.bottom = @intCast(df.SCREENHEIGHT-1);
     if (win.parent) |pw| {
-        rc = Rect.ClientRect(pw);
+        rc = pw.ClientRect();
     }
     win.oldcondition = win.condition;
     win.condition = .ISMAXIMIZED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, q.none);
-    _ = win.sendMessage(df.MOVE, .{.position=.{@intCast(rc.lf), @intCast(rc.tp)}});
-    _ = win.sendMessage(df.SIZE, .{.position=.{@intCast(rc.rt), @intCast(rc.bt)}});
+    _ = win.sendMessage(df.MOVE, .{.position=.{rc.left, rc.top}});
+    _ = win.sendMessage(df.SIZE, .{.position=.{rc.right, rc.bottom}});
     if (win.restored_attrib == 0) {
         win.restored_attrib = win.attrib;
     }

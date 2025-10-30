@@ -10,14 +10,13 @@ typedef struct    {
 #define RectBottom(r)     (r.bt)
 #define RectLeft(r)       (r.lf)
 #define RectRight(r)      (r.rt)
-BOOL within(int,int,int);
+//BOOL within(int,int,int);
 
-#define ValidRect(r)      (RectRight(r) || RectLeft(r) || \
-                           RectTop(r) || RectBottom(r))
+//#define ValidRect(r)      (RectRight(r) || RectLeft(r) || \
+//                           RectTop(r) || RectBottom(r))
 #define RectWidth(r)      (RectRight(r)-RectLeft(r)+1)
 #define RectHeight(r)     (RectBottom(r)-RectTop(r)+1)
-RECT subRectangle(RECT, RECT);
-RECT ClientRect(void *);
+//RECT subRectangle(RECT, RECT);
+//RECT ClientRect(void *);
 RECT RelativeWindowRect(void *, RECT);
-//RECT ClipRectangle(void *, RECT);
 #endif
