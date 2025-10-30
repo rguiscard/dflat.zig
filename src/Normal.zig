@@ -35,8 +35,8 @@ var HiddenWindow:*Window = undefined; // seems initialized before use ?
 // fn getDummy() df.WINDOW {
 fn getDummy() *Window {
     if(dummyWin == null) {
-//        dummy = std.mem.zeroInit(df.window, .{.rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
-        dummy = std.mem.zeroInit(df.window, .{});
+        dummy = std.mem.zeroInit(df.window, .{.rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
+//        dummy = std.mem.zeroInit(df.window, .{});
         dummyWin = Window.init(&dummy);
         dummyWin.?.Class = k.DUMMY;
         dummyWin.?.wndproc = NormalProc; // doesn't seem necessary

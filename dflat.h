@@ -76,6 +76,7 @@ typedef enum {FALSE, TRUE} BOOL;
 typedef intptr_t PARAM;
 
 typedef struct window {
+    RECT rc; /* FIXME. This is to prevent from memory problem (alignment ?) */
     /* ----------------- text box fields ------------------ */
 //    int wlines;     /* number of lines of text              */
 //    int wtop;       /* text line that is on the top display */
