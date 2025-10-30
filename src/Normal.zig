@@ -35,7 +35,8 @@ var HiddenWindow:*Window = undefined; // seems initialized before use ?
 // fn getDummy() df.WINDOW {
 fn getDummy() *Window {
     if(dummyWin == null) {
-        dummy = std.mem.zeroInit(df.window, .{.rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
+//        dummy = std.mem.zeroInit(df.window, .{.rc = .{.lf = -1, .tp = -1, .rt = -1, .bt = -1}});
+        dummy = std.mem.zeroInit(df.window, .{});
         dummyWin = Window.init(&dummy);
         dummyWin.?.Class = k.DUMMY;
         dummyWin.?.wndproc = NormalProc; // doesn't seem necessary
@@ -440,7 +441,6 @@ fn MouseMovedMsg(win:*Window, p1:usize, p2:usize) bool {
 
 // --------- MOVE Message ----------
 fn MoveMsg(win:*Window, x:usize, y:usize) void {
-    const wnd = win.win;
     const wasVisible = win.isVisible();
 
     const win_x:usize = win.GetLeft();
@@ -459,7 +459,7 @@ fn MoveMsg(win:*Window, x:usize, y:usize) void {
     win.SetRight(win.GetLeft()+win.WindowWidth()-1);
     win.SetBottom(win.GetTop()+win.WindowHeight()-1);
     if (win.condition == .ISRESTORED) {
-        wnd.*.RestoredRC = wnd.*.rc;
+        win.RestoredRC = win.rc;
     }
 
     var cwin = win.firstWindow();
@@ -479,7 +479,6 @@ fn MoveMsg(win:*Window, x:usize, y:usize) void {
 
 // --------- SIZE Message ----------
 fn SizeMsg(win:*Window, x:usize, y:usize) void {
-    const wnd = win.win;
     const wasVisible = win.isVisible();
 
     if ((x == win.GetRight()) and (y == win.GetBottom())) {
@@ -495,7 +494,7 @@ fn SizeMsg(win:*Window, x:usize, y:usize) void {
     win.wd = win.GetRight()-win.GetLeft()+1;
 
     if (win.condition == .ISRESTORED)
-        wnd.*.RestoredRC = df.WindowRect(wnd);
+        win.RestoredRC = win.WindowRect();
 
     const rc = win.ClientRect();
 
@@ -559,9 +558,8 @@ fn CloseWindowMsg(win:*Window) void {
 
 // --------- MAXIMIZE Message ----------
 fn MaximizeMsg(win:*Window) void {
-    const wnd = win.win;
     var rc:Rect = .{.left=0, .top=0, .right=0, .bottom=0};
-    const holdrc = wnd.*.RestoredRC;
+    const holdrc = win.RestoredRC;
     rc.right = @intCast(df.SCREENWIDTH-1);
     rc.bottom = @intCast(df.SCREENHEIGHT-1);
     if (win.parent) |pw| {
@@ -578,13 +576,12 @@ fn MaximizeMsg(win:*Window) void {
     }
     win.ClearAttribute(df.SHADOW);
     _ = win.sendMessage(df.SHOW_WINDOW, q.none);
-    wnd.*.RestoredRC = holdrc;
+    win.RestoredRC = holdrc;
 }
 
 // --------- MINIMIZE Message ----------
 fn MinimizeMsg(win:*Window) void {
-    const wnd = win.win;
-    const holdrc = wnd.*.RestoredRC;
+    const holdrc = win.RestoredRC;
     const rc = PositionIcon(win);
     win.oldcondition = win.condition;
     win.condition = .ISMINIMIZED;
@@ -601,22 +598,21 @@ fn MinimizeMsg(win:*Window) void {
     win.ClearAttribute( df.SHADOW | df.SIZEABLE | df.HASMENUBAR |
                         df.VSCROLLBAR | df.HSCROLLBAR);
     _ = win.sendMessage(df.SHOW_WINDOW, q.none);
-    wnd.*.RestoredRC = holdrc;
+    win.RestoredRC = holdrc;
 }
 
 // --------- RESTORE Message ----------
 fn RestoreMsg(win:*Window) void {
-    const wnd = win.win;
-    const holdrc = wnd.*.RestoredRC;
+    const holdrc = win.RestoredRC;
     win.oldcondition = win.condition;
     win.condition = .ISRESTORED;
     win.wasCleared = false;
     _ = win.sendMessage(df.HIDE_WINDOW, q.none);
     win.attrib = win.restored_attrib;
     win.restored_attrib = 0;
-    _ = win.sendMessage(df.MOVE, .{.position=.{@intCast(wnd.*.RestoredRC.lf), @intCast(wnd.*.RestoredRC.tp)}});
-    wnd.*.RestoredRC = holdrc;
-    _ = win.sendMessage(df.SIZE, .{.position=.{@intCast(wnd.*.RestoredRC.rt), @intCast(wnd.*.RestoredRC.bt)}});
+    _ = win.sendMessage(df.MOVE, .{.position=.{win.RestoredRC.left, win.RestoredRC.top}});
+    win.RestoredRC = holdrc;
+    _ = win.sendMessage(df.SIZE, .{.position=.{win.RestoredRC.right, win.RestoredRC.bottom}});
     if (win != Window.inFocus) {
         _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
     } else {

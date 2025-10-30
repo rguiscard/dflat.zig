@@ -39,7 +39,6 @@ var Menus = [_][:0]u8{
 
 // --------------- CREATE_WINDOW Message --------------
 fn CreateWindowMsg(win: *Window) bool {
-    const wnd = win.win;
     ApplicationWindow = win;
     ScreenHeight = df.SCREENHEIGHT;
 
@@ -69,7 +68,7 @@ fn CreateWindowMsg(win: *Window) bool {
                 (df.SCREENHEIGHT-1 < win.GetBottom()))    {
             win.SetWindowHeight(df.SCREENHEIGHT);
             win.SetBottom(win.GetTop()+win.WindowHeight()-1);
-            wnd.*.RestoredRC = win.cWindowRect();
+            win.RestoredRC = win.WindowRect();
         }
     }
     SelectColors(win);

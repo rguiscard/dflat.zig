@@ -69,8 +69,12 @@ title:?[:0]const u8 = null,  // window title
 wndproc: ?*const fn (win:*TopLevelFields, msg: df.MESSAGE, params:q.Params) bool,
 
 // ---------------- window dimensions -----------------
-ht:usize = 0,                // window height and width.
+rc:Rect = .{ .left = 0, .top = 0,         // window coordinates
+             .right = 0, .bottom = 0},    // (0/0 to 79/24)
+ht:usize = 0,                             // window height and width.
 wd:usize = 0,
+RestoredRC:Rect = .{ .left = 0, .top = 0, // restored condition rect
+                    .right = 0, .bottom = 0},
 
 // ----------------- window colors --------------------
 WindowColors:[4][2]u8 = @splat(@splat(0)),
@@ -191,17 +195,17 @@ pub fn create(
             wt = @intCast(df.SCREENWIDTH);
 
         // ----- coordinates -1, -1 = center the window ----
-        const hht:c_int = @intCast(ht);
-        const wwt:c_int = @intCast(wt);
+//        const hht:c_int = @intCast(ht);
+//        const wwt:c_int = @intCast(wt);
         if (position.LEFT) {
-            wnd.*.rc.lf = @divFloor(df.SCREENWIDTH-wwt, 2);
+            self.rc.left = @divFloor(@as(usize, @intCast(df.SCREENWIDTH))-wt, 2);
         } else {
-            wnd.*.rc.lf = @intCast(left);
+            self.rc.left = left;
         }
         if (position.TOP) {
-            wnd.*.rc.tp = @divFloor(df.SCREENHEIGHT-hht, 2);
+            self.rc.top = @divFloor(@as(usize, @intCast(df.SCREENHEIGHT))-ht, 2);
         } else {
-            wnd.*.rc.tp = @intCast(top);
+            self.rc.top = top;
         }
         self.attrib = attrib;
         if (ttl) |tt| {
@@ -232,8 +236,8 @@ pub fn create(
         if (parent) |pw| {
             if (self.TestAttribute(df.NOCLIP) == false) {
                 // -- keep upper left within borders of parent -
-                wnd.*.rc.lf = @intCast(@max(wnd.*.rc.lf, pw.GetClientLeft()));
-                wnd.*.rc.tp = @intCast(@max(wnd.*.rc.tp, pw.GetClientTop()));
+                self.rc.left = @max(self.rc.left, pw.GetClientLeft());
+                self.rc.top = @max(self.rc.top, pw.GetClientTop());
             }
         } else {
             if (app.ApplicationWindow) |awin| {
@@ -262,19 +266,17 @@ pub fn create(
         }
 
 
-        wnd.*.rc.rt = df.GetLeft(wnd)+wwt-1;
-        wnd.*.rc.bt = df.GetTop(wnd)+hht-1;
-        self.ht = @intCast(ht);
-        self.wd = @intCast(wt);
+        self.rc.right = self.rc.left+wt-1;
+        self.rc.bottom = self.rc.top+ht-1;
+        self.ht = ht;
+        self.wd = wt;
         if (ttl != null) {
             InsertTitle(self, title);
         }
         self.parent = pt;
         self.oldcondition = .ISRESTORED;
         self.condition = .ISRESTORED;
-//        wnd.*.oldcondition = df.ISRESTORED;
-//        wnd.*.condition = df.ISRESTORED;
-        wnd.*.RestoredRC = wnd.*.rc;
+        self.RestoredRC = self.rc;
         InitWindowColors(self);
         _ = self.sendMessage(df.CREATE_WINDOW, q.none);
         if (self.isVisible()) {
@@ -866,18 +868,20 @@ pub fn ClientHeight(self: *TopLevelFields) usize {
 }
 
 pub fn WindowRect(self: *TopLevelFields) Rect {
-    const wnd = self.win;
-    return Rect{
-        .left = if (wnd.*.rc.lf > 0) @intCast(wnd.*.rc.lf) else 0,
-        .top = if (wnd.*.rc.tp > 0) @intCast(wnd.*.rc.tp) else 0,
-        .right = if (wnd.*.rc.rt > 0) @intCast(wnd.*.rc.rt) else 0,
-        .bottom = if (wnd.*.rc.bt > 0) @intCast(wnd.*.rc.bt) else 0,
-    };
+    return self.rc;
+//    const wnd = self.win;
+//    return Rect{
+//        .left = if (wnd.*.rc.lf > 0) @intCast(wnd.*.rc.lf) else 0,
+//        .top = if (wnd.*.rc.tp > 0) @intCast(wnd.*.rc.tp) else 0,
+//        .right = if (wnd.*.rc.rt > 0) @intCast(wnd.*.rc.rt) else 0,
+//        .bottom = if (wnd.*.rc.bt > 0) @intCast(wnd.*.rc.bt) else 0,
+//    };
 }
 
 pub fn cWindowRect(self: *TopLevelFields) df.RECT {
-    const wnd = self.win;
-    return wnd.*.rc;
+//    const wnd = self.win;
+//    return wnd.*.rc;
+    return self.rc.c_Rect();
 }
 
 pub fn GetTop(self: *TopLevelFields) usize {
@@ -885,7 +889,7 @@ pub fn GetTop(self: *TopLevelFields) usize {
     return rect.top;
 }
 pub fn SetTop(self: *TopLevelFields, top: usize) void {
-    self.win.*.rc.tp = @intCast(top);
+    self.rc.top = top;
 }
 
 pub fn GetBottom(self: *TopLevelFields) usize {
@@ -894,7 +898,7 @@ pub fn GetBottom(self: *TopLevelFields) usize {
 }
 
 pub fn SetBottom(self: *TopLevelFields, bottom: usize) void {
-    self.win.*.rc.bt = @intCast(bottom);
+    self.rc.bottom = bottom;
 }
 
 pub fn GetLeft(self: *TopLevelFields) usize {
@@ -903,7 +907,7 @@ pub fn GetLeft(self: *TopLevelFields) usize {
 }
 
 pub fn SetLeft(self: *TopLevelFields, left: usize) void {
-    self.win.*.rc.lf = @intCast(left);
+    self.rc.left = left;
 }
 
 pub fn GetRight(self: *TopLevelFields) usize {
@@ -912,7 +916,7 @@ pub fn GetRight(self: *TopLevelFields) usize {
 }
 
 pub fn SetRight(self: *TopLevelFields, right: usize) void {
-    self.win.*.rc.rt = @intCast(right);
+    self.rc.right = right;
 }
 
 pub fn GetClientTop(self: *TopLevelFields) usize {

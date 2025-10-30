@@ -76,31 +76,6 @@ typedef enum {FALSE, TRUE} BOOL;
 typedef intptr_t PARAM;
 
 typedef struct window {
-    /* ---------------- window dimensions ----------------- */
-    RECT rc;               /* window coordinates
-                                            (0/0 to 79/24)  */
-//    int ht, wd;            /* window height and width       */
-    RECT RestoredRC;       /* restored condition rect       */
-	/* ----------------- window colors -------------------- */
-//    char WindowColors[4][2];
-    /* -------------- linked list pointers ---------------- */
-
-//	struct window *childfocus;	// child that ha(s/d) focus
-//    int attrib;                 /* Window attributes        */
-//    char *videosave;            /* video save buffer        */
-//    enum Condition condition;   /* Restored, Maximized,
-//                                   Minimized, Closing       */
-//    enum Condition oldcondition;/* previous condition       */
-//  BOOL wasCleared;
-//    int restored_attrib;        /* attributes when restored */
-//    void *extension;      /* menus, dialogs, documents, etc */
-//	void *wrapper;             /* used by C++ wrapper class. not in use. */
-//    struct window *PrevMouse;   /* previous mouse capture   */
-//    struct window *PrevKeyboard;/* previous keyboard capture*/
-//	struct window *PrevClock;   /* previous clock capture   */
-//	struct window *MenuBarWnd;/* menu bar                   */
-//	struct window *StatusBar; /* status bar                 */
-//    int isHelping;	    /* > 0 when help is being displayed */
     /* ----------------- text box fields ------------------ */
 //    int wlines;     /* number of lines of text              */
 //    int wtop;       /* text line that is on the top display */
