@@ -18,6 +18,7 @@ RECT ClientRect(void *wnd)
 
 /* ----- return the rectangle relative to
             its window's screen position -------- */
+#if 0
 RECT RelativeWindowRect(void *wnd, RECT rc)
 {
     RectLeft(rc) -= GetLeft((WINDOW)wnd);
@@ -26,3 +27,4 @@ RECT RelativeWindowRect(void *wnd, RECT rc)
     RectBottom(rc) -= GetTop((WINDOW)wnd);
     return rc;
 }
+#endif

@@ -539,16 +539,15 @@ fn shadowline(wnd:df.WINDOW, rcc:df.RECT) void {
     }
 }
 
-fn ParamRect(self:*TopLevelFields, rcc:?df.RECT) df.RECT {
-    const wnd = self.win;
-    var rc:df.RECT = undefined;
+fn ParamRect(self:*TopLevelFields, rcc:?Rect) Rect {
+    var rc:Rect = undefined;
     if (rcc) |cc| {
         rc = cc;
     } else {
-        rc = df.RelativeWindowRect(wnd, self.cWindowRect());
+        rc = Rect.RelativeWindowRect(self, self.WindowRect());
         if (self.TestAttribute(df.SHADOW)) {
-            rc.rt += 1;
-            rc.bt += 1;
+            rc.right += 1;
+            rc.bottom += 1;
         }
     }
     return rc;
@@ -602,7 +601,7 @@ fn TopLine(self:*TopLevelFields, lin:u8, rcc:df.RECT) void {
 }
 
 // ------- display a window's border -----
-pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
+pub fn RepaintBorder(self:*TopLevelFields, rcc:?Rect) void {
     const wnd = self.win;
 
     if (self.TestAttribute(df.HASBORDER) == false)
@@ -611,16 +610,16 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
 
     // ---------- window title ------------
     if (self.TestAttribute(df.HASTITLEBAR)) {
-        if (rc.tp == 0) {
-            if (rc.lf < self.WindowWidth()-self.BorderAdj()) {
-                self.DisplayTitle(rc);
+        if (rc.top == 0) {
+            if (rc.left < self.WindowWidth()-self.BorderAdj()) {
+                self.DisplayTitle(rc.c_Rect());
             }
         }
     }
 
     df.foreground = colors.FrameForeground(self);
     df.background = colors.FrameBackground(self);
-    const clrc = self.AdjustRectangle(Rect.from_c_Rect(rc)).c_Rect();
+    const clrc = self.AdjustRectangle(rc).c_Rect();
 
     var lin:u8 = 0;
     var side:u8 = 0;
@@ -645,13 +644,13 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
         sw   = df.SW;
     }
 
-    line[@intCast(self.WindowWidth())] = 0; // maybe @memset ? Title was draw already
+    line[self.WindowWidth()] = 0; // maybe @memset ? Title was draw already
     // -------- top frame corners ---------
-    if (rc.tp == 0) {
-        if (rc.lf == 0)
+    if (rc.top == 0) {
+        if (rc.left == 0)
             video.wputch(self, nw, 0, 0);
-        if (rc.lf < self.WindowWidth()) {
-            if (rc.rt >= self.WindowWidth()-1) {
+        if (rc.left < self.WindowWidth()) {
+            if (rc.right >= self.WindowWidth()-1) {
                 video.wputch(self, ne, self.WindowWidth()-1, 0);
             }
             self.TopLine(lin, clrc);
@@ -659,14 +658,14 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
     }
 
     // ----------- window body ------------
-    for (@intCast(rc.tp)..@intCast(rc.bt+1)) |ydx| {
+    for (rc.top..rc.bottom+1) |ydx| {
         var ch:u8 = 0;
         if (ydx == 0 or ydx >= self.WindowHeight()-1)
             continue;
-        if (rc.lf == 0)
+        if (rc.left == 0)
             video.wputch(self, side, 0, ydx);
-        if (rc.lf < self.WindowWidth() and
-            rc.rt >= self.WindowWidth()-1) {
+        if (rc.left < self.WindowWidth() and
+            rc.right >= self.WindowWidth()-1) {
             if (self.TestAttribute(df.VSCROLLBAR)) {
                 if (ydx == 1) {
                     ch = df.UPSCROLLBOX;
@@ -682,33 +681,33 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
             }
             video.wputch(self, ch, self.WindowWidth()-1, ydx);
         }
-        if (rc.rt == self.WindowWidth())
+        if (rc.right == self.WindowWidth())
             shadow_char(self, ydx);
     }
 
-    if (rc.tp <= self.WindowHeight()-1 and
-            rc.bt >= self.WindowHeight()-1) {
+    if (rc.top <= self.WindowHeight()-1 and
+            rc.bottom >= self.WindowHeight()-1) {
         // -------- bottom frame corners ----------
-        if (rc.lf == 0)
+        if (rc.left == 0)
             video.wputch(self, sw, 0, self.WindowHeight()-1);
-        if (rc.lf < self.WindowWidth() and
-                rc.rt >= self.WindowWidth()-1) {
+        if (rc.left < self.WindowWidth() and
+                rc.right >= self.WindowWidth()-1) {
             video.wputch(self, se, self.WindowWidth()-1, self.WindowHeight()-1);
         }
 
         if (self.StatusBar == null) {
             // ----------- bottom line -------------
-            @memset(line[0..@intCast(self.WindowWidth()-1)], lin);
+            @memset(line[0..self.WindowWidth()-1], lin);
             if (self.TestAttribute(df.HSCROLLBAR)) {
                 line[0] = df.LEFTSCROLLBOX;
-                line[@intCast(self.WindowWidth()-3)] = df.RIGHTSCROLLBOX;
-                @memset(line[1..@intCast(self.WindowWidth()-4+1)], df.SCROLLBARCHAR);
+                line[self.WindowWidth()-3] = df.RIGHTSCROLLBOX;
+                @memset(line[1..self.WindowWidth()-4+1], df.SCROLLBARCHAR);
                 line[self.HScrollBox] = df.SCROLLBOXCHAR;
             }
-            line[@intCast(rc.rt)] = 0;
-            line[@intCast(self.WindowWidth()-2)] = 0;
-            if (rc.lf != rc.rt or
-                (rc.lf>0 and rc.lf < self.WindowWidth()-1)) {
+            line[rc.right] = 0;
+            line[self.WindowWidth()-2] = 0;
+            if (rc.left != rc.right or
+                (rc.left>0 and rc.left < self.WindowWidth()-1)) {
                 if (self != inFocus) {
                     df.ClipString += 1;
                 }
@@ -719,13 +718,13 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
                 df.ClipString = 0;
             }
         }
-        if (rc.rt == self.WindowWidth())
+        if (rc.right == self.WindowWidth())
             shadow_char(self, self.WindowHeight()-1);
     }
 
-    if (rc.bt == self.WindowHeight()) {
+    if (rc.bottom == self.WindowHeight()) {
         // ---------- bottom shadow -------------
-        shadowline(wnd, rc);
+        shadowline(wnd, rc.c_Rect());
     }
 }
 
@@ -733,29 +732,29 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
 pub fn ClearWindow(self:*TopLevelFields, rcc:?df.RECT, clrchar:u8) void {
     const wnd = self.win;
     if (self.isVisible()) {
-        var rc:df.RECT = undefined;
+        var rc:Rect = undefined;
         if (rcc) |cc| {
-            rc = cc;
+            rc = Rect.from_c_Rect(cc);
         } else {
-            rc = df.RelativeWindowRect(wnd, self.cWindowRect());
+            rc = Rect.RelativeWindowRect(self, self.WindowRect());
         }
         const top = self.TopBorderAdj();
         const bot = self.WindowHeight()-1-self.BottomBorderAdj();
 
-        if (rc.lf == 0)
-            rc.lf = @intCast(self.BorderAdj());
-        if (rc.rt > self.WindowWidth()-1)
-            rc.rt = @intCast(self.WindowWidth()-1);
+        if (rc.left == 0)
+            rc.left = self.BorderAdj();
+        if (rc.right > self.WindowWidth()-1)
+            rc.right = self.WindowWidth()-1;
         colors.SetStandardColor(wnd);
 
-        if (root.global_allocator.allocSentinel(u8, @intCast(rc.rt+1), 0)) |buf| {
+        if (root.global_allocator.allocSentinel(u8, rc.right+1, 0)) |buf| {
             defer root.global_allocator.free(buf);
             @memset(buf, clrchar);
             buf[buf.len] = 0;
-            for (@intCast(rc.tp)..@intCast(rc.bt+1)) |ydx| {
+            for (rc.top..rc.bottom+1) |ydx| {
                 if (ydx < top or ydx > bot)
                     continue;
-                self.writeline(@ptrCast(buf[@intCast(rc.lf)..]), @intCast(rc.lf), ydx, false);
+                self.writeline(@ptrCast(buf[rc.left..]), rc.left, ydx, false);
             }
         } else |_| {
         }

@@ -12,5 +12,5 @@ typedef struct    {
 
 #define RectWidth(r)      (RectRight(r)-RectLeft(r)+1)
 #define RectHeight(r)     (RectBottom(r)-RectTop(r)+1)
-RECT RelativeWindowRect(void *, RECT);
+//RECT RelativeWindowRect(void *, RECT);
 #endif

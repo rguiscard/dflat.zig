@@ -669,7 +669,7 @@ pub fn NormalProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             if (isVisible(win)) {
                 const p1:?df.RECT = params.paint[0];
                 if (win.TestAttribute(df.HASBORDER)) {
-                    win.RepaintBorder(p1);
+                    win.RepaintBorder(if (p1) |rc| Rect.from_c_Rect(rc) else null);
                 } else if (win.TestAttribute(df.HASTITLEBAR)) {
                     win.DisplayTitle(p1);
                 }

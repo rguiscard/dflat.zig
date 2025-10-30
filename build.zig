@@ -56,7 +56,7 @@ pub fn build(b: *std.Build) void {
             "keys.c",
             "config.c",
             "dfalloc.c",
-            "rect.c",
+//            "rect.c",
             "textbox.c",
             "editbox.c",
 
