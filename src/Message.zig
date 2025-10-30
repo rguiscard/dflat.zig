@@ -6,7 +6,7 @@ const Window = @import("Window.zig");
 const log = @import("Log.zig");
 const clipboard = @import("Clipboard.zig");
 const DialogBox = @import("DialogBox.zig");
-const rect = @import("Rect.zig");
+const Rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const app = @import("Application.zig");
 const pict = @import("PictureBox.zig");
@@ -404,27 +404,27 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
 }
 
 fn VisibleRect(win:*Window) df.RECT {
-    var rc = win.cWindowRect();
+    var rc = win.WindowRect();
     if (!win.TestAttribute(df.NOCLIP)) {
         if (win.parent) |pw| {
-            var prc = rect.ClientRect(pw);
+            var prc = pw.ClientRect();
             var pp:?*Window = pw;
             while (pp) |pwin| {
                 if (pwin.TestAttribute(df.NOCLIP))
                     break;
-                rc = df.subRectangle(rc, prc);
-                if (df.ValidRect(rc) == false)
+                rc = Rect.subRectangle(rc, prc);
+                if (Rect.ValidRect(rc) == false)
                     break;
                 pp = pwin.parent;
                 if (pp) |ppw| {
-                    prc = rect.ClientRect(ppw);
+                    prc = ppw.ClientRect();
                 }
             }
         } else {
-            return rc;
+            return rc.c_Rect();
         }
     }
-    return rc;
+    return rc.c_Rect();
 }
 
 
@@ -435,7 +435,7 @@ fn inWindow(w:?*Window, x:usize, y:usize) ?*Window {
     while (ww) |win| {
         if (win.isVisible()) {
             const rc = VisibleRect(win);
-            if (rect.InsideRect(@intCast(x), @intCast(y), rc))
+            if (Rect.InsideRect(@intCast(x), @intCast(y), rc))
                 Hit = win;
             const win1 = inWindow(win.lastWindow(), x, y);
             if (win1 != null)

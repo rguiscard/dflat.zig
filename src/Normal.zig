@@ -217,7 +217,6 @@ fn CommandMsg(win:*Window, p1:c) void {
 
 // --------- SETFOCUS Message ----------
 fn SetFocusMsg(win:*Window, yes:bool) void {
-    var rc:df.RECT = .{.lf=0, .tp=0, .rt=0, .bt=0};
     if (yes and (Window.inFocus != win)) {
         // set focus
         var this:?*Window = null;
@@ -275,15 +274,16 @@ fn SetFocusMsg(win:*Window, yes:bool) void {
             _ = focus.sendMessage(df.SETFOCUS, .{.yes=false});
         }
         Window.inFocus = win;
+        var rc:Rect = .{.left=0, .top=0, .right=0, .bottom=0};
         if ((that != null) and isVisible(win)) {
-            rc = df.subRectangle(that.?.cWindowRect(), this.?.cWindowRect());
-            if (df.ValidRect(rc) == false) {
+            rc = Rect.subRectangle(that.?.WindowRect(), this.?.WindowRect());
+            if (Rect.ValidRect(rc) == false) {
                 if (app.ApplicationWindow) |awin| {
                     var ffwin = awin.firstWindow();
                     while (ffwin) |ff| {
                         if (isAncestor(win, ff) == false) {
-                            rc = df.subRectangle(win.cWindowRect(),ff.cWindowRect());
-                            if (df.ValidRect(rc)) {
+                            rc = Rect.subRectangle(win.WindowRect(),ff.WindowRect());
+                            if (Rect.ValidRect(rc)) {
                                 break;
                             }
                         }
@@ -292,7 +292,7 @@ fn SetFocusMsg(win:*Window, yes:bool) void {
                 }
             }
         }
-        if ((that != null) and (df.ValidRect(rc)==false) and isVisible(win)) {
+        if ((that != null) and (Rect.ValidRect(rc)==false) and isVisible(win)) {
             this = null;
         }
         lists.ReFocus(win);
@@ -865,14 +865,13 @@ fn sizeborder(win:*Window, rt:usize, bt:usize) void {
 }
 
 // ----- adjust a rectangle to include the shadow -----
-fn adjShadow(win:*Window) df.RECT {
-    const wnd = win.win;
-    var rc = wnd.*.rc;
+fn adjShadow(win:*Window) Rect {
+    var rc = win.WindowRect();
     if (win.TestAttribute(df.SHADOW)) {
-        if (rc.rt < df.SCREENWIDTH-1)
-            rc.rt += 1;
-        if (rc.bt < df.SCREENHEIGHT-1)
-            rc.bt += 1;
+        if (rc.right < df.SCREENWIDTH-1)
+            rc.right += 1;
+        if (rc.bottom < df.SCREENHEIGHT-1)
+            rc.bottom += 1;
     }
     return rc;
 }
@@ -931,9 +930,9 @@ fn PaintOver(win:*Window) void {
     const wnd = win.win;
     const wrc = adjShadow(HiddenWindow);
     var rc = adjShadow(win);
-    rc = df.subRectangle(rc, wrc);
-    if (df.ValidRect(rc))
-        PaintOverLap(win, df.RelativeWindowRect(wnd, rc));
+    rc = Rect.subRectangle(rc, wrc);
+    if (Rect.ValidRect(rc))
+        PaintOverLap(win, df.RelativeWindowRect(wnd, rc.c_Rect()));
 }
 
 // --- paint the overlapped parts of all children ---
