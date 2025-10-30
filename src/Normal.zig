@@ -94,15 +94,15 @@ fn HideWindowMsg(win:*Window) void {
 
 // ----- test if screen coordinates are in a window ----
 fn InsideWindow(win:*Window, x:usize, y:usize) bool {
-    var rc = win.cWindowRect();
+    var rc = win.WindowRect();
     if (win.TestAttribute(df.NOCLIP))    {
         var pwnd = win.parent;
         while (pwnd) |pw| {
-            rc = df.subRectangle(rc, Rect.ClientRect(pw));
+            rc = Rect.subRectangle(rc, pw.ClientRect());
             pwnd = pw.parent;
         }
     }
-    if (Rect.InsideRect(@intCast(x), @intCast(y), rc)) {
+    if (Rect.InsideRect(@intCast(x), @intCast(y), rc.c_Rect())) {
         return true;
     }
     return false;

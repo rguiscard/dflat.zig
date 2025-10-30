@@ -947,6 +947,17 @@ pub fn GetClientRight(self: *TopLevelFields) usize {
     return self.GetRight() - self.TopBorderAdj();
 }
 
+// ------- return the client rectangle of a window ------
+pub fn ClientRect(self: *TopLevelFields) Rect {
+    const rc:Rect = .{
+        .left = self.GetClientLeft(),
+        .top = self.GetClientTop(),
+        .right = self.GetClientRight(),
+        .bottom = self.GetClientBottom(),
+    };
+    return rc;
+}
+
 pub fn getClass(self: *TopLevelFields) CLASS {
     return self.Class;
 }
