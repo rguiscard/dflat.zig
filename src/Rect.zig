@@ -69,6 +69,32 @@ pub fn ValidRect(r:TopLevelFields) bool {
     return (r.right > 0) or (r.left > 0) or (r.top > 0) or (r.bottom > 0);
 }
 
+pub fn InsideRect(x:usize, y:usize, r:TopLevelFields) bool {
+    return withIn(x, r.left, r.right) and withIn(y, r.top, r.bottom);
+}
+
+// ----- clip a rectangle to the parents of the window ----- 
+pub fn ClipRectangle(win:*Window, rc:TopLevelFields) TopLevelFields {
+    const sr:TopLevelFields = .{ .left = 0, .top = 0, .right = @intCast(df.SCREENWIDTH-1),
+                                                      .bottom = @intCast(df.SCREENHEIGHT-1)};
+    var rcc = rc;
+    if (win.TestAttribute(df.NOCLIP) == false) {
+        var pw = win.parent;
+        while (pw) |pwin| {
+            rcc = subRectangle(rcc, pwin.ClientRect());
+            pw = pwin.parent;
+        }
+    }
+    return subRectangle(rcc, sr);
+//    RectLeft(sr) = RectTop(sr) = 0;
+//    RectRight(sr) = SCREENWIDTH-1;
+//    RectBottom(sr) = SCREENHEIGHT-1;
+//    if (!c_TestAttribute((WINDOW)wnd, NOCLIP))
+//        while ((wnd = GetParent((WINDOW)wnd)) != NULL)
+//            rc = subRectangle(rc, ClientRect(wnd));
+//    return subRectangle(rc, sr);
+}
+
 // ------- df.Rect related -------
 
 //#define ValidRect(r)      (RectRight(r) || RectLeft(r) || \
@@ -98,11 +124,6 @@ pub fn RectLeft(r:df.RECT) callconv(.c) c_int {
 
 pub fn RectRight(r:df.RECT) callconv(.c) c_int {
     return r.rt;
-}
-
-pub export fn InsideRect(x:c_int, y:c_int, r:df.RECT) callconv(.c) bool {
-    return within((x), RectLeft(r), RectRight(r)) and
-           within((y), RectTop(r), RectBottom(r));
 }
 
 // ------- return the client rectangle of a window ------

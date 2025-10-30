@@ -81,6 +81,7 @@ RECT RelativeWindowRect(void *wnd, RECT rc)
 }
 
 /* ----- clip a rectangle to the parents of the window ----- */
+#if 0
 RECT ClipRectangle(void *wnd, RECT rc)
 {
     RECT sr;
@@ -92,3 +93,4 @@ RECT ClipRectangle(void *wnd, RECT rc)
             rc = subRectangle(rc, ClientRect(wnd));
     return subRectangle(rc, sr);
 }
+#endif

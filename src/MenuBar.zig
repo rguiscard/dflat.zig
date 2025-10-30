@@ -5,7 +5,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
-const rect = @import("Rect.zig");
+const Rect = @import("Rect.zig");
 const app = @import("Application.zig");
 const menu = @import("Menu.zig");
 const menus = @import("Menus.zig");
@@ -470,7 +470,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
         df.INSIDE_WINDOW => {
             const p1:usize = params.position[0];
             const p2:usize = params.position[1];
-            return rect.InsideRect(@intCast(p1), @intCast(p2), win.cWindowRect());
+            return Rect.InsideRect(p1, p2, win.WindowRect());
         },
         df.CLOSE_POPDOWN => {
             ClosePopdownMsg(win);

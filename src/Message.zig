@@ -403,7 +403,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
     return rrtn;
 }
 
-fn VisibleRect(win:*Window) df.RECT {
+fn VisibleRect(win:*Window) Rect {
     var rc = win.WindowRect();
     if (!win.TestAttribute(df.NOCLIP)) {
         if (win.parent) |pw| {
@@ -421,10 +421,10 @@ fn VisibleRect(win:*Window) df.RECT {
                 }
             }
         } else {
-            return rc.c_Rect();
+            return rc;
         }
     }
-    return rc.c_Rect();
+    return rc;
 }
 
 
@@ -435,7 +435,7 @@ fn inWindow(w:?*Window, x:usize, y:usize) ?*Window {
     while (ww) |win| {
         if (win.isVisible()) {
             const rc = VisibleRect(win);
-            if (Rect.InsideRect(@intCast(x), @intCast(y), rc))
+            if (Rect.InsideRect(x, y, rc))
                 Hit = win;
             const win1 = inWindow(win.lastWindow(), x, y);
             if (win1 != null)

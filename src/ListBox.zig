@@ -4,7 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
-const rect = @import("Rect.zig");
+const Rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const textbox = @import("TextBox.zig");
 
@@ -233,7 +233,7 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
     if (my >= win.wlines-win.wtop)
         my = win.wlines - win.wtop;
 
-    if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win)) == false) {
+    if (Rect.InsideRect(x, y, win.ClientRect()) == false) {
         return false;
     }
     if ((win.wlines > 0) and (if (py) |ysel| my != ysel else true)) {
@@ -261,7 +261,7 @@ fn DoubleClickMsg(win:*Window, x:usize, y:usize) bool {
         return false;
     if (win.wlines>0) {
         _ = root.BaseWndProc(k.LISTBOX, win, df.DOUBLE_CLICK, .{.position=.{x, y}});
-        if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win)))
+        if (Rect.InsideRect(x, y, win.ClientRect()))
             _ = win.sendMessage(df.LB_CHOOSE, .{.select=.{win.selection, 0}});
     }
     return true;

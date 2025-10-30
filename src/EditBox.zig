@@ -5,7 +5,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
-const rect = @import("Rect.zig");
+const Rect = @import("Rect.zig");
 const textbox = @import("TextBox.zig");
 const search = @import("Search.zig");
 const clipboard = @import("Clipboard.zig");
@@ -314,14 +314,14 @@ fn LeftButtonMsg(win:*Window,p1:usize, p2:usize) bool {
     const wnd = win.win;
     var MouseX:usize = if (p1 > win.GetClientLeft()) p1 - win.GetClientLeft() else 0;
     var MouseY:usize = if (p2 > win.GetClientTop()) p2 - win.GetClientTop() else 0;
-    const rc = rect.ClientRect(win);
+    const rc = win.ClientRect();
     if (KeyBoardMarking)
         return true;
     if (normal.WindowMoving or normal.WindowSizing)
         return false;
 
     if (TextMarking) {
-        if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false) {
+        if (Rect.InsideRect(p1, p2, rc) == false) {
             var x = MouseX;
             var y = MouseY;
             var dir = false;
@@ -352,7 +352,7 @@ fn LeftButtonMsg(win:*Window,p1:usize, p2:usize) bool {
         }
         return true;
     }
-    if (rect.InsideRect(@intCast(p1), @intCast(p2), rc) == false)
+    if (Rect.InsideRect(p1, p2, rc) == false)
         return false;
     if (textbox.TextBlockMarked(win)) {
         textbox.ClearTextBlock(win);
@@ -402,8 +402,8 @@ fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
     const wnd = win.win;
     const MouseX = if (x > win.GetClientLeft()) x - win.GetClientLeft() else 0;
     const MouseY = if (y > win.GetClientTop()) y - win.GetClientTop() else 0;
-    var rc = rect.ClientRect(win);
-    if (rect.InsideRect(@intCast(x), @intCast(y), rc) == false)
+    var rc = win.ClientRect();
+    if (Rect.InsideRect(x, y, rc) == false)
         return false;
     var wlines = win.wlines;
     wlines -|= 1;
@@ -412,8 +412,8 @@ fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
     if (ButtonDown) {
         SetAnchor(win, ButtonX+@as(usize, @intCast(wnd.*.wleft)), @intCast(ButtonY+win.wtop));
         TextMarking = true;
-        rc = win.cWindowRect();
-        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.area=rc});
+        rc = win.WindowRect();
+        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.area=rc.c_Rect()});
         ButtonDown = false;
     }
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {

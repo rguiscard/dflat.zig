@@ -4,7 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
-const rect = @import("Rect.zig");
+const Rect = @import("Rect.zig");
 const helpbox = @import("HelpBox.zig");
 const menus = @import("Menus.zig");
 const cfg = @import("Config.zig");
@@ -45,7 +45,7 @@ fn CreateWindowMsg(win:*Window) bool {
 // --------- LEFT_BUTTON Message ---------
 fn LeftButtonMsg(win:*Window, x:usize, y:usize) void {
     const my:usize = if (y > win.GetTop()) y - win.GetTop() else 0;
-    if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win))) {
+    if (Rect.InsideRect(x, y, win.ClientRect())) {
         if (my != py) {
             _ = win.sendMessage(df.LB_SELECTION,
                     .{.select=.{win.wtop+my-1, 1}});
@@ -66,7 +66,7 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) void {
 fn ButtonReleasedMsg(win:*Window, x:usize, y:usize) bool {
     const wnd = win.win;
     py = -1;
-    if (rect.InsideRect(@intCast(x), @intCast(y), rect.ClientRect(win))) {
+    if (Rect.InsideRect(x, y, win.ClientRect())) {
         const sel:usize = y - win.GetClientTop();
 //        const tl = df.TextLine(wnd, sel);
 //        if (tl[0] != df.LINE)

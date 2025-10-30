@@ -5,7 +5,7 @@ const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
 const colors = @import("Colors.zig");
-const rect = @import("Rect.zig");
+const Rect = @import("Rect.zig");
 const normal = @import("Normal.zig");
 const GapBuffer = @import("GapBuffer.zig");
 const video = @import("Video.zig");
@@ -288,7 +288,6 @@ fn ButtonReleasedMsg(win:*Window) void {
 
 // ------------ SCROLL Message --------------
 fn ScrollMsg(win:*Window,p1:bool) bool {
-    const wnd = win.win;
     // ---- vertical scroll one line ----
     if (p1) {
         // ----- scroll one line up -----
@@ -304,19 +303,19 @@ fn ScrollMsg(win:*Window,p1:bool) bool {
         win.wtop -|= 1;
     }
     if (win.isVisible()) {
-        const rc = df.ClipRectangle(wnd, rect.ClientRect(win));
-        if (df.ValidRect(rc))    {
+        const rc = Rect.ClipRectangle(win, win.ClientRect());
+        if (Rect.ValidRect(rc)) {
             // ---- scroll the window ----- 
             if (win != Window.inFocus) {
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             } else {
-                console.scroll_window(win, rc, if (p1) 1 else 0);
+                console.scroll_window(win, rc.c_Rect(), if (p1) 1 else 0);
                 if (p1 == false) {
                     // -- write top line (down) --
                     WriteTextLine(win,null,win.wtop,false);
                 } else {
                     // -- write bottom line (up) --
-                    const y:usize=@as(usize, @intCast(rc.bt))-win.GetClientTop();
+                    const y:usize=rc.bottom-win.GetClientTop();
                     WriteTextLine(win,null,win.wtop+y,false);
                 }
             }
@@ -426,8 +425,8 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
     }
    
     if (win.TestAttribute(df.HASBORDER) and
-            (rect.RectRight(rc) >= win.WindowWidth()-1)) {
-        if (rect.RectLeft(rc) >= win.WindowWidth()-1) {
+            (Rect.RectRight(rc) >= win.WindowWidth()-1)) {
+        if (Rect.RectLeft(rc) >= win.WindowWidth()-1) {
             return;
         }
         rc.rt = @intCast(win.WindowWidth()-2);
@@ -440,7 +439,7 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
 
     // ----- blank line for padding -----
     var blankline = [_]u8{' '}**df.MAXCOLS;
-    blankline[@intCast(rect.RectRight(rcc)+1)] = 0;
+    blankline[@intCast(Rect.RectRight(rcc)+1)] = 0;
 
 //    char blankline[df.MAXCOLS];
 //    memset(blankline, ' ', SCREENWIDTH);
@@ -448,7 +447,7 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
 
     // ------- each line within rectangle ------
 //    for (y = RectTop(rc); y <= RectBottom(rc); y++){
-    for (@intCast(rect.RectTop(rc))..@intCast(rect.RectBottom(rc)+1)) |y| {
+    for (@intCast(Rect.RectTop(rc))..@intCast(Rect.RectBottom(rc)+1)) |y| {
         // ---- test outside of Client area ----
         if (win.TestAttribute(df.HASBORDER | df.HASTITLEBAR)) {
             if (y < win.TopBorderAdj()) {

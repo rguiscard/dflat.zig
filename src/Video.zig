@@ -88,7 +88,7 @@ pub fn CharInView(win:*Window, x:usize, y:usize) bool {
             // --- clip character to parent's borders --
             if (win1.TestAttribute(df.VISIBLE) == false)
                 return false;
-            if (Rect.InsideRect(@intCast(x1), @intCast(y1), Rect.ClientRect(win1)) == false)
+            if (Rect.InsideRect(x1, y1, win1.ClientRect()) == false)
                 return false;
             ww = win1.parent;
         }
@@ -109,7 +109,7 @@ pub fn CharInView(win:*Window, x:usize, y:usize) bool {
                     rc = Rect.subRectangle(rc, pwin.ClientRect());
                 }
             }
-            if (Rect.InsideRect(@intCast(x1),@intCast(y1),rc.c_Rect()))
+            if (Rect.InsideRect(x1,y1,rc))
                 return false;
         }
          nwin = nw.nextWindow();
@@ -196,13 +196,13 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
                 rc = Rect.subRectangle(rc, nwin.ClientRect());
                 nwnd = nwin.parent;
             }
-            while (len > 0 and Rect.InsideRect(@intCast(x1+off),@intCast(y1),rc.c_Rect()) == false) {
+            while (len > 0 and Rect.InsideRect(x1+off,y1,rc) == false) {
                 off += 1;
                 len -|= 1;
             }
             if (len > 0) {
                 x2 = x1+len-1;
-                while (len>0 and Rect.InsideRect(@intCast(x2),@intCast(y1),rc.c_Rect()) == false) {
+                while (len>0 and Rect.InsideRect(x2,y1,rc) == false) {
                     x2 -|= 1;
                     len -|= 1;
                 }

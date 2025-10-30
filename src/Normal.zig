@@ -102,7 +102,7 @@ fn InsideWindow(win:*Window, x:usize, y:usize) bool {
             pwnd = pw.parent;
         }
     }
-    if (Rect.InsideRect(@intCast(x), @intCast(y), rc.c_Rect())) {
+    if (Rect.InsideRect(x, y, rc)) {
         return true;
     }
     return false;
@@ -1106,13 +1106,12 @@ pub fn isVisible(win:*Window) bool {
 
 // -- adjust a window's rectangle to clip it to its parent -
 fn ClipRect(win:*Window) df.RECT {
-    const wnd = win.win;
-    var rc = win.cWindowRect();
+    var rc = win.WindowRect();
     if (win.TestAttribute(df.SHADOW)) {
-        rc.bt += 1;
-        rc.rt += 1;
+        rc.bottom += 1;
+        rc.right += 1;
     }
-    return df.ClipRectangle(wnd, rc);
+    return Rect.ClipRectangle(win, rc).c_Rect();
 }
 
 // -- get the video memory that is to be used by a window --
