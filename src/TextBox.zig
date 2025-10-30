@@ -415,21 +415,21 @@ fn ScrollDocMsg(win:*Window,p1:bool) void {
 fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
     const wnd = win.win;
     // ------ paint the client area -----
-    var rc:df.RECT = undefined;
+    var rc:Rect = undefined;
 
     // ----- build the rectangle to paint -----
     if (p1) |rect1| {
-        rc = rect1;
+        rc = Rect.from_c_Rect(rect1);
     } else {
-        rc = df.RelativeWindowRect(wnd, win.cWindowRect());
+        rc = Rect.RelativeWindowRect(win, win.WindowRect());
     }
    
     if (win.TestAttribute(df.HASBORDER) and
-            (Rect.RectRight(rc) >= win.WindowWidth()-1)) {
-        if (Rect.RectLeft(rc) >= win.WindowWidth()-1) {
+            (rc.right >= win.WindowWidth()-1)) {
+        if (rc.left >= win.WindowWidth()-1) {
             return;
         }
-        rc.rt = @intCast(win.WindowWidth()-2);
+        rc.right = win.WindowWidth()-2;
     }
     const rcc = win.AdjustRectangle(rc);
 
@@ -439,7 +439,7 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
 
     // ----- blank line for padding -----
     var blankline = [_]u8{' '}**df.MAXCOLS;
-    blankline[@intCast(Rect.RectRight(rcc)+1)] = 0;
+    blankline[rcc.right+1] = 0;
 
 //    char blankline[df.MAXCOLS];
 //    memset(blankline, ' ', SCREENWIDTH);
@@ -447,7 +447,7 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
 
     // ------- each line within rectangle ------
 //    for (y = RectTop(rc); y <= RectBottom(rc); y++){
-    for (@intCast(Rect.RectTop(rc))..@intCast(Rect.RectBottom(rc)+1)) |y| {
+    for (rc.top..rc.bottom+1) |y| {
         // ---- test outside of Client area ----
         if (win.TestAttribute(df.HASBORDER | df.HASTITLEBAR)) {
             if (y < win.TopBorderAdj()) {
@@ -463,12 +463,12 @@ fn PaintMsg(win:*Window,p1:?df.RECT,p2:bool) void {
         }
         if (yy < win.wlines-win.wtop) {
             // ---- paint a text line ----
-            WriteTextLine(win, rc, @intCast(yy+win.wtop), false);
+            WriteTextLine(win, rc.c_Rect(), @intCast(yy+win.wtop), false);
         } else {
             // ---- paint a blank line ----
             df.SetStandardColor(wnd);
-            win.writeline(@ptrCast(blankline[@intCast(rcc.lf)..]),
-                    @as(usize, @intCast(rcc.lf))+win.BorderAdj(), y, false);
+            win.writeline(@ptrCast(blankline[rcc.left..]),
+                    rcc.left+win.BorderAdj(), y, false);
         }
     }
 
@@ -716,24 +716,24 @@ pub fn WriteTextLine(win:*Window, rcc:?df.RECT, y:usize, reverse:bool) void {
         return;
 
     // ---- build the retangle within which can write ----
-    var rc:df.RECT = undefined;
+    var rc:Rect = undefined;
     if (rcc) |cc| {
-        rc = cc;
+        rc = Rect.from_c_Rect(cc);
     } else {
-        rc = df.RelativeWindowRect(wnd, win.cWindowRect());
+        rc = Rect.RelativeWindowRect(win, win.WindowRect());
         if (win.TestAttribute(df.HASBORDER) and
-                rc.rt >= win.WindowWidth()-1) {
-            rc.rt = @intCast(win.WindowWidth()-2);
+                rc.right >= win.WindowWidth()-1) {
+            rc.right = win.WindowWidth()-2;
         }
     }
 
     // ----- make sure rectangle is within window ------
-    if (rc.lf >= win.WindowWidth()-1)
+    if (rc.left >= win.WindowWidth()-1)
         return;
-    if (rc.rt == 0)
+    if (rc.right == 0)
         return;
     rc = win.AdjustRectangle(rc);
-    if (y-win.wtop < rc.tp or y-win.wtop > rc.bt)
+    if (y-win.wtop < rc.top or y-win.wtop > rc.bottom)
         return;
 
     // ----- get the text to a specified line -----
@@ -822,7 +822,7 @@ pub fn WriteTextLine(win:*Window, rcc:?df.RECT, y:usize, reverse:bool) void {
 
             var line = [_]u8{0}**df.MAXCOLS;
 
-            df.cWriteTextLine(wnd, rc, lnlen, buf.ptr, @constCast(&line));
+            df.cWriteTextLine(wnd, rc.c_Rect(), lnlen, buf.ptr, @constCast(&line));
 
             var dif:usize = 0;
             // ------ establish the line's main color -----
@@ -841,7 +841,7 @@ pub fn WriteTextLine(win:*Window, rcc:?df.RECT, y:usize, reverse:bool) void {
                 colors.SetStandardColor(wnd);
             }
             // ------- display the line --------
-            win.writeline(@ptrCast(line[dif..]), @as(usize, @intCast(rc.lf))+win.BorderAdj(),
+            win.writeline(@ptrCast(line[dif..]), rc.left+win.BorderAdj(),
                                        y-win.wtop+win.TopBorderAdj(), false);
 
         } else |_| {

@@ -390,37 +390,36 @@ pub fn writeline(self:*TopLevelFields, str:[:0]const u8, x:usize, y:usize, pad:b
     video.wputs(self, @ptrCast(&wline), x, y);
 }
 
-pub fn AdjustRectangle(self:*TopLevelFields, rcc:df.RECT) df.RECT {
+pub fn AdjustRectangle(self:*TopLevelFields, rcc:Rect) Rect {
     var rc = rcc;
     // -------- adjust the rectangle -------
     if (self.TestAttribute(df.HASBORDER)) {
-        if (rc.lf == 0) {
-            rc.rt -= 1;
-        } else if (rc.lf < rc.rt and rc.lf < self.WindowWidth()+1) {
-            rc.lf -= 1;
+        if (rc.left == 0) {
+            rc.right -|= 1;
+        } else if (rc.left < rc.right and rc.left < self.WindowWidth()+1) {
+            rc.left -|= 1;
         }
     }
     if (self.TestAttribute(df.HASBORDER | df.HASTITLEBAR)) {
-        if (rc.tp == 0) {
-            rc.bt -= 1;
-        } else if (rc.tp < rc.bt and rc.tp < self.WindowHeight()+1) {
-            rc.tp -= 1;
+        if (rc.top == 0) {
+            rc.bottom -|= 1;
+        } else if (rc.top < rc.bottom and rc.top < self.WindowHeight()+1) {
+            rc.top -|= 1;
         }
     }
-    rc.rt = @intCast(@max(rc.lf, @min(rc.rt, self.WindowWidth())));
-    rc.bt = @intCast(@max(rc.tp, @min(rc.bt, self.WindowHeight())));
+    rc.right = @max(rc.left, @min(rc.right, self.WindowWidth()));
+    rc.bottom = @max(rc.top, @min(rc.bottom, self.WindowHeight()));
     return rc;
 }
 
 // -------- display a window's title ---------
 pub fn DisplayTitle(self:*TopLevelFields, rcc:?df.RECT) void {
-    const wnd = self.win;
     if (self.title) |_| {
-        var rc:df.RECT = undefined;
+        var rc:Rect = undefined;
         if (rcc) |cc| {
-            rc = cc;
+            rc = Rect.from_c_Rect(cc);
         } else {
-            rc = df.RelativeWindowRect(wnd, self.cWindowRect());
+            rc = Rect.RelativeWindowRect(self, self.WindowRect());
         }
         rc = self.AdjustRectangle(rc);
         if (self.sendMessage(df.TITLE, .{.paint=.{rcc, false}})) {
@@ -433,17 +432,17 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?df.RECT) void {
                 df.background = title_color [r.STD_COLOR] [r.BG];
             }
             const ttlen = if (self.title) |tt| tt.len else 0;
-            const tlen:usize = @intCast(@min(ttlen, self.WindowWidth()-2));
-            const tend:usize = @intCast(self.WindowWidth()-3-self.BorderAdj());
-            @memset(line[0..@intCast(self.WindowWidth())],  ' ');
+            const tlen:usize = @min(ttlen, self.WindowWidth()-2);
+            const tend:usize = self.WindowWidth()-3-self.BorderAdj();
+            @memset(line[0..self.WindowWidth()],  ' ');
             if (self.condition != .ISMINIMIZED) {
-                const pos:usize = @intCast(@divFloor(self.WindowWidth()-2-tlen, 2));
+                const pos:usize = @divFloor(self.WindowWidth()-2-tlen, 2);
                 @memcpy(line[pos..pos+tlen], self.title orelse "");
 //                strncpy(line + ((WindowWidth(wnd)-2 - tlen) / 2),
 //                            GetTitle(wnd), tlen);
             }
             if (self.TestAttribute(df.CONTROLBOX))
-                line[@intCast(2-self.BorderAdj())] = df.CONTROLBOXCHAR;
+                line[2-self.BorderAdj()] = df.CONTROLBOXCHAR;
             if (self.TestAttribute(df.MINMAXBOX)) {
                 switch (self.condition) {
                     .ISRESTORED => {
@@ -462,11 +461,11 @@ pub fn DisplayTitle(self:*TopLevelFields, rcc:?df.RECT) void {
                 }
             }
             line[tend+3] = 0;
-            line[@intCast(rc.rt+1)] = 0;
+            line[rc.right+1] = 0;
             if (self != inFocus)
                 df.ClipString += 1;
-            self.writeline(@ptrCast(line[@intCast(rc.lf)..]),
-                        @as(usize, @intCast(rc.lf))+self.BorderAdj(),
+            self.writeline(@ptrCast(line[rc.left..]),
+                        rc.left+self.BorderAdj(),
                         0, false);
             df.ClipString = 0;
         }
@@ -621,7 +620,7 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?df.RECT) void {
 
     df.foreground = colors.FrameForeground(self);
     df.background = colors.FrameBackground(self);
-    const clrc = self.AdjustRectangle(rc);
+    const clrc = self.AdjustRectangle(Rect.from_c_Rect(rc)).c_Rect();
 
     var lin:u8 = 0;
     var side:u8 = 0;
