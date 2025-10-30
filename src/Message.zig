@@ -81,7 +81,7 @@ pub const Params = union(ParamsType) {
     put_text:PutText,       // this to replace slice below ?
 
     yes:bool,               // true/false
-    area:?df.RECT,          // area
+    area:?Rect,             // area
     slice: []const u8,      // slice, zero length as null
     usize: usize,           // mainly for line number (DELETETEXT)
     usize_addr: *?usize,    // get selection from ListBox
@@ -327,12 +327,13 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
                 rrtn = if (df.mouse_installed()>0) true else false;
             },
             df.MOUSE_TRAVEL => {
-                const p1_val:?df.RECT = params.area;
-                var rc:df.RECT = .{.lf = 0, .tp = 0, .rt = df.SCREENWIDTH-1, .bt = df.SCREENHEIGHT-1};
+                const p1_val:?Rect = params.area;
+                var rc:Rect = .{.left = 0, .top = 0, .right = @intCast(df.SCREENWIDTH-1),
+                                                     .bottom = @intCast(df.SCREENHEIGHT-1)};
                 if (p1_val) |area| {
                     rc = area;
                 }
-                df.set_mousetravel(rc.lf, rc.rt, rc.tp, rc.bt);
+                df.set_mousetravel(@intCast(rc.left), @intCast(rc.right), @intCast(rc.top), @intCast(rc.bottom));
             },
             df.SHOW_MOUSE => {
                 df.show_mousecursor();

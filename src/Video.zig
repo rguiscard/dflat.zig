@@ -24,10 +24,10 @@ fn movefromscreen(bf:[]u16, offset:usize, len:usize) void {
 }
 
 // -- read a rectangle of video memory into a save buffer --
-pub fn getvideo(rc:df.RECT, bf:[]u16) void {
-    const ht:usize = @intCast(rc.bt-rc.tp+1);
-    const bytes_row:usize = @intCast(rc.rt-rc.lf+1);
-    var vadr = vad(@intCast(rc.lf), @intCast(rc.tp));
+pub fn getvideo(rc:Rect, bf:[]u16) void {
+    const ht:usize = rc.bottom-rc.top+1;
+    const bytes_row:usize = rc.right-rc.left+1;
+    var vadr = vad(rc.left, rc.top);
     df.hide_mousecursor();
     for (0..ht) |idx| {
         movefromscreen(bf[bytes_row*idx..], vadr, bytes_row);
@@ -37,10 +37,10 @@ pub fn getvideo(rc:df.RECT, bf:[]u16) void {
 }
 
 // -- write a rectangle of video memory from a save buffer --
-pub fn storevideo(rc:df.RECT, bf:[]u16) void {
-    const ht:usize = @intCast(rc.bt-rc.tp+1);
-    const bytes_row:usize = @intCast(rc.rt-rc.lf+1);
-    var vadr = vad(@intCast(rc.lf), @intCast(rc.tp));
+pub fn storevideo(rc:Rect, bf:[]u16) void {
+    const ht:usize = rc.bottom-rc.top+1;
+    const bytes_row:usize = rc.right-rc.left+1;
+    var vadr = vad(rc.left, rc.top);
     df.hide_mousecursor();
     for (0..ht) |idx| {
         movetoscreen(bf[bytes_row*idx..], vadr, bytes_row);

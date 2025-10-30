@@ -413,7 +413,7 @@ fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
         SetAnchor(win, ButtonX+@as(usize, @intCast(wnd.*.wleft)), @intCast(ButtonY+win.wtop));
         TextMarking = true;
         rc = win.WindowRect();
-        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.area=rc.c_Rect()});
+        _ = q.SendMessage(null,df.MOUSE_TRAVEL,.{.area=rc});
         ButtonDown = false;
     }
     if (TextMarking and !(normal.WindowMoving or normal.WindowSizing)) {

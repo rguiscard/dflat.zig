@@ -190,11 +190,11 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
         // ---------- in the scroll bar -----------
         if ((VSliding == false) and (my-1 == win.VScrollBox)) {
             VSliding = true;
-            const rc:df.RECT = .{
-                .lf = @intCast(win.GetRight()),
-                .rt = @intCast(win.GetRight()),
-                .tp = @intCast(win.GetTop()+2),
-                .bt = @intCast(win.GetBottom()-2),
+            const rc:Rect = .{
+                .left = win.GetRight(),
+                .right = win.GetRight(),
+                .top = win.GetTop()+2,
+                .bottom = win.GetBottom()-2,
             };
             return q.SendMessage(null, df.MOUSE_TRAVEL, .{.area = rc});
         }
@@ -221,11 +221,11 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
         if ((HSliding == false) and (mx-1 == win.HScrollBox)) {
             // --- hit the scroll box ---
             HSliding = true;
-            const rc:df.RECT = .{
-                .lf = @intCast(win.GetLeft()+2),
-                .rt = @intCast(win.GetRight()-2),
-                .tp = @intCast(win.GetBottom()),
-                .bt = @intCast(win.GetBottom()),
+            const rc:Rect = .{
+                .left = win.GetLeft()+2,
+                .right = win.GetRight()-2,
+                .top = win.GetBottom(),
+                .bottom = win.GetBottom(),
             };
             // - keep the mouse in the scroll bar -
             _ = q.SendMessage(null, df.MOUSE_TRAVEL, .{.area = rc});

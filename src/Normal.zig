@@ -1031,10 +1031,10 @@ fn SaveBorder(rect:Rect) void {
     if (Bsave) |buf| {
         var lrc = rect;
         lrc.bottom = lrc.top;
-        video.getvideo(lrc.c_Rect(), buf[0..]);
+        video.getvideo(lrc, buf[0..]);
         lrc.top = rect.bottom;
         lrc.bottom = rect.bottom;
-        video.getvideo(lrc.c_Rect(), buf[Bwd..]);
+        video.getvideo(lrc, buf[Bwd..]);
         var pos:usize = Bwd*2;
         for (1..Bht-1) |idx| {
             buf[pos] = video.GetVideoChar(rect.left, rect.top+idx);
@@ -1050,10 +1050,10 @@ fn RestoreBorder(rect:Rect) void {
     if (Bsave) |buf| {
         var lrc = rect;
         lrc.bottom = lrc.top;
-        video.storevideo(lrc.c_Rect(), buf[0..]);
+        video.storevideo(lrc, buf[0..]);
         lrc.top = rect.bottom;
         lrc.bottom = rect.bottom;
-        video.storevideo(lrc.c_Rect(), buf[Bwd..]);
+        video.storevideo(lrc, buf[Bwd..]);
         var pos:usize = Bwd*2;
         for (1..Bht-1) |idx| {
             video.PutVideoChar(rect.left, rect.top+idx, buf[pos]);
@@ -1104,27 +1104,27 @@ pub fn isVisible(win:*Window) bool {
 }
 
 // -- adjust a window's rectangle to clip it to its parent -
-fn ClipRect(win:*Window) df.RECT {
+fn ClipRect(win:*Window) Rect {
     var rc = win.WindowRect();
     if (win.TestAttribute(df.SHADOW)) {
         rc.bottom += 1;
         rc.right += 1;
     }
-    return Rect.ClipRectangle(win, rc).c_Rect();
+    return Rect.ClipRectangle(win, rc);
 }
 
 // -- get the video memory that is to be used by a window --
 fn GetVideoBuffer(win:*Window) void {
-    const rc = ClipRect(win);
-    const ht = df.RectBottom(rc) - df.RectTop(rc) + 1;
-    const wd = df.RectRight(rc) - df.RectLeft(rc) + 1;
+    const rc:Rect = ClipRect(win);
+    const ht:usize = rc.bottom - rc.top + 1;
+    const wd:usize = rc.right - rc.left + 1;
     if (win.videosave) |videosave| {
-        if (root.global_allocator.realloc(videosave, @intCast(ht * wd))) |buf| {
+        if (root.global_allocator.realloc(videosave, ht * wd)) |buf| {
             win.videosave = buf;
         } else |_| {
         }
     } else {
-        if (root.global_allocator.alloc(u16, @intCast(ht * wd))) |buf| {
+        if (root.global_allocator.alloc(u16, ht * wd)) |buf| {
             win.videosave = buf;
         } else |_| {
         }
