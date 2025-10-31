@@ -117,9 +117,9 @@ fn ClearTextMsg(win:*Window) void {
         wnd.*.text = null;
         wnd.*.textlen = 0;
         win.wlines = 0;
-        wnd.*.textwidth = 0;
+        win.textwidth = 0;
         win.wtop = 0;
-        wnd.*.wleft = 0;
+        win.wleft = 0;
     }
 
     ClearTextBlock(win);
@@ -332,20 +332,19 @@ fn ScrollMsg(win:*Window,p1:bool) bool {
 }
 
 fn HorizScrollMsg(win:*Window,p1:bool) bool {
-    const wnd = win.win;
     // --- horizontal scroll one column ---
     if (p1) {
         // --- scroll left ---
-        if (wnd.*.wleft + @as(c_int, @intCast(win.ClientWidth()))-1 >= wnd.*.textwidth) {
+        if (win.wleft + win.ClientWidth()-1 >= win.textwidth) {
             return false;
         }
-        wnd.*.wleft += 1;
+        win.wleft += 1;
     } else {
         // --- scroll right ---
-        if (wnd.*.wleft == 0) {
+        if (win.wleft == 0) {
             return false;
         }
-        wnd.*.wleft -= 1;
+        win.wleft -|= 1;
     }
     _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
     return true;
@@ -377,36 +376,36 @@ fn ScrollPageMsg(win:*Window,p1:bool) void {
 
 // ------------ HORIZSCROLLPAGE Message --------------
 fn HorizScrollPageMsg(win:*Window,p1:bool) void {
-    const wnd = win.win;
-    const clientWidth: c_int = @intCast(win.ClientWidth());
+    const clientWidth: usize = win.ClientWidth();
     // --- horizontal scroll one page ---
     if (p1 == false) {
         // ---- page left -----
-        wnd.*.wleft -= clientWidth;
+        win.wleft -|= clientWidth;
     } else {
         // ---- page right -----
-        wnd.*.wleft += clientWidth;
-        if (wnd.*.wleft > wnd.*.textwidth-clientWidth) {
-            wnd.*.wleft = @intCast(wnd.*.textwidth-clientWidth);
+        win.wleft += clientWidth;
+        if (win.wleft + clientWidth > win.textwidth) {
+            win.wleft = win.textwidth-clientWidth;
+        } else {
+            win.wleft = 0; // FIXME: is this correct ?
         }
     }
-    if (wnd.*.wleft < 0) {
-        wnd.*.wleft = 0;
-    }
+//    if (win.wleft < 0) {
+//        win.wleft = 0;
+//    }
     _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
 
 // ------------ SCROLLDOC Message --------------
 fn ScrollDocMsg(win:*Window,p1:bool) void {
-    const wnd = win.win;
     const clientHeight:usize = win.ClientHeight();
     // --- scroll to beginning or end of document ---
     if (p1) {
         win.wtop = 0;
-        wnd.*.wleft = 0;
+        win.wleft = 0;
     } else if (win.wtop+clientHeight < win.wlines) {
         win.wtop = win.wlines-clientHeight;
-        wnd.*.wleft = 0;
+        win.wleft = 0;
     }
     _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
 }
@@ -647,10 +646,9 @@ fn ComputeWindowTop(win:*Window) void {
 // ------ compute the horizontal scroll box position from
 //                 the text pointers ---------
 fn ComputeHScrollBox(win:*Window) usize {
-    const wnd = win.win;
     var pagewidth:usize = 0;
-    if (wnd.*.textwidth > win.ClientWidth()) {
-        pagewidth = @as(usize, @intCast(wnd.*.textwidth)) - win.ClientWidth();
+    if (win.textwidth > win.ClientWidth()) {
+        pagewidth = win.textwidth - win.ClientWidth();
     }
     const barlen:usize = if (win.ClientWidth() > 2) win.ClientWidth()-2 else 0;
     var chars_tick:usize = 0;
@@ -664,12 +662,12 @@ fn ComputeHScrollBox(win:*Window) usize {
         } else {
             chars_tick = if (pagewidth>0) @intCast(@divFloor(barlen, pagewidth)) else 0;
         }
-        const wleft:usize = @intCast(wnd.*.wleft);
+        const wleft:usize = win.wleft;
         const diff:usize = if (chars_tick>0) @divFloor(wleft, chars_tick) else 0;
         hscrollbox = 1 + diff;
         if (hscrollbox > win.ClientWidth()-2 or
-                wnd.*.wleft + @as(c_int, @intCast(win.ClientWidth())) >= wnd.*.textwidth) {
-            hscrollbox = @intCast(win.ClientWidth()-2);
+                win.wleft + win.ClientWidth() >= win.textwidth) {
+            hscrollbox = win.ClientWidth()-2;
         }
     }
     return hscrollbox;
@@ -677,13 +675,12 @@ fn ComputeHScrollBox(win:*Window) usize {
 
 // ---- compute left column from scroll box position ----
 fn ComputeWindowLeft(win:*Window) void {
-    const wnd = win.win;
-    const pagewidth:usize = @as(usize, @intCast(wnd.*.textwidth)) - win.ClientWidth();
+    const pagewidth:usize = win.textwidth - win.ClientWidth();
 
     if (win.HScrollBox == 0) {
-        wnd.*.wleft = 0;
+        win.wleft = 0;
     } else if (win.HScrollBox == win.ClientWidth()-2) {
-        wnd.*.wleft = @intCast(pagewidth);
+        win.wleft = pagewidth;
     } else {
         const barlen:usize = @intCast(win.ClientWidth()-2);
         var chars_tick:usize = 0;
@@ -693,12 +690,15 @@ fn ComputeWindowLeft(win:*Window) void {
         } else {
             chars_tick = @divFloor(barlen, pagewidth);
         }
-        wnd.*.wleft = @intCast((win.HScrollBox-1) * chars_tick);
-        if (wnd.*.wleft + @as(c_int, @intCast(win.ClientWidth())) > wnd.*.textwidth)
-            wnd.*.wleft = @intCast(pagewidth);
+        win.wleft = (win.HScrollBox-1) * chars_tick;
+        if (win.wleft + win.ClientWidth() > win.textwidth) {
+            win.wleft = pagewidth;
+        } else {
+            win.wleft = 0; // FIXME: is this correct ?
+        }
     }
-    if (wnd.*.wleft < 0)
-        wnd.*.wleft = 0;
+//    if (win.wleft < 0)
+//        win.wleft = 0;
 }
 
 // ------- write a line of text to a textbox window -------
@@ -816,7 +816,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
 
             var line = [_]u8{0}**df.MAXCOLS;
 
-            df.cWriteTextLine(wnd, rc.c_Rect(), lnlen, buf.ptr, @constCast(&line));
+            df.cWriteTextLine(@intCast(win.wleft), rc.c_Rect(), lnlen, buf.ptr, @constCast(&line));
 
             var dif:usize = 0;
             // ------ establish the line's main color -----
@@ -979,7 +979,7 @@ pub fn BuildTextPointers(win:*Window) void {
 
     if (wnd.*.text) |text| {
         win.wlines = 0;
-        wnd.*.textwidth = 0;
+        win.textwidth = 0;
         var next_pos:usize= 0;
 
         if (arraylist.append(allocator, 0)) {} else |_| {} // first line
@@ -987,7 +987,7 @@ pub fn BuildTextPointers(win:*Window) void {
 
         // this only cound to last '\n'
         while (std.mem.indexOfScalarPos(u8, text[0..wnd.*.textlen], next_pos, '\n')) |pos| {
-            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, pos-next_pos));
+            win.textwidth = @max(win.textwidth, pos-next_pos);
             next_pos = pos+1;
             if (next_pos < wnd.*.textlen) {
                 // add next line if there are still content
@@ -998,7 +998,7 @@ pub fn BuildTextPointers(win:*Window) void {
         }
         if (next_pos < wnd.*.textlen) {
             // there is no '\n', but may still has text.
-            wnd.*.textwidth = @intCast(@max(wnd.*.textwidth, wnd.*.textlen-next_pos));
+            win.textwidth = @max(win.textwidth, wnd.*.textlen-next_pos);
         }
        
     }

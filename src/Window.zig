@@ -105,6 +105,8 @@ isHelping:u32 = 0,                    // > 0 when help is being displayed
 // ----------------- text box fields ------------------
 wlines:usize = 0,             // number of lines of text
 wtop:usize = 0,               // text line that is on the top display
+wleft:usize = 0,              // left position in window viewport
+textwidth:usize = 0,          // width of longest line in textbox
 
 gapbuf:?*GapBuf = null,       // gap buffer
 

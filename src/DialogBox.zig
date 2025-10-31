@@ -233,14 +233,13 @@ fn FixColors(win:*Window) void {
 // --- dynamically add or remove scroll bars
 //                            from a control window ----
 fn SetScrollBars(win:*Window) void {
-    const wnd = win.win;
     const oldattr = win.GetAttribute();
     if (win.wlines > win.ClientHeight()) {
         win.AddAttribute(df.VSCROLLBAR);
     } else {
         win.ClearAttribute(df.VSCROLLBAR);
     }
-    if (wnd.*.textwidth > win.ClientWidth()) {
+    if (win.textwidth > win.ClientWidth()) {
         win.AddAttribute(df.HSCROLLBAR);
     } else {
         win.ClearAttribute(df.HSCROLLBAR);

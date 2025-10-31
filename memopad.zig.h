@@ -9,7 +9,7 @@ extern jmp_buf AllocError;
 extern BOOL AltDown;
 
 // textbox.c
-void cWriteTextLine(WINDOW, RECT, int, char*, char*);
+void cWriteTextLine(int, RECT, int, char*, char*);
 
 // editbox.c
 int CommandMsg(WINDOW, PARAM);

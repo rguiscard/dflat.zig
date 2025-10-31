@@ -3,7 +3,7 @@
 #include "dflat.h"
 
 /* ------- write a line of text to a textbox window ------- */
-void cWriteTextLine(WINDOW wnd, RECT rc, int l, char *src, char *line)
+void cWriteTextLine(int wleft, RECT rc, int l, char *src, char *line)
 {
     int len = 0;
     int dif = 0;
@@ -16,37 +16,37 @@ void cWriteTextLine(WINDOW wnd, RECT rc, int l, char *src, char *line)
     lp = src;
 
     /* - make sure left margin doesn't overlap color change - */
-    for (i = 0; i < wnd->wleft+3; i++)    {
+    for (i = 0; i < wleft+3; i++)    {
         if (*(lp+i) == '\0')
             break;
         if (*(unsigned char *)(lp + i) == RESETCOLOR)
             break;
     }
-    if (*(lp+i) && i < wnd->wleft+3)    {
-        if (wnd->wleft+4 > lnlen)
+    if (*(lp+i) && i < wleft+3)    {
+        if (wleft+4 > lnlen)
             trunc = TRUE;
         else 
             lp += 4;
     }
     else     {
         /* --- it does, shift the color change over --- */
-        for (i = 0; i < wnd->wleft; i++)    {
+        for (i = 0; i < wleft; i++)    {
             if (*(lp+i) == '\0')
                 break;
             if (*(unsigned char *)(lp + i) == CHANGECOLOR)    {
-                *(lp+wnd->wleft+2) = *(lp+i+2);
-                *(lp+wnd->wleft+1) = *(lp+i+1);
-                *(lp+wnd->wleft) = *(lp+i);
+                *(lp+wleft+2) = *(lp+i+2);
+                *(lp+wleft+1) = *(lp+i+1);
+                *(lp+wleft) = *(lp+i);
                 break;
             }
         }
     }
     /* ------ build the line to display -------- */
     if (!trunc)    {
-        if (lnlen < wnd->wleft)
+        if (lnlen < wleft)
             lnlen = 0;
         else
-            lp += wnd->wleft;
+            lp += wleft;
         if (lnlen > RectLeft(rc))    {
             /* ---- the line exceeds the rectangle ---- */
             int ct = RectLeft(rc);
