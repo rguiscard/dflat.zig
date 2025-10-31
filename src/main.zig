@@ -434,8 +434,7 @@ fn OurEditorProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
 
 // ------ display the row and column in the statusbar ------
 fn ShowPosition(win:*mp.Window) void {
-    const wnd = win.win;
-    const ln:u32 = @intCast(wnd.*.CurrLine);
+    const ln:u32 = @intCast(win.CurrLine);
     const cl:u32 = @intCast(win.CurrCol);
     if (std.fmt.allocPrintSentinel(mp.global_allocator, "Line:{d:4} Column: {d:2}", .{ln, cl}, 0)) |m| {
         defer mp.global_allocator.free(m);

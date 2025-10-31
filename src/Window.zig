@@ -1002,9 +1002,8 @@ pub fn prevWindow(self: *TopLevelFields) ?*TopLevelFields {
 }
 
 pub fn currPos(self: *TopLevelFields) usize {
-    const wnd = self.win;
     const col:c_uint = @intCast(self.CurrCol);
-    return self.TextPointers[@intCast(wnd.*.CurrLine)]+col;
+    return self.TextPointers[self.CurrLine]+col;
 }
 
 // return position of beginning of line specified by sel

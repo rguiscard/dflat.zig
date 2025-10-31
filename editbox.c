@@ -123,6 +123,8 @@ char *GetCurrChar(WINDOW);
 void SetCurrChar(WINDOW, char);
 int GetCurrCol(WINDOW);
 void SetCurrCol(WINDOW, int);
+int GetCurrLine(WINDOW);
+void SetCurrLine(WINDOW, int);
 
 /* ----------- ID_PARAGRAPH Command ---------- */
 // Rewrite to be called from  zig size
@@ -163,7 +165,7 @@ void cParagraphCmd(WINDOW wnd, char *bbl, char *bel)
     while (GetCurrChar(wnd) < bel) {
         if (*GetCurrChar(wnd) == '\n') {
             *GetCurrChar(wnd) = ' ';
-            wnd->CurrLine++;
+            SetCurrLine(wnd, GetCurrLine(wnd)+1);
             SetCurrCol(wnd, 0);
         }
         else

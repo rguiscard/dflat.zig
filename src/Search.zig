@@ -127,8 +127,8 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 
                 // position the cursor at the matching text
                 win.CurrCol = win.BlkBegCol;
-                wnd.*.CurrLine = @intCast(win.BlkBegLine);
-                wnd.*.WndRow = wnd.*.CurrLine - @as(c_int, @intCast(win.wtop));
+                win.CurrLine = win.BlkBegLine;
+                wnd.*.WndRow = @as(c_int, @intCast(win.CurrLine-win.wtop));
 
                 // -- remember the size of the matching text --
                 lastsize = cp.len;
@@ -138,7 +138,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                     wnd.*.wleft = @as(c_int, @intCast(win.CurrCol));
                 }
                 if (wnd.*.WndRow > (win.ClientHeight()-1)) {
-                    win.wtop = @intCast(wnd.*.CurrLine);
+                    win.wtop = win.CurrLine;
                     wnd.*.WndRow = 0;
                 }
 

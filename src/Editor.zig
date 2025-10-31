@@ -270,7 +270,7 @@ fn RepaintLine(win:*Window) void {
     const wnd = win.win;
     _ = win.sendMessage(df.KEYBOARD_CURSOR,
                         .{.position=.{@intCast(editbox.WndCol(win)), @intCast(wnd.*.WndRow)}});
-    textbox.WriteTextLine(win, null, @intCast(wnd.*.CurrLine), false);
+    textbox.WriteTextLine(win, null, win.CurrLine, false);
 }
 
 // for editbox.c
@@ -282,6 +282,19 @@ pub export fn GetCurrChar(wnd:df.WINDOW) [*c]u8 {
         }
     }
     return 0;
+}
+
+pub export fn GetCurrLine(wnd:df.WINDOW) c_int {
+    if (Window.get_zin(wnd)) |win| {
+        return @intCast(win.CurrLine);
+    }
+    return 0;
+}
+
+pub export fn SetCurrLine(wnd:df.WINDOW, line:c_int) void {
+    if (Window.get_zin(wnd)) |win| {
+        win.CurrLine = @intCast(line);
+    }
 }
 
 pub export fn GetCurrCol(wnd:df.WINDOW) c_int {

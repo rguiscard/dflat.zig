@@ -94,7 +94,7 @@ typedef struct window {
 //	unsigned int *TextPointers; /* -> list of line offsets	*/
     /* ----------------- edit box fields ------------------ */
 //    int CurrCol;      /* Current column                     */
-    int CurrLine;     /* Current line                       */
+//    int CurrLine;     /* Current line                       */
     int WndRow;       /* Current window row                 */
 //    BOOL TextChanged; /* TRUE if text has changed           */
 //    BOOL protect;	  /* TRUE to display '*'                */
