@@ -92,17 +92,7 @@ typedef struct window {
 //    int HScrollBox; /* position of horizontal scroll box    */
 //    int VScrollBox; /* position of vertical scroll box      */
 //	unsigned int *TextPointers; /* -> list of line offsets	*/
-    /* ----------------- edit box fields ------------------ */
-//    int CurrCol;      /* Current column                     */
-//    int CurrLine;     /* Current line                       */
-    int WndRow;       /* Current window row                 */
-//    BOOL TextChanged; /* TRUE if text has changed           */
-//    BOOL protect;	  /* TRUE to display '*'                */
-//    unsigned char *DeletedText; /* for undo                 */
-//    unsigned DeletedLength; /* Length of deleted field      */
-//    BOOL InsertMode;   /* TRUE or FALSE for text insert     */
-//    BOOL WordWrapMode; /* TRUE or FALSE for word wrap       */
-//	unsigned int MaxTextLength; /* maximum text length      */
+
     /* pointer to zig window */
     void *zin; /* Point to Window in zig */
 } * WINDOW;

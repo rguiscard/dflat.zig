@@ -128,7 +128,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 // position the cursor at the matching text
                 win.CurrCol = win.BlkBegCol;
                 win.CurrLine = win.BlkBegLine;
-                wnd.*.WndRow = @as(c_int, @intCast(win.CurrLine-win.wtop));
+                win.WndRow = win.CurrLine-win.wtop;
 
                 // -- remember the size of the matching text --
                 lastsize = cp.len;
@@ -137,13 +137,13 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 if (editbox.WndCol(win) > (win.ClientWidth()-1)) {
                     wnd.*.wleft = @as(c_int, @intCast(win.CurrCol));
                 }
-                if (wnd.*.WndRow > (win.ClientHeight()-1)) {
+                if (win.WndRow > (win.ClientHeight()-1)) {
                     win.wtop = win.CurrLine;
-                    wnd.*.WndRow = 0;
+                    win.WndRow = 0;
                 }
 
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
-                _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{@intCast(editbox.WndCol(win)), @intCast(wnd.*.WndRow)}});
+                _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{editbox.WndCol(win), win.WndRow}});
 
 //                if (Replacing)    {
 //                    if (rpl || YesNoBox("Replace the text?"))  {
