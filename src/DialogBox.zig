@@ -256,7 +256,7 @@ fn CtlCloseWindowMsg(win:*Window) void {
         if (win.getParent().ReturnCode == .ID_OK) {
             if (ct.*.Class == k.EDITBOX or ct.*.Class == k.COMBOBOX)  {
                 // should use strlen() instead ?
-                const len = wnd.*.textlen;
+                const len = win.textlen;
                 if (getGapBuffer(ct, len)) |buf| {
                     buf.clear();
                     if (wnd.*.text) |text| {

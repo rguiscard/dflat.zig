@@ -87,7 +87,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
             // --- compare at each character position ---
             const zp = cp;
 //            const zp1 = std.mem.span(cp1);
-            const zp1 = wnd.*.text[pp1..wnd.*.textlen];
+            const zp1 = wnd.*.text[pp1..win.textlen];
             var index:?usize = null;
             // FIXME: original code is whitespace normalized ('\n' -> ' ')
             if (CheckCase) {

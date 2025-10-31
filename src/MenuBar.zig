@@ -74,7 +74,7 @@ fn BuildMenuMsg(win:*Window, p1:*menus.MBAR,) void {
             ActiveMenu = &mbar.*.PullDown;
         }
         wnd.*.text = @constCast(buf.toString().ptr);
-        wnd.*.textlen = @intCast(buf.len());
+        win.textlen = buf.len();
     } else {
         // error 
     }
@@ -492,7 +492,7 @@ fn reset_menubar(win:*Window) void {
     const wnd = win.win;
     if (win.getGapBuffer(@intCast(df.SCREENWIDTH+5))) |_| {
         wnd.*.text = null;
-        wnd.*.textlen = 0;
+        win.textlen = 0;
     }
 }
 

@@ -107,7 +107,7 @@ pub fn PasteText(win:*Window, SaveTo:[]u8, len:c_uint) bool {
                 buf.moveCursor(pos);
                 if (buf.insertSlice(SaveTo)) { } else |_| { }
                 wnd.*.text = @constCast(buf.toString().ptr);
-                wnd.*.textlen = @intCast(buf.len());
+                win.textlen = buf.len();
             }
 
 //            const cp:[*c]u8 = df.zCurrChar(wnd);

@@ -153,7 +153,7 @@ fn KeyPress(win:*Window,p1:u16, p2:u8) void {
 //
 //        const first = cp[0];
         var pos = win.textLine(sel);
-        if (pos >= wnd.*.textlen)
+        if (pos >= win.textlen)
             break;
         if (win.isMultiLine())
             pos += 1;
@@ -283,7 +283,7 @@ fn AddTextMsg(win:*Window,p1:[]const u8) bool {
 fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) void {
     const wnd = win.win;
     const cp2 = win.textLine(p2);
-    if (std.mem.indexOfAnyPos(u8, wnd.*.text[0..wnd.*.textlen], cp2, &[_]u8{0, '\n'})) |pos| {
+    if (std.mem.indexOfAnyPos(u8, wnd.*.text[0..win.textlen], cp2, &[_]u8{0, '\n'})) |pos| {
         const len = pos-cp2;
         @memmove(p1[0..len], wnd.*.text[cp2..pos]);
         p1[len] = 0;

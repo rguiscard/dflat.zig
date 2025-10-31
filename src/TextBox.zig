@@ -27,7 +27,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         if (buf.insertSlice(txt)) { } else |_| { }
         if (buf.insert('\n')) { } else |_| { }
         wnd.*.text = @constCast(buf.toString().ptr);
-        wnd.*.textlen = @intCast(buf.len());
+        win.textlen = buf.len();
 
         BuildTextPointers(win);
         return true;
@@ -49,7 +49,7 @@ fn DeleteTextMsg(win:*Window, lno:usize) void {
             buf.delete();
         }
         wnd.*.text = @constCast(buf.toString().ptr);
-        wnd.*.textlen = @intCast(buf.len());
+        win.textlen = buf.len();
 
         BuildTextPointers(win);
     }
@@ -79,7 +79,7 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
         if (buf.insertSlice(txt)) { } else |_| { }
         if (buf.insert('\n')) { } else |_| { }
         wnd.*.text = @constCast(buf.toString().ptr);
-        wnd.*.textlen = @intCast(buf.len());
+        win.textlen = buf.len();
 
         BuildTextPointers(win);
         win.TextChanged = true;
@@ -104,7 +104,7 @@ fn SetTextMsg(win:*Window, txt:[]const u8) void {
         buf.clear();
         if (buf.insertSlice(txt)) { } else |_| { }
         wnd.*.text = @constCast(buf.toString().ptr);
-        wnd.*.textlen = @intCast(buf.len());
+        win.textlen = buf.len();
         BuildTextPointers(win);
     }
 }
@@ -115,7 +115,7 @@ fn ClearTextMsg(win:*Window) void {
     if (win.gapbuf) |buf| {
         buf.clear();
         wnd.*.text = null;
-        wnd.*.textlen = 0;
+        win.textlen = 0;
         win.wlines = 0;
         win.textwidth = 0;
         win.wtop = 0;
@@ -733,7 +733,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
     // ----- get the text to a specified line -----
     // should check out of bound of y?
     const beg = win.TextPointers[y];
-    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], beg, '\n')) |pos| {
+    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], beg, '\n')) |pos| {
 
         // FIXME: handle protect
 
@@ -986,19 +986,19 @@ pub fn BuildTextPointers(win:*Window) void {
         win.wlines += 1;
 
         // this only cound to last '\n'
-        while (std.mem.indexOfScalarPos(u8, text[0..wnd.*.textlen], next_pos, '\n')) |pos| {
+        while (std.mem.indexOfScalarPos(u8, text[0..win.textlen], next_pos, '\n')) |pos| {
             win.textwidth = @max(win.textwidth, pos-next_pos);
             next_pos = pos+1;
-            if (next_pos < wnd.*.textlen) {
+            if (next_pos < win.textlen) {
                 // add next line if there are still content
                 // otherwise, it is the end of line and end of text
                 if (arraylist.append(allocator, @intCast(next_pos))) {} else |_| {} // next new line
                 win.wlines += 1;
             }
         }
-        if (next_pos < wnd.*.textlen) {
+        if (next_pos < win.textlen) {
             // there is no '\n', but may still has text.
-            win.textwidth = @max(win.textwidth, wnd.*.textlen-next_pos);
+            win.textwidth = @max(win.textwidth, win.textlen-next_pos);
         }
        
     }

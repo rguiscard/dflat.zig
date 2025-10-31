@@ -38,12 +38,9 @@ pub fn WndCol(win:*Window) usize {
 
 // ----------- CREATE_WINDOW Message ----------
 fn CreateWindowMsg(win:*Window) bool {
-    const wnd = win.win;
     const rtn = root.BaseWndProc(k.EDITBOX, win, df.CREATE_WINDOW, q.none);
     win.MaxTextLength = df.MAXTEXTLEN+1;
-    wnd.*.textlen = EditBufLen(win);
-//    win.textlen = EditBufLen(win);
-//    wnd.*.InsertMode = df.TRUE;
+    win.textlen = EditBufLen(win);
     win.InsertMode = true;
     if (win.isMultiLine())
         win.WordWrapMode = true;
@@ -55,7 +52,6 @@ fn CreateWindowMsg(win:*Window) bool {
 fn AddTextMsg(win:*Window,p1:[]const u8) bool {
     var rtn = false;
 
-//    if (df.strlen(ptext)+wnd.*.textlen <= wnd.*.MaxTextLength) {
     const len = if (win.gapbuf) |buf| buf.len() else 0;
     if (p1.len+len <= win.MaxTextLength) {
         rtn = root.BaseWndProc(k.EDITBOX, win, df.ADDTEXT, .{.slice=p1});
@@ -115,11 +111,11 @@ fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) bool {
     const dst:[]u8 = p1;
     var len:usize = p2;
     if (wnd.*.text) |text| {
-        if (std.mem.indexOfScalar(u8, text[0..wnd.*.textlen], '\n')) |pos| {
+        if (std.mem.indexOfScalar(u8, text[0..win.textlen], '\n')) |pos| {
             // pos is usize, overflow if minus 1.
             len = if (pos > 0) @min(len, pos-1) else 0; 
         } else {
-            len = @min(len, wnd.*.textlen-1); // null at the end
+            len = @min(len, win.textlen-1); // null at the end
         }
         @memmove(dst[0..len], text[0..len]);
         dst[len] = 0;
@@ -145,7 +141,7 @@ fn SetTextLengthMsg(win:*Window, p1:usize) bool {
                 if (buf.insert('\n')) { } else |_| { } // 0 or \n ?
                 if (buf.insert(0)) { } else |_| { }
                 wnd.*.text = @constCast(buf.toString().ptr);
-                wnd.*.textlen = @intCast(buf.len());
+                win.textlen = buf.len();
                 textbox.BuildTextPointers(win);
             }
         }
@@ -223,7 +219,7 @@ fn HorizScrollMsg(win:*Window, p1:bool) bool {
     var rtn = false;
 //    char *currchar = CurrChar;
 //    const curr_char = df.zCurrChar(wnd);
-    if (wnd.*.textlen == 0) {
+    if (win.textlen == 0) {
         return false;
     }
     const curr_char = wnd.*.text[win.currPos()];
@@ -278,7 +274,7 @@ fn ExtendBlock(win:*Window, xx:usize, yy:usize) void {
 //    const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
     const lp = win.textLine(win.wtop+y);
     var len:usize = 0;
-    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], lp, '\n')) |pos| {
+    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], lp, '\n')) |pos| {
         len = @intCast(pos-lp);
     }
     x = @max(0, @min(x, len));
@@ -363,7 +359,7 @@ fn LeftButtonMsg(win:*Window,p1:usize, p2:usize) bool {
 //        }
         const lp = win.textLine(sel);
         var len:usize = 0;
-        if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], lp, '\n')) |pos| {
+        if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], lp, '\n')) |pos| {
             len = pos-lp;
         }
         MouseX = @min(MouseX, len);
@@ -458,7 +454,7 @@ fn KeyTyped(win:*Window, cc:u16) void {
             if (buf.insert('\n')) {} else |_| {}
             if (buf.insert(0)) {} else |_| {}
             wnd.*.text = @constCast(buf.toString().ptr);
-            wnd.*.textlen = @intCast(buf.len());
+            win.textlen = buf.len();
 //            *currchar = '\n';
 //            *(currchar+1) = '\0';
             textbox.BuildTextPointers(win);
@@ -501,7 +497,7 @@ fn KeyTyped(win:*Window, cc:u16) void {
         buf.moveCursor(currpos);
         if (buf.insert(@intCast(cc))) {} else |_| {}
         wnd.*.text = @constCast(buf.toString().ptr);
-        wnd.*.textlen = @intCast(buf.len());
+        win.textlen = buf.len();
         textbox.BuildTextPointers(win);
         _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         win.TextChanged = true;
@@ -572,7 +568,7 @@ fn DelKey(win:*Window) void {
         buf.moveCursor(curr_pos);
         buf.delete();
         wnd.*.text = @constCast(buf.toString().ptr);
-        wnd.*.textlen = @intCast(buf.len());
+        win.textlen = buf.len();
         // always repaint for now
         textbox.BuildTextPointers(win);
         _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
@@ -599,7 +595,7 @@ fn TabKey(win:*Window, p2:u8) void {
         for (pos+1..win.MaxTextLength) |idx| {
             if (insmd == false and wnd.*.text[idx] == 0)
                 break;
-            if (wnd.*.textlen == win.MaxTextLength)
+            if (win.textlen == win.MaxTextLength)
                 break;
             _ = win.sendMessage(df.KEYBOARD, .{.char=.{if (insmd) ' ' else df.FWD, 0}});
             if (@mod(win.CurrCol, tabs) == 0)
@@ -747,7 +743,7 @@ fn DeleteTextCmd(win:*Window) void {
         const bel=win.textLine(end_sel)+end_col;
         SaveDeletedText(win, bbl, bel);
         win.TextChanged = true;
-        _ = df.memmove(&wnd.*.text[bbl], &wnd.*.text[bel], wnd.*.textlen-bel);
+        _ = df.memmove(&wnd.*.text[bbl], &wnd.*.text[bel], win.textlen-bel);
 //        const bcol:usize = @intCast(wnd.*.BlkBegCol); // could we reuse beg_col?
 //        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl-bcol);
         win.CurrLine = win.BlkBegLine;
@@ -1264,10 +1260,10 @@ fn StickEnd(win:*Window) void {
     const wnd = win.win;
     const curr_pos = win.TextPointers[win.CurrLine];
     var len:usize = 0;
-    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], curr_pos, '\n')) |end_pos| {
+    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], curr_pos, '\n')) |end_pos| {
         len = end_pos-curr_pos;
     } else {
-        len = wnd.*.textlen-curr_pos-1; // consider end null -1 ?
+        len = win.textlen-curr_pos-1; // consider end null -1 ?
     }
     win.CurrCol = @min(len, win.CurrCol);
     if (win.wleft > win.CurrCol) {
@@ -1330,10 +1326,10 @@ fn Backward(win:*Window) void {
 fn End(win:*Window) void {
     const wnd = win.win;
     const curr_pos = win.TextPointers[win.CurrLine];
-    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..@intCast(wnd.*.textlen)], curr_pos, '\n')) |pos| {
+    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], curr_pos, '\n')) |pos| {
         win.CurrCol = pos-curr_pos;
     } else {
-        win.CurrCol = wnd.*.textlen-curr_pos-1;
+        win.CurrCol = win.textlen-curr_pos-1;
     }
     if (WndCol(win) >= win.ClientWidth()) {
         win.wleft = win.CurrCol - win.ClientWidth()-1;

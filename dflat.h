@@ -82,7 +82,7 @@ typedef struct window {
 //    int wlines;     /* number of lines of text              */
 //    int wtop;       /* text line that is on the top display */
     unsigned char *text; /* window text                     */
-    unsigned int textlen;  /* text length                   */
+//    unsigned int textlen;  /* text length                   */
 //    int wleft;      /* left position in window viewport     */
 //    int textwidth;  /* width of longest line in textbox     */
 //    int BlkBegLine; /* beginning line of marked block       */

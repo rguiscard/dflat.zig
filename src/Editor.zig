@@ -202,7 +202,7 @@ fn AdjustTab(win:*Window) void {
     var col = win.CurrCol;
     var curr_pos = win.currPos();
     var cc = wnd.*.text[curr_pos];
-    while ((curr_pos < wnd.*.textlen) and (cc != '\n')) {
+    while ((curr_pos < win.textlen) and (cc != '\n')) {
         if (cc == sTab) {
             const tabs:usize = @intCast(cfg.config.Tabs);
             var exp = (tabs-1) - @mod(col, tabs);
@@ -276,7 +276,7 @@ fn RepaintLine(win:*Window) void {
 pub export fn GetCurrChar(wnd:df.WINDOW) [*c]u8 {
     if (Window.get_zin(wnd)) |win| {
         const pos = win.currPos();
-        if (pos < wnd.*.textlen) {
+        if (pos < win.textlen) {
             return wnd.*.text+pos;
         }
     }
