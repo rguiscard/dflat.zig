@@ -117,19 +117,22 @@ VScrollBox:usize = 0,         // position of vertical scroll box
 TextPointers:[]c_uint = &.{}, // -> list of line offsets
 
 // ----------------- list box fields ------------------
-selection:?usize = null,      // current selection, -1 for none
+selection:?usize = null,   // current selection, -1 for none
 AddMode:bool = false,      // adding extended selections mode
 AnchorPoint:isize = -1,    // anchor point for extended selections
 SelectCount:usize = 0,     // count of selected items
 
 // ----------------- edit box fields ------------------
-TextChanged:bool = false,    // TRUE if text has changed
-protected:bool = false,      // TRUE to display
-DeletedText:?[]u8 = null,    // for undo
-DeletedLength:usize = 0,     // Length of deleted field
-InsertMode:bool = false,     // TRUE or FALSE for text insert
-WordWrapMode:bool = false,   // TRUE or FALSE for word wrap
-MaxTextLength:usize = 0,     // maximum text length
+CurrCol:usize = 0,         // Current column
+CurrLine:usize = 0,        // Current line
+WndRow:usize = 0,          // Current window row
+TextChanged:bool = false,  // TRUE if text has changed
+protected:bool = false,    // TRUE to display
+DeletedText:?[]u8 = null,  // for undo
+DeletedLength:usize = 0,   // Length of deleted field
+InsertMode:bool = false,   // TRUE or FALSE for text insert
+WordWrapMode:bool = false, // TRUE or FALSE for word wrap
+MaxTextLength:usize = 0,   // maximum text length
 
 // ---------------- dialog box fields ----------------- 
 ReturnCode:c = c.ID_NULL,       // return code from a dialog box
@@ -1000,7 +1003,7 @@ pub fn prevWindow(self: *TopLevelFields) ?*TopLevelFields {
 
 pub fn currPos(self: *TopLevelFields) usize {
     const wnd = self.win;
-    const col:c_uint = @intCast(wnd.*.CurrCol);
+    const col:c_uint = @intCast(self.CurrCol);
     return self.TextPointers[@intCast(wnd.*.CurrLine)]+col;
 }
 

@@ -76,7 +76,8 @@ typedef enum {FALSE, TRUE} BOOL;
 typedef intptr_t PARAM;
 
 typedef struct window {
-    RECT rc; /* FIXME. This is to prevent from memory problem (alignment ?) */
+    int unused; // this prevent memory issue
+//    RECT rc; /* FIXME. This is to prevent from memory problem (alignment ?) */
     /* ----------------- text box fields ------------------ */
 //    int wlines;     /* number of lines of text              */
 //    int wtop;       /* text line that is on the top display */
@@ -90,9 +91,9 @@ typedef struct window {
 //    int BlkEndCol;  /* ending column of marked block        */
 //    int HScrollBox; /* position of horizontal scroll box    */
 //    int VScrollBox; /* position of vertical scroll box      */
-	unsigned int *TextPointers; /* -> list of line offsets	*/
+//	unsigned int *TextPointers; /* -> list of line offsets	*/
     /* ----------------- edit box fields ------------------ */
-    int CurrCol;      /* Current column                     */
+//    int CurrCol;      /* Current column                     */
     int CurrLine;     /* Current line                       */
     int WndRow;       /* Current window row                 */
 //    BOOL TextChanged; /* TRUE if text has changed           */
@@ -111,26 +112,15 @@ typedef struct window {
 /* ------- window methods ----------- */
 #define WindowHeight(w)      ((w)->ht)
 #define WindowWidth(w)       ((w)->wd)
-int c_BorderAdj(WINDOW);
-int c_TopBorderAdj(WINDOW);
 int c_ClientWidth(WINDOW);
-int c_ClientHeight(WINDOW);
 #define WindowRect(w)        ((w)->rc)
 #define GetTop(w)            (RectTop(WindowRect(w)))
 #define GetBottom(w)         (RectBottom(WindowRect(w)))
 #define GetLeft(w)           (RectLeft(WindowRect(w)))
 #define GetRight(w)          (RectRight(WindowRect(w)))
-int c_GetClientLeft(WINDOW);
-int c_GetClientTop(WINDOW);
-int c_GetClientBottom(WINDOW);
-int c_GetClientRight(WINDOW);
 char *GetTitle(WINDOW);
 WINDOW GetParent(WINDOW);
-int GetClass(WINDOW); // use int for CLASS
-int c_AddAttribute(WINDOW, int);
-int c_TestAttribute(WINDOW, int);
 #define gotoxy(w,x,y) cursor(w->rc.lf+(x)+1,w->rc.tp+(y)+1)
-void writeline(WINDOW, char *, int, int, BOOL);
 
 BOOL CharInView(WINDOW, int, int);
 int CheckAndChangeDir(char *);
@@ -140,12 +130,9 @@ WINDOW GetAncestor(WINDOW);
 void PutWindowChar(WINDOW,int,int,int);
 void PutWindowLine(WINDOW, void *,int,int);
 
-int DefaultWndProc(WINDOW, MESSAGE, PARAM, PARAM); 
-
 extern int foreground, background;
 extern char DFlatApplication[];
 extern BOOL ClipString;
-//extern int CurrentMenuSelection;
 /* --------- space between menubar labels --------- */
 #define MSPACE 2
 /* --------------- border characters ------------- */
@@ -186,13 +173,9 @@ extern BOOL ClipString;
 #define RESETCOLOR   (unsigned char) 175 /* reset colors to default  */
 #define LISTSELECTOR   4    /* selected list box entry      */
 /* --------- message prototypes ----------- */
-//BOOL init_messages(void);
-//void PostMessage(WINDOW, MESSAGE, PARAM, PARAM);
 int SendMessage(WINDOW, MESSAGE, PARAM, PARAM);
 void PostEvent(MESSAGE event, int p1, int p2);
-//BOOL dispatch_message(void);
 void near collect_events(void);
-//void handshake(void);
 /* ---- standard window message processing prototypes ----- */
 int ComboProc(WINDOW, MESSAGE, PARAM, PARAM);
 int SpinButtonProc(WINDOW, MESSAGE, PARAM, PARAM);
@@ -204,19 +187,13 @@ BOOL isAncestor(WINDOW, WINDOW);
 unsigned char c_WndForeground(WINDOW);
 unsigned char c_WndBackground(WINDOW);
 /* -------- text box prototypes ---------- */
-//#define TextLine(wnd, sel) \
-//      (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
 void WriteTextLine(WINDOW, RECT *, int, BOOL);
 BOOL cTextBlockMarked(WINDOW);
-//#define TextBlockBegin(wnd) (TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol)
-//#define TextBlockEnd(wnd)   (TextLine(wnd,wnd->BlkEndLine)+wnd->BlkEndCol)
 #define GetText(w)        ((w)->text)
-//#define GetTextLines(w)   ((w)->wlines)
 void ClearTextPointers(WINDOW);
 void BuildTextPointers(WINDOW);
 int TextLineNumber(WINDOW, char *);
 /* ------------- edit box prototypes ----------- */
-//#define CurrChar (TextLine(wnd, wnd->CurrLine)+wnd->CurrCol)
 #define WndCol   (wnd->CurrCol-wnd->wleft)
 #define isMultiLine(wnd) TestAttribute(wnd, MULTILINE)
 #define SetProtected(wnd) (wnd)->protect=TRUE

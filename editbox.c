@@ -121,6 +121,8 @@ void TextBlockToN(char *bbl, char *bel) {
 BOOL KeyboardMsg(WINDOW, char);
 char *GetCurrChar(WINDOW);
 void SetCurrChar(WINDOW, char);
+int GetCurrCol(WINDOW);
+void SetCurrCol(WINDOW, int);
 
 /* ----------- ID_PARAGRAPH Command ---------- */
 // Rewrite to be called from  zig size
@@ -162,10 +164,10 @@ void cParagraphCmd(WINDOW wnd, char *bbl, char *bel)
         if (*GetCurrChar(wnd) == '\n') {
             *GetCurrChar(wnd) = ' ';
             wnd->CurrLine++;
-            wnd->CurrCol = 0;
+            SetCurrCol(wnd, 0);
         }
         else
-            wnd->CurrCol++;
+            SetCurrCol(wnd, GetCurrCol(wnd)+1);
     }
     /* ---- insert newlines at new margin boundaries ---- */
     bb = bbl;

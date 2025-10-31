@@ -126,7 +126,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 win.BlkBegCol = pp1-win.textLine(win.BlkBegLine);
 
                 // position the cursor at the matching text
-                wnd.*.CurrCol = @intCast(win.BlkBegCol);
+                win.CurrCol = win.BlkBegCol;
                 wnd.*.CurrLine = @intCast(win.BlkBegLine);
                 wnd.*.WndRow = wnd.*.CurrLine - @as(c_int, @intCast(win.wtop));
 
@@ -135,7 +135,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 
                 // align the window scroll to matching text
                 if (editbox.WndCol(win) > (win.ClientWidth()-1)) {
-                    wnd.*.wleft = wnd.*.CurrCol;
+                    wnd.*.wleft = @as(c_int, @intCast(win.CurrCol));
                 }
                 if (wnd.*.WndRow > (win.ClientHeight()-1)) {
                     win.wtop = @intCast(wnd.*.CurrLine);

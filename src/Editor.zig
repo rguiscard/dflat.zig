@@ -131,8 +131,8 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
         '\t' => {
             TurnOffDisplay(win);
             _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{sTab, p2}});
-            const tabs:c_int = @intCast(cfg.config.Tabs);
-            while (@rem(wnd.*.CurrCol, tabs) != 0) {
+            const tabs:usize = @intCast(cfg.config.Tabs);
+            while (@rem(win.CurrCol, tabs) != 0) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pTab, p2}});
             }
             TurnOnDisplay(win);
@@ -199,12 +199,12 @@ fn AdjustTab(win:*Window) void {
     // turn visibility off when use this function
     const wnd = win.win;
     // ---- test if there is a tab beyond this character ---- 
-    var col = wnd.*.CurrCol;
+    var col = win.CurrCol;
     var curr_pos = win.currPos();
     var cc = wnd.*.text[curr_pos];
     while ((curr_pos < wnd.*.textlen) and (cc != '\n')) {
         if (cc == sTab) {
-            const tabs:c_int = @intCast(cfg.config.Tabs);
+            const tabs:usize = @intCast(cfg.config.Tabs);
             var exp = (tabs-1) - @mod(col, tabs);
             col += 1;
             curr_pos += 1;
@@ -282,4 +282,17 @@ pub export fn GetCurrChar(wnd:df.WINDOW) [*c]u8 {
         }
     }
     return 0;
+}
+
+pub export fn GetCurrCol(wnd:df.WINDOW) c_int {
+    if (Window.get_zin(wnd)) |win| {
+        return @intCast(win.CurrCol);
+    }
+    return 0;
+}
+
+pub export fn SetCurrCol(wnd:df.WINDOW, col:c_int) void {
+    if (Window.get_zin(wnd)) |win| {
+        win.CurrCol = @intCast(col);
+    }
 }

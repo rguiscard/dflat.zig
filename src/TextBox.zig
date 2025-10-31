@@ -484,12 +484,18 @@ fn PaintMsg(win:*Window,p1:?Rect,p2:bool) void {
 
 // ------------ CLOSE_WINDOW Message --------------
 fn CloseWindowMsg(win:*Window) void {
-    const wnd = win.win;
+//    const wnd = win.win;
     _ = win.sendMessage(df.CLEARTEXT, q.none);
-    if (wnd.*.TextPointers != null) {
-        root.global_allocator.free(wnd.*.TextPointers[0..win.wlines]);
-        wnd.*.TextPointers = null;
+    if (win.TextPointers.len > 0) {
+//  FIXME: memory leak
+//        const allocator = root.global_allocator;
+//        var arraylist = std.ArrayList(c_uint).fromOwnedSlice(win.TextPointers);
+//        arraylist.clearAndFree(allocator);
     }
+//    if (wnd.*.TextPointers != null) {
+//        root.global_allocator.free(wnd.*.TextPointers[0..win.wlines]);
+//        wnd.*.TextPointers = null;
+//    }
 }
 
 // ----------- TEXTBOX Message-processing Module -----------
@@ -583,16 +589,6 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
     }
     return root.BaseWndProc(k.TEXTBOX, win, msg, params);
 }
-
-//#define TextLine(wnd, sel) \
-//      (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
-//pub fn TextLine(wnd:df.WINDOW, sel:c_uint) [*c]u8 {
-//    const idx:usize = @intCast(sel);
-//    if (Window.get_zin(wnd)) |win| {
-//        return wnd.*.text + win.TextPointers[idx];
-//    }
-//    return 0; // unreachable
-//}
 
 // ------ compute the vertical scroll box position from
 //                   the text pointers ---------
@@ -736,7 +732,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
 
     // ----- get the text to a specified line -----
     // should check out of bound of y?
-    const beg = win.TextPointers[@intCast(y)];
+    const beg = win.TextPointers[y];
     if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..wnd.*.textlen], beg, '\n')) |pos| {
 
         // FIXME: handle protect
@@ -872,7 +868,7 @@ pub fn ClearTextBlock(win:*Window) void {
 
 // ----- clear and initialize text line pointer array -----
 pub fn ClearTextPointers(win:*Window) void {
-    const wnd = win.win;
+//    const wnd = win.win;
     const allocator = root.global_allocator;
     var arraylist:std.ArrayList(c_uint) = undefined;
     if (win.TextPointers.len > 0) {
@@ -899,7 +895,7 @@ pub fn ClearTextPointers(win:*Window) void {
     if (arraylist.append(allocator, 0)) {} else |_| {} // first line
     if (arraylist.toOwnedSlice(allocator)) |pointers| {
         win.TextPointers = pointers;
-        wnd.*.TextPointers = pointers.ptr;
+//        wnd.*.TextPointers = pointers.ptr;
     } else |_| {}
     // set wnd.*.wlines to zero ?
     win.wlines = 0;
@@ -1009,7 +1005,7 @@ pub fn BuildTextPointers(win:*Window) void {
 
     if (arraylist.toOwnedSlice(allocator)) |pointers| {
         win.TextPointers = pointers;
-        wnd.*.TextPointers = pointers.ptr;
+//        wnd.*.TextPointers = pointers.ptr;
     } else |_| {}
 
 //    char *cp = wnd->text, *cp1;
