@@ -230,9 +230,13 @@ fn HorizScrollMsg(win:*Window, p1:bool) bool {
     const wnd = win.win;
     var rtn = false;
 //    char *currchar = CurrChar;
-    const curr_char = df.zCurrChar(wnd);
+//    const curr_char = df.zCurrChar(wnd);
+    if (wnd.*.textlen == 0) {
+        return false;
+    }
+    const curr_char = wnd.*.text[win.currPos()];
     if ((p1 and (wnd.*.CurrCol == wnd.*.wleft) and
-               (curr_char[0] == '\n')) == false)  {
+               (curr_char == '\n')) == false)  {
         rtn = root.BaseWndProc(k.EDITBOX, win, df.HORIZSCROLL, .{.yes=p1});
         if (rtn) {
             if (wnd.*.CurrCol < wnd.*.wleft) {
@@ -440,14 +444,16 @@ fn ButtonReleasedMsg(win:*Window) bool {
 fn KeyTyped(win:*Window, cc:u16) void {
     const wnd = win.win;
     if (win.getGapBuffer(1)) |buf| {
-        var currchar = df.zCurrChar(wnd);
+//        var currchar = wnd.*.text[win.currPos()];
+//        var currchar = df.zCurrChar(wnd);
         if ((cc != '\n' and cc < ' ') or (cc & 0x1000)>0) {
             // ---- not recognized by editor ---
             return;
         }
         if (win.isMultiLine()==false and textbox.TextBlockMarked(win)) {
             _ = win.sendMessage(df.CLEARTEXT, q.none);
-            currchar = df.zCurrChar(wnd);
+//            currchar = df.zCurrChar(wnd);
+//              currchar = wnd.*.text[win.currPos()];
         }
         // ---- test typing at end of text ----
         const currpos = win.currPos();
@@ -527,7 +533,7 @@ fn KeyTyped(win:*Window, cc:u16) void {
                 if (!(currpos == win.MaxTextLength))
                     _ = win.sendMessage(df.HORIZSCROLL, .{.yes=true});
             } else {
-                var cp = currchar;
+                var cp = wnd.*.text[win.currPos()];
                 const pos = win.textLine(@intCast(wnd.*.CurrLine));
                 const lchr = wnd.*.text[pos];
                 while (cp != ' ' and cp != lchr)
@@ -868,7 +874,12 @@ fn ParagraphCmd(win:*Window) void {
     }
     Home(win);
 
-    df.cParagraphCmd(wnd);
+    // ---- forming paragraph from cursor position ---
+//    const bbl:[*c]u8 = df.TextLine(wnd, wnd.*.CurrLine);
+//    const bel:[*c]u8 = df.TextLine(wnd, wnd.*.CurrLine);
+    const bbl:[*c]u8 = wnd.*.text+win.textLine(@intCast(wnd.*.CurrLine));
+    const bel:[*c]u8 = wnd.*.text+win.textLine(@intCast(wnd.*.CurrLine));
+    df.cParagraphCmd(wnd, bbl, bel);
 
     textbox.BuildTextPointers(win);
     // --- put cursor back at beginning ---

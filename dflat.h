@@ -204,19 +204,19 @@ BOOL isAncestor(WINDOW, WINDOW);
 unsigned char c_WndForeground(WINDOW);
 unsigned char c_WndBackground(WINDOW);
 /* -------- text box prototypes ---------- */
-#define TextLine(wnd, sel) \
-      (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
+//#define TextLine(wnd, sel) \
+//      (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
 void WriteTextLine(WINDOW, RECT *, int, BOOL);
 BOOL cTextBlockMarked(WINDOW);
-#define TextBlockBegin(wnd) (TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol)
-#define TextBlockEnd(wnd)   (TextLine(wnd,wnd->BlkEndLine)+wnd->BlkEndCol)
+//#define TextBlockBegin(wnd) (TextLine(wnd,wnd->BlkBegLine)+wnd->BlkBegCol)
+//#define TextBlockEnd(wnd)   (TextLine(wnd,wnd->BlkEndLine)+wnd->BlkEndCol)
 #define GetText(w)        ((w)->text)
 //#define GetTextLines(w)   ((w)->wlines)
 void ClearTextPointers(WINDOW);
 void BuildTextPointers(WINDOW);
 int TextLineNumber(WINDOW, char *);
 /* ------------- edit box prototypes ----------- */
-#define CurrChar (TextLine(wnd, wnd->CurrLine)+wnd->CurrCol)
+//#define CurrChar (TextLine(wnd, wnd->CurrLine)+wnd->CurrCol)
 #define WndCol   (wnd->CurrCol-wnd->wleft)
 #define isMultiLine(wnd) TestAttribute(wnd, MULTILINE)
 #define SetProtected(wnd) (wnd)->protect=TRUE

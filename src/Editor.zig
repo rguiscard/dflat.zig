@@ -90,7 +90,8 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
             _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
             TurnOffDisplay(win);
 //            while (*df.CurrChar == pTab) {
-            while (df.zCurrChar(wnd)[0] == pTab) {
+//            while (df.zCurrChar(wnd)[0] == pTab) {
+            while (wnd.*.text[win.currPos()] == pTab) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pn, p2}});
             }
             TurnOnDisplay(win);
@@ -101,7 +102,8 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
             _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
             TurnOffDisplay(win);
 //            while (*df.CurrChar == pTab) {
-            while (df.zCurrChar(wnd)[0] == pTab) {
+//            while (df.zCurrChar(wnd)[0] == pTab) {
+            while (wnd.*.text[win.currPos()] == pTab) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pn, p2}});
             }
             TurnOnDisplay(win);
@@ -110,10 +112,12 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
         df.DEL => {
             TurnOffDisplay(win);
 //            const delnl = (*df.CurrChar == '\n' or df.TextBlockMarked(wnd));
-            const delnl = (df.zCurrChar(wnd)[0] == '\n' or textbox.TextBlockMarked(win));
+//            const delnl = (df.zCurrChar(wnd)[0] == '\n' or textbox.TextBlockMarked(win));
+            const delnl = (wnd.*.text[win.currPos()] == '\n' or textbox.TextBlockMarked(win));
             _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
 //            while (*df.CurrChar == pTab) {
-            while (df.zCurrChar(wnd)[0] == pTab) {
+//            while (df.zCurrChar(wnd)[0] == pTab) {
+            while (wnd.*.text[win.currPos()] == pTab) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
             }
             AdjustTab(win);
@@ -267,4 +271,15 @@ fn RepaintLine(win:*Window) void {
     _ = win.sendMessage(df.KEYBOARD_CURSOR,
                         .{.position=.{@intCast(editbox.WndCol(win)), @intCast(wnd.*.WndRow)}});
     textbox.WriteTextLine(win, null, @intCast(wnd.*.CurrLine), false);
+}
+
+// for editbox.c
+pub export fn GetCurrChar(wnd:df.WINDOW) [*c]u8 {
+    if (Window.get_zin(wnd)) |win| {
+        const pos = win.currPos();
+        if (pos < wnd.*.textlen) {
+            return wnd.*.text+pos;
+        }
+    }
+    return 0;
 }

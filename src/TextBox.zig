@@ -587,7 +587,11 @@ pub fn TextBoxProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
 //#define TextLine(wnd, sel) \
 //      (wnd->text + *((wnd->TextPointers) + (unsigned int)sel))
 //pub fn TextLine(wnd:df.WINDOW, sel:c_uint) [*c]u8 {
-//    return wnd.*.text + wnd.*.TextPointers[sel];
+//    const idx:usize = @intCast(sel);
+//    if (Window.get_zin(wnd)) |win| {
+//        return wnd.*.text + win.TextPointers[idx];
+//    }
+//    return 0; // unreachable
 //}
 
 // ------ compute the vertical scroll box position from

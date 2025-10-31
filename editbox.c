@@ -119,15 +119,15 @@ void TextBlockToN(char *bbl, char *bel) {
 }
 
 BOOL KeyboardMsg(WINDOW, char);
+char *GetCurrChar(WINDOW);
+void SetCurrChar(WINDOW, char);
 
 /* ----------- ID_PARAGRAPH Command ---------- */
 // Rewrite to be called from  zig size
-void cParagraphCmd(WINDOW wnd)
+void cParagraphCmd(WINDOW wnd, char *bbl, char *bel)
 {
-    char *bbl, *bel, *bb;
+    char *bb;
 
-    /* ---- forming paragraph from cursor position --- */
-    bbl = bel = TextLine(wnd, wnd->CurrLine);
     /* ---- locate the end of the paragraph ---- */
     while (*bel)    {
         int blank = TRUE;
@@ -155,9 +155,12 @@ void cParagraphCmd(WINDOW wnd)
     if (*bel == '\n')
         --bel;
     /* --- change all newlines in block to spaces --- */
-    while ((char *)CurrChar < bel)    {
-        if (*CurrChar == '\n')    {
-            *CurrChar = ' ';
+//    while ((char *)CurrChar < bel)    {
+//        if (*CurrChar == '\n') {
+//            *CurrChar = ' ';
+    while (GetCurrChar(wnd) < bel) {
+        if (*GetCurrChar(wnd) == '\n') {
+            *GetCurrChar(wnd) = ' ';
             wnd->CurrLine++;
             wnd->CurrCol = 0;
         }

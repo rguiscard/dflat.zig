@@ -61,7 +61,7 @@ fn replacetext(wnd:df.WINDOW, cp1:[]const u8, db:*df.DBOX) void {
 fn SearchTextBox(win:*Window, incr:bool) void {
     const wnd = win.win;
 
-    var cp1:[*c]u8 = null;
+//    var cp1:[*c]u8 = null;
     var pp1:usize = 0; // based on zp1
     const dbox = if (Replacing) &Dialogs.ReplaceTextDB else  &Dialogs.SearchTextDB;
     const searchtext = DialogBox.GetEditBoxText(dbox, .ID_SEARCHFOR);
@@ -78,15 +78,16 @@ fn SearchTextBox(win:*Window, incr:bool) void {
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             }
             // search for a match starting at cursor position
-            cp1 = df.zCurrChar(wnd);
+//            cp1 = df.zCurrChar(wnd);
             pp1 = win.currPos();
             if (incr) {
-                cp1 = cp1 + lastsize; // start past the last hit
+//                cp1 = cp1 + lastsize; // start past the last hit
                 pp1 = pp1 + lastsize;
             }
             // --- compare at each character position ---
             const zp = cp;
-            const zp1 = std.mem.span(cp1);
+//            const zp1 = std.mem.span(cp1);
+            const zp1 = wnd.*.text[pp1..wnd.*.textlen];
             var index:?usize = null;
             // FIXME: original code is whitespace normalized ('\n' -> ' ')
             if (CheckCase) {
@@ -110,7 +111,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
 //                wnd.*.BlkBegCol = BlkBegColFromLine(wnd, cp1);
                 pp1 = pp1+i; // based on zp1
                 const pp2 = pp1+zp.len;
-                cp1 = cp1+i;
+//                cp1 = cp1+i;
 //                const s2 = cp1+zp.len;
 //                wnd.*.BlkEndLine = df.TextLineNumber(wnd, s2);
 //                wnd.*.BlkBegLine = df.TextLineNumber(wnd, cp1);

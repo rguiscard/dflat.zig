@@ -14,9 +14,9 @@ void cWriteTextLine(WINDOW, RECT, int, char*, char*);
 // editbox.c
 int CommandMsg(WINDOW, PARAM);
 void TextBlockToN(char *, char *);
-void cParagraphCmd(WINDOW);
+void cParagraphCmd(WINDOW, char*, char*);
 int GetTextMsg(WINDOW, PARAM, PARAM);
-#define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
+//#define zCurrChar(wnd) (TextLine(wnd, (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
 //#define TextLine(wnd, sel) \
 //      (wnd->text + *((wnd->TextPointers) + sel))
 //#define CurrPos(wnd) (*((wnd->TextPointers) + (unsigned int)(wnd->CurrLine))+(unsigned int)(wnd->CurrCol))
