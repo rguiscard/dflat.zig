@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 
 /* Check if fspec is a directory, if so chdir and return TRUE */
+#if 0
 int CheckAndChangeDir(char *fspec)
 {
     char *cp;
@@ -22,6 +23,7 @@ int CheckAndChangeDir(char *fspec)
     }
     return FALSE;
 }
+#endif
 
 /*
  * Routine to see if a text string is matched by a wildcard pattern.

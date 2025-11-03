@@ -112,7 +112,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                         @memset(&_fileNameBuf, 0);
                         DialogBox.GetItemText(win, c.ID_FILENAME, &_fileNameBuf, @intCast(df.MAXPATH));
                         _fileName = nameOfFile(&_fileNameBuf);
-                        if (df.CheckAndChangeDir(&_fileNameBuf) > 0) {
+                        if (dir.CheckAndChangeDir(_fileName)) {
                             @memcpy(_fileNameBuf[0..1], "*");
                             _fileName = nameOfFile(&_fileNameBuf);
                         }
@@ -122,8 +122,6 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                                 const db:*Dialogs.DBOX = extension.dbox;
                                 set_fileSpec(_fileName);
                                 set_srchSpec(_fileName);
-                                _ = df.printf("search %s %d\n", _srchSpec.ptr, _srchSpec.len);
-                                while(true) {}
                                 InitDlgBox(win);
                                 if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
                                     _ = cwin.sendMessage(df.SETFOCUS, .{.yes=true});
@@ -164,7 +162,9 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                         df.LB_CHOOSE => {
                             var dd = std.mem.zeroes([df.MAXPATH]u8);
                             DialogBox.GetDlgListText(win, dd[0..df.MAXPATH], c.ID_DIRECTORY);
-                            _ = df.chdir(&dd);
+                            if (std.mem.indexOfScalar(u8, &dd, 0)) |pos| {
+                                _ = dir.CheckAndChangeDir(dd[0..pos+1]);
+                            }
                             InitDlgBox(win);
                             _ = win.sendCommandMessage(c.ID_OK, 0);
                         },
@@ -186,7 +186,7 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
 
 //  Initialize the dialog box
 fn InitDlgBox(win:*Window) void {
-    var rtn = df.FALSE;
+    var rtn = false;
     if (_fileSpec.len > 0) {
         DialogBox.PutItemText(win, .ID_FILENAME, &_fileSpecBuf);
     }
@@ -194,7 +194,7 @@ fn InitDlgBox(win:*Window) void {
         rtn = dir.BuildFileList(win, &_srchSpecBuf);
     }
 
-    if (rtn == df.TRUE) {
+    if (rtn) {
         dir.BuildDirectoryList(win);
     }
     dir.BuildPathDisplay(win);
