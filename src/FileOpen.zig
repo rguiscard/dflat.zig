@@ -8,62 +8,81 @@ const DialogBox = @import("DialogBox.zig");
 const dir = @import("Directory.zig");
 const q = @import("Message.zig");
 
-var _fileSpec:?[:0]const u8 = null;
-var _srchSpec:?[:0]const u8 = null;
-var _fileName:?[:0]const u8 = null;
+var _fileSpecBuf = [_]u8{0}**df.MAXPATH;
+var _srchSpecBuf = [_]u8{0}**df.MAXPATH;
+var _fileNameBuf = [_]u8{0}**df.MAXPATH;
+
+fn nameOfFile(s: []u8) []const u8 {
+    if (std.mem.indexOfScalar(u8, s, 0)) |pos| {
+        return s[0..pos+1];
+    }
+    return &.{};
+}
+
+var _fileSpec:[]const u8 = &.{};
+var _srchSpec:[]const u8 = &.{};
+var _fileName:[]const u8 = &.{};
 
 fn set_fileSpec(text: []const u8) void {
-    if (_fileSpec) |f| {
-      root.global_allocator.free(f);
-    }
-    if (root.global_allocator.dupeZ(u8, text)) |t| {
-        _fileSpec = t;
-    } else |_| {
-    }
+    @memset(&_fileSpecBuf, 0);
+    @memcpy(_fileSpecBuf[0..text.len], text);
+    _fileSpec = nameOfFile(&_fileSpecBuf);
 }
 
 fn set_srchSpec(text: []const u8) void {
-    if (_srchSpec) |s| {
-      root.global_allocator.free(s);
-    }
-    if (root.global_allocator.dupeZ(u8, text)) |t| {
-        _srchSpec = t;
-    } else |_| {
-    }
+    @memset(&_srchSpecBuf, 0);
+    @memcpy(_srchSpecBuf[0..text.len], text);
+    _srchSpec = nameOfFile(&_srchSpecBuf);
 }
 
 fn set_fileName(text: []const u8) void {
-    if (_fileName) |n| {
-      root.global_allocator.free(n);
-    }
-    if (root.global_allocator.dupeZ(u8, text)) |t| {
-        _fileName = t;
-    } else |_| {
-    }
+    @memset(&_fileNameBuf, 0);
+    @memcpy(_fileNameBuf[0..text.len], text);
+    _fileName = nameOfFile(&_fileNameBuf);
 }
 
+//fn set_srchSpec(text: []const u8) void {
+//    if (_srchSpec) |s| {
+//      root.global_allocator.free(s);
+//    }
+//    if (root.global_allocator.dupeZ(u8, text)) |t| {
+//        _srchSpec = t;
+//    } else |_| {
+//    }
+//}
+
+//fn set_fileName(text: []const u8) void {
+//    if (_fileName) |n| {
+//      root.global_allocator.free(n);
+//    }
+//    if (root.global_allocator.dupeZ(u8, text)) |t| {
+//        _fileName = t;
+//    } else |_| {
+//    }
+//}
+
 // Dialog Box to select a file to open
-pub fn OpenFileDialogBox(Fspec:[]const u8, Fname:[*c]u8) bool {
+pub fn OpenFileDialogBox(Fspec:[]const u8, Fname:[]u8) bool {
     var fBox = Dialogs.FileOpen;
     return DlgFileOpen(Fspec, Fspec, Fname, &fBox);
 }
 
 // Dialog Box to select a file to save as
-pub fn SaveAsDialogBox(Fspec:[]const u8, Sspec:?[]const u8, Fname:[*c]u8) bool {
+pub fn SaveAsDialogBox(Fspec:[]const u8, Sspec:?[]const u8, Fname:[]u8) bool {
     var sBox = Dialogs.SaveAs;
     return DlgFileOpen(Fspec, Sspec orelse Fspec, Fname, &sBox);
 }
 
 // --------- generic file open ----------
-pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[*c]u8, db: *Dialogs.DBOX) bool {
+pub fn DlgFileOpen(Fspec: []const u8, Sspec: []const u8, Fname:[]u8, db: *Dialogs.DBOX) bool {
     // Keep a copy of Fspec, Sspec; Fname is returned value
     set_fileSpec(Fspec);
     set_srchSpec(Sspec);
 
     const rtn = DialogBox.create(null, db, df.TRUE, DlgFnOpen);
     if (rtn) {
-        if (_fileName) |n| {
-            _ = df.strcpy(Fname, n.ptr);
+        if (_fileName.len > 0) {
+            @memcpy(Fname[0.._fileName.len], _fileName);
         }
     }
     return rtn;
@@ -90,19 +109,21 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
             switch(cmd) {
                 .ID_OK => {
                     if (subcmd == 0) {
-                        var fName = std.mem.zeroes([df.MAXPATH]u8);
-                        DialogBox.GetItemText(win, c.ID_FILENAME, fName[0..df.MAXPATH], @intCast(df.MAXPATH));
-                        set_fileName(&fName);
-                        if (df.CheckAndChangeDir(&fName) > 0) {
-                            std.mem.copyForwards(u8, &fName, "*");
-                            set_fileName(&fName);
+                        @memset(&_fileNameBuf, 0);
+                        DialogBox.GetItemText(win, c.ID_FILENAME, &_fileNameBuf, @intCast(df.MAXPATH));
+                        _fileName = nameOfFile(&_fileNameBuf);
+                        if (df.CheckAndChangeDir(&_fileNameBuf) > 0) {
+                            @memcpy(_fileNameBuf[0..1], "*");
+                            _fileName = nameOfFile(&_fileNameBuf);
                         }
-                        if (IncompleteFilename(&fName)) {
+                        if (IncompleteFilename(_fileName)) {
                             // --- no file name yet ---
                             if (win.extension) |extension| {
                                 const db:*Dialogs.DBOX = extension.dbox;
-                                set_fileSpec(&fName);
-                                set_srchSpec(&fName);
+                                set_fileSpec(_fileName);
+                                set_srchSpec(_fileName);
+                                _ = df.printf("search %s %d\n", _srchSpec.ptr, _srchSpec.len);
+                                while(true) {}
                                 InitDlgBox(win);
                                 if (DialogBox.ControlWindow(db, c.ID_FILENAME)) |cwin| {
                                     _ = cwin.sendMessage(df.SETFOCUS, .{.yes=true});
@@ -116,17 +137,17 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                     switch (subcmd) {
                         df.ENTERFOCUS, df.LB_SELECTION => {
                             // selected a different filename
-                            var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(win, fName[0..df.MAXPATH], c.ID_FILES);
-                            DialogBox.PutItemText(win, c.ID_FILENAME, &fName);
-                            set_fileName(&fName);
+                            @memset(&_fileNameBuf, 0);
+                            DialogBox.GetDlgListText(win, &_fileNameBuf, c.ID_FILES);
+                            DialogBox.PutItemText(win, c.ID_FILENAME, &_fileNameBuf);
+                            _fileName = nameOfFile(&_fileNameBuf);
                         },
                         df.LB_CHOOSE => {
                             // chose a file name
-                            var fName = std.mem.zeroes([df.MAXPATH]u8);
-                            DialogBox.GetDlgListText(win, fName[0..df.MAXPATH], c.ID_FILES);
+                            @memset(&_fileNameBuf, 0);
+                            DialogBox.GetDlgListText(win, &_fileNameBuf, c.ID_FILES);
                             _ = win.sendCommandMessage(c.ID_OK, 0);
-                            set_fileName(&fName);
+                            _fileName = nameOfFile(&_fileNameBuf);
                         },
                         else => {
                         }
@@ -136,8 +157,8 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
                 .ID_DIRECTORY => {
                     switch (subcmd) {
                         df.ENTERFOCUS => {
-                            if (_fileSpec) |f| {
-                                DialogBox.PutItemText(win, c.ID_FILENAME, @constCast(f.ptr));
+                            if (_fileSpec.len > 0) {
+                                DialogBox.PutItemText(win, c.ID_FILENAME, &_fileSpecBuf);
                             }
                         },
                         df.LB_CHOOSE => {
@@ -165,14 +186,12 @@ fn DlgFnOpen(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
 
 //  Initialize the dialog box
 fn InitDlgBox(win:*Window) void {
-    var sspec:[*c]u8 = null;
     var rtn = df.FALSE;
-    if (_fileSpec) |f| {
-        DialogBox.PutItemText(win, .ID_FILENAME, @constCast(f.ptr));
+    if (_fileSpec.len > 0) {
+        DialogBox.PutItemText(win, .ID_FILENAME, &_fileSpecBuf);
     }
-    if (_srchSpec) |s| {
-        sspec = @constCast(s.ptr);
-        rtn = dir.BuildFileList(win, s);
+    if (_srchSpec.len > 0) {
+        rtn = dir.BuildFileList(win, &_srchSpecBuf);
     }
 
     if (rtn == df.TRUE) {
@@ -181,8 +200,8 @@ fn InitDlgBox(win:*Window) void {
     dir.BuildPathDisplay(win);
 }
 
-fn IncompleteFilename(s: *[df.MAXPATH]u8) bool {
-    const len = s.*.len;
+fn IncompleteFilename(s: []const u8) bool {
+    const len = s.len;
     if (len == 0)
         return true;
     if ((std.mem.indexOfAny(u8, s, "?*") != null) or (s[0] == 0)) {

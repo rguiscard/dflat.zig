@@ -179,7 +179,7 @@ fn SelectFile(win: *mp.Window) !void {
     const fspec:[:0]const u8 = "*";
     var filename = std.mem.zeroes([df.MAXPATH]u8);
 
-    if (mp.fileopen.OpenFileDialogBox(fspec, &filename)) {
+    if (mp.fileopen.OpenFileDialogBox(fspec, filename[0..])) {
         // --- see if the document is already in a window ---
         var win1 = win.firstWindow();
         while (win1) |w1| {
@@ -277,7 +277,7 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
     const fspec:[:0]const u8 = "*";
     var filename = std.mem.zeroes([df.MAXPATH]u8);
     if ((win.extension == null) or (Saveas == true)) {
-        if (mp.fileopen.SaveAsDialogBox(fspec, null, &filename)) {
+        if (mp.fileopen.SaveAsDialogBox(fspec, null, filename[0..])) {
             if (win.extension) |ext| {
                 _ = ext;
 //  FIXME: free memory

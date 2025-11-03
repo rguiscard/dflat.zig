@@ -113,7 +113,8 @@ fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) bool {
     if (wnd.*.text) |text| {
         if (std.mem.indexOfScalar(u8, text[0..win.textlen], '\n')) |pos| {
             // pos is usize, overflow if minus 1.
-            len = if (pos > 0) @min(len, pos-1) else 0; 
+//            len = if (pos > 0) @min(len, pos-1) else 0;
+            len = pos;
         } else {
             len = @min(len, win.textlen-1); // null at the end
         }
