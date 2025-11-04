@@ -7,7 +7,7 @@ jmp_buf AllocError;
 
 static void AllocationError(void)
 {
-	WINDOW wnd;
+//	WINDOW wnd;
 	static BOOL OnceIn = FALSE;
 	extern jmp_buf AllocError;
 	extern BOOL AllocTesting;
