@@ -190,7 +190,7 @@ pub fn create(
 
     if (wnd != null) {
         // This need to go first. Otherwise, SendMessage() will not have this class available
-        wnd.*.zin = @ptrCast(@alignCast(self));
+//        wnd.*.zin = @ptrCast(@alignCast(self));
 
         // ----- height, width = -1: fill the screen -------
         var ht = height;
@@ -729,7 +729,6 @@ pub fn RepaintBorder(self:*TopLevelFields, rcc:?Rect) void {
 
 // ------ clear the data space of a window -------- 
 pub fn ClearWindow(self:*TopLevelFields, rcc:?Rect, clrchar:u8) void {
-    const wnd = self.win;
     if (self.isVisible()) {
         var rc:Rect = rcc orelse Rect.RelativeWindowRect(self, self.WindowRect());
         const top = self.TopBorderAdj();
@@ -739,7 +738,7 @@ pub fn ClearWindow(self:*TopLevelFields, rcc:?Rect, clrchar:u8) void {
             rc.left = self.BorderAdj();
         if (rc.right > self.WindowWidth()-1)
             rc.right = self.WindowWidth()-1;
-        colors.SetStandardColor(wnd);
+        colors.SetStandardColor(self);
 
         if (root.global_allocator.allocSentinel(u8, rc.right+1, 0)) |buf| {
             defer root.global_allocator.free(buf);
@@ -1015,16 +1014,16 @@ pub fn textLine(self: *TopLevelFields, sel:usize) usize {
 }
 
 // Accessories for c
-pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
-    // @fieldParentPtr is not yet reliable at this stage. Therefore, use zin inserted into WINDOW in c.
-    if (wnd) |w| {
-        if (w.*.zin) |z| {
-            const win:*TopLevelFields = @ptrCast(@alignCast(z));
-            return win;
-        }
-    }
-    return null;
-}
+//pub fn get_zin(wnd:df.WINDOW) ?*TopLevelFields {
+//    // @fieldParentPtr is not yet reliable at this stage. Therefore, use zin inserted into WINDOW in c.
+//    if (wnd) |w| {
+//        if (w.*.zin) |z| {
+//            const win:*TopLevelFields = @ptrCast(@alignCast(z));
+//            return win;
+//        }
+//    }
+//    return null;
+//}
 
 // Accessories
 pub fn GetControl(self:*TopLevelFields) ?*Dialogs.CTLWINDOW {
@@ -1042,12 +1041,12 @@ pub fn getGapBuffer(self:*TopLevelFields, size:usize) ?*GapBuf {
     return self.gapbuf orelse null;
 }
 
-pub export fn c_ClientWidth(wnd:df.WINDOW) c_int {
-    if (TopLevelFields.get_zin(wnd)) |win| {
-        return @intCast(win.ClientWidth());
-    }
-    return 0;
-}
+//pub export fn c_ClientWidth(wnd:df.WINDOW) c_int {
+//    if (TopLevelFields.get_zin(wnd)) |win| {
+//        return @intCast(win.ClientWidth());
+//    }
+//    return 0;
+//}
 
 pub fn HitControlBox(self:*TopLevelFields, x:usize, y:usize) bool {
     return (self.TestAttribute(df.CONTROLBOX) and x == 2 and y == 0);

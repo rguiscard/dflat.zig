@@ -7,6 +7,7 @@ const Window = @import("Window.zig");
 const pict = @import("PictureBox.zig");
 const helpbox = @import("HelpBox.zig");
 const q = @import("Message.zig");
+const colors = @import("Colors.zig");
 
 const ctime = @cImport({
     @cInclude("time.h");
@@ -62,14 +63,13 @@ const months = [_][]const u8{
 };
 
 fn DisplayDates(win:*Window) void {
-    const wnd = win.win;
     var dyln:[10:0]u8 = .{0} ** 10;
 //    int offset;
 //    char banner[CALWIDTH-1];
     var banner:[CALWIDTH-1:0]u8 = undefined;
     var banner1:[30:0]u8 = undefined;
 
-    df.SetStandardColor(wnd);
+    colors.SetStandardColor(win);
     const weeks:[:0]const u8 = "Sun Mon Tue Wed Thu Fri Sat";
     win.PutWindowLine(weeks, 2, 1);
     @memset(&banner, '-');
@@ -107,7 +107,7 @@ fn DisplayDates(win:*Window) void {
                 } else |_| { // err
                 }
             }
-            df.SetStandardColor(wnd);
+            colors.SetStandardColor(win);
             win.PutWindowLine(&dyln, 2 + day * 4, 3 + week*2);
         }
     }

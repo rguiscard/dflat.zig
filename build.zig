@@ -65,7 +65,6 @@ pub fn build(b: *std.Build) void {
             // "slidebox.c",
             // "msgbox.c",
 
-//            "direct.c",
             "helpbox.c",
             "decomp.c",
 

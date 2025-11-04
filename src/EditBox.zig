@@ -13,6 +13,7 @@ const normal = @import("Normal.zig");
 const cfg = @import("Config.zig");
 const video = @import("Video.zig");
 const console = @import("Console.zig");
+const colors = @import("Colors.zig");
 
 // -------- local variables --------
 var KeyBoardMarking = false;
@@ -542,7 +543,7 @@ fn KeyTyped(win:*Window, cc:u16) void {
             }
         }
         // ------ display the character ------
-        df.SetStandardColor(wnd);
+        colors.SetStandardColor(win);
 //        if (wnd.*.protect)
 //            c = '*';
 //        win.PutWindowChar(c, df.WndCol(), wnd.*.WndRow);
@@ -845,39 +846,37 @@ fn UndoCmd(win:*Window) void {
 
 // ----------- ID_PARAGRAPH Command ----------
 fn ParagraphCmd(win:*Window) void {
-    const wnd = win.win;
-    textbox.ClearTextBlock(win);
-
-    // ---- forming paragraph from cursor position ---
-    const fl:usize = win.wtop + win.WndRow;
-//    const bl = df.TextLine(wnd, wnd.*.CurrLine);
-    const saved_line = win.CurrLine;
-    var bc = win.CurrCol;
-    if (bc >= win.ClientWidth()) {
-        bc = 0;
-    }
-    Home(win);
-
-    // ---- forming paragraph from cursor position ---
-//    const bbl:[*c]u8 = df.TextLine(wnd, wnd.*.CurrLine);
-//    const bel:[*c]u8 = df.TextLine(wnd, wnd.*.CurrLine);
-    const bbl:[*c]u8 = wnd.*.text+win.textLine(win.CurrLine);
-    const bel:[*c]u8 = wnd.*.text+win.textLine(win.CurrLine);
-    df.cParagraphCmd(wnd, bbl, bel);
-
-    textbox.BuildTextPointers(win);
-    // --- put cursor back at beginning ---
-//    wnd.*.CurrLine = df.TextLineNumber(wnd, bl);
-    win.CurrLine = saved_line;
-    win.CurrCol = bc;
-    if (fl < win.wtop)
-        win.wtop = fl;
-    win.WndRow = fl - win.wtop;
-
-    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
-    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{WndCol(win), win.WndRow}});
-    win.TextChanged = true;
-    textbox.BuildTextPointers(win);
+    _ = win;
+// Do nothing for now
+//    const wnd = win.win;
+//    textbox.ClearTextBlock(win);
+//
+//    // ---- forming paragraph from cursor position ---
+//    const fl:usize = win.wtop + win.WndRow;
+//    const saved_line = win.CurrLine;
+//    var bc = win.CurrCol;
+//    if (bc >= win.ClientWidth()) {
+//        bc = 0;
+//    }
+//    Home(win);
+//
+//    // ---- forming paragraph from cursor position ---
+//    const bbl:[*c]u8 = wnd.*.text+win.textLine(win.CurrLine);
+//    const bel:[*c]u8 = wnd.*.text+win.textLine(win.CurrLine);
+//    df.cParagraphCmd(wnd, bbl, bel);
+//
+//    textbox.BuildTextPointers(win);
+//    // --- put cursor back at beginning ---
+//    win.CurrLine = saved_line;
+//    win.CurrCol = bc;
+//    if (fl < win.wtop)
+//        win.wtop = fl;
+//    win.WndRow = fl - win.wtop;
+//
+//    _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
+//    _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{WndCol(win), win.WndRow}});
+//    win.TextChanged = true;
+//    textbox.BuildTextPointers(win);
 }
 
 // ----------- COMMAND Message ----------
@@ -928,11 +927,11 @@ fn CommandMsg(win:*Window,p1:c) bool {
             _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             return true;
         },
-        .ID_PARAGRAPH => {
-            ParagraphCmd(win);
-            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
-            return true;
-        },
+//        .ID_PARAGRAPH => {
+//            ParagraphCmd(win);
+//            _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
+//            return true;
+//        },
         else => {
         }
     }

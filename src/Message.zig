@@ -604,9 +604,9 @@ pub fn dispatch_message() bool {
     return true;
 }
 
-pub export fn KeyboardMsg(wnd:df.WINDOW, chr:u16) df.BOOL {
-    if (Window.get_zin(wnd)) |win| {
-        return if (win.sendMessage(df.KEYBOARD, .{.char = .{chr, 0}})) df.TRUE else df.FALSE;
-    }
-    return df.FALSE;
-}
+//pub export fn KeyboardMsg(wnd:df.WINDOW, chr:u16) df.BOOL {
+//    if (Window.get_zin(wnd)) |win| {
+//        return if (win.sendMessage(df.KEYBOARD, .{.char = .{chr, 0}})) df.TRUE else df.FALSE;
+//    }
+//    return df.FALSE;
+//}

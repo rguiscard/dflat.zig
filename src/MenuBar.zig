@@ -12,6 +12,7 @@ const menus = @import("Menus.zig");
 const popdown = @import("PopDown.zig");
 const video = @import("Video.zig");
 const console = @import("Console.zig");
+const colors = @import("Colors.zig");
 
 // positions in menu bar & shortcut key value
 var menupos = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
@@ -82,13 +83,12 @@ fn BuildMenuMsg(win:*Window, p1:*menus.MBAR,) void {
 
 // ---------- PAINT Message ----------
 fn PaintMsg(win:*Window) void {
-    const wnd = win.win;
     if (Selecting)
         return;
     if (win == Window.inFocus) {
         _ = win.getParent().sendTextMessage(df.ADDSTATUS, "");
     }
-    df.SetStandardColor(wnd);
+    colors.SetStandardColor(win);
 
     if (win.gapbuf) |buf| {
         buf.compact();
@@ -107,7 +107,7 @@ fn PaintMsg(win:*Window) void {
 
                     text[@intCast(offset1)] = 0;
 
-                    df.SetReverseColor(wnd);
+                    colors.SetReverseColor(win);
 
                     if (std.mem.indexOfScalarPos(u8, text, @intCast(offset), df.CHANGECOLOR)) |idxx| {
                         text[idxx+2] = @intCast(df.background | 0x80);

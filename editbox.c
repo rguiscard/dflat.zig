@@ -118,6 +118,7 @@ void TextBlockToN(char *bbl, char *bel) {
         }
 }
 
+#if 0
 BOOL KeyboardMsg(WINDOW, char);
 char *GetCurrChar(WINDOW);
 void SetCurrChar(WINDOW, char);
@@ -188,3 +189,4 @@ void cParagraphCmd(WINDOW wnd, char *bbl, char *bel)
         }
     }
 }
+#endif

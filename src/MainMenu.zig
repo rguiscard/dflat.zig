@@ -28,8 +28,8 @@ pub var MainMenu:mp.menus.MBAR = mp.menus.buildMenuBar(.{
             menus.Separator,
             .{"Cl~ear",      .ID_CLEAR,     0,           Inactive  },
             .{"~Delete",     .ID_DELETETEXT,df.DEL,      Inactive  },
-            menus.Separator,
-            .{"Pa~ragraph",  .ID_PARAGRAPH, df.ALT_P,    Inactive  },
+//            menus.Separator,
+//            .{"Pa~ragraph",  .ID_PARAGRAPH, df.ALT_P,    Inactive  },
         },
     },
     .{"~Search", main.PrepSearchMenu, "Search and replace", -1, .{

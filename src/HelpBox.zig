@@ -180,7 +180,7 @@ fn KeyboardMsg(win: *Window, p1: u16) bool {
                             if (thisword) |word| {
                                 const hp = word.hkey.*.hname;
                                 if (word.isDefinition) {
-                                    DisplayDefinition(win.getParent().win, hp);
+                                    DisplayDefinition(win.getParent(), hp);
                                 } else {
                                     SelectHelp(win, word.hkey, true);
                                 }
@@ -303,7 +303,7 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) bool {
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
                 if (word.isDefinition) {
                     if (win.parent) |pw| {
-                        DisplayDefinition(pw.win, word.hkey.*.hname); 
+                        DisplayDefinition(pw, word.hkey.*.hname); 
                     }
                 }
                 break;
@@ -424,54 +424,52 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
 
 // ------- display a definition window --------- 
 // This one does not work properly from origin
-pub export fn DisplayDefinition(wnd:df.WINDOW, def:[*c]u8) void { // should be private
+pub fn DisplayDefinition(win:*Window, def:[*c]u8) void { // should be private
     const MAXHEIGHT = df.SCREENHEIGHT-10;
     const HoldThisHelp = ThisHelp;
 
-    if (Window.get_zin(wnd)) |win| {
-        var hwin:?*Window = win;
-        if (win.Class == k.POPDOWNMENU) {
-            hwin = win.parent;
+    var hwin:?*Window = win;
+    if (win.Class == k.POPDOWNMENU) {
+        hwin = win.parent;
+    }
+    var y:usize = 1;
+    if (hwin) |hw| {
+        if (hw.Class == k.MENUBAR) {
+            y = 2;
         }
-        var y:usize = 1;
-        if (hwin) |hw| {
-            if (hw.Class == k.MENUBAR) {
-                y = 2;
-            }
-            ThisHelp = df.FindHelp(def);
-            if (ThisHelp) |help| {
-                const dwin = Window.create(
-                            k.TEXTBOX,
-                            null,
-                            @intCast(hw.GetClientLeft()),
-                            @intCast(hw.GetClientTop()+y),
-                            @intCast(@min(help.*.hheight, MAXHEIGHT)+3),
-                            @intCast(help.*.hwidth+2),
-                            null,
-                            win,
-                            null,
-                            df.HASBORDER | df.NOCLIP | df.SAVESELF,
-                            .{});
+        ThisHelp = df.FindHelp(def);
+        if (ThisHelp) |help| {
+            const dwin = Window.create(
+                        k.TEXTBOX,
+                        null,
+                        @intCast(hw.GetClientLeft()),
+                        @intCast(hw.GetClientTop()+y),
+                        @intCast(@min(help.*.hheight, MAXHEIGHT)+3),
+                        @intCast(help.*.hwidth+2),
+                        null,
+                        win,
+                        null,
+                        df.HASBORDER | df.NOCLIP | df.SAVESELF,
+                        .{});
 //                    df.clearBIOSbuffer(); // no function
-                // ----- read the help text -------
-                df.SeekHelpLine(help.*.hptr, help.*.bit);
-                while (true) {
-                    //  df.clearBIOSbuffer(); // no function
-                    var hline = [_]u8{0}**100;
-                    if (df.GetHelpLine(&hline) == null)
-                        break;
-                    if (hline[0] == '<')
-                        break;
-                    if (std.mem.indexOfScalar(u8, &hline, 0)) |end| {
-                        hline[end-1] = 0;
-                    }
-                    _ = dwin.sendTextMessage(df.ADDTEXT, &hline);
+            // ----- read the help text -------
+            df.SeekHelpLine(help.*.hptr, help.*.bit);
+            while (true) {
+                //  df.clearBIOSbuffer(); // no function
+                var hline = [_]u8{0}**100;
+                if (df.GetHelpLine(&hline) == null)
+                    break;
+                if (hline[0] == '<')
+                    break;
+                if (std.mem.indexOfScalar(u8, &hline, 0)) |end| {
+                    hline[end-1] = 0;
                 }
-                _ = dwin.sendMessage(df.SHOW_WINDOW, q.none);
-                _ = q.SendMessage(null, df.WAITKEYBOARD, q.none);
-                _ = q.SendMessage(null, df.WAITMOUSE, q.none);
-                _ = dwin.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
+                _ = dwin.sendTextMessage(df.ADDTEXT, &hline);
             }
+            _ = dwin.sendMessage(df.SHOW_WINDOW, q.none);
+            _ = q.SendMessage(null, df.WAITKEYBOARD, q.none);
+            _ = q.SendMessage(null, df.WAITMOUSE, q.none);
+            _ = dwin.sendMessage(df.CLOSE_WINDOW, .{.yes=false});
         }
     }
     ThisHelp = HoldThisHelp;

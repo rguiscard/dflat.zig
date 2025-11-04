@@ -515,16 +515,12 @@ pub fn WindowHighlightColor(win:*Window, fg:u8, bg:u8) void {
 }
 
 // --------- set window colors ---------
-pub export fn SetStandardColor(wnd:df.WINDOW) void {
-    if (Window.get_zin(wnd)) |win| {
-        df.foreground = WndForeground(win);
-        df.background = WndBackground(win);
-    }
+pub fn SetStandardColor(win:*Window) void {
+    df.foreground = WndForeground(win);
+    df.background = WndBackground(win);
 }
 
-pub export fn SetReverseColor(wnd:df.WINDOW) void {
-    if (Window.get_zin(wnd)) |win| {
-        df.foreground = SelectForeground(win);
-        df.background = SelectBackground(win);
-    }
+pub fn SetReverseColor(win:*Window) void {
+    df.foreground = SelectForeground(win);
+    df.background = SelectBackground(win);
 }

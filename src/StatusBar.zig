@@ -4,9 +4,9 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
+const colors = @import("Colors.zig");
 
 pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             _ = win.sendMessage(df.CAPTURE_CLOCK, q.none);
@@ -46,7 +46,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
 //                        strncpy(statusbar+WindowWidth(wnd)-8, time_string, 9);
                     }
 
-                    df.SetStandardColor(wnd);
+                    colors.SetStandardColor(win);
                     win.PutWindowLine(@ptrCast(sb), 0, 0);
                     return true;
                 } else |_| {
@@ -78,7 +78,7 @@ pub fn StatusBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
         },
         df.CLOCKTICK => {
             const p1 = params.legacy[0];
-            df.SetStandardColor(wnd);
+            colors.SetStandardColor(win);
             const pp:usize = @intCast(p1);
             const str:[*c]u8 = @ptrFromInt(pp);
             win.PutWindowLine(std.mem.span(str), win.WindowWidth()-8, 0);

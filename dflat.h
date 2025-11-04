@@ -94,7 +94,7 @@ typedef struct window {
 //	unsigned int *TextPointers; /* -> list of line offsets	*/
 
     /* pointer to zig window */
-    void *zin; /* Point to Window in zig */
+//    void *zin; /* Point to Window in zig */
 } * WINDOW;
 
 #include "video.h"

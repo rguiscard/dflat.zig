@@ -412,7 +412,6 @@ fn ScrollDocMsg(win:*Window,p1:bool) void {
 
 // ------------ PAINT Message --------------
 fn PaintMsg(win:*Window,p1:?Rect,p2:bool) void {
-    const wnd = win.win;
     // ------ paint the client area -----
     // ----- build the rectangle to paint -----
     var rc:Rect = p1 orelse Rect.RelativeWindowRect(win, win.WindowRect());
@@ -459,7 +458,7 @@ fn PaintMsg(win:*Window,p1:?Rect,p2:bool) void {
             WriteTextLine(win, rc, @intCast(yy+win.wtop), false);
         } else {
             // ---- paint a blank line ----
-            df.SetStandardColor(wnd);
+            colors.SetStandardColor(win);
             win.writeline(@ptrCast(blankline[rcc.left..]),
                     rcc.left+win.BorderAdj(), y, false);
         }
@@ -809,7 +808,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
 //                memmove(lp+blkbeg+3,lp+blkbeg,strlen(lp+blkbeg)+1);
 //                lp[blkbeg] = CHANGECOLOR;
                 // ----- insert the color tokens -----
-                colors.SetReverseColor(wnd);
+                colors.SetReverseColor(win);
                 buf[blkbeg+1] = @intCast(df.foreground | 0x80);
                 buf[blkbeg+2] = @intCast(df.background | 0x80);
                 lnlen += 4;
@@ -823,7 +822,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
         var dif:usize = 0;
         // ------ establish the line's main color -----
         if (reverse) {
-            colors.SetReverseColor(wnd);
+            colors.SetReverseColor(win);
             var loc:usize = 0;
             while(std.mem.indexOfScalarPos(u8, @constCast(&line), loc, df.CHANGECOLOR)) |l| {
                 loc = l+2;
@@ -834,7 +833,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
                 dif = 3;
             }
         } else {
-            colors.SetStandardColor(wnd);
+            colors.SetStandardColor(win);
         }
         // ------- display the line --------
         win.writeline(@ptrCast(line[dif..]), rc.left+win.BorderAdj(),
