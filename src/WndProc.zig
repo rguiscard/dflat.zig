@@ -24,8 +24,7 @@ const q = @import("Message.zig");
 //}
 
 pub fn ComboProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
-    const wnd = win.win;
-    _ = wnd;
+    _ = win;
     _ = msg;
     _ = params;
     return false;
@@ -34,8 +33,7 @@ pub fn ComboProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
 }
 
 pub fn SpinButtonProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
-    const wnd = win.win;
-    _ = wnd;
+    _ = win;
     _ = msg;
     _ = params;
     return false;

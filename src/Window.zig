@@ -155,12 +155,12 @@ TimePosted:bool = false,        // True if time has been posted
 // ------------- picture box fields -------------------
 VectorList:?[]picture.VECT = null,   // list of picture box vectors
 
-win: df.WINDOW,
+//win: df.WINDOW,
 
-pub fn init(wnd: df.WINDOW) TopLevelFields {
+pub fn init() TopLevelFields {
     return .{
         .Class = CLASS.FORCEINTTYPE,
-        .win = wnd,
+//        .win = wnd,
         .wndproc = null,
     };
 }
@@ -177,7 +177,7 @@ pub fn create(
     position: Center) *TopLevelFields {
 
     const title = ttl;
-    const wnd:df.WINDOW = @ptrCast(@alignCast(df.DFcalloc(1, @sizeOf(df.window))));
+//    const wnd:df.WINDOW = @ptrCast(@alignCast(df.DFcalloc(1, @sizeOf(df.window))));
 
     var self:*TopLevelFields = undefined;
     if (root.global_allocator.create(TopLevelFields)) |s| {
@@ -185,11 +185,11 @@ pub fn create(
     } else |_| {
         // error
     }
-    self.* = init(wnd);
+    self.* = init();
 
     video.get_videomode();
 
-    if (wnd != null) {
+//    if (wnd != null) {
         // This need to go first. Otherwise, SendMessage() will not have this class available
 //        wnd.*.zin = @ptrCast(@alignCast(self));
 
@@ -289,7 +289,7 @@ pub fn create(
         if (self.isVisible()) {
             _ = self.sendMessage(df.SHOW_WINDOW, q.none);
         }
-    }
+//    }
 
     return self;
 }

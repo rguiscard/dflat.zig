@@ -43,7 +43,7 @@ fn getDummy() *Window {
 //        dummy.zin = @ptrCast(@alignCast(&dummyWin.?));
         dummyWin = Window{
             .Class = k.DUMMY,
-            .win = null,
+//            .win = null,
             .wndproc = NormalProc,
         };
     }
@@ -517,7 +517,7 @@ fn SizeMsg(win:*Window, x:usize, y:usize) void {
 
 // --------- CLOSE_WINDOW Message ----------
 fn CloseWindowMsg(win:*Window) void {
-    const wnd = win.win;
+//    const wnd = win.win;
     win.condition = .ISCLOSING;
     // ----------- hide this window ------------
     _ = win.sendMessage(df.HIDE_WINDOW, q.none);
@@ -557,8 +557,8 @@ fn CloseWindowMsg(win:*Window) void {
     lists.RemoveWindow(win);
     if (win == Window.inFocus)
         Window.inFocus = null;
-    df.free(wnd);
     // FIXME: should also free parent win
+//    df.free(wnd);
 }
 
 // --------- MAXIMIZE Message ----------
@@ -964,15 +964,13 @@ fn PaintOverLappers(win:*Window) void {
 
 // --- paint those parts of a window that are overlapped ---
 fn PaintUnderLappers(win:*Window) void {
-    const wnd = win.win;
     var hw = win.nextWindow();
     while (hw) |hwin| {
-        const hwnd = hwin.win;
         // ------- test only at document window level ------
         var pwin = hwin.parent;
         // if (pwnd == NULL || GetClass(pwnd) == APPLICATION) {
         // ---- don't bother testing self -----
-        if (isVisible(hwin) and hwnd != wnd) {
+        if (isVisible(hwin) and hwin != win) {
             // --- see if other window is descendent ---
             while (pwin) |pw| {
                 if (pw == win)

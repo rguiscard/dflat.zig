@@ -76,25 +76,6 @@ typedef enum {FALSE, TRUE} BOOL;
 typedef intptr_t PARAM;
 
 typedef struct window {
-//    int unused; // this prevent memory issue
-//    RECT rc; /* FIXME. This is to prevent from memory problem (alignment ?) */
-    /* ----------------- text box fields ------------------ */
-//    int wlines;     /* number of lines of text              */
-//    int wtop;       /* text line that is on the top display */
-//    unsigned char *text; /* window text                     */
-//    unsigned int textlen;  /* text length                   */
-//    int wleft;      /* left position in window viewport     */
-//    int textwidth;  /* width of longest line in textbox     */
-//    int BlkBegLine; /* beginning line of marked block       */
-//    int BlkBegCol;  /* beginning column of marked block     */
-//    int BlkEndLine; /* ending line of marked block          */
-//    int BlkEndCol;  /* ending column of marked block        */
-//    int HScrollBox; /* position of horizontal scroll box    */
-//    int VScrollBox; /* position of vertical scroll box      */
-//	unsigned int *TextPointers; /* -> list of line offsets	*/
-
-    /* pointer to zig window */
-//    void *zin; /* Point to Window in zig */
 } * WINDOW;
 
 #include "video.h"

@@ -430,7 +430,6 @@ pub fn PrepWindowMenu(w:?*Window, mnu:*menus.MENU) void {
 }
 
 fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
-    const wnd = win.win;
     switch (msg) {
         df.INITIATE_DIALOG => {
             if (DialogBox.ControlWindow(&Dialogs.Windows,.ID_WINDOWLIST)) |cwin| {
@@ -438,8 +437,7 @@ fn WindowPrep(win:*Window,msg:df.MESSAGE,params:q.Params) bool {
                 if (ApplicationWindow) |awin| {
                     var win1 = awin.firstWindow();
                     while (win1) |w1| {
-                        const wnd1 = w1.win;
-                        if (w1.isVisible() and (wnd1 != wnd) and
+                        if (w1.isVisible() and (w1 != win) and
                                         (w1.getClass() != k.MENUBAR) and
                                         w1.getClass() != k.STATUSBAR) {
                             if (w1 == oldFocus)
