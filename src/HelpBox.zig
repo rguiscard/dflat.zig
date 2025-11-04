@@ -36,13 +36,13 @@ var ThisHelp:?*df.helps = null;
 
 // ------------- CREATE_WINDOW message ------------
 fn CreateWindowMsg(win:*Window) void {
-    const wnd = win.win;
+//    const wnd = win.win;
     df.Helping = df.TRUE;
     win.Class = k.HELPBOX;
     win.InitWindowColors();
-    if (ThisHelp) |help| {
-        help.*.hwnd = wnd;
-    }
+//    if (ThisHelp) |help| {
+//        help.*.hwnd = wnd;
+//    }
 }
 
 // -------- read the help text into the editbox -------
@@ -261,9 +261,9 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             }
         },
         df.CLOSE_WINDOW => {
-            if (ThisHelp) |help| {
-                help.*.hwnd = null;
-            }
+//            if (ThisHelp) |help| {
+//                help.*.hwnd = null;
+//            }
             df.Helping = df.FALSE;
         },
         else => {
@@ -626,11 +626,11 @@ fn BestFit(win:*Window, dwnd:*Dialogs.DIALOGWINDOW) void {
         dwnd.*.x = @max(0, win.GetLeft()-dwnd.*.w-2);
     }
 
-    if (dwnd.*.x == win.GetRight()+2 or dwnd.*.x == win.GetLeft()-dwnd.*.w-2) {
+    if (dwnd.*.x == win.GetRight()+2 or dwnd.*.x+dwnd.*.w+2 == win.GetLeft()) {
         dwnd.*.y = 0;
         dwnd.*.center.TOP = true;
     }
-    if (dwnd.*.y == win.GetTop()-dwnd.*.h-2 or dwnd.*.y == win.GetBottom()+2) {
+    if (dwnd.*.y+dwnd.*.h+2 == win.GetTop() or dwnd.*.y == win.GetBottom()+2) {
         dwnd.*.x = 0;
         dwnd.*.center.LEFT = true;
     }

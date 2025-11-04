@@ -76,7 +76,7 @@ typedef enum {FALSE, TRUE} BOOL;
 typedef intptr_t PARAM;
 
 typedef struct window {
-    int unused; // this prevent memory issue
+//    int unused; // this prevent memory issue
 //    RECT rc; /* FIXME. This is to prevent from memory problem (alignment ?) */
     /* ----------------- text box fields ------------------ */
 //    int wlines;     /* number of lines of text              */
@@ -179,7 +179,6 @@ unsigned char c_WndBackground(WINDOW);
 /* -------- text box prototypes ---------- */
 void WriteTextLine(WINDOW, RECT *, int, BOOL);
 BOOL cTextBlockMarked(WINDOW);
-//#define GetText(w)        ((w)->text)
 void ClearTextPointers(WINDOW);
 void BuildTextPointers(WINDOW);
 int TextLineNumber(WINDOW, char *);

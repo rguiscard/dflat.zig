@@ -13,7 +13,7 @@ struct helps {
     int hwidth;
 	int nexthlp;
 	int prevhlp;
-    void *hwnd;
+//    void *hwnd;
 	char *PrevName;
 	char *NextName;
 #ifdef FIXHELP
