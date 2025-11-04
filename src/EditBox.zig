@@ -107,11 +107,10 @@ fn ClearTextMsg(win:*Window) bool {
 
 // ----------- GETTEXT Message ---------- 
 fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) bool {
-    const wnd = win.win;
 //    const pp:usize = @intCast(p1);
     const dst:[]u8 = p1;
     var len:usize = p2;
-    if (wnd.*.text) |text| {
+    if (win.text) |text| {
         if (std.mem.indexOfScalar(u8, text[0..win.textlen], '\n')) |pos| {
             // pos is usize, overflow if minus 1.
 //            len = if (pos > 0) @min(len, pos-1) else 0;
@@ -131,7 +130,6 @@ fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) bool {
 
 // ----------- SETTEXTLENGTH Message ----------
 fn SetTextLengthMsg(win:*Window, p1:usize) bool {
-    const wnd = win.win;
     var len:usize = p1;
     len += 1;
     if (len < df.MAXTEXTLEN) {
@@ -142,7 +140,7 @@ fn SetTextLengthMsg(win:*Window, p1:usize) bool {
                 buf.trancate(@intCast(len));
                 if (buf.insert('\n')) { } else |_| { } // 0 or \n ?
                 if (buf.insert(0)) { } else |_| { }
-                wnd.*.text = @constCast(buf.toString().ptr);
+                win.text = @constCast(buf.toString().ptr);
                 win.textlen = buf.len();
                 textbox.BuildTextPointers(win);
             }
@@ -217,14 +215,13 @@ fn ScrollMsg(win:*Window, p1:bool) bool {
 
 // ----------- HORIZSCROLL Message ----------
 fn HorizScrollMsg(win:*Window, p1:bool) bool {
-    const wnd = win.win;
     var rtn = false;
 //    char *currchar = CurrChar;
 //    const curr_char = df.zCurrChar(wnd);
     if (win.textlen == 0) {
         return false;
     }
-    const curr_char = wnd.*.text[win.currPos()];
+    const curr_char = win.text[win.currPos()];
     if ((p1 and (win.CurrCol == win.wleft) and
                (curr_char == '\n')) == false)  {
         rtn = root.BaseWndProc(k.EDITBOX, win, df.HORIZSCROLL, .{.yes=p1});
@@ -267,7 +264,6 @@ fn HorizPageMsg(win:*Window, p1:bool) bool {
 
 // ----- Extend the marked block to the new x,y position ----
 fn ExtendBlock(win:*Window, xx:usize, yy:usize) void {
-    const wnd = win.win;
     var x = xx;
     var y = yy;
     var ptop:usize = @min(win.BlkBegLine, win.BlkEndLine);
@@ -276,7 +272,7 @@ fn ExtendBlock(win:*Window, xx:usize, yy:usize) void {
 //    const len:c_int = @intCast(df.strchr(lp, '\n') - lp);
     const lp = win.textLine(win.wtop+y);
     var len:usize = 0;
-    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], lp, '\n')) |pos| {
+    if (std.mem.indexOfScalarPos(u8, win.text[0..win.textlen], lp, '\n')) |pos| {
         len = @intCast(pos-lp);
     }
     x = @max(0, @min(x, len));
@@ -302,7 +298,6 @@ fn ExtendBlock(win:*Window, xx:usize, yy:usize) void {
 
 // ----------- LEFT_BUTTON Message ---------- 
 fn LeftButtonMsg(win:*Window,p1:usize, p2:usize) bool {
-    const wnd = win.win;
     var MouseX:usize = if (p1 > win.GetClientLeft()) p1 - win.GetClientLeft() else 0;
     var MouseY:usize = if (p2 > win.GetClientTop()) p2 - win.GetClientTop() else 0;
     const rc = win.ClientRect();
@@ -361,7 +356,7 @@ fn LeftButtonMsg(win:*Window,p1:usize, p2:usize) bool {
 //        }
         const lp = win.textLine(sel);
         var len:usize = 0;
-        if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], lp, '\n')) |pos| {
+        if (std.mem.indexOfScalarPos(u8, win.text[0..win.textlen], lp, '\n')) |pos| {
             len = pos-lp;
         }
         MouseX = @min(MouseX, len);
@@ -381,7 +376,7 @@ fn LeftButtonMsg(win:*Window,p1:usize, p2:usize) bool {
 
     if (win.isMultiLine() or
         ((textbox.TextBlockMarked(win) == false) and
-            (MouseX+win.wleft < df.strlen(wnd.*.text)))) {
+            (MouseX+win.wleft < df.strlen(win.text)))) {
         win.CurrCol = MouseX+win.wleft;
     }
     _ = win.sendMessage(df.KEYBOARD_CURSOR, .{.position=.{WndCol(win), win.WndRow}});
@@ -428,7 +423,6 @@ fn ButtonReleasedMsg(win:*Window) bool {
 
 // --------- All displayable typed keys -------------
 fn KeyTyped(win:*Window, cc:u16) void {
-    const wnd = win.win;
     if (win.getGapBuffer(1)) |buf| {
 //        var currchar = wnd.*.text[win.currPos()];
 //        var currchar = df.zCurrChar(wnd);
@@ -455,7 +449,7 @@ fn KeyTyped(win:*Window, cc:u16) void {
             // --- insert a newline at end of text ---
             if (buf.insert('\n')) {} else |_| {}
             if (buf.insert(0)) {} else |_| {}
-            wnd.*.text = @constCast(buf.toString().ptr);
+            win.text = @constCast(buf.toString().ptr);
             win.textlen = buf.len();
 //            *currchar = '\n';
 //            *(currchar+1) = '\0';
@@ -498,7 +492,7 @@ fn KeyTyped(win:*Window, cc:u16) void {
         // ----- put the char in the buffer -----
         buf.moveCursor(currpos);
         if (buf.insert(@intCast(cc))) {} else |_| {}
-        wnd.*.text = @constCast(buf.toString().ptr);
+        win.text = @constCast(buf.toString().ptr);
         win.textlen = buf.len();
         textbox.BuildTextPointers(win);
         _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
@@ -519,9 +513,9 @@ fn KeyTyped(win:*Window, cc:u16) void {
                 if (!(currpos == win.MaxTextLength))
                     _ = win.sendMessage(df.HORIZSCROLL, .{.yes=true});
             } else {
-                var cp = wnd.*.text[win.currPos()];
+                var cp = win.text[win.currPos()];
                 const pos = win.textLine(win.CurrLine);
-                const lchr = wnd.*.text[pos];
+                const lchr = win.text[pos];
                 while (cp != ' ' and cp != lchr)
                     cp -= 1;
                 if (cp == lchr or (win.WordWrapMode == false)) {
@@ -554,9 +548,8 @@ fn KeyTyped(win:*Window, cc:u16) void {
 
 // -------------- Del key ----------------
 fn DelKey(win:*Window) void {
-    const wnd = win.win;
     const curr_pos = win.currPos();
-    const curr_char = wnd.*.text[curr_pos];
+    const curr_char = win.text[curr_pos];
 //    const repaint = (curr_char == '\n');
 
     if (textbox.TextBlockMarked(win))    {
@@ -564,12 +557,12 @@ fn DelKey(win:*Window) void {
         _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
         return;
     }
-    if (win.isMultiLine() and curr_char == '\n' and  wnd.*.text[curr_pos+1] == 0)
+    if (win.isMultiLine() and curr_char == '\n' and  win.text[curr_pos+1] == 0)
         return;
     if (win.gapbuf) |buf| {
         buf.moveCursor(curr_pos);
         buf.delete();
-        wnd.*.text = @constCast(buf.toString().ptr);
+        win.text = @constCast(buf.toString().ptr);
         win.textlen = buf.len();
         // always repaint for now
         textbox.BuildTextPointers(win);
@@ -589,13 +582,12 @@ fn DelKey(win:*Window) void {
 
 // ------------ Tab key ------------
 fn TabKey(win:*Window, p2:u8) void {
-    const wnd = win.win;
     const tabs:usize = @intCast(cfg.config.Tabs);
     if (win.isMultiLine()) {
         const insmd = win.InsertMode;
         const pos = win.currPos();
         for (pos+1..win.MaxTextLength) |idx| {
-            if (insmd == false and wnd.*.text[idx] == 0)
+            if (insmd == false and win.text[idx] == 0)
                 break;
             if (win.textlen == win.MaxTextLength)
                 break;
@@ -729,7 +721,6 @@ fn ShiftChangedMsg(win:*Window, p1:u16) void {
 
 // ----------- ID_DELETETEXT Command ----------
 fn DeleteTextCmd(win:*Window) void {
-    const wnd = win.win;
     if (textbox.TextBlockMarked(win)) {
         const beg_sel = win.BlkBegLine;
         const end_sel = win.BlkEndLine;
@@ -745,7 +736,7 @@ fn DeleteTextCmd(win:*Window) void {
         const bel=win.textLine(end_sel)+end_col;
         SaveDeletedText(win, bbl, bel);
         win.TextChanged = true;
-        _ = df.memmove(&wnd.*.text[bbl], &wnd.*.text[bel], win.textlen-bel);
+        _ = df.memmove(&win.text[bbl], &win.text[bel], win.textlen-bel);
 //        const bcol:usize = @intCast(wnd.*.BlkBegCol); // could we reuse beg_col?
 //        wnd.*.CurrLine = df.TextLineNumber(wnd, bbl-bcol);
         win.CurrLine = win.BlkBegLine;
@@ -765,7 +756,6 @@ fn DeleteTextCmd(win:*Window) void {
 
 // ----------- ID_CLEAR Command ----------
 fn ClearCmd(win:*Window) void {
-    const wnd = win.win;
     if (textbox.TextBlockMarked(win))    {
         const beg_sel = win.BlkBegLine;
         const end_sel = win.BlkEndLine;
@@ -804,7 +794,7 @@ fn ClearCmd(win:*Window) void {
 //        }
 
         // ------ change all text lines in block to \n -----
-        df.TextBlockToN(&wnd.*.text[bbl], &wnd.*.text[bel]);
+        df.TextBlockToN(&win.text[bbl], &win.text[bel]);
 //        while (bbl < bel)    {
 //            char *cp = strchr(bbl, '\n');
 //            if (cp > bel)
@@ -940,7 +930,6 @@ fn CommandMsg(win:*Window,p1:c) bool {
 
 // ---------- CLOSE_WINDOW Message -----------
 fn CloseWindowMsg(win:*Window) bool {
-    const wnd = win.win;
     _ = q.SendMessage(null, df.HIDE_CURSOR, q.none);
     if (win.DeletedText) |text| {
         root.global_allocator.free(text);
@@ -959,7 +948,7 @@ fn CloseWindowMsg(win:*Window) bool {
     if (win.gapbuf) |buf| {
         buf.deinit();
         win.gapbuf = null;
-        wnd.*.text = null;
+        win.text = null;
     }
     return rtn;
 }
@@ -1201,7 +1190,6 @@ fn StopMarking(win:*Window) void {
 // ------ save deleted text for the Undo command ------
 //fn SaveDeletedText(win:*Window, bbl:[*c]u8, len:usize) void {
 fn SaveDeletedText(win:*Window, bbl:usize, bel:usize) void {
-    const wnd = win.win;
     const len = bel-bbl;
     win.DeletedLength = len;
 
@@ -1219,7 +1207,7 @@ fn SaveDeletedText(win:*Window, bbl:usize, bel:usize) void {
     }
     if (win.DeletedText) |buf| {
 //        wnd.*.DeletedText = buf.ptr;
-        @memmove(buf, wnd.*.text[bbl..bel]);
+        @memmove(buf, win.text[bbl..bel]);
     }
 
 //    wnd->DeletedText=DFrealloc(wnd->DeletedText,len);
@@ -1228,9 +1216,8 @@ fn SaveDeletedText(win:*Window, bbl:usize, bel:usize) void {
 
 // ---- cursor right key: right one character position ----
 fn Forward(win:*Window) void {
-    const wnd = win.win;
     const pos = win.currPos();
-    const cc = wnd.*.text[pos+1];
+    const cc = win.text[pos+1];
     if (cc == 0)
         return;
     if (cc == '\n') {
@@ -1257,10 +1244,9 @@ fn Forward(win:*Window) void {
 
 // ----- stick the moving cursor to the end of the line ----
 fn StickEnd(win:*Window) void {
-    const wnd = win.win;
     const curr_pos = win.TextPointers[win.CurrLine];
     var len:usize = 0;
-    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], curr_pos, '\n')) |end_pos| {
+    if (std.mem.indexOfScalarPos(u8, win.text[0..win.textlen], curr_pos, '\n')) |end_pos| {
         len = end_pos-curr_pos;
     } else {
         len = win.textlen-curr_pos-1; // consider end null -1 ?
@@ -1324,9 +1310,8 @@ fn Backward(win:*Window) void {
 
 // -------- End key: to end of line -------
 fn End(win:*Window) void {
-    const wnd = win.win;
     const curr_pos = win.TextPointers[win.CurrLine];
-    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], curr_pos, '\n')) |pos| {
+    if (std.mem.indexOfScalarPos(u8, win.text[0..win.textlen], curr_pos, '\n')) |pos| {
         win.CurrCol = pos-curr_pos;
     } else {
         win.CurrCol = win.textlen-curr_pos-1;
@@ -1356,26 +1341,25 @@ fn Home(win:*Window) void {
 // not really tested. Key binding doesn't work
 // modern escape does not have \f
 fn NextWord(win:*Window) void {
-    const wnd = win.win;
     const savetop = win.wtop;
     const saveleft = win.wleft;
     win.ClearVisible();
 
     var curr_pos:usize = win.currPos();
-    var cc:u8 = @intCast(wnd.*.text[curr_pos]&0x7f);
+    var cc:u8 = @intCast(win.text[curr_pos]&0x7f);
     while(!isWhite(cc)) {
-        if (wnd.*.text[curr_pos+1] == 0)
+        if (win.text[curr_pos+1] == 0)
             break;
         Forward(win);
         curr_pos = win.currPos();
-        cc = @intCast(wnd.*.text[curr_pos]&0x7f);
+        cc = @intCast(win.text[curr_pos]&0x7f);
     }
     while(isWhite(cc)) {
-        if (wnd.*.text[curr_pos+1] == 0)
+        if (win.text[curr_pos+1] == 0)
             break;
         Forward(win);
         curr_pos = win.currPos();
-        cc = @intCast(wnd.*.text[curr_pos]&0x7f);
+        cc = @intCast(win.text[curr_pos]&0x7f);
     }
 //    while (!isWhite(*CurrChar)) {
 //        char *cc = CurrChar+1;
@@ -1398,25 +1382,24 @@ fn NextWord(win:*Window) void {
 // -- Ctrl+cursor left key: to beginning of previous word --
 // not tested as NextWord()
 fn PrevWord(win:*Window) void {
-    const wnd = win.win;
     const savetop = win.wtop;
     const saveleft = win.wleft;
     win.ClearVisible();
     Backward(win);
 
     var curr_pos:usize = win.currPos();
-    var cc:u8 = @intCast(wnd.*.text[curr_pos]&0x7f);
+    var cc:u8 = @intCast(win.text[curr_pos]&0x7f);
     while(isWhite(cc)) {
         if ((win.CurrLine == 0) and (win.CurrCol == 0))
             break;
         Backward(win);
         curr_pos = win.currPos();
-        cc = @intCast(wnd.*.text[curr_pos]&0x7f);
+        cc = @intCast(win.text[curr_pos]&0x7f);
     }
     while(win.CurrCol != 0 and !isWhite(cc)) {
         Backward(win);
         curr_pos = win.currPos();
-        cc = @intCast(wnd.*.text[curr_pos]&0x7f);
+        cc = @intCast(win.text[curr_pos]&0x7f);
     }
     if (isWhite(cc)) {
         Forward(win);

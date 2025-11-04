@@ -81,7 +81,7 @@ typedef struct window {
     /* ----------------- text box fields ------------------ */
 //    int wlines;     /* number of lines of text              */
 //    int wtop;       /* text line that is on the top display */
-    unsigned char *text; /* window text                     */
+//    unsigned char *text; /* window text                     */
 //    unsigned int textlen;  /* text length                   */
 //    int wleft;      /* left position in window viewport     */
 //    int textwidth;  /* width of longest line in textbox     */
@@ -179,7 +179,7 @@ unsigned char c_WndBackground(WINDOW);
 /* -------- text box prototypes ---------- */
 void WriteTextLine(WINDOW, RECT *, int, BOOL);
 BOOL cTextBlockMarked(WINDOW);
-#define GetText(w)        ((w)->text)
+//#define GetText(w)        ((w)->text)
 void ClearTextPointers(WINDOW);
 void BuildTextPointers(WINDOW);
 int TextLineNumber(WINDOW, char *);

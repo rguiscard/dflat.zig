@@ -64,14 +64,13 @@ fn LeftButtonMsg(win:*Window, x:usize, y:usize) void {
 
 // -------- BUTTON_RELEASED Message --------
 fn ButtonReleasedMsg(win:*Window, x:usize, y:usize) bool {
-    const wnd = win.win;
     py = -1;
     if (Rect.InsideRect(x, y, win.ClientRect())) {
         const sel:usize = y - win.GetClientTop();
 //        const tl = df.TextLine(wnd, sel);
 //        if (tl[0] != df.LINE)
         const tl = win.textLine(sel);
-        if (wnd.*.text[tl] != df.LINE) {
+        if (win.text[tl] != df.LINE) {
             if (win.selection) |selection| {
                 _ = win.sendMessage(df.LB_CHOOSE, .{.select=.{selection, 0}});
             }
@@ -202,7 +201,6 @@ fn PaintMsg(win:*Window) void {
 }
 
 fn BorderMsg(win:*Window) bool {
-    const wnd = win.win;
     var rtn = true;
     if (win.mnu) |_| {
         const currFocus = Window.inFocus;
@@ -211,7 +209,7 @@ fn BorderMsg(win:*Window) bool {
         Window.inFocus = currFocus;
         for (0..@intCast(win.ClientHeight())) |i| {
             const pos = win.textLine(i);
-            const chr = wnd.*.text[pos]; 
+            const chr = win.text[pos]; 
             if (chr == df.LINE) {
                 video.wputch(win, df.LEDGE, 0, i+1);
                 video.wputch(win, df.REDGE, win.WindowWidth()-1, i+1);
@@ -352,7 +350,6 @@ fn CloseWindowMsg(win:*Window) bool {
 
 // - Window processing module for POPDOWNMENU window class -
 pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             return CreateWindowMsg(win);
@@ -370,7 +367,7 @@ pub fn PopDownProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             const p1:?usize = params.select[0];
             if (p1) |sel| {
                 const l = win.textLine(sel);
-                if (wnd.*.text[l] == df.LINE) {
+                if (win.text[l] == df.LINE) {
                     return true;
                 }
                 if (win.mnu) |mnu| {

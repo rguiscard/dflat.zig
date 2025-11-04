@@ -37,7 +37,6 @@ fn SetFocusMsg(win:*Window, yes:bool) bool {
 
 // --------- BUILDMENU Message ---------
 fn BuildMenuMsg(win:*Window, p1:*menus.MBAR,) void {
-    const wnd = win.win;
     reset_menubar(win);
     if (win.gapbuf) |buf| {
         const b = [_]u8{0}**80;
@@ -74,7 +73,7 @@ fn BuildMenuMsg(win:*Window, p1:*menus.MBAR,) void {
 
             ActiveMenu = &mbar.*.PullDown;
         }
-        wnd.*.text = @constCast(buf.toString().ptr);
+        win.text = @constCast(buf.toString().ptr);
         win.textlen = buf.len();
     } else {
         // error 
@@ -406,12 +405,11 @@ fn ClosePopdownMsg(win:*Window) void {
 
 // ---------------- CLOSE_WINDOW Message ---------------
 fn CloseWindowMsg(win:*Window) void {
-    const wnd = win.win;
     if (win.gapbuf) |buf| {
         buf.clear();
         // buf.deinit(); // free ?
 //        win.text = null;
-        wnd.*.text = null;
+        win.text = null;
     }
     mctr = 0;
     if (ActiveMenuBar) |mbar| {
@@ -422,7 +420,6 @@ fn CloseWindowMsg(win:*Window) void {
 }
 
 pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
-    const wnd = win.win;
     switch (msg) {
         df.CREATE_WINDOW => {
             reset_menubar(win);
@@ -435,7 +432,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
             BuildMenuMsg(win, p1);
         },
         df.PAINT => {
-            if (win.isVisible() and (wnd.*.text != null)) {
+            if (win.isVisible() and (win.text != null)) {
                 PaintMsg(win);
                 return false;
             }
@@ -489,9 +486,8 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
 
 // ------------- reset the MENUBAR --------------
 fn reset_menubar(win:*Window) void {
-    const wnd = win.win;
     if (win.getGapBuffer(@intCast(df.SCREENWIDTH+5))) |_| {
-        wnd.*.text = null;
+        win.text = null;
         win.textlen = 0;
     }
 }

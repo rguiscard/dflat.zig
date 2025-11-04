@@ -74,8 +74,6 @@ fn SetTextMsg(win:*Window,p1:[]const u8) bool {
 
 // --------- KEYBOARD Message ----------
 fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
-    const wnd = win.win;
-
     if (normal.WindowMoving or normal.WindowSizing or ((p2 & df.ALTKEY)>0))
         return false;
 
@@ -91,7 +89,7 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
             TurnOffDisplay(win);
 //            while (*df.CurrChar == pTab) {
 //            while (df.zCurrChar(wnd)[0] == pTab) {
-            while (wnd.*.text[win.currPos()] == pTab) {
+            while (win.text[win.currPos()] == pTab) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pn, p2}});
             }
             TurnOnDisplay(win);
@@ -103,7 +101,7 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
             TurnOffDisplay(win);
 //            while (*df.CurrChar == pTab) {
 //            while (df.zCurrChar(wnd)[0] == pTab) {
-            while (wnd.*.text[win.currPos()] == pTab) {
+            while (win.text[win.currPos()] == pTab) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{pn, p2}});
             }
             TurnOnDisplay(win);
@@ -113,11 +111,11 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
             TurnOffDisplay(win);
 //            const delnl = (*df.CurrChar == '\n' or df.TextBlockMarked(wnd));
 //            const delnl = (df.zCurrChar(wnd)[0] == '\n' or textbox.TextBlockMarked(win));
-            const delnl = (wnd.*.text[win.currPos()] == '\n' or textbox.TextBlockMarked(win));
+            const delnl = (win.text[win.currPos()] == '\n' or textbox.TextBlockMarked(win));
             _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
 //            while (*df.CurrChar == pTab) {
 //            while (df.zCurrChar(wnd)[0] == pTab) {
-            while (wnd.*.text[win.currPos()] == pTab) {
+            while (win.text[win.currPos()] == pTab) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{p1, p2}});
             }
             AdjustTab(win);
@@ -197,18 +195,17 @@ fn KeyboardMsg(win:*Window,p1:u16, p2:u8) bool {
 //  not sure it work properly
 fn AdjustTab(win:*Window) void {
     // turn visibility off when use this function
-    const wnd = win.win;
     // ---- test if there is a tab beyond this character ---- 
     var col = win.CurrCol;
     var curr_pos = win.currPos();
-    var cc = wnd.*.text[curr_pos];
+    var cc = win.text[curr_pos];
     while ((curr_pos < win.textlen) and (cc != '\n')) {
         if (cc == sTab) {
             const tabs:usize = @intCast(cfg.config.Tabs);
             var exp = (tabs-1) - @mod(col, tabs);
             col += 1;
             curr_pos += 1;
-            cc = wnd.*.text[curr_pos];
+            cc = win.text[curr_pos];
             while (cc == pTab) {
                 _ = root.BaseWndProc(k.EDITOR, win, df.KEYBOARD, .{.char=.{df.DEL, 0}});
             }
@@ -220,7 +217,7 @@ fn AdjustTab(win:*Window) void {
         }
         col += 1;
         curr_pos += 1;
-        cc = wnd.*.text[curr_pos];
+        cc = win.text[curr_pos];
     }
 //    while (*CurrChar && *CurrChar != '\n')    {
 //                if (*CurrChar == sTab)  {

@@ -273,7 +273,6 @@ fn LoadFile(win: *mp.Window) void {
 
 // ---------- save a file to disk ------------
 fn SaveFile(win:*mp.Window, Saveas: bool) void {
-    const wnd = win.win;
     const fspec:[:0]const u8 = "*";
     var filename = std.mem.zeroes([df.MAXPATH]u8);
     if ((win.extension == null) or (Saveas == true)) {
@@ -309,7 +308,7 @@ fn SaveFile(win:*mp.Window, Saveas: bool) void {
 //        const ptr = @as([*:0]u8, @ptrCast(ext));
 //        const path = std.mem.span(ptr);
         const path = ext.filename;
-        const text = @as([*:0]u8, @ptrCast(wnd.*.text));
+        const text = @as([*:0]u8, @ptrCast(win.text));
         const data:[]const u8 = std.mem.span(text); // save data up to \0
         if (std.fs.cwd().writeFile(.{.sub_path = path, .data = data})) {
             win.TextChanged = false;

@@ -59,8 +59,6 @@ fn replacetext(wnd:df.WINDOW, cp1:[]const u8, db:*df.DBOX) void {
 
 // ------- search for the occurrance of a string ------- 
 fn SearchTextBox(win:*Window, incr:bool) void {
-    const wnd = win.win;
-
 //    var cp1:[*c]u8 = null;
     var pp1:usize = 0; // based on zp1
     const dbox = if (Replacing) &Dialogs.ReplaceTextDB else  &Dialogs.SearchTextDB;
@@ -87,7 +85,7 @@ fn SearchTextBox(win:*Window, incr:bool) void {
             // --- compare at each character position ---
             const zp = cp;
 //            const zp1 = std.mem.span(cp1);
-            const zp1 = wnd.*.text[pp1..win.textlen];
+            const zp1 = win.text[pp1..win.textlen];
             var index:?usize = null;
             // FIXME: original code is whitespace normalized ('\n' -> ' ')
             if (CheckCase) {

@@ -26,7 +26,6 @@ fn AddModeKey(win:*Window) void {
 
 // --------- UP (Up Arrow) Key ------------
 fn UpKey(win:*Window,p2:u8) void {
-    const wnd = win.win;
     if (win.selection) |selection| {
         if (selection > 0) {
             if (selection == win.wtop) {
@@ -37,7 +36,7 @@ fn UpKey(win:*Window,p2:u8) void {
                 var newsel:usize = selection-1;
                 if (win.wlines == win.ClientHeight()) {
                       var last = win.textLine(newsel);
-                      while(wnd.*.text[last] == df.LINE) {
+                      while(win.text[last] == df.LINE) {
                           // Not sure this is really work.
                           newsel -|= 1; // check boundary ?
                           last = win.textLine(@intCast(newsel));
@@ -60,7 +59,6 @@ fn UpKey(win:*Window,p2:u8) void {
 
 // --------- DN (Down Arrow) Key ------------
 fn DnKey(win:*Window, p2:u8) void {
-    const wnd = win.win;
     if (win.selection) |selection| {
         if (selection < win.wlines-1) {
             if (selection == win.wtop+win.ClientHeight()-1) {
@@ -71,7 +69,7 @@ fn DnKey(win:*Window, p2:u8) void {
                 var newsel:usize = selection+1;
                 if (win.wlines == win.ClientHeight()) {
                       var last = win.textLine(@intCast(newsel));
-                      while(wnd.*.text[last] == df.LINE) {
+                      while(win.text[last] == df.LINE) {
                           // Not sure this is really work.
                           newsel +|= 1; // check boundary ?
                           last = win.textLine(newsel);
@@ -142,7 +140,6 @@ fn EnterKey(win:*Window) void {
 
 // --------- All Other Key Presses ------------
 fn KeyPress(win:*Window,p1:u16, p2:u8) void {
-    const wnd = win.win;
     var sel:usize = if (win.selection) |selection| selection+1 else 0;
     while (sel < win.wlines) {
 //        var cp = df.TextLine(wnd, sel);
@@ -157,7 +154,7 @@ fn KeyPress(win:*Window,p1:u16, p2:u8) void {
             break;
         if (win.isMultiLine())
             pos += 1;
-        const first = wnd.*.text[pos];
+        const first = win.text[pos];
         if ((first < 256) and (std.ascii.toLower(first) == p1)) {
             _ = win.sendMessage(df.LB_SELECTION, .{.select=.{sel,
                 if (win.isMultiLine()) p2 else 0}});
@@ -281,11 +278,10 @@ fn AddTextMsg(win:*Window,p1:[]const u8) bool {
 
 // --------- GETTEXT Message ------------
 fn GetTextMsg(win:*Window, p1:[]u8, p2:usize) void {
-    const wnd = win.win;
     const cp2 = win.textLine(p2);
-    if (std.mem.indexOfAnyPos(u8, wnd.*.text[0..win.textlen], cp2, &[_]u8{0, '\n'})) |pos| {
+    if (std.mem.indexOfAnyPos(u8, win.text[0..win.textlen], cp2, &[_]u8{0, '\n'})) |pos| {
         const len = pos-cp2;
-        @memmove(p1[0..len], wnd.*.text[cp2..pos]);
+        @memmove(p1[0..len], win.text[cp2..pos]);
         p1[len] = 0;
     }
 }
@@ -476,33 +472,30 @@ fn ExtendSelections(win:*Window, sel:usize, shift:u8) usize {
 }
 
 fn SetSelection(win:*Window,sel:?usize) void {
-    const wnd = win.win;
     if (sel) |selection| {
         if (win.isMultiLine() and (ItemSelected(win, selection) == false)) {
             const lp = win.textLine(selection);
-            wnd.*.text[lp] = df.LISTSELECTOR;
+            win.text[lp] = df.LISTSELECTOR;
             win.SelectCount += 1;
         }
     }
 }
 
 fn ClearSelection(win:*Window,sel:?usize) void {
-    const wnd = win.win;
     if (sel) |selection| {
         if (win.isMultiLine() and ItemSelected(win, selection)) {
             const lp = win.textLine(selection);
-            wnd.*.text[lp] = ' ';
+            win.text[lp] = ' ';
             win.SelectCount -= 1;
         }
     }
 }
 
 pub fn ItemSelected(win:*Window,sel:?usize) bool {
-    const wnd = win.win;
     if (sel) |selection| {
         if (win.isMultiLine() and selection < win.wlines) {
             const cp = win.textLine(selection);
-            return (wnd.*.text[cp] & 255) == df.LISTSELECTOR;
+            return (win.text[cp] & 255) == df.LISTSELECTOR;
         }
     }
     return false;

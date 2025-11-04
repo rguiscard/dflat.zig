@@ -274,16 +274,15 @@ pub fn HelpBoxProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
 
 // ---- PAINT message for the helpbox text editbox ----
 fn PaintMsg(win:*Window, params:q.Params) bool {
-    const wnd = win.win;
     if (thisword) |word| {
         const pwin = win.getParent();
         var pos:usize = win.TextPointers[word.*.lineno];
         pos += @intCast(word.*.off1);
-        wnd.*.text[pos+1] = pwin.WindowColors[df.SELECT_COLOR][df.FG];
-        wnd.*.text[pos+2] = pwin.WindowColors[df.SELECT_COLOR][df.BG];
+        win.text[pos+1] = pwin.WindowColors[df.SELECT_COLOR][df.FG];
+        win.text[pos+2] = pwin.WindowColors[df.SELECT_COLOR][df.BG];
         const rtn = root.DefaultWndProc(win, df.PAINT, params);
-        wnd.*.text[pos+1] = pwin.WindowColors[df.HILITE_COLOR][df.FG];
-        wnd.*.text[pos+2] = pwin.WindowColors[df.HILITE_COLOR][df.BG];
+        win.text[pos+1] = pwin.WindowColors[df.HILITE_COLOR][df.FG];
+        win.text[pos+2] = pwin.WindowColors[df.HILITE_COLOR][df.BG];
         return rtn;
     }
     return root.DefaultWndProc(win, df.PAINT, params);

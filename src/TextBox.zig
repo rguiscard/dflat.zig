@@ -16,7 +16,6 @@ var HSliding = false;
 
 // ------------ ADDTEXT Message --------------
 fn AddTextMsg(win:*Window, txt:[]const u8) bool {
-    const wnd = win.win;
     // --- append text to the textbox's buffer ---
     const adln:usize = txt.len;
     if (adln > 0xfff0)
@@ -26,7 +25,7 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
         // ---- append the text ----
         if (buf.insertSlice(txt)) { } else |_| { }
         if (buf.insert('\n')) { } else |_| { }
-        wnd.*.text = @constCast(buf.toString().ptr);
+        win.text = @constCast(buf.toString().ptr);
         win.textlen = buf.len();
 
         BuildTextPointers(win);
@@ -39,7 +38,6 @@ fn AddTextMsg(win:*Window, txt:[]const u8) bool {
 
 // ------------ DELETETEXT Message --------------
 fn DeleteTextMsg(win:*Window, lno:usize) void {
-    const wnd = win.win;
     win.wlines -|= 1;
 
     if (win.gapbuf) |buf| {
@@ -48,7 +46,7 @@ fn DeleteTextMsg(win:*Window, lno:usize) void {
         for(pos1..pos2) |_| {
             buf.delete();
         }
-        wnd.*.text = @constCast(buf.toString().ptr);
+        win.text = @constCast(buf.toString().ptr);
         win.textlen = buf.len();
 
         BuildTextPointers(win);
@@ -68,8 +66,6 @@ fn DeleteTextMsg(win:*Window, lno:usize) void {
 
 // ------------ INSERTTEXT Message --------------
 fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
-    const wnd = win.win;
-
     if (win.getGapBuffer(txt.len)) |buf| {
         buf.compact();
         // find line
@@ -78,7 +74,7 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
         // ---- append the text ----
         if (buf.insertSlice(txt)) { } else |_| { }
         if (buf.insert('\n')) { } else |_| { }
-        wnd.*.text = @constCast(buf.toString().ptr);
+        win.text = @constCast(buf.toString().ptr);
         win.textlen = buf.len();
 
         BuildTextPointers(win);
@@ -96,25 +92,23 @@ fn InsertTextMsg(win:*Window, txt:[]const u8, lno:usize) void {
 
 // ------------ SETTEXT Message --------------
 fn SetTextMsg(win:*Window, txt:[]const u8) void {
-    const wnd = win.win;
     // -- assign new text value to textbox buffer --
     _ = win.sendMessage(df.CLEARTEXT, q.none);
     
     if (win.getGapBuffer(txt.len)) |buf| {
         buf.clear();
         if (buf.insertSlice(txt)) { } else |_| { }
-        wnd.*.text = @constCast(buf.toString().ptr);
+        win.text = @constCast(buf.toString().ptr);
         win.textlen = buf.len();
         BuildTextPointers(win);
     }
 }
 
 fn ClearTextMsg(win:*Window) void {
-    const wnd = win.win;
     // ----- clear text from textbox -----
     if (win.gapbuf) |buf| {
         buf.clear();
-        wnd.*.text = null;
+        win.text = null;
         win.textlen = 0;
         win.wlines = 0;
         win.textwidth = 0;
@@ -702,8 +696,6 @@ fn ComputeWindowLeft(win:*Window) void {
 
 // ------- write a line of text to a textbox window -------
 pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
-    const wnd = win.win;
-
     // ------ make sure y is inside the window -----
     if (y < win.wtop or y >= win.wtop+win.ClientHeight())
         return;
@@ -733,7 +725,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
     // should check out of bound of y?
     const beg = win.TextPointers[y];
     var len:usize = 0;
-    if (std.mem.indexOfScalarPos(u8, wnd.*.text[0..win.textlen], beg, '\n')) |pos| {
+    if (std.mem.indexOfScalarPos(u8, win.text[0..win.textlen], beg, '\n')) |pos| {
         len = pos-beg;
     } else {
         len = win.textlen-beg;
@@ -741,7 +733,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
     if (root.global_allocator.alloc(u8, len+7)) |buf| {
         defer root.global_allocator.free(buf);
         @memset(buf, 0);
-        @memmove(buf[0..len], wnd.*.text[beg..beg+len]);
+        @memmove(buf[0..len], win.text[beg..beg+len]);
 
         // FIXME: handle protect
         // -------- insert block color change controls -------
@@ -906,7 +898,6 @@ pub fn ClearTextPointers(win:*Window) void {
 
 // ---- build array of pointers to text lines ----
 pub fn BuildTextPointers(win:*Window) void {
-    const wnd = win.win;
     const allocator = root.global_allocator;
     var arraylist:std.ArrayList(c_uint) = undefined;
     if (win.TextPointers.len > 0) {
@@ -977,7 +968,7 @@ pub fn BuildTextPointers(win:*Window) void {
 //       
 //    }
 
-    if (wnd.*.text) |text| {
+    if (win.text) |text| {
         win.wlines = 0;
         win.textwidth = 0;
         var next_pos:usize= 0;

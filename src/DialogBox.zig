@@ -250,7 +250,6 @@ fn SetScrollBars(win:*Window) void {
 
 // ------- CLOSE_WINDOW Message (Control) -----
 fn CtlCloseWindowMsg(win:*Window) void {
-    const wnd = win.win;
     if (win.GetControl()) |ct| {
         ct.win = null;
         if (win.getParent().ReturnCode == .ID_OK) {
@@ -259,7 +258,7 @@ fn CtlCloseWindowMsg(win:*Window) void {
                 const len = win.textlen;
                 if (getGapBuffer(ct, len)) |buf| {
                     buf.clear();
-                    if (wnd.*.text) |text| {
+                    if (win.text) |text| {
                         if (buf.insertSlice(text[0..len])) {} else |_| {}
                         if (win.isMultiLine() == false) {
                             // remove first \n

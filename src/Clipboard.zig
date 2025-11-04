@@ -26,7 +26,6 @@ pub var ClipboardLength:usize = 0;
 //}
 
 pub fn CopyToClipboard(win:*Window) void {
-    const wnd = win.win;
     if (textbox.TextBlockMarked(win)) {
         const begCol = win.BlkBegCol;
         const endCol = win.BlkEndCol;
@@ -55,7 +54,7 @@ pub fn CopyToClipboard(win:*Window) void {
         }
    
 //        @memcpy(list.items, bbl[0..ClipboardLength]);
-        @memcpy(list.items, wnd.*.text[bbl..bel]);
+        @memcpy(list.items, win.text[bbl..bel]);
 
         if (list.toOwnedSlice(root.global_allocator)) |text| {
             Clipboard = text;
@@ -79,7 +78,6 @@ pub fn PasteFromClipboard(win: *Window) bool {
 }
 
 pub fn PasteText(win:*Window, SaveTo:[]u8, len:c_uint) bool {
-    const wnd = win.win;
 //    const src:[*c]u8 = SaveTo.ptr;
     
 //    if (SaveTo != null and len > 0)    {
@@ -106,7 +104,7 @@ pub fn PasteText(win:*Window, SaveTo:[]u8, len:c_uint) bool {
                 const pos = win.currPos();
                 buf.moveCursor(pos);
                 if (buf.insertSlice(SaveTo)) { } else |_| { }
-                wnd.*.text = @constCast(buf.toString().ptr);
+                win.text = @constCast(buf.toString().ptr);
                 win.textlen = buf.len();
             }
 

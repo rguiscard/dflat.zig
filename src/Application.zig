@@ -526,9 +526,8 @@ fn DoWindowColors(win:*Window) void {
     win.InitWindowColors();
     var cwin = win.firstWindow();
     while (cwin) |cw| {
-        const cwnd = cw.win;
         DoWindowColors(cw);
-        if ((cw.getClass() == k.TEXT) and df.GetText(cwnd) != null) {
+        if ((cw.getClass() == k.TEXT) and cw.text != null) {
             _ = cw.sendMessage(df.CLEARTEXT, q.none);
         }
         cwin = cw.nextWindow();
