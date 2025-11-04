@@ -23,6 +23,10 @@ pub fn CheckAndChangeDir(fspec:[]const u8) bool {
     return false;
 }
 
+fn lessThan(_: void, lhs: []const u8, rhs: []const u8) bool {
+    return std.mem.order(u8, lhs, rhs) == .lt;
+}
+
 fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
     if (win.extension) |extension| {
         const dbox:*Dialogs.DBOX = extension.dbox;
@@ -41,23 +45,41 @@ fn BuildList(win:*Window, fspec:[]const u8, dirs:bool) bool {
                         // add up directory
                         _ = cwin.sendTextMessage(df.ADDTEXT, "..");
                     }
-                    while (true) {
-                        if (iterator.next()) |iter| {
-                            if (iter) |entry| {
-                                if (dirs and entry.kind == .directory) {
-                                    _ = cwin.sendTextMessage(df.ADDTEXT, entry.name);
-                                } else if (!dirs and entry.kind == .file) {
-                                    _ = cwin.sendTextMessage(df.ADDTEXT, entry.name);
+                    if (std.ArrayList([]const u8).initCapacity(root.global_allocator, 1)) |*l| {
+                        var list = @constCast(l);
+                        defer list.deinit(root.global_allocator);
+                        while (true) {
+                            if (iterator.next()) |iter| {
+                                if (iter) |entry| {
+                                    if (entry.name.len > 0 and entry.name[0] == '.')
+                                        continue;
+                                    if (dirs and entry.kind == .directory) {
+                                        if (root.global_allocator.dupeZ(u8, entry.name)) |name| {
+                                            if (list.append(root.global_allocator, name)) {} else |_| {}
+                                        } else |_| {}
+//                                        _ = cwin.sendTextMessage(df.ADDTEXT, entry.name);
+                                    } else if (!dirs and entry.kind == .file) {
+                                        if (root.global_allocator.dupeZ(u8, entry.name)) |name| {
+                                            if (list.append(root.global_allocator, name)) {} else |_| {}
+                                        } else |_| {}
+//                                        _ = cwin.sendTextMessage(df.ADDTEXT, entry.name);
+                                    }
+                                } else {
+                                break;
                                 }
-                            } else {
+                            } else |_| {
                                 break;
                             }
-                        } else |_| {
-                            break;
                         }
-                    }
-                } else |_| {
-                }
+
+                        std.mem.sort([]const u8, list.items, {}, lessThan);
+
+                        for(list.items) |item| {
+                            _ = cwin.sendTextMessage(df.ADDTEXT, item);
+                            root.global_allocator.free(item);
+                        }
+                    } else |_| { }
+                } else |_| { }
                 _ = cwin.sendMessage(df.SHOW_WINDOW, q.none);
             }
         }
