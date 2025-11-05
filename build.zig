@@ -166,6 +166,33 @@ pub fn build(b: *std.Build) void {
         run_cmd.addArgs(args);
     }
 
+    const wttr = b.addExecutable(.{
+        .name = "wttr",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("examples/weather.zig"),
+            .target = target,
+            .optimize = optimize,
+            .imports = &.{
+                .{ .name = "dflat", .module = lib_mod },
+                .{ .name = "memopad", .module = memopad_mod },
+            },
+        }),
+    });
+    wttr.linkLibC();
+    wttr.addIncludePath(b.path("."));
+
+    b.installArtifact(wttr);
+
+    const run_wttr_step = b.step("wttr", "Run the app");
+
+    const run_wttr_cmd = b.addRunArtifact(wttr);
+    run_wttr_step.dependOn(&run_wttr_cmd.step);
+    run_wttr_cmd.step.dependOn(b.getInstallStep());
+
+    if (b.args) |args| {
+        run_wttr_cmd.addArgs(args);
+    }
+
     // Creates an executable that will run `test` blocks from the provided module.
     // Here `mod` needs to define a target, which is why earlier we made sure to
     // set the releative field.

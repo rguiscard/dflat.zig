@@ -16,8 +16,6 @@ void convert_screen_to_ansi(void);
 
 #define near
 
-void scroll_window(WINDOW, RECT, int);
-
 #define clr(fg,bg) ((fg)|((bg)<<4))
 
 #endif

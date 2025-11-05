@@ -155,12 +155,9 @@ TimePosted:bool = false,        // True if time has been posted
 // ------------- picture box fields -------------------
 VectorList:?[]picture.VECT = null,   // list of picture box vectors
 
-//win: df.WINDOW,
-
 pub fn init() TopLevelFields {
     return .{
         .Class = CLASS.FORCEINTTYPE,
-//        .win = wnd,
         .wndproc = null,
     };
 }
@@ -177,7 +174,6 @@ pub fn create(
     position: Center) *TopLevelFields {
 
     const title = ttl;
-//    const wnd:df.WINDOW = @ptrCast(@alignCast(df.DFcalloc(1, @sizeOf(df.window))));
 
     var self:*TopLevelFields = undefined;
     if (root.global_allocator.create(TopLevelFields)) |s| {
@@ -190,9 +186,6 @@ pub fn create(
     video.get_videomode();
 
 //    if (wnd != null) {
-        // This need to go first. Otherwise, SendMessage() will not have this class available
-//        wnd.*.zin = @ptrCast(@alignCast(self));
-
         // ----- height, width = -1: fill the screen -------
         var ht = height;
         if (position.HEIGHT)
@@ -202,8 +195,6 @@ pub fn create(
             wt = @intCast(df.SCREENWIDTH);
 
         // ----- coordinates -1, -1 = center the window ----
-//        const hht:c_int = @intCast(ht);
-//        const wwt:c_int = @intCast(wt);
         if (position.LEFT) {
             self.rc.left = @divFloor(@as(usize, @intCast(df.SCREENWIDTH))-wt, 2);
         } else {
@@ -590,7 +581,6 @@ fn TopLine(self:*TopLevelFields, lin:u8, rcc:Rect) void {
     if (rc.left < rc.right) {
         // ----------- top line -------------
         @memset(line[0..self.WindowWidth()-1], lin);
-//        @memset(line,lin,WindowWidth(wnd)-1);
         if (self.TestAttribute(df.CONTROLBOX)) {
             @memcpy(line[1..4], "   ");
             line[2] = df.CONTROLBOXCHAR;

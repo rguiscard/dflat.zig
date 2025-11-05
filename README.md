@@ -12,6 +12,14 @@ To run the default memopad, use
 $ zig build run
 ```
 
+To run a demo weather applicaiton, use 
+
+```
+$ zig build wttr
+```
+
+Please note that it fetches information from wttr.in, thus, may have delays in display.
+
 ## Known bugs:
 
 - Text field in search box does not work properly when modifying search text after first one. This is a bug from original dflat.
