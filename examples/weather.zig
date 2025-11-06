@@ -1,7 +1,6 @@
 pub const DFlatApplication = "memopad";
 
 var textbox:?*mp.Window = null;
-var listbox:?*mp.Window = null;
 
 pub fn main() !void {
     const argv = std.os.argv.ptr; // already C-compatible
@@ -12,8 +11,8 @@ pub fn main() !void {
 
     df.Argv = @ptrCast(argv);
 
-    var win = mp.Window.create(mp.CLASS.APPLICATION,
-                        "Weather via wttr.in",
+    const win = mp.Window.create(mp.CLASS.APPLICATION,
+                        "Weather",
                         0, 0, 0, 0,
                         null, // main menu
                         null,
@@ -22,10 +21,123 @@ pub fn main() !void {
                         df.HASBORDER,
                         mp.Window.CENTER_SIZE);
 
-    _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
+    textbox = mp.Window.create(mp.CLASS.TEXTBOX,
+                    "Weather",
+                    25, 2, @intCast(df.SCREENHEIGHT-14), @intCast(df.SCREENWIDTH-28),
+                    null, win, textBoxProc,
+                df.SHADOW     |
+                df.HASBORDER  |
+                df.MULTILINE,
+                    .{});
+    if (textbox) |box| {
+        const txt =
+            \\
+            \\ Choose location on the right for weather information
+            ;
+        _ = box.sendTextMessage(df.SETTEXT, txt);
+        _ = box.sendMessage(df.SHOW_WINDOW, mp.q.none);
+    }
+
+    const usageBox = mp.Window.create(mp.CLASS.TEXT,
+                    "Usage",
+                    2, 18, 9, @intCast(df.SCREENWIDTH-4),
+                    null, win, usageBoxProc,
+                df.SHADOW     |
+                df.HASBORDER  |
+                df.MULTILINE,
+                    .{});
+    const text =
+        \\
+        \\ Ctrl+C to quit, or double-click top-left corner to close.
+        \\
+        \\ Please wait a few seconds for retriving information through internet.
+        \\ Network activity blocks user interface in this single-thread application.
+        \\
+        \\ Data from wttr.in
+        ;
+    _ = usageBox.sendTextMessage(df.SETTEXT, text);
+    _ = usageBox.sendMessage(df.SHOW_WINDOW, mp.q.none);
+
+    const listbox = mp.Window.create(mp.CLASS.LISTBOX,
+                    "Locations",
+                    2, 2, @intCast(df.SCREENHEIGHT-14), 21,
+                    null, win, listBoxProc,
+                df.SHADOW     |
+                df.HASBORDER,
+                    .{});
+    _ = listbox.sendTextMessage(df.ADDTEXT, "Current Place");
+    _ = listbox.sendTextMessage(df.ADDTEXT, "New_York");
+    _ = listbox.sendTextMessage(df.ADDTEXT, "San_Francisco");
+    _ = listbox.sendTextMessage(df.ADDTEXT, "Tokyo");
+    _ = listbox.sendTextMessage(df.ADDTEXT, "Singapore");
+    _ = listbox.sendTextMessage(df.ADDTEXT, "Dubai");
+    _ = listbox.sendTextMessage(df.ADDTEXT, "Cairo");
+    _ = listbox.sendTextMessage(df.ADDTEXT, "Paris");
+    _ = listbox.sendMessage(df.LB_SETSELECTION, .{.select =.{0, 0}});
+    _ = listbox.sendMessage(df.SHOW_WINDOW, mp.q.none);
 
     while (mp.q.dispatch_message()) {
     }
+}
+
+fn WeatherProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
+    switch(msg) {
+        else => {
+        }
+    }
+    return mp.DefaultWndProc(win, msg, params);
+}
+
+fn textBoxProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
+    switch (msg) {
+        else => {
+        }
+    }
+    return mp.DefaultWndProc(win, msg, params);
+}
+
+fn showWeather(location:?[]const u8) void {
+    if (textbox) |win| {
+        if (getWeather(location)) |output| {
+            _ = win.sendTextMessage(df.SETTEXT, output);
+            _ = win.sendMessage(df.SHOW_WINDOW, mp.q.none);
+        } else |_| {
+        }
+    }
+}
+
+fn listBoxProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
+    switch (msg) {
+        df.LB_SELECTION => {
+            const rtn = mp.DefaultWndProc(win, msg, params);
+            var sel:?usize = null;
+            var buf = [_]u8{0}**64;
+            _ = win.sendMessage(df.LB_CURRENTSELECTION, .{.usize_addr=&sel});
+            if (sel) |s| {
+                if (s == 0) {
+                    showWeather(null);
+                } else {
+                    _ = win.sendMessage(df.LB_GETTEXT, .{.get_text=.{&buf, s}});
+                    if (std.mem.indexOfScalar(u8, &buf, 0)) |pos| {
+                        showWeather(buf[0..pos]);
+                    } else {
+                    }
+                }
+            }
+            return rtn;
+        },
+        else => {
+        }
+    }
+    return mp.DefaultWndProc(win, msg, params);
+}
+
+fn usageBoxProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
+    switch (msg) {
+        else => {
+        }
+    }
+    return mp.DefaultWndProc(win, msg, params);
 }
 
 fn getWeather(location:?[]const u8) ![:0]const u8 {
@@ -40,9 +152,6 @@ fn getWeather(location:?[]const u8) ![:0]const u8 {
         var buf = [_]u8{0}**80;
         const s = try std.fmt.bufPrint(&buf, "http://wttr.in/{s}?0AdT", .{loc});
         uri = try std.Uri.parse(s);
-        if (textbox) |win| {
-            _ = win.sendTextMessage(df.SETTEXT, s);
-        }
     } else {
     }
 
@@ -98,98 +207,6 @@ fn getWeather(location:?[]const u8) ![:0]const u8 {
     } else |_| {
     }
     return "Not Found";
-}
-
-fn WeatherProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
-    switch(msg) {
-        df.CREATE_WINDOW => {
-            const rtn = mp.DefaultWndProc(win, msg, params);
-            textbox = mp.Window.create(mp.CLASS.TEXTBOX,
-                    "Weather",
-                    25, 2, @intCast(df.SCREENHEIGHT-4), @intCast(df.SCREENWIDTH-28),
-                    null, win, textBoxProc,
-                df.SHADOW     |
-                df.HASBORDER  |
-                df.MULTILINE,
-                    .{});
-            _ = textbox.?.sendMessage(df.SHOW_WINDOW, mp.q.none);
-            listbox = mp.Window.create(mp.CLASS.LISTBOX,
-                    "Locations",
-                    2, 2, @intCast(df.SCREENHEIGHT-4), 21,
-                    null, win, listBoxProc,
-                df.SHADOW     |
-                df.HASBORDER,
-                    .{});
-            _ = listbox.?.sendMessage(df.SHOW_WINDOW, mp.q.none);
-
-            _ = listbox.?.sendMessage(df.SETFOCUS, .{.yes=true});
-            return rtn;
-        },
-//        df.COMMAND => {
-//        },
-        else => {
-        }
-    }
-    return mp.DefaultWndProc(win, msg, params);
-}
-
-fn showWeather(location:?[]const u8) void {
-    if (textbox) |win| {
-        if (getWeather(location)) |output| {
-            _ = win.sendTextMessage(df.SETTEXT, output);
-            _ = win.sendMessage(df.SHOW_WINDOW, mp.q.none);
-        } else |_| {
-        }
-    }
-}
-
-fn textBoxProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
-    switch (msg) {
-//        df.CREATE_WINDOW => {
-//            const rtn = mp.DefaultWndProc(win, msg, params);
-//            return rtn;
-//        },
-        else => {
-        }
-    }
-    return mp.DefaultWndProc(win, msg, params);
-}
-
-fn listBoxProc(win:*mp.Window, msg: df.MESSAGE, params:mp.q.Params) bool {
-    switch (msg) {
-        df.CREATE_WINDOW => {
-            const rtn = mp.DefaultWndProc(win, msg, params);
-            _ = mp.DefaultWndProc(win, msg, params);
-            _ = win.sendTextMessage(df.ADDTEXT, "Current Place");
-            _ = win.sendTextMessage(df.ADDTEXT, "New_York");
-            _ = win.sendTextMessage(df.ADDTEXT, "Paris");
-            _ = win.sendTextMessage(df.ADDTEXT, "Tokyo");
-            _ = win.sendMessage(df.LB_SETSELECTION, .{.select =.{0, 0}});
-            _ = win.sendMessage(df.SHOW_WINDOW, mp.q.none);
-            showWeather(null);
-            return rtn;
-        },
-        df.LB_SELECTION => {
-            const rtn = mp.DefaultWndProc(win, msg, params);
-            var sel:?usize = null;
-            var buf = [_]u8{0}**64;
-            _ = win.sendMessage(df.LB_CURRENTSELECTION, .{.usize_addr=&sel});
-            if (sel) |s| {
-                if (s == 0) {
-                    showWeather(null);
-                }
-                _ = win.sendMessage(df.LB_GETTEXT, .{.get_text=.{&buf, s}});
-                if (std.mem.indexOfScalar(u8, &buf, 0)) |pos| {
-                    showWeather(buf[0..pos]);
-                } else {
-                }
-            }
-            return rtn;
-        },
-        else => {
-        }
-    }
-    return mp.DefaultWndProc(win, msg, params);
 }
 
 const std = @import("std");

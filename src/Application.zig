@@ -42,7 +42,6 @@ fn CreateWindowMsg(win: *Window) bool {
     ApplicationWindow = win;
     ScreenHeight = df.SCREENHEIGHT;
 
-    // INCLUDE_WINDOWOPTIONS
     if (cfg.config.Border) {
         DialogBox.SetCheckBox(&Dialogs.Display, .ID_BORDER);
     }

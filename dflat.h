@@ -2,26 +2,6 @@
 #ifndef DFLAT_H
 #define DFLAT_H
 
-#define INCLUDE_MULTI_WINDOWS
-
-#ifndef BUILD_SMALL_DFLAT
-#define INCLUDE_HELP
-#define INCLUDE_FILEOPENSAVE
-#define INCLUDE_EDITMENU
-#define INCLUDE_WINDOWMENU
-#define INCLUDE_WINDOWOPTIONS
-#define INCLUDE_SHELLDOS
-#define INCLUDE_PICTUREBOX
-#endif
-
-#ifdef BUILD_FULL_DFLAT
-#define INCLUDE_LOGGING
-#define INCLUDE_MINIMIZE
-#define INCLUDE_MAXIMIZE
-#define INCLUDE_RESTORE
-#define INCLUDE_EXTENDEDSELECTIONS
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
