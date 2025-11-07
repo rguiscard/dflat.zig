@@ -20,6 +20,7 @@ const Colors = @import("Colors.zig");
 const cfg = @import("Config.zig");
 const console = @import("Console.zig");
 const Rect = @import("Rect.zig");
+const shell = @import("Shell.zig");
 
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
@@ -694,7 +695,10 @@ fn ShellDOS(win:*Window) void {
     _ = q.SendMessage(null, df.HIDE_MOUSE, q.none);
     _ = df.fflush(df.stdout);
     df.tty_restore();
-    _ = df.runshell();
+//    _ = df.runshell();
+    if (shell.run()) |_| {
+    } else |_| {
+    }
     df.tty_enable_unikey();
 
     if (df.SCREENHEIGHT != cfg.config.ScreenLines)
