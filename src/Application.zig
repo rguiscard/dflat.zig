@@ -695,7 +695,6 @@ fn ShellDOS(win:*Window) void {
     _ = q.SendMessage(null, df.HIDE_MOUSE, q.none);
     _ = df.fflush(df.stdout);
     df.tty_restore();
-//    _ = df.runshell();
     if (shell.run()) |_| {
     } else |_| {
     }

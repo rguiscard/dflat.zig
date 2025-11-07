@@ -22,10 +22,6 @@
 
 extern char **Argv;
 
-void *DFcalloc(size_t, size_t);
-void *DFmalloc(size_t);
-void *DFrealloc(void *, size_t);
-
 typedef enum {FALSE, TRUE} BOOL;
 
 #define OFF FALSE

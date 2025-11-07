@@ -55,7 +55,7 @@ pub fn build(b: *std.Build) void {
     lib_mod.addCSourceFiles(.{ .files = &.{
             "keys.c",
             "config.c",
-            "dfalloc.c",
+//            "dfalloc.c",
             "textbox.c",
             "editbox.c",
 
@@ -75,7 +75,6 @@ pub fn build(b: *std.Build) void {
             "unikey.c",
             "tty.c",
             "tty-cp437.c",
-            "runshell.c",
         },
         .flags = &flags,
     });
