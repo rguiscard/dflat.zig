@@ -13,6 +13,7 @@ const popdown = @import("PopDown.zig");
 const video = @import("Video.zig");
 const console = @import("Console.zig");
 const colors = @import("Colors.zig");
+const r = colors;
 
 // positions in menu bar & shortcut key value
 var menupos = [_]struct{x1:isize, x2:isize, sc:u8} {.{.x1=-1, .x2=-1, .sc=0}}**10;
@@ -48,7 +49,7 @@ fn BuildMenuMsg(win:*Window, p1:*menus.MBAR,) void {
                 if (m.Title) |title| {
                     if (title.len+3 > buf.items.len+offset)
                         break; // longer than buffer size. should compare to screenwidth ?
-                    const len = popdown.CopyCommand(@constCast(b[0..]), title, false, win.WindowColors [df.STD_COLOR] [df.BG]);
+                    const len = popdown.CopyCommand(@constCast(b[0..]), title, false, win.WindowColors [r.STD_COLOR] [r.BG]);
                     while(offset > buf.len()) {
                         if (buf.insert(' ')) {} else |_| {}
                     }

@@ -10,6 +10,7 @@ const normal = @import("Normal.zig");
 const radio = @import("RadioButton.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
+const r = @import("Colors.zig");
 const CLASS = @import("Classes.zig").CLASS;
 const k = CLASS; // abbreviation
 const GapBuffer = @import("GapBuffer.zig");
@@ -216,14 +217,14 @@ fn FixColors(win:*Window) void {
             if ((ct.*.Class != k.SPINBUTTON) and (ct.*.Class != k.COMBOBOX)) {
                 if ((ct.*.Class != k.EDITBOX) and (ct.*.Class != k.LISTBOX)) {
                     const pwin = win.getParent();
-                    win.WindowColors[df.FRAME_COLOR][df.FG] =
-                                            pwin.WindowColors[df.FRAME_COLOR][df.FG];
-                    win.WindowColors[df.FRAME_COLOR][df.BG] =
-                                            pwin.WindowColors[df.FRAME_COLOR][df.BG];
-                    win.WindowColors[df.STD_COLOR][df.FG] =
-                                            pwin.WindowColors[df.STD_COLOR][df.FG];
-                    win.WindowColors[df.STD_COLOR][df.BG] =
-                                            pwin.WindowColors[df.STD_COLOR][df.BG];
+                    win.WindowColors[r.FRAME_COLOR][r.FG] =
+                                            pwin.WindowColors[r.FRAME_COLOR][r.FG];
+                    win.WindowColors[r.FRAME_COLOR][r.BG] =
+                                            pwin.WindowColors[r.FRAME_COLOR][r.BG];
+                    win.WindowColors[r.STD_COLOR][r.FG] =
+                                            pwin.WindowColors[r.STD_COLOR][r.FG];
+                    win.WindowColors[r.STD_COLOR][r.BG] =
+                                            pwin.WindowColors[r.STD_COLOR][r.BG];
                 }
             }
         }

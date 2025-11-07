@@ -32,8 +32,8 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?Rect) void {
                 var start:usize = 0;
                 if (ct.*.setting == df.OFF) {
                   txt[0] = df.CHANGECOLOR;
-                  txt[1] = win.WindowColors[df.HILITE_COLOR][df.FG] | 0x80;
-                  txt[2] = win.WindowColors[df.STD_COLOR][df.BG] | 0x80;
+                  txt[1] = win.WindowColors[r.HILITE_COLOR][r.FG] | 0x80;
+                  txt[2] = win.WindowColors[r.STD_COLOR][r.BG] | 0x80;
                   start = 3;
                 }
                 _ = popdown.CopyCommand(txt[start..],itext, (ct.*.setting == df.OFF), r.WndBackground(win));

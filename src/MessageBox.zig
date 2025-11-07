@@ -90,10 +90,10 @@ pub fn MomentaryMessage(msg: [:0]const u8) *Window {
 
     _ = win.sendTextMessage(df.SETTEXT, msg);
     if (cfg.config.mono == 0) {
-        win.WindowColors[df.STD_COLOR][df.FG] = r.WHITE;
-        win.WindowColors[df.STD_COLOR][df.BG] = r.GREEN;
-        win.WindowColors[df.FRAME_COLOR][df.FG] = r.WHITE;
-        win.WindowColors[df.FRAME_COLOR][df.BG] = r.GREEN;
+        win.WindowColors[r.STD_COLOR][r.FG] = r.WHITE;
+        win.WindowColors[r.STD_COLOR][r.BG] = r.GREEN;
+        win.WindowColors[r.FRAME_COLOR][r.FG] = r.WHITE;
+        win.WindowColors[r.FRAME_COLOR][r.BG] = r.GREEN;
     }
     _ = win.sendMessage(df.SHOW_WINDOW, q.none);
     return win;

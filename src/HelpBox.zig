@@ -8,6 +8,7 @@ const WndProc = @import("WndProc.zig");
 const q = @import("Message.zig");
 const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
+const r = @import("Colors.zig");
 const lists = @import("Lists.zig");
 const normal = @import("Normal.zig");
 
@@ -83,9 +84,9 @@ pub fn ReadHelp(win:*Window) void {
                         pos = idx;
                         hline[pos] = df.CHANGECOLOR;
                         pos += 1;
-                        hline[pos] = win.WindowColors[df.HILITE_COLOR][df.FG];
+                        hline[pos] = win.WindowColors[r.HILITE_COLOR][r.FG];
                         pos += 1;
-                        hline[pos] = win.WindowColors[df.HILITE_COLOR][df.BG];
+                        hline[pos] = win.WindowColors[r.HILITE_COLOR][r.BG];
                         pos += 1;
                         const begin = pos;
                         if (std.mem.indexOfScalarPos(u8, &hline, pos, ']')) |end| {
@@ -278,11 +279,11 @@ fn PaintMsg(win:*Window, params:q.Params) bool {
         const pwin = win.getParent();
         var pos:usize = win.TextPointers[word.*.lineno];
         pos += @intCast(word.*.off1);
-        win.text[pos+1] = pwin.WindowColors[df.SELECT_COLOR][df.FG];
-        win.text[pos+2] = pwin.WindowColors[df.SELECT_COLOR][df.BG];
+        win.text[pos+1] = pwin.WindowColors[r.SELECT_COLOR][r.FG];
+        win.text[pos+2] = pwin.WindowColors[r.SELECT_COLOR][r.BG];
         const rtn = root.DefaultWndProc(win, df.PAINT, params);
-        win.text[pos+1] = pwin.WindowColors[df.HILITE_COLOR][df.FG];
-        win.text[pos+2] = pwin.WindowColors[df.HILITE_COLOR][df.BG];
+        win.text[pos+1] = pwin.WindowColors[r.HILITE_COLOR][r.FG];
+        win.text[pos+2] = pwin.WindowColors[r.HILITE_COLOR][r.BG];
         return rtn;
     }
     return root.DefaultWndProc(win, df.PAINT, params);

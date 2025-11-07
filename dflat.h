@@ -43,7 +43,6 @@ typedef enum {FALSE, TRUE} BOOL;
 
 #include "classes.h"
 #include "system.h"
-#include "config.h"
 #include "rect.h"
 #include "keys.h"
 #include "helpbox.h"

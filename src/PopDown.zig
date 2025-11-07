@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const Window = @import("Window.zig");
 const q = @import("Message.zig");
 const k = @import("Classes.zig").CLASS;
+const r = @import("Colors.zig");
 const Rect = @import("Rect.zig");
 const helpbox = @import("HelpBox.zig");
 const menus = @import("Menus.zig");
@@ -100,8 +101,8 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
         if (pd1.*.Attrib.INACTIVE) {
             // ------ inactive menu selection -----
             buf[0] = df.CHANGECOLOR;
-            buf[1] = win.WindowColors [df.HILITE_COLOR] [df.FG]|0x80;
-            buf[2] = win.WindowColors [df.STD_COLOR] [df.BG]|0x80;
+            buf[1] = win.WindowColors [r.HILITE_COLOR] [r.FG]|0x80;
+            buf[2] = win.WindowColors [r.STD_COLOR] [r.BG]|0x80;
             idx += 3;
         }
         buf[idx] = ' ';
@@ -116,7 +117,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
 
         var len=CopyCommand(buf[idx..], pd1.*.SelectionTitle.?,
                  pd1.*.Attrib.INACTIVE,
-                 win.WindowColors [df.STD_COLOR] [df.BG]);
+                 win.WindowColors [r.STD_COLOR] [r.BG]);
         idx += len;
 
         if (pd1.*.Accelerator>0) {
@@ -479,7 +480,7 @@ pub fn CopyCommand(dest:[]u8, src:[]const u8, skipcolor:bool, bg:c_int) usize {
         }
         if (change and !skipcolor) {
             dest[idx]   = df.CHANGECOLOR;
-            dest[idx+1] = cfg.config.clr[pmi] [df.HILITE_COLOR] [df.BG] | 0x80;
+            dest[idx+1] = cfg.config.clr[pmi] [r.HILITE_COLOR] [r.BG] | 0x80;
             dest[idx+2] = @intCast(bg | 0x80);
             dest[idx+3] = chr;
             dest[idx+4] = df.RESETCOLOR;
