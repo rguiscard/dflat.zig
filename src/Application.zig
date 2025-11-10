@@ -22,6 +22,7 @@ const console = @import("Console.zig");
 const Rect = @import("Rect.zig");
 const shell = @import("Shell.zig");
 
+pub var DFlatApplication:[]const u8 = "DFlatApplication";
 pub var ApplicationWindow:?*Window = null;
 var ScreenHeight:c_int = 0;
 var WindowSel:usize = 0; // use optional if it behaves weird
@@ -169,7 +170,7 @@ fn CommandMsg(win:*Window, p1:c, p2:usize) void {
             q.PostMessage(win, df.CLOSE_WINDOW, .{.yes=false});
         },
         .ID_HELP => {
-            _ = helpbox.DisplayHelp(win, std.mem.span(df.DFlatApplication));
+            _ = helpbox.DisplayHelp(win, DFlatApplication);
         },
         .ID_HELPHELP => {
             const help = "HelpHelp";

@@ -25,7 +25,9 @@ FILE *OpenHelpFile(const char *fn, const char *md)
     char helpname[MAXPATH];
 
     /* -------- get the name of the help file ---------- */
-    BuildFileName(helpname, fn, ".hlp");
+    strcpy(helpname, fn);
+    strcat(helpname, ".hlp");
+//    BuildFileName(helpname, fn, ".hlp");
     if ((fi = fopen(helpname, md)) == NULL)
         return NULL;
 	if (HelpTree == NULL)	{

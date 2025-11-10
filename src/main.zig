@@ -2,13 +2,15 @@
 //! you are building an executable. If you are making a library, the convention
 //! is to delete this file and start with root.zig instead.
 
-pub const DFlatApplication = "memopad";
+//pub const DFlatApplication = "memopad";
 const sUntitled:[:0]const u8 = "Untitled";
 var wndpos:usize = 0;
 
 pub fn main() !void {
 //    const argc: c_int = @intCast(std.os.argv.len);
-    const argv = std.os.argv.ptr; // already C-compatible
+//    const argv = std.os.argv.ptr; // already C-compatible
+
+    mp.app.DFlatApplication = "memopad";
 
     // Force zig to load, otherwise, it is lazy.
     _ = mp.video;
@@ -17,7 +19,7 @@ pub fn main() !void {
         return;
     }
 
-    df.Argv = @ptrCast(argv);
+//    df.Argv = @ptrCast(argv);
 
     if (mp.cfg.Load() == false) {
         mp.cfg.config.ScreenLines = @intCast(df.SCREENHEIGHT);
@@ -36,7 +38,7 @@ pub fn main() !void {
                         df.HASSTATUSBAR,
                         mp.Window.CENTER_SIZE);
 
-    df.LoadHelpFile(@constCast(DFlatApplication.ptr));
+    df.LoadHelpFile(@constCast(mp.app.DFlatApplication.ptr));
     _ = win.sendMessage(df.SETFOCUS, .{.yes=true});
 
 //    while (argc > 1)    {

@@ -2,9 +2,10 @@
 
 #include "dflat.h"
 
-char DFlatApplication[] = "memopad";
-char **Argv;
+//char DFlatApplication[] = "memopad";
+//char **Argv;
 
+#if 0
 void BuildFileName(char *path, const char *fn, const char *ext)
 {
     char *cp;
@@ -18,3 +19,4 @@ void BuildFileName(char *path, const char *fn, const char *ext)
 	strcpy(cp, fn);
 	strcat(cp, ext);
 }
+#endif

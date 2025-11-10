@@ -3,13 +3,13 @@ pub const DFlatApplication = "memopad";
 var textbox:?*mp.Window = null;
 
 pub fn main() !void {
-    const argv = std.os.argv.ptr; // already C-compatible
+//    const argv = std.os.argv.ptr; // already C-compatible
 
     if (mp.q.init_messages() == false) {
         return;
     }
 
-    df.Argv = @ptrCast(argv);
+//    df.Argv = @ptrCast(argv);
 
     const win = mp.Window.create(mp.CLASS.APPLICATION,
                         "Weather",
