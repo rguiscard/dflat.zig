@@ -9,6 +9,9 @@ const sTab:u16 = 0x0C + 0x80;
 
 pub var SCREENWIDTH:usize = 80;
 pub var SCREENHEIGHT:usize = 24;
+pub var ClipString:usize = 0;
+pub var foreground:u8 = 0; // current video colors
+pub var background:u8 = 0;
 
 // assume video_address is 16 bites (2 bytes)
 fn vad(x:usize, y:usize) usize {
@@ -121,11 +124,18 @@ pub fn CharInView(win:*Window, x:usize, y:usize) bool {
     return (x1 < SCREENWIDTH and y1 < SCREENHEIGHT);
 }
 
+pub fn clr(fg:u8, bg:u8) u16 {
+    const fg16:u16 = @intCast(fg);
+    const bg16:u16 = @intCast(bg);
+    return (fg16 | (bg16 << 4));
+}
+
 // -------- write a character to a window -------
 pub fn wputch(win:*Window, chr:u16, x:usize, y:usize) void {
     if (CharInView(win, x, y)) {
         // #define clr(fg,bg) ((fg)|((bg)<<4))
-        const ch:u16 = @intCast((chr & 255) | ((df.foreground | (df.background << 4)) << 8));
+        //const ch:u16 = @intCast((chr & 255) | ((df.foreground | (df.background << 4)) << 8));
+        const ch:u16 = (chr & 255) | (clr(foreground, background) << 8);
         const xc:usize = win.GetLeft()+x;
         const yc:usize = win.GetTop()+y;
         mouse.hide_mousecursor();
@@ -147,27 +157,27 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
     var idx:usize = 0;
     var ln = [_]u16{0}**df.MAXCOLS;
     var ldx:usize = 0;
-    const fg = df.foreground;
-    const bg = df.background;
+    const fg = foreground;
+    const bg = background;
     if (x1 < SCREENWIDTH and y1 < SCREENHEIGHT and win.isVisible()) {
         while ((idx < s.len) and (s[idx] != 0)){
             if (s[idx] == df.CHANGECOLOR) {
-                df.foreground = s[idx+1] & 0x7f;
-                df.background = s[idx+2] & 0x7f;
+                foreground = s[idx+1] & 0x7f;
+                background = s[idx+2] & 0x7f;
                 idx += 3;
                 continue;
             }
             if (s[idx] == df.RESETCOLOR) {
-                df.foreground = fg & 0x7f;
-                df.background = bg & 0x7f;
+                foreground = fg & 0x7f;
+                background = bg & 0x7f;
                 idx += 1;
                 continue;
             }
             if (s[idx] == ('\t' | 0x80) or s[idx] == (sTab | 0x80)) {
-                ln[ldx] =  @intCast(' ' | ((df.foreground | (df.background << 4)) << 8));
+                ln[ldx] =  @as(u16, @intCast(' ')) | (clr(foreground, background) << 8);
             } else {
-                ln[ldx] = @intCast((s[idx] & 255) | ((df.foreground | (df.background << 4)) << 8));
-                if (df.ClipString>0) {
+                ln[ldx] = @as(u16, @intCast((s[idx] & 255))) | (clr(foreground, background) << 8);
+                if (ClipString>0) {
                     if (CharInView(win, xx, y)  == false) {
                         const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
                         const c:[*]u16 = va16_ptr+vad(x2,y1);
@@ -180,14 +190,14 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
             xx += 1;
             x2 += 1;
         }
-        df.foreground = fg;
-        df.background = bg;
+        foreground = fg;
+        background = bg;
         var len = ldx;
         if (x1+len > SCREENWIDTH)
             len = SCREENWIDTH-x1;
 
         var off:usize = 0;
-        if (df.ClipString == 0 and win.TestAttribute(df.NOCLIP) == false) {
+        if (ClipString == 0 and win.TestAttribute(df.NOCLIP) == false) {
             // -- clip the line to within ancestor windows --
             var rc = win.WindowRect();
             var nwnd = win.parent;

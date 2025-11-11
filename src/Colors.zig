@@ -3,6 +3,7 @@ const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Classes = @import("Classes.zig");
 const Window = @import("Window.zig");
+const video = @import("Video.zig");
 
 const CLASSCOUNT:usize = @intFromEnum(Classes.CLASS.CLASSCOUNT);
 
@@ -516,11 +517,11 @@ pub fn WindowHighlightColor(win:*Window, fg:u8, bg:u8) void {
 
 // --------- set window colors ---------
 pub fn SetStandardColor(win:*Window) void {
-    df.foreground = WndForeground(win);
-    df.background = WndBackground(win);
+    video.foreground = WndForeground(win);
+    video.background = WndBackground(win);
 }
 
 pub fn SetReverseColor(win:*Window) void {
-    df.foreground = SelectForeground(win);
-    df.background = SelectBackground(win);
+    video.foreground = SelectForeground(win);
+    video.background = SelectBackground(win);
 }

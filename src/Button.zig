@@ -18,8 +18,8 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?Rect) void {
     if (win.isVisible()) {
         if (win.TestAttribute(df.SHADOW) and (cfg.config.mono == 0)) {
             // -------- draw the button's shadow -------
-            df.background = r.WndBackground(win.getParent());
-            df.foreground = r.BLACK;
+            video.background = r.WndBackground(win.getParent());
+            video.foreground = r.BLACK;
             for(1..@intCast(win.WindowWidth()+1)) |x| {
                 video.wputch(win, 223, x, 1);
             }
@@ -50,8 +50,8 @@ fn PaintMsg(win: *Window, ct: *Dialogs.CTLWINDOW, rc: ?Rect) void {
 fn LeftButtonMsg(win: *Window, msg: df.MESSAGE, ct: *Dialogs.CTLWINDOW) void {
     if (cfg.config.mono == 0) {
         // --------- draw a pushed button --------
-        df.background = r.WndBackground(win.getParent());
-        df.foreground = r.WndBackground(win);
+        video.background = r.WndBackground(win.getParent());
+        video.foreground = r.WndBackground(win);
         video.wputch(win, ' ', 0, 0);
         for (0..@intCast(win.WindowWidth())) |x| {
             video.wputch(win, 220, x+1, 0);

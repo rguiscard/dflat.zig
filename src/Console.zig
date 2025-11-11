@@ -129,7 +129,9 @@ fn scroll_video(up:c_int, n:c_int, at:c_int, y1:c_int, x1:c_int, y2:c_int, x2:c_
 pub fn scroll_window(win:*Window, rc:df.RECT, d:c_int) void {
     if (rc.tp != rc.bt) {
         mouse.hide_mousecursor();
-        scroll_video(d, 1, colors.WndForeground(win) | (colors.WndBackground(win) << 4),
+//        scroll_video(d, 1, colors.WndForeground(win) | (colors.WndBackground(win) << 4),
+//                     rc.tp, rc.lf, rc.bt, rc.rt);
+        scroll_video(d, 1, video.clr(colors.WndForeground(win), colors.WndBackground(win)),
                      rc.tp, rc.lf, rc.bt, rc.rt);
         mouse.show_mousecursor();
     }

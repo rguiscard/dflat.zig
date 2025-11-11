@@ -32,6 +32,7 @@ Please note that it fetches information from wttr.in, thus, may have delays in d
 - SaveDialog return truncated filename by 1.
 - Help window title is not draw to the right most position.
 - Open file with double click work, but not using "Open" button.
+- Horizontal scroll seems off.
 --------
 
 # D-Flat: Text User Interface for UNIX, ELKS and Cosmopolitan

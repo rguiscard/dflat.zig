@@ -5,10 +5,10 @@
 
 //int SCREENWIDTH = 80;
 //int SCREENHEIGHT = 24;
-BOOL ClipString;
+//BOOL ClipString;
 
 char *video_address;
-int foreground, background;   /* current video colors */
+//int foreground, background;   /* current video colors */
 int cx, cy = -1; // from console-unix.c
 
 void convert_screen_to_ansi()

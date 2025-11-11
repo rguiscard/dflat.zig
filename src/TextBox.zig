@@ -241,8 +241,8 @@ fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
     if (VSliding) {
         // ---- dragging the vertical scroll box ---
         if (my-1 != win.VScrollBox) {
-            df.foreground = colors.FrameForeground(win);
-            df.background = colors.FrameBackground(win);
+            video.foreground = colors.FrameForeground(win);
+            video.background = colors.FrameBackground(win);
             video.wputch(win, df.SCROLLBARCHAR, win.WindowWidth()-1, win.VScrollBox+1);
             win.VScrollBox = @intCast(my-1);
             video.wputch(win, df.SCROLLBOXCHAR, win.WindowWidth()-1, my);
@@ -252,8 +252,8 @@ fn MouseMovedMsg(win:*Window, x:usize, y:usize) bool {
     if (HSliding) {
         // --- dragging the horizontal scroll box ---
         if (mx-1 != win.HScrollBox) {
-            df.foreground = colors.FrameForeground(win);
-            df.background = colors.FrameBackground(win);
+            video.foreground = colors.FrameForeground(win);
+            video.background = colors.FrameBackground(win);
             video.wputch(win, df.SCROLLBARCHAR, win.HScrollBox+1, win.WindowHeight()-1);
             win.HScrollBox = @intCast(mx-1);
             video.wputch(win, df.SCROLLBOXCHAR, mx, win.WindowHeight()-1);
@@ -420,7 +420,7 @@ fn PaintMsg(win:*Window,p1:?Rect,p2:bool) void {
     const rcc = win.AdjustRectangle(rc);
 
     if ((p2 == false) and (win != Window.inFocus)) {
-        df.ClipString += 1;
+        video.ClipString += 1;
     }
 
     // ----- blank line for padding -----
@@ -470,7 +470,7 @@ fn PaintMsg(win:*Window,p1:?Rect,p2:bool) void {
         }
     }
     if ((p2 == false) and (win != Window.inFocus)) {
-        df.ClipString -= 1;
+        video.ClipString -|= 1;
     }
 }
 
@@ -801,8 +801,8 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
 //                lp[blkbeg] = CHANGECOLOR;
                 // ----- insert the color tokens -----
                 colors.SetReverseColor(win);
-                buf[blkbeg+1] = @intCast(df.foreground | 0x80);
-                buf[blkbeg+2] = @intCast(df.background | 0x80);
+                buf[blkbeg+1] = video.foreground | 0x80;
+                buf[blkbeg+2] = video.background | 0x80;
                 lnlen += 4;
             }
         }
@@ -818,7 +818,7 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
             var loc:usize = 0;
             while(std.mem.indexOfScalarPos(u8, @constCast(&line), loc, df.CHANGECOLOR)) |l| {
                 loc = l+2;
-                line[loc] = @intCast(df.background | 0x80);
+                line[loc] = video.background | 0x80;
                 loc += 1;
             }
             if (line[0] == df.CHANGECOLOR) {
@@ -1024,8 +1024,8 @@ pub fn BuildTextPointers(win:*Window) void {
 }
 
 fn MoveScrollBox(win:*Window, vscrollbox:usize) void {
-    df.foreground = colors.FrameForeground(win);
-    df.background = colors.FrameBackground(win);
+    video.foreground = colors.FrameForeground(win);
+    video.background = colors.FrameBackground(win);
     video.wputch(win, df.SCROLLBARCHAR, win.WindowWidth()-1, win.VScrollBox+1);
     video.wputch(win, df.SCROLLBOXCHAR, win.WindowWidth()-1, vscrollbox+1);
     win.VScrollBox = vscrollbox;

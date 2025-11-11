@@ -110,7 +110,7 @@ fn PaintMsg(win:*Window) void {
                     colors.SetReverseColor(win);
 
                     if (std.mem.indexOfScalarPos(u8, text, @intCast(offset), df.CHANGECOLOR)) |idxx| {
-                        text[idxx+2] = @intCast(df.background | 0x80);
+                        text[idxx+2] = video.background | 0x80;
                     }
                     // ActiveSelection suggest how many shortcut symbol ahead
                     video.wputs(win, text[@intCast(offset)..], @intCast(offset-mbar.*.ActiveSelection*4), 0);
