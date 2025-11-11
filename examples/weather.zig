@@ -23,7 +23,7 @@ pub fn main() !void {
 
     textbox = mp.Window.create(mp.CLASS.TEXTBOX,
                     "Weather",
-                    25, 2, @intCast(df.SCREENHEIGHT-14), @intCast(df.SCREENWIDTH-28),
+                    25, 2, mp.video.SCREENHEIGHT-14, mp.video.SCREENWIDTH-28,
                     null, win, textBoxProc,
                 df.SHADOW     |
                 df.HASBORDER  |
@@ -40,7 +40,7 @@ pub fn main() !void {
 
     const usageBox = mp.Window.create(mp.CLASS.TEXT,
                     "Usage",
-                    2, 18, 9, @intCast(df.SCREENWIDTH-4),
+                    2, 18, 9, mp.video.SCREENWIDTH-4,
                     null, win, usageBoxProc,
                 df.SHADOW     |
                 df.HASBORDER  |
@@ -60,7 +60,7 @@ pub fn main() !void {
 
     const listbox = mp.Window.create(mp.CLASS.LISTBOX,
                     "Locations",
-                    2, 2, @intCast(df.SCREENHEIGHT-14), 21,
+                    2, 2, mp.video.SCREENHEIGHT-14, 21,
                     null, win, listBoxProc,
                 df.SHADOW     |
                 df.HASBORDER,

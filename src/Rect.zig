@@ -2,6 +2,7 @@ const std = @import("std");
 const df = @import("ImportC.zig").df;
 const root = @import("root.zig");
 const Window = @import("Window.zig");
+const video = @import("Video.zig");
 
 left:usize = 0,
 top:usize = 0,
@@ -75,8 +76,8 @@ pub fn InsideRect(x:usize, y:usize, r:TopLevelFields) bool {
 
 // ----- clip a rectangle to the parents of the window ----- 
 pub fn ClipRectangle(win:*Window, rc:TopLevelFields) TopLevelFields {
-    const sr:TopLevelFields = .{ .left = 0, .top = 0, .right = @intCast(df.SCREENWIDTH-1),
-                                                      .bottom = @intCast(df.SCREENHEIGHT-1)};
+    const sr:TopLevelFields = .{ .left = 0, .top = 0, .right = video.SCREENWIDTH-1,
+                                                      .bottom = video.SCREENHEIGHT-1};
     var rcc = rc;
     if (win.TestAttribute(df.NOCLIP) == false) {
         var pw = win.parent;

@@ -68,7 +68,7 @@ fn BuildMenuMsg(win:*Window, p1:*menus.MBAR,) void {
                 }
             }
             // FIXME: width is not accurate
-            while(buf.len() < df.SCREENWIDTH*2) {
+            while(buf.len() < video.SCREENWIDTH*2) {
                  if (buf.insert(' ')) {} else |_| {}
             }
 
@@ -487,7 +487,7 @@ pub fn MenuBarProc(win: *Window, msg: df.MESSAGE, params:q.Params) bool {
 
 // ------------- reset the MENUBAR --------------
 fn reset_menubar(win:*Window) void {
-    if (win.getGapBuffer(@intCast(df.SCREENWIDTH+5))) |_| {
+    if (win.getGapBuffer(video.SCREENWIDTH+5)) |_| {
         win.text = null;
         win.textlen = 0;
     }

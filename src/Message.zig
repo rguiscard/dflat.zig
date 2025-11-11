@@ -14,6 +14,8 @@ const cmd = @import("Commands.zig").Command;
 const menus = @import("Menus.zig");
 const console = @import("Console.zig");
 const mouse = @import("Mouse.zig");
+const events = @import("Events.zig");
+const video = @import("Video.zig");
 
 const MAXMESSAGES = 100;
 
@@ -131,12 +133,12 @@ pub fn init_messages() bool {
 
     _ = df.tty_init(df.MouseTracking|df.CatchISig|df.ExitLastLine|df.FullBuffer);
     if (df.tty_getsize(&cols, &rows) > 0) {
-        df.SCREENWIDTH = @min(cols, df.MAXCOLS-1);
-        df.SCREENHEIGHT = rows - 1;
+        video.SCREENWIDTH = @intCast(@min(cols, df.MAXCOLS-1));
+        video.SCREENHEIGHT = @intCast(rows - 1);
     }
 
     mouse.resetmouse();
-    mouse.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
+    mouse.set_mousetravel(0, video.SCREENWIDTH-1, 0, video.SCREENHEIGHT-1);
     console.savecursor();
     console.hidecursor();
 
@@ -322,19 +324,19 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
             // -------- mouse messages --------
             df.RESET_MOUSE => {
                 mouse.resetmouse();
-                mouse.set_mousetravel(0, df.SCREENWIDTH-1, 0, df.SCREENHEIGHT-1);
+                mouse.set_mousetravel(0, video.SCREENWIDTH-1, 0, video.SCREENHEIGHT-1);
             },
             df.MOUSE_INSTALLED => {
                 rrtn = mouse.mouse_installed();
             },
             df.MOUSE_TRAVEL => {
                 const p1_val:?Rect = params.area;
-                var rc:Rect = .{.left = 0, .top = 0, .right = @intCast(df.SCREENWIDTH-1),
-                                                     .bottom = @intCast(df.SCREENHEIGHT-1)};
+                var rc:Rect = .{.left = 0, .top = 0, .right = video.SCREENWIDTH-1,
+                                                     .bottom = video.SCREENHEIGHT-1};
                 if (p1_val) |area| {
                     rc = area;
                 }
-                mouse.set_mousetravel(@intCast(rc.left), @intCast(rc.right), @intCast(rc.top), @intCast(rc.bottom));
+                mouse.set_mousetravel(rc.left, rc.right, rc.top, rc.bottom);
             },
             df.SHOW_MOUSE => {
                 mouse.show_mousecursor();
@@ -345,7 +347,7 @@ pub fn ProcessMessage(win:?*Window, msg:df.MESSAGE, params: Params, rtn:bool) bo
             df.MOUSE_CURSOR => {
                 const x = params.position[0];
                 const y = params.position[1];
-                mouse.set_mouseposition(@intCast(x), @intCast(y));
+                mouse.set_mouseposition(x, y);
             },
             df.CURRENT_MOUSE_CURSOR => {
                 // df.get_mouseposition((int*)p1,(int*)p2); // do nothing in original code
@@ -479,7 +481,8 @@ fn MouseWindow(x:usize, y:usize) ?*Window {
 // ---- dispatch messages to the message proc function ----
 pub fn dispatch_message() bool {
     // -------- collect mouse and keyboard events -------
-    df.collect_events();
+//    df.collect_events();
+    events.collect();
 
     // --------- dequeue and process events --------
     while (EventQueueCtr > 0)  {

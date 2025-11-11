@@ -53,6 +53,11 @@ pub fn DefaultWndProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
     return BaseWndProc(klass, win, msg, params);
 }
 
+pub export fn insideScreen(mx:c_int, my:c_int) c_int {
+    return if (mx >= video.SCREENWIDTH or my >= video.SCREENHEIGHT-1) df.FALSE else df.TRUE;
+    
+}
+
 pub export fn add(a: i32, b: i32) i32 {
     return a + b;
 }

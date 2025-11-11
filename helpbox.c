@@ -50,7 +50,8 @@ static void *DFcalloc(size_t nitems, size_t size)
 	return rtn;
 }
 
-#define MAXHEIGHT (SCREENHEIGHT-10)
+//#define MAXHEIGHT (SCREENHEIGHT-10)
+#define MAXHEIGHT (24-10)
 #define MAXHELPKEYWORDS 50  /* --- maximum keywords in a window --- */
 #define MAXHELPSTACK 100
 

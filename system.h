@@ -33,12 +33,12 @@ void clearscreen(void);
 BOOL mouse_installed(void);
 int mousebuttons(void);
 void get_mouseposition(int *x, int *y);
-void set_mouseposition(int x, int y);
+//void set_mouseposition(int x, int y);
 void show_mousecursor(void);
 void hide_mousecursor(void);
 int button_releases(void);
 void resetmouse(void);
-void set_mousetravel(int, int, int, int);
+//void set_mousetravel(int, int, int, int);
 void waitformouse(void);
 /* ------------ timer macros -------------- */
 #define timed_out(timer)         (timer==0)

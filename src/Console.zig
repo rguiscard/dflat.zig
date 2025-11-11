@@ -4,6 +4,7 @@ const root = @import("root.zig");
 const colors = @import("Colors.zig");
 const Window = @import("Window.zig");
 const mouse = @import("Mouse.zig");
+const video = @import("Video.zig");
 
 //static int near cursorpos[MAXSAVES];
 //static int near cursorshape[MAXSAVES];
@@ -62,7 +63,7 @@ pub fn set_cursor_type(t:c_uint) void {
 fn clear_line(x1:c_int, x2:c_int, y:c_int, attr:c_int) void {
     const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
     for (@intCast(x1)..@intCast(x2+1)) |x| {
-        const offset:usize = @intCast(y * df.SCREENWIDTH + @as(c_int, @intCast(x)));
+        const offset:usize = @as(usize, @intCast(y)) * video.SCREENWIDTH + x;
         const c:[*]u16 = va16_ptr+offset;
         c[0] = @intCast(' ' | (attr << 8));
     }
@@ -74,7 +75,7 @@ fn clear_line(x1:c_int, x2:c_int, y:c_int, attr:c_int) void {
 
 // scroll video RAM up from line y1 up to and including line y2
 fn scrollup(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
-    const pitch = df.SCREENWIDTH * 2;
+    const pitch:c_int = @intCast(video.SCREENWIDTH * 2);
     const width = (x2 - x1 + 1) * 2;
 //    unsigned char *vid = video_address + y1 * pitch + x1 * 2;
     var y = y1;
@@ -92,7 +93,7 @@ fn scrollup(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
 
 // scroll video RAM down from line y1 up to and including line y2
 fn scrolldn(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
-    const pitch = df.SCREENWIDTH * 2;
+    const pitch:c_int = @intCast(video.SCREENWIDTH * 2);
     const width = (x2 - x1 + 1) * 2;
 //    var vid = y2 * pitch + x1 * 2;
     var y = y2;
@@ -109,7 +110,7 @@ fn scrolldn(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
 }
 
 fn scroll_video(up:c_int, n:c_int, at:c_int, y1:c_int, x1:c_int, y2:c_int, x2:c_int) void {
-    if (n == 0 or n >= df.SCREENHEIGHT) {
+    if (n == 0 or n >= video.SCREENHEIGHT) {
         clear_line(x1, x2, y1, at);
     } else if (y1 != y2) {
         var nn = n;

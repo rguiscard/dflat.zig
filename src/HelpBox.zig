@@ -11,6 +11,7 @@ const k = @import("Classes.zig").CLASS;
 const r = @import("Colors.zig");
 const lists = @import("Lists.zig");
 const normal = @import("Normal.zig");
+const video = @import("Video.zig");
 
 const MAXHELPKEYWORDS = 50; // --- maximum keywords in a window ---
 const MAXHELPSTACK = 100;
@@ -425,7 +426,7 @@ pub fn DisplayHelp(win:*Window, Help:[]const u8) bool {
 // ------- display a definition window --------- 
 // This one does not work properly from origin
 pub fn DisplayDefinition(win:*Window, def:[*c]u8) void { // should be private
-    const MAXHEIGHT = df.SCREENHEIGHT-10;
+    const MAXHEIGHT = video.SCREENHEIGHT-10;
     const HoldThisHelp = ThisHelp;
 
     var hwin:?*Window = win;
@@ -476,7 +477,7 @@ pub fn DisplayDefinition(win:*Window, def:[*c]u8) void { // should be private
 }
 
 fn BuildHelpBox(win:?*Window) void {
-    const MAXHEIGHT = df.SCREENHEIGHT-10;
+    const MAXHEIGHT = video.SCREENHEIGHT-10;
 
     if (ThisHelp) |help| {
         // -- seek to the first line of the help text --
@@ -560,8 +561,8 @@ pub fn SelectHelp(win:*Window, newhelp:[*c]df.helps, recall:bool) void {
             win.AddTitle(ttl);
         } // handle null title ?
         // --- reposition and resize the help window ---
-        Dialogs.HelpBox.dwnd.x = @divFloor(@as(usize, @intCast(df.SCREENWIDTH))-Dialogs.HelpBox.dwnd.w, 2);
-        Dialogs.HelpBox.dwnd.y = @divFloor(@as(usize, @intCast(df.SCREENHEIGHT))-Dialogs.HelpBox.dwnd.h, 2);
+        Dialogs.HelpBox.dwnd.x = @divFloor(video.SCREENWIDTH-Dialogs.HelpBox.dwnd.w, 2);
+        Dialogs.HelpBox.dwnd.y = @divFloor(video.SCREENHEIGHT-Dialogs.HelpBox.dwnd.h, 2);
         _ = win.sendMessage(df.MOVE, .{.position=.{Dialogs.HelpBox.dwnd.x,
                                                    Dialogs.HelpBox.dwnd.y}});
         _ = win.sendMessage(df.SIZE,
@@ -610,19 +611,19 @@ fn BestFit(win:*Window, dwnd:*Dialogs.DIALOGWINDOW) void {
     // --- compute above overlap ----
     const above:usize = OverLap(dwnd.*.h, win.GetTop());
     // --- compute below overlap ----
-    const below:usize = OverLap(win.GetBottom(), @as(usize, @intCast(df.SCREENHEIGHT))-dwnd.*.h);
+    const below:usize = OverLap(win.GetBottom(), video.SCREENHEIGHT-dwnd.*.h);
     // --- compute right overlap ----
-    const right:usize = OverLap(win.GetRight(), @as(usize, @intCast(df.SCREENWIDTH))-dwnd.*.w);
+    const right:usize = OverLap(win.GetRight(), video.SCREENWIDTH-dwnd.*.w);
     // --- compute left  overlap ----
     const left:usize = OverLap(dwnd.*.w, win.GetLeft());
 
     if (above < below) {
         dwnd.*.y = @max(0, win.GetTop()-dwnd.*.h-2);
     } else {
-        dwnd.*.y = @min(@as(usize, @intCast(df.SCREENHEIGHT))-dwnd.*.h, win.GetBottom()+2);
+        dwnd.*.y = @min(video.SCREENHEIGHT-dwnd.*.h, win.GetBottom()+2);
     }
     if (right < left) {
-        dwnd.*.x = @min(win.GetRight()+2, @as(usize, @intCast(df.SCREENWIDTH))-dwnd.*.w);
+        dwnd.*.x = @min(win.GetRight()+2, video.SCREENWIDTH-dwnd.*.w);
     } else {
         dwnd.*.x = @max(0, win.GetLeft()-dwnd.*.w-2);
     }

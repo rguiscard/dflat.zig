@@ -189,19 +189,19 @@ pub fn create(
         // ----- height, width = -1: fill the screen -------
         var ht = height;
         if (position.HEIGHT)
-            ht = @intCast(df.SCREENHEIGHT);
+            ht = video.SCREENHEIGHT;
         var wt = width;
         if (position.WIDTH)
-            wt = @intCast(df.SCREENWIDTH);
+            wt = video.SCREENWIDTH;
 
         // ----- coordinates -1, -1 = center the window ----
         if (position.LEFT) {
-            self.rc.left = @divFloor(@as(usize, @intCast(df.SCREENWIDTH))-wt, 2);
+            self.rc.left = @divFloor(video.SCREENWIDTH-wt, 2);
         } else {
             self.rc.left = left;
         }
         if (position.TOP) {
-            self.rc.top = @divFloor(@as(usize, @intCast(df.SCREENHEIGHT))-ht, 2);
+            self.rc.top = @divFloor(video.SCREENHEIGHT-ht, 2);
         } else {
             self.rc.top = top;
         }
@@ -816,8 +816,8 @@ pub fn WindowHeight(self: *TopLevelFields) usize {
     return self.ht;
 }
 
-pub fn SetWindowHeight(self: *TopLevelFields, height: isize) void {
-    self.ht = @intCast(height);
+pub fn SetWindowHeight(self: *TopLevelFields, height: usize) void {
+    self.ht = height;
 }
 
 pub fn WindowWidth(self: *TopLevelFields) usize {

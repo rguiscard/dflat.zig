@@ -3,8 +3,8 @@
 #include "dflat.h"
 #include <stdint.h>
 
-int SCREENWIDTH = 80;
-int SCREENHEIGHT = 24;
+//int SCREENWIDTH = 80;
+//int SCREENHEIGHT = 24;
 BOOL ClipString;
 
 char *video_address;

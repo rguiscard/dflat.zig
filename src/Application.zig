@@ -21,10 +21,11 @@ const cfg = @import("Config.zig");
 const console = @import("Console.zig");
 const Rect = @import("Rect.zig");
 const shell = @import("Shell.zig");
+const video = @import("Video.zig");
 
 pub var DFlatApplication:[]const u8 = "DFlatApplication";
 pub var ApplicationWindow:?*Window = null;
-var ScreenHeight:c_int = 0;
+var ScreenHeight:usize = 0;
 var WindowSel:usize = 0; // use optional if it behaves weird
 var oldFocus:?*Window = null;
 var Menus = [_][:0]u8{
@@ -42,7 +43,7 @@ var Menus = [_][:0]u8{
 // --------------- CREATE_WINDOW Message --------------
 fn CreateWindowMsg(win: *Window) bool {
     ApplicationWindow = win;
-    ScreenHeight = df.SCREENHEIGHT;
+    ScreenHeight = video.SCREENHEIGHT;
 
     if (cfg.config.Border) {
         DialogBox.SetCheckBox(&Dialogs.Display, .ID_BORDER);
@@ -63,11 +64,11 @@ fn CreateWindowMsg(win: *Window) bool {
     } else {
         radio.PushRadioButton(&Dialogs.Display, .ID_COLOR);
     }
-    if (df.SCREENHEIGHT != cfg.config.ScreenLines) {
-        SetScreenHeight(@intCast(cfg.config.ScreenLines));
+    if (video.SCREENHEIGHT != cfg.config.ScreenLines) {
+        SetScreenHeight(cfg.config.ScreenLines);
         if ((win.WindowHeight() == ScreenHeight) or
-                (df.SCREENHEIGHT-1 < win.GetBottom()))    {
-            win.SetWindowHeight(df.SCREENHEIGHT);
+                (video.SCREENHEIGHT-1 < win.GetBottom()))    {
+            win.SetWindowHeight(video.SCREENHEIGHT);
             win.SetBottom(win.GetTop()+win.WindowHeight()-1);
             win.RestoredRC = win.WindowRect();
         }
@@ -252,7 +253,7 @@ fn CloseWindowMsg(win:*Window) bool {
     q.PostMessage(null, df.STOP, q.none);
 
     const rtn = root.BaseWndProc(k.APPLICATION, win, df.CLOSE_WINDOW, .{.yes=false});
-    if (ScreenHeight != df.SCREENHEIGHT)
+    if (ScreenHeight != video.SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
 
     df.UnLoadHelpFile();
@@ -558,30 +559,30 @@ fn SelectColors(win: *Window) void {
 
 // ---- select screen lines ----
 fn SelectLines(win:*Window) void {
-    cfg.config.ScreenLines = @intCast(df.SCREENHEIGHT);
-    if (df.SCREENHEIGHT != cfg.config.ScreenLines) {
-        SetScreenHeight(@intCast(cfg.config.ScreenLines));
+    cfg.config.ScreenLines = video.SCREENHEIGHT;
+    if (video.SCREENHEIGHT != cfg.config.ScreenLines) {
+        SetScreenHeight(cfg.config.ScreenLines);
         // ---- re-maximize ----
         if (win.condition == .ISMAXIMIZED) {
-            _ = win.sendMessage(df.SIZE, .{.position=.{win.GetRight(), @intCast(df.SCREENHEIGHT-1)}});
+            _ = win.sendMessage(df.SIZE, .{.position=.{win.GetRight(), video.SCREENHEIGHT-1}});
             return;
         }
         // --- adjust if current size does not fit ---
-        if (win.WindowHeight() > df.SCREENHEIGHT) {
+        if (win.WindowHeight() > video.SCREENHEIGHT) {
             _ = win.sendMessage(df.SIZE, .{.position=.{win.GetRight(),
-                win.GetTop()+@as(usize, @intCast(df.SCREENHEIGHT-1))}});
+                win.GetTop()+video.SCREENHEIGHT-1}});
         }
         // --- if window is off-screen, move it on-screen ---
-        if (win.GetTop() >= df.SCREENHEIGHT-1) {
+        if (win.GetTop() >= video.SCREENHEIGHT-1) {
             _ = win.sendMessage(df.MOVE, .{.position=.{win.GetLeft(),
-                    @as(usize, @intCast(df.SCREENHEIGHT))-win.WindowHeight()}});
+                    video.SCREENHEIGHT-win.WindowHeight()}});
         }
     }
 }
 
 
 // ---- set the screen height in the video hardware ----
-fn SetScreenHeight(height: c_int) void {
+fn SetScreenHeight(height: usize) void {
     _ = height;
     // not implemented originally
 //#if 0   /* display size changes not supported */
@@ -691,7 +692,7 @@ fn ShellDOS(win:*Window) void {
     oldFocus = Window.inFocus;
     _ = win.sendMessage(df.HIDE_WINDOW, q.none);
     SwitchCursor();
-    if (ScreenHeight != df.SCREENHEIGHT)
+    if (ScreenHeight != video.SCREENHEIGHT)
         SetScreenHeight(ScreenHeight);
     _ = q.SendMessage(null, df.HIDE_MOUSE, q.none);
     _ = df.fflush(df.stdout);
@@ -701,8 +702,8 @@ fn ShellDOS(win:*Window) void {
     }
     df.tty_enable_unikey();
 
-    if (df.SCREENHEIGHT != cfg.config.ScreenLines)
-        SetScreenHeight(@intCast(cfg.config.ScreenLines));
+    if (video.SCREENHEIGHT != cfg.config.ScreenLines)
+        SetScreenHeight(cfg.config.ScreenLines);
     SwitchCursor();
     _ = win.sendMessage(df.SHOW_WINDOW, q.none);
     if (oldFocus) |focus| {

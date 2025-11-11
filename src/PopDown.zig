@@ -23,13 +23,13 @@ fn CreateWindowMsg(win:*Window) bool {
                        df.SIZEABLE     |
                        df.HSCROLLBAR);
     // ------ adjust to keep popdown on screen -----
-    if (df.SCREENHEIGHT-1 < win.GetBottom()) {
-        const offset = win.GetBottom()-@as(usize, @intCast(df.SCREENHEIGHT-1));
+    if (video.SCREENHEIGHT-1 < win.GetBottom()) {
+        const offset = win.GetBottom()-video.SCREENHEIGHT-1;
         win.SetTop(win.GetTop()-offset);
         win.SetBottom(win.GetBottom()-offset);
     }
-    if (df.SCREENWIDTH-1 < win.GetRight()) {
-        const offset = win.GetRight()-@as(usize, @intCast(df.SCREENWIDTH-1));
+    if (video.SCREENWIDTH-1 < win.GetRight()) {
+        const offset = win.GetRight()-video.SCREENWIDTH-1;
         win.SetLeft(win.GetLeft()-offset);
         win.SetRight(win.GetRight()-offset);
     }
@@ -111,7 +111,7 @@ fn PaintPopDownSelection(win:*Window, pd1:*menus.PopDown, sel:[]u8) void {
         if (pd1.*.Attrib.CHECKED) {
                 // ---- paint the toggle checkmark ----
                 // #define CHECKMARK      (unsigned char) (SCREENHEIGHT==25?251:4)
-                const checkmark:u8 = if (df.SCREENHEIGHT == 25) 251 else 4;
+                const checkmark:u8 = if (video.SCREENHEIGHT == 25) 251 else 4;
                 buf[idx-1] = checkmark;
         }
 

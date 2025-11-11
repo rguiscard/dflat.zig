@@ -10,6 +10,7 @@ const Dialogs = @import("Dialogs.zig");
 const DialogBox = @import("DialogBox.zig");
 const WndProc = @import("WndProc.zig");
 const cfg = @import("Config.zig");
+const video = @import("Video.zig");
 
 const sOK      = "   Ok   ";
 const sYES     = "   Yes  ";
@@ -184,7 +185,7 @@ fn CancelProc(win:*Window, msg:df.MESSAGE, params:q.Params) bool {
 
 pub fn MsgHeight(msg:[:0]const u8) usize {
     const h:usize = std.mem.count(u8, msg, "\n")+1;
-    return @intCast(@min(h, df.SCREENHEIGHT-10));
+    return @min(h, video.SCREENHEIGHT-10);
 }
 
 pub fn MsgWidth(msg:[:0]const u8) usize {
@@ -193,5 +194,5 @@ pub fn MsgWidth(msg:[:0]const u8) usize {
     while (iter.next()) |line| {
         w = @max(w, line.len);
     }
-    return @intCast(@min(w, df.SCREENWIDTH-10));
+    return @min(w, video.SCREENWIDTH-10);
 }

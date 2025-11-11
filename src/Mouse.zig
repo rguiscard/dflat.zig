@@ -23,7 +23,7 @@ pub fn get_mouseposition(x:*c_int, y:*c_int) void {
 }
 
 // -------- position the mouse cursor --------
-pub fn set_mouseposition(x:c_int, y:c_int) void {
+pub fn set_mouseposition(x:usize, y:usize) void {
     _ = x;
     _ = y;
     //char buf[32];
@@ -51,7 +51,7 @@ pub fn button_releases() c_int {
 }
 
 // ----- set mouse travel limits -------
-pub fn set_mousetravel(minx:c_int, maxx:c_int, miny:c_int, maxy:c_int) void {
+pub fn set_mousetravel(minx:usize, maxx:usize, miny:usize, maxy:usize) void {
     _ = minx;
     _ = maxx;
     _ = miny;

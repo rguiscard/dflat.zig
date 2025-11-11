@@ -9,6 +9,7 @@ const popdown = @import("PopDown.zig");
 const c = @import("Commands.zig").Command;
 const k = @import("Classes.zig").CLASS;
 const q = @import("Message.zig");
+const video = @import("Video.zig");
 
 pub fn SystemMenuProc(win:*Window, msg: df.MESSAGE, params:q.Params) bool {
     switch (msg) {
@@ -64,12 +65,12 @@ pub fn BuildSystemMenu(win: *Window) void {
         menus.SystemMenu.PullDown[0].Selections[6].Accelerator = df.CTRL_F4;
     }
 
-    if (lf+wd > df.SCREENWIDTH-1) {
-        const screen_wd:usize = @intCast(df.SCREENWIDTH-1);
+    if (lf+wd > video.SCREENWIDTH-1) {
+        const screen_wd:usize = video.SCREENWIDTH-1;
         lf = screen_wd - wd;
     }
-    if (tp+ht > df.SCREENHEIGHT-2) {
-        const screen_ht:usize = @intCast(df.SCREENHEIGHT-2);
+    if (tp+ht > video.SCREENHEIGHT-2) {
+        const screen_ht:usize = video.SCREENHEIGHT-2;
         tp = screen_ht - ht;
     }
 

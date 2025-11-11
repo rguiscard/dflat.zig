@@ -181,14 +181,6 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-#if 0
-void BuildFileName(char *fn, const char *fname, const char *ext)
-{
-	strcpy(fn, Argv[1]);
-	strcat(fn, ext);
-}
-#endif
-
 static void WriteText(char *text)
 {
 	char *np = text ? text : "";

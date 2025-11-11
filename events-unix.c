@@ -10,6 +10,8 @@ int mouse_x, mouse_y;
 int mouse_button;
 char time_string[] = "         ";
 
+BOOL insideScreen(int, int);
+
 /* ------ collect mouse, clock, and keyboard events ----- */
 void collect_events(void)
 {
@@ -34,7 +36,8 @@ void collect_events(void)
             return;
         }
         if ((n = ansi_to_unimouse(buf, n, &mx, &my, &modkeys, &e)) != -1) {
-            if (mx >= SCREENWIDTH || my >= SCREENHEIGHT-1) return;
+//            if (mx >= SCREENWIDTH || my >= SCREENHEIGHT-1) return;
+            if (insideScreen(mx, my) == FALSE) return; // zig function
             switch (n) {
             case kMouseLeftDown:
                 PostEvent(LEFT_BUTTON, mx, my);

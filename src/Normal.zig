@@ -130,11 +130,11 @@ fn KeyboardMsg(win:*Window, p1:u16, p2:u8) bool {
                 y -|= 1;
             },
             df.DN => {
-                if (y < df.SCREENHEIGHT-1)
+                if (y < video.SCREENHEIGHT-1)
                     y +|= 1;
             },
             df.FWD => {
-                if (x < df.SCREENWIDTH-1)
+                if (x < video.SCREENWIDTH-1)
                     x +|= 1;
             },
             df.BS => {
@@ -410,8 +410,8 @@ fn MouseMovedMsg(win:*Window, p1:usize, p2:usize) bool {
     if (WindowMoving) {
         var leftmost:usize = 0;
         var topmost:usize = 0;
-        var bottommost:usize = @intCast(df.SCREENHEIGHT-2);
-        var rightmost:usize = @intCast(df.SCREENWIDTH-2);
+        var bottommost:usize = video.SCREENHEIGHT-2;
+        var rightmost:usize = video.SCREENWIDTH-2;
         var x:usize = if (p1 > diff) p1 - diff else 0;
         var y:usize = p2;
         if ((win.parent != null) and
@@ -565,8 +565,8 @@ fn CloseWindowMsg(win:*Window) void {
 fn MaximizeMsg(win:*Window) void {
     var rc:Rect = .{.left=0, .top=0, .right=0, .bottom=0};
     const holdrc = win.RestoredRC;
-    rc.right = @intCast(df.SCREENWIDTH-1);
-    rc.bottom = @intCast(df.SCREENHEIGHT-1);
+    rc.right = video.SCREENWIDTH-1;
+    rc.bottom = video.SCREENHEIGHT-1;
     if (win.parent) |pw| {
         rc = pw.ClientRect();
     }
@@ -765,10 +765,10 @@ fn LowerRight(prc:Rect) Rect {
 // ----- compute a position for a minimized window icon ----
 fn PositionIcon(win:*Window) Rect {
     var rc = Rect{
-        .left = @as(usize, @intCast(df.SCREENWIDTH-ICONWIDTH)),
-        .top = @as(usize, @intCast(df.SCREENHEIGHT-ICONHEIGHT)),
-        .right = @as(usize, @intCast(df.SCREENWIDTH-1)),
-        .bottom = @as(usize, @intCast(df.SCREENHEIGHT-1)),
+        .left = video.SCREENWIDTH-ICONWIDTH,
+        .top = video.SCREENHEIGHT-ICONHEIGHT,
+        .right = video.SCREENWIDTH-1,
+        .bottom = video.SCREENHEIGHT-1,
     };
 
     if (win.parent) |pwin| {
@@ -837,8 +837,8 @@ fn sizeborder(win:*Window, rt:usize, bt:usize) void {
 
     const leftmost:usize = win.GetLeft()+10;
     const topmost:usize = win.GetTop()+3;
-    var bottommost:usize = @intCast(df.SCREENHEIGHT-1);
-    var rightmost:usize = @intCast(df.SCREENWIDTH-1);
+    var bottommost:usize = video.SCREENHEIGHT-1;
+    var rightmost:usize = video.SCREENWIDTH-1;
     if (win.parent) |pwin| {
         bottommost = @min(bottommost, pwin.GetClientBottom());
         rightmost  = @min(rightmost, pwin.GetClientRight());
@@ -869,9 +869,9 @@ fn sizeborder(win:*Window, rt:usize, bt:usize) void {
 fn adjShadow(win:*Window) Rect {
     var rc = win.WindowRect();
     if (win.TestAttribute(df.SHADOW)) {
-        if (rc.right < df.SCREENWIDTH-1)
+        if (rc.right < video.SCREENWIDTH-1)
             rc.right += 1;
-        if (rc.bottom < df.SCREENHEIGHT-1)
+        if (rc.bottom < video.SCREENHEIGHT-1)
             rc.bottom += 1;
     }
     return rc;

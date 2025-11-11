@@ -7,9 +7,12 @@ const mouse = @import("Mouse.zig");
 
 const sTab:u16 = 0x0C + 0x80;
 
+pub var SCREENWIDTH:usize = 80;
+pub var SCREENHEIGHT:usize = 24;
+
 // assume video_address is 16 bites (2 bytes)
 fn vad(x:usize, y:usize) usize {
-    return y * @as(usize, @intCast(df.SCREENWIDTH)) + x;
+    return y * SCREENWIDTH + x;
 }
 
 fn movetoscreen(bf:[]u16, offset:usize, len:usize) void {
@@ -32,7 +35,7 @@ pub fn getvideo(rc:Rect, bf:[]u16) void {
     mouse.hide_mousecursor();
     for (0..ht) |idx| {
         movefromscreen(bf[bytes_row*idx..], vadr, bytes_row);
-        vadr += @as(usize, @intCast(df.SCREENWIDTH));
+        vadr += SCREENWIDTH;
     }
     mouse.show_mousecursor();
 }
@@ -45,7 +48,7 @@ pub fn storevideo(rc:Rect, bf:[]u16) void {
     mouse.hide_mousecursor();
     for (0..ht) |idx| {
         movetoscreen(bf[bytes_row*idx..], vadr, bytes_row);
-        vadr += @intCast(df.SCREENWIDTH);
+        vadr += SCREENWIDTH;
     }
     mouse.show_mousecursor();
 }
@@ -63,7 +66,7 @@ pub fn GetVideoChar(x:usize, y:usize) u16 {
 
 // -------- write a character of video memory -------
 pub fn PutVideoChar(x:usize, y:usize, chr:u16) void {
-    if (x < df.SCREENWIDTH and y < df.SCREENHEIGHT) {
+    if (x < SCREENWIDTH and y < SCREENHEIGHT) {
         mouse.hide_mousecursor();
         // #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
         // poke(video_address, vad(x,y), chr);
@@ -115,7 +118,7 @@ pub fn CharInView(win:*Window, x:usize, y:usize) bool {
         }
          nwin = nw.nextWindow();
     }
-    return (x1 < df.SCREENWIDTH and y1 < df.SCREENHEIGHT);
+    return (x1 < SCREENWIDTH and y1 < SCREENHEIGHT);
 }
 
 // -------- write a character to a window -------
@@ -146,7 +149,7 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
     var ldx:usize = 0;
     const fg = df.foreground;
     const bg = df.background;
-    if (x1 < df.SCREENWIDTH and y1 < df.SCREENHEIGHT and win.isVisible()) {
+    if (x1 < SCREENWIDTH and y1 < SCREENHEIGHT and win.isVisible()) {
         while ((idx < s.len) and (s[idx] != 0)){
             if (s[idx] == df.CHANGECOLOR) {
                 df.foreground = s[idx+1] & 0x7f;
@@ -180,8 +183,8 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
         df.foreground = fg;
         df.background = bg;
         var len = ldx;
-        if (x1+len > df.SCREENWIDTH)
-            len = @as(usize, @intCast(df.SCREENWIDTH))-x1;
+        if (x1+len > SCREENWIDTH)
+            len = SCREENWIDTH-x1;
 
         var off:usize = 0;
         if (df.ClipString == 0 and win.TestAttribute(df.NOCLIP) == false) {
@@ -221,5 +224,5 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
 // --------- get the current video mode --------
 pub fn get_videomode() void {
     if (df.video_address == null)
-        df.video_address = df.tty_allocate_screen(df.SCREENWIDTH, df.SCREENHEIGHT);
+        df.video_address = df.tty_allocate_screen(@intCast(SCREENWIDTH), @intCast(SCREENHEIGHT));
 }
