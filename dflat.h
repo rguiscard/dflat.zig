@@ -20,7 +20,7 @@
 #define VERSION "Version 20"
 #endif
 
-extern char **Argv;
+//extern char **Argv;
 
 typedef enum {FALSE, TRUE} BOOL;
 
@@ -101,13 +101,13 @@ extern BOOL ClipString;
 #define LISTSELECTOR   4    /* selected list box entry      */
 /* --------- message prototypes ----------- */
 void PostEvent(MESSAGE event, int p1, int p2);
-void near collect_events(void);
+void collect_events(void);
 
 /* ------------- help box prototypes ------------- */
 void LoadHelpFile(char *);
 void UnLoadHelpFile(void);
 char *HelpComment(char *);
 
-void BuildFileName(char *path, const char *fn, const char *ext);
+//void BuildFileName(char *path, const char *fn, const char *ext);
 
 #endif

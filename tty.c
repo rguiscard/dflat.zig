@@ -61,37 +61,37 @@ void tty_enable_unikey(void)
 void tty_fullbuffer(void)
 {
     fflush(stdout);
-#if ELKS
-    /* use existing stdout buffer to save heap space */
-    setvbuf(stdout, (char *)stdout->bufstart, _IOFBF, stdout->bufend - stdout->bufstart);
-#else
+//#if ELKS
+//    /* use existing stdout buffer to save heap space */
+//    setvbuf(stdout, (char *)stdout->bufstart, _IOFBF, stdout->bufend - stdout->bufstart);
+//#else
     setvbuf(stdout, NULL, _IOFBF, 0);
-#endif
+//#endif
 }
 
 void tty_linebuffer(void)
 {
     fflush(stdout);
-#if ELKS
-    /* use existing stdout buffer to save heap space */
-    setvbuf(stdout, (char *)stdout->bufstart, _IOLBF, stdout->bufend - stdout->bufstart);
-#else
+//#if ELKS
+//    /* use existing stdout buffer to save heap space */
+//    setvbuf(stdout, (char *)stdout->bufstart, _IOLBF, stdout->bufend - stdout->bufstart);
+//#else
     setvbuf(stdout, NULL, _IOLBF, 0);
-#endif
+//#endif
 }
 
 int tty_iselksconsole(int fd)
 {
-#if ELKS
-    char *p = ttyname(fd);
-
-    if (!p) return 0;
-    return !strcmp(p, "/dev/tty1") ||
-           !strcmp(p, "/dev/tty2") ||
-           !strcmp(p, "/dev/tty3");
-#else
+//#if ELKS
+//    char *p = ttyname(fd);
+//
+//    if (!p) return 0;
+//    return !strcmp(p, "/dev/tty1") ||
+//           !strcmp(p, "/dev/tty2") ||
+//           !strcmp(p, "/dev/tty3");
+//#else
     return 0;
-#endif
+//#endif
 }
 
 int tty_init(enum ttyflags f)

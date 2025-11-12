@@ -303,7 +303,7 @@ fn ScrollMsg(win:*Window,p1:bool) bool {
             if (win != Window.inFocus) {
                 _ = win.sendMessage(df.PAINT, .{.paint=.{null, false}});
             } else {
-                console.scroll_window(win, rc.c_Rect(), if (p1) 1 else 0);
+                console.scroll_window(win, rc, p1);
                 if (p1 == false) {
                     // -- write top line (down) --
                     WriteTextLine(win,null,win.wtop,false);
@@ -809,7 +809,8 @@ pub fn WriteTextLine(win:*Window, rcc:?Rect, y:usize, reverse:bool) void {
 
         var line = [_]u8{0}**df.MAXCOLS;
 
-        df.cWriteTextLine(@intCast(win.wleft), rc.c_Rect(), lnlen, buf.ptr, @constCast(&line));
+//        df.cWriteTextLine(@intCast(win.wleft), rc.c_Rect(), lnlen, buf.ptr, @constCast(&line));
+        df.cWriteTextLine(@intCast(win.wleft), @intCast(rc.left), @intCast(rc.right), lnlen, buf.ptr, @constCast(&line));
 
         var dif:usize = 0;
         // ------ establish the line's main color -----

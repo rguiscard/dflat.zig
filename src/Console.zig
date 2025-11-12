@@ -5,6 +5,7 @@ const colors = @import("Colors.zig");
 const Window = @import("Window.zig");
 const mouse = @import("Mouse.zig");
 const video = @import("Video.zig");
+const Rect = @import("Rect.zig");
 
 //static int near cursorpos[MAXSAVES];
 //static int near cursorshape[MAXSAVES];
@@ -60,10 +61,10 @@ pub fn set_cursor_type(t:c_uint) void {
 }
 
 // clear line y from x1 up to and including x2 to attribute attr
-fn clear_line(x1:c_int, x2:c_int, y:c_int, attr:c_int) void {
+fn clear_line(x1:usize, x2:usize, y:usize, attr:c_int) void {
     const va16_ptr:[*]u16 = @ptrCast(@alignCast(video.get_videomode()));
-    for (@intCast(x1)..@intCast(x2+1)) |x| {
-        const offset:usize = @as(usize, @intCast(y)) * video.SCREENWIDTH + x;
+    for (x1..x2+1) |x| {
+        const offset:usize = y * video.SCREENWIDTH + x;
         const c:[*]u16 = va16_ptr+offset;
         c[0] = @intCast(' ' | (attr << 8));
     }
@@ -74,17 +75,17 @@ fn clear_line(x1:c_int, x2:c_int, y:c_int, attr:c_int) void {
 }
 
 // scroll video RAM up from line y1 up to and including line y2
-fn scrollup(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
-    const pitch:c_int = @intCast(video.SCREENWIDTH * 2);
+fn scrollup(y1:usize, x1:usize, y2:usize, x2:usize, attr:c_int) void {
+    const pitch = video.SCREENWIDTH * 2;
     const width = (x2 - x1 + 1) * 2;
 //    unsigned char *vid = video_address + y1 * pitch + x1 * 2;
     var y = y1;
 
     while (y < y2) {
         const vid = y * pitch + x1 * 2;
-        const begin:usize = @intCast(vid);
-        const end:usize = @intCast(vid+width);
-        const shift:usize = @intCast(pitch);
+        const begin:usize = vid;
+        const end:usize = vid+width;
+        const shift:usize = pitch;
         @memcpy (video.get_videomode()[begin..end], video.get_videomode()[begin+shift..end+shift]);
         y += 1;
     }
@@ -92,30 +93,30 @@ fn scrollup(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
 }
 
 // scroll video RAM down from line y1 up to and including line y2
-fn scrolldn(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
-    const pitch:c_int = @intCast(video.SCREENWIDTH * 2);
+fn scrolldn(y1:usize, x1:usize, y2:usize, x2:usize, attr:c_int) void {
+    const pitch = video.SCREENWIDTH * 2;
     const width = (x2 - x1 + 1) * 2;
 //    var vid = y2 * pitch + x1 * 2;
     var y = y2;
 
     while (y > y1) {
         const vid = y * pitch + x1 * 2;
-        const begin:usize = @intCast(vid);
-        const end:usize = @intCast(vid+width);
-        const shift:usize = @intCast(pitch);
+        const begin:usize = vid;
+        const end:usize = vid+width;
+        const shift:usize = pitch;
         @memcpy (video.get_videomode()[begin..end], video.get_videomode()[begin-shift..end-shift]);
-        y -= 1;
+        y -|= 1;
     }
     clear_line (x1, x2, y1, attr);
 }
 
-fn scroll_video(up:c_int, n:c_int, at:c_int, y1:c_int, x1:c_int, y2:c_int, x2:c_int) void {
+fn scroll_video(up:bool, n:c_int, at:c_int, y1:usize, x1:usize, y2:usize, x2:usize) void {
     if (n == 0 or n >= video.SCREENHEIGHT) {
         clear_line(x1, x2, y1, at);
     } else if (y1 != y2) {
         var nn = n;
         while (nn > 0) {
-            if (up>0) {
+            if (up) {
                 scrollup(y1, x1, y2, x2, at);
             } else {
                 scrolldn(y1, x1, y2, x2, at);
@@ -126,13 +127,13 @@ fn scroll_video(up:c_int, n:c_int, at:c_int, y1:c_int, x1:c_int, y2:c_int, x2:c_
 }
 
 // --------- scroll the window. d: 1 = up, 0 = dn ----------
-pub fn scroll_window(win:*Window, rc:df.RECT, d:c_int) void {
-    if (rc.tp != rc.bt) {
+pub fn scroll_window(win:*Window, rc:Rect, d:bool) void {
+    if (rc.top != rc.bottom) {
         mouse.hide_mousecursor();
 //        scroll_video(d, 1, colors.WndForeground(win) | (colors.WndBackground(win) << 4),
 //                     rc.tp, rc.lf, rc.bt, rc.rt);
         scroll_video(d, 1, video.clr(colors.WndForeground(win), colors.WndBackground(win)),
-                     rc.tp, rc.lf, rc.bt, rc.rt);
+                     rc.top, rc.left, rc.bottom, rc.right);
         mouse.show_mousecursor();
     }
 }
@@ -153,21 +154,21 @@ pub fn AltConvert(c:u16) c_int {
 }
 
 // only called from AllocationError, wait on keyboard read to exit
-pub export fn getkey() c_int {
-    var buf = [_]u8{0}**32;
-
-    df.convert_screen_to_ansi();
-    while(true) {
-        const n = df.readansi(0, &buf, 32);
-        if (n < 0)
-            break;
-        const e = df.ansi_to_unikey(&buf, n);
-        if (e != -1)
-            return e;
-        // not keystroke, ignore mouse
-    }
-    return -1;
-}
+//pub export fn getkey() c_int {
+//    var buf = [_]u8{0}**32;
+//
+//    df.convert_screen_to_ansi();
+//    while(true) {
+//        const n = df.readansi(0, &buf, 32);
+//        if (n < 0)
+//            break;
+//        const e = df.ansi_to_unikey(&buf, n);
+//        if (e != -1)
+//            return e;
+//        // not keystroke, ignore mouse
+//    }
+//    return -1;
+//}
 
 pub fn waitformouse() void {
     var mx:c_int = 0;

@@ -9,18 +9,21 @@ top:usize = 0,
 right:usize = 0,
 bottom:usize = 0,
 
+// Width need +1
+//#define RectWidth(r)      (RectRight(r)-RectLeft(r)+1)
+
 /// `@This()` can be used to refer to this struct type. In files with fields, it is quite common to
 /// name the type here, so it can be easily referenced by other declarations in this file.
 const TopLevelFields = @This();
 
-pub fn c_Rect(self:TopLevelFields) df.RECT {
-    return df.RECT{
-        .lf = @intCast(self.left),
-        .tp = @intCast(self.top),
-        .rt = @intCast(self.right),
-        .bt = @intCast(self.bottom),
-    };
-}
+//pub fn c_Rect(self:TopLevelFields) df.RECT {
+//    return df.RECT{
+//        .lf = @intCast(self.left),
+//        .tp = @intCast(self.top),
+//        .rt = @intCast(self.right),
+//        .bt = @intCast(self.bottom),
+//    };
+//}
 
 fn withIn(p:usize, v1:usize, v2:usize) bool {
     return ((p >= v1) and (p <= v2));

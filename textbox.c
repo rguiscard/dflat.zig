@@ -3,7 +3,7 @@
 #include "dflat.h"
 
 /* ------- write a line of text to a textbox window ------- */
-void cWriteTextLine(int wleft, RECT rc, int l, char *src, char *line)
+void cWriteTextLine(int wleft, int left, int right, int l, char *src, char *line)
 {
     int len = 0;
     int dif = 0;
@@ -47,9 +47,9 @@ void cWriteTextLine(int wleft, RECT rc, int l, char *src, char *line)
             lnlen = 0;
         else
             lp += wleft;
-        if (lnlen > RectLeft(rc))    {
+        if (lnlen > left)    {
             /* ---- the line exceeds the rectangle ---- */
-            int ct = RectLeft(rc);
+            int ct = left;
             char *initlp = lp;
             /* --- point to end of clipped line --- */
             while (ct)    {
@@ -60,7 +60,7 @@ void cWriteTextLine(int wleft, RECT rc, int l, char *src, char *line)
                 else
                     lp++, --ct;
             }
-            if (RectLeft(rc))    {
+            if (left)    {
                 char *lpp = lp;
                 while (*lpp)    {
                     if (*(unsigned char*)lpp==CHANGECOLOR)
@@ -82,7 +82,7 @@ void cWriteTextLine(int wleft, RECT rc, int l, char *src, char *line)
                 }
             }
             lnlen = LineLength(lp);
-            len = min(lnlen, RectWidth(rc));
+            len = min(lnlen, (right-left+1));
             dif = strlen(lp) - lnlen;
             len += dif;
             if (len > 0)
@@ -90,7 +90,7 @@ void cWriteTextLine(int wleft, RECT rc, int l, char *src, char *line)
         }
     }
     /* -------- pad the line --------- */
-    while (len < RectWidth(rc)+dif)
+    while (len < (right-left+1)+dif)
         line[len++] = ' ';
     line[len] = '\0';
 }

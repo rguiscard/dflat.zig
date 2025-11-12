@@ -57,35 +57,35 @@ static char *attr_to_ansi(char *buf, unsigned int attr)
     return buf;
 }
 
-#if ELKS
-static int elks_displayable(int c)
-{
-    switch (c) {
-    case '\0':
-    case '\007':
-    case '\b':
-    case '\t':
-    case '\r':
-    case '\n':
-    case '\033':
-        return 0;
-    }
-    return 1;
-}
-#endif
+//#if ELKS
+//static int elks_displayable(int c)
+//{
+//    switch (c) {
+//    case '\0':
+//    case '\007':
+//    case '\b':
+//    case '\t':
+//    case '\r':
+//    case '\n':
+//    case '\033':
+//        return 0;
+//    }
+//    return 1;
+//}
+//#endif
 
 /* convert CP 437 byte to string + NUL, depending on platform */
 int cp437tostr(char *s, int c)
 {
-#if ELKS
-    if (iselksconsole) {
-        if (!elks_displayable(c & 255))
-            c = '?';
-        s[0] = (char)c;
-        s[1] = '\0';
-        return 1;
-    }
-#endif
+//#if ELKS
+//    if (iselksconsole) {
+//        if (!elks_displayable(c & 255))
+//            c = '?';
+//        s[0] = (char)c;
+//        s[1] = '\0';
+//        return 1;
+//    }
+//#endif
     return runetostr(s, kCp437[c & 255]);
 }
 
