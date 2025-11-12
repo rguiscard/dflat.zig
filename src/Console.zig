@@ -61,7 +61,7 @@ pub fn set_cursor_type(t:c_uint) void {
 
 // clear line y from x1 up to and including x2 to attribute attr
 fn clear_line(x1:c_int, x2:c_int, y:c_int, attr:c_int) void {
-    const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
+    const va16_ptr:[*]u16 = @ptrCast(@alignCast(video.get_videomode()));
     for (@intCast(x1)..@intCast(x2+1)) |x| {
         const offset:usize = @as(usize, @intCast(y)) * video.SCREENWIDTH + x;
         const c:[*]u16 = va16_ptr+offset;
@@ -85,7 +85,7 @@ fn scrollup(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
         const begin:usize = @intCast(vid);
         const end:usize = @intCast(vid+width);
         const shift:usize = @intCast(pitch);
-        @memcpy (df.video_address[begin..end], df.video_address[begin+shift..end+shift]);
+        @memcpy (video.get_videomode()[begin..end], video.get_videomode()[begin+shift..end+shift]);
         y += 1;
     }
     clear_line (x1, x2, y2, attr);
@@ -103,7 +103,7 @@ fn scrolldn(y1:c_int, x1:c_int, y2:c_int, x2:c_int, attr:c_int) void {
         const begin:usize = @intCast(vid);
         const end:usize = @intCast(vid+width);
         const shift:usize = @intCast(pitch);
-        @memcpy (df.video_address[begin..end], df.video_address[begin-shift..end-shift]);
+        @memcpy (video.get_videomode()[begin..end], video.get_videomode()[begin-shift..end-shift]);
         y -= 1;
     }
     clear_line (x1, x2, y1, attr);

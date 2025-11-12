@@ -183,7 +183,7 @@ pub fn create(
     }
     self.* = init();
 
-    video.get_videomode();
+    _ = video.get_videomode();
 
 //    if (wnd != null) {
         // ----- height, width = -1: fill the screen -------

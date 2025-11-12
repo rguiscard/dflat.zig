@@ -13,6 +13,8 @@ pub var ClipString:usize = 0;
 pub var foreground:u8 = 0; // current video colors
 pub var background:u8 = 0;
 
+pub var video_address:?[*]u8 = null;
+
 // assume video_address is 16 bites (2 bytes)
 fn vad(x:usize, y:usize) usize {
     return y * SCREENWIDTH + x;
@@ -21,13 +23,13 @@ fn vad(x:usize, y:usize) usize {
 fn movetoscreen(bf:[]u16, offset:usize, len:usize) void {
     // video_address is u8
     const bf8:[]u8 = @ptrCast(bf);
-    @memcpy(df.video_address[offset*2..(offset+len)*2], bf8[0..len*2]);
+    @memcpy(get_videomode()[offset*2..(offset+len)*2], bf8[0..len*2]);
 }
 
 fn movefromscreen(bf:[]u16, offset:usize, len:usize) void {
     // video_address is u8
     const bf8:[]u8 = @ptrCast(bf);
-    @memcpy(bf8[0..len*2], df.video_address[offset*2..(offset+len)*2]);
+    @memcpy(bf8[0..len*2], get_videomode()[offset*2..(offset+len)*2]);
 }
 
 // -- read a rectangle of video memory into a save buffer --
@@ -61,7 +63,7 @@ pub fn GetVideoChar(x:usize, y:usize) u16 {
     mouse.hide_mousecursor();
     // #define peek(a,o)       (*((unsigned short *)((char *)(a)+(o))))
     // const c = peek(video_address, vad(x,y));
-    const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
+    const va16_ptr:[*]u16 = @ptrCast(@alignCast(get_videomode()));
     const c:[*]u16 = va16_ptr+vad(x,y);
     mouse.show_mousecursor();
     return c[0];
@@ -73,7 +75,7 @@ pub fn PutVideoChar(x:usize, y:usize, chr:u16) void {
         mouse.hide_mousecursor();
         // #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
         // poke(video_address, vad(x,y), chr);
-        const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
+        const va16_ptr:[*]u16 = @ptrCast(@alignCast(get_videomode()));
         const c:[*]u16 = va16_ptr+vad(x,y);
         c[0] = chr;
         mouse.show_mousecursor();
@@ -141,7 +143,7 @@ pub fn wputch(win:*Window, chr:u16, x:usize, y:usize) void {
         mouse.hide_mousecursor();
         // #define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
         // poke(video_address, vad(xc, yc), ch);
-        const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
+        const va16_ptr:[*]u16 = @ptrCast(@alignCast(get_videomode()));
         const c:[*]u16 = va16_ptr+vad(xc,yc);
         c[0] = ch;
         mouse.show_mousecursor();
@@ -179,7 +181,7 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
                 ln[ldx] = @as(u16, @intCast((s[idx] & 255))) | (clr(foreground, background) << 8);
                 if (ClipString>0) {
                     if (CharInView(win, xx, y)  == false) {
-                        const va16_ptr:[*]u16 = @ptrCast(@alignCast(df.video_address));
+                        const va16_ptr:[*]u16 = @ptrCast(@alignCast(get_videomode()));
                         const c:[*]u16 = va16_ptr+vad(x2,y1);
                         ln[ldx] = c[0];
                     }
@@ -232,7 +234,9 @@ pub fn wputs(win:*Window, s:[:0]const u8, x:usize, y:usize) void {
 }
 
 // --------- get the current video mode --------
-pub fn get_videomode() void {
-    if (df.video_address == null)
-        df.video_address = df.tty_allocate_screen(@intCast(SCREENWIDTH), @intCast(SCREENHEIGHT));
+pub fn get_videomode() [*]u8 {
+    if (video_address == null) {
+        video_address = df.tty_allocate_screen(@intCast(SCREENWIDTH), @intCast(SCREENHEIGHT));
+    }
+    return video_address.?;
 }
