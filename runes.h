@@ -5,13 +5,13 @@
 
 #include <stdint.h>
 
-#define RUNE_UTF32   0  /* A Rune is 16-bits for ELKS, 32-bits for Linux/UNIX */
+//#define RUNE_UTF32   0  /* A Rune is 16-bits for ELKS, 32-bits for Linux/UNIX */
 
-#if RUNE_UTF32
-typedef int32_t Rune;   /* full UTF-32 encoding */
-#else
+//#if RUNE_UTF32
+//typedef int32_t Rune;   /* full UTF-32 encoding */
+//#else
 typedef uint16_t Rune;  /* UCS-2 encodings only */
-#endif
+//#endif
 
 int isvalidrune(Rune r);            /* is Rune valid? */
 int runelen(Rune r);                /* UTF-8 length of Rune */

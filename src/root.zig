@@ -30,6 +30,7 @@ pub const Colors = @import("Colors.zig");
 pub const textbox = @import("TextBox.zig");
 pub const cfg = @import("Config.zig");
 pub const console = @import("Console.zig");
+pub const at = @import("Attributes.zig");
 
 pub const global_allocator = std.heap.c_allocator;
 

@@ -21,7 +21,7 @@ static void AllocationError(void)
 	};
 	int x, y;
 	char savbuf[108];
-	RECT rc = {30,11,47,13};
+//	RECT rc = {30,11,47,13};
 
 	if (!OnceIn)	{
 	    OnceIn = TRUE;

@@ -23,19 +23,19 @@
 
 int isvalidrune(Rune r)
 {
-#if RUNE_UTF32
-    if(r < 0)
-        return 0; /* negative value */
-
-    if((r & 0xFFFE) == 0xFFFE)
-        return 0; /* non-character at end of plane */
-
-    if(r > 0x10FFFF)
-        return 0; /* too large, thanks to UTF-16 */
-#else
+//#if RUNE_UTF32
+//    if(r < 0)
+//        return 0; /* negative value */
+//
+//    if((r & 0xFFFE) == 0xFFFE)
+//        return 0; /* non-character at end of plane */
+//
+//    if(r > 0x10FFFF)
+//        return 0; /* too large, thanks to UTF-16 */
+//#else
     if(r > 0xFFFD)
         return 0; /* too large, not UCS-2 */
-#endif
+//#endif
     if(r >= 0xD800 && r <= 0xDFFF)
         return 0; /* surrogate pair range */
 
@@ -54,18 +54,18 @@ int runelen(Rune r)
         return 1;
     else if(r < (1 << 11))
         return 2;
-#if RUNE_UTF32
-    else if(r < (1 << 16))
-        return 3;
-    else if(r < (1 << 21))
-        return 4;
-    else if(r < (1 << 26))
-        return 5;
-    else
-        return 6;
-#else
+//#if RUNE_UTF32
+//    else if(r < (1 << 16))
+//        return 3;
+//    else if(r < (1 << 21))
+//        return 4;
+//    else if(r < (1 << 26))
+//        return 5;
+//    else
+//        return 6;
+//#else
     return 3;   /* non-UCS-2 checked in isvalidrune() */
-#endif
+//#endif
 }
 
 /* convert Rune to UTF-8 + NUL, return length */

@@ -11,7 +11,7 @@
 static struct termios oldterm;
 static struct termios t;
 static int flags;
-int iselksconsole;
+//int iselksconsole;
 
 #define WRITE(FD, SLIT)             write(FD, SLIT, strlen(SLIT))
 #define ENABLE_SAFE_PASTE           "\e[?2004h"
@@ -80,8 +80,8 @@ void tty_linebuffer(void)
 //#endif
 }
 
-int tty_iselksconsole(int fd)
-{
+//int tty_iselksconsole(int fd)
+//{
 //#if ELKS
 //    char *p = ttyname(fd);
 //
@@ -90,9 +90,9 @@ int tty_iselksconsole(int fd)
 //           !strcmp(p, "/dev/tty2") ||
 //           !strcmp(p, "/dev/tty3");
 //#else
-    return 0;
+//    return 0;
 //#endif
-}
+//}
 
 int tty_init(enum ttyflags f)
 {
@@ -109,7 +109,7 @@ int tty_init(enum ttyflags f)
         }
         once = 1;
         memcpy(&t, &oldterm, sizeof(t));
-        iselksconsole = tty_iselksconsole(1);
+//        iselksconsole = tty_iselksconsole(1);
     }
     tty_enable_unikey();
     if (flags & FullBuffer)

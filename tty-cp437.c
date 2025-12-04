@@ -49,7 +49,7 @@ static char *attr_to_ansi(char *buf, unsigned int attr)
     int fg = attr & 0x0F;               /* 16 fg colors */
     int bg = (attr & 0x70) >> 4;        /*  8 bg colors */
 
-    if (fg_pal256 && !iselksconsole) {
+    if (fg_pal256 /*&& !iselksconsole*/) {
         sprintf(buf, "\e[38;5;%dm\e[%dm", fg_pal256[fg], ansi_colors[bg] + 10);
     } else {
         sprintf(buf, "\e[%d;%dm", fg_pal16[fg], ansi_colors[bg] + 10);

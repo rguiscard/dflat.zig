@@ -1,5 +1,6 @@
 /* ----------- classes.h ------------ */
 
+#if 1
 #define SHADOW       0x0001
 #define MOVEABLE     0x0002
 #define SIZEABLE     0x0004
@@ -16,3 +17,4 @@
 #define MULTILINE    0x2000
 #define HASBORDER    0x4000
 #define HASSTATUSBAR 0x8000
+#endif
