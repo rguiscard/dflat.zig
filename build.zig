@@ -29,7 +29,8 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
-    lib_mod.addCSourceFiles(.{ .files = &.{
+    lib_mod.addCSourceFiles(.{
+        .files = &.{
             "message.c",
             "keys.c",
             "config.c",
@@ -82,12 +83,7 @@ pub fn build(b: *std.Build) void {
             "tty-cp437.c",
             "runshell.c",
         },
-        .flags = &[_][]const u8{"-DMACOS=1",
-                                "-DBUILD_FULL_DFLAT",
-                                "-g",
-                                "-Wno-pointer-sign",
-                                "-Wno-compare-distinct-pointer-types",
-                                "-Wno-invalid-source-encoding"},
+        .flags = &[_][]const u8{ "-DMACOS=1", "-DBUILD_FULL_DFLAT", "-g", "-Wno-pointer-sign", "-Wno-compare-distinct-pointer-types", "-Wno-invalid-source-encoding" },
     });
     lib_mod.addIncludePath(b.path("./"));
 
@@ -100,6 +96,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
+        .link_libc = true,
     });
 
     // Modules can depend on one another using the `std.Build.Module.addImport` function.
@@ -115,7 +112,7 @@ pub fn build(b: *std.Build) void {
         .name = "dflat",
         .root_module = lib_mod,
     });
-    lib.linkLibC();
+    exe_mod.linkLibrary(lib);
 
     // This declares intent for the library to be installed into the standard
     // location when the user invokes the "install" step (the default step when
@@ -128,8 +125,6 @@ pub fn build(b: *std.Build) void {
         .name = "dflat",
         .root_module = exe_mod,
     });
-    exe.linkLibC();
-    exe.linkLibrary(lib);
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
