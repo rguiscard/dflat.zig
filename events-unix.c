@@ -77,11 +77,19 @@ void collect_events(void)
             case TB_EVENT_MOUSE:
                 switch (ev.key) {
                     case TB_KEY_MOUSE_LEFT:
-                        if (ev.x < SCREENWIDTH && ev.y < SCREENHEIGHT - 1) {
-                            PostEvent(LEFT_BUTTON, ev.x, ev.y);
-                            mouse_x = ev.x;
-                            mouse_y = ev.y;
-                            mouse_button = 1;
+                        if (mouse_button == 1) {
+                            if (ev.x < SCREENWIDTH && ev.y < SCREENHEIGHT - 1) {
+                                PostEvent(MOUSE_MOVED, ev.x, ev.y);
+                                mouse_x = ev.x;
+                                mouse_y = ev.y;
+                            }
+                        } else {
+                            if (ev.x < SCREENWIDTH && ev.y < SCREENHEIGHT - 1) {
+                                PostEvent(LEFT_BUTTON, ev.x, ev.y);
+                                mouse_x = ev.x;
+                                mouse_y = ev.y;
+                                mouse_button = 1;
+                            }
                         }
                         break;
                     case TB_KEY_MOUSE_RELEASE:
