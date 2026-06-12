@@ -1,6 +1,7 @@
 /* --------- message.c ---------- */
 
 #include "dflat.h"
+#include "termbox2.h"
 
 static int px = -1, py = -1;
 static int pmx = -1, pmy = -1;
@@ -54,9 +55,10 @@ static void StopMsg(void)
 	ClearClipboard();
 	ClearDialogBoxes();
 #endif
-	restorecursor();	
+	restorecursor();
 	unhidecursor();
     hide_mousecursor();
+    tb_shutdown();
 }
 
 /* ------------ initialize the message system --------- */
@@ -69,14 +71,12 @@ BOOL init_messages(void)
 		StopMsg();
 		return FALSE;
 	}
-    tty_init(MouseTracking|CatchISig|ExitLastLine|FullBuffer);
-    if (tty_getsize(&cols, &rows) > 0) {
-        SCREENWIDTH = min(cols, MAXCOLS-1);
-        SCREENHEIGHT = rows - 1;
-    }
-    resetmouse();
-	set_mousetravel(0, SCREENWIDTH-1, 0, SCREENHEIGHT-1);
-	savecursor();
+    if (tb_init() != TB_OK)
+        return FALSE;
+    tb_set_input_mode(TB_INPUT_ESC | TB_INPUT_MOUSE);
+    SCREENWIDTH = min(tb_width(), MAXCOLS-1);
+    SCREENHEIGHT = tb_height() - 1;
+    savecursor();
 	hidecursor();
     px = py = -1;
     pmx = pmy = -1;
@@ -517,8 +517,11 @@ void handshake(void)
 BOOL dispatch_message(void)
 {
     WINDOW Mwnd, Kwnd;
+    static int dirty = 0;
+
     /* -------- collect mouse and keyboard events ------- */
     collect_events();
+
     /* --------- dequeue and process events -------- */
     while (EventQueueCtr > 0)  {
         struct events ev;
@@ -527,6 +530,7 @@ BOOL dispatch_message(void)
         if (++EventQueueOffCtr == MAXMESSAGES)
             EventQueueOffCtr = 0;
         --EventQueueCtr;
+        dirty = 1;
 
         /* ------ get the window in which a
                         keyboard event occurred ------ */
@@ -566,6 +570,7 @@ BOOL dispatch_message(void)
             case MOUSE_MOVED:
 		        Mwnd = MouseWindow(ev.mx, ev.my);
                 SendMessage(Mwnd, ev.event, ev.mx, ev.my);
+                dirty = 1;
                 break;
 #if MSDOS	// FIXME add MK_FP
             case CLOCKTICK:
@@ -586,6 +591,7 @@ BOOL dispatch_message(void)
             MsgQueueOffCtr = 0;
         --MsgQueueCtr;
         SendMessage(mq.wnd, mq.msg, mq.p1, mq.p2);
+        dirty = 1;
         if (mq.msg == ENDDIALOG)
 			return FALSE;
         if (mq.msg == STOP)	{
@@ -594,7 +600,10 @@ BOOL dispatch_message(void)
 		}
     }
 #if VIDEO_FB
-    convert_screen_to_ansi();
+    if (dirty) {
+        convert_screen_to_ansi();
+        dirty = 0;
+    }
 #endif
     return TRUE;
 }

@@ -1,9 +1,10 @@
 /* ----------- console.c ---------- */
 
 #include "dflat.h"
-#include "unikey.h"
+#include "termbox2.h"
 
 extern char *video_address;
+extern int tb_to_dflat_key(struct tb_event *);
 
 static int near cursorpos[MAXSAVES];
 static int near cursorshape[MAXSAVES];
@@ -148,37 +149,30 @@ int AltConvert(unsigned int c)
 /* only called from AllocationError, wait on keyboard read to exit */
 int getkey(void)
 {
-    int n, e;
-    char buf[32];
+    struct tb_event ev;
 
-    convert_screen_to_ansi();
     for (;;) {
-        if ((n = readansi(0, buf, sizeof(buf))) < 0)
-            break;
-        if ((e = ansi_to_unikey(buf, n)) != -1)
-            return e;
-        /* not keystroke, ignore mouse */
+        if (tb_poll_event(&ev) != TB_OK)
+            continue;
+        if (ev.type == TB_EVENT_KEY) {
+            int k = tb_to_dflat_key(&ev);
+            if (k != 0)
+                return k;
+        }
     }
-    return -1;
 }
 
 void waitformouse(void)
 {
-    int n, e;
-    int mx, my, modkeys;
-    char buf[32];
-    extern int mouse_button;
+    struct tb_event ev;
 
-    if (mouse_button != kMouseLeftDown && mouse_button != kMouseLeftDoubleClick)
-        return;
     for (;;) {
-        if ((n = readansi(0, buf, sizeof(buf))) < 0)
-            break;
-        if ((n = ansi_to_unimouse(buf, n, &mx, &my, &modkeys, &e)) != -1) {
-            if (n == kMouseLeftUp)
+        if (tb_poll_event(&ev) != TB_OK)
+            continue;
+        if (ev.type == TB_EVENT_MOUSE) {
+            if (ev.key == TB_KEY_MOUSE_RELEASE)
                 return;
         }
-        /* ignore keystrokes */
     }
 }
 

@@ -119,9 +119,7 @@ void tty_output_screen(int flush)
             if (cp437tostr(buf, b & 255))
                 fputs(buf, stdout);
         }
-        if (r == LINES - 1)
-            printf("\r");
-        else printf("\n");
+        printf("\r\n");
     }
     printf("\e[1;0;0m");           /* reset attrs, cursor left off */
     if (flush)

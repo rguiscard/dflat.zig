@@ -204,19 +204,23 @@ void wputs(WINDOW wnd, void *s, int x, int y)
 void get_videomode(void)
 {
 #if VIDEO_FB
-    if (!video_address)
+    static int prev_w = -1, prev_h = -1;
+    if (SCREENWIDTH != prev_w || SCREENHEIGHT != prev_h) {
+        if (video_address)
+            free(video_address);
         video_address = tty_allocate_screen(SCREENWIDTH, SCREENHEIGHT);
+        prev_w = SCREENWIDTH;
+        prev_h = SCREENHEIGHT;
+    }
 #else
     video_address = 0xb800;
 #if VIDEO_BIOS
 #define ismono() (video_mode == 7)
-    /* ---- Monochrome Display Adaptor or text mode ---- */
     if (ismono())
         video_address = 0xb000;
-    else	{
-        /* ------ Text mode -------- */
+    else {
         video_address = 0xb800 + video_page;
-	}
+    }
 #endif
 #endif
 }
