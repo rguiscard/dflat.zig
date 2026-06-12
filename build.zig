@@ -16,12 +16,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // Common flags used by dflat
-    const flags = [_][]const u8{"-DMACOS=1",
-                                "-DBUILD_FULL_DFLAT",
-                                "-g",
-                                "-Wno-pointer-sign",
-                                "-Wno-compare-distinct-pointer-types",
-                                "-Wno-invalid-source-encoding"};
+    const flags = [_][]const u8{ "-DMACOS=1", "-DBUILD_FULL_DFLAT", "-g", "-Wno-pointer-sign", "-Wno-compare-distinct-pointer-types", "-Wno-invalid-source-encoding" };
 
     // This creates a "module", which represents a collection of source files alongside
     // some compilation options, such as optimization mode and linked system libraries.
@@ -37,7 +32,8 @@ pub fn build(b: *std.Build) void {
         .link_libc = true,
     });
 
-    lib_mod.addCSourceFiles(.{ .files = &.{
+    lib_mod.addCSourceFiles(.{
+        .files = &.{
             "message.c",
             "keys.c",
             "config.c",
@@ -89,7 +85,6 @@ pub fn build(b: *std.Build) void {
             "tty.c",
             "tty-cp437.c",
             "runshell.c",
-
             "dialogs.c", // this should belong to library
         },
         .flags = &flags,
@@ -102,7 +97,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .link_libc = true,
     });
-    memopad_mod.addCSourceFiles(.{ .files = &.{
+    memopad_mod.addCSourceFiles(.{
+        .files = &.{
             "menus.c",
             "memopad.c",
         },
@@ -119,6 +115,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
+        .link_libc = true,
     });
 
     // Modules can depend on one another using the `std.Build.Module.addImport` function.
@@ -126,6 +123,7 @@ pub fn build(b: *std.Build) void {
     // file path. In this case, we set up `exe_mod` to import `lib_mod`.
     exe_mod.addImport("dflat", lib_mod); // this import c as module
     exe_mod.addImport("memopad", memopad_mod);
+    exe_mod.addIncludePath(b.path("."));
 
     // This creates another `std.Build.Step.Compile`, but this one builds an executable
     // rather than a static library.
@@ -133,8 +131,6 @@ pub fn build(b: *std.Build) void {
         .name = "memopad",
         .root_module = exe_mod,
     });
-    exe.linkLibC();
-    exe.addIncludePath(b.path("."));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default

@@ -4,10 +4,16 @@
 
 extern fn c_main(argc: c_int, argv: [*][*:0]u8) void;
 
-pub fn main() !void {
-    const argc: c_int = @intCast(std.os.argv.len);
-    const argv = std.os.argv.ptr; // already C-compatible
-    c_main(argc, argv);
+pub fn main(init: std.process.Init) !void {
+    // This is appropriate for anything that lives as long as the process.
+    const arena: std.mem.Allocator = init.arena.allocator();
+
+    // Accessing command line arguments:
+    const args = try init.minimal.args.toSlice(arena);
+
+    //    const argc: c_int = @intCast(std.os.argv.len);
+    //    const argv = std.os.argv.ptr; // already C-compatible
+    c_main(@intCast(args.len), @ptrCast(@constCast(args)));
 }
 
 const std = @import("std");
