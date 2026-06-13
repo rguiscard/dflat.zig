@@ -308,7 +308,6 @@ void wputs(WINDOW wnd, void *s, int x, int y)
 /* --------- get the current video mode -------- */
 void get_videomode(void)
 {
-#if VIDEO_FB
     int w = tb_width();
     int h = tb_height();
 
@@ -316,24 +315,12 @@ void get_videomode(void)
         SCREENWIDTH = min(w, MAXCOLS - 1);
         SCREENHEIGHT = h - 1;
     }
-#else
-#if VIDEO_BIOS
-#define ismono() (video_mode == 7)
-    if (ismono())
-        video_address = 0xb000;
-    else {
-        video_address = 0xb800 + video_page;
-    }
-#endif
-#endif
 }
 
-#if VIDEO_FB
 void convert_screen_to_ansi()
 {
     tb_present();
 }
-#endif
 
 void scroll_window(WINDOW wnd, RECT rc, int d)
 {

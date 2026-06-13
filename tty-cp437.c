@@ -49,43 +49,13 @@ static char *attr_to_ansi(char *buf, unsigned int attr)
     int fg = attr & 0x0F;               /* 16 fg colors */
     int bg = (attr & 0x70) >> 4;        /*  8 bg colors */
 
-    if (fg_pal256 && !iselksconsole) {
-        sprintf(buf, "\e[38;5;%dm\e[%dm", fg_pal256[fg], ansi_colors[bg] + 10);
-    } else {
-        sprintf(buf, "\e[%d;%dm", fg_pal16[fg], ansi_colors[bg] + 10);
-    }
+    sprintf(buf, "\e[38;5;%dm\e[%dm", fg_pal256[fg], ansi_colors[bg] + 10);
     return buf;
 }
 
-#if ELKS
-static int elks_displayable(int c)
-{
-    switch (c) {
-    case '\0':
-    case '\007':
-    case '\b':
-    case '\t':
-    case '\r':
-    case '\n':
-    case '\033':
-        return 0;
-    }
-    return 1;
-}
-#endif
-
-/* convert CP 437 byte to string + NUL, depending on platform */
+/* convert CP 437 byte to string + NUL */
 int cp437tostr(char *s, int c)
 {
-#if ELKS
-    if (iselksconsole) {
-        if (!elks_displayable(c & 255))
-            c = '?';
-        s[0] = (char)c;
-        s[1] = '\0';
-        return 1;
-    }
-#endif
     return runetostr(s, kCp437[c & 255]);
 }
 
@@ -97,7 +67,7 @@ char *tty_allocate_screen(int cols, int lines)
 {
     if (cols) COLS = cols;
     if (lines) LINES = lines;
-    video_ram = calloc(COLS * LINES * 2, 1);
+    video_ram = calloc(COLS * LINES * 4, 1);
     return video_ram;
 }
 

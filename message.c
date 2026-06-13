@@ -601,11 +601,9 @@ BOOL dispatch_message(void)
 			return FALSE;
 		}
     }
-#if VIDEO_FB
-    if (dirty) {
+if (dirty) {
         convert_screen_to_ansi();
         dirty = 0;
     }
-#endif
     return TRUE;
 }
