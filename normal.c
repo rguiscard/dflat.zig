@@ -22,7 +22,7 @@ static int px = -1, py = -1;
 static int diff;
 static struct window dwnd = {DUMMY, NULL, NormalProc,
                                 {-1,-1,-1,-1}};
-static short *Bsave;
+static videocell_t *Bsave;
 static int Bht, Bwd;
 BOOL WindowMoving;
 BOOL WindowSizing;
@@ -981,10 +981,11 @@ static void SaveBorder(RECT rc)
 {
     RECT lrc;
     int i;
-    short *cp;
+    videocell_t *cp;
     Bht = RectBottom(rc) - RectTop(rc) + 1;
     Bwd = RectRight(rc) - RectLeft(rc) + 1;
-    Bsave = DFrealloc(Bsave, (Bht + Bwd) * 4);
+    /* Need: top(Bwd) + bottom(Bwd) + left(Bht-2) + right(Bht-2) cells = 2*(Bwd + Bht) - 4 cells */
+    Bsave = DFrealloc(Bsave, (2 * (Bwd + Bht) - 4) * sizeof(videocell_t));
 
     lrc = rc;
     RectBottom(lrc) = RectTop(lrc);
@@ -997,13 +998,12 @@ static void SaveBorder(RECT rc)
         *cp++ = GetVideoChar(RectRight(rc),RectTop(rc)+i);
     }
 }
-/* ---- restore video area used by dummy window border ---- */
 static void RestoreBorder(RECT rc)
 {
     if (Bsave != NULL)    {
         RECT lrc;
         int i;
-        short *cp;
+        videocell_t *cp;
         lrc = rc;
         RectBottom(lrc) = RectTop(lrc);
         storevideo(lrc, Bsave);
@@ -1089,7 +1089,7 @@ static void GetVideoBuffer(WINDOW wnd)
     rc = ClipRect(wnd);
     ht = RectBottom(rc) - RectTop(rc) + 1;
     wd = RectRight(rc) - RectLeft(rc) + 1;
-    wnd->videosave = DFrealloc(wnd->videosave, (ht * wd * 2));
+    wnd->videosave = DFrealloc(wnd->videosave, ht * wd * sizeof(videocell_t));
     get_videomode();
     getvideo(rc, wnd->videosave);
 }

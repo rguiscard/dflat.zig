@@ -11,9 +11,10 @@
 
 #if VIDEO_FB
 #define far
-#define poke(a,o,w)     (*((unsigned short *)((char *)(a)+(o))) = (w))
-#define peek(a,o)       (*((unsigned short *)((char *)(a)+(o))))
+#define poke(a,o,w)     (*((unsigned long *)((char *)(a)+(o))) = (w))
+#define peek(a,o)       (*((unsigned long *)((char *)(a)+(o))))
 void convert_screen_to_ansi(void);
+typedef unsigned int videocell_t; /* 32-bit: upper 16-bit attr + lower 16-bit original CP437 or Unicode char */
 #endif
 
 #if VIDEO_EGA
@@ -42,7 +43,7 @@ void wputs(WINDOW, void *, int, int);
 void scroll_window(WINDOW, RECT, int);
 
 #define clr(fg,bg) ((fg)|((bg)<<4))
-#define vad(x,y) ((y)*(SCREENWIDTH*2)+(x)*2)
-#define videochar(x,y) (GetVideoChar(x,y) & 255)
+#define vad(x,y) ((y)*(SCREENWIDTH*4)+(x)*4)
+#define videochar(x,y) (GetVideoChar(x,y) & 0xff)
 
 #endif
