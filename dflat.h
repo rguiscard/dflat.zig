@@ -263,13 +263,13 @@ extern int CurrentMenuSelection;
 #define FOCUS_NE      0x2557  /* ╗ double line top-right */
 #define FOCUS_SE      0x255d  /* ╝ double line bottom-right */
 #define FOCUS_SW      0x255a  /* ╚ double line bottom-left */
-#define FOCUS_SIDE    0xba    /* ║ (byte value, converted via kCp437) */
+#define FOCUS_SIDE    0x2551    /* ║ */
 #define FOCUS_LINE    0xcd    /* ═ (byte value, converted via kCp437) */
-#define NW            0xda    /* ┌ (byte value, converted via kCp437) */
-#define NE            0xbf    /* ┐ (byte value, converted via kCp437) */
-#define SE            0xd9    /* └ (byte value, converted via kCp437) */
-#define SW            0xc0    /* ┘ (byte value, converted via kCp437) */
-#define SIDE          0xb3    /* │ (byte value, converted via kCp437) */
+#define NW            0x250c    /* ┌ */
+#define NE            0x2510    /* ┐ */
+#define SE            0x2518    /* ┘ */
+#define SW            0x2514    /* └ */
+#define SIDE          0x2502    /* │ */
 #define LINE          0xc4    /* ─ (byte value, converted via kCp437) */
 #define LEDGE         0xc3    /* ├ (byte value, converted via kCp437) */
 #define REDGE         0xb4    /* ┤ (byte value, converted via kCp437) */
@@ -290,7 +290,7 @@ extern int CurrentMenuSelection;
 #define MINPOINTER     25      /* minimize token            */
 #define RESTOREPOINTER 18      /* restore token             */
 /* --------------- text control characters ---------------- */
-#define APPLCHAR     (unsigned char) 176 /* fills application window */
+#define APPLCHAR     0x2591 /* fills application window */
 #define SHORTCUTCHAR '~'    /* prefix: shortcut key display */
 #define CHANGECOLOR  (unsigned char) 174 /* prefix to change colors  */
 #define RESETCOLOR   (unsigned char) 175 /* reset colors to default  */

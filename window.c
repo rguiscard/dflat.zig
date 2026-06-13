@@ -456,6 +456,15 @@ void ClearWindow(WINDOW wnd, RECT *rcc, int clrchar)
         if (RectRight(rc) > WindowWidth(wnd)-1)
             RectRight(rc) = WindowWidth(wnd)-1;
         SetStandardColor(wnd);
+        if (clrchar > 255)    {
+            int len = RectRight(rc)-RectLeft(rc)+1;
+            for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
+                if (y < top || y > bot)
+                    continue;
+                wputuline(wnd, (uint32_t)clrchar, RectLeft(rc), y, len);
+            }
+            return;
+        }
         memset(line, clrchar, sizeof line);
         line[RectRight(rc)+1] = '\0';
         for (y = RectTop(rc); y <= RectBottom(rc); y++)    {

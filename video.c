@@ -283,6 +283,67 @@ void wputs(WINDOW wnd, void *s, int x, int y)
     }
 }
 
+void wputuline(WINDOW wnd, uint32_t ch, int x, int y, int len)
+{
+    int x1 = GetLeft(wnd)+x;
+    int x2 = x1;
+    int y1 = GetTop(wnd)+y;
+    if (len > MAXCOLS)
+        len = MAXCOLS;
+    if (len > 0 && x1 < SCREENWIDTH && y1 < SCREENHEIGHT && isVisible(wnd))	{
+        videocell_t ln[MAXCOLS];
+        videocell_t *cp1 = ln;
+        int off = 0;
+        int fg = foreground;
+        int bg = background;
+        int attr = clr(fg, bg);
+        int i;
+        for (i = 0; i < len; i++)    {
+            cp1->ch = ch;
+            cp1->fg = tb_fg_from_attr(attr);
+            cp1->bg = tb_bg_from_attr(attr);
+            if (ClipString)
+                if (!CharInView(wnd, x+i, y))
+                    *cp1 = GetVideoChar(x2,y1);
+            cp1++;
+            x2++;
+        }
+        len = (int)(cp1-ln);
+        if (x1+len > SCREENWIDTH)
+            len = SCREENWIDTH-x1;
+
+        if (!ClipString && !TestAttribute(wnd, NOCLIP))	{
+            RECT rc = WindowRect(wnd);
+            WINDOW nwnd = GetParent(wnd);
+            while (len > 0 && nwnd != NULL)	{
+                if (!isVisible(nwnd))	{
+                    len = 0;
+                    break;
+                }
+                rc = subRectangle(rc, ClientRect(nwnd));
+                nwnd = GetParent(nwnd);
+            }
+            while (len > 0 && !InsideRect(x1+off,y1,rc))	{
+                off++;
+                --len;
+            }
+            if (len > 0)	{
+                x2 = x1+len-1;
+                while (len && !InsideRect(x2,y1,rc))	{
+                    --x2;
+                    --len;
+                }
+            }
+        }
+        if (len > 0) {
+            hide_mousecursor();
+            for (i = 0; i < len; i++)
+                tb_set_cell(x1+off+i, y1, ln[off+i].ch, ln[off+i].fg, ln[off+i].bg);
+            show_mousecursor();
+        }
+    }
+}
+
 /* --------- get the current video mode -------- */
 void get_videomode(void)
 {
