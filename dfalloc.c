@@ -28,6 +28,7 @@ static void AllocationError(void)
 				PutVideoChar(x+rc.lf, y+rc.tp, c);
 			}
 		}
+		convert_screen_to_ansi();
 		getkey();
         storevideo(rc, savbuf);
 		if (AllocTesting)

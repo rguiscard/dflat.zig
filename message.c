@@ -74,6 +74,7 @@ BOOL init_messages(void)
     if (tb_init() != TB_OK)
         return FALSE;
     tb_set_input_mode(TB_INPUT_ESC | TB_INPUT_MOUSE);
+    tb_set_output_mode(TB_OUTPUT_NORMAL);
     SCREENWIDTH = min(tb_width(), MAXCOLS-1);
     SCREENHEIGHT = tb_height() - 1;
     savecursor();
