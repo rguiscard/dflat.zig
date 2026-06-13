@@ -16,6 +16,8 @@ static void AllocationError(void)
 	int x, y;
 	videocell_t *savbuf = DFmalloc(216 * sizeof(videocell_t));
 	RECT rc = {30,11,47,13};
+	int fg_attr = tb_fg_from_attr(LIGHTGRAY);
+	int bg_attr = tb_bg_from_attr(BLACK);
 
 	if (!OnceIn)	{
 		OnceIn = TRUE;
@@ -24,7 +26,10 @@ static void AllocationError(void)
         getvideo(rc, savbuf);
 		for (x = 0; x < 18; x++)	{
 			for (y = 0; y < 3; y++)		{
-				videocell_t c = (videocell_t)(unsigned char)(*(*(ErrMsg+y)+x)) | 0x70000UL;
+				videocell_t c;
+				c.ch = kCp437[(unsigned char)(*(*(ErrMsg+y)+x))];
+				c.fg = fg_attr;
+				c.bg = bg_attr;
 				PutVideoChar(x+rc.lf, y+rc.tp, c);
 			}
 		}

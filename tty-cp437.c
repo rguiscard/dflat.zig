@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <sys/select.h>
 #include <time.h>
+#include <stdint.h>
 #include "unikey.h"
 #include "runes.h"
 
@@ -49,7 +50,11 @@ static char *attr_to_ansi(char *buf, unsigned int attr)
     int fg = attr & 0x0F;               /* 16 fg colors */
     int bg = (attr & 0x70) >> 4;        /*  8 bg colors */
 
-    sprintf(buf, "\e[38;5;%dm\e[%dm", fg_pal256[fg], ansi_colors[bg] + 10);
+    if (fg_pal256) {
+        sprintf(buf, "\e[38;5;%dm\e[%dm", fg_pal256[fg], ansi_colors[bg] + 10);
+    } else {
+        sprintf(buf, "\e[%d;%dm", fg_pal16[fg], ansi_colors[bg] + 10);
+    }
     return buf;
 }
 
@@ -73,20 +78,22 @@ char *tty_allocate_screen(int cols, int lines)
 
 void tty_output_screen(int flush)
 {
-    int r, c, a, b;
-    unsigned short *chattr = (unsigned short *)video_ram;
+    int r, c, a;
+    uint32_t *chattr = (uint32_t *)video_ram;
     char buf[16];
 
     printf("\e[?25l\e[H");      /* cursor off, home */
     for (r=0; r<LINES; r++) {
         a = -1;
         for (c=0; c<COLS; c++) {
-            b = *chattr++;
-            if (a != (b & 0xFF00)) {
-                fputs(attr_to_ansi(buf, b >> 8), stdout);
-                a = b & 0xFF00;
+            uint32_t b = *chattr++;
+            int attr = (b >> 16) & 0xff;
+            int ch = b & 0xffff;
+            if (a != attr) {
+                fputs(attr_to_ansi(buf, attr), stdout);
+                a = attr;
             }
-            if (cp437tostr(buf, b & 255))
+            if (cp437tostr(buf, ch))
                 fputs(buf, stdout);
         }
         printf("\r\n");

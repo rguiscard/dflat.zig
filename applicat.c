@@ -448,9 +448,6 @@ void PrepWindowMenu(void *w, struct Menu *mnu)
             if (isVisible(cwnd) && GetClass(cwnd) != MENUBAR &&
                     GetClass(cwnd) != STATUSBAR) {
                 /* --- add the document window to the menu --- */
-#if MSDOS | ELKS
-                strncpy(Menus[MenuNo]+4, WindowName(cwnd), 20);
-#endif
                 pd->SelectionTitle = Menus[MenuNo];
                 if (cwnd == oldFocus)    {
                     /* -- mark the current document -- */

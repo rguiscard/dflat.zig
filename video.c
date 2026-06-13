@@ -2,6 +2,7 @@
 
 #include "dflat.h"
 #include "termbox2.h"
+
 #include "unikey.h"
 #include <stdint.h>
 
@@ -19,26 +20,7 @@ static int in_screen(int x, int y)
     return x >= 0 && y >= 0 && x < SCREENWIDTH && y < SCREENHEIGHT;
 }
 
-/* use videocell_t from video.h */
-
-static uint32_t dflat_char_to_tb(videocell_t c)
-{
-    /* The lower 16 bits contain either CP437 code (0-255) or Unicode (>=256) */
-    uint16_t ch = c & 0xffff;
-    if (ch < 256)
-        return kCp437[ch];
-    return ch;  /* Already Unicode */
-}
-
-static uint32_t tb_char_to_dflat(uint32_t ch)
-{
-    /* Store Unicode codepoint directly - preserve original character */
-    /* For Unicode >= 256, store as-is. For ASCII 0-255, also store as-is */
-    /* since dflat_char_to_tb will handle the remapping when writing */
-    return ch;
-}
-
-static uintattr_t tb_fg_from_attr(int attr)
+uintattr_t tb_fg_from_attr(int attr)
 {
     int fg = attr & 0x0f;
     uintattr_t color = tb_base_colors[fg & 7];
@@ -48,7 +30,7 @@ static uintattr_t tb_fg_from_attr(int attr)
     return color;
 }
 
-static uintattr_t tb_bg_from_attr(int attr)
+uintattr_t tb_bg_from_attr(int attr)
 {
     return tb_base_colors[(attr >> 4) & 7];
 }
@@ -78,38 +60,6 @@ static int dflat_attr_from_tb(uintattr_t fg, uintattr_t bg)
     return (f & 0x0f) | ((b & 7) << 4);
 }
 
-static void termbox_read_cell(int x, int y, uint32_t *ch,
-    uintattr_t *fg, uintattr_t *bg)
-{
-    struct tb_cell *cell = NULL;
-
-    if (tb_get_cell(x, y, 1, &cell) == TB_OK && cell != NULL) {
-        *ch = cell->ch;
-        *fg = cell->fg;
-        *bg = cell->bg;
-    } else {
-        *ch = ' ';
-        *fg = TB_DEFAULT;
-        *bg = TB_DEFAULT;
-    }
-}
-
-static void termbox_write_cell(int x, int y, uint32_t ch,
-    uintattr_t fg, uintattr_t bg)
-{
-    if (in_screen(x, y))
-        tb_set_cell(x, y, ch, fg, bg);
-}
-
-static void termbox_write_dflat_cell(int x, int y, videocell_t c)
-{
-    uint32_t ch = dflat_char_to_tb(c);
-    int attr = (c >> 16) & 0xff;
-
-    termbox_write_cell(x, y, ch,
-        tb_fg_from_attr(attr), tb_bg_from_attr(attr));
-}
-
 /* -- read a rectangle of video memory into a save buffer -- */
 void getvideo(RECT rc, void far *bf)
 {
@@ -121,11 +71,18 @@ void getvideo(RECT rc, void far *bf)
     for (y = RectTop(rc); y <= RectBottom(rc); y++) {
         int x;
         for (x = RectLeft(rc); x <= RectRight(rc); x++) {
-            uint32_t ch;
-            uintattr_t fg, bg;
+            struct tb_cell *src = NULL;
 
-            termbox_read_cell(x, y, &ch, &fg, &bg);
-            *p++ = ((videocell_t)ch) | ((videocell_t)dflat_attr_from_tb(fg, bg) << 16);
+            if (tb_get_cell(x, y, 1, &src) == TB_OK && src != NULL) {
+                p->ch = src->ch;
+                p->fg = src->fg;
+                p->bg = src->bg;
+            } else {
+                p->ch = ' ';
+                p->fg = TB_DEFAULT;
+                p->bg = TB_DEFAULT;
+            }
+            p++;
         }
     }
     show_mousecursor();
@@ -134,7 +91,6 @@ void getvideo(RECT rc, void far *bf)
 /* -- write a rectangle of video memory from a save buffer -- */
 void storevideo(RECT rc, void far *bf)
 {
-    int ht = RectBottom(rc)-RectTop(rc)+1;
     int y;
     videocell_t far *p = bf;
 
@@ -142,30 +98,40 @@ void storevideo(RECT rc, void far *bf)
     for (y = RectTop(rc); y <= RectBottom(rc); y++) {
         int x;
         for (x = RectLeft(rc); x <= RectRight(rc); x++) {
-            termbox_write_dflat_cell(x, y, *p++);
+            if (in_screen(x, y))
+                tb_set_cell(x, y, p->ch, p->fg, p->bg);
+            p++;
         }
     }
     show_mousecursor();
 }
 
 /* -------- read a character of video memory ------- */
-unsigned int GetVideoChar(int x, int y)
+videocell_t GetVideoChar(int x, int y)
 {
-    uint32_t ch;
-    uintattr_t fg, bg;
+    videocell_t c;
+    struct tb_cell *src = NULL;
 
     hide_mousecursor();
-    termbox_read_cell(x, y, &ch, &fg, &bg);
+    if (tb_get_cell(x, y, 1, &src) == TB_OK && src != NULL) {
+        c.ch = src->ch;
+        c.fg = src->fg;
+        c.bg = src->bg;
+    } else {
+        c.ch = ' ';
+        c.fg = TB_DEFAULT;
+        c.bg = TB_DEFAULT;
+    }
     show_mousecursor();
-    return ((unsigned int)dflat_attr_from_tb(fg, bg) << 16) | (unsigned int)tb_char_to_dflat(ch);
+    return c;
 }
 
 /* -------- write a character of video memory ------- */
-void PutVideoChar(int x, int y, int c)
+void PutVideoChar(int x, int y, videocell_t c)
 {
     if (in_screen(x, y)) {
         hide_mousecursor();
-        termbox_write_dflat_cell(x, y, (videocell_t)c);
+        tb_set_cell(x, y, c.ch, c.fg, c.bg);
         show_mousecursor();
     }
 }
@@ -217,11 +183,15 @@ BOOL CharInView(WINDOW wnd, int x, int y)
 void wputch(WINDOW wnd, int c, int x, int y)
 {
     if (CharInView(wnd, x, y))    {
-        videocell_t ch = ((videocell_t)c) | ((videocell_t)clr(foreground, background) << 16);
+        uint32_t ch = c & 0xffff;
+        if (ch < 256)
+            ch = kCp437[ch];
+        int attr = clr(foreground, background);
         int xc = GetLeft(wnd)+x;
         int yc = GetTop(wnd)+y;
+
         hide_mousecursor();
-        termbox_write_dflat_cell(xc, yc, ch);
+        tb_set_cell(xc, yc, ch, tb_fg_from_attr(attr), tb_bg_from_attr(attr));
         show_mousecursor();
     }
 }
@@ -253,10 +223,16 @@ void wputs(WINDOW wnd, void *s, int x, int y)
                 str++;
                 continue;
             }
-            if (*str == ('\t' | 0x80) || *str == ('\f' | 0x80))
-                *cp1 = (videocell_t)' ' | ((videocell_t)clr(foreground, background) << 16);
-            else
-                *cp1 = ((videocell_t)(unsigned char)*str) | ((videocell_t)clr(foreground, background) << 16);
+            {
+                uint32_t ch = (unsigned char)*str;
+                if (*str == ('\t' | 0x80) || *str == ('\f' | 0x80))
+                    ch = ' ';
+                if (ch < 256 && (unsigned char)*str < 256)
+                    ch = kCp437[(unsigned char)*str];
+                cp1->ch = ch;
+                cp1->fg = tb_fg_from_attr(clr(foreground, background));
+                cp1->bg = tb_bg_from_attr(clr(foreground, background));
+            }
             if (ClipString)
                 if (!CharInView(wnd, x, y))
                     *cp1 = GetVideoChar(x2,y1);
@@ -299,7 +275,7 @@ void wputs(WINDOW wnd, void *s, int x, int y)
             int i;
             hide_mousecursor();
             for (i = 0; i < len; i++)
-                termbox_write_dflat_cell(x1+off+i, y1, ln[off+i]);
+                tb_set_cell(x1+off+i, y1, ln[off+i].ch, ln[off+i].fg, ln[off+i].bg);
             show_mousecursor();
         }
     }
@@ -347,25 +323,51 @@ void scroll_window(WINDOW wnd, RECT rc, int d)
     if (d) {
         for (y = y1; y < y2; y++)
             for (x = x1; x <= x2; x++) {
-                uint32_t ch;
-                uintattr_t fg, bg;
+                struct tb_cell *src = NULL;
+                struct tb_cell cell;
 
-                termbox_read_cell(x, y + 1, &ch, &fg, &bg);
-                termbox_write_cell(x, y, ch, fg, bg);
+                if (tb_get_cell(x, y + 1, 1, &src) == TB_OK && src != NULL) {
+                    cell.ch = src->ch;
+                    cell.fg = src->fg;
+                    cell.bg = src->bg;
+                } else {
+                    cell.ch = ' ';
+                    cell.fg = TB_DEFAULT;
+                    cell.bg = TB_DEFAULT;
+                }
+                tb_set_cell(x, y, cell.ch, cell.fg, cell.bg);
             }
-        for (x = x1; x <= x2; x++)
-            termbox_write_dflat_cell(x, y2, (videocell_t)' ' | ((videocell_t)attr << 16));
+        for (x = x1; x <= x2; x++) {
+            struct tb_cell cell;
+            cell.ch = ' ';
+            cell.fg = tb_fg_from_attr(attr);
+            cell.bg = tb_bg_from_attr(attr);
+            tb_set_cell(x, y2, cell.ch, cell.fg, cell.bg);
+        }
     } else {
         for (y = y2; y > y1; y--)
             for (x = x1; x <= x2; x++) {
-                uint32_t ch;
-                uintattr_t fg, bg;
+                struct tb_cell *src = NULL;
+                struct tb_cell cell;
 
-                termbox_read_cell(x, y - 1, &ch, &fg, &bg);
-                termbox_write_cell(x, y, ch, fg, bg);
+                if (tb_get_cell(x, y - 1, 1, &src) == TB_OK && src != NULL) {
+                    cell.ch = src->ch;
+                    cell.fg = src->fg;
+                    cell.bg = src->bg;
+                } else {
+                    cell.ch = ' ';
+                    cell.fg = TB_DEFAULT;
+                    cell.bg = TB_DEFAULT;
+                }
+                tb_set_cell(x, y, cell.ch, cell.fg, cell.bg);
             }
-        for (x = x1; x <= x2; x++)
-            termbox_write_dflat_cell(x, y1, (videocell_t)' ' | ((videocell_t)attr << 16));
+        for (x = x1; x <= x2; x++) {
+            struct tb_cell cell;
+            cell.ch = ' ';
+            cell.fg = tb_fg_from_attr(attr);
+            cell.bg = tb_bg_from_attr(attr);
+            tb_set_cell(x, y1, cell.ch, cell.fg, cell.bg);
+        }
     }
     show_mousecursor();
 }

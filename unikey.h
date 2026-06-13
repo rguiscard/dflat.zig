@@ -21,7 +21,6 @@ void tty_restore(void);
 void tty_fullbuffer(void);
 void tty_linebuffer(void);
 int tty_getsize(int *cols, int *rows);
-extern int iselksconsole;
 
 /* tty-cp437.c - display cp437 characters */
 char *tty_allocate_screen(int cols, int lines);

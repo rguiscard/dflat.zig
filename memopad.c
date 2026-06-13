@@ -503,13 +503,8 @@ static void FixTabMenu(void)
 	char *cp = GetCommandText(&MainMenu, ID_TABS);
 	if (cp != NULL)	{
 		cp = strchr(cp, '(');
-		if (cp != NULL)	{
-#if MSDOS | ELKS   /* can't overwrite .rodata */
-			*(cp+1) = cfg.Tabs + '0';
-#endif
-			if (inFocus && (GetClass(inFocus) == POPDOWNMENU))
+		if (cp != NULL && inFocus && (GetClass(inFocus) == POPDOWNMENU))
 				SendMessage(inFocus, PAINT, 0, 0);
-		}
 	}
 }
 
