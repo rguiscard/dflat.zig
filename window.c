@@ -385,7 +385,7 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
                 WindowHeight(wnd)-1);
 
 
-		if (wnd->StatusBar == NULL)	{
+	if (wnd->StatusBar == NULL)	{
         	/* ----------- bottom line ------------- */
         	memset(line,lin,WindowWidth(wnd)-1);
         	if (TestAttribute(wnd, HSCROLLBAR))    {
@@ -396,7 +396,7 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
         	}
         	line[WindowWidth(wnd)-2] = line[RectRight(rc)] = '\0';
         	if (RectLeft(rc) != RectRight(rc) ||
-	        	(RectLeft(rc) && RectLeft(rc) < WindowWidth(wnd)-1))	{
+        		(RectLeft(rc) && RectLeft(rc) < WindowWidth(wnd)-1))	{
 				if (wnd != inFocus)
 					ClipString++;
             	writeline(wnd,

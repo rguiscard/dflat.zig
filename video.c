@@ -184,6 +184,8 @@ void wputch(WINDOW wnd, int c, int x, int y)
 {
     if (CharInView(wnd, x, y))    {
         uint32_t ch = c & 0xffff;
+        /* Unicode box-drawing chars are > 256, use directly.
+         * CP437 bytes 0-255 are converted for backward compatibility. */
         if (ch < 256)
             ch = kCp437[ch];
         int attr = clr(foreground, background);

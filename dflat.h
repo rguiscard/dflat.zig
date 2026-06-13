@@ -259,33 +259,33 @@ extern int CurrentMenuSelection;
 /* --------- space between menubar labels --------- */
 #define MSPACE 2
 /* --------------- border characters ------------- */
-#define FOCUS_NW      (unsigned char) '\xc9'
-#define FOCUS_NE      (unsigned char) '\xbb'
-#define FOCUS_SE      (unsigned char) '\xbc'
-#define FOCUS_SW      (unsigned char) '\xc8'
-#define FOCUS_SIDE    (unsigned char) '\xba'
-#define FOCUS_LINE    (unsigned char) '\xcd'
-#define NW            (unsigned char) '\xda'
-#define NE            (unsigned char) '\xbf'
-#define SE            (unsigned char) '\xd9'
-#define SW            (unsigned char) '\xc0'
-#define SIDE          (unsigned char) '\xb3'
-#define LINE          (unsigned char) '\xc4'
-#define LEDGE         (unsigned char) '\xc3'
-#define REDGE         (unsigned char) '\xb4'
-#define SIZETOKEN     (unsigned char) '\x04'
+#define FOCUS_NW      0x2554  /* ╔ double line top-left */
+#define FOCUS_NE      0x2557  /* ╗ double line top-right */
+#define FOCUS_SE      0x255d  /* ╝ double line bottom-right */
+#define FOCUS_SW      0x255a  /* ╚ double line bottom-left */
+#define FOCUS_SIDE    0xba    /* ║ (byte value, converted via kCp437) */
+#define FOCUS_LINE    0xcd    /* ═ (byte value, converted via kCp437) */
+#define NW            0xda    /* ┌ (byte value, converted via kCp437) */
+#define NE            0xbf    /* ┐ (byte value, converted via kCp437) */
+#define SE            0xd9    /* └ (byte value, converted via kCp437) */
+#define SW            0xc0    /* ┘ (byte value, converted via kCp437) */
+#define SIDE          0xb3    /* │ (byte value, converted via kCp437) */
+#define LINE          0xc4    /* ─ (byte value, converted via kCp437) */
+#define LEDGE         0xc3    /* ├ (byte value, converted via kCp437) */
+#define REDGE         0xb4    /* ┤ (byte value, converted via kCp437) */
+#define SIZETOKEN     0x2588  /* █ block (was CP437 0x04) */
 /* ------------- scroll bar characters ------------ */
-#define UPSCROLLBOX    (unsigned char) '\x1e'
-#define DOWNSCROLLBOX  (unsigned char) '\x1f'
-#define LEFTSCROLLBOX  (unsigned char) '\x11'
-#define RIGHTSCROLLBOX (unsigned char) '\x10'
-#define SCROLLBARCHAR  (unsigned char) 176 
-#define SCROLLBOXCHAR  (unsigned char) 178
+#define UPSCROLLBOX    0x1e  /* ▲ up triangle (byte, converted via kCp437) */
+#define DOWNSCROLLBOX  0x1f  /* ▼ down triangle (byte, converted via kCp437) */
+#define LEFTSCROLLBOX  0x11  /* ◅ left triangle (byte, converted via kCp437) */
+#define RIGHTSCROLLBOX 0x10  /* ▻ right triangle (byte, converted via kCp437) */
+#define SCROLLBARCHAR  0xb0  /* ░ light shade (byte, converted via kCp437) */
+#define SCROLLBOXCHAR  0xb2  /* ▓ dark shade (byte, converted via kCp437) */
 /* ------------------ menu characters --------------------- */
-#define CHECKMARK      (unsigned char) (SCREENHEIGHT==25?251:4)
-#define CASCADEPOINTER (unsigned char) '\x10'
+#define CHECKMARK      0x2713  /* ✓ check mark */
+#define CASCADEPOINTER 0x25c5  /* ◅ cascade pointer */
 /* ----------------- title bar characters ----------------- */
-#define CONTROLBOXCHAR (unsigned char) '\xf0'
+#define CONTROLBOXCHAR 0xf0    /* ◼ control box */
 #define MAXPOINTER     24      /* maximize token            */
 #define MINPOINTER     25      /* minimize token            */
 #define RESTOREPOINTER 18      /* restore token             */
