@@ -9,9 +9,9 @@ static void AllocationError(void)
 	extern jmp_buf AllocError;
 	extern BOOL AllocTesting;
 	static char *ErrMsg[] = {
-		"旼컴컴컴컴컴컴컴커",
-		"� Out of Memory! �",
-		"읕컴컴컴컴컴컴컴켸"
+		"+----------------+",
+		"| Out of Memory! |",
+		"+----------------+"
 	};
 	int x, y;
 	videocell_t *savbuf = DFmalloc(216 * sizeof(videocell_t));
@@ -27,7 +27,7 @@ static void AllocationError(void)
 		for (x = 0; x < 18; x++)	{
 			for (y = 0; y < 3; y++)		{
 				videocell_t c;
-				c.ch = kCp437[(unsigned char)(*(*(ErrMsg+y)+x))];
+				c.ch = (unsigned char)(*(*(ErrMsg+y)+x));
 				c.fg = fg_attr;
 				c.bg = bg_attr;
 				PutVideoChar(x+rc.lf, y+rc.tp, c);

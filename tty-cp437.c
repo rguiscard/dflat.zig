@@ -62,6 +62,7 @@ static char *attr_to_ansi(char *buf, unsigned int attr)
 int cp437tostr(char *s, int c)
 {
     return runetostr(s, kCp437[c & 255]);
+//    return runetostr(s, c & 255);
 }
 
 static int COLS = 80;
