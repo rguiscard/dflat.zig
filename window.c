@@ -392,7 +392,7 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
                 int hscroll = wnd->HScrollBox+1;
                 wputch(wnd, LEFTSCROLLBOX, left, WindowHeight(wnd)-1);
                 if (right > left+1)
-                    wputuchline(wnd, (uint32_t)kCp437[SCROLLBARCHAR], left+1,
+                    wputuchline(wnd, (uint32_t)SCROLLBARCHAR, left+1,
                         WindowHeight(wnd)-1, right-left-1);
                 wputch(wnd, RIGHTSCROLLBOX, right, WindowHeight(wnd)-1);
                 if (hscroll < left+1)

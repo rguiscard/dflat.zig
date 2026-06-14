@@ -275,12 +275,12 @@ extern int CurrentMenuSelection;
 #define REDGE         0x2524    /* ┤ */
 #define SIZETOKEN     0x2588  /* █ block (was CP437 0x04) */
 /* ------------- scroll bar characters ------------ */
-#define UPSCROLLBOX    0x1e  /* ▲ up triangle (byte, converted via kCp437) */
-#define DOWNSCROLLBOX  0x1f  /* ▼ down triangle (byte, converted via kCp437) */
-#define LEFTSCROLLBOX  0x11  /* ◅ left triangle (byte, converted via kCp437) */
-#define RIGHTSCROLLBOX 0x10  /* ▻ right triangle (byte, converted via kCp437) */
-#define SCROLLBARCHAR  0xb0  /* ░ light shade (byte, converted via kCp437) */
-#define SCROLLBOXCHAR  0xb2  /* ▓ dark shade (byte, converted via kCp437) */
+#define UPSCROLLBOX    0x25b2  /* ▲ */
+#define DOWNSCROLLBOX  0x25bc  /* ▼ */
+#define LEFTSCROLLBOX  0x25c4  /* ◀ */
+#define RIGHTSCROLLBOX 0x25ba  /* ▶ */
+#define SCROLLBARCHAR  0x2591  /* ░ */
+#define SCROLLBOXCHAR  0x2593  /* ▓ */
 /* ------------------ menu characters --------------------- */
 #define CHECKMARK      0x2713  /* ✓ check mark */
 #define CASCADEPOINTER 0x25c5  /* ◅ cascade pointer */
