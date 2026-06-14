@@ -162,36 +162,46 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
             	foreground = cfg.clr[TITLEBAR] [STD_COLOR] [FG];
             	background = cfg.clr[TITLEBAR] [STD_COLOR] [BG];
         	}
-        	memset(line,' ',WindowWidth(wnd));
+        	uint32_t titleLine[MAXCOLS];
+        	int titleStart = (WindowWidth(wnd)-2 - tlen) / 2;
+        	int i;
+
+        	for (i = 0; i < WindowWidth(wnd); i++)
+            	titleLine[i] = ' ';
 #ifdef INCLUDE_MINIMIZE
         	if (wnd->condition != ISMINIMIZED)
 #endif
-            	strncpy(line + ((WindowWidth(wnd)-2 - tlen) / 2),
-                	wnd->title, tlen);
+        	{
+            	for (i = 0; i < tlen; i++)    {
+                	unsigned char c = (unsigned char)wnd->title[i];
+                	titleLine[titleStart+i] = (c == CHANGECOLOR || c == RESETCOLOR) ?
+                    	c : kCp437[c];
+            	}
+        	}
         	if (TestAttribute(wnd, CONTROLBOX))
-            	line[2-BorderAdj(wnd)] = CONTROLBOXCHAR;
+            	titleLine[2-BorderAdj(wnd)] = CONTROLBOXCHAR;
         	if (TestAttribute(wnd, MINMAXBOX))    {
             	switch (wnd->condition)    {
                 	case ISRESTORED:
 #ifdef INCLUDE_MAXIMIZE
-                    	line[tend+1] = MAXPOINTER;
+                    	titleLine[tend+1] = MAXPOINTER;
 #endif
 #ifdef INCLUDE_MINIMIZE
-                    	line[tend]   = MINPOINTER;
+                    	titleLine[tend]   = MINPOINTER;
 #endif
                     	break;
 #ifdef INCLUDE_MINIMIZE
                 	case ISMINIMIZED:
-                    	line[tend+1] = MAXPOINTER;
+                    	titleLine[tend+1] = MAXPOINTER;
                     	break;
 #endif
 #ifdef INCLUDE_MAXIMIZE
                 	case ISMAXIMIZED:
 #ifdef INCLUDE_MINIMIZE
-                    	line[tend]   = MINPOINTER;
+                    	titleLine[tend]   = MINPOINTER;
 #endif
 #ifdef INCLUDE_RESTORE
-                    	line[tend+1] = RESTOREPOINTER;
+                    	titleLine[tend+1] = RESTOREPOINTER;
 #endif
                     	break;
 #endif
@@ -199,13 +209,12 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
                     	break;
             	}
         	}
-        	line[RectRight(rc)+1] = line[tend+3] = '\0';
+        	titleLine[RectRight(rc)+1] = titleLine[tend+3] = 0;
 			if (wnd != inFocus)
 				ClipString++;
-        	writeline(wnd, line+RectLeft(rc),
+        	wputuline(wnd, titleLine+RectLeft(rc),
                        	RectLeft(rc)+BorderAdj(wnd),
-                       	0,
-                       	FALSE);
+                       	0);
 			ClipString = 0;
     	}
 	}

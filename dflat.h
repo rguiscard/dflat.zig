@@ -286,10 +286,10 @@ extern int CurrentMenuSelection;
 #define CASCADEPOINTER 0x25c5  /* ◅ cascade pointer */
 #define MENU_SEPARATOR 0xc4    /* byte marker for menu separator */
 /* ----------------- title bar characters ----------------- */
-#define CONTROLBOXCHAR 0xf0    /* ◼ control box */
-#define MAXPOINTER     24      /* maximize token            */
-#define MINPOINTER     25      /* minimize token            */
-#define RESTOREPOINTER 18      /* restore token             */
+#define CONTROLBOXCHAR 0x2261  /* ≡ (was CP437 0xf0) */
+#define MAXPOINTER     0x2195  /* ↕ (was CP437 0x18) */
+#define MINPOINTER     0x203c  /* ‼ (was CP437 0x19) */
+#define RESTOREPOINTER 0x25ba  /* ▶ (was CP437 0x12) */
 /* --------------- text control characters ---------------- */
 #define APPLCHAR     0x2591 /* fills application window */
 #define SHORTCUTCHAR '~'    /* prefix: shortcut key display */
