@@ -42,7 +42,7 @@ static void UpKey(WINDOW wnd, PARAM p2)
         else    {
             int newsel = wnd->selection-1;
             if (wnd->wlines == ClientHeight(wnd))
-                while (*TextLine(wnd, newsel) == LINE)
+                while (*TextLine(wnd, newsel) == MENU_SEPARATOR)
                     --newsel;
             PostMessage(wnd, LB_SELECTION, newsel,
 #ifdef INCLUDE_EXTENDEDSELECTIONS
@@ -65,7 +65,7 @@ static void DnKey(WINDOW wnd, PARAM p2)
         else    {
             int newsel = wnd->selection+1;
             if (wnd->wlines == ClientHeight(wnd))
-                while (*TextLine(wnd, newsel) == LINE)
+                while (*TextLine(wnd, newsel) == MENU_SEPARATOR)
                     newsel++;
             PostMessage(wnd, LB_SELECTION, newsel,
 #ifdef INCLUDE_EXTENDEDSELECTIONS

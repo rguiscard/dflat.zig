@@ -33,7 +33,8 @@ videocell_t GetVideoChar(int, int);
 void PutVideoChar(int, int, videocell_t);
 void get_videomode(void);
 void wputs(WINDOW, void *, int, int);
-void wputuline(WINDOW, uint32_t, int, int, int);
+void wputuline(WINDOW, uint32_t *, int, int);
+void wputuchline(WINDOW, uint32_t, int, int, int);
 void scroll_window(WINDOW, RECT, int);
 
 /* Color conversion functions - used by callers that need to construct cell values */

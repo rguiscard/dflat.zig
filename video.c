@@ -283,7 +283,83 @@ void wputs(WINDOW wnd, void *s, int x, int y)
     }
 }
 
-void wputuline(WINDOW wnd, uint32_t ch, int x, int y, int len)
+void wputuline(WINDOW wnd, uint32_t *s, int x, int y)
+{
+    int x1 = GetLeft(wnd)+x;
+    int x2 = x1;
+    int y1 = GetTop(wnd)+y;
+    if (x1 < SCREENWIDTH && y1 < SCREENHEIGHT && isVisible(wnd))	{
+        videocell_t ln[MAXCOLS];
+        videocell_t *cp1 = ln;
+        uint32_t *str = s;
+        int fg = foreground;
+        int bg = background;
+        int len;
+        int off = 0;
+        while (*str && cp1 < ln+MAXCOLS)    {
+            if (*str == CHANGECOLOR)    {
+                str++;
+                foreground = (*str++) & 0x7f;
+                background = (*str++) & 0x7f;
+                continue;
+            }
+            if (*str == RESETCOLOR)    {
+                foreground = fg & 0x7f;
+                background = bg & 0x7f;
+                str++;
+                continue;
+            }
+            cp1->ch = *str;
+            cp1->fg = tb_fg_from_attr(clr(foreground, background));
+            cp1->bg = tb_bg_from_attr(clr(foreground, background));
+            if (ClipString)
+                if (!CharInView(wnd, x, y))
+                    *cp1 = GetVideoChar(x2,y1);
+            cp1++;
+            str++;
+            x++;
+            x2++;
+        }
+        foreground = fg;
+        background = bg;
+        len = (int)(cp1-ln);
+        if (x1+len > SCREENWIDTH)
+            len = SCREENWIDTH-x1;
+
+        if (!ClipString && !TestAttribute(wnd, NOCLIP))	{
+            RECT rc = WindowRect(wnd);
+            WINDOW nwnd = GetParent(wnd);
+            while (len > 0 && nwnd != NULL)	{
+                if (!isVisible(nwnd))	{
+                    len = 0;
+                    break;
+                }
+                rc = subRectangle(rc, ClientRect(nwnd));
+                nwnd = GetParent(nwnd);
+            }
+            while (len > 0 && !InsideRect(x1+off,y1,rc))	{
+                off++;
+                --len;
+            }
+            if (len > 0)	{
+                x2 = x1+len-1;
+                while (len && !InsideRect(x2,y1,rc))	{
+                    --x2;
+                    --len;
+                }
+            }
+        }
+        if (len > 0) {
+            int i;
+            hide_mousecursor();
+            for (i = 0; i < len; i++)
+                tb_set_cell(x1+off+i, y1, ln[off+i].ch, ln[off+i].fg, ln[off+i].bg);
+            show_mousecursor();
+        }
+    }
+}
+
+void wputuchline(WINDOW wnd, uint32_t ch, int x, int y, int len)
 {
     int x1 = GetLeft(wnd)+x;
     int x2 = x1;

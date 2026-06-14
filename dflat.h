@@ -264,15 +264,15 @@ extern int CurrentMenuSelection;
 #define FOCUS_SE      0x255d  /* ╝ double line bottom-right */
 #define FOCUS_SW      0x255a  /* ╚ double line bottom-left */
 #define FOCUS_SIDE    0x2551    /* ║ */
-#define FOCUS_LINE    0xcd    /* ═ (byte value, converted via kCp437) */
+#define FOCUS_LINE    0x2550    /* ═ */
 #define NW            0x250c    /* ┌ */
 #define NE            0x2510    /* ┐ */
 #define SE            0x2518    /* ┘ */
 #define SW            0x2514    /* └ */
 #define SIDE          0x2502    /* │ */
-#define LINE          0xc4    /* ─ (byte value, converted via kCp437) */
-#define LEDGE         0xc3    /* ├ (byte value, converted via kCp437) */
-#define REDGE         0xb4    /* ┤ (byte value, converted via kCp437) */
+#define LINE          0x2500    /* ─ */
+#define LEDGE         0x251c    /* ├ */
+#define REDGE         0x2524    /* ┤ */
 #define SIZETOKEN     0x2588  /* █ block (was CP437 0x04) */
 /* ------------- scroll bar characters ------------ */
 #define UPSCROLLBOX    0x1e  /* ▲ up triangle (byte, converted via kCp437) */
@@ -284,6 +284,7 @@ extern int CurrentMenuSelection;
 /* ------------------ menu characters --------------------- */
 #define CHECKMARK      0x2713  /* ✓ check mark */
 #define CASCADEPOINTER 0x25c5  /* ◅ cascade pointer */
+#define MENU_SEPARATOR 0xc4    /* byte marker for menu separator */
 /* ----------------- title bar characters ----------------- */
 #define CONTROLBOXCHAR 0xf0    /* ◼ control box */
 #define MAXPOINTER     24      /* maximize token            */

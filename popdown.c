@@ -58,7 +58,7 @@ static BOOL ButtonReleasedMsg(WINDOW wnd, PARAM p1, PARAM p2)
     py = -1;
     if (InsideRect((int)p1, (int)p2, ClientRect(wnd)))    {
         int sel = (int)p2 - GetClientTop(wnd);
-        if (*TextLine(wnd, sel) != LINE)
+        if (*TextLine(wnd, sel) != MENU_SEPARATOR)
             SendMessage(wnd, LB_CHOOSE, wnd->selection, 0);
     }
     else    {
@@ -84,13 +84,12 @@ static void PaintMsg(WINDOW wnd)
 
     ActivePopDown = pd1 = wnd->mnu->Selections;
     wd = MenuWidth(ActivePopDown)-2;
-    while (wd--)
-        *cp++ = LINE;
-    *cp = '\0';
+    sep[0] = MENU_SEPARATOR;
+    sep[1] = '\0';
     SendMessage(wnd, CLEARTEXT, 0, 0);
     wnd->selection = wnd->mnu->Selection;
     while (pd1->SelectionTitle != NULL)    {
-        if (*pd1->SelectionTitle == LINE)
+        if (*pd1->SelectionTitle == MENU_SEPARATOR)
             SendMessage(wnd, ADDTEXT, (PARAM) sep, 0);
         else    {
             int len;
@@ -162,7 +161,8 @@ static int BorderMsg(WINDOW wnd)
         rtn = BaseWndProc(POPDOWNMENU, wnd, BORDER, 0, 0);
         inFocus = currFocus;
         for (i = 0; i < ClientHeight(wnd); i++)    {
-            if (*TextLine(wnd, i) == LINE)    {
+            if (*TextLine(wnd, i) == MENU_SEPARATOR)    {
+                wputuchline(wnd, (uint32_t)LINE, 1, i+1, WindowWidth(wnd)-2);
                 wputch(wnd, LEDGE, 0, i+1);
                 wputch(wnd, REDGE, WindowWidth(wnd)-1, i+1);
             }
@@ -295,7 +295,7 @@ int PopDownProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case DOUBLE_CLICK:
             return TRUE;
         case LB_SELECTION:
-            if (*TextLine(wnd, (int)p1) == LINE)
+            if (*TextLine(wnd, (int)p1) == MENU_SEPARATOR)
                 return TRUE;
             wnd->mnu->Selection = (int)p1;
             break;

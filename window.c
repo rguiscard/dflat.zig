@@ -331,23 +331,24 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
         se   = SeCorner(wnd, SE);
         sw   = SW;
     }
-    line[WindowWidth(wnd)] = '\0';
+    foreground = FrameForeground(wnd);
+    background = FrameBackground(wnd);
     /* ---------- window title ------------ */
     if (TestAttribute(wnd, HASTITLEBAR))
         if (RectTop(rc) == 0)
             if (RectLeft(rc) < WindowWidth(wnd)-BorderAdj(wnd))
                 DisplayTitle(wnd, &rc);
-    foreground = FrameForeground(wnd);
-    background = FrameBackground(wnd);
     /* -------- top frame corners --------- */
     if (RectTop(rc) == 0)    {
-        if (RectLeft(rc) == 0)
-            wputch(wnd, nw, 0, 0);
         if (RectLeft(rc) < WindowWidth(wnd))    {
             if (RectRight(rc) >= WindowWidth(wnd)-1)
-                wputch(wnd, ne, WindowWidth(wnd)-1, 0);
-            TopLine(wnd, lin, clrc);
+                TopLine(wnd, lin, clrc);
         }
+        if (RectLeft(rc) == 0)
+            wputch(wnd, nw, 0, 0);
+        if (RectLeft(rc) < WindowWidth(wnd))
+            if (RectRight(rc) >= WindowWidth(wnd)-1)
+                wputch(wnd, ne, WindowWidth(wnd)-1, 0);
     }
 
     /* ----------- window body ------------ */
@@ -376,6 +377,31 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
 
     if (RectTop(rc) <= WindowHeight(wnd)-1 &&
             RectBottom(rc) >= WindowHeight(wnd)-1)    {
+        if (wnd->StatusBar == NULL)    {
+            if (RectLeft(rc) != RectRight(rc) ||
+                    (RectLeft(rc) && RectLeft(rc) < WindowWidth(wnd)-1))    {
+                int left = RectLeft(clrc)+1;
+                int right = min(RectRight(rc)-1, WindowWidth(wnd)-2);
+                if (left <= right)
+                    wputuchline(wnd, (uint32_t)lin, left,
+                        WindowHeight(wnd)-1, right-left+1);
+            }
+            if (TestAttribute(wnd, HSCROLLBAR))    {
+                int left = 1;
+                int right = WindowWidth(wnd)-2;
+                int hscroll = wnd->HScrollBox+1;
+                wputch(wnd, LEFTSCROLLBOX, left, WindowHeight(wnd)-1);
+                if (right > left+1)
+                    wputuchline(wnd, (uint32_t)kCp437[SCROLLBARCHAR], left+1,
+                        WindowHeight(wnd)-1, right-left-1);
+                wputch(wnd, RIGHTSCROLLBOX, right, WindowHeight(wnd)-1);
+                if (hscroll < left+1)
+                    hscroll = left+1;
+                if (hscroll > right-1)
+                    hscroll = right-1;
+                wputch(wnd, SCROLLBOXCHAR, hscroll, WindowHeight(wnd)-1);
+            }
+        }
         /* -------- bottom frame corners ---------- */
         if (RectLeft(rc) == 0)
             wputch(wnd, sw, 0, WindowHeight(wnd)-1);
@@ -383,30 +409,6 @@ void RepaintBorder(WINDOW wnd, RECT *rcc)
                 RectRight(rc) >= WindowWidth(wnd)-1)
             wputch(wnd, se, WindowWidth(wnd)-1,
                 WindowHeight(wnd)-1);
-
-
-	if (wnd->StatusBar == NULL)	{
-        	/* ----------- bottom line ------------- */
-        	memset(line,lin,WindowWidth(wnd)-1);
-        	if (TestAttribute(wnd, HSCROLLBAR))    {
-            	line[0] = LEFTSCROLLBOX;
-            	line[WindowWidth(wnd)-3] = RIGHTSCROLLBOX;
-            	memset(line+1, SCROLLBARCHAR, WindowWidth(wnd)-4);
-            	line[wnd->HScrollBox] = SCROLLBOXCHAR;
-        	}
-        	line[WindowWidth(wnd)-2] = line[RectRight(rc)] = '\0';
-        	if (RectLeft(rc) != RectRight(rc) ||
-        		(RectLeft(rc) && RectLeft(rc) < WindowWidth(wnd)-1))	{
-				if (wnd != inFocus)
-					ClipString++;
-            	writeline(wnd,
-                			line+(RectLeft(clrc)),
-                			RectLeft(clrc)+1,
-                			WindowHeight(wnd)-1,
-                			FALSE);
-				ClipString = 0;
-			}
-		}
         if (RectRight(rc) == WindowWidth(wnd))
             shadow_char(wnd, WindowHeight(wnd)-1);
     }
@@ -425,19 +427,16 @@ static void TopLine(WINDOW wnd, int lin, RECT rc)
 		RectLeft(rc) += BorderAdj(wnd);
 		RectRight(rc) += BorderAdj(wnd);
 	}
-	if (RectRight(rc) < WindowWidth(wnd)-1)
+	if (RectRight(rc) >= WindowWidth(wnd))
+		RectRight(rc) = WindowWidth(wnd)-1;
+	else if (RectRight(rc) < WindowWidth(wnd)-1)
 		RectRight(rc)++;
 
     if (RectLeft(rc) < RectRight(rc))    {
-        /* ----------- top line ------------- */
-        memset(line,lin,WindowWidth(wnd)-1);
-		if (TestAttribute(wnd, CONTROLBOX))	{
-			strncpy(line+1, "   ", 3);
-			*(line+2) = CONTROLBOXCHAR;
-		}
-        line[RectRight(rc)] = '\0';
-        writeline(wnd, line+RectLeft(rc),
-            RectLeft(rc), 0, FALSE);
+        wputuchline(wnd, (uint32_t)lin, RectLeft(rc), 0,
+            RectRight(rc)-RectLeft(rc)+1);
+        if (TestAttribute(wnd, CONTROLBOX))
+            wputch(wnd, CONTROLBOXCHAR, RectLeft(rc)+2, 0);
     }
 }
 
@@ -461,10 +460,11 @@ void ClearWindow(WINDOW wnd, RECT *rcc, int clrchar)
             for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
                 if (y < top || y > bot)
                     continue;
-                wputuline(wnd, (uint32_t)clrchar, RectLeft(rc), y, len);
+                wputuchline(wnd, (uint32_t)clrchar, RectLeft(rc), y, len);
             }
             return;
         }
+        // This can be removed if cp437 is not in use
         memset(line, clrchar, sizeof line);
         line[RectRight(rc)+1] = '\0';
         for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
