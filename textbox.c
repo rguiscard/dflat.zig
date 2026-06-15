@@ -800,9 +800,16 @@ void WriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
     else
         SetStandardColor(wnd);
     /* ------- display the line -------- */
-    writeline(wnd, line+dif,
-                RectLeft(rc)+BorderAdj(wnd),
-                    y-wnd->wtop+TopBorderAdj(wnd));
+    {
+        uint32_t uline[MAXCOLS];
+        int ui;
+        for (ui = 0; ui < MAXCOLS-1 && line[dif+ui]; ui++)
+            uline[ui] = (uint32_t)(unsigned char)line[dif+ui];
+        uline[ui] = 0;
+        writeline(wnd, uline,
+                    RectLeft(rc)+BorderAdj(wnd),
+                        y-wnd->wtop+TopBorderAdj(wnd));
+    }
     free(svlp);
 }
 

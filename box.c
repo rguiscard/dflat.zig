@@ -16,8 +16,14 @@ int BoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
                 return SendMessage(GetParent(wnd), msg, p1, p2);
             case BORDER:
                 rtn = BaseWndProc(BOX, wnd, msg, p1, p2);
-                if (ct != NULL && ct->itext != NULL)
-                    writeline(wnd, ct->itext, 1, 0);
+                if (ct != NULL && ct->itext != NULL)    {
+                    uint32_t textBuf[MAXCOLS];
+                    int i;
+                    for (i = 0; i < MAXCOLS-1 && ct->itext[i]; i++)
+                        textBuf[i] = (uint32_t)(unsigned char)ct->itext[i];
+                    textBuf[i] = 0;
+                    writeline(wnd, textBuf, 1, 0);
+                }
                 return rtn;
             default:
                 break;

@@ -93,21 +93,48 @@ void InsertTitle(WINDOW wnd, const char *ttl)
     strcpy(wnd->title, ttl);
 }
 
-static unsigned char line[MAXCOLS];
+static uint32_t line[MAXCOLS];
+static uint32_t uline[MAXCOLS];
+
+static int LineLengthU32(uint32_t *ln)
+{
+    int len = 0;
+    uint32_t *cp = ln;
+    while (*cp)    {
+        if (*cp == CHANGECOLOR)    {
+            cp += 3;
+            continue;
+        }
+        if (*cp == RESETCOLOR)    {
+            cp++;
+            continue;
+        }
+        len++;
+        cp++;
+    }
+    return len;
+}
 
 /* ------ write a line to video window client area ------ */
-void writeline(WINDOW wnd, char *str, int x, int y)
+void writeline(WINDOW wnd, uint32_t *str, int x, int y)
 {
-    char *cp;
     int len;
     int dif;
-    char wline[MAXCOLS];
+    uint32_t *cp;
 
-    memset(wline, 0, sizeof(wline));
-    len = LineLength(str);
-    dif = strlen(str) - len;
-    strncpy(wline, str, ClientWidth(wnd) + dif);
-    wputs(wnd, wline, x, y);
+    len = LineLengthU32(str);
+    dif = 0;
+    for (cp = str; *cp; cp++)    {
+        if (*cp == CHANGECOLOR)
+            dif += 3;
+        else if (*cp == RESETCOLOR)
+            dif++;
+    }
+    dif = (int)(cp - str) - len;
+    for (cp = str; *cp && cp < str + ClientWidth(wnd) + dif; cp++)
+        ;
+    len = (int)(cp - str);
+    wputuline(wnd, str, x, y, len);
 }
 
 RECT AdjustRectangle(WINDOW wnd, RECT rc)
@@ -210,9 +237,9 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
         	titleLine[RectRight(rc)+1] = titleLine[tend+3] = 0;
 			if (wnd != inFocus)
 				ClipString++;
-        	wputuline(wnd, titleLine+RectLeft(rc),
-                       	RectLeft(rc)+BorderAdj(wnd),
-                       	0);
+         	wputuline(wnd, titleLine+RectLeft(rc),
+                        	RectLeft(rc)+BorderAdj(wnd),
+                        	0, RectRight(rc)-RectLeft(rc)+1);
 			ClipString = 0;
     	}
 	}
@@ -272,8 +299,14 @@ static void near shadowline(WINDOW wnd, RECT rc)
     if (RectLeft(rc) == 0)
         rc.lf++;
 	ClipString++;
-    wputs(wnd, line+RectLeft(rc), RectLeft(rc),
-        WindowHeight(wnd));
+    {
+        int shadowlen = 0;
+        uint32_t *sp;
+        for (sp = line+RectLeft(rc); *sp && shadowlen < MAXCOLS; sp++)
+            shadowlen++;
+        wputuline(wnd, line+RectLeft(rc), RectLeft(rc),
+            WindowHeight(wnd), shadowlen);
+    }
 	--ClipString;
     foreground = fg;
     background = bg;

@@ -287,7 +287,7 @@ void wputs(WINDOW wnd, void *s, int x, int y)
     }
 }
 
-void wputuline(WINDOW wnd, uint32_t *s, int x, int y)
+void wputuline(WINDOW wnd, uint32_t *s, int x, int y, int slen)
 {
     int x1 = GetLeft(wnd)+x;
     int x2 = x1;
@@ -298,9 +298,10 @@ void wputuline(WINDOW wnd, uint32_t *s, int x, int y)
         uint32_t *str = s;
         int fg = foreground;
         int bg = background;
-        int len;
+        int len = 0;
         int off = 0;
-        while (*str && cp1 < ln+MAXCOLS)    {
+        int i;
+        while (*str && len < slen && cp1 < ln+MAXCOLS)    {
             if (*str == CHANGECOLOR)    {
                 str++;
                 foreground = (*str++) & 0x7f;
@@ -323,10 +324,10 @@ void wputuline(WINDOW wnd, uint32_t *s, int x, int y)
             str++;
             x++;
             x2++;
+            len++;
         }
         foreground = fg;
         background = bg;
-        len = (int)(cp1-ln);
         if (x1+len > SCREENWIDTH)
             len = SCREENWIDTH-x1;
 
