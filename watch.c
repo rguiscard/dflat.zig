@@ -6,8 +6,8 @@ int WatchIconProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 {
     int rtn, i;
 	static int tick = 0;
-	static char *hands[] = {
-		" À ", " Ú ", " ¿ ", " Ù "
+	static const uint32_t hands[] = {
+		0x2514, 0x250C, 0x2510, 0x2518
 	};
     switch (msg)    {
         case CREATE_WINDOW:
@@ -25,11 +25,13 @@ int WatchIconProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
 			/* (fall through and paint) */
         case PAINT:
             SetStandardColor(wnd);
-            writeline(wnd, hands[tick], 1, 1, FALSE);
+            wputch(wnd, ' ', 1, 1);
+            wputch(wnd, hands[tick], 2, 1);
+            wputch(wnd, ' ', 3, 1);
             return TRUE;
         case BORDER:
             rtn = DefaultWndProc(wnd, msg, p1, p2);
-            writeline(wnd, "Í", 2, 0, FALSE);
+            wputch(wnd, 0x2550, 2, 0);
             return rtn;
         case MOUSE_MOVED:
             SendMessage(wnd, HIDE_WINDOW, 0, 0);

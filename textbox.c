@@ -364,7 +364,6 @@ static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
     /* ------ paint the client area ----- */
     RECT rc, rcc;
     int y;
-    char blankline[MAXCOLS];
 
     /* ----- build the rectangle to paint ----- */
     if ((RECT *)p1 == NULL)
@@ -381,10 +380,6 @@ static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
 
 	if (!p2 && wnd != inFocus)
 		ClipString++;
-
-    /* ----- blank line for padding ----- */
-    memset(blankline, ' ', SCREENWIDTH);
-    blankline[RectRight(rcc)+1] = '\0';
 
     /* ------- each line within rectangle ------ */
     for (y = RectTop(rc); y <= RectBottom(rc); y++){
@@ -405,8 +400,7 @@ static void PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
         else    {
             /* ---- paint a blank line ---- */
             SetStandardColor(wnd);
-            writeline(wnd, blankline+RectLeft(rcc),
-                    RectLeft(rcc)+BorderAdj(wnd), y, FALSE);
+	    wputuchline(wnd, ' ', RectLeft(rcc)+BorderAdj(wnd), y, ClientWidth(wnd));
         }
     }
     /* ------- position the scroll box ------- */
