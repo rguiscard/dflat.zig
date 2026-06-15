@@ -802,7 +802,7 @@ void WriteTextLine(WINDOW wnd, RECT *rcc, int y, BOOL reverse)
     /* ------- display the line -------- */
     writeline(wnd, line+dif,
                 RectLeft(rc)+BorderAdj(wnd),
-                    y-wnd->wtop+TopBorderAdj(wnd), FALSE);
+                    y-wnd->wtop+TopBorderAdj(wnd));
     free(svlp);
 }
 

@@ -1,0 +1,94 @@
+Segmentation fault at address 0x1c30000
+/home/rguiscard/Projects/dflat.zig/popdown.c:393:21: 0x12296bd in CopyCommand (/home/rguiscard/Projects/dflat.zig/popdown.c)
+            *dest++ = *src++;
+                    ^
+/home/rguiscard/Projects/dflat.zig/text.c:40:17: 0x1295335 in TextProc (/home/rguiscard/Projects/dflat.zig/text.c)
+                CopyCommand(txt, txt, FALSE, WndBackground(wnd));
+                ^
+/home/rguiscard/Projects/dflat.zig/dialbox.c:751:12: 0x12601d3 in ControlProc (/home/rguiscard/Projects/dflat.zig/dialbox.c)
+    return DefaultWndProc(wnd, msg, p1, p2);
+           ^
+/home/rguiscard/Projects/dflat.zig/message.c:272:24: 0x1263f37 in SendMessage (/home/rguiscard/Projects/dflat.zig/message.c)
+	                rtn = (*wnd->wndproc)(wnd, msg, p1, p2);
+                       ^
+/home/rguiscard/Projects/dflat.zig/normal.c:56:9: 0x122bb61 in ShowWindowMsg (/home/rguiscard/Projects/dflat.zig/normal.c)
+        SendMessage(wnd, PAINT, 0, TRUE);
+        ^
+/home/rguiscard/Projects/dflat.zig/normal.c:611:13: 0x122ae91 in NormalProc (/home/rguiscard/Projects/dflat.zig/normal.c)
+            ShowWindowMsg(wnd, p1, p2);
+            ^
+/home/rguiscard/Projects/dflat.zig/textbox.c:497:12: 0x12439d8 in TextBoxProc (/home/rguiscard/Projects/dflat.zig/textbox.c)
+    return BaseWndProc(TEXTBOX, wnd, msg, p1, p2);
+           ^
+/home/rguiscard/Projects/dflat.zig/text.c:53:12: 0x12956b0 in TextProc (/home/rguiscard/Projects/dflat.zig/text.c)
+    return BaseWndProc(TEXT, wnd, msg, p1, p2);
+           ^
+/home/rguiscard/Projects/dflat.zig/dialbox.c:751:12: 0x12601d3 in ControlProc (/home/rguiscard/Projects/dflat.zig/dialbox.c)
+    return DefaultWndProc(wnd, msg, p1, p2);
+           ^
+/home/rguiscard/Projects/dflat.zig/message.c:290:23: 0x126408b in SendMessage (/home/rguiscard/Projects/dflat.zig/message.c)
+                rtn = (*wnd->wndproc)(wnd, msg, p1, p2);
+                      ^
+/home/rguiscard/Projects/dflat.zig/normal.c:62:17: 0x122bc88 in ShowWindowMsg (/home/rguiscard/Projects/dflat.zig/normal.c)
+                SendMessage(cwnd, SHOW_WINDOW, p1, p2);
+                ^
+/home/rguiscard/Projects/dflat.zig/normal.c:611:13: 0x122ae91 in NormalProc (/home/rguiscard/Projects/dflat.zig/normal.c)
+            ShowWindowMsg(wnd, p1, p2);
+            ^
+/home/rguiscard/Projects/dflat.zig/dialbox.c:259:12: 0x1258ad3 in DialogProc (/home/rguiscard/Projects/dflat.zig/dialbox.c)
+    return BaseWndProc(DIALOG, wnd, msg, p1, p2);
+           ^
+/home/rguiscard/Projects/dflat.zig/fileopen.c:128:12: 0x12c7001 in DlgFnOpen (/home/rguiscard/Projects/dflat.zig/fileopen.c)
+    return DefaultWndProc(wnd, msg, p1, p2);
+           ^
+/home/rguiscard/Projects/dflat.zig/message.c:290:23: 0x126408b in SendMessage (/home/rguiscard/Projects/dflat.zig/message.c)
+                rtn = (*wnd->wndproc)(wnd, msg, p1, p2);
+                      ^
+/home/rguiscard/Projects/dflat.zig/normal.c:272:10: 0x122e37c in SetFocusMsg (/home/rguiscard/Projects/dflat.zig/normal.c)
+	        SendMessage(This, SHOW_WINDOW, 0, 0);
+         ^
+/home/rguiscard/Projects/dflat.zig/normal.c:652:13: 0x122b240 in NormalProc (/home/rguiscard/Projects/dflat.zig/normal.c)
+            SetFocusMsg(wnd, p1);
+            ^
+/home/rguiscard/Projects/dflat.zig/dialbox.c:259:12: 0x1258ad3 in DialogProc (/home/rguiscard/Projects/dflat.zig/dialbox.c)
+    return BaseWndProc(DIALOG, wnd, msg, p1, p2);
+           ^
+/home/rguiscard/Projects/dflat.zig/fileopen.c:128:12: 0x12c7001 in DlgFnOpen (/home/rguiscard/Projects/dflat.zig/fileopen.c)
+    return DefaultWndProc(wnd, msg, p1, p2);
+           ^
+/home/rguiscard/Projects/dflat.zig/message.c:290:23: 0x126408b in SendMessage (/home/rguiscard/Projects/dflat.zig/message.c)
+                rtn = (*wnd->wndproc)(wnd, msg, p1, p2);
+                      ^
+/home/rguiscard/Projects/dflat.zig/dialbox.c:279:2: 0x125ba3c in DialogBox (/home/rguiscard/Projects/dflat.zig/dialbox.c)
+	SendMessage(DialogWnd, SETFOCUS, TRUE, 0);
+ ^
+/home/rguiscard/Projects/dflat.zig/fileopen.c:42:16: 0x12c60e2 in DlgFileOpen (/home/rguiscard/Projects/dflat.zig/fileopen.c)
+    if ((rtn = DialogBox(NULL, db, TRUE, DlgFnOpen)) != FALSE)
+               ^
+/home/rguiscard/Projects/dflat.zig/fileopen.c:23:12: 0x12c6027 in OpenFileDialogBox (/home/rguiscard/Projects/dflat.zig/fileopen.c)
+    return DlgFileOpen(Fspec, Fspec, Fname, &FileOpen);
+           ^
+/home/rguiscard/Projects/dflat.zig/memopad.c:170:9: 0x130e9de in SelectFile (/home/rguiscard/Projects/dflat.zig/memopad.c)
+    if (OpenFileDialogBox("*", FileName))    {
+        ^
+/home/rguiscard/Projects/dflat.zig/memopad.c:83:21: 0x130d357 in MemoPadProc (/home/rguiscard/Projects/dflat.zig/memopad.c)
+                    SelectFile(wnd);
+                    ^
+/home/rguiscard/Projects/dflat.zig/message.c:290:23: 0x126408b in SendMessage (/home/rguiscard/Projects/dflat.zig/message.c)
+                rtn = (*wnd->wndproc)(wnd, msg, p1, p2);
+                      ^
+/home/rguiscard/Projects/dflat.zig/message.c:595:9: 0x1265cd3 in dispatch_message (/home/rguiscard/Projects/dflat.zig/message.c)
+        SendMessage(mq.wnd, mq.msg, mq.p1, mq.p2);
+        ^
+/home/rguiscard/Projects/dflat.zig/memopad.c:58:12: 0x130cd6c in c_main (/home/rguiscard/Projects/dflat.zig/memopad.c)
+    while (dispatch_message())
+           ^
+/home/rguiscard/Projects/dflat.zig/src/main.zig:16:11: 0x11e08ce in main (main.zig)
+    c_main(@intCast(args.len), @ptrCast(@constCast(args)));
+          ^
+/home/rguiscard/Projects/zig-x86_64-linux-0.16.0/lib/std/start.zig:737:30: 0x11e1107 in callMain (std.zig)
+    return wrapMain(root.main(.{
+                             ^
+???:?:?: 0x7f35eda6d1c9 in ??? (/lib/x86_64-linux-gnu/libc.so.6)
+???:?:?: 0x7f35eda6d28a in ??? (/lib/x86_64-linux-gnu/libc.so.6)
+???:?:?: 0x1219374 in ??? (???)

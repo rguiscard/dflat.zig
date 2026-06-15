@@ -96,22 +96,17 @@ void InsertTitle(WINDOW wnd, const char *ttl)
 static unsigned char line[MAXCOLS];
 
 /* ------ write a line to video window client area ------ */
-void writeline(WINDOW wnd, char *str, int x, int y, BOOL pad)
+void writeline(WINDOW wnd, char *str, int x, int y)
 {
     char *cp;
     int len;
     int dif;
-	char wline[MAXCOLS];
+    char wline[MAXCOLS];
 
     memset(wline, 0, sizeof(wline));
     len = LineLength(str);
     dif = strlen(str) - len;
     strncpy(wline, str, ClientWidth(wnd) + dif);
-    if (pad)    {
-        cp = wline+strlen(wline);
-        while (len++ < ClientWidth(wnd)-x)
-            *cp++ = ' ';
-    }
     wputs(wnd, wline, x, y);
 }
 

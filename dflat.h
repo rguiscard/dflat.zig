@@ -213,7 +213,7 @@ void DisplayTitle(WINDOW, RECT *);
 void RepaintBorder(WINDOW, RECT *);
 void PaintShadow(WINDOW);
 void ClearWindow(WINDOW, RECT *, int);
-void writeline(WINDOW, char *, int, int, BOOL);
+void writeline(WINDOW, char *, int, int);
 void InitWindowColors(WINDOW);
 
 void SetNextFocus(void);

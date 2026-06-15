@@ -17,7 +17,7 @@ int BoxProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             case BORDER:
                 rtn = BaseWndProc(BOX, wnd, msg, p1, p2);
                 if (ct != NULL && ct->itext != NULL)
-                    writeline(wnd, ct->itext, 1, 0, FALSE);
+                    writeline(wnd, ct->itext, 1, 0);
                 return rtn;
             default:
                 break;
