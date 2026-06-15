@@ -8,48 +8,48 @@ typedef struct    {
     RECT rc;
 } VECT;
 
-unsigned char CharInWnd[] = "ƒ≥⁄øŸ¿≈√¥¡¬";
+static const uint32_t CharInWnd[] = {0x2500, 0x2502, 0x250C, 0x2510, 0x2514, 0x2518, 0x253C, 0x251C, 0x2524, 0x2534, 0x252C};
 
-unsigned char VectCvt[3][11][2][4] = {
+static const uint32_t VectCvt[3][11][2][3] = {
     {   /* --- first character in collision vector --- */
-        /* ( drawing ƒ ) ( drawing ≥ ) */
-             {{"ƒƒƒ"},     {"⁄√¿"}},
-             {{"⁄¬ø"},     {"≥≥≥"}},
-             {{"⁄¬¬"},     {"⁄√√"}},
-             {{"øøø"},     {"øøø"}},
-             {{"ŸŸŸ"},     {"ŸŸŸ"}},
-             {{"¿¡¡"},     {"√√¿"}},
-             {{"≈≈≈"},     {"≈≈≈"}},
-             {{"√≈≈"},     {"√√√"}},
-             {{"¥¥¥"},     {"¥¥¥"}},
-             {{"¡¡¡"},     {"¡¡¡"}},
-             {{"¬¬¬"},     {"¬≈≈"}}    },
+        /* ( drawing M-D ) ( drawing M-3 ) */
+             {{0x2500, 0x2500, 0x2500},     {0x250C, 0x251C, 0x2514}},
+             {{0x250C, 0x252C, 0x2510},     {0x2502, 0x2502, 0x2502}},
+             {{0x250C, 0x252C, 0x252C},     {0x250C, 0x251C, 0x251C}},
+             {{0x2510, 0x2510, 0x2510},     {0x2510, 0x2510, 0x2510}},
+             {{0x2514, 0x2514, 0x2514},     {0x2514, 0x2514, 0x2514}},
+             {{0x2518, 0x2534, 0x2534},     {0x251C, 0x251C, 0x2518}},
+             {{0x253C, 0x253C, 0x253C},     {0x253C, 0x253C, 0x253C}},
+             {{0x251C, 0x253C, 0x253C},     {0x251C, 0x251C, 0x251C}},
+             {{0x2524, 0x2524, 0x2524},     {0x2524, 0x2524, 0x2524}},
+             {{0x2534, 0x2534, 0x2534},     {0x2534, 0x2534, 0x2534}},
+             {{0x252C, 0x252C, 0x252C},     {0x252C, 0x253C, 0x253C}}    },
     {   /* --- middle character in collision vector --- */
-        /* ( drawing ƒ ) ( drawing ≥ ) */
-             {{"ƒƒƒ"},     {"¬≈¡"}},
-             {{"√≈¥"},     {"≥≥≥"}},
-             {{"⁄⁄⁄"},     {"⁄⁄⁄"}},
-             {{"øøø"},     {"øøø"}},
-             {{"ŸŸŸ"},     {"ŸŸŸ"}},
-             {{"¿¿¿"},     {"¿¿¿"}},
-             {{"≈≈≈"},     {"≈≈≈"}},
-             {{"√√√"},     {"√√√"}},
-             {{"≈≈¥"},     {"¥¥¥"}},
-             {{"¡¡¡"},     {"≈≈¡"}},
-             {{"¬¬¬"},     {"¬¬¬"}}    },
+        /* ( drawing M-D ) ( drawing M-3 ) */
+             {{0x2500, 0x2500, 0x2500},     {0x252C, 0x253C, 0x2534}},
+             {{0x251C, 0x253C, 0x2524},     {0x2502, 0x2502, 0x2502}},
+             {{0x250C, 0x250C, 0x250C},     {0x250C, 0x250C, 0x250C}},
+             {{0x2510, 0x2510, 0x2510},     {0x2510, 0x2510, 0x2510}},
+             {{0x2514, 0x2514, 0x2514},     {0x2514, 0x2514, 0x2514}},
+             {{0x2518, 0x2518, 0x2518},     {0x2518, 0x2518, 0x2518}},
+             {{0x253C, 0x253C, 0x253C},     {0x253C, 0x253C, 0x253C}},
+             {{0x251C, 0x251C, 0x251C},     {0x251C, 0x251C, 0x251C}},
+             {{0x253C, 0x253C, 0x2524},     {0x2524, 0x2524, 0x2524}},
+             {{0x2534, 0x2534, 0x2534},     {0x253C, 0x253C, 0x2534}},
+             {{0x252C, 0x252C, 0x252C},     {0x252C, 0x252C, 0x252C}}    },
     {   /* --- last character in collision vector --- */
-        /* ( drawing ƒ ) ( drawing ≥ ) */
-             {{"ƒƒƒ"},     {"ø¥Ÿ"}},
-             {{"¿¡Ÿ"},     {"≥≥≥"}},
-             {{"⁄⁄⁄"},     {"⁄⁄⁄"}},
-             {{"¬¬ø"},     {"ø¥¥"}},
-             {{"¡¡Ÿ"},     {"¥¥Ÿ"}},
-             {{"¿¿¿"},     {"¿¿¿"}},
-             {{"≈≈≈"},     {"≈≈≈"}},
-             {{"√√√"},     {"√√√"}},
-             {{"≈≈¥"},     {"¥¥¥"}},
-             {{"¡¡¡"},     {"≈≈¡"}},
-             {{"¬¬¬"},     {"¬¬¬"}}    }
+        /* ( drawing M-D ) ( drawing M-3 ) */
+             {{0x2500, 0x2500, 0x2500},     {0x2510, 0x2524, 0x2514}},
+             {{0x2518, 0x2534, 0x2518},     {0x2502, 0x2502, 0x2502}},
+             {{0x250C, 0x250C, 0x250C},     {0x250C, 0x250C, 0x250C}},
+             {{0x252C, 0x252C, 0x2510},     {0x2510, 0x2524, 0x2524}},
+             {{0x2534, 0x2534, 0x2514},     {0x2524, 0x2524, 0x2514}},
+             {{0x2518, 0x2518, 0x2518},     {0x2518, 0x2518, 0x2518}},
+             {{0x253C, 0x253C, 0x253C},     {0x253C, 0x253C, 0x253C}},
+             {{0x251C, 0x251C, 0x251C},     {0x251C, 0x251C, 0x251C}},
+             {{0x253C, 0x253C, 0x2524},     {0x2524, 0x2524, 0x2524}},
+             {{0x2534, 0x2534, 0x2534},     {0x253C, 0x253C, 0x2534}},
+             {{0x252C, 0x252C, 0x252C},     {0x252C, 0x252C, 0x252C}}    }
 };
 
 /* -- compute whether character is first, middle, or last -- */
@@ -75,7 +75,7 @@ static int FindVector(WINDOW wnd, RECT rc, int x, int y)
                         coll = 0;
                     else if (rc.lf+x == rcc.rt)
                         coll = 2;
-                    else 
+                    else
                         coll = 1;
                 }
             }
@@ -89,7 +89,7 @@ static int FindVector(WINDOW wnd, RECT rc, int x, int y)
                         coll = 0;
                     else if (rc.tp+y == rcc.bt)
                         coll = 2;
-                    else 
+                    else
                         coll = 1;
                 }
             }
@@ -107,13 +107,13 @@ static void PaintVector(WINDOW wnd, RECT rc)
 
     if (rc.rt == rc.lf)    {
         /* ------ vertical vector ------- */
-        nc = '≥';
+        nc = 0x2502;
         vertvect = 1;
         len = rc.bt-rc.tp+1;
     }
     else     {
         /* ------ horizontal vector ------- */
-        nc = 'ƒ';
+        nc = 0x2500;
         vertvect = 0;
         len = rc.rt-rc.lf+1;
     }
@@ -127,7 +127,7 @@ static void PaintVector(WINDOW wnd, RECT rc)
             xi = i;
         ch = videochar(GetClientLeft(wnd)+rc.lf+xi,
                     GetClientTop(wnd)+rc.tp+yi);
-        for (cw = 0; cw < sizeof(CharInWnd); cw++)    {
+        for (cw = 0; cw < sizeof(CharInWnd)/sizeof(CharInWnd[0]); cw++)    {
             if (ch == CharInWnd[cw])    {
                 /* ---- hit another vector character ---- */
                 if ((coll=FindVector(wnd, rc, xi, yi)) != -1) {
@@ -149,9 +149,7 @@ static void PaintVector(WINDOW wnd, RECT rc)
 static void PaintBar(WINDOW wnd, RECT rc, enum VectTypes vt)
 {
     int i, vertbar, len;
-    unsigned int tys[] = {219, 178, 177, 176};
-/*    unsigned int tys[] = {'€', '≤', '±', '∞'};
-*/
+    static const uint32_t tys[] = {0x2588, 0x2592, 0x2591, 0x2580};
     unsigned int nc = tys[vt-1];
 
     if (rc.rt == rc.lf)    {
