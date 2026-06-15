@@ -186,8 +186,10 @@ void wputch(WINDOW wnd, int c, int x, int y)
         uint32_t ch = c & 0xffff;
         /* Unicode box-drawing chars are > 256, use directly.
          * CP437 bytes 0-255 are converted for backward compatibility. */
+#if 0
         if (ch < 256)
             ch = kCp437[ch];
+#endif
         int attr = clr(foreground, background);
         int xc = GetLeft(wnd)+x;
         int yc = GetTop(wnd)+y;
@@ -229,8 +231,10 @@ void wputs(WINDOW wnd, void *s, int x, int y)
                 uint32_t ch = (unsigned char)*str;
                 if (*str == ('\t' | 0x80) || *str == ('\f' | 0x80))
                     ch = ' ';
+#if 0
                 if (ch < 256 && (unsigned char)*str < 256)
                     ch = kCp437[(unsigned char)*str];
+#endif
                 cp1->ch = ch;
                 cp1->fg = tb_fg_from_attr(clr(foreground, background));
                 cp1->bg = tb_bg_from_attr(clr(foreground, background));

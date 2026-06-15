@@ -11,8 +11,8 @@ void PaintMsg(WINDOW wnd, CTLWINDOW *ct, RECT *rc)
             background = WndBackground(GetParent(wnd));
             foreground = BLACK;
             for (x = 1; x <= WindowWidth(wnd); x++)
-                wputch(wnd, 223, x, 1);
-            wputch(wnd, 220, WindowWidth(wnd), 0);
+                wputch(wnd, 0x2580, x, 1);
+            wputch(wnd, 0x2584, WindowWidth(wnd), 0);
         }
         if (ct->itext != NULL)    {
             unsigned char *txt;
@@ -44,8 +44,10 @@ void LeftButtonMsg(WINDOW wnd, MESSAGE msg, CTLWINDOW *ct)
         foreground = WndBackground(wnd);
         wputch(wnd, ' ', 0, 0);
         for (x = 0; x < WindowWidth(wnd); x++)    {
-            wputch(wnd, 220, x+1, 0);
-            wputch(wnd, 223, x+1, 1);
+            wputch(wnd, 0x2584, x+1, 0);
+            wputch(wnd, 0x2580, x+1, 1);
+//            wputch(wnd, 220, x+1, 0);
+//            wputch(wnd, 223, x+1, 1);
         }
     }
     if (msg == LEFT_BUTTON)

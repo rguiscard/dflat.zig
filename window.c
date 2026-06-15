@@ -174,8 +174,11 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
         	{
             	for (i = 0; i < tlen; i++)    {
                 	unsigned char c = (unsigned char)wnd->title[i];
+                	titleLine[titleStart+i] = c;
+#if 0
                 	titleLine[titleStart+i] = (c == CHANGECOLOR || c == RESETCOLOR) ?
                     	c : kCp437[c];
+#endif
             	}
         	}
         	if (TestAttribute(wnd, CONTROLBOX))
