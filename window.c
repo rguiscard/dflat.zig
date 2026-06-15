@@ -459,34 +459,19 @@ void ClearWindow(WINDOW wnd, RECT *rcc, int clrchar)
         int y;
         RECT rc = rcc ? *rcc : RelativeWindowRect(wnd, WindowRect(wnd));
 
-		int top = TopBorderAdj(wnd);
-		int bot = WindowHeight(wnd)-1-BottomBorderAdj(wnd);
+	int top = TopBorderAdj(wnd);
+	int bot = WindowHeight(wnd)-1-BottomBorderAdj(wnd);
 
         if (RectLeft(rc) == 0)
             RectLeft(rc) = BorderAdj(wnd);
         if (RectRight(rc) > WindowWidth(wnd)-1)
             RectRight(rc) = WindowWidth(wnd)-1;
         SetStandardColor(wnd);
-        if (clrchar > 255)    {
-            int len = RectRight(rc)-RectLeft(rc)+1;
-            for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
-                if (y < top || y > bot)
-                    continue;
-                wputuchline(wnd, (uint32_t)clrchar, RectLeft(rc), y, len);
-            }
-            return;
-        }
-        // This can be removed if cp437 is not in use
-        memset(line, clrchar, sizeof line);
-        line[RectRight(rc)+1] = '\0';
+        int len = RectRight(rc)-RectLeft(rc)+1;
         for (y = RectTop(rc); y <= RectBottom(rc); y++)    {
             if (y < top || y > bot)
                 continue;
-            writeline(wnd,
-                line+(RectLeft(rc)),
-                RectLeft(rc),
-                y,
-                FALSE);
+            wputuchline(wnd, (uint32_t)clrchar, RectLeft(rc), y, len);
         }
     }
 }
