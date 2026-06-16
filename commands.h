@@ -54,17 +54,11 @@ enum commands {
     ID_HELPINDEX,
     ID_ABOUT,
     /* --------------- System menu -------------- */
-#ifdef INCLUDE_RESTORE
     ID_SYSRESTORE,
-#endif
     ID_SYSMOVE,
     ID_SYSSIZE,
-#ifdef INCLUDE_MINIMIZE
     ID_SYSMINIMIZE,
-#endif
-#ifdef INCLUDE_MAXIMIZE
     ID_SYSMAXIMIZE,
-#endif
     ID_SYSCLOSE,
     /* ---- FileOpen and SaveAs dialog boxes ---- */
     ID_FILENAME,

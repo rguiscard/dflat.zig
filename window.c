@@ -190,9 +190,7 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
 
         	for (i = 0; i < WindowWidth(wnd); i++)
             	titleLine[i] = ' ';
-#ifdef INCLUDE_MINIMIZE
         	if (wnd->condition != ISMINIMIZED)
-#endif
         	{
             	for (i = 0; i < tlen; i++)    {
                 	unsigned char c = (unsigned char)wnd->title[i];
@@ -208,28 +206,16 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
         	if (TestAttribute(wnd, MINMAXBOX))    {
             	switch (wnd->condition)    {
                 	case ISRESTORED:
-#ifdef INCLUDE_MAXIMIZE
                     	titleLine[tend+1] = MAXPOINTER;
-#endif
-#ifdef INCLUDE_MINIMIZE
                     	titleLine[tend]   = MINPOINTER;
-#endif
                     	break;
-#ifdef INCLUDE_MINIMIZE
                 	case ISMINIMIZED:
                     	titleLine[tend+1] = MAXPOINTER;
                     	break;
-#endif
-#ifdef INCLUDE_MAXIMIZE
                 	case ISMAXIMIZED:
-#ifdef INCLUDE_MINIMIZE
                     	titleLine[tend]   = MINPOINTER;
-#endif
-#ifdef INCLUDE_RESTORE
                     	titleLine[tend+1] = RESTOREPOINTER;
-#endif
                     	break;
-#endif
                 	default:
                     	break;
             	}
@@ -245,17 +231,9 @@ void DisplayTitle(WINDOW wnd, RECT *rcc)
 	}
 }
 
-#ifdef INCLUDE_MINIMIZE
 #define MinTest() (wnd->condition == ISMINIMIZED) ||
-#else
-#define MinTest() /**/
-#endif
 
-#ifdef INCLUDE_MAXIMIZE
 #define MaxTest() (wnd->condition == ISMAXIMIZED) ||
-#else
-#define MaxTest() /**/
-#endif
 
 #define NoShadow(wnd)                    \
      (TestAttribute(wnd, SHADOW) == 0 || \

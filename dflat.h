@@ -4,7 +4,6 @@
 
 #define INCLUDE_MULTI_WINDOWS
 
-#ifndef BUILD_SMALL_DFLAT
 #define INCLUDE_HELP
 #define INCLUDE_FILEOPENSAVE
 #define INCLUDE_EDITMENU
@@ -12,15 +11,12 @@
 #define INCLUDE_WINDOWOPTIONS
 #define INCLUDE_SHELLDOS
 #define INCLUDE_PICTUREBOX
-#endif
 
-#ifdef BUILD_FULL_DFLAT
 #define INCLUDE_LOGGING
 #define INCLUDE_MINIMIZE
 #define INCLUDE_MAXIMIZE
 #define INCLUDE_RESTORE
 #define INCLUDE_EXTENDEDSELECTIONS
-#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -287,9 +283,9 @@ extern int CurrentMenuSelection;
 #define MENU_SEPARATOR 0xc4    /* byte marker for menu separator */
 /* ----------------- title bar characters ----------------- */
 #define CONTROLBOXCHAR 0x2261  /* ≡ (was CP437 0xf0) */
-#define MAXPOINTER     0x2195  /* ↕ (was CP437 0x18) */
-#define MINPOINTER     0x203c  /* ‼ (was CP437 0x19) */
-#define RESTOREPOINTER 0x25ba  /* ▶ (was CP437 0x12) */
+#define MAXPOINTER     0x2191  /* ↕ (was CP437 0x18) */
+#define MINPOINTER     0x2193  /* ‼ (was CP437 0x19) */
+#define RESTOREPOINTER 0x2195  /* ▶ (was CP437 0x12) */
 /* --------------- text control characters ---------------- */
 #define APPLCHAR     0x2591 /* fills application window */
 #define SHORTCUTCHAR '~'    /* prefix: shortcut key display */
