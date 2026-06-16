@@ -325,8 +325,9 @@ int CancelBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int ErrorBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int YesNoBoxProc(WINDOW, MESSAGE, PARAM, PARAM);
 int StatusBarProc(WINDOW, MESSAGE, PARAM, PARAM);
-int WatchIconProc(WINDOW, MESSAGE, PARAM, PARAM);
-/* ------------- normal box prototypes ------------- */
+ int WatchIconProc(WINDOW, MESSAGE, PARAM, PARAM);
+ int KiloProc(WINDOW, MESSAGE, PARAM, PARAM);
+ /* ------------- normal box prototypes ------------- */
 void SetStandardColor(WINDOW);
 void SetReverseColor(WINDOW);
 BOOL isAncestor(WINDOW, WINDOW);
