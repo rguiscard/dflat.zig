@@ -36,6 +36,7 @@ enum commands {
 	/* --------------- Utilities Menu ------------- */
 	ID_CALENDAR,
 	ID_BARCHART,
+	ID_KILO,
     /* -------------- Options menu -------------- */
     ID_INSERT,
     ID_WRAP,

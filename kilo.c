@@ -171,12 +171,17 @@ void kiloRowDelChar(WINDOW wnd, int at)
 /* Render a line to the window */
 void kiloRenderLine(WINDOW wnd, int y)
 {
+    SetStandardColor(wnd);
+    
     kilo_state *k = GetKiloState(wnd);
     int filerow = k->rowoff + y;
     
+    /* Convert to window-relative coordinates with border adjustment */
+    int yy = y + TopBorderAdj(wnd);
+    
     if (filerow >= k->numrows) {
         /* Blank line */
-        wputuchline(wnd, ' ', 0, y, ClientWidth(wnd));
+        wputuchline(wnd, ' ', BorderAdj(wnd), yy, ClientWidth(wnd));
         return;
     }
     
@@ -184,7 +189,7 @@ void kiloRenderLine(WINDOW wnd, int y)
     int len = row->rsize - k->coloff;
     
     if (len <= 0) {
-        wputuchline(wnd, ' ', 0, y, ClientWidth(wnd));
+        wputuchline(wnd, ' ', BorderAdj(wnd), yy, ClientWidth(wnd));
         return;
     }
     
@@ -199,7 +204,7 @@ void kiloRenderLine(WINDOW wnd, int y)
     }
     uline[len] = 0;
     
-    writeline(wnd, uline, 0, y);
+    writeline(wnd, uline, BorderAdj(wnd), yy);
 }
 
 /* --- CREATE_WINDOW Message --- */
@@ -214,6 +219,9 @@ static int PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int y;
     RECT rc;
+    
+    /* Clear the client area first */
+    ClearWindow(wnd, (RECT *)p1, ' ');
     
     /* Build the rectangle to paint */
     if ((RECT *)p1 == NULL)
@@ -547,6 +555,7 @@ int KiloProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case CREATE_WINDOW:
             return CreateWindowMsg(wnd);
         case PAINT:
+            /* Don't call BaseWndProc for PAINT - we handle our own rendering */
             return PaintMsg(wnd, p1, p2);
         case SETTEXT:
             return SetTextMsg(wnd, p1);

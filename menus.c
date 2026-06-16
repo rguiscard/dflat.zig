@@ -45,6 +45,7 @@ DEFMENU(MainMenu)
 	POPDOWN( "~Utilities", NULL, "Utility programs" )
 		SELECTION( "~Calendar",   ID_CALENDAR,     0,   0)
 		SELECTION( "~Bar chart",  ID_BARCHART,     0,   0)
+		SELECTION( "~Kilo",       ID_KILO,         0,   0)
 	ENDPOPDOWN
 
     /* ------------- the Options popdown menu ---------------*/

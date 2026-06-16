@@ -1,6 +1,7 @@
 /* --------------- memopad.c ----------- */
 
 #include "dflat.h"
+#include "kilo.h"
 
 extern DBOX PrintSetup;
 
@@ -18,6 +19,8 @@ static void PrintPad(WINDOW);
 static void SaveFile(WINDOW, int);
 static void DeleteFile(WINDOW);
 static int OurEditorProc(WINDOW, MESSAGE, PARAM, PARAM);
+static int OurKiloProc(WINDOW, MESSAGE, PARAM, PARAM);
+static void OpenKiloWindow(WINDOW);
 static char *NameComponent(char *);
 static int PrintSetupProc(WINDOW, MESSAGE, PARAM, PARAM);
 static void FixTabMenu(void);
@@ -131,6 +134,9 @@ static int MemoPadProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 					BarChart(wnd);
 					return TRUE;
 #endif
+				case ID_KILO:
+					OpenKiloWindow(wnd);
+					return TRUE;
                 case ID_ABOUT:
                     MessageBox(
                          "About D-Flat and the MemoPad",
@@ -426,6 +432,75 @@ static int OurEditorProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
     }
     return DefaultWndProc(wnd, msg, p1, p2);
 }
+/* --- open a Kilo test window --- */
+static void OpenKiloWindow(WINDOW wnd)
+{
+    WINDOW wnd1;
+    static int wndpos = 0;
+    
+    wndpos += 2;
+    if (wndpos == 20)
+        wndpos = 2;
+    
+    wnd1 = CreateWindow(KILO,
+        "Kilo",
+        (wndpos-1)*2, wndpos, 10, 40,
+        NULL, wnd, OurKiloProc,
+        SHADOW     |
+        MINMAXBOX  |
+        CONTROLBOX |
+        MOVEABLE   |
+        HASBORDER  |
+        SIZEABLE
+    );
+    
+    /* Set some test text */
+    char *test = "Hello, Kilo!\nLine 2\nLine 3\n";
+    SendMessage(wnd1, SETTEXT, (PARAM) test, 0);
+    SendMessage(wnd1, SETFOCUS, TRUE, 0);
+}
+
+/* --- Kilo window procedure --- */
+static int OurKiloProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
+{
+    int rtn;
+    switch (msg) {
+        case SETFOCUS:
+            rtn = DefaultWndProc(wnd, msg, p1, p2);
+            if ((int)p1) {
+                /* Show position in status bar */
+                kilo_state *k = GetKiloState(wnd);
+                char status[30];
+                sprintf(status, "Line:%4d  Col:%2d", k->cy + k->rowoff + 1, k->cx + k->coloff + 1);
+                SendMessage(GetParent(wnd), ADDSTATUS, (PARAM) status, 0);
+            } else {
+                SendMessage(GetParent(wnd), ADDSTATUS, 0, 0);
+            }
+            return rtn;
+        case KEYBOARD_CURSOR:
+            rtn = DefaultWndProc(wnd, msg, p1, p2);
+            {
+                kilo_state *k = GetKiloState(wnd);
+                char status[30];
+                sprintf(status, "Line:%4d  Col:%2d", k->cy + k->rowoff + 1, k->cx + k->coloff + 1);
+                SendMessage(GetParent(wnd), ADDSTATUS, (PARAM) status, 0);
+            }
+            return rtn;
+        case CLOSE_WINDOW:
+            {
+                kilo_state *k = GetKiloState(wnd);
+                if (k && k->dirty) {
+                    if (YesNoBox("Text changed. Save?"))
+                        SendMessage(GetParent(wnd), COMMAND, ID_SAVE, 0);
+                }
+            }
+            break;
+        default:
+            break;
+    }
+    return DefaultWndProc(wnd, msg, p1, p2);
+}
+
 /* -- point to the name component of a file specification -- */
 static char *NameComponent(char *FileName)
 {
