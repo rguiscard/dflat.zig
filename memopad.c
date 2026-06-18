@@ -452,7 +452,8 @@ static void OpenKiloWindow(WINDOW wnd)
         MOVEABLE   |
         HASBORDER  |
         SIZEABLE   |
-        VSCROLLBAR
+        VSCROLLBAR |
+        HSCROLLBAR
     );
     
     /* Read build.zig file */

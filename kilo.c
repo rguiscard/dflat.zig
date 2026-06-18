@@ -1,8 +1,9 @@
 /* ------------- kilo.c ------------- */
 #include "kilo.h"
 
-/* ------ compute the vertical scroll box position for Kilo editor ------ */
-int ComputeKiloVScrollBox(WINDOW wnd);
+/* Forward declarations */
+static int ComputeKiloVScrollBox(WINDOW wnd);
+static int ComputeKiloHScrollBox(WINDOW wnd);
 
 /* Get or create the per-window kilo editor state */
 kilo_state *GetKiloState(WINDOW wnd)
@@ -267,6 +268,15 @@ static int PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
         int vscrollbox = ComputeKiloVScrollBox(wnd);
         if (vscrollbox != wnd->VScrollBox) {
             wnd->VScrollBox = vscrollbox;
+            SendMessage(wnd, BORDER, p1, 0);
+        }
+    }
+    
+    if (TestAttribute(wnd, HSCROLLBAR)) {
+        kilo_state *k = GetKiloState(wnd);
+        int hscrollbox = ComputeKiloHScrollBox(wnd);
+        if (hscrollbox != wnd->HScrollBox) {
+            wnd->HScrollBox = hscrollbox;
             SendMessage(wnd, BORDER, p1, 0);
         }
     }
@@ -578,6 +588,61 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
         return TRUE;
     }
     
+    if (TestAttribute(wnd, HSCROLLBAR) && my == WindowHeight(wnd) - 1) {
+        /* Click on horizontal scrollbar - adjust coloff */
+        kilo_state *k = GetKiloState(wnd);
+        
+        if (mx == 1) {
+            /* Left arrow: scroll left */
+            if (k->coloff > 0) {
+                k->coloff--;
+                SendMessage(wnd, PAINT, 0, 0);
+                SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
+            }
+            return TRUE;
+        }
+        if (mx == WindowWidth(wnd) - 2) {
+            /* Right arrow: scroll right - but not over VSCROLLBAR */
+            int maxlen = 0;
+            int i;
+            for (i = 0; i < k->numrows; i++) {
+                if (k->row[i].rsize > maxlen)
+                    maxlen = k->row[i].rsize;
+            }
+            if (k->coloff + ClientWidth(wnd) < maxlen) {
+                k->coloff++;
+                SendMessage(wnd, PAINT, 0, 0);
+                SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
+            }
+            return TRUE;
+        }
+        
+        /* Click on scrollbar track - scroll to position */
+        int barlen = ClientWidth(wnd) - 2;
+        int maxlen = 0;
+        int i;
+        for (i = 0; i < k->numrows; i++) {
+            if (k->row[i].rsize > maxlen)
+                maxlen = k->row[i].rsize;
+        }
+        int pagelen = maxlen - ClientWidth(wnd);
+        
+        if (mx >= 2 && mx <= barlen + 1) {
+            int new_coloff;
+            if (pagelen > barlen)
+                new_coloff = (mx - 1) * pagelen / barlen;
+            else
+                new_coloff = mx - 1;
+            
+            if (new_coloff != k->coloff) {
+                k->coloff = new_coloff;
+                SendMessage(wnd, PAINT, 0, 0);
+                SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
+            }
+        }
+        return TRUE;
+    }
+    
     RECT rc = ClientRect(wnd);
     if (!InsideRect(p1, p2, rc))
         return FALSE;
@@ -585,6 +650,37 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
     /* Convert screen to editor coordinates */
     kiloSetCursorFromScreen(wnd, mx, my);
     kilo_state *k = GetKiloState(wnd);
+    SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
+    return TRUE;
+}
+
+/* --- HORIZSCROLL Message --- */
+static int HorizScrollMsg(WINDOW wnd, PARAM p1)
+{
+    kilo_state *k = GetKiloState(wnd);
+    int cw = ClientWidth(wnd);
+    int maxlen = 0;
+    int i;
+    
+    /* Find max line length */
+    for (i = 0; i < k->numrows; i++) {
+        if (k->row[i].rsize > maxlen)
+            maxlen = k->row[i].rsize;
+    }
+    
+    if ((int)p1) {
+        /* ----- scroll right (coloff increases) ----- */
+        if (k->coloff + cw >= maxlen)
+            return FALSE;
+        k->coloff++;
+    } else {
+        /* ----- scroll left (coloff decreases) ----- */
+        if (k->coloff == 0)
+            return FALSE;
+        k->coloff--;
+    }
+    
+    SendMessage(wnd, PAINT, 0, 0);
     SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
     return TRUE;
 }
@@ -618,7 +714,7 @@ void kiloSetCursorFromScreen(WINDOW wnd, int x, int y)
 }
 
 /* ------ compute the vertical scroll box position for Kilo editor ------ */
-int ComputeKiloVScrollBox(WINDOW wnd)
+static int ComputeKiloVScrollBox(WINDOW wnd)
 {
     kilo_state *k = GetKiloState(wnd);
     int pagelen = k->numrows - ClientHeight(wnd);
@@ -637,6 +733,34 @@ int ComputeKiloVScrollBox(WINDOW wnd)
         vscrollbox = barlen;
     
     return vscrollbox;
+}
+
+/* ------ compute the horizontal scroll box position for Kilo editor ------ */
+static int ComputeKiloHScrollBox(WINDOW wnd)
+{
+    kilo_state *k = GetKiloState(wnd);
+    int maxlen = 0;
+    int i;
+    for (i = 0; i < k->numrows; i++) {
+        if (k->row[i].rsize > maxlen)
+            maxlen = k->row[i].rsize;
+    }
+    int pagelen = maxlen - ClientWidth(wnd);
+    int barlen = ClientWidth(wnd) - 2;
+    int hscrollbox;
+    
+    if (pagelen < 1 || barlen < 1)
+        return 1;
+    
+    if (pagelen > barlen)
+        hscrollbox = 1 + (k->coloff * barlen / pagelen);
+    else
+        hscrollbox = 1 + k->coloff;
+    
+    if (hscrollbox > barlen)
+        hscrollbox = barlen;
+    
+    return hscrollbox;
 }
 
 /* --- SCROLL Message --- */
@@ -687,6 +811,8 @@ int KiloProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             return SizeMsg(wnd, p1, p2);
         case SCROLL:
             return ScrollMsg(wnd, p1);
+        case HORIZSCROLL:
+            return HorizScrollMsg(wnd, p1);
         case KEYBOARD:
             return KeyboardMsg(wnd, p1, p2);
         case LEFT_BUTTON:
