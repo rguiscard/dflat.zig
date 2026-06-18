@@ -451,12 +451,23 @@ static void OpenKiloWindow(WINDOW wnd)
         CONTROLBOX |
         MOVEABLE   |
         HASBORDER  |
-        SIZEABLE
+        SIZEABLE   |
+        VSCROLLBAR
     );
     
-    /* Set some test text */
-    char *test = "Hello, Kilo!\nLine 2\nLine 3\n";
-    SendMessage(wnd1, SETTEXT, (PARAM) test, 0);
+    /* Read build.zig file */
+    FILE *fp = fopen("build.zig", "r");
+    if (fp != NULL) {
+        fseek(fp, 0, SEEK_END);
+        long size = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+        char *content = DFmalloc(size + 1);
+        fread(content, 1, size, fp);
+        content[size] = '\0';
+        fclose(fp);
+        SendMessage(wnd1, SETTEXT, (PARAM) content, 0);
+        free(content);
+    }
     SendMessage(wnd1, SETFOCUS, TRUE, 0);
 }
 

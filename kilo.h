@@ -36,7 +36,7 @@ void kiloUpdateRow(WINDOW wnd, kilo_row *row);
 void kiloFreeRow(kilo_row *row);
 
 /* Rendering */
-void kiloRenderLine(WINDOW wnd, int y);
+void kiloRenderLine(WINDOW wnd, int yscreen, int yclient);
 
 /* Editor operations */
 void kiloInsertChar(WINDOW wnd, int c);
@@ -44,6 +44,8 @@ void kiloInsertNewline(WINDOW wnd);
 void kiloDelChar(WINDOW wnd);
 void kiloMoveCursor(WINDOW wnd, int key);
 void kiloSetCursorFromScreen(WINDOW wnd, int x, int y);
+
+/* Scrollbar - internal use only */
 
 /* Text conversion */
 char *kiloRowsToString(WINDOW wnd, int *buflen);

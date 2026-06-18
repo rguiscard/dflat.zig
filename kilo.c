@@ -1,6 +1,9 @@
 /* ------------- kilo.c ------------- */
 #include "kilo.h"
 
+/* ------ compute the vertical scroll box position for Kilo editor ------ */
+int ComputeKiloVScrollBox(WINDOW wnd);
+
 /* Get or create the per-window kilo editor state */
 kilo_state *GetKiloState(WINDOW wnd)
 {
@@ -169,19 +172,18 @@ void kiloRowDelChar(WINDOW wnd, int at)
 }
 
 /* Render a line to the window */
-void kiloRenderLine(WINDOW wnd, int y)
+void kiloRenderLine(WINDOW wnd, int yscreen, int yclient)
 {
     SetStandardColor(wnd);
     
-    kilo_state *k = GetKiloState(wnd);
-    int filerow = k->rowoff + y;
+    int xwin = BorderAdj(wnd);  /* Window-relative x for client area */
     
-    /* Convert to window-relative coordinates with border adjustment */
-    int yy = y + TopBorderAdj(wnd);
+    kilo_state *k = GetKiloState(wnd);
+    int filerow = k->rowoff + yclient;
     
     if (filerow >= k->numrows) {
         /* Blank line */
-        wputuchline(wnd, ' ', BorderAdj(wnd), yy, ClientWidth(wnd));
+        wputuchline(wnd, ' ', xwin, TopBorderAdj(wnd) + yclient, ClientWidth(wnd));
         return;
     }
     
@@ -189,7 +191,7 @@ void kiloRenderLine(WINDOW wnd, int y)
     int len = row->rsize - k->coloff;
     
     if (len <= 0) {
-        wputuchline(wnd, ' ', BorderAdj(wnd), yy, ClientWidth(wnd));
+        wputuchline(wnd, ' ', xwin, TopBorderAdj(wnd) + yclient, ClientWidth(wnd));
         return;
     }
     
@@ -204,7 +206,8 @@ void kiloRenderLine(WINDOW wnd, int y)
     }
     uline[len] = 0;
     
-    writeline(wnd, uline, BorderAdj(wnd), yy);
+    /* writeline expects window-relative coordinates */
+    writeline(wnd, uline, xwin, TopBorderAdj(wnd) + yclient);
 }
 
 /* --- CREATE_WINDOW Message --- */
@@ -220,22 +223,54 @@ static int PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
     int y;
     RECT rc;
     
-    /* Clear the client area first */
-    ClearWindow(wnd, (RECT *)p1, ' ');
-    
     /* Build the rectangle to paint */
     if ((RECT *)p1 == NULL)
         rc = RelativeWindowRect(wnd, WindowRect(wnd));
     else
         rc = *(RECT *)p1;
     
+    /* Skip non-client areas */
+    if (TestAttribute(wnd, HASBORDER | HASTITLEBAR)) {
+        if (RectTop(rc) < TopBorderAdj(wnd))
+            RectTop(rc) = TopBorderAdj(wnd);
+        if (RectBottom(rc) >= WindowHeight(wnd) - BottomBorderAdj(wnd))
+            RectBottom(rc) = WindowHeight(wnd) - BottomBorderAdj(wnd) - 1;
+    }
+    
+    /* Adjust for border - don't overwrite right border scrollbar */
+    if (TestAttribute(wnd, HASBORDER) && RectRight(rc) >= WindowWidth(wnd) - 1) {
+        if (RectLeft(rc) >= WindowWidth(wnd) - 1)
+            return TRUE;
+        RectRight(rc) = WindowWidth(wnd) - 2;
+    }
+    
     rc = AdjustRectangle(wnd, rc);
     
+    /* Clear the client area first */
+    SetStandardColor(wnd);
     for (y = RectTop(rc); y <= RectBottom(rc); y++) {
         int yy = y - TopBorderAdj(wnd);
         if (yy >= 0 && yy < ClientHeight(wnd))
-            kiloRenderLine(wnd, yy);
+            wputuchline(wnd, ' ', BorderAdj(wnd), y, ClientWidth(wnd));
     }
+    
+    for (y = RectTop(rc); y <= RectBottom(rc); y++) {
+        /* y is screen coordinate; convert to client-relative */
+        int yy = y - TopBorderAdj(wnd);
+        if (yy >= 0 && yy < ClientHeight(wnd))
+            kiloRenderLine(wnd, y, yy);
+    }
+    
+    /* Update scrollbar position */
+    if (TestAttribute(wnd, VSCROLLBAR)) {
+        kilo_state *k = GetKiloState(wnd);
+        int vscrollbox = ComputeKiloVScrollBox(wnd);
+        if (vscrollbox != wnd->VScrollBox) {
+            wnd->VScrollBox = vscrollbox;
+            SendMessage(wnd, BORDER, p1, 0);
+        }
+    }
+    
     return TRUE;
 }
 
@@ -499,10 +534,51 @@ static int KeyboardMsg(WINDOW wnd, PARAM p1, PARAM p2)
 /* --- LEFT_BUTTON Message --- */
 static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
-    RECT rc = ClientRect(wnd);
-    int mx = (int)p1 - GetClientLeft(wnd);
-    int my = (int)p2 - GetClientTop(wnd);
+    int mx = (int)p1 - GetLeft(wnd);
+    int my = (int)p2 - GetTop(wnd);
     
+    if (TestAttribute(wnd, VSCROLLBAR) && mx == WindowWidth(wnd) - 1) {
+        /* Click on vertical scrollbar - adjust rowoff */
+        kilo_state *k = GetKiloState(wnd);
+        
+        if (my == 1) {
+            /* Top arrow: show earlier lines (rowoff decreases) */
+            if (k->rowoff > 0) {
+                k->rowoff--;
+                SendMessage(wnd, PAINT, 0, 0);
+                SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
+            }
+            return TRUE;
+        }
+        if (my == WindowHeight(wnd) - 2) {
+            /* Bottom arrow: show later lines (rowoff increases) */
+            if (k->rowoff + ClientHeight(wnd) < k->numrows) {
+                k->rowoff++;
+                SendMessage(wnd, PAINT, 0, 0);
+                SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
+            }
+            return TRUE;
+        }
+        /* Click on scrollbar track */
+        int barlen = ClientHeight(wnd) - 2;
+        if (my >= 2 && my <= barlen + 1) {
+            int pagelen = k->numrows - ClientHeight(wnd);
+            int new_rowoff;
+            if (pagelen > barlen)
+                new_rowoff = (my - 1) * pagelen / barlen;
+            else
+                new_rowoff = my - 1;
+            
+            if (new_rowoff != k->rowoff) {
+                k->rowoff = new_rowoff;
+                SendMessage(wnd, PAINT, 0, 0);
+                SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
+            }
+        }
+        return TRUE;
+    }
+    
+    RECT rc = ClientRect(wnd);
     if (!InsideRect(p1, p2, rc))
         return FALSE;
     
@@ -541,6 +617,52 @@ void kiloSetCursorFromScreen(WINDOW wnd, int x, int y)
         k->cx = row->rsize;
 }
 
+/* ------ compute the vertical scroll box position for Kilo editor ------ */
+int ComputeKiloVScrollBox(WINDOW wnd)
+{
+    kilo_state *k = GetKiloState(wnd);
+    int pagelen = k->numrows - ClientHeight(wnd);
+    int barlen = ClientHeight(wnd) - 2;
+    int vscrollbox;
+    
+    if (pagelen < 1 || barlen < 1)
+        return 1;
+    
+    if (pagelen > barlen)
+        vscrollbox = 1 + (k->rowoff * barlen / pagelen);
+    else
+        vscrollbox = 1 + k->rowoff;
+    
+    if (vscrollbox > barlen)
+        vscrollbox = barlen;
+    
+    return vscrollbox;
+}
+
+/* --- SCROLL Message --- */
+static int ScrollMsg(WINDOW wnd, PARAM p1)
+{
+    kilo_state *k = GetKiloState(wnd);
+    int ch = ClientHeight(wnd);
+    
+    if ((int)p1)    {
+        /* ----- scroll one line up ----- */
+        if (k->rowoff + ch >= k->numrows)
+            return FALSE;
+        k->rowoff++;
+    }
+    else {
+        /* ----- scroll one line down ----- */
+        if (k->rowoff == 0)
+            return FALSE;
+        k->rowoff--;
+    }
+    
+    SendMessage(wnd, PAINT, 0, 0);
+    SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
+    return TRUE;
+}
+
 /* --- CLOSE_WINDOW Message --- */
 static int CloseWindowMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
@@ -563,6 +685,8 @@ int KiloProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
             return ClearTextMsg(wnd);
         case SIZE:
             return SizeMsg(wnd, p1, p2);
+        case SCROLL:
+            return ScrollMsg(wnd, p1);
         case KEYBOARD:
             return KeyboardMsg(wnd, p1, p2);
         case LEFT_BUTTON:
