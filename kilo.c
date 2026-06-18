@@ -178,13 +178,14 @@ void kiloRenderLine(WINDOW wnd, int yscreen, int yclient)
     SetStandardColor(wnd);
     
     int xwin = BorderAdj(wnd);  /* Window-relative x for client area */
+    int render_width = ClientWidth(wnd);
     
     kilo_state *k = GetKiloState(wnd);
     int filerow = k->rowoff + yclient;
     
     if (filerow >= k->numrows) {
         /* Blank line */
-        wputuchline(wnd, ' ', xwin, TopBorderAdj(wnd) + yclient, ClientWidth(wnd));
+        wputuchline(wnd, ' ', xwin, TopBorderAdj(wnd) + yclient, render_width);
         return;
     }
     
@@ -192,12 +193,12 @@ void kiloRenderLine(WINDOW wnd, int yscreen, int yclient)
     int len = row->rsize - k->coloff;
     
     if (len <= 0) {
-        wputuchline(wnd, ' ', xwin, TopBorderAdj(wnd) + yclient, ClientWidth(wnd));
+        wputuchline(wnd, ' ', xwin, TopBorderAdj(wnd) + yclient, render_width);
         return;
     }
     
-    if (len > ClientWidth(wnd))
-        len = ClientWidth(wnd);
+    if (len > render_width)
+        len = render_width;
     
     /* Convert to uint32_t for writeline */
     uint32_t uline[MAXCOLS];
@@ -246,13 +247,14 @@ static int PaintMsg(WINDOW wnd, PARAM p1, PARAM p2)
     }
     
     rc = AdjustRectangle(wnd, rc);
+    int render_width = ClientWidth(wnd);
     
     /* Clear the client area first */
     SetStandardColor(wnd);
     for (y = RectTop(rc); y <= RectBottom(rc); y++) {
         int yy = y - TopBorderAdj(wnd);
         if (yy >= 0 && yy < ClientHeight(wnd))
-            wputuchline(wnd, ' ', BorderAdj(wnd), y, ClientWidth(wnd));
+            wputuchline(wnd, ' ', BorderAdj(wnd), y, render_width);
     }
     
     for (y = RectTop(rc); y <= RectBottom(rc); y++) {
@@ -344,12 +346,33 @@ static int SizeMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     BaseWndProc(KILO, wnd, SIZE, p1, p2);
     
-    /* Adjust cursor position if it's now out of bounds */
+    /* Clamp cursor to new window size */
     kilo_state *k = GetKiloState(wnd);
-    int maxcol = ClientWidth(wnd) - 1;
     
-    if (k->cx > maxcol)
+    int maxcol = ClientWidth(wnd) - 1;
+    if (k->cx > maxcol && maxcol >= 0)
         k->cx = maxcol;
+    
+    int maxrow = ClientHeight(wnd) - 1;
+    if (k->cy > maxrow && maxrow >= 0)
+        k->cy = maxrow;
+    
+    /* Clamp rowoff to valid range */
+    if (k->rowoff + k->cy >= k->numrows && k->numrows > 0)
+        k->rowoff = max(0, k->numrows - ClientHeight(wnd));
+    
+    /* Clamp coloff to valid range */
+    int maxlen = 0;
+    int i;
+    for (i = 0; i < k->numrows; i++) {
+        if (k->row[i].rsize > maxlen)
+            maxlen = k->row[i].rsize;
+    }
+    if (k->coloff + k->cx >= maxlen && maxlen > 0)
+        k->coloff = max(0, maxlen - ClientWidth(wnd));
+    
+    SendMessage(wnd, PAINT, 0, 0);
+    SendMessage(wnd, KEYBOARD_CURSOR, k->cx, k->cy);
     
     return TRUE;
 }
@@ -546,6 +569,11 @@ static int LeftButtonMsg(WINDOW wnd, PARAM p1, PARAM p2)
 {
     int mx = (int)p1 - GetLeft(wnd);
     int my = (int)p2 - GetTop(wnd);
+    
+    /* Handle sizing (bottom-right corner) - fall through to base proc */
+    if (mx == WindowWidth(wnd) - 1 && my == WindowHeight(wnd) - 1) {
+        return FALSE;
+    }
     
     if (TestAttribute(wnd, VSCROLLBAR) && mx == WindowWidth(wnd) - 1) {
         /* Click on vertical scrollbar - adjust rowoff */
@@ -816,8 +844,14 @@ int KiloProc(WINDOW wnd, MESSAGE msg, PARAM p1, PARAM p2)
         case KEYBOARD:
             return KeyboardMsg(wnd, p1, p2);
         case LEFT_BUTTON:
-            if (LeftButtonMsg(wnd, p1, p2))
+            if (!WindowSizing && LeftButtonMsg(wnd, p1, p2))
                 return TRUE;
+            break;
+        case BUTTON_RELEASED:
+            if (WindowSizing || WindowMoving) {
+                SendMessage(wnd, PAINT, 0, 0);
+                SendMessage(wnd, KEYBOARD_CURSOR, 0, 0);
+            }
             break;
         case CLOSE_WINDOW:
             return CloseWindowMsg(wnd, p1, p2);
